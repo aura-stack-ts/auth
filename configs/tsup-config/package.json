@@ -1,0 +1,17 @@
+{
+  "name": "@aura-auth/tsup-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Tsup configuration for Aura Auth packages.",
+  "type": "module",
+  "keywords": [
+    "typescript",
+    "tsconfig",
+    "configuration",
+    "aura-auth"
+  ],
+  "author": "Aura Auth <auraauthoss@gmail.com> | Hernan Alvarado <hernanvid123@gmail.com>",
+  "license": "MIT",
+  "exports": "./tsup.config.js",
+  "packageManager": "pnpm@10.15.0"
+}
