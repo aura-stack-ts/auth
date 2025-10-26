@@ -8,6 +8,7 @@ build/
 out/
 **/build/
 **/out/
+**/dist/
 
 # Package manager files
 pnpm-lock.yaml

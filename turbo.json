@@ -8,6 +8,10 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "!.turbo/**"]
+    },
+    "test": {
+      "dependsOn": ["^test"],
+      "cache": false
     }
   },
   "ui": "tui",

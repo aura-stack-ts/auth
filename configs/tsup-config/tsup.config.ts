@@ -1,8 +1,9 @@
+import { Options } from "tsup"
+
 /**
  * Tsup base configuration used by Aura Auth packages
- * @type {import("tsup").Options}
  */
-export const tsupConfig = {
+export const tsupConfig: Options = {
     entry: ["src"],
     format: ["esm", "cjs"],
     dts: true,

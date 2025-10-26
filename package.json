@@ -1,21 +1,22 @@
 {
-  "name": "@aura-auth/root",
+  "name": "@aura-stack/auth-root",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "An open-source authentication library for JavaScript.",
+  "description": "An open-source authentication library for TypeScript.",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aura-auth/aura-auth.git"
+    "url": "git+https://github.com/aura-stack-js/auth.git"
   },
-  "bugs": "https://github.com/aura-auth/aura-auth/issues",
-  "homepage": "https://github.com/aura-auth/aura-auth#readme",
+  "bugs": "https://github.com/aura-stack-js/auth/issues",
+  "homepage": "https://github.com/aura-stack-js/auth#readme",
   "keywords": [
     "authentication",
     "auth",
@@ -26,15 +27,20 @@
     "openid connect",
     "oidc"
   ],
-  "author": "Aura Auth <auraauthoss@gmail.com> | Hernan Alvarado <hernanvid123@gmail.com>",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <hernanvid123@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@aura-stack/prettier-config": "workspace:*",
     "@types/node": "^24.5.1",
     "eslint": "^9.35.0",
     "prettier": "^3.6.2",
     "tsup": "^8.5.0",
     "turbo": "^2.5.6",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^4.0.3"
   },
-  "packageManager": "pnpm@10.15.0"
+  "packageManager": "pnpm@10.15.0",
+  "dependencies": {
+    "@vitest/coverage-v8": "^4.0.3"
+  }
 }

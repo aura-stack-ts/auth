@@ -1,0 +1,34 @@
+{
+  "name": "@aura-stack/prettier-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Prettier configuration for Aura Stack Auth packages.",
+  "scripts": {
+    "build": "tsup prettier.config.js --format cjs,esm --dts --clean",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [
+    "typescript",
+    "tsconfig",
+    "configuration",
+    "aura-stack"
+  ],
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <hernanvid123@gmail.com>",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/prettier.config.d.ts",
+      "import": "./dist/prettier.config.js",
+      "require": "./dist/prettier.config.cjs"
+    }
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*"
+  },
+  "packageManager": "pnpm@10.15.0"
+}
