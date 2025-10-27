@@ -20,3 +20,18 @@ export const createRedirectURI = (requestURL: string, oauth: string) => {
     const url = new URL(requestURL)
     return `${url.origin}/auth/callback/${oauth}`
 }
+
+export const equals = (a: string | undefined | null, b: string | undefined | null) => {
+    if (a === null || b === null || a === undefined || b === undefined) return false
+    return a === b
+}
+
+export const pick = <Obj extends Record<string, unknown>, Keys extends keyof Obj>(object: Obj, keys: Keys[]) => {
+    return keys.reduce(
+        (previous, key) => ({
+            ...previous,
+            [key]: object[key],
+        }),
+        {}
+    ) as Pick<Obj, Keys>
+}

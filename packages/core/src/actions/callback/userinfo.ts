@@ -1,15 +1,18 @@
-import { OAuthUserProfile } from "@/@types/index.js"
+import { OAuthSecureConfig, OAuthUserProfile } from "@/@types/index.js"
+import { AuraStackError } from "@/error.js"
+import { OAuthErrorResponse } from "@/schemas.js"
 
 const getDefaultUserInfo = (profile: Record<string, any>): OAuthUserProfile => {
     return {
         id: profile?.id,
         email: profile?.email,
         name: profile?.name ?? profile?.username ?? profile?.nickname,
-        image: profile?.picture,
+        image: profile?.image ?? profile?.picture,
     }
 }
 
-export const getUserInfo = async (userinfoEndpoint: string, accessToken: string) => {
+export const getUserInfo = async (oauthConfig: OAuthSecureConfig, accessToken: string) => {
+    const userinfoEndpoint = oauthConfig.userInfo
     try {
         const response = await fetch(userinfoEndpoint, {
             method: "GET",
@@ -18,14 +21,13 @@ export const getUserInfo = async (userinfoEndpoint: string, accessToken: string)
                 Authorization: `Bearer ${accessToken}`,
             },
         })
-        /*
-        if (!response.ok) {
-            throw new Error("Failed to fetch userinfo")
+        const json = await response.json()
+        const valid = OAuthErrorResponse.safeParse(json)
+        if (valid.success) {
+            return Response.json(valid.data, { status: 400 })
         }
-        */
-        const data = await response.json()
-        return getDefaultUserInfo(data)
+        return oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
     } catch {
-        throw new Error(`Failed to retrieve userinfo from ${userinfoEndpoint}`)
+        throw new AuraStackError(`Failed to retrieve userinfo from ${userinfoEndpoint}`)
     }
 }

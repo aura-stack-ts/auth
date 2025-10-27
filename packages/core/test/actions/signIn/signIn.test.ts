@@ -2,8 +2,10 @@ import { describe, test, expect } from "vitest"
 import { createRouter } from "@aura-stack/router"
 import { signInAction } from "@/actions/index.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
+import { parse } from "@/cookie.js"
+import { createRedirectURI } from "@/utils.js"
 
-const oauthConfig = createOAuthIntegrations([
+const oauthIntegrations = createOAuthIntegrations([
     {
         id: "oauth-integration",
         name: "OAuth",
@@ -17,33 +19,16 @@ const oauthConfig = createOAuthIntegrations([
     },
 ])
 
-const { GET } = createRouter([signInAction({ oauth: oauthConfig })])
+const { GET } = createRouter([signInAction({ oauth: oauthIntegrations })])
 
 describe("signIn action", () => {
     test("unsupported oauth integration", async () => {
         const request = await GET(new Request("http://example.com/signIn/unsupported"))
         expect(request.status).toBe(400)
-        expect(await request.json()).toEqual({ message: "OAuth provider not supported" })
+        expect(await request.json()).toEqual({ error: "OAuth provider not supported" })
     })
 
-    test("supported oauth integration", async () => {
-        const request = await GET(new Request("http://example.com/signIn/oauth-integration"))
-        const headers = new Headers(request.headers)
-        const cookie = headers.get("Set-Cookie")
-        const location = headers.get("Location")
-
-        expect(request.status).toBe(302)
-        expect(cookie).toBeDefined()
-        expect(location).toBeDefined()
-
-        const searchParams = new URL(location as string).searchParams
-        expect(location).toContain("https://example.com/oauth/authorize?")
-        expect(searchParams.get("client_id")).toBe("oauth_client_id")
-        expect(searchParams.get("state")).toBeDefined()
-        expect(searchParams.get("redirect_uri")).toBe("http://example.com/auth/callback/oauth-integration")
-    })
-
-    describe("validate redirect URI", () => {
+    describe("valid signIn requests", () => {
         const testCases = [
             {
                 description: "standard case",
@@ -66,11 +51,22 @@ describe("signIn action", () => {
             test.concurrent(description, async ({ expect }) => {
                 const request = await GET(new Request(url))
                 const headers = new Headers(request.headers)
+                const cookies = headers.get("Set-Cookie")
+                const parsedCookies = parse(cookies || "")
                 const location = headers.get("Location") as string
                 const searchParams = new URL(location).searchParams
+
                 expect(request.status).toBe(302)
+                expect(cookies).toBeDefined()
+                expect(location).toBeDefined()
+
+                expect(location).toContain("https://example.com/oauth/authorize?")
                 expect(headers.get("Location")).toBeDefined()
+                expect(searchParams.get("client_id")).toBe("oauth_client_id")
                 expect(searchParams.get("redirect_uri")).toMatch(expected)
+
+                expect(parsedCookies["aura-stack.state"]).toBeDefined()
+                expect(parsedCookies["aura-stack.redirect_uri"]).toBe(createRedirectURI(url, "oauth-integration"))
             })
         }
     })

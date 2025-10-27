@@ -1,12 +1,13 @@
-import z from "zod"
-import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { encode } from "@aura-stack/session"
-import type { AuthConfigInternal } from "@/@types/index.js"
-import { createAccessToken } from "./access-token.js"
-import { expiredCookieOptions, setCookie, getCookie } from "@/cookie.js"
-import { getUserInfo } from "./userinfo.js"
+import { expiredCookieOptions } from "@aura-stack/session/cookie"
+import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import type { JWTPayload } from "jose"
-import { createRedirectURI } from "@/utils.js"
+import type { AuthConfigInternal } from "@/@types/index.js"
+import { equals } from "@/utils.js"
+import { getUserInfo } from "./userinfo.js"
+import { createAccessToken } from "./access-token.js"
+import { OAuthAuthorizationSearchParams } from "@/schemas.js"
+import { getCookiesByNames, setCookiesByNames } from "@/cookie.js"
 
 export const callbackAction = (authConfig: AuthConfigInternal) => {
     const { oauth: oauthIntegrations } = authConfig
@@ -17,32 +18,43 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
         async (request, ctx) => {
             const oauth = ctx.params.oauth as keyof typeof oauthIntegrations
             if (!(oauth in oauthIntegrations)) {
-                return Response.json({ message: "OAuth provider not supported" }, { status: 400 })
+                return Response.json({ error: "OAuth provider not supported" }, { status: 400 })
             }
             const oauthConfig = oauthIntegrations[oauth]
-
             const { code, state } = ctx.searchParams
-            const cookies = ctx.headers.get("Cookie")
-            const inferRedirectURL = createRedirectURI(request.url, oauth)
-            const cookieState = getCookie(request, "state")
+            const {
+                state: cookieState,
+                original_uri: cookieOriginalURI,
+                redirect_uri: cookieRedirectURI,
+            } = getCookiesByNames(request, ["state", "original_uri", "redirect_uri"])
 
-            if (!code || !state) {
-                return Response.json({ message: "Missing code or state" }, { status: 400 })
+            if (equals(cookieState, state)) {
+                return Response.json({ error: "Mismatching state" }, { status: 400 })
             }
-            if (cookieState !== state) {
-                return Response.json({ message: "Missing cookies" }, { status: 400 })
+
+            const accessToken = await createAccessToken(oauthConfig, code, cookieRedirectURI as string)
+            if (accessToken instanceof Response) {
+                return accessToken
             }
-            const accessToken = await createAccessToken(oauthConfig, code, inferRedirectURL)
+
             const headers = new Headers()
-            headers.set("Location", "http://localhost:3000")
+            headers.set("Location", cookieOriginalURI as string)
+            const userInfo = await getUserInfo(oauthConfig, accessToken)
+            if (userInfo instanceof Response) {
+                return userInfo
+            }
 
-            /*
-            const userInfo = await getUserInfo(oauthConfig.userInfo, accessToken)
             const sessionCookie = await encode("sessionToken", userInfo as never as JWTPayload)
 
-            const stateCookie = setCookie("state", "", expiredCookieOptions)
-            headers.set("Set-Cookie", `${sessionCookie}; ${stateCookie}`)
-            */
+            const expiredCookies = setCookiesByNames(
+                {
+                    state,
+                    redirect_uri: "",
+                    original_uri: "",
+                },
+                expiredCookieOptions
+            )
+            headers.set("Set-Cookie", `${sessionCookie}; ${expiredCookies}`)
             return Response.json({ oauth }, { status: 200, headers })
         },
         config
@@ -51,9 +63,6 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
 
 const config = createEndpointConfig("/callback/:oauth", {
     schemas: {
-        searchParams: z.object({
-            code: z.string(),
-            state: z.string(),
-        }),
+        searchParams: OAuthAuthorizationSearchParams,
     },
 })

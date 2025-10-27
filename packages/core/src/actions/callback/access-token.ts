@@ -1,11 +1,11 @@
 import { OAuthSecureConfig } from "@/@types/index.js"
-import { CodeSchema, OAuthConfigSchema, RedirectURISchema } from "@/schemas.js"
+import { AuraStackError } from "@/error.js"
+import { OAuthAccessToken, OAuthAccessTokenResponse, OAuthErrorResponse } from "@/schemas.js"
 
 export const createAccessToken = async (oauthConfig: OAuthSecureConfig, redirectURI: string, code: string) => {
-    const schema = OAuthConfigSchema.extend({ redirectURI: RedirectURISchema, code: CodeSchema })
-    const parsed = schema.safeParse({ ...oauthConfig, redirectURI, code })
+    const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code })
     if (!parsed.success) {
-        throw new Error("Invalid OAuth configuration")
+        throw new AuraStackError("Invalid OAuth configuration")
     }
     const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data
 
@@ -25,17 +25,19 @@ export const createAccessToken = async (oauthConfig: OAuthSecureConfig, redirect
             }).toString(),
         })
         if (!response.ok) {
-            throw new Error("Failed to create access token")
+            throw new AuraStackError("Failed to create access token")
         }
-        /**
-         * Manage different response formats here if needed
-         * - error and error_description
-         * - access_token
-         * - token_type
-         */
-        const data = await response.json()
-        return data.access_token as string
+        const json = await response.json()
+        const validResponse = OAuthAccessTokenResponse.safeParse(json)
+        if (!validResponse.success) {
+            const errorResponse = OAuthErrorResponse.safeParse(json)
+            if (!errorResponse.success) {
+                throw new AuraStackError("Invalid access token response format")
+            }
+            return Response.json(errorResponse.data, { status: 400 })
+        }
+        return json.access_token as string
     } catch {
-        throw new Error(`Failed to retrieve accessToken from ${oauthConfig.name}`)
+        throw new AuraStackError(`Failed to retrieve accessToken from ${oauthConfig.name}`)
     }
 }

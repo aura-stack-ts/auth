@@ -1,5 +1,11 @@
 import { parse, serialize, SerializeOptions } from "cookie"
 import type { LiteralUnion } from "@/@types/index.js"
+import { AuraStackError } from "./error.js"
+
+/**
+ * Remove it the "@aura-stack/session" package will be stable
+ */
+export { parse } from "cookie"
 
 type CookieName = "sessionToken" | "csrfToken" | "state" | "pkce" | "nonce"
 
@@ -42,8 +48,29 @@ export const setCookie = (name: LiteralUnion<CookieName>, value: string, options
 export const getCookie = (request: Request, cookie: LiteralUnion<CookieName>) => {
     const cookies = request.headers.get("Cookie")
     if (!cookies) {
-        throw new Error("No cookies found. There is no session active.")
+        throw new AuraStackError("No cookies found. There is no session active.")
     }
     const parsedCookies = parse(cookies)
     return parsedCookies[`${COOKIE_PREFIX}.${cookie}`]
+}
+
+export const getCookiesByNames = <T extends LiteralUnion<CookieName>>(request: Request, cookieNames: T[]) => {
+    const cookies = request.headers.get("Cookie")
+    if (!cookies) {
+        throw new AuraStackError("No cookies found. There is no session active.")
+    }
+    const parsedCookies = parse(cookies)
+    return cookieNames.reduce(
+        (previous, cookie) => {
+            return { ...previous, [cookie]: parsedCookies[`${COOKIE_PREFIX}.${cookie}`] }
+        },
+        {} as Record<T, string | undefined>
+    )
+}
+
+export const setCookiesByNames = <T extends LiteralUnion<CookieName>>(cookies: Record<T, string>, options?: SerializeOptions) => {
+    return Object.keys(cookies).reduce((previous, cookieName) => {
+        const cookie = setCookie(cookieName, cookies[cookieName as T], options)
+        return previous ? `${previous}; ${cookie}` : cookie
+    }, "")
 }
