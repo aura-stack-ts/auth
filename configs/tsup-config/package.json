@@ -1,0 +1,32 @@
+{
+  "name": "@aura-stack/tsup-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Tsup configuration for Aura Stack Auth packages.",
+  "scripts": {
+    "build": "tsup tsup.config.ts --format cjs,esm --dts --clean"
+  },
+  "keywords": [
+    "typescript",
+    "tsconfig",
+    "configuration",
+    "aura-stack"
+  ],
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <hernanvid123@gmail.com>",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/tsup.config.d.ts",
+      "import": "./dist/tsup.config.js",
+      "require": "./dist/tsup.config.cjs"
+    }
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*"
+  },
+  "packageManager": "pnpm@10.15.0"
+}
