@@ -28,11 +28,11 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 redirect_uri: cookieRedirectURI,
             } = getCookiesByNames(request, ["state", "original_uri", "redirect_uri"])
 
-            if (equals(cookieState, state)) {
+            if (!equals(cookieState, state)) {
                 return Response.json({ error: "Mismatching state" }, { status: 400 })
             }
 
-            const accessToken = await createAccessToken(oauthConfig, code, cookieRedirectURI as string)
+            const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI as string, code)
             if (accessToken instanceof Response) {
                 return accessToken
             }

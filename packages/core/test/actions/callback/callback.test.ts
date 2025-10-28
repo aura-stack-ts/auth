@@ -20,9 +20,6 @@ const oauthIntegrations = createOAuthIntegrations([
 const { GET } = createRouter([callbackAction({ oauth: oauthIntegrations })])
 
 describe("callbackAction", () => {
-    //const mockFetch = vi.fn()
-    //vi.stubGlobal("fetch", mockFetch)
-
     test("endpoint without code and state", async () => {
         const response = await GET(new Request("https://example.com/callback/unknown"))
         expect(response.status).toBe(422)
@@ -37,5 +34,32 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/callback/unknown?code=123&state=abc"))
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({ error: "OAuth provider not supported" })
+    })
+
+    test("mismatching state", async () => {
+        const response = await GET(
+            new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
+                headers: {
+                    Cookie: "aura-stack.state=123; Path=/; SameSite=Lax",
+                },
+            })
+        )
+        expect(response.status).toBe(400)
+        expect(await response.json()).toEqual({ error: "Mismatching state" })
+    })
+
+    test("without missing redirect_uri", async () => {
+        const mockFetch = vi.fn()
+        vi.stubGlobal("fetch", mockFetch)
+
+        const response = await GET(
+            new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
+                headers: {
+                    Cookie: "aura-stack.state=abc; Path=/; SameSite=Lax",
+                },
+            })
+        )
+        expect(response.status).toBe(400)
+        expect(await response.json()).toEqual({ error: "Mismatching state" })
     })
 })
