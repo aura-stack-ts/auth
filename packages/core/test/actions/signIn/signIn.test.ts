@@ -3,7 +3,7 @@ import { createRouter } from "@aura-stack/router"
 import { signInAction } from "@/actions/index.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { parse } from "@/cookie.js"
-import { createRedirectURI } from "@/utils.js"
+import { createRedirectURI } from "@/actions/signIn/authorization.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {
@@ -25,7 +25,10 @@ describe("signIn action", () => {
     test("unsupported oauth integration", async () => {
         const request = await GET(new Request("http://example.com/signIn/unsupported"))
         expect(request.status).toBe(400)
-        expect(await request.json()).toEqual({ error: "OAuth provider not supported" })
+        expect(await request.json()).toEqual({
+            error: "invalid_request",
+            error_description: "Unsupported OAuth Social Integration",
+        })
     })
 
     describe("valid signIn requests", () => {

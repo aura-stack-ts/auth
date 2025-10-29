@@ -1,19 +1,24 @@
 import { OAuthSecureConfig } from "@/@types/index.js"
 import { toCastCase } from "@/utils.js"
 import { OAuthAuthorization } from "@/schemas.js"
-import { AuraStackError } from "@/error.js"
+import { AuraAuthError } from "@/error.js"
 
 /**
  * Only supports basic OAuth 2.0 Authorization Code Flow without PKCE.
  * @todo: Add support for PKCE and other OAuth flows.
  */
 export const createAuthorizationURL = (oauthConfig: OAuthSecureConfig, redirectURI: string, state: string) => {
-    const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, state, redirectURI })
+    const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state })
     if (!parsed.success) {
-        throw new AuraStackError("Invalid OAuth configuration")
+        throw new AuraAuthError("invalid_request", "Invalid OAuth configuration")
     }
     const { authorizeURL, ...options } = parsed.data
     const { userInfo, accessToken, clientSecret, ...required } = options
     const searchParams = new URLSearchParams(toCastCase(required))
     return `${authorizeURL}?${searchParams}`
+}
+
+export const createRedirectURI = (requestURL: string, oauth: string) => {
+    const url = new URL(requestURL)
+    return `${url.origin}/auth/callback/${oauth}`
 }
