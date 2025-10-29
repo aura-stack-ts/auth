@@ -47,7 +47,7 @@ export const OAuthAccessToken = OAuthConfigSchema.extend({
 
 export const OAuthAccessTokenResponse = object({
     access_token: string(),
-    token_type: string(),
+    token_type: string().optional(),
 })
 
 export const OAuthErrorResponse = object({

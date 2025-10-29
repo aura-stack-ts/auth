@@ -95,10 +95,50 @@ describe("getUserInfo", () => {
         })
     })
 
-    test("invalid response", async () => {
+    test("throw error in custom profile function", async () => {
         const mockResponse = {
-            error: "invalid_access_token",
-            error_description: "The access token provided is invalid.",
+            uniqueId: "12345",
+            username: "John Doe",
+            email: "john.doe@example.com",
+            avatar_url: "http://example.com/john-doe.jpg",
+        }
+
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(async () => ({
+                ok: true,
+                json: async () => mockResponse,
+            }))
+        )
+
+        const oauthConfig: OAuthConfig<{ username: string; avatar_url: string; uniqueId: string; email: string }> = {
+            id: "oauth-integration",
+            name: "OAuth",
+            authorizeURL: "https://example.com/oauth/authorize",
+            accessToken: "https://example.com/oauth/token",
+            scope: "profile email",
+            responseType: "code",
+            userInfo: "https://example.com/oauth/userinfo",
+            profile(profile) {
+                throw new Error("Profile parsing error")
+            },
+        }
+
+        await expect(getUserInfo(oauthConfig as OAuthSecureConfig, "access_token_123")).rejects.toThrow(/Profile parsing error/)
+
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: "Bearer access_token_123",
+            },
+        })
+    })
+
+    test("with valid error response", async () => {
+        const mockResponse = {
+            error: "acess_denied",
+            error_description: "Invalid access token",
         }
 
         vi.stubGlobal(
@@ -109,20 +149,22 @@ describe("getUserInfo", () => {
             }))
         )
 
-        const response = (await getUserInfo(
-            {
-                id: "oauth-integration",
-                name: "OAuth",
-                authorizeURL: "https://example.com/oauth/authorize",
-                accessToken: "https://example.com/oauth/token",
-                scope: "profile email",
-                responseType: "code",
-                userInfo: "https://example.com/oauth/userinfo",
-                clientId: "oauth_client_id",
-                clientSecret: "oauth_client_secret",
-            },
-            "invalid_access_token"
-        )) as Response
+        await expect(
+            getUserInfo(
+                {
+                    id: "oauth-integration",
+                    name: "OAuth",
+                    authorizeURL: "https://example.com/oauth/authorize",
+                    accessToken: "https://example.com/oauth/token",
+                    scope: "profile email",
+                    responseType: "code",
+                    userInfo: "https://example.com/oauth/userinfo",
+                    clientId: "oauth_client_id",
+                    clientSecret: "oauth_client_secret",
+                },
+                "invalid_access_token"
+            )
+        ).rejects.toThrow(/Invalid access token/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -131,6 +173,39 @@ describe("getUserInfo", () => {
                 Authorization: "Bearer invalid_access_token",
             },
         })
-        expect(await response.json()).toEqual(mockResponse)
+    })
+
+    test("fetch throws error", async () => {
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(async () => {
+                throw new Error("Fetch Network error")
+            })
+        )
+
+        await expect(
+            getUserInfo(
+                {
+                    id: "oauth-integration",
+                    name: "OAuth",
+                    authorizeURL: "https://example.com/oauth/authorize",
+                    accessToken: "https://example.com/oauth/token",
+                    scope: "profile email",
+                    responseType: "code",
+                    userInfo: "https://example.com/oauth/userinfo",
+                    clientId: "oauth_client_id",
+                    clientSecret: "oauth_client_secret",
+                },
+                "access_token"
+            )
+        ).rejects.toThrow(/Fetch Network error/)
+
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: "Bearer access_token",
+            },
+        })
     })
 })
