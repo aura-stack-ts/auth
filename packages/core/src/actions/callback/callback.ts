@@ -1,16 +1,14 @@
 import z from "zod"
-import { encode } from "@aura-stack/session"
-import { expiredCookieOptions } from "@aura-stack/session/cookie"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import type { JWTPayload } from "jose"
 import type { AuthConfigInternal, ErrorResponse, OAuthUserProfile } from "@/@types/index.js"
 import { equals } from "@/utils.js"
 import { getUserInfo } from "./userinfo.js"
 import { createAccessToken } from "./access-token.js"
 import { OAuthAccessTokenResponse, OAuthAuthorizationSearchParams } from "@/schemas.js"
-import { getCookiesByNames, setCookiesByNames } from "@/cookie.js"
+import { createSessionCookie, expiredCookieOptions, getCookiesByNames, setCookiesByNames } from "@/cookie.js"
 import { AuraResponse } from "@/response.js"
 import { AuraAuthError, isAuraAuthError } from "@/error.js"
+import { JWTPayload } from "@/jose.js"
 
 export const callbackAction = (authConfig: AuthConfigInternal) => {
     const { oauth: oauthIntegrations } = authConfig
@@ -45,7 +43,7 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 headers.set("Location", cookieOriginalURI as string)
                 const userInfo = (await getUserInfo(oauthConfig, accessToken.access_token)) as OAuthUserProfile
 
-                const sessionCookie = await encode("sessionToken", userInfo as never as JWTPayload)
+                const sessionCookie = await createSessionCookie(userInfo as never as JWTPayload)
 
                 const expiredCookies = setCookiesByNames(
                     {

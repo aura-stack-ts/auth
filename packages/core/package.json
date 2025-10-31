@@ -33,11 +33,10 @@
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <hernanvid123@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@aura-stack/jose": "workspace:*",
     "@aura-stack/router": "^0.2.0",
-    "@aura-stack/session": "workspace:*",
     "cookie": "^1.0.2",
     "dotenv": "^17.2.3",
-    "jose": "^6.1.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
