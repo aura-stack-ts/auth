@@ -1,6 +1,7 @@
 import { parse, serialize, SerializeOptions } from "cookie"
 import type { LiteralUnion } from "@/@types/index.js"
 import { AuraAuthError } from "./error.js"
+import { encodeJWT, JWTPayload } from "./jose.js"
 
 /**
  * Remove this when the "@aura-stack/session" package is stable
@@ -74,4 +75,9 @@ export const setCookiesByNames = <T extends LiteralUnion<CookieName>>(cookies: R
         const cookie = setCookie(cookieName, cookies[cookieName as T], options)
         return previous ? `${previous}; ${cookie}` : cookie
     }, "")
+}
+
+export const createSessionCookie = async (session: JWTPayload) => {
+    const encoded = await encodeJWT(session)
+    return setCookie("sessionToken", encoded)
 }

@@ -1,9 +1,9 @@
 {
-  "name": "@aura-stack/session",
+  "name": "@aura-stack/jose",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Session management for @aura-stack",
+  "description": "JOSE utilities for @aura-stack/auth",
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
@@ -33,6 +33,11 @@
       "types": "./dist/sign.d.ts",
       "require": "./dist/sign.cjs",
       "import": "./dist/sign.js"
+    },
+    "./jose": {
+      "types": "./dist/jose.d.ts",
+      "require": "./dist/jose.cjs",
+      "import": "./dist/jose.js"
     }
   },
   "keywords": [

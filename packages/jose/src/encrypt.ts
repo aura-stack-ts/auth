@@ -49,11 +49,11 @@ export const decryptJWE = async (token: string, secret: SecretInput) => {
 }
 
 /**
- * Creates a JWE (JSON Web Encryption) encrypter and decrypter. It implements the encryptJWE
- * and decryptJWE functions of the module.
+ * Creates a `JWE (JSON Web Encryption)` encrypter and decrypter. It implements the `encryptJWE`
+ * and `decryptJWE` functions of the module.
  *
  * @param secret - Secret key used for encrypting and decrypting the JWE
- * @returns - encryptJWE and decryptJWE functions
+ * @returns encryptJWE and decryptJWE functions
  */
 export const createJWE = (secret: SecretInput) => {
     const secretKey = createSecret(secret)

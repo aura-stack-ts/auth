@@ -7,6 +7,7 @@ import type { SecretInput } from "@/index.js"
  * @returns The secret in Uint8Array format
  */
 export const createSecret = (secret: SecretInput) => {
+    if (secret === undefined) throw new Error("Secret is required")
     if (typeof secret === "string") {
         return new Uint8Array(Buffer.from(secret, "utf-8"))
     }

@@ -12,8 +12,6 @@ import { createSecret } from "@/secret.js"
  *  - exp: expiration time of the JWT
  *  - jti: unique identifier to avoid collisions
  *
- * @todo Check if the cty (content type) header is needed or useful in the JWE context.
- *
  * @param payload - Payload data information to sign the JWT
  * @param secret - Secret key to sign the JWT (CryptoKey, KeyObject, string or Uint8Array)
  * @returns Signed JWT string
@@ -51,11 +49,11 @@ export const verifyJWS = async (token: string, secret: SecretInput): Promise<JWT
 }
 
 /**
- * Create a JWS (JSON Web Signature) signer and verifier. It implements the signJWS
- * and verifyJWS functions of the module.
+ * Create a JWS (JSON Web Signature) signer and verifier. It implements the `signJWS`
+ * and `verifyJWS` functions of the module.
  *
  * @param secret - Secret key used for signing and verifying the JWS
- * @returns - signJWS and verifyJWS functions
+ * @returns signJWS and verifyJWS functions
  */
 export const createJWS = (secret: SecretInput) => {
     const secretKey = createSecret(secret)

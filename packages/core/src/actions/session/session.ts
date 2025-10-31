@@ -1,11 +1,11 @@
 import { createEndpoint } from "@aura-stack/router"
-import { decode } from "@aura-stack/session"
+import { decodeJWT } from "@/jose.js"
 import { expiredCookieOptions, getCookie, setCookie } from "@/cookie.js"
 
 export const sessionAction = createEndpoint("GET", "/session", async (request) => {
     try {
         const session = getCookie(request, "sessionToken")
-        const decoded = await decode(session as string)
+        const decoded = await decodeJWT(session as string)
         return Response.json({ session: decoded }, { status: 200 })
     } catch {
         const headers = new Headers()
