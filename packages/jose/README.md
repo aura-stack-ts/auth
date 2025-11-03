@@ -1,6 +1,6 @@
-# `@aura-stack/jose`
-
 <div align="center">
+
+<h1>@aura-stack/jose</h1>
 
 **Type-safe JOSE utilities for JWT signing, verification, and encryption**
 
@@ -34,8 +34,7 @@ Visit the [**official documentation website**](https://aura-stack-auth.vercel.ap
 
 ## License
 
-Licensed under the [MIT License](LICENSE).  
-© [Aura Stack](https://github.com/aura-stack-ts)
+Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
 ---
 

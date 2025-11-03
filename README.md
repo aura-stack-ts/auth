@@ -1,6 +1,6 @@
-# Aura Stack Auth
-
 <div align="center">
+
+<h1>Aura Stack Auth</h1>
 
 **A modern, type-safe authentication library for TypeScript**
 
@@ -32,8 +32,7 @@ Visit the [**official documentation website**](https://aura-stack-auth.vercel.ap
 
 ## License
 
-Licensed under the [MIT License](LICENSE).  
-© [Aura Stack](https://github.com/aura-stack-ts)
+Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
 ---
 

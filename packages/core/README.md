@@ -1,6 +1,6 @@
-# `@aura-stack/auth`
-
 <div align="center">
+
+<h1>@aura-stack/auth</h1>
 
 **Core authentication library for the Aura Stack ecosystem**
 
@@ -33,8 +33,7 @@ Visit the [**official documentation website**](https://aura-stack-auth.vercel.ap
 
 ## License
 
-Licensed under the [MIT License](LICENSE).  
-© [Aura Stack](https://github.com/aura-stack-ts)
+Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
 ---
 

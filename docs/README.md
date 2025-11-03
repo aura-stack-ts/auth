@@ -1,6 +1,6 @@
-# Aura Stack Auth Docs
-
 <div align="center">
+
+<h1>Aura Stack Auth Docs</h1>
 
 **Documentation site for Aura Stack Auth, built with MDX and powered by FumaDocs**
 
@@ -44,8 +44,7 @@ Visit the [**official documentation website**](https://aura-stack-auth.vercel.ap
 
 ## License
 
-Licensed under the [MIT License](LICENSE).  
-© [Aura Stack](https://github.com/aura-stack-ts)
+Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
 ---
 
