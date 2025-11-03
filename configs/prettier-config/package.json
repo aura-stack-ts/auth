@@ -6,8 +6,10 @@
   "description": "Prettier configuration for Aura Stack Auth packages.",
   "scripts": {
     "build": "tsup prettier.config.js --format cjs,esm --dts --clean",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
+    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache",
+    "clean": "rm -rf dist",
+    "clean:cts": "rm -rf dist/*.cts"
   },
   "keywords": [
     "typescript",

@@ -2,8 +2,12 @@
   "name": "@aura-stack/tsconfig",
   "version": "0.0.0",
   "private": true,
-  "description": "TypeScript configuration for Aura Stack Auth packages.",
   "type": "module",
+  "description": "TypeScript configuration for Aura Stack Auth packages.",
+  "scripts": {
+    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
+    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
+  },
   "keywords": [
     "typescript",
     "tsconfig",
