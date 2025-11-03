@@ -20,7 +20,7 @@ It also includes a convenience re-export of the official [`jose`](https://github
 
 If you haven’t installed the package yet:
 
-```bash
+```npm
 npm install @aura-stack/jose
 ```
 
@@ -45,8 +45,8 @@ const payload = {
   email: "johndoe@example.com",
 }
 
-const jwt = encodeJWT(payload)
-const jwtDecoded = decodeJWT(jwt)
+const jwt = await encodeJWT(payload)
+const jwtDecoded = await decodeJWT(jwt)
 ```
 
 ### JSON Web Signature (JWS)
