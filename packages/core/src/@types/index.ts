@@ -26,6 +26,29 @@ export interface OAuthSecureConfig extends OAuthConfig {
 export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>)
 
 export interface AuthConfig {
+    /**
+     * OAuth integrations available in the authentication and authorization flows. It provides a type-inference
+     * for the OAuth integrations that are supported by Aura Stack Auth; alternatively, you can provide a custom
+     * OAuth third-party authorization service by implementing the `OAuthSecureConfig` interface.
+     *
+     * Built-in OAuth integrations:
+     * oauth: ["github", "google"]
+     *
+     * Custom OAuth integrations:
+     * oauth: [
+     *   {
+     *     id: "oauth-integration",
+     *     name: "OAuth",
+     *     authorizeURL: "https://example.com/oauth/authorize",
+     *     accessToken: "https://example.com/oauth/token",
+     *     scope: "profile email",
+     *     responseType: "code",
+     *     userInfo: "https://example.com/oauth/userinfo",
+     *     clientId: process.env.AURA_AUTH_OAUTH_INTEGRATION_CLIENT_ID!,
+     *     clientSecret: process.env.AURA_AUTH_OAUTH_INTEGRATION_CLIENT_SECRET!,
+     *   }
+     * ]
+     */
     oauth: (OAuthIntegrations | OAuthSecureConfig)[]
 }
 
