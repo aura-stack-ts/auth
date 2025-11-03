@@ -1,7 +1,9 @@
 import { createAuth } from "@aura-stack/auth"
 
-export const {
-    handlers: { GET },
-} = createAuth({
+const auth = createAuth({
     oauth: ["github"],
 })
+
+const { handlers } = auth
+
+export { handlers as GET }

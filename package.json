@@ -6,6 +6,8 @@
   "description": "An open-source authentication library for TypeScript.",
   "scripts": {
     "dev": "turbo run dev",
+    "dev:core": "turbo run dev --filter=@aura-stack/auth",
+    "dev:docs": "turbo run dev --filter=docs",
     "build": "turbo run build",
     "test": "turbo run test --parallel",
     "format": "prettier --write .",
