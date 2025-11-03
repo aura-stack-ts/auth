@@ -29,7 +29,7 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                     state: cookieState,
                     original_uri: cookieOriginalURI,
                     redirect_uri: cookieRedirectURI,
-                } = getCookiesByNames(request, ["state", "original_uri", "redirect_uri"])
+                } = getCookiesByNames(request.headers.get("Cookie") ?? "", ["state", "original_uri", "redirect_uri"])
 
                 if (!equals(cookieState, state)) {
                     throw new AuraAuthError("invalid_request", "Mismatching state")
@@ -40,14 +40,14 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 >
 
                 const headers = new Headers()
-                headers.set("Location", cookieOriginalURI as string)
+                headers.set("Location", cookieOriginalURI)
                 const userInfo = (await getUserInfo(oauthConfig, accessToken.access_token)) as OAuthUserProfile
 
                 const sessionCookie = await createSessionCookie(userInfo as never as JWTPayload)
 
                 const expiredCookies = setCookiesByNames(
                     {
-                        state,
+                        state: "",
                         redirect_uri: "",
                         original_uri: "",
                     },

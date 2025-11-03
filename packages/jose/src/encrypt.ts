@@ -43,8 +43,9 @@ export const decryptJWE = async (token: string, secret: SecretInput) => {
         const secretKey = createSecret(secret)
         const { payload } = await jwtDecrypt<EncryptedPayload>(token, secretKey)
         return payload.token
-    } catch {
-        throw new Error("Invalid JWE")
+    } catch (error) {
+        // @ts-ignore
+        throw new Error("Invalid JWE", { cause: error })
     }
 }
 

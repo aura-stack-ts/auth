@@ -1,5 +1,11 @@
 import path from "node:path"
+import crypto from "node:crypto"
 import { defineConfig } from "vitest/config"
+
+/**
+ * For a strange reason, crypto.randomBytes function is not generating a correct length
+ */
+const SECRET_KEY = crypto.randomBytes(24).toString("base64")
 
 export default defineConfig({
     test: {
@@ -7,6 +13,10 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             enabled: true,
+        },
+        unstubEnvs: true,
+        env: {
+            AURA_AUTH_SECRET: SECRET_KEY,
         },
     },
     resolve: {

@@ -2,8 +2,9 @@
  * @module @aura-stack/jose
  */
 import { JWTPayload, CryptoKey, KeyObject } from "jose"
-import { createJWE } from "./encrypt.js"
-import { createJWS } from "./sign.js"
+import { createJWE } from "@/encrypt.js"
+import { createJWS } from "@/sign.js"
+import { createSecret } from "@/secret.js"
 
 export * from "@/sign.js"
 export * from "@/encrypt.js"
@@ -26,12 +27,14 @@ export type SecretInput = CryptoKey | KeyObject | string | Uint8Array
  */
 export const encodeJWT = async (token: JWTPayload, secret: SecretInput) => {
     try {
-        const { signJWS } = createJWS(secret)
-        const { encryptJWE } = createJWE(secret)
+        const secretKey = createSecret(secret)
+        const { signJWS } = createJWS(secretKey)
+        const { encryptJWE } = createJWE(secretKey)
         const signed = await signJWS(token)
         return await encryptJWE(signed)
     } catch (error) {
-        throw new Error("Failed to encode JWT")
+        // @ts-ignore
+        throw new Error("Failed to encode JWT", { cause: error })
     }
 }
 
@@ -49,12 +52,14 @@ export const encodeJWT = async (token: JWTPayload, secret: SecretInput) => {
  */
 export const decodeJWT = async (token: string, secret: SecretInput) => {
     try {
-        const { verifyJWS } = createJWS(secret)
-        const { decryptJWE } = createJWE(secret)
+        const secretKey = createSecret(secret)
+        const { verifyJWS } = createJWS(secretKey)
+        const { decryptJWE } = createJWE(secretKey)
         const decrypted = await decryptJWE(token)
         return await verifyJWS(decrypted)
-    } catch {
-        throw new Error("Failed to decode JWT")
+    } catch (error) {
+        // @ts-ignore
+        throw new Error("Failed to decode JWT", { cause: error })
     }
 }
 
@@ -66,9 +71,11 @@ export const decodeJWT = async (token: string, secret: SecretInput) => {
  * @param secret - Secret key used for signing, verifying, encrypting and decrypting the JWT
  * @returns JWT handler object with `signJWS/encryptJWE` and `verifyJWS/decryptJWE` methods
  */
-export const createJWT = async (secret: SecretInput) => {
+export const createJWT = (secret: SecretInput) => {
+    const secretKey = createSecret(secret)
+
     return {
-        encodeJWT: async (payload: JWTPayload) => encodeJWT(payload, secret),
-        decodeJWT: async (token: string) => decodeJWT(token, secret),
+        encodeJWT: async (payload: JWTPayload) => encodeJWT(payload, secretKey),
+        decodeJWT: async (token: string) => decodeJWT(token, secretKey),
     }
 }

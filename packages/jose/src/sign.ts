@@ -44,7 +44,8 @@ export const verifyJWS = async (token: string, secret: SecretInput): Promise<JWT
         const { payload } = await jwtVerify(token, secretKey)
         return payload
     } catch (error) {
-        throw new Error("Invalid JWS")
+        // @ts-ignore
+        throw new Error("Invalid JWS", { cause: error })
     }
 }
 
