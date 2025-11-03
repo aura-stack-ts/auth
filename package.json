@@ -6,12 +6,14 @@
   "description": "An open-source authentication library for TypeScript.",
   "scripts": {
     "dev": "turbo run dev",
-    "dev:core": "turbo run dev --filter=@aura-stack/auth",
-    "dev:docs": "turbo run dev --filter=docs",
+    "dev:core": "turbo run @aura-stack/auth#dev",
+    "dev:docs": "turbo run docs#dev",
     "build": "turbo run build",
     "test": "turbo run test --parallel",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format": "turbo run format format:root --parallel",
+    "format:root": "prettier --write . \"!packages\" \"!apps\" \"!configs\" --cache --cache-location .cache/.prettiercache",
+    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache",
+    "type-check": "turbo run type-check --parallel"
   },
   "repository": {
     "type": "git",

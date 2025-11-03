@@ -12,6 +12,18 @@
     "test": {
       "dependsOn": ["^test"],
       "cache": false
+    },
+    "format": {
+      "dependsOn": ["^format"],
+      "outputs": [".cache/.prettiercache"],
+      "outputLogs": "new-only"
+    },
+    "//#format:root": {
+      "outputs": [".cache/.prettiercache"],
+      "outputLogs": "new-only"
+    },
+    "type-check": {
+      "dependsOn": ["^type-check"]
     }
   },
   "ui": "tui",
