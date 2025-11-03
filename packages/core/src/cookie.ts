@@ -2,6 +2,7 @@ import { parse, serialize, SerializeOptions } from "cookie"
 import type { LiteralUnion } from "@/@types/index.js"
 import { AuraAuthError } from "./error.js"
 import { encodeJWT, JWTPayload } from "./jose.js"
+import { isFalsy } from "./assert.js"
 
 /**
  * Remove this when the "@aura-stack/session" package is stable
@@ -21,6 +22,7 @@ export const defaultCookieOptions: SerializeOptions = {
 export const expiredCookieOptions: SerializeOptions = {
     ...defaultCookieOptions,
     expires: new Date(0),
+    maxAge: 0,
 }
 
 /**
@@ -56,9 +58,8 @@ export const getCookie = (request: Request, cookie: LiteralUnion<CookieName>) =>
     return parsedCookies[`${COOKIE_PREFIX}.${cookie}`]
 }
 
-export const getCookiesByNames = <T extends LiteralUnion<CookieName>>(request: Request, cookieNames: T[]) => {
-    const cookies = request.headers.get("Cookie")
-    if (!cookies) {
+export const getCookiesByNames = <Keys extends LiteralUnion<CookieName>>(cookies: string, cookieNames: Keys[]) => {
+    if (isFalsy(cookies)) {
         throw new AuraAuthError("invalid_request", "No cookies found. There is no active session")
     }
     const parsedCookies = parse(cookies)
@@ -66,7 +67,7 @@ export const getCookiesByNames = <T extends LiteralUnion<CookieName>>(request: R
         (previous, cookie) => {
             return { ...previous, [cookie]: parsedCookies[`${COOKIE_PREFIX}.${cookie}`] }
         },
-        {} as Record<T, string>
+        {} as Record<Keys, string>
     )
 }
 
@@ -78,6 +79,10 @@ export const setCookiesByNames = <T extends LiteralUnion<CookieName>>(cookies: R
 }
 
 export const createSessionCookie = async (session: JWTPayload) => {
-    const encoded = await encodeJWT(session)
-    return setCookie("sessionToken", encoded)
+    try {
+        const encoded = await encodeJWT(session)
+        return setCookie("sessionToken", encoded)
+    } catch {
+        throw new AuraAuthError("server_error", "Failed to create session cookie")
+    }
 }

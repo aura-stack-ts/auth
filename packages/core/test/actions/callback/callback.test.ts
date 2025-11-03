@@ -3,7 +3,7 @@ import { callbackAction } from "@/actions/callback/callback.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { createRouter } from "@aura-stack/router"
 import { getCookiesByNames, setCookiesByNames } from "@/cookie.js"
-import { expiredCookieOptions } from "@aura-stack/session/cookie"
+import { encodeJWT } from "@/jose.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {
@@ -76,6 +76,7 @@ describe("callbackAction", () => {
 
     test("callback action workflow", async () => {
         const mockFetch = vi.fn()
+
         vi.stubGlobal("fetch", mockFetch)
 
         const accessTokenMock = {
@@ -133,8 +134,24 @@ describe("callbackAction", () => {
         })
         expect(fetch).toHaveBeenCalledTimes(2)
 
+        expect(response.status).toBe(302)
+        expect(response.headers.get("Location")).toBe("https://example.com/original")
+
+        const { state, original_uri, redirect_uri, sessionToken } = getCookiesByNames(response.headers.get("Set-Cookie") ?? "", [
+            "state",
+            "redirect_uri",
+            "original_uri",
+            "sessionToken",
+        ])
+        expect(state).toEqual("")
+        expect(redirect_uri).toEqual("")
+        expect(original_uri).toEqual("")
+
         /**
-         * @todo: add tests to verify session cookie is set
+         * The JWT can't be precisely tested here because it contains dynamic values such as
+         * the issued at time (iat), jwt id (jti), and expiration time (exp). Instead, we
+         * verify that a sessionToken cookie is indeed set.
          */
+        expect(sessionToken).toBeDefined()
     })
 })
