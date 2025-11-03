@@ -3,7 +3,6 @@ import { callbackAction } from "@/actions/callback/callback.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { createRouter } from "@aura-stack/router"
 import { getCookiesByNames, setCookiesByNames } from "@/cookie.js"
-import { encodeJWT } from "@/jose.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {

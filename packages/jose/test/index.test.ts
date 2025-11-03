@@ -131,12 +131,6 @@ describe("JWTs", () => {
          * Jose expects a secret of at least 32 bytes for HS256
          */
         const { encodeJWT } = createJWT("short")
-        const payload: JWTPayload = {
-            sub: "user-123",
-            name: "John Doe",
-            email: "john.doe@example.com",
-        }
-
         await expect(encodeJWT(payload)).rejects.toThrow()
     })
 })
