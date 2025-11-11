@@ -1,9 +1,3 @@
-import crypto from "node:crypto"
-
-export const generateSecure = (length: number = 32) => {
-    return crypto.randomBytes(length).toString("base64")
-}
-
 export const toSnakeCase = (str: string) => {
     return str
         .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
@@ -12,21 +6,23 @@ export const toSnakeCase = (str: string) => {
         .replace(/^_+/, "")
 }
 
-export const toCastCase = (obj: Record<string, any>) => {
-    return Object.entries(obj).reduce((previous, [key, value]) => ({ ...previous, [toSnakeCase(key)]: value }), {})
+export const toUpperCase = (str: string) => {
+    return str.toUpperCase()
+}
+
+export const toCastCase = <Obj extends Record<string, any>, Type extends "snake" | "upper">(
+    obj: Obj,
+    type: Type = "snake" as Type
+) => {
+    return Object.entries(obj).reduce((previous, [key, value]) => {
+        const newKey = type === "snake" ? toSnakeCase(key) : toUpperCase(key)
+        return { ...previous, [newKey]: value }
+    }, {}) as Type extends "snake"
+        ? { [K in keyof Obj as `${string & K}`]: Obj[K] }
+        : { [K in keyof Obj as Uppercase<string & K>]: Obj[K] }
 }
 
 export const equals = (a: string | undefined | null, b: string | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
     return a === b
-}
-
-export const pick = <Obj extends Record<string, unknown>, Keys extends keyof Obj>(object: Obj, keys: Keys[]) => {
-    return keys.reduce(
-        (previous, key) => ({
-            ...previous,
-            [key]: object[key],
-        }),
-        {}
-    ) as Pick<Obj, Keys>
 }

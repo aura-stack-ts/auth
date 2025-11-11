@@ -17,6 +17,8 @@ export default defineConfig({
         unstubEnvs: true,
         env: {
             AURA_AUTH_SECRET: SECRET_KEY,
+            AURA_AUTH_GITHUB_CLIENT_ID: "github-client-id",
+            AURA_AUTH_GITHUB_CLIENT_SECRET: "github-client-secret",
         },
     },
     resolve: {

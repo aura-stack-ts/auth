@@ -1,11 +1,22 @@
 import type { OAuthSecureConfig } from "@/@types/index.js"
-import { AuraAuthError, throwAuraAuthError } from "@/error.js"
-import { OAuthAccessToken, OAuthAccessTokenResponse, OAuthErrorResponse } from "@/schemas.js"
+import { AuthError, ERROR_RESPONSE, throwAuthError } from "@/error.js"
+import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
 
+/**
+ * Make a request to the OAuth integration to the token endpoint to exchange the authorization code provided
+ * by the authorization server.
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
+ * @see https://datatracker.ietf.org/doc/html/rfc6749#section-5
+ * @param oauthConfig - OAuth integration configuration
+ * @param redirectURI - The redirect URI registered in the Resource Owner's authorization request and sent in the authorization code exchange
+ * @param code - The authorization code received from the OAuth server
+ * @returns The access token response from the OAuth server
+ */
 export const createAccessToken = async (oauthConfig: OAuthSecureConfig, redirectURI: string, code: string) => {
     const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code })
     if (!parsed.success) {
-        throw new AuraAuthError("invalid_request", "Invalid OAuth configuration")
+        throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Invalid OAuth configuration")
     }
     const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data
     try {
@@ -24,16 +35,16 @@ export const createAccessToken = async (oauthConfig: OAuthSecureConfig, redirect
             }).toString(),
         })
         const json = await response.json()
-        const errorResponse = OAuthAccessTokenResponse.safeParse(json)
-        if (!errorResponse.success) {
-            const { success, data } = OAuthErrorResponse.safeParse(json)
+        const token = OAuthAccessTokenResponse.safeParse(json)
+        if (!token.success) {
+            const { success, data } = OAuthAccessTokenErrorResponse.safeParse(json)
             if (!success) {
-                throw new AuraAuthError("invalid_request", "Invalid access token response format")
+                throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_GRANT, "Invalid access token response format")
             }
-            throw new AuraAuthError(data.error, data?.error_description ?? "Failed to retrieve access token")
+            throw new AuthError(data.error, data?.error_description ?? "Failed to retrieve access token")
         }
-        return errorResponse.data
+        return token.data
     } catch (error) {
-        throwAuraAuthError(error, "Failed to create access token")
+        throw throwAuthError(error, "Failed to create access token")
     }
 }

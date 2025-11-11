@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { toSnakeCase } from "@/utils.js"
+import { toCastCase, toSnakeCase } from "@/utils.js"
+import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 
 describe("toSnakeCase", () => {
     const testCases = [
@@ -45,4 +46,19 @@ describe("toSnakeCase", () => {
             expect(toSnakeCase(input)).toBe(expected)
         })
     }
+})
+
+describe("toUpperCase", () => {
+    test("converts string to uppercase", () => {
+        const entries = toCastCase(OAuthAuthorizationErrorResponse.shape.error.enum, "upper")
+        expect(entries).toEqual({
+            INVALID_REQUEST: "invalid_request",
+            UNAUTHORIZED_CLIENT: "unauthorized_client",
+            ACCESS_DENIED: "access_denied",
+            UNSUPPORTED_RESPONSE_TYPE: "unsupported_response_type",
+            INVALID_SCOPE: "invalid_scope",
+            SERVER_ERROR: "server_error",
+            TEMPORARILY_UNAVAILABLE: "temporarily_unavailable",
+        })
+    })
 })

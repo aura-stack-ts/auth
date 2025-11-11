@@ -1,9 +1,15 @@
+import { z } from "zod/v4"
 import type { OAuthIntegrations } from "@/oauth/index.js"
+import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
 
+/**
+ * Standardized user profile returned by OAuth integrations after fetching user information
+ * and mapping the response to this format by default or via `profile` custom profile function.
+ */
 export interface OAuthUserProfile {
-    id: string
-    email?: string
+    sub: string
     name?: string
+    email?: string
     image?: string
 }
 
@@ -56,16 +62,21 @@ export interface AuthConfigInternal {
     oauth: Record<LiteralUnion<OAuthIntegrations>, OAuthSecureConfig>
 }
 
-export type ErrorTypes =
-    | "invalid_request"
-    | "unauthorized_client"
-    | "access_denied"
-    | "unsupported_response_type"
-    | "invalid_scope"
-    | "server_error"
-    | "temporarily_unavailable"
+/**
+ * OAuth 2.0 Authorization Error Response Types
+ * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1
+ */
+export type AuthorizationErrorResponse = z.infer<typeof OAuthAuthorizationErrorResponse>["error"]
 
-export interface ErrorResponse {
-    error: LiteralUnion<ErrorTypes>
+/**
+ * OAuth 2.0 Access Token Error Response Types
+ * @see https://datatracker.ietf.org/doc/html/rfc6749#section-5.2
+ */
+export type AccessTokenErrorResponse = z.infer<typeof OAuthAccessTokenErrorResponse>["error"]
+
+export interface OAuthErrorResponse<Errors extends "authorization" | "token"> {
+    error: LiteralUnion<Errors extends "authorization" ? AuthorizationErrorResponse : AccessTokenErrorResponse>
     error_description?: string
 }
+
+export type ErrorTypes = AuthorizationErrorResponse | AccessTokenErrorResponse
