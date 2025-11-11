@@ -1,14 +1,13 @@
-import z from "zod"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import type { AuthConfigInternal, ErrorResponse, OAuthUserProfile } from "@/@types/index.js"
 import { equals } from "@/utils.js"
 import { getUserInfo } from "./userinfo.js"
-import { createAccessToken } from "./access-token.js"
-import { OAuthAccessTokenResponse, OAuthAuthorizationSearchParams } from "@/schemas.js"
-import { createSessionCookie, expiredCookieOptions, getCookiesByNames, setCookiesByNames } from "@/cookie.js"
 import { AuraResponse } from "@/response.js"
-import { AuraAuthError, isAuraAuthError } from "@/error.js"
-import { JWTPayload } from "@/jose.js"
+import { createAccessToken } from "./access-token.js"
+import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
+import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
+import { createSessionCookie, expiredCookieOptions, getCookiesByNames, setCookiesByNames } from "@/cookie.js"
+import type { JWTPayload } from "@/jose.js"
+import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
 export const callbackAction = (authConfig: AuthConfigInternal) => {
     const { oauth: oauthIntegrations } = authConfig
@@ -20,8 +19,14 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
             const oauth = ctx.params.oauth as keyof typeof oauthIntegrations
             try {
                 if (!(oauth in oauthIntegrations)) {
-                    throw new AuraAuthError("invalid_request", "Unsupported OAuth Social Integration")
+                    throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Unsupported OAuth Social Integration")
                 }
+                const isErrorResponse = OAuthAuthorizationErrorResponse.safeParse(ctx.searchParams)
+                if (isErrorResponse.success) {
+                    const { error, error_description } = isErrorResponse.data
+                    throw new AuthError(error, error_description ?? "OAuth Authorization Error")
+                }
+
                 const oauthConfig = oauthIntegrations[oauth]
                 const { code, state } = ctx.searchParams
 
@@ -32,19 +37,16 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 } = getCookiesByNames(request.headers.get("Cookie") ?? "", ["state", "original_uri", "redirect_uri"])
 
                 if (!equals(cookieState, state)) {
-                    throw new AuraAuthError("invalid_request", "Mismatching state")
+                    throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Mismatching state")
                 }
 
-                const accessToken = (await createAccessToken(oauthConfig, cookieRedirectURI, code)) as z.infer<
-                    typeof OAuthAccessTokenResponse
-                >
+                const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code)
 
                 const headers = new Headers()
                 headers.set("Location", cookieOriginalURI)
-                const userInfo = (await getUserInfo(oauthConfig, accessToken.access_token)) as OAuthUserProfile
+                const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
 
                 const sessionCookie = await createSessionCookie(userInfo as never as JWTPayload)
-
                 const expiredCookies = setCookiesByNames(
                     {
                         state: "",
@@ -56,12 +58,15 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 headers.set("Set-Cookie", `${sessionCookie}; ${expiredCookies}`)
                 return Response.json({ oauth }, { status: 302, headers })
             } catch (error) {
-                if (isAuraAuthError(error)) {
+                if (isAuthError(error)) {
                     const { type, message } = error
-                    return AuraResponse.json<ErrorResponse>({ error: type, error_description: message }, { status: 400 })
+                    return AuraResponse.json<OAuthErrorResponse<"authorization">>(
+                        { error: type, error_description: message },
+                        { status: 400 }
+                    )
                 }
-                return AuraResponse.json<ErrorResponse>(
-                    { error: "server_error", error_description: "An unexpected error occurred" },
+                return AuraResponse.json<OAuthErrorResponse<"token">>(
+                    { error: ERROR_RESPONSE.ACCESS_TOKEN.INVALID_CLIENT, error_description: "An unexpected error occurred" },
                     { status: 500 }
                 )
             }
@@ -72,6 +77,6 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
 
 const config = createEndpointConfig("/callback/:oauth", {
     schemas: {
-        searchParams: OAuthAuthorizationSearchParams,
+        searchParams: OAuthAuthorizationResponse,
     },
 })

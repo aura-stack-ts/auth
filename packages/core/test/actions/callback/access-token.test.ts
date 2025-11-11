@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { OAuthSecureConfig } from "@/@types/index.js"
-import { AuraAuthError } from "@/error.js"
+import { AuthError } from "@/error.js"
 
 describe("createAccessToken", () => {
     test("get access token", async () => {
@@ -74,7 +74,7 @@ describe("createAccessToken", () => {
                 "https://myapp.com/auth/callback/oauth-integration",
                 "authorization_code_123"
             )
-        ).rejects.toBeInstanceOf(AuraAuthError)
+        ).rejects.toBeInstanceOf(AuthError)
         expect(fetch).not.toHaveBeenCalled()
     })
 
@@ -122,7 +122,7 @@ describe("createAccessToken", () => {
 
     test("with error and error_description", async () => {
         const mockResponse = {
-            error: "access_denied",
+            error: "invalid_grant",
             error_description: "Invalid grant",
         }
 

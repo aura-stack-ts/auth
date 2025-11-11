@@ -43,11 +43,11 @@ describe("createOAuthIntegrations", () => {
                 name: "OAuth",
                 authorizeURL: "https://example.com/authorize",
                 accessToken: "https://example.com/token",
-                clientId: "oauth-client-id",
-                clientSecret: "oauth-client-secret",
                 responseType: "code",
                 scope: "read",
                 userInfo: "https://example.com/userinfo",
+                clientId: "oauth-client-id",
+                clientSecret: "oauth-client-secret",
             },
         ])
         for (const config of Object.values(oauth)) {
@@ -63,6 +63,25 @@ describe("createOAuthIntegrations", () => {
                 name: "OAuth",
                 authorizeURL: "https://example.com/authorize",
             } as OAuthSecureConfig,
+        ])
+        const invalidConfig = Object.values(oauth)[0]
+        const isValid = OAuthConfigSchema.safeParse(invalidConfig)
+        expect(isValid.success).toBe(false)
+    })
+
+    test("create oauth config with invalid userinfo URL", () => {
+        const oauth = createOAuthIntegrations([
+            {
+                id: "oauth",
+                name: "OAuth",
+                authorizeURL: "https://example.com/authorize",
+                accessToken: "https://example.com/token",
+                responseType: "code",
+                scope: "read",
+                userInfo: "invalid-url",
+                clientId: "oauth-client-id",
+                clientSecret: "oauth-client-secret",
+            },
         ])
         const invalidConfig = Object.values(oauth)[0]
         const isValid = OAuthConfigSchema.safeParse(invalidConfig)

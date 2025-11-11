@@ -5,7 +5,7 @@ import { OAuthConfig, OAuthSecureConfig } from "@/@types/index.js"
 describe("getUserInfo", () => {
     test("get user info", async () => {
         const mockResponse = {
-            id: "12345",
+            sub: "12345",
             name: "John Doe",
             email: "john.doe@example.com",
             image: "http://example.com/john-doe.jpg",
@@ -70,7 +70,7 @@ describe("getUserInfo", () => {
             userInfo: "https://example.com/oauth/userinfo",
             profile(profile) {
                 return {
-                    id: profile.uniqueId,
+                    sub: profile.uniqueId,
                     name: profile.username,
                     email: profile.email,
                     image: profile.avatar_url,
@@ -88,7 +88,7 @@ describe("getUserInfo", () => {
             },
         })
         expect(response).toEqual({
-            id: "12345",
+            sub: "12345",
             name: "John Doe",
             email: "john.doe@example.com",
             image: "http://example.com/john-doe.jpg",
