@@ -26,7 +26,7 @@ export const encryptJWE = async (payload: string, secret: SecretInput) => {
         .setProtectedHeader({ alg: "dir", enc: "A256GCM", typ: "JWT", cty: "JWT" })
         .setIssuedAt()
         .setNotBefore("0s")
-        .setExpirationTime("15h")
+        .setExpirationTime("15d")
         .setJti(jti)
         .encrypt(secretKey)
 }

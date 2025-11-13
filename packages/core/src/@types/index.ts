@@ -1,6 +1,7 @@
 import { z } from "zod/v4"
 import type { OAuthIntegrations } from "@/oauth/index.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
+import { SESSION_VERSION } from "@/actions/session/session.js"
 
 /**
  * Standardized user profile returned by OAuth integrations after fetching user information
@@ -11,6 +12,15 @@ export interface OAuthUserProfile {
     name?: string
     email?: string
     image?: string
+}
+
+/**
+ * Internal OAuth user profile used in the session payload, extending the standard OAuthUserProfile
+ * with additional fields such as `integrations` and `version`.
+ */
+export interface OAuthUserProfileInternal extends OAuthUserProfile {
+    integrations: LiteralUnion<OAuthIntegrations>[]
+    version: typeof SESSION_VERSION
 }
 
 export interface OAuthConfig<Profile extends object = {}> {
