@@ -20,12 +20,14 @@ export const signInAction = (authConfig: AuthConfigInternal) => {
             const redirectURI = createRedirectURI(request.url, oauth)
             const stateCookie = setCookie("state", state)
             const redirectURICookie = setCookie("redirect_uri", redirectURI)
+            const redirectToCookie = setCookie("redirect_to", request.headers.get("Referer") ?? "/")
 
             const authorization = createAuthorizationURL(oauthIntegrations[oauth], redirectURI, state)
             const headers = new Headers()
             headers.set("Location", authorization)
             headers.append("Set-Cookie", stateCookie)
             headers.append("Set-Cookie", redirectURICookie)
+            headers.append("Set-Cookie", redirectToCookie)
 
             return Response.json(
                 { oauth },

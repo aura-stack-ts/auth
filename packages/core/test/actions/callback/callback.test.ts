@@ -101,7 +101,7 @@ describe("callbackAction", () => {
         const cookies = setCookiesByNames({
             state: "abc",
             redirect_uri: "https://example.com/callback/oauth-integration",
-            original_uri: "https://example.com/original",
+            redirect_to: "https://example.com/auth",
         })
         const response = await GET(
             new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
@@ -134,17 +134,18 @@ describe("callbackAction", () => {
         expect(fetch).toHaveBeenCalledTimes(2)
 
         expect(response.status).toBe(302)
-        expect(response.headers.get("Location")).toBe("https://example.com/original")
+        expect(response.headers.get("Location")).toBe("https://example.com/auth")
 
-        const { state, original_uri, redirect_uri, sessionToken } = getCookiesByNames(response.headers.get("Set-Cookie") ?? "", [
+        const { state, redirect_to, redirect_uri, sessionToken } = getCookiesByNames(response.headers.get("Set-Cookie") ?? "", [
             "state",
             "redirect_uri",
-            "original_uri",
+            "redirect_to",
             "sessionToken",
         ])
+        console.log(response.headers.get("Set-Cookie"))
         expect(state).toEqual("")
         expect(redirect_uri).toEqual("")
-        expect(original_uri).toEqual("")
+        expect(redirect_to).toEqual("")
 
         /**
          * The JWT can't be precisely tested here because it contains dynamic values such as

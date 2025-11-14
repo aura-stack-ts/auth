@@ -40,9 +40,9 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
 
                 const {
                     state: cookieState,
-                    original_uri: cookieOriginalURI,
+                    redirect_to: cookieRedirectTo,
                     redirect_uri: cookieRedirectURI,
-                } = getCookiesByNames(request.headers.get("Cookie") ?? "", ["state", "original_uri", "redirect_uri"])
+                } = getCookiesByNames(request.headers.get("Cookie") ?? "", ["state", "redirect_to", "redirect_uri"])
 
                 if (!equals(cookieState, state)) {
                     throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Mismatching state")
@@ -51,7 +51,7 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code)
 
                 const headers = new Headers(cacheControl)
-                headers.set("Location", cookieOriginalURI ?? "/")
+                headers.set("Location", cookieRedirectTo ?? "/")
                 const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
 
                 const sessionCookie = await createSessionCookie({
@@ -62,7 +62,7 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 headers.append("Set-Cookie", sessionCookie)
                 headers.append("Set-Cookie", setCookie("state", "", expiredCookieOptions))
                 headers.append("Set-Cookie", setCookie("redirect_uri", "", expiredCookieOptions))
-                headers.append("Set-Cookie", setCookie("original_uri", "", expiredCookieOptions))
+                headers.append("Set-Cookie", setCookie("redirect_to", "", expiredCookieOptions))
                 return Response.json({ oauth }, { status: 302, headers })
             } catch (error) {
                 if (isAuthError(error)) {

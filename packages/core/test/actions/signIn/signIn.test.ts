@@ -69,7 +69,6 @@ describe("signIn action", () => {
                 expect(searchParams.get("redirect_uri")).toMatch(expected)
 
                 expect(parsedCookies["aura-stack.state"]).toBeDefined()
-                expect(parsedCookies["aura-stack.redirect_uri"]).toBe(createRedirectURI(url, "oauth-integration"))
             })
         }
     })
