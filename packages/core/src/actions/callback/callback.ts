@@ -1,11 +1,13 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { equals } from "@/utils.js"
+import { cacheControl } from "@/headers.js"
 import { getUserInfo } from "./userinfo.js"
 import { AuraResponse } from "@/response.js"
 import { createAccessToken } from "./access-token.js"
+import { SESSION_VERSION } from "../session/session.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
-import { createSessionCookie, expiredCookieOptions, getCookiesByNames, setCookiesByNames } from "@/cookie.js"
+import { createSessionCookie, expiredCookieOptions, getCookiesByNames, setCookie } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
@@ -32,9 +34,9 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
 
                 const {
                     state: cookieState,
-                    original_uri: cookieOriginalURI,
+                    redirect_to: cookieRedirectTo,
                     redirect_uri: cookieRedirectURI,
-                } = getCookiesByNames(request.headers.get("Cookie") ?? "", ["state", "original_uri", "redirect_uri"])
+                } = getCookiesByNames(request.headers.get("Cookie") ?? "", ["state", "redirect_to", "redirect_uri"])
 
                 if (!equals(cookieState, state)) {
                     throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Mismatching state")
@@ -42,20 +44,20 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
 
                 const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code)
 
-                const headers = new Headers()
-                headers.set("Location", cookieOriginalURI)
+                const headers = new Headers(cacheControl)
+                headers.set("Location", cookieRedirectTo ?? "/")
                 const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
 
-                const sessionCookie = await createSessionCookie(userInfo as never as JWTPayload)
-                const expiredCookies = setCookiesByNames(
-                    {
-                        state: "",
-                        redirect_uri: "",
-                        original_uri: "",
-                    },
-                    expiredCookieOptions
-                )
-                headers.set("Set-Cookie", `${sessionCookie}; ${expiredCookies}`)
+                const sessionCookie = await createSessionCookie({
+                    ...userInfo,
+                    integrations: [oauth],
+                    version: SESSION_VERSION,
+                } as never as JWTPayload)
+
+                headers.append("Set-Cookie", sessionCookie)
+                headers.append("Set-Cookie", setCookie("state", "", expiredCookieOptions))
+                headers.append("Set-Cookie", setCookie("redirect_uri", "", expiredCookieOptions))
+                headers.append("Set-Cookie", setCookie("redirect_to", "", expiredCookieOptions))
                 return Response.json({ oauth }, { status: 302, headers })
             } catch (error) {
                 if (isAuthError(error)) {

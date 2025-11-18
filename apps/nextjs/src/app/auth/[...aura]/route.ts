@@ -4,6 +4,8 @@ const auth = createAuth({
     oauth: ["github"],
 })
 
-const { handlers } = auth
+const {
+    handlers: { GET },
+} = auth
 
-export { handlers as GET }
+export { GET }

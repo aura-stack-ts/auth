@@ -1,7 +1,7 @@
 import { createEndpoint } from "@aura-stack/router"
 import { generateSecure } from "@/secure.js"
 import { AuraResponse } from "@/response.js"
-import { setCookiesByNames } from "@/cookie.js"
+import { setCookie, setCookiesByNames } from "@/cookie.js"
 import { integrations } from "@/oauth/index.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { createAuthorizationURL, createRedirectURI } from "@/actions/signIn/authorization.js"
@@ -18,16 +18,16 @@ export const signInAction = (authConfig: AuthConfigInternal) => {
             }
             const state = generateSecure()
             const redirectURI = createRedirectURI(request.url, oauth)
-            const cookies = setCookiesByNames({
-                state,
-                redirect_uri: redirectURI,
-                original_uri: request.url,
-            })
+            const stateCookie = setCookie("state", state)
+            const redirectURICookie = setCookie("redirect_uri", redirectURI)
+            const redirectToCookie = setCookie("redirect_to", request.headers.get("Referer") ?? "/")
 
             const authorization = createAuthorizationURL(oauthIntegrations[oauth], redirectURI, state)
             const headers = new Headers()
             headers.set("Location", authorization)
-            headers.set("Set-Cookie", cookies)
+            headers.append("Set-Cookie", stateCookie)
+            headers.append("Set-Cookie", redirectURICookie)
+            headers.append("Set-Cookie", redirectToCookie)
 
             return Response.json(
                 { oauth },

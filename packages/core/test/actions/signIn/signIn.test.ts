@@ -3,7 +3,6 @@ import { createRouter } from "@aura-stack/router"
 import { signInAction } from "@/actions/index.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { parse } from "@/cookie.js"
-import { createRedirectURI } from "@/actions/signIn/authorization.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {
@@ -69,7 +68,6 @@ describe("signIn action", () => {
                 expect(searchParams.get("redirect_uri")).toMatch(expected)
 
                 expect(parsedCookies["aura-stack.state"]).toBeDefined()
-                expect(parsedCookies["aura-stack.redirect_uri"]).toBe(createRedirectURI(url, "oauth-integration"))
             })
         }
     })

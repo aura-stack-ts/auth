@@ -27,5 +27,6 @@
     }
   },
   "ui": "tui",
-  "cacheDir": ".turbo/cache"
+  "cacheDir": ".turbo/cache",
+  "globalDependencies": ["tsconfig.json"]
 }

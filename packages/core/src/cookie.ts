@@ -93,7 +93,7 @@ export const getCookiesByNames = <Keys extends LiteralUnion<CookieName>>(cookies
     const parsedCookies = parse(cookies)
     return cookieNames.reduce(
         (previous, cookie) => {
-            return { ...previous, [cookie]: parsedCookies[`${COOKIE_PREFIX}.${cookie}`] }
+            return { ...previous, [cookie]: parsedCookies[`${COOKIE_PREFIX}.${cookie}`] ?? "" }
         },
         {} as Record<Keys, string>
     )
