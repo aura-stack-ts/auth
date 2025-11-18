@@ -3,7 +3,6 @@ import { createRouter } from "@aura-stack/router"
 import { signInAction } from "@/actions/index.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { parse } from "@/cookie.js"
-import { createRedirectURI } from "@/actions/signIn/authorization.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {

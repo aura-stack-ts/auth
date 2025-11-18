@@ -13,7 +13,7 @@ export const sessionAction = createEndpoint("GET", "/session", async (request) =
         if (!session) {
             throw new AuthError("session_cookie", "Unauthorized")
         }
-        const decoded = (await decodeJWT(session as string)) as OAuthUserProfile
+        const decoded = (await decodeJWT(session)) as OAuthUserProfile
         const user: OAuthUserProfileInternal = {
             sub: decoded.sub,
             email: decoded.email,
@@ -26,7 +26,7 @@ export const sessionAction = createEndpoint("GET", "/session", async (request) =
             throw new AuthError("session_version", "Session version mismatch")
         }
         const headers = new Headers(cacheControl)
-        return Response.json({ user, authenticated: true }, { status: 200, headers })
+        return Response.json({ user, authenticated: true }, { headers })
     } catch {
         const headers = new Headers(cacheControl)
         const sessionCookie = setCookie("sessionToken", "", expiredCookieOptions)

@@ -7,15 +7,9 @@ import { createAccessToken } from "./access-token.js"
 import { SESSION_VERSION } from "../session/session.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
-import { createSessionCookie, expiredCookieOptions, getCookiesByNames, setCookie, setCookiesByNames } from "@/cookie.js"
+import { createSessionCookie, expiredCookieOptions, getCookiesByNames, setCookie } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
-
-const config = createEndpointConfig("/callback/:oauth", {
-    schemas: {
-        searchParams: OAuthAuthorizationResponse,
-    },
-})
 
 export const callbackAction = (authConfig: AuthConfigInternal) => {
     const { oauth: oauthIntegrations } = authConfig
@@ -59,6 +53,7 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                     integrations: [oauth],
                     version: SESSION_VERSION,
                 } as never as JWTPayload)
+
                 headers.append("Set-Cookie", sessionCookie)
                 headers.append("Set-Cookie", setCookie("state", "", expiredCookieOptions))
                 headers.append("Set-Cookie", setCookie("redirect_uri", "", expiredCookieOptions))
@@ -81,3 +76,9 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
         config
     )
 }
+
+const config = createEndpointConfig("/callback/:oauth", {
+    schemas: {
+        searchParams: OAuthAuthorizationResponse,
+    },
+})

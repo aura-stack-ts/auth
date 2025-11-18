@@ -78,7 +78,7 @@ describe("createAuthorizationURL", () => {
                 },
                 "https://example.com/auth/callback",
                 "123"
-            ) as string
+            )
 
             const searchParams = new URL(url).searchParams
             expect(searchParams.get("client_id")).toBe("1")

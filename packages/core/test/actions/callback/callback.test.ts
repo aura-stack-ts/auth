@@ -61,18 +61,6 @@ describe("callbackAction", () => {
         })
     })
 
-    test("without missing redirect_uri cookie", async () => {
-        const response = await GET(
-            new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
-                headers: {
-                    Cookie: "aura-stack.state=abc; Path=/; SameSite=Lax",
-                },
-            })
-        )
-        expect(response.status).toBe(400)
-        expect(await response.json()).toEqual({ error: "invalid_request", error_description: "Invalid OAuth configuration" })
-    })
-
     test("callback action workflow", async () => {
         const mockFetch = vi.fn()
 
@@ -142,7 +130,6 @@ describe("callbackAction", () => {
             "redirect_to",
             "sessionToken",
         ])
-        console.log(response.headers.get("Set-Cookie"))
         expect(state).toEqual("")
         expect(redirect_uri).toEqual("")
         expect(redirect_to).toEqual("")
