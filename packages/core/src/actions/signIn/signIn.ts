@@ -1,7 +1,7 @@
 import { createEndpoint } from "@aura-stack/router"
 import { generateSecure } from "@/secure.js"
 import { AuraResponse } from "@/response.js"
-import { setCookie, setCookiesByNames } from "@/cookie.js"
+import { setCookie } from "@/cookie.js"
 import { integrations } from "@/oauth/index.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { createAuthorizationURL, createRedirectURI } from "@/actions/signIn/authorization.js"

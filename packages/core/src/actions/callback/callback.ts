@@ -11,6 +11,12 @@ import { createSessionCookie, expiredCookieOptions, getCookiesByNames, setCookie
 import type { JWTPayload } from "@/jose.js"
 import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
+const config = createEndpointConfig("/callback/:oauth", {
+    schemas: {
+        searchParams: OAuthAuthorizationResponse,
+    },
+})
+
 export const callbackAction = (authConfig: AuthConfigInternal) => {
     const { oauth: oauthIntegrations } = authConfig
 
@@ -76,9 +82,3 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
         config
     )
 }
-
-const config = createEndpointConfig("/callback/:oauth", {
-    schemas: {
-        searchParams: OAuthAuthorizationResponse,
-    },
-})

@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { createRouter, type RouterConfig } from "@aura-stack/router"
-import { signInAction, callbackAction, sessionAction } from "@/actions/index.js"
+import { signInAction, callbackAction, sessionAction, signOutAction } from "@/actions/index.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import type { AuthConfig } from "@/@types/index.js"
 
@@ -32,7 +32,7 @@ const routerConfig: RouterConfig = {
  */
 export const createAuth = (authConfig?: AuthConfig) => {
     const oauth = createOAuthIntegrations(authConfig?.oauth)
-    const router = createRouter([signInAction({ oauth }), callbackAction({ oauth }), sessionAction], routerConfig)
+    const router = createRouter([signInAction({ oauth }), callbackAction({ oauth }), sessionAction, signOutAction], routerConfig)
     return {
         handlers: router,
     }
