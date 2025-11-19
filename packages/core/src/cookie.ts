@@ -1,5 +1,5 @@
 import { parse, serialize, SerializeOptions } from "cookie"
-import type { LiteralUnion } from "@/@types/index.js"
+import type { CookieOptions, CookieOptionsInternal, LiteralUnion, StandardCookie } from "@/@types/index.js"
 import { AuthError } from "./error.js"
 import { encodeJWT, JWTPayload } from "./jose.js"
 import { isFalsy } from "./assert.js"
@@ -13,9 +13,8 @@ type CookieName = "sessionToken" | "csrfToken" | "state" | "pkce" | "nonce"
 
 /**
  * Prefix for all cookies set by Aura Auth.
- * @todo: allow customization of the prefix
  */
-const COOKIE_PREFIX = "aura-stack"
+export const COOKIE_NAME = "aura-stack"
 
 /**
  * Default cookie options for session management.
@@ -53,11 +52,11 @@ export const expiredCookieOptions: SerializeOptions = {
  * - Partitioned
  * - Priority
  */
-export const setCookie = (name: LiteralUnion<CookieName>, value: string, options?: SerializeOptions) => {
-    const isSecure = options?.secure
-    const securePrefix = isSecure ? "__Secure-" : ""
-    const cookieName = `${securePrefix}${COOKIE_PREFIX}.${name}`
-    return serialize(cookieName, value, {
+export const setCookie = (name: LiteralUnion<CookieName>, value: string, options?: CookieOptionsInternal) => {
+    const prefix = options?.secure ? "__Secure-" : (options?.prefix ?? "")
+    const cookieOptions: CookieOptionsInternal = { name: COOKIE_NAME, prefix, ...defaultCookieConfig.options, ...options }
+    const cookieNameWithPrefix = `${cookieOptions.prefix}${cookieOptions.name}.${name}`
+    return serialize(cookieNameWithPrefix, value, {
         ...defaultCookieOptions,
         ...options,
     })
@@ -76,7 +75,7 @@ export const getCookie = (request: Request, cookie: LiteralUnion<CookieName>) =>
         throw new AuthError("invalid_request", "No cookies found. There is no active session")
     }
     const parsedCookies = parse(cookies)
-    const value = parsedCookies[`${COOKIE_PREFIX}.${cookie}`]
+    const value = parsedCookies[`${COOKIE_NAME}.${cookie}`]
     if (value === undefined) {
         throw new AuthError("invalid_request", `Cookie "${cookie}" not found. There is no active session`)
     }
@@ -97,7 +96,7 @@ export const getCookiesByNames = <Keys extends LiteralUnion<CookieName>>(cookies
     const parsedCookies = parse(cookies)
     return cookieNames.reduce(
         (previous, cookie) => {
-            return { ...previous, [cookie]: parsedCookies[`${COOKIE_PREFIX}.${cookie}`] ?? "" }
+            return { ...previous, [cookie]: parsedCookies[`${COOKIE_NAME}.${cookie}`] ?? "" }
         },
         {} as Record<Keys, string>
     )
@@ -110,7 +109,10 @@ export const getCookiesByNames = <Keys extends LiteralUnion<CookieName>>(cookies
  * @param options Cookie serialization options
  * @returns A string representing the set-cookie headers
  */
-export const setCookiesByNames = <T extends LiteralUnion<CookieName>>(cookies: Record<T, string>, options?: SerializeOptions) => {
+export const setCookiesByNames = <T extends LiteralUnion<CookieName>>(
+    cookies: Record<T, string>,
+    options?: CookieOptionsInternal
+) => {
     return Object.keys(cookies).reduce((previous, cookieName) => {
         const cookie = setCookie(cookieName, cookies[cookieName as T], options)
         return previous ? `${previous}; ${cookie}` : cookie
@@ -124,11 +126,47 @@ export const setCookiesByNames = <T extends LiteralUnion<CookieName>>(cookies: R
  * @param session - The JWT payload to be encoded in the session cookie
  * @returns The serialized session cookie string
  */
-export const createSessionCookie = async (session: JWTPayload) => {
+export const createSessionCookie = async (session: JWTPayload, cookieOptions: CookieOptionsInternal) => {
     try {
         const encoded = await encodeJWT(session)
-        return setCookie("sessionToken", encoded)
-    } catch {
-        throw new AuthError("server_error", "Failed to create session cookie")
+        return setCookie("sessionToken", encoded, cookieOptions)
+    } catch (error) {
+        // @ts-ignore
+        throw new AuthError("server_error", "Failed to create session cookie", { cause: error })
     }
+}
+
+export const defaultCookieConfig: CookieOptions = {
+    flag: "standard",
+    name: COOKIE_NAME,
+    options: defaultCookieOptions,
+}
+
+/**
+ *
+ * @param request
+ * @param cookieOptions
+ * @returns
+ */
+export const secureCookieOptions = (request: Request, cookieOptions: CookieOptions): CookieOptionsInternal => {
+    const name = cookieOptions.name ?? COOKIE_NAME
+    const isSecure = request.url.startsWith("https://") || request.headers.get("X-Forwarded-Proto") === "https"
+    if (!isSecure) {
+        if ((cookieOptions.options as StandardCookie["options"])?.secure) {
+            console.warn("Warning: Attempting to set a secure cookie over an insecure connection.")
+        }
+        return { ...defaultCookieOptions, ...cookieOptions.options, secure: false, flag: "standard", name, prefix: "" }
+    }
+    return cookieOptions.flag === "host"
+        ? {
+              ...defaultCookieOptions,
+              ...cookieOptions.options,
+              secure: true,
+              path: "/",
+              domain: undefined,
+              flag: "host",
+              name,
+              prefix: "__Host-",
+          }
+        : { ...defaultCookieOptions, ...cookieOptions.options, secure: true, flag: "secure", name, prefix: "__Secure-" }
 }

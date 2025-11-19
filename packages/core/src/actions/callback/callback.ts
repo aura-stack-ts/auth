@@ -7,7 +7,7 @@ import { createAccessToken } from "./access-token.js"
 import { SESSION_VERSION } from "../session/session.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
-import { createSessionCookie, expiredCookieOptions, getCookiesByNames, setCookie } from "@/cookie.js"
+import { createSessionCookie, expiredCookieOptions, getCookiesByNames, isSecureCookie, setCookie } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
@@ -54,11 +54,15 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 headers.set("Location", cookieRedirectTo ?? "/")
                 const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
 
-                const sessionCookie = await createSessionCookie({
-                    ...userInfo,
-                    integrations: [oauth],
-                    version: SESSION_VERSION,
-                } as never as JWTPayload)
+                const isSecure = isSecureCookie(request)
+                const sessionCookie = await createSessionCookie(
+                    {
+                        ...userInfo,
+                        integrations: [oauth],
+                        version: SESSION_VERSION,
+                    } as never as JWTPayload,
+                    isSecure
+                )
 
                 headers.append("Set-Cookie", sessionCookie)
                 headers.append("Set-Cookie", setCookie("state", "", expiredCookieOptions))

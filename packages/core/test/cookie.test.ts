@@ -1,5 +1,7 @@
 import { describe, test, expect } from "vitest"
-import { setCookie, getCookie } from "@/cookie.js"
+import { setCookie, getCookie, secureCookieOptions, COOKIE_NAME } from "@/cookie.js"
+import { SerializeOptions } from "cookie"
+import type { CookieOptions, CookieOptionsInternal } from "@/@types/index.js"
 
 describe("setCookie", () => {
     test("set state cookie with default options", () => {
@@ -53,4 +55,260 @@ describe("setCookie", () => {
         const req = new Request("http://localhost", { headers })
         expect(() => getCookie(req, "sessionToken")).toThrow()
     })
+
+    test("secure cookie", () => {
+        const cookie = setCookie("csrfToken", "secureValue", { secure: true })
+        expect(cookie).toBeDefined()
+        expect(cookie).toEqual("__Secure-aura-stack.csrfToken=secureValue; Path=/; HttpOnly; Secure; SameSite=Lax")
+    })
+})
+
+describe("secureCookieOptions", () => {
+    const http = new Request("http://localhost:3000")
+    const https = new Request("https://www.example.com")
+
+    const testCases: Array<{ description: string; request: Request; options: CookieOptions; expected: CookieOptionsInternal }> = [
+        {
+            description: "override httpOnly in a secure connection with standard flag",
+            request: https,
+            options: {
+                flag: "standard",
+                options: {
+                    httpOnly: false,
+                },
+            },
+            expected: {
+                secure: true,
+                httpOnly: false,
+                path: "/",
+                sameSite: "lax",
+                flag: "secure",
+                name: COOKIE_NAME,
+                prefix: "__Secure-",
+            },
+        },
+        {
+            description: "override httpOnly in a secure connection with secure flag",
+            request: https,
+            options: {
+                flag: "secure",
+                options: {
+                    httpOnly: false,
+                },
+            },
+            expected: {
+                secure: true,
+                httpOnly: false,
+                path: "/",
+                sameSite: "lax",
+                flag: "secure",
+                name: COOKIE_NAME,
+                prefix: "__Secure-",
+            },
+        },
+        {
+            description: "override httpOnly in a secure connection with host flag",
+            request: https,
+            options: {
+                flag: "host",
+                options: {
+                    httpOnly: false,
+                },
+            },
+            expected: {
+                secure: true,
+                httpOnly: false,
+                path: "/",
+                sameSite: "lax",
+                domain: undefined,
+                flag: "host",
+                name: COOKIE_NAME,
+                prefix: "__Host-",
+            },
+        },
+        {
+            description: "disable secure option in a insecure connection with standard flag",
+            request: http,
+            options: {
+                flag: "standard",
+                options: {
+                    secure: false,
+                },
+            },
+            expected: {
+                secure: false,
+                httpOnly: true,
+                path: "/",
+                sameSite: "lax",
+                flag: "standard",
+                name: COOKIE_NAME,
+                prefix: "",
+            },
+        },
+        {
+            description: "disable secure option in a insecure connection with secure flag",
+            request: http,
+            options: {
+                flag: "secure",
+            },
+            expected: {
+                secure: false,
+                httpOnly: true,
+                path: "/",
+                sameSite: "lax",
+                flag: "standard",
+                name: COOKIE_NAME,
+                prefix: "",
+            },
+        },
+        {
+            description: "disable secure option in a insecure connection with host flag",
+            request: http,
+            options: {
+                flag: "host",
+            },
+            expected: {
+                secure: false,
+                httpOnly: true,
+                path: "/",
+                sameSite: "lax",
+                flag: "standard",
+                name: COOKIE_NAME,
+                prefix: "",
+            },
+        },
+        {
+            description: "default secure flag in a secure connection",
+            request: https,
+            options: {
+                flag: "secure",
+            },
+            expected: {
+                secure: true,
+                httpOnly: true,
+                path: "/",
+                sameSite: "lax",
+                flag: "secure",
+                name: COOKIE_NAME,
+                prefix: "__Secure-",
+            },
+        },
+        {
+            description: "default host flag in a secure connection",
+            request: https,
+            options: {
+                flag: "host",
+            },
+            expected: {
+                secure: true,
+                httpOnly: true,
+                path: "/",
+                sameSite: "lax",
+                domain: undefined,
+                flag: "host",
+                name: COOKIE_NAME,
+                prefix: "__Host-",
+            },
+        },
+        {
+            description: "default secure flag in a insecure connection",
+            request: http,
+            options: {
+                flag: "secure",
+            },
+            expected: {
+                secure: false,
+                httpOnly: true,
+                path: "/",
+                sameSite: "lax",
+                flag: "standard",
+                name: COOKIE_NAME,
+                prefix: "",
+            },
+        },
+        {
+            description: "default host flag in a insecure connection",
+            request: http,
+            options: {
+                flag: "host",
+            },
+            expected: {
+                secure: false,
+                httpOnly: true,
+                path: "/",
+                sameSite: "lax",
+                flag: "standard",
+                name: COOKIE_NAME,
+                prefix: "",
+            },
+        },
+        {
+            description: "force to disable secure flag in a secure connection with secure flag",
+            request: https,
+            options: {
+                flag: "secure",
+                options: {
+                    secure: false,
+                } as SerializeOptions,
+            },
+            expected: {
+                secure: true,
+                httpOnly: true,
+                path: "/",
+                sameSite: "lax",
+                flag: "secure",
+                name: COOKIE_NAME,
+                prefix: "__Secure-",
+            },
+        },
+        {
+            description: "force to custom domain in a secure connection with host flag",
+            request: https,
+            options: {
+                flag: "host",
+                options: {
+                    domain: "example.com",
+                    path: "/dashboard",
+                } as SerializeOptions,
+            },
+            expected: {
+                secure: true,
+                httpOnly: true,
+                path: "/",
+                sameSite: "lax",
+                domain: undefined,
+                flag: "host",
+                name: COOKIE_NAME,
+                prefix: "__Host-",
+            },
+        },
+        {
+            description: "force to custom domain in a insecure connection with host flag",
+            request: http,
+            options: {
+                flag: "host",
+                options: {
+                    domain: "example.com",
+                    path: "/dashboard",
+                } as SerializeOptions,
+            },
+            expected: {
+                secure: false,
+                httpOnly: true,
+                path: "/dashboard",
+                sameSite: "lax",
+                domain: "example.com",
+                flag: "standard",
+                name: COOKIE_NAME,
+                prefix: "",
+            },
+        },
+    ]
+
+    for (const { description, request, options, expected } of testCases) {
+        test(description, () => {
+            const config = secureCookieOptions(request, options)
+            expect(config).toEqual<SerializeOptions>(expected)
+        })
+    }
 })

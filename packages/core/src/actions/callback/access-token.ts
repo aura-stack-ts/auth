@@ -45,6 +45,7 @@ export const createAccessToken = async (oauthConfig: OAuthSecureConfig, redirect
         }
         return token.data
     } catch (error) {
+        console.log(error)
         throw throwAuthError(error, "Failed to create access token")
     }
 }
