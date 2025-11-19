@@ -10,9 +10,6 @@ export const SESSION_VERSION = "v0.1.0"
 export const sessionAction = createEndpoint("GET", "/session", async (request) => {
     try {
         const session = getCookie(request, "sessionToken")
-        if (!session) {
-            throw new AuthError("session_cookie", "Unauthorized")
-        }
         const decoded = (await decodeJWT(session)) as OAuthUserProfile
         const user: OAuthUserProfileInternal = {
             sub: decoded.sub,

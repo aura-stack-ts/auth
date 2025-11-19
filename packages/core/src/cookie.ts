@@ -76,7 +76,11 @@ export const getCookie = (request: Request, cookie: LiteralUnion<CookieName>) =>
         throw new AuthError("invalid_request", "No cookies found. There is no active session")
     }
     const parsedCookies = parse(cookies)
-    return parsedCookies[`${COOKIE_PREFIX}.${cookie}`]
+    const value = parsedCookies[`${COOKIE_PREFIX}.${cookie}`]
+    if (value === undefined) {
+        throw new AuthError("invalid_request", `Cookie "${cookie}" not found. There is no active session`)
+    }
+    return value
 }
 
 /**

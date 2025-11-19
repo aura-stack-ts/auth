@@ -84,9 +84,17 @@ export type AuthorizationErrorResponse = z.infer<typeof OAuthAuthorizationErrorR
  */
 export type AccessTokenErrorResponse = z.infer<typeof OAuthAccessTokenErrorResponse>["error"]
 
-export interface OAuthErrorResponse<Errors extends "authorization" | "token"> {
-    error: LiteralUnion<Errors extends "authorization" ? AuthorizationErrorResponse : AccessTokenErrorResponse>
+export type TokenRevocationErrorResponse = "invalid_session_token"
+
+export interface OAuthErrorResponse<Errors extends "authorization" | "token" | "signOut"> {
+    error: LiteralUnion<
+        Errors extends "authorization"
+            ? AuthorizationErrorResponse
+            : Errors extends "token"
+              ? AccessTokenErrorResponse
+              : TokenRevocationErrorResponse
+    >
     error_description?: string
 }
 
-export type ErrorTypes = AuthorizationErrorResponse | AccessTokenErrorResponse
+export type ErrorTypes = AuthorizationErrorResponse | AccessTokenErrorResponse | TokenRevocationErrorResponse
