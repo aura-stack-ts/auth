@@ -70,9 +70,13 @@ export type CookieOptions = {
 
 export type CookieOptionsInternal = {
     name?: string
-    flag?: "standard" | "secure" | "host"
     prefix?: string
 } & SerializeOptions
+
+/**
+ * Names of cookies used by Aura Auth for session management and OAuth flows
+ */
+export type CookieName = "sessionToken" | "csrfToken" | "state" | "pkce" | "nonce"
 
 export interface AuthConfig {
     /**

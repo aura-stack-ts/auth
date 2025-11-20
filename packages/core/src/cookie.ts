@@ -1,15 +1,10 @@
-import { parse, serialize, SerializeOptions } from "cookie"
-import type { CookieOptions, CookieOptionsInternal, LiteralUnion, StandardCookie } from "@/@types/index.js"
+import { parse, serialize, type SerializeOptions } from "cookie"
 import { AuthError } from "./error.js"
-import { encodeJWT, JWTPayload } from "./jose.js"
-import { isFalsy } from "./assert.js"
+import { encodeJWT, type JWTPayload } from "./jose.js"
+import { isRequest } from "./assert.js"
+import type { CookieName, CookieOptions, CookieOptionsInternal, LiteralUnion, StandardCookie } from "@/@types/index.js"
 
 export { parse } from "cookie"
-
-/**
- * Names of cookies used by Aura Auth for session management and OAuth flows
- */
-type CookieName = "sessionToken" | "csrfToken" | "state" | "pkce" | "nonce"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -17,12 +12,41 @@ type CookieName = "sessionToken" | "csrfToken" | "state" | "pkce" | "nonce"
 export const COOKIE_NAME = "aura-stack"
 
 /**
- * Default cookie options for session management.
+ * Default cookie options used by Aura Auth.
  */
 export const defaultCookieOptions: SerializeOptions = {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
+}
+
+/**
+ * Default cookie options for "standard" cookies.
+ */
+export const defaultCookieConfig: CookieOptions = {
+    flag: "standard",
+    name: COOKIE_NAME,
+    options: defaultCookieOptions,
+}
+
+/**
+ * Default cookie options for "secure" cookies.
+ * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
+ */
+export const defaultSecureCookieConfig: CookieOptionsInternal = {
+    secure: true,
+    prefix: "__Secure-",
+}
+
+/**
+ * Default cookie options for "host" cookies.
+ * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
+ */
+export const defaultHostCookieConfig: CookieOptionsInternal = {
+    secure: true,
+    prefix: "__Host-",
+    path: "/",
+    domain: undefined,
 }
 
 /**
@@ -34,28 +58,25 @@ export const expiredCookieOptions: SerializeOptions = {
     maxAge: 0,
 }
 
+export const defineDefaultCookieOptions = (options?: CookieOptionsInternal): CookieOptionsInternal => {
+    return {
+        name: options?.name ?? COOKIE_NAME,
+        prefix: options?.secure ? "__Secure-" : (options?.prefix ?? ""),
+        ...defaultCookieOptions,
+        ...options,
+    }
+}
+
 /**
- * Set a cookie with the given name, value, and options.
+ * Set a cookie with the given name, value and `CookieOptionsInternal`; supports secure
+ * cookies with the `__Secure-` and `__Host-` prefixes.
  *
- * @todo:
- * - implement the __Host- prefix for cookies set on secure connections
- * - implement the __Secure- prefix for cookies set on secure connections
- *
- * Order of attributes:
- * - Expires
- * - Max-Age
- * - Domain
- * - Path
- * - Secure
- * - HttpOnly
- * - SameSite
- * - Partitioned
- * - Priority
+ * Cookie attributes are serialized in the following order:
+ * Expires, Max-Age, Domain, Path, Secure, HttpOnly, SameSite, Partitioned, Priority.
  */
-export const setCookie = (name: LiteralUnion<CookieName>, value: string, options?: CookieOptionsInternal) => {
-    const prefix = options?.secure ? "__Secure-" : (options?.prefix ?? "")
-    const cookieOptions: CookieOptionsInternal = { name: COOKIE_NAME, prefix, ...defaultCookieConfig.options, ...options }
-    const cookieNameWithPrefix = `${cookieOptions.prefix}${cookieOptions.name}.${name}`
+export const setCookie = (cookieName: LiteralUnion<CookieName>, value: string, options?: CookieOptionsInternal) => {
+    const { prefix, name } = defineDefaultCookieOptions(options)
+    const cookieNameWithPrefix = `${prefix}${name}.${cookieName}`
     return serialize(cookieNameWithPrefix, value, {
         ...defaultCookieOptions,
         ...options,
@@ -69,54 +90,18 @@ export const setCookie = (name: LiteralUnion<CookieName>, value: string, options
  * @param cookie Cookie name to retrieve
  * @returns The value of the cookie or undefined if not found
  */
-export const getCookie = (request: Request, cookie: LiteralUnion<CookieName>) => {
-    const cookies = request.headers.get("Cookie")
+export const getCookie = (petition: Request | Response, cookie: LiteralUnion<CookieName>, options?: CookieOptionsInternal) => {
+    const cookies = isRequest(petition) ? petition.headers.get("Cookie") : petition.headers.getSetCookie().join("; ")
     if (!cookies) {
         throw new AuthError("invalid_request", "No cookies found. There is no active session")
     }
+    const { name, prefix } = defineDefaultCookieOptions(options)
     const parsedCookies = parse(cookies)
-    const value = parsedCookies[`${COOKIE_NAME}.${cookie}`]
+    const value = parsedCookies[`${prefix}${name}.${cookie}`]
     if (value === undefined) {
         throw new AuthError("invalid_request", `Cookie "${cookie}" not found. There is no active session`)
     }
     return value
-}
-
-/**
- * Get a set of cookies by their names from a raw cookies string.
- *
- * @param cookies Raw cookies string from the request headers
- * @param cookieNames Array of cookie names to retrieve
- * @returns A record of cookie names and their corresponding values
- */
-export const getCookiesByNames = <Keys extends LiteralUnion<CookieName>>(cookies: string, cookieNames: Keys[]) => {
-    if (isFalsy(cookies)) {
-        throw new AuthError("invalid_request", "No cookies found. There is no active session")
-    }
-    const parsedCookies = parse(cookies)
-    return cookieNames.reduce(
-        (previous, cookie) => {
-            return { ...previous, [cookie]: parsedCookies[`${COOKIE_NAME}.${cookie}`] ?? "" }
-        },
-        {} as Record<Keys, string>
-    )
-}
-
-/**
- * Set multiple cookies by their names and values.
- *
- * @param cookies Record of cookie names and their values
- * @param options Cookie serialization options
- * @returns A string representing the set-cookie headers
- */
-export const setCookiesByNames = <T extends LiteralUnion<CookieName>>(
-    cookies: Record<T, string>,
-    options?: CookieOptionsInternal
-) => {
-    return Object.keys(cookies).reduce((previous, cookieName) => {
-        const cookie = setCookie(cookieName, cookies[cookieName as T], options)
-        return previous ? `${previous}; ${cookie}` : cookie
-    }, "")
 }
 
 /**
@@ -136,12 +121,6 @@ export const createSessionCookie = async (session: JWTPayload, cookieOptions: Co
     }
 }
 
-export const defaultCookieConfig: CookieOptions = {
-    flag: "standard",
-    name: COOKIE_NAME,
-    options: defaultCookieOptions,
-}
-
 /**
  *
  * @param request
@@ -155,18 +134,14 @@ export const secureCookieOptions = (request: Request, cookieOptions: CookieOptio
         if ((cookieOptions.options as StandardCookie["options"])?.secure) {
             console.warn("Warning: Attempting to set a secure cookie over an insecure connection.")
         }
-        return { ...defaultCookieOptions, ...cookieOptions.options, secure: false, flag: "standard", name, prefix: "" }
+        return { ...defaultCookieOptions, ...cookieOptions.options, secure: false, name, prefix: "" }
     }
     return cookieOptions.flag === "host"
         ? {
               ...defaultCookieOptions,
               ...cookieOptions.options,
-              secure: true,
-              path: "/",
-              domain: undefined,
-              flag: "host",
+              ...defaultHostCookieConfig,
               name,
-              prefix: "__Host-",
           }
-        : { ...defaultCookieOptions, ...cookieOptions.options, secure: true, flag: "secure", name, prefix: "__Secure-" }
+        : { ...defaultCookieOptions, ...cookieOptions.options, ...defaultSecureCookieConfig, name }
 }

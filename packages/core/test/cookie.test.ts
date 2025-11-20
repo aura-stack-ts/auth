@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { setCookie, getCookie, secureCookieOptions, COOKIE_NAME } from "@/cookie.js"
-import { SerializeOptions } from "cookie"
+import type { SerializeOptions } from "cookie"
 import type { CookieOptions, CookieOptionsInternal } from "@/@types/index.js"
 
 describe("setCookie", () => {
@@ -61,6 +61,69 @@ describe("setCookie", () => {
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("__Secure-aura-stack.csrfToken=secureValue; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
+
+    test("host cookie", () => {
+        const cookie = setCookie("csrfToken", "hostValue", { prefix: "__Host-", secure: true })
+        expect(cookie).toBeDefined()
+        expect(cookie).toEqual("__Host-aura-stack.csrfToken=hostValue; Path=/; HttpOnly; Secure; SameSite=Lax")
+    })
+})
+
+describe("getCookie", () => {
+    test("retrieve sessionToken from a request without secure", () => {
+        const sessionCookie = setCookie("sessionToken", "session", { secure: false })
+        const request = new Request("http://localhost", {
+            headers: {
+                Cookie: sessionCookie,
+            },
+        })
+        expect(getCookie(request, "sessionToken")).toBe("session")
+    })
+
+    test("retrieve sessionToken from a request with __Secure- prefix", () => {
+        const sessionCookie = setCookie("sessionToken", "session", { secure: true })
+        const request = new Request("https://www.example.com", {
+            headers: {
+                Cookie: sessionCookie,
+            },
+        })
+        expect(getCookie(request, "sessionToken", { secure: true })).toBe("session")
+    })
+
+    test("retrieve sessionToken from a request with __Host- prefix", () => {
+        const sessionCookie = setCookie("sessionToken", "session", { prefix: "__Host-", secure: true })
+        const request = new Request("https://www.example.com", {
+            headers: {
+                Cookie: sessionCookie,
+            },
+        })
+        expect(getCookie(request, "sessionToken", { prefix: "__Host-", secure: true })).toBe("session")
+    })
+
+    test("getCookie throws when cookie is not found", () => {
+        const sessionCookie = setCookie("sessionToken", "session")
+        const request = new Request("http://localhost", {
+            headers: {
+                Cookie: sessionCookie,
+            },
+        })
+        expect(() => getCookie(request, "nonExistentCookie")).toThrow()
+    })
+
+    test("getCookie throws when no Cookie header is present", () => {
+        const request = new Request("http://localhost")
+        expect(() => getCookie(request, "sessionToken")).toThrow()
+    })
+
+    test("retrieve cookie from Response Set-Cookie header", () => {
+        const sessionCookie = setCookie("sessionToken", "sessionValue")
+        const response = new Response(null, {
+            headers: {
+                "Set-Cookie": sessionCookie,
+            },
+        })
+        expect(getCookie(response, "sessionToken")).toBe("sessionValue")
+    })
 })
 
 describe("secureCookieOptions", () => {
@@ -82,7 +145,6 @@ describe("secureCookieOptions", () => {
                 httpOnly: false,
                 path: "/",
                 sameSite: "lax",
-                flag: "secure",
                 name: COOKIE_NAME,
                 prefix: "__Secure-",
             },
@@ -101,7 +163,6 @@ describe("secureCookieOptions", () => {
                 httpOnly: false,
                 path: "/",
                 sameSite: "lax",
-                flag: "secure",
                 name: COOKIE_NAME,
                 prefix: "__Secure-",
             },
@@ -121,7 +182,6 @@ describe("secureCookieOptions", () => {
                 path: "/",
                 sameSite: "lax",
                 domain: undefined,
-                flag: "host",
                 name: COOKIE_NAME,
                 prefix: "__Host-",
             },
@@ -140,7 +200,6 @@ describe("secureCookieOptions", () => {
                 httpOnly: true,
                 path: "/",
                 sameSite: "lax",
-                flag: "standard",
                 name: COOKIE_NAME,
                 prefix: "",
             },
@@ -156,7 +215,6 @@ describe("secureCookieOptions", () => {
                 httpOnly: true,
                 path: "/",
                 sameSite: "lax",
-                flag: "standard",
                 name: COOKIE_NAME,
                 prefix: "",
             },
@@ -172,7 +230,6 @@ describe("secureCookieOptions", () => {
                 httpOnly: true,
                 path: "/",
                 sameSite: "lax",
-                flag: "standard",
                 name: COOKIE_NAME,
                 prefix: "",
             },
@@ -188,7 +245,6 @@ describe("secureCookieOptions", () => {
                 httpOnly: true,
                 path: "/",
                 sameSite: "lax",
-                flag: "secure",
                 name: COOKIE_NAME,
                 prefix: "__Secure-",
             },
@@ -205,7 +261,6 @@ describe("secureCookieOptions", () => {
                 path: "/",
                 sameSite: "lax",
                 domain: undefined,
-                flag: "host",
                 name: COOKIE_NAME,
                 prefix: "__Host-",
             },
@@ -221,7 +276,6 @@ describe("secureCookieOptions", () => {
                 httpOnly: true,
                 path: "/",
                 sameSite: "lax",
-                flag: "standard",
                 name: COOKIE_NAME,
                 prefix: "",
             },
@@ -237,7 +291,6 @@ describe("secureCookieOptions", () => {
                 httpOnly: true,
                 path: "/",
                 sameSite: "lax",
-                flag: "standard",
                 name: COOKIE_NAME,
                 prefix: "",
             },
@@ -256,7 +309,6 @@ describe("secureCookieOptions", () => {
                 httpOnly: true,
                 path: "/",
                 sameSite: "lax",
-                flag: "secure",
                 name: COOKIE_NAME,
                 prefix: "__Secure-",
             },
@@ -277,7 +329,6 @@ describe("secureCookieOptions", () => {
                 path: "/",
                 sameSite: "lax",
                 domain: undefined,
-                flag: "host",
                 name: COOKIE_NAME,
                 prefix: "__Host-",
             },
@@ -298,7 +349,6 @@ describe("secureCookieOptions", () => {
                 path: "/dashboard",
                 sameSite: "lax",
                 domain: "example.com",
-                flag: "standard",
                 name: COOKIE_NAME,
                 prefix: "",
             },

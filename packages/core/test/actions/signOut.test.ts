@@ -1,10 +1,14 @@
 import { describe, test, expect, vi } from "vitest"
 import { signOutAction } from "@/actions/signOut.js"
 import { createRouter } from "@aura-stack/router"
-import { encodeJWT, JWTPayload } from "@/jose.js"
+import { encodeJWT, type JWTPayload } from "@/jose.js"
 import { SESSION_VERSION } from "@/actions/session/session.js"
+import { createOAuthIntegrations } from "@/oauth/index.js"
+import { defaultCookieConfig } from "@/cookie.js"
 
-const { POST } = createRouter([signOutAction])
+const oauth = createOAuthIntegrations([])
+
+const { POST } = createRouter([signOutAction({ oauth, cookies: defaultCookieConfig })])
 
 describe("signOut action", () => {
     test("sessionToken cookie not present", async () => {
@@ -25,7 +29,7 @@ describe("signOut action", () => {
             new Request("https://example.com/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: "aura-stack.sessionToken=invalid_token",
+                    Cookie: "__Secure-aura-stack.sessionToken=invalid_token",
                 },
             })
         )
@@ -53,7 +57,7 @@ describe("signOut action", () => {
         const request = await POST(
             new Request("https://example.com/signOut?token_type_hint=session_token", {
                 headers: {
-                    Cookie: `aura-stack.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
                 },
             })
         )
@@ -79,7 +83,7 @@ describe("signOut action", () => {
             new Request("https://example.com/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-stack.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
                 },
             })
         )

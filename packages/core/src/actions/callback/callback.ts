@@ -7,7 +7,7 @@ import { createAccessToken } from "./access-token.js"
 import { SESSION_VERSION } from "../session/session.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
-import { createSessionCookie, expiredCookieOptions, getCookiesByNames, isSecureCookie, setCookie } from "@/cookie.js"
+import { createSessionCookie, expiredCookieOptions, getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
@@ -18,7 +18,7 @@ const config = createEndpointConfig("/callback/:oauth", {
 })
 
 export const callbackAction = (authConfig: AuthConfigInternal) => {
-    const { oauth: oauthIntegrations } = authConfig
+    const { oauth: oauthIntegrations, cookies } = authConfig
 
     return createEndpoint(
         "GET",
@@ -38,11 +38,10 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 const oauthConfig = oauthIntegrations[oauth]
                 const { code, state } = ctx.searchParams
 
-                const {
-                    state: cookieState,
-                    redirect_to: cookieRedirectTo,
-                    redirect_uri: cookieRedirectURI,
-                } = getCookiesByNames(request.headers.get("Cookie") ?? "", ["state", "redirect_to", "redirect_uri"])
+                const cookieOptions = secureCookieOptions(request, cookies)
+                const cookieState = getCookie(request, "state", cookieOptions)
+                const cookieRedirectTo = getCookie(request, "redirect_to", cookieOptions)
+                const cookieRedirectURI = getCookie(request, "redirect_uri", cookieOptions)
 
                 if (!equals(cookieState, state)) {
                     throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Mismatching state")
@@ -54,20 +53,19 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 headers.set("Location", cookieRedirectTo ?? "/")
                 const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
 
-                const isSecure = isSecureCookie(request)
                 const sessionCookie = await createSessionCookie(
                     {
                         ...userInfo,
                         integrations: [oauth],
                         version: SESSION_VERSION,
                     } as never as JWTPayload,
-                    isSecure
+                    cookieOptions
                 )
 
-                headers.append("Set-Cookie", sessionCookie)
-                headers.append("Set-Cookie", setCookie("state", "", expiredCookieOptions))
-                headers.append("Set-Cookie", setCookie("redirect_uri", "", expiredCookieOptions))
-                headers.append("Set-Cookie", setCookie("redirect_to", "", expiredCookieOptions))
+                headers.set("Set-Cookie", sessionCookie)
+                headers.append("Set-Cookie", setCookie("state", "", { ...cookieOptions, ...expiredCookieOptions }))
+                headers.append("Set-Cookie", setCookie("redirect_uri", "", { ...cookieOptions, ...expiredCookieOptions }))
+                headers.append("Set-Cookie", setCookie("redirect_to", "", { ...cookieOptions, ...expiredCookieOptions }))
                 return Response.json({ oauth }, { status: 302, headers })
             } catch (error) {
                 if (isAuthError(error)) {
