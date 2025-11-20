@@ -13,8 +13,13 @@ import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenRespon
  * @param code - The authorization code received from the OAuth server
  * @returns The access token response from the OAuth server
  */
-export const createAccessToken = async (oauthConfig: OAuthSecureConfig, redirectURI: string, code: string) => {
-    const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code })
+export const createAccessToken = async (
+    oauthConfig: OAuthSecureConfig,
+    redirectURI: string,
+    code: string,
+    codeVerifier: string
+) => {
+    const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code, codeVerifier })
     if (!parsed.success) {
         throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Invalid OAuth configuration")
     }

@@ -77,7 +77,9 @@ describe("createAuthorizationURL", () => {
                     clientSecret: "2",
                 },
                 "https://example.com/auth/callback",
-                "123"
+                "123",
+                "challenge",
+                "S256"
             )
 
             const searchParams = new URL(url).searchParams
@@ -122,7 +124,9 @@ describe("createAuthorizationURL", () => {
 
         for (const { description, oauthConfig, redirectURL, expected } of testCases) {
             test(description, () => {
-                expect(() => createAuthorizationURL(oauthConfig as any, redirectURL, "123")).toThrow(expected)
+                expect(() => createAuthorizationURL(oauthConfig as any, redirectURL, "123", "challenge", "S256")).toThrow(
+                    expected
+                )
             })
         }
     })

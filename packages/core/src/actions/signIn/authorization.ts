@@ -15,8 +15,14 @@ import { AuthError, ERROR_RESPONSE } from "@/error.js"
  * @param redirectURI - The redirect URI where the OAuth service will send the user after authorization.
  * @param state - A unique string used to maintain state between the request and callback.
  */
-export const createAuthorizationURL = (oauthConfig: OAuthSecureConfig, redirectURI: string, state: string) => {
-    const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state })
+export const createAuthorizationURL = (
+    oauthConfig: OAuthSecureConfig,
+    redirectURI: string,
+    state: string,
+    codeChallenge: string,
+    codeChallengeMethod: string
+) => {
+    const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state, codeChallenge, codeChallengeMethod })
     if (!parsed.success) {
         throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid OAuth configuration")
     }

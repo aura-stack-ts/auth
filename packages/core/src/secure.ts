@@ -5,7 +5,8 @@ export const generateSecure = (length: number = 32) => {
 }
 
 /**
- * @todo: implement
+ * Creates the code_verifier for PKCE OAuth flow.
+ * @see https://datatracker.ietf.org/doc/html/rfc7636#section-4.1
  */
 export const createCodeVerifier = () => {
     return generateSecure(64)

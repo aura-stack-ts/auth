@@ -42,12 +42,13 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 const cookieState = getCookie(request, "state", cookieOptions)
                 const cookieRedirectTo = getCookie(request, "redirect_to", cookieOptions)
                 const cookieRedirectURI = getCookie(request, "redirect_uri", cookieOptions)
+                const codeVerifier = getCookie(request, "code_verifier", cookieOptions)
 
                 if (!equals(cookieState, state)) {
                     throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Mismatching state")
                 }
 
-                const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code)
+                const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier)
 
                 const headers = new Headers(cacheControl)
                 headers.set("Location", cookieRedirectTo ?? "/")
@@ -66,6 +67,7 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 headers.append("Set-Cookie", setCookie("state", "", { ...cookieOptions, ...expiredCookieOptions }))
                 headers.append("Set-Cookie", setCookie("redirect_uri", "", { ...cookieOptions, ...expiredCookieOptions }))
                 headers.append("Set-Cookie", setCookie("redirect_to", "", { ...cookieOptions, ...expiredCookieOptions }))
+                headers.append("Set-Cookie", setCookie("code_verifier", "", { ...cookieOptions, ...expiredCookieOptions }))
                 return Response.json({ oauth }, { status: 302, headers })
             } catch (error) {
                 if (isAuthError(error)) {
