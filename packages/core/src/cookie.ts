@@ -18,6 +18,7 @@ export const defaultCookieOptions: SerializeOptions = {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
+    maxAge: 60 * 60 * 24 * 15,
 }
 
 /**
@@ -27,6 +28,12 @@ export const defaultCookieConfig: CookieOptions = {
     flag: "standard",
     name: COOKIE_NAME,
     options: defaultCookieOptions,
+}
+
+export const defaultStandardCookieConfig: CookieOptionsInternal = {
+    secure: false,
+    httpOnly: true,
+    prefix: "",
 }
 
 /**
@@ -122,19 +129,48 @@ export const createSessionCookie = async (session: JWTPayload, cookieOptions: Co
 }
 
 /**
+ * Defines the cookie configuration based on the request security and cookie options passed
+ * in the Aura Auth configuration (`createAuth` function). This function ensures the correct
+ * cookie prefixes and security attributes are applied based on whether the request is secure
+ * (HTTPS) or not.
  *
- * @param request
- * @param cookieOptions
- * @returns
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-Proto
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Forwarded
+ * @param request The incoming request object
+ * @param cookieOptions Cookie options from the Aura Auth configuration
+ * @returns The finalized cookie options to be used for setting cookies
  */
 export const secureCookieOptions = (request: Request, cookieOptions: CookieOptions): CookieOptionsInternal => {
     const name = cookieOptions.name ?? COOKIE_NAME
-    const isSecure = request.url.startsWith("https://") || request.headers.get("X-Forwarded-Proto") === "https"
+    const isSecure =
+        request.url.startsWith("https://") ||
+        request.headers.get("X-Forwarded-Proto") === "https" ||
+        request.headers.get("Forwarded")?.includes("proto=https")
+    if (!cookieOptions.options?.httpOnly) {
+        console.warn(
+            "[WARNING]: Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk."
+        )
+    }
+    if ((cookieOptions.options as StandardCookie["options"])?.domain === "*") {
+        console.warn("[WARNING]: Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.")
+    }
     if (!isSecure) {
-        if ((cookieOptions.options as StandardCookie["options"])?.secure) {
-            console.warn("Warning: Attempting to set a secure cookie over an insecure connection.")
+        const options = cookieOptions.options as StandardCookie["options"]
+        if (options?.secure) {
+            console.warn(
+                "[WARNING]: TThe 'Secure' attribute will be disabled for this cookie. Serve over HTTPS to enforce Secure cookies."
+            )
         }
-        return { ...defaultCookieOptions, ...cookieOptions.options, secure: false, name, prefix: "" }
+        if (options?.sameSite == "none") {
+            console.warn("[WARNING]: SameSite=None without a secure connection can be blocked by browsers.")
+        }
+        return {
+            ...defaultCookieOptions,
+            ...cookieOptions.options,
+            sameSite: options?.sameSite === "none" ? "lax" : (options?.sameSite ?? "lax"),
+            ...defaultStandardCookieConfig,
+            name,
+        }
     }
     return cookieOptions.flag === "host"
         ? {

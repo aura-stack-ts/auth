@@ -7,25 +7,25 @@ describe("setCookie", () => {
     test("set state cookie with default options", () => {
         const cookie = setCookie("state", "xyz123")
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("aura-stack.state=xyz123; Path=/; HttpOnly; SameSite=Lax")
+        expect(cookie).toEqual("aura-stack.state=xyz123; Max-Age=1296000; Path=/; HttpOnly; SameSite=Lax")
     })
 
     test("set csrfToken cookie with disabled httpOnly flag on cookie", () => {
         const cookie = setCookie("csrfToken", "xyz123", { httpOnly: false })
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("aura-stack.csrfToken=xyz123; Path=/; SameSite=Lax")
+        expect(cookie).toEqual("aura-stack.csrfToken=xyz123; Max-Age=1296000; Path=/; SameSite=Lax")
     })
 
     test("set pkce cookie with secure flag on cookie", () => {
         const cookie = setCookie("pkce", "xyz123", { secure: true })
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("__Secure-aura-stack.pkce=xyz123; Path=/; HttpOnly; Secure; SameSite=Lax")
+        expect(cookie).toEqual("__Secure-aura-stack.pkce=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 
     test("set custom cookie with default options", () => {
         const cookie = setCookie("customCookie", "customValue")
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("aura-stack.customCookie=customValue; Path=/; HttpOnly; SameSite=Lax")
+        expect(cookie).toEqual("aura-stack.customCookie=customValue; Max-Age=1296000; Path=/; HttpOnly; SameSite=Lax")
     })
 
     test("set session cookie and retrieve it from a client-sent Cookie header", () => {
@@ -59,13 +59,15 @@ describe("setCookie", () => {
     test("secure cookie", () => {
         const cookie = setCookie("csrfToken", "secureValue", { secure: true })
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("__Secure-aura-stack.csrfToken=secureValue; Path=/; HttpOnly; Secure; SameSite=Lax")
+        expect(cookie).toEqual(
+            "__Secure-aura-stack.csrfToken=secureValue; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax"
+        )
     })
 
     test("host cookie", () => {
         const cookie = setCookie("csrfToken", "hostValue", { prefix: "__Host-", secure: true })
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("__Host-aura-stack.csrfToken=hostValue; Path=/; HttpOnly; Secure; SameSite=Lax")
+        expect(cookie).toEqual("__Host-aura-stack.csrfToken=hostValue; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 })
 
@@ -143,6 +145,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: true,
                 httpOnly: false,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 name: COOKIE_NAME,
@@ -161,6 +164,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: true,
                 httpOnly: false,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 name: COOKIE_NAME,
@@ -179,6 +183,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: true,
                 httpOnly: false,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 domain: undefined,
@@ -198,6 +203,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: false,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 name: COOKIE_NAME,
@@ -213,6 +219,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: false,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 name: COOKIE_NAME,
@@ -228,6 +235,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: false,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 name: COOKIE_NAME,
@@ -243,6 +251,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: true,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 name: COOKIE_NAME,
@@ -258,6 +267,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: true,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 domain: undefined,
@@ -274,6 +284,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: false,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 name: COOKIE_NAME,
@@ -289,6 +300,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: false,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 name: COOKIE_NAME,
@@ -307,6 +319,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: true,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 name: COOKIE_NAME,
@@ -326,6 +339,7 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: true,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
                 domain: undefined,
@@ -346,9 +360,30 @@ describe("secureCookieOptions", () => {
             expected: {
                 secure: false,
                 httpOnly: true,
+                maxAge: 1296000,
                 path: "/dashboard",
                 sameSite: "lax",
                 domain: "example.com",
+                name: COOKIE_NAME,
+                prefix: "",
+            },
+        },
+        {
+            description: "disable secure and httpOnly attributes in a insecure connection",
+            request: http,
+            options: {
+                flag: "standard",
+                options: {
+                    secure: false,
+                    httpOnly: false,
+                },
+            },
+            expected: {
+                secure: false,
+                httpOnly: true,
+                maxAge: 1296000,
+                path: "/",
+                sameSite: "lax",
                 name: COOKIE_NAME,
                 prefix: "",
             },
