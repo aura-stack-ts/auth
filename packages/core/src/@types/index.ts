@@ -2,6 +2,7 @@ import { z } from "zod/v4"
 import type { OAuthIntegrations } from "@/oauth/index.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import { SESSION_VERSION } from "@/actions/session/session.js"
+import { SerializeOptions } from "cookie"
 
 /**
  * Standardized user profile returned by OAuth integrations after fetching user information
@@ -41,6 +42,42 @@ export interface OAuthSecureConfig extends OAuthConfig {
 
 export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>)
 
+/**
+ * Cookie type with __Secure- prefix, must be Secure.
+ * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
+ */
+type SecureCookie = { flag: "secure" } & { options?: Omit<SerializeOptions, "secure" | "encode"> }
+
+/**
+ * Cookie type with __Host- prefix, must be Secure, Path=/, no Domain attribute.
+ * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
+ */
+type HostCookie = { flag: "host" } & { options?: Omit<SerializeOptions, "secure" | "path" | "domain" | "encode"> }
+
+export type StandardCookie = { flag?: "standard" } & { options?: Omit<SerializeOptions, "encode"> }
+
+/**
+ * Union type for cookie options based on the specified flag.
+ *  - secure: Cookies are only sent over HTTPS connections.
+ *  - host: Cookies use the __Host- prefix and are only sent over HTTPS connections.
+ *  - standard: Cookies can be sent over both HTTP and HTTPS connections. (default in development)
+ */
+export type CookieFlagOptions = StandardCookie | SecureCookie | HostCookie
+
+export type CookieOptions = {
+    name?: string
+} & CookieFlagOptions
+
+export type CookieOptionsInternal = {
+    name?: string
+    prefix?: string
+} & SerializeOptions
+
+/**
+ * Names of cookies used by Aura Auth for session management and OAuth flows
+ */
+export type CookieName = "sessionToken" | "csrfToken" | "state" | "pkce" | "nonce"
+
 export interface AuthConfig {
     /**
      * OAuth integrations available in the authentication and authorization flows. It provides a type-inference
@@ -66,10 +103,30 @@ export interface AuthConfig {
      * ]
      */
     oauth: (OAuthIntegrations | OAuthSecureConfig)[]
+    /**
+     * Cookie options defines the configuration for cookies used in Aura Auth.
+     * It includes a prefix for cookie names and flag options to determine
+     * the security and scope of the cookies.
+     *
+     * **⚠️ WARNING:** Ensure that the cookie options are configured correctly to
+     * maintain the security and integrity of the authentication process. `Aura Auth`
+     * is not responsible for misconfigured cookies that may lead to security vulnerabilities.
+     *
+     * - prefix: A string prefix to be added to all cookie names, by default "aura-stack".
+     * - flag options (This attributes help to define the security level of the cookies):
+     *   - secure: Cookies use the __Secure- prefix and are only sent over HTTPS connections.
+     *   - host: Cookies use the __Host- prefix and are only sent over HTTPS connections.
+     *   - standard: Cookies can be sent over both HTTP and HTTPS connections. (default in development)
+     *
+     * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
+     * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
+     */
+    cookies?: CookieOptions
 }
 
 export interface AuthConfigInternal {
     oauth: Record<LiteralUnion<OAuthIntegrations>, OAuthSecureConfig>
+    cookies: CookieOptions
 }
 
 /**

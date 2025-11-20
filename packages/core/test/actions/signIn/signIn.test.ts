@@ -2,7 +2,7 @@ import { describe, test, expect } from "vitest"
 import { createRouter } from "@aura-stack/router"
 import { signInAction } from "@/actions/index.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
-import { parse } from "@/cookie.js"
+import { defaultCookieConfig, getCookie, parse, secureCookieOptions } from "@/cookie.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {
@@ -18,7 +18,7 @@ const oauthIntegrations = createOAuthIntegrations([
     },
 ])
 
-const { GET } = createRouter([signInAction({ oauth: oauthIntegrations })])
+const { GET } = createRouter([signInAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })])
 
 describe("signIn action", () => {
     test("unsupported oauth integration", async () => {
@@ -53,21 +53,16 @@ describe("signIn action", () => {
             test.concurrent(description, async ({ expect }) => {
                 const request = await GET(new Request(url))
                 const headers = new Headers(request.headers)
-                const cookies = headers.get("Set-Cookie")
-                const parsedCookies = parse(cookies || "")
+
+                const stateCookie = getCookie(request, "state", { secure: url.startsWith("https://") })
                 const location = headers.get("Location") as string
                 const searchParams = new URL(location).searchParams
 
                 expect(request.status).toBe(302)
-                expect(cookies).toBeDefined()
-                expect(location).toBeDefined()
-
                 expect(location).toContain("https://example.com/oauth/authorize?")
-                expect(headers.get("Location")).toBeDefined()
                 expect(searchParams.get("client_id")).toBe("oauth_client_id")
                 expect(searchParams.get("redirect_uri")).toMatch(expected)
-
-                expect(parsedCookies["aura-stack.state"]).toBeDefined()
+                expect(stateCookie).toBeDefined()
             })
         }
     })

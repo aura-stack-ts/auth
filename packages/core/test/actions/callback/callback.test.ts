@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { callbackAction } from "@/actions/callback/callback.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { createRouter } from "@aura-stack/router"
-import { getCookiesByNames, setCookiesByNames } from "@/cookie.js"
+import { defaultCookieConfig, getCookie, parse, setCookie } from "@/cookie.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {
@@ -18,7 +18,7 @@ const oauthIntegrations = createOAuthIntegrations([
     },
 ])
 
-const { GET } = createRouter([callbackAction({ oauth: oauthIntegrations })])
+const { GET } = createRouter([callbackAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })])
 
 describe("callbackAction", () => {
     test("endpoint without code and state", async () => {
@@ -44,7 +44,7 @@ describe("callbackAction", () => {
         const response = await GET(
             new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
                 headers: {
-                    Cookie: "aura-stack.state=123; Path=/; SameSite=Lax",
+                    Cookie: "__Secure-aura-stack.state=123; __Secure-aura-stack.redirect_to=https://example.com/auth; __Secure-aura-stack.redirect_uri=https://example.com/callback/oauth-integration",
                 },
             })
         )
@@ -86,16 +86,21 @@ describe("callbackAction", () => {
             json: async () => userInfoMock,
         })
 
-        const cookies = setCookiesByNames({
-            state: "abc",
-            redirect_uri: "https://example.com/callback/oauth-integration",
-            redirect_to: "https://example.com/auth",
+        const state = setCookie("state", "abc", { secure: true, prefix: "__Secure-" })
+        const redirectURI = setCookie("redirect_uri", "https://example.com/callback/oauth-integration", {
+            secure: true,
+            prefix: "__Secure-",
         })
+        const redirectTo = setCookie("redirect_to", "https://example.com/auth", { secure: true, prefix: "__Secure-" })
+
+        const headers = new Headers()
+        headers.append("Cookie", state)
+        headers.append("Cookie", redirectURI)
+        headers.append("Cookie", redirectTo)
+
         const response = await GET(
             new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
-                headers: {
-                    Cookie: cookies,
-                },
+                headers: headers,
             })
         )
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/token", {
@@ -124,21 +129,9 @@ describe("callbackAction", () => {
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("https://example.com/auth")
 
-        const { state, redirect_to, redirect_uri, sessionToken } = getCookiesByNames(response.headers.get("Set-Cookie") ?? "", [
-            "state",
-            "redirect_uri",
-            "redirect_to",
-            "sessionToken",
-        ])
-        expect(state).toEqual("")
-        expect(redirect_uri).toEqual("")
-        expect(redirect_to).toEqual("")
-
-        /**
-         * The JWT can't be precisely tested here because it contains dynamic values such as
-         * the issued at time (iat), jwt id (jti), and expiration time (exp). Instead, we
-         * verify that a sessionToken cookie is indeed set.
-         */
-        expect(sessionToken).toBeDefined()
+        expect(getCookie(response, "sessionToken", { secure: true })).toBeDefined()
+        expect(getCookie(response, "state", { secure: true })).toEqual("")
+        expect(getCookie(response, "redirect_to", { secure: true })).toEqual("")
+        expect(getCookie(response, "redirect_uri", { secure: true })).toEqual("")
     })
 })
