@@ -10,7 +10,7 @@ export const generateSecure = (length: number = 32) => {
  *   - code_verifier: A cryptographically random string used to mitigate authorization code interception attacks.
  *   - code_challenge: A hashed version of the code_verifier sent in the authorization request.
  *   - method: The method used to generate the code challenge, typically "S256" for SHA-256.
- * 
+ *
  * @see https://datatracker.ietf.org/doc/html/rfc7636#section-4.1
  */
 export const createPKCE = async (verifier?: string) => {

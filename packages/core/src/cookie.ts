@@ -68,7 +68,7 @@ export const expiredCookieOptions: SerializeOptions = {
 export const defineDefaultCookieOptions = (options?: CookieOptionsInternal): CookieOptionsInternal => {
     return {
         name: options?.name ?? COOKIE_NAME,
-        prefix: options?.secure ? "__Secure-" : (options?.prefix ?? ""),
+        prefix: options?.prefix ?? (options?.secure ? "__Secure-" : ""),
         ...defaultCookieOptions,
         ...options,
     }
@@ -180,4 +180,31 @@ export const secureCookieOptions = (request: Request, cookieOptions: CookieOptio
               name,
           }
         : { ...defaultCookieOptions, ...cookieOptions.options, ...defaultSecureCookieConfig, name }
+}
+
+/**
+ * Expire a cookie by setting its value to an empty string and applying expired cookie options.
+ *
+ * @param name The name of the cookie to expire
+ * @param options cookie options obtained from secureCookieOptions
+ * @returns formatted cookie options for an expired cookie
+ */
+export const expireCookie = (name: LiteralUnion<CookieName>, options: CookieOptionsInternal) => {
+    return setCookie(name, "", { ...options, ...expiredCookieOptions })
+}
+
+/**
+ * Set OAuth-specific cookie options, including a short maxAge of 5 minutes.
+ *
+ * @param options cookie options obtained from secureCookieOptions
+ * @returns formatted cookie options for OAuth cookies
+ */
+export const oauthCookie = (options: CookieOptionsInternal): CookieOptionsInternal => {
+    return {
+        ...options,
+        secure: options.secure,
+        httpOnly: options.httpOnly,
+        maxAge: 5 * 60,
+        expires: new Date(Date.now() + 5 * 60 * 1000),
+    }
 }

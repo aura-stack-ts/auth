@@ -2,6 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { OAuthSecureConfig } from "@/@types/index.js"
 import { AuthError } from "@/error.js"
+import { generateSecure } from "@/secure.js"
 
 describe("createAccessToken", () => {
     test("get access token", async () => {
@@ -18,6 +19,7 @@ describe("createAccessToken", () => {
             }))
         )
 
+        const codeVerifier = generateSecure(64)
         const accessToken = await createAccessToken(
             {
                 id: "oauth-integration",
@@ -31,7 +33,8 @@ describe("createAccessToken", () => {
                 clientSecret: "oauth_client_secret",
             },
             "https://myapp.com/auth/callback/oauth-integration",
-            "authorization_code_123"
+            "authorization_code_123",
+            codeVerifier
         )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
@@ -46,6 +49,7 @@ describe("createAccessToken", () => {
                 code: "authorization_code_123",
                 redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
                 grant_type: "authorization_code",
+                code_verifier: codeVerifier,
             }).toString(),
         })
         expect(accessToken).toEqual(mockResponse)
@@ -60,6 +64,8 @@ describe("createAccessToken", () => {
             }))
         )
 
+        const codeVerifier = generateSecure(64)
+
         await expect(
             createAccessToken(
                 {
@@ -72,7 +78,8 @@ describe("createAccessToken", () => {
                     userInfo: "https://example.com/oauth/userinfo",
                 } as OAuthSecureConfig,
                 "https://myapp.com/auth/callback/oauth-integration",
-                "authorization_code_123"
+                "authorization_code_123",
+                codeVerifier
             )
         ).rejects.toBeInstanceOf(AuthError)
         expect(fetch).not.toHaveBeenCalled()
@@ -85,6 +92,8 @@ describe("createAccessToken", () => {
                 throw new Error("Network Fetch error")
             })
         )
+
+        const codeVerifier = generateSecure(64)
 
         await expect(
             createAccessToken(
@@ -100,7 +109,8 @@ describe("createAccessToken", () => {
                     clientSecret: "oauth_client_secret",
                 },
                 "https://myapp.com/auth/callback/oauth-integration",
-                "authorization_code_123"
+                "authorization_code_123",
+                codeVerifier
             )
         ).rejects.toThrow(/Network Fetch error/)
 
@@ -116,6 +126,7 @@ describe("createAccessToken", () => {
                 code: "authorization_code_123",
                 redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
                 grant_type: "authorization_code",
+                code_verifier: codeVerifier,
             }).toString(),
         })
     })
@@ -134,6 +145,7 @@ describe("createAccessToken", () => {
             }))
         )
 
+        const codeVerifier = generateSecure(64)
         await expect(
             createAccessToken(
                 {
@@ -148,7 +160,8 @@ describe("createAccessToken", () => {
                     clientSecret: "oauth_client_secret",
                 },
                 "https://myapp.com/auth/callback/oauth-integration",
-                "invalid_code"
+                "invalid_code",
+                codeVerifier
             )
         ).rejects.toThrow(/Invalid grant/)
 
@@ -164,6 +177,7 @@ describe("createAccessToken", () => {
                 code: "invalid_code",
                 redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
                 grant_type: "authorization_code",
+                code_verifier: codeVerifier,
             }).toString(),
         })
     })
@@ -181,6 +195,7 @@ describe("createAccessToken", () => {
             }))
         )
 
+        const codeVerifier = generateSecure(64)
         await expect(
             createAccessToken(
                 {
@@ -195,7 +210,8 @@ describe("createAccessToken", () => {
                     clientSecret: "oauth_client_secret",
                 },
                 "https://myapp.com/auth/callback/oauth-integration",
-                "authorization_code_123"
+                "authorization_code_123",
+                codeVerifier
             )
         ).rejects.toThrow(/Invalid access token response format/)
 
@@ -211,6 +227,7 @@ describe("createAccessToken", () => {
                 code: "authorization_code_123",
                 redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
                 grant_type: "authorization_code",
+                code_verifier: codeVerifier,
             }).toString(),
         })
     })

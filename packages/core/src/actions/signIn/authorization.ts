@@ -1,15 +1,15 @@
-import { OAuthSecureConfig } from "@/@types/index.js"
 import { toCastCase } from "@/utils.js"
 import { OAuthAuthorization } from "@/schemas.js"
 import { AuthError, ERROR_RESPONSE } from "@/error.js"
+import type { OAuthSecureConfig } from "@/@types/index.js"
 
 /**
  * Constructs the request URI for the Authorization Request to the third-party OAuth service. It includes
- * the necessary query parameters such as `client_id`, `redirect_uri`, `response_type`, `scope`, and `state`.
- * Only supports basic OAuth 2.0 Authorization Code Flow without PKCE.
+ * the necessary query parameters such as `client_id`, `redirect_uri`, `response_type`, `scope`, `state`,
+ * `code_challenge`, and `code_challenge_method`.
  *
- * @todo: Add support for PKCE and other OAuth flows.
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1
+ * @see https://datatracker.ietf.org/doc/html/rfc7636#section-4
  *
  * @param oauthConfig - The OAuth configuration for the third-party service.
  * @param redirectURI - The redirect URI where the OAuth service will send the user after authorization.

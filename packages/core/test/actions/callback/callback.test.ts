@@ -2,7 +2,8 @@ import { describe, test, expect, vi } from "vitest"
 import { callbackAction } from "@/actions/callback/callback.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { createRouter } from "@aura-stack/router"
-import { defaultCookieConfig, getCookie, parse, setCookie } from "@/cookie.js"
+import { defaultCookieConfig, getCookie, setCookie } from "@/cookie.js"
+import { generateSecure } from "@/secure.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {
@@ -41,10 +42,18 @@ describe("callbackAction", () => {
     })
 
     test("mismatching state", async () => {
+        const state = setCookie("state", "123", { secure: true, prefix: "__Secure-" })
+        const redirectURI = setCookie("redirect_uri", "https://example.com/callback/oauth-integration", {
+            secure: true,
+            prefix: "__Secure-",
+        })
+        const redirectTo = setCookie("redirect_to", "https://example.com/auth", { secure: true, prefix: "__Secure-" })
+        const codeVerifier = setCookie("code_verifier", "verifier_123", { secure: true, prefix: "__Secure-" })
+
         const response = await GET(
             new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
                 headers: {
-                    Cookie: "__Secure-aura-stack.state=123; __Secure-aura-stack.redirect_to=https://example.com/auth; __Secure-aura-stack.redirect_uri=https://example.com/callback/oauth-integration",
+                    Cookie: [state, redirectURI, redirectTo, codeVerifier].join("; "),
                 },
             })
         )
@@ -92,15 +101,14 @@ describe("callbackAction", () => {
             prefix: "__Secure-",
         })
         const redirectTo = setCookie("redirect_to", "https://example.com/auth", { secure: true, prefix: "__Secure-" })
-
-        const headers = new Headers()
-        headers.append("Cookie", state)
-        headers.append("Cookie", redirectURI)
-        headers.append("Cookie", redirectTo)
+        const codeVerifierValue = generateSecure(64)
+        const codeVerifier = setCookie("code_verifier", codeVerifierValue, { secure: true, prefix: "__Secure-" })
 
         const response = await GET(
             new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
-                headers: headers,
+                headers: {
+                    Cookie: [state, redirectURI, redirectTo, codeVerifier].join("; "),
+                },
             })
         )
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/token", {
@@ -115,6 +123,7 @@ describe("callbackAction", () => {
                 code: "123",
                 redirect_uri: "https://example.com/callback/oauth-integration",
                 grant_type: "authorization_code",
+                code_verifier: codeVerifierValue,
             }).toString(),
         })
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {

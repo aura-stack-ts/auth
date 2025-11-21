@@ -2,7 +2,7 @@ import { createEndpoint } from "@aura-stack/router"
 import { decodeJWT } from "@/jose.js"
 import { AuthError } from "@/error.js"
 import { cacheControl } from "@/headers.js"
-import { expiredCookieOptions, getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
 import type { AuthConfigInternal, OAuthUserProfile, OAuthUserProfileInternal } from "@/@types/index.js"
 
 export const SESSION_VERSION = "v0.1.0"
@@ -30,7 +30,7 @@ export const sessionAction = (authConfig: AuthConfigInternal) => {
             return Response.json({ user, authenticated: true }, { headers })
         } catch {
             const headers = new Headers(cacheControl)
-            const sessionCookie = setCookie("sessionToken", "", { ...cookieOptions, ...expiredCookieOptions })
+            const sessionCookie = expireCookie("sessionToken", cookieOptions)
             headers.set("Set-Cookie", sessionCookie)
             return Response.json({ authenticated: false, message: "Unauthorized" }, { status: 401, headers })
         }
