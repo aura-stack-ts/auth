@@ -21,6 +21,8 @@ export const OAuthConfigSchema = object({
 export const OAuthAuthorization = OAuthConfigSchema.extend({
     redirectURI: string(),
     state: string(),
+    codeChallenge: string(),
+    codeChallengeMethod: options(["plain", "S256"]),
 })
 
 /**
@@ -60,11 +62,13 @@ export const OAuthAuthorizationErrorResponse = object({
 export const OAuthAccessToken = OAuthConfigSchema.extend({
     redirectURI: string(),
     code: string(),
+    codeVerifier: string().min(43).max(128),
 })
 
 /**
  * Schema for OAuth Access Token Response
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-5.1
+ * @see https://datatracker.ietf.org/doc/html/rfc7636#section-4
  */
 export const OAuthAccessTokenResponse = object({
     access_token: string(),

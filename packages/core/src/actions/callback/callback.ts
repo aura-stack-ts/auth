@@ -7,7 +7,7 @@ import { createAccessToken } from "./access-token.js"
 import { SESSION_VERSION } from "../session/session.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
-import { createSessionCookie, expiredCookieOptions, getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import { createSessionCookie, expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
@@ -42,12 +42,13 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 const cookieState = getCookie(request, "state", cookieOptions)
                 const cookieRedirectTo = getCookie(request, "redirect_to", cookieOptions)
                 const cookieRedirectURI = getCookie(request, "redirect_uri", cookieOptions)
+                const codeVerifier = getCookie(request, "code_verifier", cookieOptions)
 
                 if (!equals(cookieState, state)) {
                     throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Mismatching state")
                 }
 
-                const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code)
+                const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier)
 
                 const headers = new Headers(cacheControl)
                 headers.set("Location", cookieRedirectTo ?? "/")
@@ -63,9 +64,10 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 )
 
                 headers.set("Set-Cookie", sessionCookie)
-                headers.append("Set-Cookie", setCookie("state", "", { ...cookieOptions, ...expiredCookieOptions }))
-                headers.append("Set-Cookie", setCookie("redirect_uri", "", { ...cookieOptions, ...expiredCookieOptions }))
-                headers.append("Set-Cookie", setCookie("redirect_to", "", { ...cookieOptions, ...expiredCookieOptions }))
+                headers.append("Set-Cookie", expireCookie("state", cookieOptions))
+                headers.append("Set-Cookie", expireCookie("redirect_uri", cookieOptions))
+                headers.append("Set-Cookie", expireCookie("redirect_to", cookieOptions))
+                headers.append("Set-Cookie", expireCookie("code_verifier", cookieOptions))
                 return Response.json({ oauth }, { status: 302, headers })
             } catch (error) {
                 if (isAuthError(error)) {

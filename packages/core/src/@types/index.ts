@@ -76,7 +76,7 @@ export type CookieOptionsInternal = {
 /**
  * Names of cookies used by Aura Auth for session management and OAuth flows
  */
-export type CookieName = "sessionToken" | "csrfToken" | "state" | "pkce" | "nonce"
+export type CookieName = "sessionToken" | "csrfToken" | "state" | "pkce" | "nonce" | "code_verifier"
 
 export interface AuthConfig {
     /**

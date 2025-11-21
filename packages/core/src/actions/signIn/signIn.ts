@@ -1,7 +1,7 @@
 import { createEndpoint } from "@aura-stack/router"
-import { generateSecure } from "@/secure.js"
+import { createPKCE, generateSecure } from "@/secure.js"
 import { AuraResponse } from "@/response.js"
-import { secureCookieOptions, setCookie } from "@/cookie.js"
+import { oauthCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 import { integrations } from "@/oauth/index.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { createAuthorizationURL, createRedirectURI } from "@/actions/signIn/authorization.js"
@@ -19,16 +19,20 @@ export const signInAction = (authConfig: AuthConfigInternal) => {
             const cookieOptions = secureCookieOptions(request, cookies)
             const state = generateSecure()
             const redirectURI = createRedirectURI(request.url, oauth)
-            const stateCookie = setCookie("state", state, cookieOptions)
-            const redirectURICookie = setCookie("redirect_uri", redirectURI, cookieOptions)
-            const redirectToCookie = setCookie("redirect_to", request.headers.get("Referer") ?? "/", cookieOptions)
+            const stateCookie = setCookie("state", state, oauthCookie(cookieOptions))
+            const redirectURICookie = setCookie("redirect_uri", redirectURI, oauthCookie(cookieOptions))
+            const redirectToCookie = setCookie("redirect_to", request.headers.get("Referer") ?? "/", oauthCookie(cookieOptions))
 
-            const authorization = createAuthorizationURL(oauthIntegrations[oauth], redirectURI, state)
+            const { codeVerifier, codeChallenge, method } = await createPKCE()
+            const codeVerifierCookie = setCookie("code_verifier", codeVerifier, oauthCookie(cookieOptions))
+
+            const authorization = createAuthorizationURL(oauthIntegrations[oauth], redirectURI, state, codeChallenge, method)
             const headers = new Headers()
             headers.set("Location", authorization)
             headers.append("Set-Cookie", stateCookie)
             headers.append("Set-Cookie", redirectURICookie)
             headers.append("Set-Cookie", redirectToCookie)
+            headers.append("Set-Cookie", codeVerifierCookie)
 
             return Response.json(
                 { oauth },

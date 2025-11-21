@@ -1,7 +1,7 @@
 import z from "zod"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
-import { expiredCookieOptions, getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
 import { cacheControl } from "@/headers.js"
 import { decodeJWT } from "@/jose.js"
 import { AuraResponse } from "@/response.js"
@@ -30,7 +30,7 @@ export const signOutAction = (authConfig: AuthConfigInternal) => {
                 const session = getCookie(request, "sessionToken", cookiesOptions)
                 await decodeJWT(session)
                 const headers = new Headers(cacheControl)
-                const expiredSessionToken = setCookie("sessionToken", "", expiredCookieOptions)
+                const expiredSessionToken = expireCookie("sessionToken", cookiesOptions)
                 headers.set("Set-Cookie", expiredSessionToken)
                 return Response.json({ message: "Signed out successfully" }, { status: 200, headers })
             } catch {
