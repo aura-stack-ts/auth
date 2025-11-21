@@ -1,5 +1,5 @@
 import { createEndpoint } from "@aura-stack/router"
-import { createCodeChallenge, createCodeVerifier, generateSecure } from "@/secure.js"
+import { createPKCE, generateSecure } from "@/secure.js"
 import { AuraResponse } from "@/response.js"
 import { secureCookieOptions, setCookie } from "@/cookie.js"
 import { integrations } from "@/oauth/index.js"
@@ -23,9 +23,8 @@ export const signInAction = (authConfig: AuthConfigInternal) => {
             const redirectURICookie = setCookie("redirect_uri", redirectURI, cookieOptions)
             const redirectToCookie = setCookie("redirect_to", request.headers.get("Referer") ?? "/", cookieOptions)
 
-            const codeVerifier = createCodeVerifier()
+            const { codeVerifier, codeChallenge, method } = await createPKCE()
             const codeVerifierCookie = setCookie("code_verifier", codeVerifier, cookieOptions)
-            const { codeChallenge, method } = createCodeChallenge(codeVerifier)
 
             const authorization = createAuthorizationURL(oauthIntegrations[oauth], redirectURI, state, codeChallenge, method)
             const headers = new Headers()

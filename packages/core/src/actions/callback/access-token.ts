@@ -37,6 +37,7 @@ export const createAccessToken = async (
                 code: codeParsed,
                 redirect_uri: redirectParsed,
                 grant_type: "authorization_code",
+                code_verifier: codeVerifier,
             }).toString(),
         })
         const json = await response.json()
