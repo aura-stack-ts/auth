@@ -47,7 +47,7 @@ describe("callbackAction", () => {
             secure: true,
             prefix: "__Secure-",
         })
-        const redirectTo = setCookie("redirect_to", "https://example.com/auth", { secure: true, prefix: "__Secure-" })
+        const redirectTo = setCookie("redirect_to", "/auth", { secure: true, prefix: "__Secure-" })
         const codeVerifier = setCookie("code_verifier", "verifier_123", { secure: true, prefix: "__Secure-" })
 
         const response = await GET(
@@ -100,7 +100,7 @@ describe("callbackAction", () => {
             secure: true,
             prefix: "__Secure-",
         })
-        const redirectTo = setCookie("redirect_to", "https://example.com/auth", { secure: true, prefix: "__Secure-" })
+        const redirectTo = setCookie("redirect_to", "/auth", { secure: true, prefix: "__Secure-" })
         const codeVerifierValue = generateSecure(64)
         const codeVerifier = setCookie("code_verifier", codeVerifierValue, { secure: true, prefix: "__Secure-" })
 
@@ -136,7 +136,7 @@ describe("callbackAction", () => {
         expect(fetch).toHaveBeenCalledTimes(2)
 
         expect(response.status).toBe(302)
-        expect(response.headers.get("Location")).toBe("https://example.com/auth")
+        expect(response.headers.get("Location")).toBe("/auth")
 
         expect(getCookie(response, "sessionToken", { secure: true })).toBeDefined()
         expect(getCookie(response, "state", { secure: true })).toEqual("")

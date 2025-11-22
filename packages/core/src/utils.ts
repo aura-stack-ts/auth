@@ -1,5 +1,3 @@
-import { AuthError, ERROR_RESPONSE } from "./error.js"
-
 export const toSnakeCase = (str: string) => {
     return str
         .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
@@ -30,23 +28,78 @@ export const equals = (a: string | undefined | null, b: string | undefined | nul
 }
 
 /**
- * Cleans up a URL by removing redundant slashes, dots, and trimming whitespace.
+ * Sanitizes a URL by removing dangerous patterns that could be used for path traversal
+ * or other attacks. This function:
+ * - Decodes URL-encoded characters
+ * - Removes multiple consecutive slashes (preserving protocol slashes)
+ * - Removes path traversal patterns (..)
+ * - Removes trailing slashes (except root)
+ * - Trims whitespace
  *
- * @param url - The URL string to sanitize.
- * @returns The sanitized URL string.
+ * @param url - The URL or path to sanitize
+ * @returns The sanitized URL or path
  */
 export const sanitizeURL = (url: string) => {
-    const decodedURL = decodeURIComponent(url)
+    try {
+        let decodedURL = decodeURIComponent(url).trim()
+        const protocolMatch = decodedURL.match(/^([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)/)
+        let protocol = ""
+        let rest = decodedURL
+        if (protocolMatch) {
+            protocol = protocolMatch[1]
+            rest = decodedURL.slice(protocol.length)
+            const slashIndex = rest.indexOf("/")
+            if (slashIndex === -1) {
+                return protocol + rest
+            }
+            const domain = rest.slice(0, slashIndex)
+            let path = rest
+                .slice(slashIndex)
+                .replace(/\/\.\.\//g, "/")
+                .replace(/\/\.\.$/, "")
+                .replace(/\.{2,}/g, "")
+                .replace(/\/{2,}/g, "/")
+            if (path !== "/" && path.endsWith("/")) {
+                path = path.replace(/\/+$/, "/")
+            } else if (path !== "/") {
+                path = path.replace(/\/+$/, "")
+            }
+            return protocol + domain + path
+        }
+        let sanitized = decodedURL
+            .replace(/\/\.\.\//g, "/")
+            .replace(/\/\.\.$/, "")
+            .replace(/\.{2,}/g, "")
+            .replace(/\/{2,}/g, "/")
 
-    const sanitizeSlashes = (input: string) => {
-        return input.replace(/\/{2,}/g, (m, pos, s) => {
-            const before = s.slice(Math.max(0, pos - 6), pos)
-            if (before.endsWith("http:") || before.endsWith("https:")) return "//"
-            return "/"
-        })
+        if (sanitized !== "/" && sanitized.endsWith("/")) {
+            sanitized = sanitized.replace(/\/+$/, "/")
+        } else if (sanitized !== "/") {
+            sanitized = sanitized.replace(/\/+$/, "")
+        }
+        return sanitized
+    } catch {
+        return url.trim()
     }
+}
 
-    return sanitizeSlashes(decodedURL.replace(/\.{2,}/g, "").replace(/\/\.\//g, "/"))
-        .replace(/\s/g, "")
-        .trim()
+/**
+ * Validates that a path is a safe relative path to prevent open redirect attacks.
+ * A safe relative path must:
+ * - Start with '/'
+ * - Not contain protocol schemes (://)
+ * - Not contain newline characters
+ * - Not contain null bytes
+ * - Not be an absolute URL
+ *
+ * @param path - The path to validate
+ * @returns true if the path is safe, false otherwise
+ */
+export const isValidRelativePath = (path: string | undefined | null): boolean => {
+    if (!path || typeof path !== "string") return false
+    if (!path.startsWith("/") || path.includes("://") || path.includes("\r") || path.includes("\n")) return false
+    if (/[\x00-\x1F\x7F]/.test(path) || path.includes("\0")) return false
+    const sanitized = sanitizeURL(path)
+    if (sanitized.includes("..")) return false
+    return true
 }
