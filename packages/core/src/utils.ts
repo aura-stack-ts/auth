@@ -1,3 +1,5 @@
+import { AuthError, ERROR_RESPONSE } from "./error.js"
+
 export const toSnakeCase = (str: string) => {
     return str
         .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
@@ -25,4 +27,26 @@ export const toCastCase = <Obj extends Record<string, any>, Type extends "snake"
 export const equals = (a: string | undefined | null, b: string | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
     return a === b
+}
+
+/**
+ * Cleans up a URL by removing redundant slashes, dots, and trimming whitespace.
+ *
+ * @param url - The URL string to sanitize.
+ * @returns The sanitized URL string.
+ */
+export const sanitizeURL = (url: string) => {
+    const decodedURL = decodeURIComponent(url)
+
+    const sanitizeSlashes = (input: string) => {
+        return input.replace(/\/{2,}/g, (m, pos, s) => {
+            const before = s.slice(Math.max(0, pos - 6), pos)
+            if (before.endsWith("http:") || before.endsWith("https:")) return "//"
+            return "/"
+        })
+    }
+
+    return sanitizeSlashes(decodedURL.replace(/\.{2,}/g, "").replace(/\/\.\//g, "/"))
+        .replace(/\s/g, "")
+        .trim()
 }
