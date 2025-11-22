@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { createAuthorizationURL, createRedirectURI } from "@/actions/signIn/authorization.js"
+import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/actions/signIn/authorization.js"
 
 describe("createRedirectURI", () => {
     const testCases = [
@@ -127,6 +127,182 @@ describe("createAuthorizationURL", () => {
                 expect(() => createAuthorizationURL(oauthConfig as any, redirectURL, "123", "challenge", "S256")).toThrow(
                     expected
                 )
+            })
+        }
+    })
+})
+
+describe("createRedirectTo", () => {
+    describe("valid origin", () => {
+        const testCases = [
+            {
+                description: "returns '/' when Referer header is missing",
+                request: new Request("https://example.com/auth/signIn/github"),
+                expected: "/",
+            },
+            {
+                description: "returns pathname when origins match",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com/auth" },
+                }),
+                expected: "/auth",
+            },
+            {
+                description: "returns pathname with query when origins match",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com/auth?next=123" },
+                }),
+                expected: "/auth",
+            },
+            {
+                description: "returns pathname with trailing slash when origins match",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com/auth/" },
+                }),
+                expected: "/auth/",
+            },
+            {
+                description: "javascript URL injection in Referer query",
+                request: new Request("https://www.example.com/auth/signIn/google", {
+                    headers: { Referer: "https://www.example.com?redirectURL=javascript:alert()" },
+                }),
+                expected: "/",
+            },
+            {
+                description: "pathname contains multiple consecutive slashes",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com//auth///dashboard" },
+                }),
+                expected: "/auth/dashboard",
+            },
+            /**
+             * update createRedirectTo to accept the original url and not the request, because request.url accept path traversal
+             * and this test case would fail. This case should be rejected by the origin check.
+             */
+            {
+                description: "pathname contains invalid segments (parent directory)",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com/../admin" },
+                }),
+                expected: "/admin",
+            },
+        ]
+
+        for (const { description, request, expected } of testCases) {
+            test(description, () => {
+                const redirectTo = createRedirectTo(request)
+                expect(redirectTo).toBe(expected)
+            })
+        }
+    })
+
+    describe("invalid origin", () => {
+        const testCases = [
+            {
+                description: "different origins do not match",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://malicious.com/phishing" },
+                }),
+                expected: /The origin of the request does not match the hosted origin./,
+            },
+            {
+                description: "different protocols do not match",
+                request: new Request("https://www.example.com/auth/signIn/google", {
+                    headers: { Referer: "http://www.example.com/auth" },
+                }),
+                expected: /The origin of the request does not match the hosted origin./,
+            },
+            {
+                description: "different subdomains do not match",
+                request: new Request("https://example.com/auth/signIn/google", {
+                    headers: { Referer: "https://sub.example.com/auth" },
+                }),
+                expected: /The origin of the request does not match the hosted origin./,
+            },
+            {
+                description: "different ports do not match",
+                request: new Request("http://localhost:3000/auth/signIn/google", {
+                    headers: { Referer: "http://localhost:4000/auth" },
+                }),
+                expected: /The origin of the request does not match the hosted origin./,
+            },
+
+            {
+                description: "missing www in hosted URL",
+                request: new Request("https://www.example.com/auth/signIn/google", {
+                    headers: { Referer: "https://example.com/auth" },
+                }),
+                expected: /The origin of the request does not match the hosted origin./,
+            },
+            {
+                description: "pathname contains invalid segments with backslashes",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com/..\\admin" },
+                }),
+                expected: /The redirect path contains invalid segments./,
+            },
+
+            {
+                description: "invalid Referer URL (plain text)",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "not-a-valid-url" },
+                }),
+                expected: /Invalid origin./,
+            },
+            {
+                description: "invalid protocol in Referer URL (unsupported protocol)",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "ftp://example.com/resource" },
+                }),
+                expected: /The origin of the request does not match the hosted origin./,
+            },
+            {
+                description: "encoded double slash in Referer path",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com/%2f%2fevil.com" },
+                }),
+                expected: /Invalid origin./,
+            },
+            {
+                description: "invalid custom protocol in Referer URL",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "invalid://url" },
+                }),
+                expected: /The origin of the request does not match the hosted origin./,
+            },
+            {
+                description: "invalid path traversal using encoded segments",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com/auth/%2e%2e/%2e%2e/admin" },
+                }),
+                expected: /Invalid origin./,
+            },
+            {
+                description: "invalid path traversal using slashes",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://%2F%2Fexample.com" },
+                }),
+                expected: /Invalid origin./,
+            },
+            {
+                description: "invalid Referer with spaces",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com/auth path" },
+                }),
+                expected: /Invalid origin./,
+            },
+            {
+                description: "invalid path traversal using encoded dots",
+                request: new Request("https://example.com/auth/signIn/github", {
+                    headers: { Referer: "https://example.com/%2e%2e/%2e%2e/" },
+                }),
+                expected: /Invalid origin./,
+            },
+        ]
+
+        for (const { description, request, expected } of testCases) {
+            test(description, () => {
+                expect(() => createRedirectTo(request)).toThrow(expected)
             })
         }
     })

@@ -4,7 +4,7 @@ import { AuraResponse } from "@/response.js"
 import { oauthCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 import { integrations } from "@/oauth/index.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
-import { createAuthorizationURL, createRedirectURI } from "@/actions/signIn/authorization.js"
+import { createAuthorizationURL, createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.js"
 import type { OAuthErrorResponse, AuthConfigInternal } from "@/@types/index.js"
 
 export const signInAction = (authConfig: AuthConfigInternal) => {
@@ -21,7 +21,7 @@ export const signInAction = (authConfig: AuthConfigInternal) => {
             const redirectURI = createRedirectURI(request.url, oauth)
             const stateCookie = setCookie("state", state, oauthCookie(cookieOptions))
             const redirectURICookie = setCookie("redirect_uri", redirectURI, oauthCookie(cookieOptions))
-            const redirectToCookie = setCookie("redirect_to", request.headers.get("Referer") ?? "/", oauthCookie(cookieOptions))
+            const redirectToCookie = setCookie("redirect_to", createRedirectTo(request), oauthCookie(cookieOptions))
 
             const { codeVerifier, codeChallenge, method } = await createPKCE()
             const codeVerifierCookie = setCookie("code_verifier", codeVerifier, oauthCookie(cookieOptions))

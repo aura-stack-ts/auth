@@ -1,6 +1,6 @@
 import { toCastCase } from "@/utils.js"
 import { OAuthAuthorization } from "@/schemas.js"
-import { AuthError, ERROR_RESPONSE } from "@/error.js"
+import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import type { OAuthSecureConfig } from "@/@types/index.js"
 
 /**
@@ -42,4 +42,42 @@ export const createAuthorizationURL = (
 export const createRedirectURI = (requestURL: string, oauth: string) => {
     const url = new URL(requestURL)
     return `${url.origin}/auth/callback/${oauth}`
+}
+
+/**
+ * Verifies if the request's origin matches the expected origin. It checks the 'Referer' header of the request
+ * with the origin where is hosted the authentication flow. If they do not match, it throws an AuthError to avoid
+ * potential `Open URL Redirection` attacks.
+ *
+ * @param request The incoming request object
+ * @param hosted The expected origin URL
+ * @returns The pathname of the referer URL if origins match
+ */
+export const createRedirectTo = (request: Request) => {
+    try {
+        const hosted = request.url
+        const referer = request.headers.get("Referer")
+        if (!referer) return "/"
+        const originURL = new URL(hosted)
+        const refererURL = new URL(referer)
+        if (originURL.origin !== refererURL.origin) {
+            throw new AuthError(
+                ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST,
+                "The origin of the request does not match the hosted origin."
+            )
+        }
+        const pathname = refererURL.pathname
+            .replace(/\/{2,}/g, "/")
+            .replace(/\\+/g, "")
+            .trim()
+        if (pathname.includes("..")) {
+            throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "The redirect path contains invalid segments.")
+        }
+        return pathname
+    } catch (error) {
+        if (isAuthError(error)) {
+            throw error
+        }
+        throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin.")
+    }
 }
