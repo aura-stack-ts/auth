@@ -1,5 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { equals } from "@/utils.js"
+import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { cacheControl } from "@/headers.js"
 import { getUserInfo } from "./userinfo.js"
 import { AuraResponse } from "@/response.js"
@@ -49,9 +49,16 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 }
 
                 const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier)
+                const sanitized = sanitizeURL(cookieRedirectTo)
+                if (!isValidRelativePath(sanitized)) {
+                    throw new AuthError(
+                        ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST,
+                        "Invalid redirect path. Potential open redirect attack detected."
+                    )
+                }
 
                 const headers = new Headers(cacheControl)
-                headers.set("Location", cookieRedirectTo ?? "/")
+                headers.set("Location", sanitized)
                 const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
 
                 const sessionCookie = await createSessionCookie(
