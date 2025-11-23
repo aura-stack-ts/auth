@@ -1,5 +1,5 @@
 import z from "zod"
-import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
 import { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
 import { cacheControl } from "@/headers.js"
@@ -32,14 +32,14 @@ export const signOutAction = (authConfig: AuthConfigInternal) => {
                 const headers = new Headers(cacheControl)
                 const expiredSessionToken = expireCookie("sessionToken", cookiesOptions)
                 headers.set("Set-Cookie", expiredSessionToken)
-                return Response.json({ message: "Signed out successfully" }, { status: 200, headers })
+                return Response.json({ message: "Signed out successfully" }, { status: statusCode.ACCEPTED, headers })
             } catch {
                 return AuraResponse.json<OAuthErrorResponse<"signOut">>(
                     {
                         error: "invalid_session_token",
                         error_description: "The provided sessionToken is invalid or has already expired",
                     },
-                    { status: 400 }
+                    { status: statusCode.UNAUTHORIZED }
                 )
             }
         },

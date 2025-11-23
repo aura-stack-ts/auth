@@ -1,3 +1,6 @@
+import { isRouterError, RouterConfig } from "@aura-stack/router"
+import { isAuthError } from "./error.js"
+
 export const toSnakeCase = (str: string) => {
     return str
         .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
@@ -102,4 +105,16 @@ export const isValidRelativePath = (path: string | undefined | null): boolean =>
     const sanitized = sanitizeURL(path)
     if (sanitized.includes("..")) return false
     return true
+}
+
+export const onErrorHandler: RouterConfig["onError"] = (error) => {
+    if (isRouterError(error)) {
+        const { message, status, statusText } = error
+        return Response.json({ error: "invalid_request", error_description: message }, { status, statusText })
+    }
+    if (isAuthError(error)) {
+        const { type, message } = error
+        return Response.json({ error: type, error_description: message }, { status: 400 })
+    }
+    return Response.json({ error: "server_error", error_description: "An unexpected error occurred" }, { status: 500 })
 }

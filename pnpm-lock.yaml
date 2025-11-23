@@ -146,8 +146,8 @@ importers:
         specifier: workspace:*
         version: link:../jose
       '@aura-stack/router':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       cookie:
         specifier: ^1.0.2
         version: 1.0.2
@@ -184,8 +184,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@aura-stack/router@0.2.0':
-    resolution: {integrity: sha512-4fk5j4Q9OQcs8v60jVsbOMoPb08MqeYhTGKKm25xK4GLs29xDtrd3FuywsrLfVvonE1ukH+VHJc0Nry8dVl+cg==}
+  '@aura-stack/router@0.3.0':
+    resolution: {integrity: sha512-0xIugW2XH1Wt3IKvj+Mf+7U9owJV1ZQAF9ndA3HxjvWfKV+yu0u5SuZLtocp0QnrnqmuPqfHCFo3IZKiMh6ISg==}
 
   '@babel/helper-string-parser@7.27.1':
     resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
@@ -3068,7 +3068,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@aura-stack/router@0.2.0': {}
+  '@aura-stack/router@0.3.0': {}
 
   '@babel/helper-string-parser@7.27.1': {}
 

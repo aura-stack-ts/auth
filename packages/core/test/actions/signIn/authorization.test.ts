@@ -250,84 +250,84 @@ describe("createRedirectTo", () => {
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "not-a-valid-url" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid protocol in Referer URL (unsupported protocol)",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "ftp://example.com/resource" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "encoded double slash in Referer path",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "https://%2f%2fexample.com" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "encoded double slash in Referer path",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "https://%2f%2fevil.com" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid custom protocol in Referer URL",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "invalid://url" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid path traversal using encoded segments",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "https://example.com/auth/%2e%2e/%2e%2e/admin" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid path traversal using slashes",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "https://%2F%2Fexample.com" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid Referer with spaces",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "https://example.com/auth path" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid path traversal using encoded dots",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "https://example.com/%2e%2e/%2e%2e/" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "pathname contains invalid segments with backslashes",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "https://example.com/..\\admin" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "javascript URL injection in Referer query",
                 request: new Request("https://www.example.com/auth/signIn/google", {
                     headers: { Referer: "https://www.example.com?redirectURL=javascript:alert(1)" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "javascript URL injection in Referer",
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "javascript:alert(1)" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "with port in Referer header",
@@ -369,7 +369,7 @@ describe("createRedirectTo", () => {
                 request: new Request("https://example.com/auth/signIn/github", {
                     headers: { Referer: "https://example.com/auth?next=123" },
                 }),
-                expected: /Invalid origin./,
+                expected: /Invalid origin \(potential CSRF\)./,
             },
         ]
 

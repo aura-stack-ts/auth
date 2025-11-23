@@ -2,7 +2,8 @@ import { describe, test, expect } from "vitest"
 import { createRouter } from "@aura-stack/router"
 import { signInAction } from "@/actions/index.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
-import { defaultCookieConfig, getCookie, parse, secureCookieOptions } from "@/cookie.js"
+import { defaultCookieConfig, getCookie } from "@/cookie.js"
+import { onErrorHandler } from "@/utils.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {
@@ -18,15 +19,17 @@ const oauthIntegrations = createOAuthIntegrations([
     },
 ])
 
-const { GET } = createRouter([signInAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })])
+const { GET } = createRouter([signInAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })], {
+    onError: onErrorHandler,
+})
 
 describe("signIn action", () => {
     test("unsupported oauth integration", async () => {
         const request = await GET(new Request("http://example.com/signIn/unsupported"))
-        expect(request.status).toBe(400)
+        expect(request.status).toBe(422)
         expect(await request.json()).toEqual({
             error: "invalid_request",
-            error_description: "Unsupported OAuth Social Integration",
+            error_description: "Invalid route parameters",
         })
     })
 

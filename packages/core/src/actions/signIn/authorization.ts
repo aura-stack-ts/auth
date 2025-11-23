@@ -25,7 +25,7 @@ export const createAuthorizationURL = (
 ) => {
     const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state, codeChallenge, codeChallengeMethod })
     if (!parsed.success) {
-        throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid OAuth configuration")
+        throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.SERVER_ERROR, "Invalid OAuth configuration")
     }
     const { authorizeURL, ...options } = parsed.data
     const { userInfo, accessToken, clientSecret, ...required } = options
@@ -60,12 +60,12 @@ export const createRedirectTo = (request: Request) => {
         const referer = request.headers.get("Referer")
         if (!referer) return "/"
         if (!isValidURL(referer) || !isValidURL(request.url)) {
-            throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin.")
-        }
-        if ((origin && !isValidURL(origin)) || (origin && new URL(origin).origin !== new URL(request.url).origin)) {
-            throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin.")
+            throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin (potential CSRF).")
         }
         const hostedURL = new URL(request.url)
+        if (origin && (!isValidURL(origin) || !equals(new URL(origin).origin, hostedURL.origin))) {
+            throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin (potential CSRF).")
+        }
         const refererURL = new URL(sanitizeURL(referer))
         if (!equals(hostedURL.origin, refererURL.origin)) {
             throw new AuthError(
@@ -78,6 +78,6 @@ export const createRedirectTo = (request: Request) => {
         if (isAuthError(error)) {
             throw error
         }
-        throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin.")
+        throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin (potential CSRF).")
     }
 }

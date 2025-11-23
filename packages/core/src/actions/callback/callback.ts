@@ -1,4 +1,5 @@
-import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import z from "zod"
+import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
 import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { cacheControl } from "@/headers.js"
 import { getUserInfo } from "./userinfo.js"
@@ -11,24 +12,23 @@ import { createSessionCookie, expireCookie, getCookie, secureCookieOptions } fro
 import type { JWTPayload } from "@/jose.js"
 import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
-const config = createEndpointConfig("/callback/:oauth", {
-    schemas: {
-        searchParams: OAuthAuthorizationResponse,
-    },
-})
-
-export const callbackAction = (authConfig: AuthConfigInternal) => {
-    const { oauth: oauthIntegrations, cookies } = authConfig
-
+const callbackConfig = (oauth: AuthConfigInternal["oauth"]) => {
+    return createEndpointConfig("/callback/:oauth", {
+        schemas: {
+            searchParams: OAuthAuthorizationResponse,
+            params: z.object({
+                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[]),
+            }),
+        },
+    })
+}
+export const callbackAction = ({ oauth: oauthIntegrations, cookies }: AuthConfigInternal) => {
     return createEndpoint(
         "GET",
         "/callback/:oauth",
         async (request, ctx) => {
-            const oauth = ctx.params.oauth as keyof typeof oauthIntegrations
+            const oauth = ctx.params.oauth
             try {
-                if (!(oauth in oauthIntegrations)) {
-                    throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Unsupported OAuth Social Integration")
-                }
                 const isErrorResponse = OAuthAuthorizationErrorResponse.safeParse(ctx.searchParams)
                 if (isErrorResponse.success) {
                     const { error, error_description } = isErrorResponse.data
@@ -81,15 +81,15 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                     const { type, message } = error
                     return AuraResponse.json<OAuthErrorResponse<"authorization">>(
                         { error: type, error_description: message },
-                        { status: 400 }
+                        { status: statusCode.BAD_REQUEST }
                     )
                 }
                 return AuraResponse.json<OAuthErrorResponse<"token">>(
                     { error: ERROR_RESPONSE.ACCESS_TOKEN.INVALID_CLIENT, error_description: "An unexpected error occurred" },
-                    { status: 500 }
+                    { status: statusCode.INTERNAL_SERVER_ERROR }
                 )
             }
         },
-        config
+        callbackConfig(oauthIntegrations)
     )
 }

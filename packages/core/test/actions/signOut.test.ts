@@ -56,6 +56,7 @@ describe("signOut action", () => {
         const sessionToken = await encodeJWT(payload)
         const request = await POST(
             new Request("https://example.com/signOut?token_type_hint=session_token", {
+                method: "POST",
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
                 },

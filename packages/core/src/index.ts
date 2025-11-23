@@ -3,10 +3,12 @@ import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { signInAction, callbackAction, sessionAction, signOutAction } from "@/actions/index.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { defaultCookieConfig } from "@/cookie.js"
+import { onErrorHandler } from "./utils.js"
 import type { AuthConfig, AuthConfigInternal } from "@/@types/index.js"
 
 const routerConfig: RouterConfig = {
     basePath: "/auth",
+    onError: onErrorHandler,
 }
 
 const createInternalConfig = (authConfig?: AuthConfig): AuthConfigInternal => {
