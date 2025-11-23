@@ -20,7 +20,7 @@ const oauthIntegrations = createOAuthIntegrations([
 ])
 
 const { GET } = createRouter([signInAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })], {
-    onError: onErrorHandler
+    onError: onErrorHandler,
 })
 
 describe("signIn action", () => {

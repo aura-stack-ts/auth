@@ -8,7 +8,7 @@ import type { AuthConfig, AuthConfigInternal } from "@/@types/index.js"
 
 const routerConfig: RouterConfig = {
     basePath: "/auth",
-    onError: onErrorHandler
+    onError: onErrorHandler,
 }
 
 const createInternalConfig = (authConfig?: AuthConfig): AuthConfigInternal => {

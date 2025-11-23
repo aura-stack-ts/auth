@@ -61,5 +61,5 @@ export const ERROR_RESPONSE = {
         UNAUTHORIZED_CLIENT: "unauthorized_client",
         UNSUPPORTED_GRANT_TYPE: "unsupported_grant_type",
         INVALID_SCOPE: "invalid_scope",
-    }
+    },
 }

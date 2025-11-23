@@ -21,7 +21,7 @@ const oauthIntegrations = createOAuthIntegrations([
 ])
 
 const { GET } = createRouter([callbackAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })], {
-    onError: onErrorHandler
+    onError: onErrorHandler,
 })
 
 describe("callbackAction", () => {

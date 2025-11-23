@@ -1,5 +1,5 @@
 import z from "zod"
-import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
 import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { cacheControl } from "@/headers.js"
 import { getUserInfo } from "./userinfo.js"
@@ -81,12 +81,12 @@ export const callbackAction = ({ oauth: oauthIntegrations, cookies }: AuthConfig
                     const { type, message } = error
                     return AuraResponse.json<OAuthErrorResponse<"authorization">>(
                         { error: type, error_description: message },
-                        { status: 400 }
+                        { status: statusCode.BAD_REQUEST }
                     )
                 }
                 return AuraResponse.json<OAuthErrorResponse<"token">>(
                     { error: ERROR_RESPONSE.ACCESS_TOKEN.INVALID_CLIENT, error_description: "An unexpected error occurred" },
-                    { status: 500 }
+                    { status: statusCode.INTERNAL_SERVER_ERROR }
                 )
             }
         },
