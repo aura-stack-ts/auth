@@ -4,6 +4,7 @@ import { createOAuthIntegrations } from "@/oauth/index.js"
 import { createRouter } from "@aura-stack/router"
 import { defaultCookieConfig, getCookie, setCookie } from "@/cookie.js"
 import { generateSecure } from "@/secure.js"
+import { onErrorHandler } from "@/utils.js"
 
 const oauthIntegrations = createOAuthIntegrations([
     {
@@ -19,25 +20,23 @@ const oauthIntegrations = createOAuthIntegrations([
     },
 ])
 
-const { GET } = createRouter([callbackAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })])
+const { GET } = createRouter([callbackAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })], {
+    onError: onErrorHandler
+})
 
 describe("callbackAction", () => {
     test("endpoint without code and state", async () => {
         const response = await GET(new Request("https://example.com/callback/unknown"))
         expect(response.status).toBe(422)
-        /**
-         * The request is missing the required "code" and "state" parameters. The body of the response is provided
-         * by the Aura Stack Router's built-in validation mechanism not by our action.
-         */
-        expect(await response.json()).toEqual({ message: "Invalid search parameters" })
+        expect(await response.json()).toEqual({ error: "invalid_request", error_description: "Invalid route parameters" })
     })
 
     test("unsupported oauth integration", async () => {
         const response = await GET(new Request("https://example.com/callback/unknown?code=123&state=abc"))
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
             error: "invalid_request",
-            error_description: "Unsupported OAuth Social Integration",
+            error_description: "Invalid route parameters",
         })
     })
 

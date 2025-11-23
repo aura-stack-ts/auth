@@ -1,3 +1,4 @@
+import z from "zod"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { cacheControl } from "@/headers.js"
@@ -11,24 +12,23 @@ import { createSessionCookie, expireCookie, getCookie, secureCookieOptions } fro
 import type { JWTPayload } from "@/jose.js"
 import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
-const config = createEndpointConfig("/callback/:oauth", {
-    schemas: {
-        searchParams: OAuthAuthorizationResponse,
-    },
-})
-
-export const callbackAction = (authConfig: AuthConfigInternal) => {
-    const { oauth: oauthIntegrations, cookies } = authConfig
-
+const callbackConfig = (oauth: AuthConfigInternal["oauth"]) => {
+    return createEndpointConfig("/callback/:oauth", {
+        schemas: {
+            searchParams: OAuthAuthorizationResponse,
+            params: z.object({
+                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[]),
+            }),
+        },
+    })
+}
+export const callbackAction = ({ oauth: oauthIntegrations, cookies }: AuthConfigInternal) => {
     return createEndpoint(
         "GET",
         "/callback/:oauth",
         async (request, ctx) => {
-            const oauth = ctx.params.oauth as keyof typeof oauthIntegrations
+            const oauth = ctx.params.oauth
             try {
-                if (!(oauth in oauthIntegrations)) {
-                    throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Unsupported OAuth Social Integration")
-                }
                 const isErrorResponse = OAuthAuthorizationErrorResponse.safeParse(ctx.searchParams)
                 if (isErrorResponse.success) {
                     const { error, error_description } = isErrorResponse.data
@@ -90,6 +90,6 @@ export const callbackAction = (authConfig: AuthConfigInternal) => {
                 )
             }
         },
-        config
+        callbackConfig(oauthIntegrations)
     )
 }

@@ -1,6 +1,4 @@
 import type { ErrorTypes, LiteralUnion } from "./@types/index.js"
-import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "./schemas.js"
-import { toCastCase } from "./utils.js"
 
 /**
  * Error class for all Aura Auth errors.
@@ -47,6 +45,21 @@ export const throwAuthError = (error: unknown, message?: string) => {
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-5.2
  */
 export const ERROR_RESPONSE = {
-    AUTHORIZATION: toCastCase(OAuthAuthorizationErrorResponse.shape.error.enum, "upper"),
-    ACCESS_TOKEN: toCastCase(OAuthAccessTokenErrorResponse.shape.error.enum, "upper"),
+    AUTHORIZATION: {
+        INVALID_REQUEST: "invalid_request",
+        UNAUTHORIZED_CLIENT: "unauthorized_client",
+        ACCESS_DENIED: "access_denied",
+        UNSUPPORTED_RESPONSE_TYPE: "unsupported_response_type",
+        INVALID_SCOPE: "invalid_scope",
+        SERVER_ERROR: "server_error",
+        TEMPORARILY_UNAVAILABLE: "temporarily_unavailable",
+    },
+    ACCESS_TOKEN: {
+        INVALID_REQUEST: "invalid_request",
+        INVALID_CLIENT: "invalid_client",
+        INVALID_GRANT: "invalid_grant",
+        UNAUTHORIZED_CLIENT: "unauthorized_client",
+        UNSUPPORTED_GRANT_TYPE: "unsupported_grant_type",
+        INVALID_SCOPE: "invalid_scope",
+    }
 }
