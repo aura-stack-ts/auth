@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { signOutAction } from "@/actions/signOut.js"
+import { signOutAction } from "@/actions/signOut/signOut.js"
 import { createRouter } from "@aura-stack/router"
 import { encodeJWT, type JWTPayload } from "@/jose.js"
 import { SESSION_VERSION } from "@/actions/session/session.js"

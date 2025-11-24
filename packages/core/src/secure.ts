@@ -1,7 +1,12 @@
 import crypto from "node:crypto"
+import { equals } from "./utils.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")
+}
+
+export const createHash = (data: string, base: "hex" | "base64" | "base64url" = "hex") => {
+    return crypto.createHash("sha256").update(data).digest().toString(base)
 }
 
 /**
@@ -15,6 +20,30 @@ export const generateSecure = (length: number = 32) => {
  */
 export const createPKCE = async (verifier?: string) => {
     const codeVerifier = verifier ?? generateSecure(86)
-    const codeChallenge = crypto.createHash("sha256").update(codeVerifier).digest().toString("base64url")
+    const codeChallenge = createHash(codeVerifier, "base64url")
     return { codeVerifier, codeChallenge, method: "S256" }
+}
+
+/**
+ * Creates a CSRF token to be used in OAuth flows to prevent cross-site request forgery attacks.
+ *   - token: A cryptographically random string that serves as the CSRF token.
+ *   - hash: A hashed version of the token, using SHA-256, to be stored in a cookie.
+ *
+ * @returns
+ */
+export const createCSRF = async (csrfCookie?: string) => {
+    if (csrfCookie) {
+        const [token, hash] = csrfCookie.split(":")
+        if (verifyCSRF(token, hash)) {
+            return { token, hash: csrfCookie }
+        }
+    }
+    const token = generateSecure(48)
+    const hash = createHash(token, "hex")
+    return { token, hash: `${token}:${hash}` }
+}
+
+export const verifyCSRF = (token: string, hash: string) => {
+    const tokenHash = createHash(token, "hex")
+    return equals(tokenHash, hash)
 }

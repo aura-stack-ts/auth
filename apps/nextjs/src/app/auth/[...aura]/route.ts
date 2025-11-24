@@ -5,7 +5,7 @@ const auth = createAuth({
 })
 
 const {
-    handlers: { GET },
+    handlers: { GET, POST },
 } = auth
 
-export { GET }
+export { GET, POST }

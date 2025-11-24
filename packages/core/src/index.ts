@@ -1,9 +1,9 @@
 import "dotenv/config"
 import { createRouter, type RouterConfig } from "@aura-stack/router"
-import { signInAction, callbackAction, sessionAction, signOutAction } from "@/actions/index.js"
-import { createOAuthIntegrations } from "@/oauth/index.js"
-import { defaultCookieConfig } from "@/cookie.js"
 import { onErrorHandler } from "./utils.js"
+import { defaultCookieConfig } from "@/cookie.js"
+import { createOAuthIntegrations } from "@/oauth/index.js"
+import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
 import type { AuthConfig, AuthConfigInternal } from "@/@types/index.js"
 
 const routerConfig: RouterConfig = {
@@ -43,7 +43,7 @@ const createInternalConfig = (authConfig?: AuthConfig): AuthConfigInternal => {
 export const createAuth = (authConfig?: AuthConfig) => {
     const config = createInternalConfig(authConfig)
     const router = createRouter(
-        [signInAction(config), callbackAction(config), sessionAction(config), signOutAction(config)],
+        [signInAction(config), callbackAction(config), sessionAction(config), signOutAction(config), csrfTokenAction(config)],
         routerConfig
     )
     return {

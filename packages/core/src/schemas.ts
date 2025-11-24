@@ -1,5 +1,4 @@
 import { object, string, enum as options, number, url } from "zod/v4"
-import { AuthConfigInternal } from "./@types/index.js"
 
 /**
  * Schema for OAuth Integration Configuration

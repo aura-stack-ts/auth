@@ -1,7 +1,7 @@
 import { parse, serialize, type SerializeOptions } from "cookie"
 import { AuthError } from "./error.js"
-import { encodeJWT, type JWTPayload } from "./jose.js"
 import { isRequest } from "./assert.js"
+import { encodeJWT, type JWTPayload } from "./jose.js"
 import type { CookieName, CookieOptions, CookieOptionsInternal, LiteralUnion, StandardCookie } from "@/@types/index.js"
 
 export { parse } from "cookie"
@@ -63,6 +63,14 @@ export const expiredCookieOptions: SerializeOptions = {
     ...defaultCookieOptions,
     expires: new Date(0),
     maxAge: 0,
+}
+
+export const defaultCSRFTokenCookieOptions: CookieOptionsInternal = {
+    ...defaultCookieOptions,
+    secure: true,
+    prefix: "__Host-",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 15,
 }
 
 export const defineDefaultCookieOptions = (options?: CookieOptionsInternal): CookieOptionsInternal => {

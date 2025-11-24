@@ -1,9 +1,9 @@
 import z from "zod"
 import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
-import { createPKCE, generateSecure } from "@/secure.js"
 import { AuraResponse } from "@/response.js"
-import { oauthCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import { createPKCE, generateSecure } from "@/secure.js"
 import { ERROR_RESPONSE, isAuthError } from "@/error.js"
+import { oauthCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 import { createAuthorizationURL, createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.js"
 import type { OAuthErrorResponse, AuthConfigInternal } from "@/@types/index.js"
 

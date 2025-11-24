@@ -1,8 +1,8 @@
-import { equals, sanitizeURL, toCastCase } from "@/utils.js"
+import { isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
+import { equals, sanitizeURL, toCastCase } from "@/utils.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import type { OAuthSecureConfig } from "@/@types/index.js"
-import { isValidURL } from "@/assert.js"
 
 /**
  * Constructs the request URI for the Authorization Request to the third-party OAuth service. It includes
