@@ -1,5 +1,5 @@
 import crypto from "node:crypto"
-import { signJWS, verifyJWS } from "@/jose.js"
+import { signJWS, verifyJWS } from "./jose.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")
@@ -25,10 +25,11 @@ export const createPKCE = async (verifier?: string) => {
 }
 
 /**
- * Signs and verifies a CSRF token using JWS. If a valid CSRF cookie is provided, it verifies and returns it.
+ * Creates a CSRF token to be used in OAuth flows to prevent cross-site request forgery attacks.
+ *   - token: A cryptographically random string that serves as the CSRF token.
+ *   - hash: tuple of the token and its hash for verification and separated by a colon (:).
  *
- * @param csrfCookie If provided, the function will verify this existing CSRF token.
- * @returns the signed CSRF token.
+ * @returns
  */
 export const createCSRF = async (csrfCookie?: string) => {
     try {
@@ -43,9 +44,18 @@ export const createCSRF = async (csrfCookie?: string) => {
         return signJWS({ token })
     }
 }
-export const verifyCSRF = async (csrfToken: string): Promise<boolean> => {
+export const verifyCSRF = async (cookie: string, header: string): Promise<boolean> => {
     try {
-        await verifyJWS(csrfToken)
+        const { token: cookieToken } = await verifyJWS(cookie)
+        const { token: headerToken } = await verifyJWS(header)
+        const cookieBuffer = Buffer.from(cookieToken as string)
+        const headerBuffer = Buffer.from(headerToken as string)
+        if (cookieBuffer.length !== headerBuffer.length) {
+            return false
+        }
+        if (!crypto.timingSafeEqual(cookieBuffer, headerBuffer)) {
+            return false
+        }
         return true
     } catch {
         return false

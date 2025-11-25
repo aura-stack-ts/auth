@@ -1,11 +1,11 @@
 import z from "zod"
 import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
 import { decodeJWT } from "@/jose.js"
-import { createCSRF } from "@/secure.js"
+import { verifyCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
 import { AuraResponse } from "@/response.js"
 import { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
-import { defaultHostCookieConfig, expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
+import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
 
 const config = createEndpointConfig({
     schemas: {
@@ -22,16 +22,23 @@ export const signOutAction = ({ cookies }: AuthConfigInternal) => {
     return createEndpoint(
         "POST",
         "/signOut",
-        async (request) => {
+        async (request, ctx) => {
             try {
                 const cookiesOptions = secureCookieOptions(request, cookies)
                 const session = getCookie(request, "sessionToken", cookiesOptions)
-                const csrfToken = getCookie(request, "csrfToken", { ...cookiesOptions, ...defaultHostCookieConfig })
-                await createCSRF(csrfToken)
+                const csrfToken = getCookie(request, "csrfToken", {
+                    ...cookiesOptions,
+                    prefix: cookiesOptions.secure ? "__Host-" : "",
+                })
+                const header = ctx.headers.get("X-CSRF-Token")
+                if (!header || !session || !csrfToken) {
+                    throw new Error("Missing CSRF token or session token")
+                }
+                await verifyCSRF(csrfToken, header)
                 await decodeJWT(session)
                 const headers = new Headers(cacheControl)
-                const expiredSessionToken = expireCookie("sessionToken", cookiesOptions)
-                headers.set("Set-Cookie", expiredSessionToken)
+                headers.append("Set-Cookie", expireCookie("sessionToken", cookiesOptions))
+                headers.append("Set-Cookie", expireCookie("csrfToken", cookiesOptions))
                 return Response.json({ message: "Signed out successfully" }, { status: statusCode.ACCEPTED, headers })
             } catch {
                 return AuraResponse.json<OAuthErrorResponse<"signOut">>(

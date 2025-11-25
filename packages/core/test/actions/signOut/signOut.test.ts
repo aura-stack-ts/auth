@@ -76,7 +76,7 @@ describe("signOut action", async () => {
         decodeJWTMock.mockRestore()
     })
 
-    test("valid sessionToken cookie with valid csrfToken", async () => {
+    test("valid sessionToken cookie with valid csrfToken in a secure connection", async () => {
         const payload: JWTPayload = {
             sub: "1234567890",
             email: "john@example.com",
@@ -91,6 +91,31 @@ describe("signOut action", async () => {
                 method: "POST",
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}; __Host-aura-stack.csrfToken=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                },
+            })
+        )
+        expect(request.status).toBe(202)
+        expect(await request.json()).toEqual({ message: "Signed out successfully" })
+        expect(request.headers.get("Set-Cookie")).toContain("aura-stack.sessionToken=;")
+    })
+
+    test("valid sessionToken cookie with valid csrfToken in an insecure connection", async () => {
+        const payload: JWTPayload = {
+            sub: "1234567890",
+            email: "john@example.com",
+            name: "John Doe",
+            image: "https://example.com/image.jpg",
+            integrations: ["github"],
+            version: SESSION_VERSION,
+        }
+        const sessionToken = await encodeJWT(payload)
+        const request = await POST(
+            new Request("http://example.com/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `aura-stack.sessionToken=${sessionToken}; aura-stack.csrfToken=${csrf}`,
+                    "X-CSRF-Token": csrf,
                 },
             })
         )

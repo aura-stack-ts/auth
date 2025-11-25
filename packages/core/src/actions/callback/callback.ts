@@ -78,15 +78,17 @@ export const callbackAction = ({ oauth: oauthIntegrations, cookies }: AuthConfig
                     cookieOptions
                 )
 
-                const csrfCookieOptions = { ...cookieOptions, ...defaultHostCookieConfig }
                 const csrfToken = await createCSRF()
-
+                const csrfCookie = setCookie("csrfToken", csrfToken, secureCookieOptions(request, {
+                    ...cookies,
+                    flag: "host",
+                }))
                 headers.set("Set-Cookie", sessionCookie)
                 headers.append("Set-Cookie", expireCookie("state", cookieOptions))
                 headers.append("Set-Cookie", expireCookie("redirect_uri", cookieOptions))
                 headers.append("Set-Cookie", expireCookie("redirect_to", cookieOptions))
                 headers.append("Set-Cookie", expireCookie("code_verifier", cookieOptions))
-                headers.append("Set-Cookie", setCookie("csrfToken", csrfToken, csrfCookieOptions))
+                headers.append("Set-Cookie", csrfCookie)
                 return Response.json({ oauth }, { status: 302, headers })
             } catch (error) {
                 if (isAuthError(error)) {
