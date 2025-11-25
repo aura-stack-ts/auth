@@ -5,19 +5,25 @@ import { encodeJWT, type JWTPayload } from "@/jose.js"
 import { SESSION_VERSION } from "@/actions/session/session.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { defaultCookieConfig } from "@/cookie.js"
+import { createCSRF } from "@/secure.js"
 
 const oauth = createOAuthIntegrations([])
 
 const { POST } = createRouter([signOutAction({ oauth, cookies: defaultCookieConfig })])
 
-describe("signOut action", () => {
+describe("signOut action", async () => {
+    const csrf = await createCSRF()
+
     test("sessionToken cookie not present", async () => {
         const response = await POST(
             new Request("https://example.com/signOut?token_type_hint=session_token", {
                 method: "POST",
+                headers: {
+                    Cookie: `__Host-aura-stack.csrfToken=${csrf}`,
+                },
             })
         )
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             error: "invalid_session_token",
             error_description: "The provided sessionToken is invalid or has already expired",
@@ -29,11 +35,11 @@ describe("signOut action", () => {
             new Request("https://example.com/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: "__Secure-aura-stack.sessionToken=invalid_token",
+                    Cookie: `__Secure-aura-stack.sessionToken=invalid_token; __Host-aura-stack.csrfToken=${csrf}`,
                 },
             })
         )
-        expect(request.status).toBe(400)
+        expect(request.status).toBe(401)
         expect(await request.json()).toEqual({
             error: "invalid_session_token",
             error_description: "The provided sessionToken is invalid or has already expired",
@@ -62,7 +68,7 @@ describe("signOut action", () => {
                 },
             })
         )
-        expect(request.status).toBe(400)
+        expect(request.status).toBe(401)
         expect(await request.json()).toEqual({
             error: "invalid_session_token",
             error_description: "The provided sessionToken is invalid or has already expired",
@@ -70,7 +76,30 @@ describe("signOut action", () => {
         decodeJWTMock.mockRestore()
     })
 
-    test("valid sessionToken cookie", async () => {
+    test("valid sessionToken cookie with valid csrfToken", async () => {
+        const payload: JWTPayload = {
+            sub: "1234567890",
+            email: "john@example.com",
+            name: "John Doe",
+            image: "https://example.com/image.jpg",
+            integrations: ["github"],
+            version: SESSION_VERSION,
+        }
+        const sessionToken = await encodeJWT(payload)
+        const request = await POST(
+            new Request("https://example.com/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}; __Host-aura-stack.csrfToken=${csrf}`,
+                },
+            })
+        )
+        expect(request.status).toBe(202)
+        expect(await request.json()).toEqual({ message: "Signed out successfully" })
+        expect(request.headers.get("Set-Cookie")).toContain("aura-stack.sessionToken=;")
+    })
+
+    test("valid sessionToken cookie with missing csrfToken", async () => {
         const payload: JWTPayload = {
             sub: "1234567890",
             email: "john@example.com",
@@ -88,8 +117,10 @@ describe("signOut action", () => {
                 },
             })
         )
-        expect(request.status).toBe(200)
-        expect(await request.json()).toEqual({ message: "Signed out successfully" })
-        expect(request.headers.get("Set-Cookie")).toContain("aura-stack.sessionToken=;")
+        expect(request.status).toBe(401)
+        expect(await request.json()).toEqual({
+            error: "invalid_session_token",
+            error_description: "The provided sessionToken is invalid or has already expired",
+        })
     })
 })

@@ -10,19 +10,25 @@ const getSession = async () => {
     return response
 }
 
+const getCSRFToken = async () => {
+    const csrfResponse = await fetch("http://localhost:3000/auth/csrfToken", {
+        method: "GET",
+    })
+    const csrfData = await csrfResponse.json()
+    return csrfData.csrfToken
+}
+
 const signOut = async () => {
     "use server"
-    const headersList = new Headers(await headers())
-    headersList.set("Content-Type", "application/json")
-    headersList.delete("Content-Length")
-    console.log("headersList", headersList)
+    const csrf = await getCSRFToken()
     const signOutResponse = await fetch("http://localhost:3000/auth/signOut?token_type_hint=session_token", {
         method: "POST",
-        headers: headersList,
-        body: JSON.stringify({ csrfToken: headersList.get("csrfToken") }),
+        headers: {
+            "X-CSRF-Token": csrf,
+        },
     })
-    console.log("signOutResponse", signOutResponse)
     const response = await signOutResponse.json()
+    console.log("signOut response", response)
     return response
 }
 

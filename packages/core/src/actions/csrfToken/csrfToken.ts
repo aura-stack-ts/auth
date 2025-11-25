@@ -1,17 +1,18 @@
-import { createCSRF } from "@/secure.js"
 import { createEndpoint } from "@aura-stack/router"
-import type { AuthConfigInternal } from "@/@types/index.js"
-import { defaultCSRFTokenCookieOptions, getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
+import { getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import type { AuthConfigInternal } from "@/@types/index.js"
 
 export const csrfTokenAction = ({ cookies }: AuthConfigInternal) => {
     return createEndpoint("GET", "/csrfToken", async (request) => {
-        const cookieOptions = secureCookieOptions(request, cookies)
-        const csrfTokenCookie = getCookie(request, "csrfToken", { ...cookieOptions, ...defaultCSRFTokenCookieOptions })
-        const { token, hash } = await createCSRF(csrfTokenCookie)
+        const cookieOptions = secureCookieOptions(request, { ...cookies, flag: "host" })
+
+        const existingCSRFToken = getCookie(request, "csrfToken", cookieOptions, true)
+        const csrfToken = await createCSRF(existingCSRFToken)
+
         const headers = new Headers(cacheControl)
-        const csrfToken = setCookie("csrfToken", hash, { ...cookieOptions, ...defaultCSRFTokenCookieOptions })
-        headers.set("Set-Cookie", csrfToken)
-        return Response.json({ csrfToken: token }, { headers })
+        headers.set("Set-Cookie", setCookie("csrfToken", csrfToken, cookieOptions))
+        return Response.json({ csrfToken }, { headers })
     })
 }

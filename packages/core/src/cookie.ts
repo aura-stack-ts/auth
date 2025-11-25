@@ -65,14 +65,6 @@ export const expiredCookieOptions: SerializeOptions = {
     maxAge: 0,
 }
 
-export const defaultCSRFTokenCookieOptions: CookieOptionsInternal = {
-    ...defaultCookieOptions,
-    secure: true,
-    prefix: "__Host-",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 15,
-}
-
 export const defineDefaultCookieOptions = (options?: CookieOptionsInternal): CookieOptionsInternal => {
     return {
         name: options?.name ?? COOKIE_NAME,
@@ -103,17 +95,30 @@ export const setCookie = (cookieName: LiteralUnion<CookieName>, value: string, o
  *
  * @param request The incoming request object
  * @param cookie Cookie name to retrieve
+ * @param options Cookie options to define the prefix and other attributes
+ * @param optional If true, returns an empty string instead of throwing an error when the cookie is not found
  * @returns The value of the cookie or undefined if not found
  */
-export const getCookie = (petition: Request | Response, cookie: LiteralUnion<CookieName>, options?: CookieOptionsInternal) => {
+export const getCookie = (
+    petition: Request | Response,
+    cookie: LiteralUnion<CookieName>,
+    options?: CookieOptionsInternal,
+    optional: boolean = false
+) => {
     const cookies = isRequest(petition) ? petition.headers.get("Cookie") : petition.headers.getSetCookie().join("; ")
     if (!cookies) {
+        if (optional) {
+            return ""
+        }
         throw new AuthError("invalid_request", "No cookies found. There is no active session")
     }
     const { name, prefix } = defineDefaultCookieOptions(options)
     const parsedCookies = parse(cookies)
     const value = parsedCookies[`${prefix}${name}.${cookie}`]
     if (value === undefined) {
+        if (optional) {
+            return ""
+        }
         throw new AuthError("invalid_request", `Cookie "${cookie}" not found. There is no active session`)
     }
     return value

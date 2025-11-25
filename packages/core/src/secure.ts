@@ -1,5 +1,5 @@
 import crypto from "node:crypto"
-import { equals } from "./utils.js"
+import { signJWS, verifyJWS } from "@/jose.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")
@@ -25,25 +25,29 @@ export const createPKCE = async (verifier?: string) => {
 }
 
 /**
- * Creates a CSRF token to be used in OAuth flows to prevent cross-site request forgery attacks.
- *   - token: A cryptographically random string that serves as the CSRF token.
- *   - hash: A hashed version of the token, using SHA-256, to be stored in a cookie.
+ * Signs and verifies a CSRF token using JWS. If a valid CSRF cookie is provided, it verifies and returns it.
  *
- * @returns
+ * @param csrfCookie If provided, the function will verify this existing CSRF token.
+ * @returns the signed CSRF token.
  */
 export const createCSRF = async (csrfCookie?: string) => {
-    if (csrfCookie) {
-        const [token, hash] = csrfCookie.split(":")
-        if (verifyCSRF(token, hash)) {
-            return { token, hash: csrfCookie }
+    try {
+        const token = generateSecure(32)
+        if (csrfCookie) {
+            await verifyJWS(csrfCookie)
+            return csrfCookie
         }
+        return signJWS({ token })
+    } catch {
+        const token = generateSecure(32)
+        return signJWS({ token })
     }
-    const token = generateSecure(48)
-    const hash = createHash(token, "hex")
-    return { token, hash: `${token}:${hash}` }
 }
-
-export const verifyCSRF = (token: string, hash: string) => {
-    const tokenHash = createHash(token, "hex")
-    return equals(tokenHash, hash)
+export const verifyCSRF = async (csrfToken: string): Promise<boolean> => {
+    try {
+        await verifyJWS(csrfToken)
+        return true
+    } catch {
+        return false
+    }
 }

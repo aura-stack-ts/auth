@@ -11,7 +11,7 @@ import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
 import {
     createSessionCookie,
-    defaultCSRFTokenCookieOptions,
+    defaultHostCookieConfig,
     expireCookie,
     getCookie,
     secureCookieOptions,
@@ -78,14 +78,15 @@ export const callbackAction = ({ oauth: oauthIntegrations, cookies }: AuthConfig
                     cookieOptions
                 )
 
-                const csrfToken = getCookie(request, "csrfToken", { ...cookieOptions, ...defaultCSRFTokenCookieOptions })
-                const { token, } = await createCSRF(csrfToken)
+                const csrfCookieOptions = { ...cookieOptions, ...defaultHostCookieConfig }
+                const csrfToken = await createCSRF()
+
                 headers.set("Set-Cookie", sessionCookie)
                 headers.append("Set-Cookie", expireCookie("state", cookieOptions))
                 headers.append("Set-Cookie", expireCookie("redirect_uri", cookieOptions))
                 headers.append("Set-Cookie", expireCookie("redirect_to", cookieOptions))
                 headers.append("Set-Cookie", expireCookie("code_verifier", cookieOptions))
-                headers.append("Set-Cookie", setCookie("csrfToken", token, cookieOptions))
+                headers.append("Set-Cookie", setCookie("csrfToken", csrfToken, csrfCookieOptions))
                 return Response.json({ oauth }, { status: 302, headers })
             } catch (error) {
                 if (isAuthError(error)) {

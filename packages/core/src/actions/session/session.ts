@@ -8,9 +8,7 @@ import type { AuthConfigInternal, OAuthUserProfile, OAuthUserProfileInternal } f
 
 export const SESSION_VERSION = "v0.1.0"
 
-export const sessionAction = (authConfig: AuthConfigInternal) => {
-    const { cookies } = authConfig
-
+export const sessionAction = ({ cookies }: AuthConfigInternal) => {
     return createEndpoint("GET", "/session", async (request) => {
         const cookieOptions = secureCookieOptions(request, cookies)
         try {
