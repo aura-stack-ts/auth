@@ -1,7 +1,7 @@
-import { OAuthSecureConfig, OAuthUserProfile } from "@/@types/index.js"
-import { AuthError, throwAuthError } from "@/error.js"
-import { OAuthErrorResponse } from "@/schemas.js"
 import { generateSecure } from "@/secure.js"
+import { OAuthErrorResponse } from "@/schemas.js"
+import { AuthError, throwAuthError } from "@/error.js"
+import { OAuthSecureConfig, OAuthUserProfile } from "@/@types/index.js"
 
 /**
  * Map the default user information fields from the OAuth integration's userinfo response

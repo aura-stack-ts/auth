@@ -1,7 +1,14 @@
 import crypto from "node:crypto"
+import { equals } from "./utils.js"
+import { signJWS, verifyJWS } from "./jose.js"
+import { InvalidCsrfTokenError } from "./error.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")
+}
+
+export const createHash = (data: string, base: "hex" | "base64" | "base64url" = "hex") => {
+    return crypto.createHash("sha256").update(data).digest().toString(base)
 }
 
 /**
@@ -15,6 +22,44 @@ export const generateSecure = (length: number = 32) => {
  */
 export const createPKCE = async (verifier?: string) => {
     const codeVerifier = verifier ?? generateSecure(86)
-    const codeChallenge = crypto.createHash("sha256").update(codeVerifier).digest().toString("base64url")
+    const codeChallenge = createHash(codeVerifier, "base64url")
     return { codeVerifier, codeChallenge, method: "S256" }
+}
+
+/**
+ * Creates a CSRF token to be used in OAuth flows to prevent cross-site request forgery attacks.
+ *   - token: A cryptographically random string that serves as the CSRF token.
+ *   - hash: tuple of the token and its hash for verification and separated by a colon (:).
+ *
+ * @returns
+ */
+export const createCSRF = async (csrfCookie?: string) => {
+    try {
+        const token = generateSecure(32)
+        if (csrfCookie) {
+            await verifyJWS(csrfCookie)
+            return csrfCookie
+        }
+        return signJWS({ token })
+    } catch {
+        const token = generateSecure(32)
+        return signJWS({ token })
+    }
+}
+export const verifyCSRF = async (cookie: string, header: string): Promise<boolean> => {
+    try {
+        const { token: cookieToken } = await verifyJWS(cookie)
+        const { token: headerToken } = await verifyJWS(header)
+        const cookieBuffer = Buffer.from(cookieToken as string)
+        const headerBuffer = Buffer.from(headerToken as string)
+        if (!equals(headerBuffer.length, cookieBuffer.length)) {
+            throw new InvalidCsrfTokenError()
+        }
+        if (!crypto.timingSafeEqual(cookieBuffer, headerBuffer)) {
+            throw new InvalidCsrfTokenError()
+        }
+        return true
+    } catch {
+        throw new InvalidCsrfTokenError()
+    }
 }

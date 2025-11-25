@@ -197,6 +197,13 @@ describe("createRedirectTo", () => {
                 }),
                 expected: "/auth",
             },
+            {
+                description: "with complex path in Referer header",
+                request: new Request("https://example_name.com/auth/signIn/github", {
+                    headers: { Referer: "https://example_name.com/dashboard/admin/panel" },
+                }),
+                expected: "/dashboard/admin/panel",
+            },
         ]
 
         for (const { description, request, expected } of testCases) {

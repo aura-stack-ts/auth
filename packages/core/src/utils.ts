@@ -1,5 +1,6 @@
 import { isRouterError, RouterConfig } from "@aura-stack/router"
-import { isAuthError } from "./error.js"
+import { AuthError, ERROR_RESPONSE, isAuthError } from "./error.js"
+import { isValidURL } from "./assert.js"
 
 export const toSnakeCase = (str: string) => {
     return str
@@ -25,7 +26,7 @@ export const toCastCase = <Obj extends Record<string, any>, Type extends "snake"
         : { [K in keyof Obj as Uppercase<string & K>]: Obj[K] }
 }
 
-export const equals = (a: string | undefined | null, b: string | undefined | null) => {
+export const equals = (a: string | number | undefined | null, b: string | number | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
     return a === b
 }

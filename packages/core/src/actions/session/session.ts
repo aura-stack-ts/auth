@@ -1,4 +1,5 @@
 import { createEndpoint } from "@aura-stack/router"
+import { equals } from "@/utils.js"
 import { decodeJWT } from "@/jose.js"
 import { AuthError } from "@/error.js"
 import { cacheControl } from "@/headers.js"
@@ -7,9 +8,7 @@ import type { AuthConfigInternal, OAuthUserProfile, OAuthUserProfileInternal } f
 
 export const SESSION_VERSION = "v0.1.0"
 
-export const sessionAction = (authConfig: AuthConfigInternal) => {
-    const { cookies } = authConfig
-
+export const sessionAction = ({ cookies }: AuthConfigInternal) => {
     return createEndpoint("GET", "/session", async (request) => {
         const cookieOptions = secureCookieOptions(request, cookies)
         try {
@@ -23,7 +22,7 @@ export const sessionAction = (authConfig: AuthConfigInternal) => {
                 integrations: (decoded as any).integrations,
                 version: (decoded as any).version,
             }
-            if (user.version !== SESSION_VERSION) {
+            if (!equals(user.version, SESSION_VERSION)) {
                 throw new AuthError("session_version", "Session version mismatch")
             }
             const headers = new Headers(cacheControl)

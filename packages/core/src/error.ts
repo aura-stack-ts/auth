@@ -13,6 +13,13 @@ export class AuthError extends Error {
     }
 }
 
+export class InvalidCsrfTokenError extends AuthError {
+    constructor(message: string = "The provided CSRF token is invalid or has expired") {
+        super("invalid_csrf_token", message)
+        this.name = "InvalidCsrfTokenError"
+    }
+}
+
 /**
  * Verifies if the provided error is an instance of AuthError.
  *
