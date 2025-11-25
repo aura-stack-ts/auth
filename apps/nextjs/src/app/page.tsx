@@ -1,5 +1,6 @@
-import { headers } from "next/headers"
 import Image from "next/image"
+import { redirect } from "next/navigation"
+import { cookies, headers } from "next/headers"
 
 const getSession = async () => {
     const headersList = new Headers(await headers())
@@ -21,14 +22,29 @@ const getCSRFToken = async () => {
 const signOut = async () => {
     "use server"
     const csrf = await getCSRFToken()
+    const headersList = new Headers(await headers())
+    const cookieStore = await cookies()
+    headersList.set("Cookie", cookieStore.toString())
+    /**
+     * Remove Content-Length header to allow fetch to recalculate it based on the new body.
+     * If not removed, it may lead to mismatched Content-Length errors. On the other hand,
+     * Aura Router is not working well with the body and content-type headers.
+     */
+    headersList.delete("Content-Length")
+    headersList.set("X-CSRF-Token", csrf)
+    headersList.set("Content-Type", "application/json")
     const signOutResponse = await fetch("http://localhost:3000/auth/signOut?token_type_hint=session_token", {
         method: "POST",
-        headers: {
-            "X-CSRF-Token": csrf,
-        },
+        headers: headersList,
+        credentials: "include",
+        body: JSON.stringify({}),
     })
     const response = await signOutResponse.json()
-    console.log("signOut response", response)
+    if(signOutResponse.status === 202) {
+        cookieStore.delete("aura-stack.sessionToken")
+        cookieStore.delete("aura-stack.csrfToken")
+        redirect("/")
+    }
     return response
 }
 
