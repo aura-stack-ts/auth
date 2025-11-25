@@ -97,7 +97,35 @@ describe("signOut action", async () => {
         )
         expect(request.status).toBe(202)
         expect(await request.json()).toEqual({ message: "Signed out successfully" })
-        expect(request.headers.get("Set-Cookie")).toContain("aura-stack.sessionToken=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-stack.sessionToken=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-stack.csrfToken=;")
+    })
+
+    test("valid sessionToken cookie with valid csrfToken in a secure connection with referer", async () => {
+        const payload: JWTPayload = {
+            sub: "1234567890",
+            email: "john@example.com",
+            name: "John Doe",
+            image: "https://example.com/image.jpg",
+            integrations: ["github"],
+            version: SESSION_VERSION,
+        }
+        const sessionToken = await encodeJWT(payload)
+        const request = await POST(
+            new Request("https://example.com/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}; __Host-aura-stack.csrfToken=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                    Referer: "https://example.com/auth/form",
+                },
+            })
+        )
+        expect(request.status).toBe(202)
+        expect(await request.json()).toEqual({ message: "Signed out successfully" })
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-stack.sessionToken=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-stack.csrfToken=;")
+        expect(request.headers.get("Location")).toContain("/auth/form")
     })
 
     test("valid sessionToken cookie with valid csrfToken in an insecure connection", async () => {
@@ -122,6 +150,7 @@ describe("signOut action", async () => {
         expect(request.status).toBe(202)
         expect(await request.json()).toEqual({ message: "Signed out successfully" })
         expect(request.headers.get("Set-Cookie")).toContain("aura-stack.sessionToken=;")
+        expect(request.headers.get("Set-Cookie")).toContain("aura-stack.csrfToken=;")
     })
 
     test("valid sessionToken cookie with missing csrfToken", async () => {

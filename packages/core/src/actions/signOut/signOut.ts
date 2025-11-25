@@ -6,6 +6,8 @@ import { cacheControl } from "@/headers.js"
 import { AuraResponse } from "@/response.js"
 import { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
+import { createRedirectTo } from "../signIn/authorization.js"
+import { InvalidCsrfTokenError } from "@/error.js"
 
 const config = createEndpointConfig({
     schemas: {
@@ -36,11 +38,33 @@ export const signOutAction = ({ cookies }: AuthConfigInternal) => {
                 }
                 await verifyCSRF(csrfToken, header)
                 await decodeJWT(session)
+                const url = new URL(request.url)
+                /**
+                 * @todo: Allows user to redirect to a custom URL after sign out
+                 */
+                const redirectTo = createRedirectTo(
+                    new Request(`${url.origin}${url.pathname}`, {
+                        headers: ctx.headers,
+                    })
+                )
                 const headers = new Headers(cacheControl)
                 headers.append("Set-Cookie", expireCookie("sessionToken", cookiesOptions))
-                headers.append("Set-Cookie", expireCookie("csrfToken", cookiesOptions))
+                headers.append(
+                    "Set-Cookie",
+                    expireCookie("csrfToken", { ...cookiesOptions, prefix: cookiesOptions.secure ? "__Host-" : "" })
+                )
+                headers.append("Location", redirectTo)
                 return Response.json({ message: "Signed out successfully" }, { status: statusCode.ACCEPTED, headers })
-            } catch {
+            } catch (error) {
+                if (error instanceof InvalidCsrfTokenError) {
+                    return AuraResponse.json<OAuthErrorResponse<"signOut">>(
+                        {
+                            error: "invalid_csrf_token",
+                            error_description: "The provided CSRF token is invalid or has expired",
+                        },
+                        { status: statusCode.UNAUTHORIZED }
+                    )
+                }
                 return AuraResponse.json<OAuthErrorResponse<"signOut">>(
                     {
                         error: "invalid_session_token",

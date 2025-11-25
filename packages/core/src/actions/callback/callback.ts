@@ -9,14 +9,7 @@ import { createAccessToken } from "./access-token.js"
 import { SESSION_VERSION } from "../session/session.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
-import {
-    createSessionCookie,
-    defaultHostCookieConfig,
-    expireCookie,
-    getCookie,
-    secureCookieOptions,
-    setCookie,
-} from "@/cookie.js"
+import { createSessionCookie, expireCookie, getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
@@ -79,10 +72,14 @@ export const callbackAction = ({ oauth: oauthIntegrations, cookies }: AuthConfig
                 )
 
                 const csrfToken = await createCSRF()
-                const csrfCookie = setCookie("csrfToken", csrfToken, secureCookieOptions(request, {
-                    ...cookies,
-                    flag: "host",
-                }))
+                const csrfCookie = setCookie(
+                    "csrfToken",
+                    csrfToken,
+                    secureCookieOptions(request, {
+                        ...cookies,
+                        flag: "host",
+                    })
+                )
                 headers.set("Set-Cookie", sessionCookie)
                 headers.append("Set-Cookie", expireCookie("state", cookieOptions))
                 headers.append("Set-Cookie", expireCookie("redirect_uri", cookieOptions))

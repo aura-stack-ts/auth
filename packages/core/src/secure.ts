@@ -1,5 +1,7 @@
 import crypto from "node:crypto"
+import { equals } from "./utils.js"
 import { signJWS, verifyJWS } from "./jose.js"
+import { InvalidCsrfTokenError } from "./error.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")
@@ -50,14 +52,14 @@ export const verifyCSRF = async (cookie: string, header: string): Promise<boolea
         const { token: headerToken } = await verifyJWS(header)
         const cookieBuffer = Buffer.from(cookieToken as string)
         const headerBuffer = Buffer.from(headerToken as string)
-        if (cookieBuffer.length !== headerBuffer.length) {
-            return false
+        if (!equals(headerBuffer.length, cookieBuffer.length)) {
+            throw new InvalidCsrfTokenError()
         }
         if (!crypto.timingSafeEqual(cookieBuffer, headerBuffer)) {
-            return false
+            throw new InvalidCsrfTokenError()
         }
         return true
     } catch {
-        return false
+        throw new InvalidCsrfTokenError()
     }
 }
