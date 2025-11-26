@@ -1,0 +1,1 @@
+# `@aura-auth/prettier-config`

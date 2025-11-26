@@ -1,6 +1,5 @@
 import { isRouterError, RouterConfig } from "@aura-stack/router"
-import { AuthError, ERROR_RESPONSE, isAuthError } from "./error.js"
-import { isValidURL } from "./assert.js"
+import { isAuthError } from "./error.js"
 
 export const toSnakeCase = (str: string) => {
     return str
