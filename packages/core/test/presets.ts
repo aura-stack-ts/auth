@@ -1,7 +1,7 @@
-import { OAuthSecureConfig } from "@/@types/index.js"
+import { CookieOptionsInternal, OAuthSecureConfig } from "@/@types/index.js"
 import { SESSION_VERSION } from "@/actions/session/session.js"
 import { createAuth } from "@/index.js"
-import { JWTPayload } from "@/jose.js"
+import { type JWTPayload } from "@/jose.js"
 
 export const oauthCustomService: OAuthSecureConfig = {
     id: "oauth-integration",
@@ -24,6 +24,11 @@ export const sessionPayload: JWTPayload = {
     version: SESSION_VERSION,
 }
 
+export const secureCookieOptions: CookieOptionsInternal = { secure: true, prefix: "__Secure-" }
+
+export const hostCookieOptions: CookieOptionsInternal = { secure: true, prefix: "__Host-" }
+
 export const { GET, POST } = createAuth({
     oauth: [oauthCustomService],
+    cookies: {},
 }).handlers

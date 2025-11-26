@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
 import { OAuthConfig, OAuthSecureConfig } from "@/@types/index.js"
-import { oauthCustomService } from "@test/utilities.js"
+import { oauthCustomService } from "@test/presets.js"
 
 describe("getUserInfo", () => {
     test("get user info", async () => {

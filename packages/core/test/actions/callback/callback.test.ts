@@ -1,17 +1,26 @@
 import { describe, test, expect, vi } from "vitest"
-import { GET } from "@test/utilities.js"
-import { generateSecure } from "@/secure.js"
+import { createPKCE } from "@/secure.js"
 import { getCookie, setCookie } from "@/cookie.js"
+import { GET, secureCookieOptions } from "@test/presets.js"
 
 describe("callbackAction", () => {
+    test("invalid endpoint", async () => {
+        const response = await GET(new Request("https://example.com/callback/invalid"))
+        expect(response.status).toBe(404)
+        expect(await response.json()).toEqual({
+            error: "invalid_request",
+            error_description: "No route found for path: /callback/invalid",
+        })
+    })
+
     test("endpoint without code and state", async () => {
-        const response = await GET(new Request("https://example.com/callback/unknown"))
+        const response = await GET(new Request("https://example.com/auth/callback/unknown"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({ error: "invalid_request", error_description: "Invalid route parameters" })
     })
 
     test("unsupported oauth integration", async () => {
-        const response = await GET(new Request("https://example.com/callback/unknown?code=123&state=abc"))
+        const response = await GET(new Request("https://example.com/auth/callback/unknown?code=123&state=abc"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
             error: "invalid_request",
@@ -19,17 +28,23 @@ describe("callbackAction", () => {
         })
     })
 
-    test("mismatching state", async () => {
-        const state = setCookie("state", "123", { secure: true, prefix: "__Secure-" })
-        const redirectURI = setCookie("redirect_uri", "https://example.com/callback/oauth-integration", {
-            secure: true,
-            prefix: "__Secure-",
+    test("without cookies", async () => {
+        const response = await GET(new Request("https://example.com/auth/callback/oauth-integration?code=123&state=abc"))
+        expect(response.status).toBe(400)
+        expect(await response.json()).toEqual({
+            error: "invalid_request",
+            error_description: "No cookies found. There is no active session",
         })
-        const redirectTo = setCookie("redirect_to", "/auth", { secure: true, prefix: "__Secure-" })
-        const codeVerifier = setCookie("code_verifier", "verifier_123", { secure: true, prefix: "__Secure-" })
+    })
+
+    test("mismatching state", async () => {
+        const state = setCookie("state", "123", secureCookieOptions)
+        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-integration", secureCookieOptions)
+        const redirectTo = setCookie("redirect_to", "/auth", secureCookieOptions)
+        const codeVerifier = setCookie("code_verifier", "verifier_123", secureCookieOptions)
 
         const response = await GET(
-            new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
+            new Request("https://example.com/auth/callback/oauth-integration?code=123&state=abc", {
                 headers: {
                     Cookie: [state, redirectURI, redirectTo, codeVerifier].join("; "),
                 },
@@ -37,15 +52,6 @@ describe("callbackAction", () => {
         )
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({ error: "invalid_request", error_description: "Mismatching state" })
-    })
-
-    test("without cookies", async () => {
-        const response = await GET(new Request("https://example.com/callback/oauth-integration?code=123&state=abc"))
-        expect(response.status).toBe(400)
-        expect(await response.json()).toEqual({
-            error: "invalid_request",
-            error_description: "No cookies found. There is no active session",
-        })
     })
 
     test("callback action workflow", async () => {
@@ -66,30 +72,30 @@ describe("callbackAction", () => {
         }
 
         mockFetch.mockResolvedValueOnce({
+            ok: true,
             json: async () => accessTokenMock,
         })
 
         mockFetch.mockResolvedValueOnce({
+            ok: true,
             json: async () => userInfoMock,
         })
 
-        const state = setCookie("state", "abc", { secure: true, prefix: "__Secure-" })
-        const redirectURI = setCookie("redirect_uri", "https://example.com/callback/oauth-integration", {
-            secure: true,
-            prefix: "__Secure-",
-        })
-        const redirectTo = setCookie("redirect_to", "/auth", { secure: true, prefix: "__Secure-" })
-        const codeVerifierValue = generateSecure(64)
-        const codeVerifier = setCookie("code_verifier", codeVerifierValue, { secure: true, prefix: "__Secure-" })
+        const state = setCookie("state", "abc", secureCookieOptions)
+        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-integration", secureCookieOptions)
+        const redirectTo = setCookie("redirect_to", "/auth", secureCookieOptions)
+        const { codeVerifier } = await createPKCE()
+        const codeVerifierCookie = setCookie("code_verifier", codeVerifier, secureCookieOptions)
 
         const response = await GET(
-            new Request("https://example.com/callback/oauth-integration?code=123&state=abc", {
+            new Request("https://example.com/auth/callback/oauth-integration?code=auth_code_123&state=abc", {
                 headers: {
-                    Cookie: [state, redirectURI, redirectTo, codeVerifier].join("; "),
+                    Cookie: [state, redirectURI, redirectTo, codeVerifierCookie].join("; "),
                 },
             })
         )
-        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/token", {
+
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -98,12 +104,13 @@ describe("callbackAction", () => {
             body: new URLSearchParams({
                 client_id: "oauth_client_id",
                 client_secret: "oauth_client_secret",
-                code: "123",
-                redirect_uri: "https://example.com/callback/oauth-integration",
+                code: "auth_code_123",
+                redirect_uri: "https://example.com/auth/callback/oauth-integration",
                 grant_type: "authorization_code",
-                code_verifier: codeVerifierValue,
+                code_verifier: codeVerifier,
             }).toString(),
         })
+
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
@@ -112,7 +119,6 @@ describe("callbackAction", () => {
             },
         })
         expect(fetch).toHaveBeenCalledTimes(2)
-
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
 

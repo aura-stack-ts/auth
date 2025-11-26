@@ -1,17 +1,17 @@
-import { GET, sessionPayload } from "@test/utilities.js"
+import { GET, sessionPayload } from "@test/presets.js"
 import { describe, test, expect, vi } from "vitest"
 import { encodeJWT, type JWTPayload } from "@/jose.js"
 
 describe("sessionAction", () => {
     test("sessionToken cookie not found", async () => {
-        const request = await GET(new Request("https://example.com/session"))
+        const request = await GET(new Request("https://example.com/auth/session"))
         expect(request.status).toBe(401)
         expect(await request.json()).toEqual({ authenticated: false, message: "Unauthorized" })
     })
 
     test("invalid sessionToken cookie", async () => {
         const request = await GET(
-            new Request("https://example.com/session", {
+            new Request("https://example.com/auth/session", {
                 headers: {
                     Cookie: "aura_auth.sessionToken=invalidtoken",
                 },
@@ -25,7 +25,7 @@ describe("sessionAction", () => {
         const sessionToken = await encodeJWT(sessionPayload)
 
         const request = await GET(
-            new Request("https://example.com/session", {
+            new Request("https://example.com/auth/session", {
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
                 },
@@ -43,7 +43,7 @@ describe("sessionAction", () => {
         const sessionToken = await encodeJWT(payload)
 
         const request = await GET(
-            new Request("https://example.com/session", {
+            new Request("https://example.com/auth/session", {
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
                 },
@@ -60,7 +60,7 @@ describe("sessionAction", () => {
 
         const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
-            new Request("https://example.com/session", {
+            new Request("https://example.com/auth/session", {
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
                 },
@@ -74,7 +74,7 @@ describe("sessionAction", () => {
     test("verify cache control headers are set", async () => {
         const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
-            new Request("https://example.com/session", {
+            new Request("https://example.com/auth/session", {
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
                 },
@@ -90,7 +90,7 @@ describe("sessionAction", () => {
     test("invalid access from http", async () => {
         const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
-            new Request("http://example.com/session", {
+            new Request("http://example.com/auth/session", {
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
                 },
@@ -102,7 +102,7 @@ describe("sessionAction", () => {
     test("invalid access from https", async () => {
         const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
-            new Request("https://example.com/session", {
+            new Request("https://example.com/auth/session", {
                 headers: {
                     Cookie: `aura-stack.sessionToken=${sessionToken}`,
                 },

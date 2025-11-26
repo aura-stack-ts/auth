@@ -2,7 +2,7 @@ import { describe, test, expect } from "vitest"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { OAuthConfigSchema } from "@/schemas.js"
 import { OAuthSecureConfig } from "@/@types/index.js"
-import { oauthCustomService } from "./utilities.js"
+import { oauthCustomService } from "./presets.js"
 
 describe("createOAuthIntegrations", () => {
     test("create oauth config for github", () => {

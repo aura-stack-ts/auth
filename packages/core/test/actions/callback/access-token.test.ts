@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { AuthError } from "@/error.js"
 import { createPKCE } from "@/secure.js"
-import { oauthCustomService } from "@test/utilities.js"
+import { oauthCustomService } from "@test/presets.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 
 describe("createAccessToken", async () => {
@@ -57,7 +57,6 @@ describe("createAccessToken", async () => {
             }))
         )
 
-        const { codeVerifier } = await createPKCE()
         await expect(
             createAccessToken(
                 {

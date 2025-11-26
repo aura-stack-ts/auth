@@ -1,4 +1,5 @@
 import { describe, test, expect } from "vitest"
+import { hostCookieOptions } from "./presets.js"
 import { setCookie, getCookie, secureCookieOptions, COOKIE_NAME } from "@/cookie.js"
 import type { SerializeOptions } from "cookie"
 import type { CookieOptions, CookieOptionsInternal } from "@/@types/index.js"
@@ -93,13 +94,13 @@ describe("getCookie", () => {
     })
 
     test("retrieve sessionToken from a request with __Host- prefix", () => {
-        const sessionCookie = setCookie("sessionToken", "session", { prefix: "__Host-", secure: true })
+        const sessionCookie = setCookie("sessionToken", "session", hostCookieOptions)
         const request = new Request("https://www.example.com", {
             headers: {
                 Cookie: sessionCookie,
             },
         })
-        expect(getCookie(request, "sessionToken", { prefix: "__Host-", secure: true })).toBe("session")
+        expect(getCookie(request, "sessionToken", hostCookieOptions)).toBe("session")
     })
 
     test("getCookie throws when cookie is not found", () => {

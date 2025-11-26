@@ -1,6 +1,6 @@
-import type { OAuthSecureConfig } from "@/@types/index.js"
 import { AuthError, ERROR_RESPONSE, throwAuthError } from "@/error.js"
 import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
+import type { OAuthSecureConfig } from "@/@types/index.js"
 
 /**
  * Make a request to the OAuth integration to the token endpoint to exchange the authorization code provided

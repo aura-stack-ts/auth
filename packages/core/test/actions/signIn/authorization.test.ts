@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+import { oauthCustomService } from "@test/presets.js"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/actions/signIn/authorization.js"
 
 describe("createRedirectURI", () => {
@@ -65,29 +66,19 @@ describe("createAuthorizationURL", () => {
     describe("valid OAuth configuration", () => {
         test("valid OAuth configuration with all fields", () => {
             const url = createAuthorizationURL(
-                {
-                    id: "oauth-integration",
-                    name: "OAuth Integration",
-                    authorizeURL: "https://example.com/oauth/authorize",
-                    accessToken: "https://example.com/oauth/access_token",
-                    userInfo: "https://example.com/oauth/user_info",
-                    scope: "read:user",
-                    responseType: "code",
-                    clientId: "1",
-                    clientSecret: "2",
-                },
-                "https://example.com/auth/callback",
+                oauthCustomService,
+                "https://example.com/auth/callback/oauth-integration",
                 "123",
                 "challenge",
                 "S256"
             )
 
             const searchParams = new URL(url).searchParams
-            expect(searchParams.get("client_id")).toBe("1")
             expect(searchParams.has("client_secret")).toBeFalsy()
-            expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback")
+            expect(searchParams.get("client_id")).toBe("oauth_client_id")
+            expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-integration")
             expect(searchParams.get("state")).toBe("123")
-            expect(searchParams.get("scope")).toBe("read:user")
+            expect(searchParams.get("scope")).toBe("profile email")
             expect(searchParams.get("response_type")).toBe("code")
         })
     })
