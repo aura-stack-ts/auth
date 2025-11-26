@@ -1,10 +1,10 @@
 /**
  * @module @aura-stack/jose
  */
-import { JWTPayload, CryptoKey, KeyObject } from "jose"
+import { JWTPayload } from "jose"
 import { createJWE } from "@/encrypt.js"
 import { createJWS } from "@/sign.js"
-import { createSecret } from "@/secret.js"
+import type { KeyObject } from "node:crypto"
 
 export * from "@/sign.js"
 export * from "@/encrypt.js"
@@ -27,9 +27,8 @@ export type SecretInput = CryptoKey | KeyObject | string | Uint8Array
  */
 export const encodeJWT = async (token: JWTPayload, secret: SecretInput) => {
     try {
-        const secretKey = createSecret(secret)
-        const { signJWS } = createJWS(secretKey)
-        const { encryptJWE } = createJWE(secretKey)
+        const { signJWS } = createJWS(secret)
+        const { encryptJWE } = createJWE(secret)
         const signed = await signJWS(token)
         return await encryptJWE(signed)
     } catch (error) {
@@ -52,9 +51,8 @@ export const encodeJWT = async (token: JWTPayload, secret: SecretInput) => {
  */
 export const decodeJWT = async (token: string, secret: SecretInput) => {
     try {
-        const secretKey = createSecret(secret)
-        const { verifyJWS } = createJWS(secretKey)
-        const { decryptJWE } = createJWE(secretKey)
+        const { verifyJWS } = createJWS(secret)
+        const { decryptJWE } = createJWE(secret)
         const decrypted = await decryptJWE(token)
         return await verifyJWS(decrypted)
     } catch (error) {
@@ -71,11 +69,9 @@ export const decodeJWT = async (token: string, secret: SecretInput) => {
  * @param secret - Secret key used for signing, verifying, encrypting and decrypting the JWT
  * @returns JWT handler object with `signJWS/encryptJWE` and `verifyJWS/decryptJWE` methods
  */
-export const createJWT = (secret: SecretInput) => {
-    const secretKey = createSecret(secret)
-
+export const createJWT = async (secret: SecretInput) => {
     return {
-        encodeJWT: async (payload: JWTPayload) => encodeJWT(payload, secretKey),
-        decodeJWT: async (token: string) => decodeJWT(token, secretKey),
+        encodeJWT: async (payload: JWTPayload) => encodeJWT(payload, secret),
+        decodeJWT: async (token: string) => decodeJWT(token, secret),
     }
 }

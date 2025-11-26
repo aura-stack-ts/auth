@@ -39,6 +39,11 @@
       "types": "./dist/jose.d.ts",
       "require": "./dist/jose.cjs",
       "import": "./dist/jose.js"
+    },
+    "./hkdf": {
+      "types": "./dist/deriveKey.d.ts",
+      "require": "./dist/deriveKey.cjs",
+      "import": "./dist/deriveKey.js"
     }
   },
   "keywords": [
@@ -49,7 +54,7 @@
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <hernanvid123@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "jose": "^6.1.0"
+    "jose": "^6.1.2"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",

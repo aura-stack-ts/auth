@@ -1,7 +1,7 @@
 import crypto from "node:crypto"
 import { jwtVerify, SignJWT, type JWTPayload } from "jose"
-import type { SecretInput } from "@/index.js"
-import { createSecret } from "@/secret.js"
+import { createSecret } from "./secret.js"
+import type { SecretInput } from "./index.js"
 
 /**
  * Sign a standard JWT token with the following claims:
@@ -57,10 +57,8 @@ export const verifyJWS = async (token: string, secret: SecretInput): Promise<JWT
  * @returns signJWS and verifyJWS functions
  */
 export const createJWS = (secret: SecretInput) => {
-    const secretKey = createSecret(secret)
-
     return {
-        signJWS: (payload: JWTPayload) => signJWS(payload, secretKey),
-        verifyJWS: (payload: string) => verifyJWS(payload, secretKey),
+        signJWS: (payload: JWTPayload) => signJWS(payload, secret),
+        verifyJWS: (payload: string) => verifyJWS(payload, secret),
     }
 }
