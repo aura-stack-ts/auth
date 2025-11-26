@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1>@aura-stack/auth</h1>
+<h1><b>@aura-stack/auth</b></h1>
 
 **Core authentication library for the Aura Stack ecosystem**
 
