@@ -57,10 +57,8 @@ export const decryptJWE = async (token: string, secret: SecretInput) => {
  * @returns encryptJWE and decryptJWE functions
  */
 export const createJWE = (secret: SecretInput) => {
-    const secretKey = createSecret(secret)
-
     return {
-        encryptJWE: (payload: string) => encryptJWE(payload, secretKey),
-        decryptJWE: (payload: string) => decryptJWE(payload, secretKey),
+        encryptJWE: (payload: string) => encryptJWE(payload, secret),
+        decryptJWE: (payload: string) => decryptJWE(payload, secret),
     }
 }

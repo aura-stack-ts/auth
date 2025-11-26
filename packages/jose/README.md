@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1>@aura-stack/jose</h1>
+<h1><b>@aura-stack/jose</b></h1>
 
 **Type-safe JOSE utilities for JWT signing, verification, and encryption**
 
