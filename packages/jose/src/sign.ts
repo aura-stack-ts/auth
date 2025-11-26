@@ -1,7 +1,7 @@
 import crypto from "node:crypto"
 import { jwtVerify, SignJWT, type JWTPayload } from "jose"
-import { createSecret } from "./secret.js"
-import type { SecretInput } from "./index.js"
+import { createSecret } from "@/secret.js"
+import type { SecretInput } from "@/index.js"
 
 /**
  * Sign a standard JWT token with the following claims:

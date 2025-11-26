@@ -1,6 +1,6 @@
 import crypto from "node:crypto"
 import { EncryptJWT, jwtDecrypt } from "jose"
-import { createSecret } from "./secret.js"
+import { createSecret } from "@/secret.js"
 import type { SecretInput } from "@/index.js"
 
 export interface EncryptedPayload {

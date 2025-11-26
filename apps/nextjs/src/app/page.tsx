@@ -40,7 +40,7 @@ const signOut = async () => {
         body: JSON.stringify({}),
     })
     const response = await signOutResponse.json()
-    if(signOutResponse.status === 202) {
+    if (signOutResponse.status === 202) {
         cookieStore.delete("aura-stack.sessionToken")
         cookieStore.delete("aura-stack.csrfToken")
         redirect("/")

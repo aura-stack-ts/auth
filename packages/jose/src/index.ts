@@ -8,6 +8,7 @@ import type { KeyObject } from "node:crypto"
 
 export * from "@/sign.js"
 export * from "@/encrypt.js"
+export * from "@/deriveKey.js"
 
 export type SecretInput = CryptoKey | KeyObject | string | Uint8Array
 
@@ -69,7 +70,7 @@ export const decodeJWT = async (token: string, secret: SecretInput) => {
  * @param secret - Secret key used for signing, verifying, encrypting and decrypting the JWT
  * @returns JWT handler object with `signJWS/encryptJWE` and `verifyJWS/decryptJWE` methods
  */
-export const createJWT = async (secret: SecretInput) => {
+export const createJWT = (secret: SecretInput) => {
     return {
         encodeJWT: async (payload: JWTPayload) => encodeJWT(payload, secret),
         decodeJWT: async (token: string) => decodeJWT(token, secret),
