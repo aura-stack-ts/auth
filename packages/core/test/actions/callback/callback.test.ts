@@ -1,28 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
-import { callbackAction } from "@/actions/callback/callback.js"
-import { createOAuthIntegrations } from "@/oauth/index.js"
-import { createRouter } from "@aura-stack/router"
-import { defaultCookieConfig, getCookie, setCookie } from "@/cookie.js"
+import { GET } from "@test/utilities.js"
 import { generateSecure } from "@/secure.js"
-import { onErrorHandler } from "@/utils.js"
-
-const oauthIntegrations = createOAuthIntegrations([
-    {
-        id: "oauth-integration",
-        name: "OAuth",
-        authorizeURL: "https://example.com/oauth/authorize",
-        accessToken: "https://example.com/oauth/token",
-        scope: "profile email",
-        responseType: "code",
-        userInfo: "https://example.com/oauth/userinfo",
-        clientId: "oauth_client_id",
-        clientSecret: "oauth_client_secret",
-    },
-])
-
-const { GET } = createRouter([callbackAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })], {
-    onError: onErrorHandler,
-})
+import { getCookie, setCookie } from "@/cookie.js"
 
 describe("callbackAction", () => {
     test("endpoint without code and state", async () => {

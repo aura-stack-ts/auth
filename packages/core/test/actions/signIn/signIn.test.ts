@@ -1,27 +1,6 @@
 import { describe, test, expect } from "vitest"
-import { createRouter } from "@aura-stack/router"
-import { signInAction } from "@/actions/index.js"
-import { createOAuthIntegrations } from "@/oauth/index.js"
-import { defaultCookieConfig, getCookie } from "@/cookie.js"
-import { onErrorHandler } from "@/utils.js"
-
-const oauthIntegrations = createOAuthIntegrations([
-    {
-        id: "oauth-integration",
-        name: "OAuth",
-        authorizeURL: "https://example.com/oauth/authorize",
-        accessToken: "https://example.com/oauth/token",
-        scope: "profile email",
-        responseType: "code",
-        userInfo: "https://example.com/oauth/userinfo",
-        clientId: "oauth_client_id",
-        clientSecret: "oauth_client_secret",
-    },
-])
-
-const { GET } = createRouter([signInAction({ oauth: oauthIntegrations, cookies: defaultCookieConfig })], {
-    onError: onErrorHandler,
-})
+import { GET } from "@test/utilities.js"
+import { getCookie } from "@/cookie.js"
 
 describe("signIn action", () => {
     test("unsupported oauth integration", async () => {

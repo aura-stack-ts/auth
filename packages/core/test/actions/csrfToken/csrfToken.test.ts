@@ -1,12 +1,6 @@
 import { describe, test, expect } from "vitest"
-import { csrfTokenAction } from "@/actions/index.js"
-import { createRouter } from "@aura-stack/router"
-import { createOAuthIntegrations } from "@/oauth/index.js"
-import { defaultCookieConfig, defaultHostCookieConfig, setCookie } from "@/cookie.js"
-
-const oauth = createOAuthIntegrations([])
-
-const { GET } = createRouter([csrfTokenAction({ oauth, cookies: defaultCookieConfig })])
+import { GET } from "@test/utilities.js"
+import { defaultHostCookieConfig, setCookie } from "@/cookie.js"
 
 describe("csrfTokenAction", () => {
     test("generates a CSRF token and sets it in a cookie", async () => {

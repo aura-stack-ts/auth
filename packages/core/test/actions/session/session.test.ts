@@ -1,14 +1,6 @@
-import { sessionAction } from "@/actions/index.js"
-import { createRouter } from "@aura-stack/router"
+import { GET, sessionPayload } from "@test/utilities.js"
 import { describe, test, expect, vi } from "vitest"
 import { encodeJWT, type JWTPayload } from "@/jose.js"
-import { SESSION_VERSION } from "@/actions/session/session.js"
-import { defaultCookieConfig } from "@/cookie.js"
-import { createOAuthIntegrations } from "@/oauth/index.js"
-
-const oauth = createOAuthIntegrations([])
-
-const { GET } = createRouter([sessionAction({ oauth, cookies: defaultCookieConfig })])
 
 describe("sessionAction", () => {
     test("sessionToken cookie not found", async () => {
@@ -30,15 +22,7 @@ describe("sessionAction", () => {
     })
 
     test("valid sessionToken cookie with correct version", async () => {
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
 
         const request = await GET(
             new Request("https://example.com/session", {
@@ -48,16 +32,12 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(200)
-        expect(await request.json()).toEqual({ user: payload, authenticated: true })
+        expect(await request.json()).toEqual({ user: sessionPayload, authenticated: true })
     })
 
     test("valid sessionToken cookie with incorrect version", async () => {
         const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
+            ...sessionPayload,
             version: "incorrect_version",
         }
         const sessionToken = await encodeJWT(payload)
@@ -78,15 +58,7 @@ describe("sessionAction", () => {
             throw new Error("Token expired")
         })
 
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
             new Request("https://example.com/session", {
                 headers: {
@@ -100,16 +72,7 @@ describe("sessionAction", () => {
     })
 
     test("verify cache control headers are set", async () => {
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
             new Request("https://example.com/session", {
                 headers: {
@@ -125,16 +88,7 @@ describe("sessionAction", () => {
     })
 
     test("invalid access from http", async () => {
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
             new Request("http://example.com/session", {
                 headers: {
@@ -146,16 +100,7 @@ describe("sessionAction", () => {
     })
 
     test("invalid access from https", async () => {
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
             new Request("https://example.com/session", {
                 headers: {

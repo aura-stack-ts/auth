@@ -1,10 +1,21 @@
 import { describe, test, expect, vi } from "vitest"
-import { createAccessToken } from "@/actions/callback/access-token.js"
-import { OAuthSecureConfig } from "@/@types/index.js"
 import { AuthError } from "@/error.js"
-import { generateSecure } from "@/secure.js"
+import { createPKCE } from "@/secure.js"
+import { oauthCustomService } from "@test/utilities.js"
+import { createAccessToken } from "@/actions/callback/access-token.js"
 
-describe("createAccessToken", () => {
+describe("createAccessToken", async () => {
+    const { codeVerifier } = await createPKCE()
+
+    const bodyParams = {
+        client_id: "oauth_client_id",
+        client_secret: "oauth_client_secret",
+        code: "authorization_code_123",
+        redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
+        grant_type: "authorization_code",
+        code_verifier: codeVerifier,
+    }
+
     test("get access token", async () => {
         const mockResponse = {
             access_token: "access_token",
@@ -19,19 +30,8 @@ describe("createAccessToken", () => {
             }))
         )
 
-        const codeVerifier = generateSecure(64)
         const accessToken = await createAccessToken(
-            {
-                id: "oauth-integration",
-                name: "OAuth",
-                authorizeURL: "https://example.com/oauth/authorize",
-                accessToken: "https://example.com/oauth/access_token",
-                scope: "profile email",
-                responseType: "code",
-                userInfo: "https://example.com/oauth/userinfo",
-                clientId: "oauth_client_id",
-                clientSecret: "oauth_client_secret",
-            },
+            oauthCustomService,
             "https://myapp.com/auth/callback/oauth-integration",
             "authorization_code_123",
             codeVerifier
@@ -43,14 +43,7 @@ describe("createAccessToken", () => {
                 Accept: "application/json",
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: new URLSearchParams({
-                client_id: "oauth_client_id",
-                client_secret: "oauth_client_secret",
-                code: "authorization_code_123",
-                redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
-                grant_type: "authorization_code",
-                code_verifier: codeVerifier,
-            }).toString(),
+            body: new URLSearchParams(bodyParams).toString(),
         })
         expect(accessToken).toEqual(mockResponse)
     })
@@ -64,20 +57,14 @@ describe("createAccessToken", () => {
             }))
         )
 
-        const codeVerifier = generateSecure(64)
-
+        const { codeVerifier } = await createPKCE()
         await expect(
             createAccessToken(
                 {
-                    id: "oauth-integration",
-                    name: "OAuth",
-                    authorizeURL: "https://example.com/oauth/authorize",
-                    accessToken: "https://example.com/oauth/access_token",
-                    scope: "profile email",
-                    responseType: "code",
-                    userInfo: "https://example.com/oauth/userinfo",
-                } as OAuthSecureConfig,
-                "https://myapp.com/auth/callback/oauth-integration",
+                    ...oauthCustomService,
+                    userInfo: "invalid-url",
+                },
+                "https://myapp.com/auth/callback/oauth",
                 "authorization_code_123",
                 codeVerifier
             )
@@ -93,21 +80,9 @@ describe("createAccessToken", () => {
             })
         )
 
-        const codeVerifier = generateSecure(64)
-
         await expect(
             createAccessToken(
-                {
-                    id: "oauth-integration",
-                    name: "OAuth",
-                    authorizeURL: "https://example.com/oauth/authorize",
-                    accessToken: "https://example.com/oauth/access_token",
-                    scope: "profile email",
-                    responseType: "code",
-                    userInfo: "https://example.com/oauth/userinfo",
-                    clientId: "oauth_client_id",
-                    clientSecret: "oauth_client_secret",
-                },
+                oauthCustomService,
                 "https://myapp.com/auth/callback/oauth-integration",
                 "authorization_code_123",
                 codeVerifier
@@ -120,14 +95,7 @@ describe("createAccessToken", () => {
                 Accept: "application/json",
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: new URLSearchParams({
-                client_id: "oauth_client_id",
-                client_secret: "oauth_client_secret",
-                code: "authorization_code_123",
-                redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
-                grant_type: "authorization_code",
-                code_verifier: codeVerifier,
-            }).toString(),
+            body: new URLSearchParams(bodyParams).toString(),
         })
     })
 
@@ -145,20 +113,9 @@ describe("createAccessToken", () => {
             }))
         )
 
-        const codeVerifier = generateSecure(64)
         await expect(
             createAccessToken(
-                {
-                    id: "oauth-integration",
-                    name: "OAuth",
-                    authorizeURL: "https://example.com/oauth/authorize",
-                    accessToken: "https://example.com/oauth/access_token",
-                    scope: "profile email",
-                    responseType: "code",
-                    userInfo: "https://example.com/oauth/userinfo",
-                    clientId: "oauth_client_id",
-                    clientSecret: "oauth_client_secret",
-                },
+                oauthCustomService,
                 "https://myapp.com/auth/callback/oauth-integration",
                 "invalid_code",
                 codeVerifier
@@ -172,12 +129,8 @@ describe("createAccessToken", () => {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams({
-                client_id: "oauth_client_id",
-                client_secret: "oauth_client_secret",
+                ...bodyParams,
                 code: "invalid_code",
-                redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
-                grant_type: "authorization_code",
-                code_verifier: codeVerifier,
             }).toString(),
         })
     })
@@ -195,20 +148,9 @@ describe("createAccessToken", () => {
             }))
         )
 
-        const codeVerifier = generateSecure(64)
         await expect(
             createAccessToken(
-                {
-                    id: "oauth-integration",
-                    name: "OAuth",
-                    authorizeURL: "https://example.com/oauth/authorize",
-                    accessToken: "https://example.com/oauth/access_token",
-                    scope: "profile email",
-                    responseType: "code",
-                    userInfo: "https://example.com/oauth/userinfo",
-                    clientId: "oauth_client_id",
-                    clientSecret: "oauth_client_secret",
-                },
+                oauthCustomService,
                 "https://myapp.com/auth/callback/oauth-integration",
                 "authorization_code_123",
                 codeVerifier
@@ -221,14 +163,7 @@ describe("createAccessToken", () => {
                 Accept: "application/json",
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: new URLSearchParams({
-                client_id: "oauth_client_id",
-                client_secret: "oauth_client_secret",
-                code: "authorization_code_123",
-                redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
-                grant_type: "authorization_code",
-                code_verifier: codeVerifier,
-            }).toString(),
+            body: new URLSearchParams(bodyParams).toString(),
         })
     })
 })
