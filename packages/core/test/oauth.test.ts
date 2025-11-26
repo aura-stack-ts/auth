@@ -2,6 +2,7 @@ import { describe, test, expect } from "vitest"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { OAuthConfigSchema } from "@/schemas.js"
 import { OAuthSecureConfig } from "@/@types/index.js"
+import { oauthCustomService } from "./presets.js"
 
 describe("createOAuthIntegrations", () => {
     test("create oauth config for github", () => {
@@ -12,19 +13,7 @@ describe("createOAuthIntegrations", () => {
     })
 
     test("create custom oauth config", () => {
-        const oauth = createOAuthIntegrations([
-            {
-                id: "oauth",
-                name: "OAuth",
-                authorizeURL: "https://example.com/authorize",
-                accessToken: "https://example.com/token",
-                clientId: "oauth-client-id",
-                clientSecret: "oauth-client-secret",
-                responseType: "code",
-                scope: "read",
-                userInfo: "https://example.com/userinfo",
-            },
-        ])
+        const oauth = createOAuthIntegrations([oauthCustomService])
         const customConfig = Object.values(oauth)[0]
         const isValid = OAuthConfigSchema.safeParse(customConfig)
         expect(isValid.success).toBe(true)
@@ -36,20 +25,7 @@ describe("createOAuthIntegrations", () => {
     })
 
     test("create oauth config for github and custom", () => {
-        const oauth = createOAuthIntegrations([
-            "github",
-            {
-                id: "oauth",
-                name: "OAuth",
-                authorizeURL: "https://example.com/authorize",
-                accessToken: "https://example.com/token",
-                responseType: "code",
-                scope: "read",
-                userInfo: "https://example.com/userinfo",
-                clientId: "oauth-client-id",
-                clientSecret: "oauth-client-secret",
-            },
-        ])
+        const oauth = createOAuthIntegrations(["github", oauthCustomService])
         for (const config of Object.values(oauth)) {
             const isValid = OAuthConfigSchema.safeParse(config)
             expect(isValid.success).toBe(true)
@@ -72,15 +48,8 @@ describe("createOAuthIntegrations", () => {
     test("create oauth config with invalid userinfo URL", () => {
         const oauth = createOAuthIntegrations([
             {
-                id: "oauth",
-                name: "OAuth",
-                authorizeURL: "https://example.com/authorize",
-                accessToken: "https://example.com/token",
-                responseType: "code",
-                scope: "read",
-                userInfo: "invalid-url",
-                clientId: "oauth-client-id",
-                clientSecret: "oauth-client-secret",
+                ...oauthCustomService,
+                userInfo: "not-a-valid-url",
             },
         ])
         const invalidConfig = Object.values(oauth)[0]

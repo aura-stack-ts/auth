@@ -1,22 +1,14 @@
 import { describe, test, expect, vi } from "vitest"
-import { signOutAction } from "@/actions/signOut/signOut.js"
-import { createRouter } from "@aura-stack/router"
-import { encodeJWT, type JWTPayload } from "@/jose.js"
-import { SESSION_VERSION } from "@/actions/session/session.js"
-import { createOAuthIntegrations } from "@/oauth/index.js"
-import { defaultCookieConfig } from "@/cookie.js"
+import { encodeJWT } from "@/jose.js"
 import { createCSRF } from "@/secure.js"
-
-const oauth = createOAuthIntegrations([])
-
-const { POST } = createRouter([signOutAction({ oauth, cookies: defaultCookieConfig })])
+import { POST, sessionPayload } from "@test/presets.js"
 
 describe("signOut action", async () => {
     const csrf = await createCSRF()
 
     test("sessionToken cookie not present", async () => {
         const response = await POST(
-            new Request("https://example.com/signOut?token_type_hint=session_token", {
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
                     Cookie: `__Host-aura-stack.csrfToken=${csrf}`,
@@ -32,7 +24,7 @@ describe("signOut action", async () => {
 
     test("invalid sessionToken cookie", async () => {
         const request = await POST(
-            new Request("https://example.com/signOut?token_type_hint=session_token", {
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=invalid_token; __Host-aura-stack.csrfToken=${csrf}`,
@@ -51,17 +43,9 @@ describe("signOut action", async () => {
             throw new Error("Token expired")
         })
 
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
         const request = await POST(
-            new Request("https://example.com/signOut?token_type_hint=session_token", {
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
@@ -77,17 +61,9 @@ describe("signOut action", async () => {
     })
 
     test("valid sessionToken cookie with valid csrfToken in a secure connection", async () => {
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
         const request = await POST(
-            new Request("https://example.com/signOut?token_type_hint=session_token", {
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}; __Host-aura-stack.csrfToken=${csrf}`,
@@ -102,17 +78,9 @@ describe("signOut action", async () => {
     })
 
     test("valid sessionToken cookie with valid csrfToken in a secure connection with referer", async () => {
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
         const request = await POST(
-            new Request("https://example.com/signOut?token_type_hint=session_token", {
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}; __Host-aura-stack.csrfToken=${csrf}`,
@@ -129,17 +97,9 @@ describe("signOut action", async () => {
     })
 
     test("valid sessionToken cookie with valid csrfToken in an insecure connection", async () => {
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
         const request = await POST(
-            new Request("http://example.com/signOut?token_type_hint=session_token", {
+            new Request("http://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
                     Cookie: `aura-stack.sessionToken=${sessionToken}; aura-stack.csrfToken=${csrf}`,
@@ -154,17 +114,9 @@ describe("signOut action", async () => {
     })
 
     test("valid sessionToken cookie with missing csrfToken", async () => {
-        const payload: JWTPayload = {
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            integrations: ["github"],
-            version: SESSION_VERSION,
-        }
-        const sessionToken = await encodeJWT(payload)
+        const sessionToken = await encodeJWT(sessionPayload)
         const request = await POST(
-            new Request("https://example.com/signOut?token_type_hint=session_token", {
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
                     Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,

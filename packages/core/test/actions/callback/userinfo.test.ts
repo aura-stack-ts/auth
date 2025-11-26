@@ -1,6 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
 import { OAuthConfig, OAuthSecureConfig } from "@/@types/index.js"
+import { oauthCustomService } from "@test/presets.js"
 
 describe("getUserInfo", () => {
     test("get user info", async () => {
@@ -19,20 +20,7 @@ describe("getUserInfo", () => {
             }))
         )
 
-        const response = await getUserInfo(
-            {
-                id: "oauth-integration",
-                name: "OAuth",
-                authorizeURL: "https://example.com/oauth/authorize",
-                accessToken: "https://example.com/oauth/token",
-                scope: "profile email",
-                responseType: "code",
-                userInfo: "https://example.com/oauth/userinfo",
-                clientId: "oauth_client_id",
-                clientSecret: "oauth_client_secret",
-            },
-            "access_token_123"
-        )
+        const response = await getUserInfo(oauthCustomService, "access_token_123")
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -61,13 +49,7 @@ describe("getUserInfo", () => {
         )
 
         const oauthConfig: OAuthConfig<{ username: string; avatar_url: string; uniqueId: string; email: string }> = {
-            id: "oauth-integration",
-            name: "OAuth",
-            authorizeURL: "https://example.com/oauth/authorize",
-            accessToken: "https://example.com/oauth/token",
-            scope: "profile email",
-            responseType: "code",
-            userInfo: "https://example.com/oauth/userinfo",
+            ...oauthCustomService,
             profile(profile) {
                 return {
                     sub: profile.uniqueId,
@@ -111,15 +93,9 @@ describe("getUserInfo", () => {
             }))
         )
 
-        const oauthConfig: OAuthConfig<{ username: string; avatar_url: string; uniqueId: string; email: string }> = {
-            id: "oauth-integration",
-            name: "OAuth",
-            authorizeURL: "https://example.com/oauth/authorize",
-            accessToken: "https://example.com/oauth/token",
-            scope: "profile email",
-            responseType: "code",
-            userInfo: "https://example.com/oauth/userinfo",
-            profile(profile) {
+        const oauthConfig: OAuthConfig = {
+            ...oauthCustomService,
+            profile() {
                 throw new Error("Profile parsing error")
             },
         }
@@ -149,22 +125,7 @@ describe("getUserInfo", () => {
             }))
         )
 
-        await expect(
-            getUserInfo(
-                {
-                    id: "oauth-integration",
-                    name: "OAuth",
-                    authorizeURL: "https://example.com/oauth/authorize",
-                    accessToken: "https://example.com/oauth/token",
-                    scope: "profile email",
-                    responseType: "code",
-                    userInfo: "https://example.com/oauth/userinfo",
-                    clientId: "oauth_client_id",
-                    clientSecret: "oauth_client_secret",
-                },
-                "invalid_access_token"
-            )
-        ).rejects.toThrow(/Invalid access token/)
+        await expect(getUserInfo(oauthCustomService, "invalid_access_token")).rejects.toThrow(/Invalid access token/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -183,22 +144,7 @@ describe("getUserInfo", () => {
             })
         )
 
-        await expect(
-            getUserInfo(
-                {
-                    id: "oauth-integration",
-                    name: "OAuth",
-                    authorizeURL: "https://example.com/oauth/authorize",
-                    accessToken: "https://example.com/oauth/token",
-                    scope: "profile email",
-                    responseType: "code",
-                    userInfo: "https://example.com/oauth/userinfo",
-                    clientId: "oauth_client_id",
-                    clientSecret: "oauth_client_secret",
-                },
-                "access_token"
-            )
-        ).rejects.toThrow(/Fetch Network error/)
+        await expect(getUserInfo(oauthCustomService, "access_token")).rejects.toThrow(/Fetch Network error/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",

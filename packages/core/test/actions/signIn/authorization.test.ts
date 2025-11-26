@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+import { oauthCustomService } from "@test/presets.js"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/actions/signIn/authorization.js"
 
 describe("createRedirectURI", () => {
@@ -65,29 +66,19 @@ describe("createAuthorizationURL", () => {
     describe("valid OAuth configuration", () => {
         test("valid OAuth configuration with all fields", () => {
             const url = createAuthorizationURL(
-                {
-                    id: "oauth-integration",
-                    name: "OAuth Integration",
-                    authorizeURL: "https://example.com/oauth/authorize",
-                    accessToken: "https://example.com/oauth/access_token",
-                    userInfo: "https://example.com/oauth/user_info",
-                    scope: "read:user",
-                    responseType: "code",
-                    clientId: "1",
-                    clientSecret: "2",
-                },
-                "https://example.com/auth/callback",
+                oauthCustomService,
+                "https://example.com/auth/callback/oauth-integration",
                 "123",
                 "challenge",
                 "S256"
             )
 
             const searchParams = new URL(url).searchParams
-            expect(searchParams.get("client_id")).toBe("1")
             expect(searchParams.has("client_secret")).toBeFalsy()
-            expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback")
+            expect(searchParams.get("client_id")).toBe("oauth_client_id")
+            expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-integration")
             expect(searchParams.get("state")).toBe("123")
-            expect(searchParams.get("scope")).toBe("read:user")
+            expect(searchParams.get("scope")).toBe("profile email")
             expect(searchParams.get("response_type")).toBe("code")
         })
     })
@@ -133,23 +124,25 @@ describe("createAuthorizationURL", () => {
 })
 
 describe("createRedirectTo", () => {
+    const signInURL = "https://example.com/auth/signIn/github"
+
     describe("valid origin", () => {
         const testCases = [
             {
                 description: "returns '/' when Referer header is missing",
-                request: new Request("https://example.com/auth/signIn/github"),
+                request: new Request(signInURL),
                 expected: "/",
             },
             {
                 description: "returns pathname when origins match",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/auth" },
                 }),
                 expected: "/auth",
             },
             {
                 description: "returns pathname with trailing slash when origins match",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/auth/" },
                 }),
                 expected: "/auth/",
@@ -157,28 +150,28 @@ describe("createRedirectTo", () => {
 
             {
                 description: "pathname contains multiple consecutive slashes",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com//auth///dashboard" },
                 }),
                 expected: "/auth/dashboard",
             },
             {
                 description: "pathname contains invalid segments (parent directory)",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/../admin" },
                 }),
                 expected: "/admin",
             },
             {
                 description: "pathname is root '/'",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com" },
                 }),
                 expected: "/",
             },
             {
                 description: "with jump lines in Referer header",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/auth/\r\n" },
                 }),
                 expected: "/auth/",
@@ -218,7 +211,7 @@ describe("createRedirectTo", () => {
         const testCases = [
             {
                 description: "different origins do not match",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://malicious.com/phishing" },
                 }),
                 expected: /The origin of the request does not match the hosted origin./,
@@ -254,70 +247,70 @@ describe("createRedirectTo", () => {
 
             {
                 description: "invalid Referer URL (plain text)",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "not-a-valid-url" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid protocol in Referer URL (unsupported protocol)",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "ftp://example.com/resource" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "encoded double slash in Referer path",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://%2f%2fexample.com" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "encoded double slash in Referer path",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://%2f%2fevil.com" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid custom protocol in Referer URL",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "invalid://url" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid path traversal using encoded segments",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/auth/%2e%2e/%2e%2e/admin" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid path traversal using slashes",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://%2F%2Fexample.com" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid Referer with spaces",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/auth path" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid path traversal using encoded dots",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/%2e%2e/%2e%2e/" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "pathname contains invalid segments with backslashes",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/..\\admin" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
@@ -331,49 +324,49 @@ describe("createRedirectTo", () => {
             },
             {
                 description: "javascript URL injection in Referer",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "javascript:alert(1)" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "with port in Referer header",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com:3000" },
                 }),
                 expected: /The origin of the request does not match the hosted origin./,
             },
             {
                 description: "with IP address in Referer header",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://192.168.1.1/auth" },
                 }),
                 expected: /The origin of the request does not match the hosted origin./,
             },
             {
                 description: "with subdomain in Referer header",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://subdomain.example.com/auth" },
                 }),
                 expected: /The origin of the request does not match the hosted origin./,
             },
             {
                 description: "with .app domain in Referer header",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.app/auth" },
                 }),
                 expected: /The origin of the request does not match the hosted origin./,
             },
             {
                 description: "with .dev domain in Referer header",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.dev/auth" },
                 }),
                 expected: /The origin of the request does not match the hosted origin./,
             },
             {
                 description: "returns pathname with query when origins match",
-                request: new Request("https://example.com/auth/signIn/github", {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/auth?next=123" },
                 }),
                 expected: /Invalid origin \(potential CSRF\)./,
