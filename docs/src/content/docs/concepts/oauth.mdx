@@ -1,0 +1,78 @@
+---
+title: OAuth 2.0 Flow
+description: The OAuth 2.0 authorizaton framework flow
+---
+
+## OAuth 2.0 authorizaton framework
+
+The Internet Engineering Task Force (IETF) publishes `The OAuth 2.0 Authorization Framework` in October 2012, below [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749).
+
+The `OAuth 2.0 authorizaton framework` is an authorization protocol which enables to third-party applications access to resources without sharing their credentials, based on delegation the authorizaton for conveing authorization, decisions and logic in a network of a web application and APIs. It can be used by userts to delegate limited authority and by trusted applications to provide information to a client.
+
+## The importance of OAuth 2.0
+
+OAuth is an modern solution implemented by the major services like `GitHub`, `Google`, `Facebook`, `Instagram`, `Spotify` and more, which allows to users to authorize them to third party applications and acces to the data and informatio storaged by the applications, without need to share their credentials. As NOTE, the major of the web applications doesn't provide credentials to third-party services.
+
+Although, when its mentioned OAuth 2.0, the major of the people thinks that OAuth only provides support for Web applications, that is not truth, because OAuth was designed to work with any third-party service like `browswer applications`, `server applications`, `native apps`, `mobile apps`, `IoT` and more.
+
+## Principles
+
+As mentioned before, OAuth 2.0 it is an authorization protocol and NOT an authentication protocol, because it was designed for grant acess to resources (it looked from the server). However, traditionally OAuth is used as Authentication model from the client.
+
+## OAuth 2.0 Roles
+
+OAuth defines the following roles to the authorization framework:
+
+- `Resource Owner`: Entity to contains the resources and grant the access, for example `GitHub`.
+- `Authorization Server`: Server who issues the `Access Token` after a successful authentication.
+- `Resource Server`: Server where is located the resources (API servers) who accepting and responsing the protected resources from the `Access Tokens`
+- `Client`: System who wants to access to the protected resources (Aura Auth users).
+
+## Authorization Grant
+
+### Authorization Code
+
+`Authorization Code Flow` It's an authorization mechanims of OAuth 2.0 used to don't pass the credentials directly from the user, which allows to obtain an `Access Token`, in which the Authorization Server works in the middle between Client and Resource Ownwer, in this flow, the Client redirects `User` to the authorization server via `user-agent` to grant the access, and the resource owner is who grant the user, once the proces has been sucessful, the authorization redirects to the client with the Authorization Code, it communicates with the authorization serverfor exchanging an `Access Token` and an optional `Refresh Token`. Once the access token is obtained the client can communicate with the resource owner to acess to protected resources. for more detailed information [read](https://www.rfc-editor.org/rfc/rfc6749#section-4.1).
+
+#### Authorization Request
+
+In this flow, the client should construct a URI with the following values, for detailed information [read](https://www.rfc-editor.org/rfc/rfc6749#section-4.1.1):
+
+- `response_type: code`: value used to mentioend to the authorization server that the client expects to receive the Authroization code.
+- `client_id`: Identifier of the OAuth provider
+- `redirect_uri`: URL which the authorization server should redirect for logic management
+- `scope`: The scopes to access the protected resources from the client to the Resource owner.
+- `state`: an opaque value to mitigate `Cross-Site Request Forgery`
+- `code_challenge` (optional): a hashes vlaue to protect public applications.
+- `code_challenge_method=256` (optional): method used to create the `code_challenge`
+
+#### Authorization Response
+
+once the user grant to authorizarion server via user-agent, the authorizarion response to the client with teh following values, for detailed information [read](https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2):
+
+- `state`: the opaque value passed in the authoirzation request
+- `code`: a value used for exchanging the Acces Token
+
+### Acces Token
+
+`Access Token` is a piece of information which works are credentails to users to access to protected resources to third party services, which are identifier used to retrive information, for more detailed information [read](https://www.rfc-editor.org/rfc/rfc6749#section-1.4)
+
+#### Access Token Request
+
+Once th client has the code value, it can directs to the authorization server for an acess token. For more detailed information [read](https://www.rfc-editor.org/rfc/rfc6749#section-4.1.3)
+
+- `grant_type: authorization_code`: notifices the authorization grant used.
+- `code`: the value obtained in the authorization resposne
+- `redirect_uri`: URL which the authorization server should redirect for logic management. It MUST be identifcal that the provided in the `Authorization` flow
+- `client_id`: Identifier of the OAuth provider
+- `client_secret`:
+
+#### Access Token Response
+
+If the Authorizarion confirms the code, it returns the Acces Token. For more detailed information read [Access Token Format](https://www.rfc-editor.org/rfc/rfc6749#section-4.1.4) and [sucessful response](https://www.rfc-editor.org/rfc/rfc6749#section-5.1).
+
+- `access_token`
+- `token_type`
+- `expires_in`
+- `refresh_token`
+- `scope`

@@ -1,0 +1,485 @@
+---
+title: Core API Reference
+description: Complete API documentation for @aura-stack/auth
+---
+
+import { Callout } from "fumadocs-ui/components/callout"
+import { Tab, Tabs } from "fumadocs-ui/components/tabs"
+
+## Installation
+
+<Tabs items={["pnpm", "npm", "yarn"]}>
+  <Tab value="pnpm">```bash pnpm add @aura-stack/auth ```</Tab>
+  <Tab value="npm">```bash npm install @aura-stack/auth ```</Tab>
+  <Tab value="yarn">```bash yarn add @aura-stack/auth ```</Tab>
+</Tabs>
+
+## `createAuth(config?)`
+
+Creates an authentication instance with handlers for OAuth flows, session management, and CSRF protection.
+
+### Signature
+
+```typescript
+function createAuth(authConfig?: AuthConfig): {
+  handlers: Router
+}
+```
+
+### Parameters
+
+#### `authConfig` <small>(optional)</small>
+
+Configuration object for authentication settings.
+
+| Property  | Type                                         | Description                                 |
+| --------- | -------------------------------------------- | ------------------------------------------- |
+| `oauth`   | `(OAuthIntegrations \| OAuthSecureConfig)[]` | Array of OAuth provider configurations      |
+| `cookies` | `CookieOptions`                              | Cookie configuration for session management |
+
+### Returns
+
+An object containing:
+
+- **`handlers`**: Router instance with authentication endpoints
+
+### Example
+
+```typescript title="auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+// Using built-in providers with environment variables
+const auth = createAuth({
+  oauth: ["github"],
+})
+
+// Using custom OAuth provider
+const auth = createAuth({
+  oauth: [
+    {
+      id: "custom-oauth",
+      name: "Custom OAuth",
+      authorizeURL: "https://oauth.example.com/authorize",
+      accessToken: "https://oauth.example.com/token",
+      userInfo: "https://oauth.example.com/userinfo",
+      scope: "profile email",
+      responseType: "code",
+      clientId: process.env.CUSTOM_CLIENT_ID!,
+      clientSecret: process.env.CUSTOM_CLIENT_SECRET!,
+    },
+  ],
+})
+
+export const { handlers } = auth
+```
+
+## Types
+
+### `AuthConfig`
+
+Main configuration interface for authentication setup.
+
+```typescript
+interface AuthConfig {
+  oauth: (OAuthIntegrations | OAuthSecureConfig)[]
+  cookies?: CookieOptions
+}
+```
+
+#### Properties
+
+**`oauth`** <small>required</small>
+
+Array of OAuth integrations. Can be either:
+
+- Built-in provider names: `'github'`
+- Custom OAuth configurations implementing `OAuthSecureConfig`
+
+```typescript
+// Built-in providers
+oauth: ["github"]
+
+// Custom provider
+oauth: [
+  {
+    id: "custom",
+    name: "Custom Provider",
+    authorizeURL: "https://...",
+    accessToken: "https://...",
+    userInfo: "https://...",
+    scope: "profile email",
+    responseType: "code",
+    clientId: process.env.CLIENT_ID!,
+    clientSecret: process.env.CLIENT_SECRET!,
+  },
+]
+```
+
+**`cookies`** <small>optional</small>
+
+Cookie configuration for security and domain settings.
+
+```typescript
+cookies: {
+  name: 'my-app',  // Optional prefix (default: 'aura-stack')
+  flag: 'secure',  // 'standard' | 'secure' | 'host'
+  options: {
+    // Additional cookie options
+  }
+}
+```
+
+### `OAuthSecureConfig`
+
+Configuration for custom OAuth 2.0 providers.
+
+```typescript
+interface OAuthSecureConfig extends OAuthConfig {
+  clientId: string
+  clientSecret: string
+}
+
+interface OAuthConfig<Profile = any> {
+  id: string
+  name: string
+  authorizeURL: string
+  accessToken: string
+  userInfo: string
+  scope: string
+  responseType: string
+  profile?: (profile: Profile) => OAuthUserProfile | Promise<OAuthUserProfile>
+}
+```
+
+#### Properties
+
+| Property       | Type       | Description                              |
+| -------------- | ---------- | ---------------------------------------- |
+| `id`           | `string`   | Unique identifier for the provider       |
+| `name`         | `string`   | Display name of the provider             |
+| `authorizeURL` | `string`   | OAuth authorization endpoint             |
+| `accessToken`  | `string`   | Token exchange endpoint                  |
+| `userInfo`     | `string`   | User information endpoint                |
+| `scope`        | `string`   | OAuth scopes to request                  |
+| `responseType` | `string`   | OAuth response type (typically `'code'`) |
+| `clientId`     | `string`   | OAuth client ID                          |
+| `clientSecret` | `string`   | OAuth client secret                      |
+| `profile`      | `function` | Optional profile transformer             |
+
+### `OAuthUserProfile`
+
+Standardized user profile returned after OAuth authentication.
+
+```typescript
+interface OAuthUserProfile {
+  sub: string // Unique user identifier
+  name?: string // Full name
+  email?: string // Email address
+  image?: string // Avatar/profile image URL
+}
+```
+
+### `CookieOptions`
+
+Configuration for authentication cookies with security flags.
+
+```typescript
+type CookieOptions = {
+  name?: string // Cookie name prefix
+} & CookieFlagOptions
+
+type CookieFlagOptions =
+  | StandardCookie // HTTP & HTTPS
+  | SecureCookie // HTTPS only with __Secure- prefix
+  | HostCookie // HTTPS only with __Host- prefix
+```
+
+#### Cookie Flags
+
+<Callout type="warn">
+  **Security Warning:** Choose the appropriate cookie flag for your environment. Use `host` or `secure` in production for maximum
+  security.
+</Callout>
+
+**`standard`** <small>(default in development)</small>
+
+Standard cookies without security prefix. Can be sent over HTTP and HTTPS.
+
+```typescript
+cookies: {
+  flag: 'standard',
+  options: {
+    httpOnly: true,
+    sameSite: 'lax'
+  }
+}
+```
+
+**`secure`**
+
+Cookies with `__Secure-` prefix. Only sent over HTTPS connections.
+
+```typescript
+cookies: {
+  flag: 'secure',
+  options: {
+    httpOnly: true,
+    sameSite: 'lax'
+  }
+}
+```
+
+**`host`** <small>(recommended for production)</small>
+
+Cookies with `__Host-` prefix. Most secure option:
+
+- Only sent over HTTPS
+- Path must be `/`
+- No Domain attribute (prevents subdomain access)
+
+```typescript
+cookies: {
+  flag: 'host',
+  options: {
+    httpOnly: true,
+    sameSite: 'strict'
+  }
+}
+```
+
+## Built-in Routes
+
+When you create an auth instance, these routes are automatically configured under the `/auth` base path:
+
+### `GET /auth/signin`
+
+Initiates the OAuth authorization flow.
+
+**Query Parameters:**
+
+- `provider` <small>(required)</small> - OAuth provider ID (e.g., `github`)
+- `callbackUrl` <small>(optional)</small> - Redirect URL after authentication
+
+**Example:**
+
+```
+GET /auth/signin?provider=github&callbackUrl=/dashboard
+```
+
+**Response:**
+Redirects to the OAuth provider's authorization page.
+
+---
+
+### `GET /auth/callback`
+
+Handles the OAuth callback after user authorization.
+
+**Query Parameters:**
+
+- `code` - Authorization code from OAuth provider
+- `state` - CSRF protection state parameter
+- `error` - Error code if authorization failed
+- `error_description` - Human-readable error description
+
+**Response:**
+
+- Success: Sets session cookie and redirects to callback URL
+- Failure: Redirects with error parameters
+
+---
+
+### `GET /auth/session`
+
+Returns the current user session.
+
+**Response:**
+
+```typescript
+{
+  sub: string
+  name?: string
+  email?: string
+  image?: string
+  integrations: string[]
+  version: number
+}
+```
+
+Returns `null` if no active session.
+
+**Example:**
+
+```typescript
+const response = await fetch("/auth/session")
+const session = await response.json()
+
+if (session) {
+  console.log("Logged in as:", session.email)
+} else {
+  console.log("Not authenticated")
+}
+```
+
+---
+
+### `POST /auth/signout`
+
+Signs out the current user by invalidating the session.
+
+**Headers:**
+
+- `X-CSRF-Token` <small>(required)</small> - CSRF token from `/auth/csrf`
+
+**Response:**
+
+```json
+{ "success": true }
+```
+
+Clears the session cookie.
+
+**Example:**
+
+```typescript
+const csrfToken = await fetch("/auth/csrf").then((r) => r.json())
+
+await fetch("/auth/signout", {
+  method: "POST",
+  headers: {
+    "X-CSRF-Token": csrfToken.csrfToken,
+  },
+})
+```
+
+---
+
+### `GET /auth/csrf`
+
+Returns a CSRF token for protected operations.
+
+**Response:**
+
+```json
+{
+  "csrfToken": "..."
+}
+```
+
+**Example:**
+
+```typescript
+const { csrfToken } = await fetch("/auth/csrf").then((r) => r.json())
+```
+
+## Environment Variables
+
+Configure OAuth providers using environment variables:
+
+### Pattern
+
+```bash
+AURA_AUTH_{PROVIDER}_CLIENT_ID=your_client_id
+AURA_AUTH_{PROVIDER}_CLIENT_SECRET=your_client_secret
+```
+
+### Example
+
+```bash title=".env"
+# GitHub OAuth
+AURA_AUTH_GITHUB_CLIENT_ID=Iv1.1234567890abcdef
+AURA_AUTH_GITHUB_CLIENT_SECRET=0123456789abcdef...
+
+# Custom Provider
+AURA_AUTH_CUSTOM_CLIENT_ID=your_client_id
+AURA_AUTH_CUSTOM_CLIENT_SECRET=your_client_secret
+```
+
+<Callout type="warn">Never commit `.env` files to version control. Add them to `.gitignore`.</Callout>
+
+## Error Types
+
+### `AuthorizationErrorResponse`
+
+OAuth 2.0 authorization errors as defined in [RFC 6749 §4.1.2.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1):
+
+- `invalid_request`
+- `unauthorized_client`
+- `access_denied`
+- `unsupported_response_type`
+- `invalid_scope`
+- `server_error`
+- `temporarily_unavailable`
+
+### `AccessTokenErrorResponse`
+
+OAuth 2.0 access token errors as defined in [RFC 6749 §5.2](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2):
+
+- `invalid_request`
+- `invalid_client`
+- `invalid_grant`
+- `unauthorized_client`
+- `unsupported_grant_type`
+- `invalid_scope`
+
+### `TokenRevocationErrorResponse`
+
+Session invalidation errors:
+
+- `invalid_session_token`
+
+## Complete Example
+
+```typescript title="auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [
+    "github",
+    {
+      id: "custom",
+      name: "Custom OAuth",
+      authorizeURL: "https://oauth.example.com/authorize",
+      accessToken: "https://oauth.example.com/token",
+      userInfo: "https://oauth.example.com/userinfo",
+      scope: "profile email",
+      responseType: "code",
+      clientId: process.env.AURA_AUTH_CUSTOM_CLIENT_ID!,
+      clientSecret: process.env.AURA_AUTH_CUSTOM_CLIENT_SECRET!,
+      profile: (profile) => ({
+        sub: profile.id,
+        name: profile.full_name,
+        email: profile.email_address,
+        image: profile.avatar_url,
+      }),
+    },
+  ],
+  cookies: {
+    name: "my-app",
+    flag: process.env.NODE_ENV === "production" ? "host" : "standard",
+    options: {
+      httpOnly: true,
+      sameSite: "lax",
+    },
+  },
+})
+
+export const { handlers } = auth
+```
+
+## Related Documentation
+
+<Cards>
+  <Card title="Quick Start" href="/docs/getting-started/quick-start">
+    Get started with authentication
+  </Card>
+  <Card title="OAuth Providers" href="/docs/guides/oauth-providers">
+    Configure OAuth providers
+  </Card>
+  <Card title="Cookie Security" href="/docs/guides/security">
+    Security best practices
+  </Card>
+  <Card title="JOSE API" href="/docs/api/jose">
+    JWT and encryption utilities
+  </Card>
+</Cards>
