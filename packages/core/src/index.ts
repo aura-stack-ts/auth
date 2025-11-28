@@ -40,7 +40,7 @@ const createInternalConfig = (authConfig?: AuthConfig): AuthConfigInternal => {
  *   }]
  * })
  */
-export const createAuth = (authConfig?: AuthConfig) => {
+export const createAuth = (authConfig: AuthConfig) => {
     const config = createInternalConfig(authConfig)
     const router = createRouter(
         [signInAction(config), callbackAction(config), sessionAction(config), signOutAction(config), csrfTokenAction(config)],

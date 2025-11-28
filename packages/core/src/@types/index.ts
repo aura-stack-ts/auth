@@ -42,19 +42,21 @@ export interface OAuthSecureConfig extends OAuthConfig {
 
 export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>)
 
+export type Prettify<T> = { [K in keyof T]: T[K] } & {}
+
 /**
  * Cookie type with __Secure- prefix, must be Secure.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
  */
-type SecureCookie = { flag: "secure" } & { options?: Omit<SerializeOptions, "secure" | "encode"> }
+type SecureCookie = { flag: "secure" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "encode">> }
 
 /**
  * Cookie type with __Host- prefix, must be Secure, Path=/, no Domain attribute.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
  */
-type HostCookie = { flag: "host" } & { options?: Omit<SerializeOptions, "secure" | "path" | "domain" | "encode"> }
+type HostCookie = { flag: "host" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "path" | "domain" | "encode">> }
 
-export type StandardCookie = { flag?: "standard" } & { options?: Omit<SerializeOptions, "encode"> }
+export type StandardCookie = { flag?: "standard" } & { options?: Prettify<Omit<SerializeOptions, "encode">> }
 
 /**
  * Union type for cookie options based on the specified flag.

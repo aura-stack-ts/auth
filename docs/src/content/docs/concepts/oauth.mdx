@@ -1,0 +1,147 @@
+---
+title: OAuth 2.0 Flow and Security in Delegated Authorization
+description: The OAuth 2.0 authorization framework flow and its security best practices
+---
+
+## Why Aura Auth Simplifies OAuth 2.0
+
+Before diving into the technical details, it's important to note how **Aura Auth** is designed to streamline and secure your implementation of this complex framework.
+
+<Callout>
+  **Aura Auth** is engineered to provide full, compliant support for the secure **OAuth 2.0 Authorization Code Flow with PKCE**.
+  By handling the secure exchange of the Authorization Code for the Access Token, Aura Auth abstracts away much of the underlying
+  complexity, allowing developers to focus purely on business logic rather than security primitives.
+</Callout>
+---
+
+## What you'll learn
+
+This guide, essential for security-minded developers, breaks down OAuth 2.0 from foundational principles to the most secure implementation practices.
+
+- [OAuth 2.0](#oauth-authorization-server)
+  - [Importance of OAuth 2.0](#the-importance-of-oauth-2.0)
+- [Core principles](#core-principles)
+- [OAuth 2.0 Roles](#oauth-2.0-roles)
+- [Authorization Grant](#authorization-grant)
+  - [Authorization Request](#authorization-request)
+  - [Authorization Response](#authorization-response)
+  - [Access Token Request](#access-token-request)
+  - [Access Token Response](#access-token-response)
+- [Resources](#resources)
+
+---
+
+## OAuth 2.0: The Delegated Authorization Framework [#oauth-authorization-server]
+
+The **Internet Engineering Task Force (IETF)** published the OAuth 2.0 Authorization Framework in October 2012, documented under [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749).
+
+The **OAuth 2.0 Authorization Framework** is an **authorization** protocol that allows client applications to access a user's protected resources without the user having to share their credentials. It is based on the concept of **delegated authority**, where the user grants limited permission to a client application via a digital credential (**Access Token**).
+
+### The Importance of OAuth 2.0
+
+OAuth 2.0 is a fundamental solution implemented by major service providers like `Google`, `GitHub`, `Facebook`, and `Spotify`, among many others. Its importance lies in a key security principle:
+
+> **Principle of Least Privilege:** It allows users to authorize third-party applications to access a specific subset of their data, limiting the risk in case the client application is compromised.
+
+Although the OAuth concept is commonly associated with web applications, the protocol was designed to work with any type of client, including: `server-based web applications`, `Single-Page Applications (SPAs)`, `mobile applications (iOS/Android)`, `native desktop applications`, and even `IoT` devices.
+
+---
+
+## Core Principles: Authorization vs. Authentication [#core-principles]
+
+It is vital for security to understand OAuth 2.0's primary role:
+
+- **OAuth 2.0 is an AUTHORIZATION protocol:** It was designed exclusively to **grant access to protected resources** (What can the client do?).
+- **OAuth 2.0 is NOT an AUTHENTICATION protocol:** By itself, it does not confirm the user's identity (Who is the user?).
+
+However, OAuth 2.0 serves as the foundation for other protocols like **OpenID Connect (OIDC)**, which does add the authentication layer to securely verify the user's identity.
+
+## OAuth 2.0 Roles
+
+OAuth defines four essential roles to facilitate the delegated authorization process:
+
+- `Resource Owner` **(User):** The entity (usually the end-user) who owns the protected resources and **grants the authorization** to access them.
+- `Client` **(Application):** The system or application (web, mobile, etc.) that wishes to access the user's protected resources.
+- `Authorization Server` **(AuthZ Server):** The server that verifies the user's identity and, after successful consent, issues the **Access Tokens** to the client.
+- `Resource Server` **(API Server):** The server (the API) where the protected resources are hosted. It accepts the Access Tokens to validate requests and respond with the user's data.
+
+---
+
+## Authorization Grant: The Authorization Code Flow [#authorization-grant]
+
+The **Authorization Code Flow** is the most recommended and secure authorization mechanism, especially for clients that can maintain a secret.
+
+This flow is characterized by **not exposing the Access Token** on the browser channel (the _front-channel_), performing the credential exchange over a direct, secure channel between the Client and the Authorization Server (_back-channel_).
+
+<Steps>
+
+<Step>
+
+### Authorization Request
+
+In this step, the **Client** redirects the **User** to the **Authorization Server** (via the user's browser, or _User-Agent_). The request URI must include the following security parameters:
+
+- `response_type: code`: Indicates the Client expects to receive an Authorization Code.
+- `client_id`: The Client's public identifier.
+- `redirect_uri`: The URL to which the Authorization Server must redirect the user. This URL **must be registered** and **strictly validated** to prevent malicious redirection attacks.
+- `scope`: Defines the set of permissions the Client requests over the User's resources (Principle of Least Privilege).
+- `state`: A **unique, opaque, per-session value** that the Client generates and verifies upon receiving the response. **CRUCIAL** for mitigating Cross-Site Request Forgery (**CSRF**) attacks.
+
+<Callout>
+
+**Security Enhancement: PKCE**
+For **public** applications (like SPAs or mobile apps) that cannot safely custody a `client_secret`, the use of PKCE (RFC 7636) is **mandatory**.
+
+- `code_challenge`: A hashed value sent in the authorization request.
+- `code_challenge_method=S256`: The method used for hashing (typically SHA-256).
+
+</Callout>
+
+</Step>
+
+<Step>
+
+### Authorization Response
+
+Once the **User** successfully authenticates and **grants consent** to the Authorization Server, the server redirects the **Client** (to the specified `redirect_uri`) with two critical values in the URL:
+
+- `code`: A short-lived, single-use **Authorization Code**.
+- `state`: The original opaque value sent by the client. **The client must validate that this value matches** the one generated in step 1.
+
+</Step>
+
+<Step>
+
+### Access Token Request
+
+This is the most security-critical step. The **Client** takes the received code and exchanges it directly with the **Authorization Server** over a secure **server-to-server connection (back-channel)**.
+
+- `grant_type: authorization_code`: Indicates the authorization grant type used.
+- `code`: The code obtained in step 2.
+- `redirect_uri`: **Must be identical** to the one sent in Step 1 to ensure integrity.
+- `client_id`: Client identifier.
+- `client_secret`: The Client's confidential secret. **(Optional, if PKCE is used)**.
+- `code_verifier`: The un-hashed value of the `code_challenge`. **(Required if PKCE is used)**.
+
+</Step>
+
+<Step>
+
+### Access Token Response
+
+If the Authorization Server confirms the validity of the code and (if applicable) the Client authentication and PKCE verifier, it responds with:
+
+- `access_token`: The main credential used to access protected resources.
+- `token_type`: The token type (typically `Bearer`).
+- `expires_in`: The lifespan of the Access Token (e.g., 3600 seconds). **Tokens should be short-lived.**
+- `refresh_token` (Optional): A long-lived token used to request a new Access Token without requiring the user to log in again. **Must be stored extremely securely.**
+- `scope` (Optional): The permissions that were finally granted.
+
+</Step>
+
+</Steps>
+
+## Resources
+
+- [The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749).
+- [Proof Key for Code Exchange by OAuth Public Clients](https://datatracker.ietf.org/doc/html/rfc7636).
