@@ -3,12 +3,42 @@ title: "@aura-stack/auth"
 description: Framework-agnostic authentication and authorization library for Aura Stack.
 ---
 
-## Overview
+## Core API Reference
 
 The `@aura-stack/auth` package provides a **framework-agnostic authentication core** for TypeScript applications, built on modern standards like **OAuth 2.0** and **OpenID Connect** (future support planned).  
 It offers **secure, type-safe, and composable primitives** designed for an exceptional **developer experience (DX)**.
 
 Inspired by [Auth.js](https://authjs.dev/), this package focuses on **clarity, security, and flexibility**, providing everything needed to implement authentication and authorization in a clean and extensible way.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+})
+```
+
+---
+
+## What you'll learn
+
+Through this api reference documentation you are going to learn and understand from basic to advanced about the `createAuth` API Reference:
+
+- [Features](#features)
+- [Installation](#installation)
+- [API Reference](#api-reference)
+  - [createAuth](#create-auth)
+    - [Parameters](#parameters)
+    - [Returns](#returns)
+- [Environment variables](#environment-variables)
+- [Errors](#errors)
+  - [AuthorizationErrorResponse](#authorization-error-response)
+  - [AccessTokenErrorResponse](#access-token-error-response)
+  - [TokenRevocationErrorResponse](#token-Revocation-error-response)
+- [Usage](#usage)
+- [Best practices](#best-practices)
+
+---
 
 ## Features
 
@@ -18,65 +48,193 @@ Inspired by [Auth.js](https://authjs.dev/), this package focuses on **clarity, s
 - **Framework agnostic** — Works seamlessly with any HTTP framework or runtime.
 - **Router integration** — Compatible with [`@aura-stack/router`](https://github.com/aura-stack-ts/router) for effortless endpoint mounting.
 
+---
+
 ## Installation
 
 ```npm
 npm install @aura-stack/auth
 ```
 
-## Getting Started
-
-### Create an auth instance
-
-Use `createAuth` to configure your authentication providers. The API is intentionally lightweight, flexible, and independent of any framework.
-
-<Callout>
-  `@aura-stack/auth` integrates naturally with [`@aura-stack/router`](https://github.com/aura-stack-ts/router) under the hood.
-  Simply mount the returned handlers within your application’s routing layer
-</Callout>
-
-```ts title="auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-const auth = createAuth({
-  oauth: ["github"],
-})
-
-export const { handlers } = auth
-```
-
-### Environment variables
-
-This package expects two main types of environment variables:
-
-- A secret key for signing and encrypting sessions (recommended: 32 bytes / 256 bits).
-- OAuth credentials for each provider integration.
-
-Create a `.env` file in your project root:
-
-```bash title=".env"
-# 32-byte (256-bit) secret used for signing and encrypting sessions
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-
-# OAuth provider credentials
-AURA_AUTH_GITHUB_CLIENT_ID=your_client_id
-AURA_AUTH_GITHUB_CLIENT_SECRET=your_client_secret
-```
-
-<Callout type="warn">
-  Never hard-code credentials in your source code. Always store secrets in environment variables and consider using
-  secret-scanning tools (e.g., [GitGuardian](https://www.gitguardian.com/)) to prevent leaks
-</Callout>
+---
 
 ## API Reference
 
-### `createAuth(config?: AuthConfig)`
+### `createAuth(config: AuthConfig)`
 
-Creates a new Aura Auth instance configured for your environment and providers.
+Creates an authentication instance with handlers for OAuth flows, session management, and CSRF protection.
 
-| Parameter | Type                                   | Description                                                                                               |
-| --------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `oauth`   | `Array<string \| OAuthProviderConfig>` | List of OAuth providers. You can specify provider IDs (e.g., "github") or custom provider configurations. |
+#### Parameters
+
+Configuration object for authentication settings.
+
+| Parameter | Type                                         | Description                                 |
+| --------- | -------------------------------------------- | ------------------------------------------- |
+| `oauth`   | `(OAuthIntegrations \| OAuthSecureConfig)[]` | Array of OAuth provider configurations      |
+| `cookies` | `CookieOptions`                              | Cookie configuration for session management |
+
+##### `oauth`
+
+The OAuth providers are the third-party applications which the Aura Auth will sign in. Can be either
+
+- Built-in providers: are the OAuth buildt-in by aura auth, for example `github`
+
+```ts lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+})
+```
+
+- Custom OAuth configuration implementations: create custom oauth providers doesn't supported natvely by aura auth, follow the `OAuthSecureConfig` type.
+
+```ts lineNumbers
+interface OAuthConfig<Profile extends object = {}> {
+  id: string
+  name: string
+  authorizeURL: string
+  accessToken: string
+  userInfo: string
+  scope: string
+  responseType: string
+  profile?: (profile: Profile) => Promise<OAuthUserProfile> | OAuthUserProfile
+}
+
+interface OAuthSecureConfig extends OAuthConfig {
+  clientId: string
+  clientSecret: string
+}
+```
+
+**Properties**
+
+| Property       | Type       | Description                              |
+| -------------- | ---------- | ---------------------------------------- |
+| `id`           | `string`   | Unique identifier for the provider       |
+| `name`         | `string`   | Display name of the provider             |
+| `authorizeURL` | `string`   | OAuth authorization endpoint             |
+| `accessToken`  | `string`   | Token exchange endpoint                  |
+| `userInfo`     | `string`   | User information endpoint                |
+| `scope`        | `string`   | OAuth scopes to request                  |
+| `responseType` | `string`   | OAuth response type (typically `'code'`) |
+| `clientId`     | `string`   | OAuth client ID                          |
+| `clientSecret` | `string`   | OAuth client secret                      |
+| `profile`      | `function` | Optional profile transformer             |
+
+```ts lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [
+    {
+      id: "custom",
+      name: "Custom Provider",
+      authorizeURL: "https://custom.com/authorization",
+      accessToken: "https://custom.com/access_token",
+      userInfo: "https://api.custom.com/v1/user",
+      scope: "user:email user:profile",
+      responseType: "code",
+      clientId: process.env.CLIENT_ID!,
+      clientSecret: process.env.CLIENT_SECRET!,
+    },
+  ],
+})
+```
+
+##### `cookies`
+
+Cookie configuration management for session management by Aura Auth, the user can modify the obtains based on their needs.
+
+```ts lineNumbers
+type CookieOptions = {
+  name?: string
+  flag: "standard" | "secure" | "host"
+  options: StandardCookie | SecureCookie | HostCookie
+}
+```
+
+###### `name`
+
+Define the name of the cookie to be storaged for signing and encrypting JWTs, by default the name is `aura-stack`
+
+<Callout type="warning">
+
+This configuration option is critical, we recommended to the user be caution and be careful with the options passed to the `cookie` options to avoid information leak, cookie attacks and more vulnerabilities exposed by the cookies. So Aura Auth is not resposible for any bad cookie configuration and vulnerabilities caused by this option. For detailed information about cookie management read [RFC - HTTP State Management Mechanism](https://datatracker.ietf.org/doc/html/rfc6265).
+
+For that reason Aura Auth, provides secure by default, disabling cases which the cookie configuration options is not recommended and bad configured with `httpOnly` always to true to be unaccessible by JavaScript.
+
+</Callout>
+
+Aura Auth provides three flags to users with the options available per flag, removind the recommended options per flag and good practices.
+
+<Callout type="warn">
+  **Security Warning:** Choose the appropriate cookie flag for your environment. Use `host` or `secure` in production for maximum
+  security.
+</Callout>
+
+###### `standard`
+
+This flag default in development. Standard cookies without security prefix. Can be sent over HTTP and HTTPS.
+
+```ts lineNumbers
+type StandardCookie = {
+  flag: "standard"
+  options: {
+    secure?: boolean | undefined
+    maxAge?: number | undefined
+    expires?: Date | undefined
+    domain?: string | undefined
+    path?: string | undefined
+    httpOnly?: boolean | undefined
+    partitioned?: boolean | undefined
+    priority?: "low" | "medium" | "high" | undefined
+    sameSite?: boolean | "lax" | "strict" | "none" | undefined
+  }
+}
+```
+
+###### `secure`
+
+when `secure` flag is set in a development environment (HTTP) it is disable because secure cookios only can be transmitted in a HTTPS, additionally it adds the `__Secure-` prefix to the cookies, for more detailed informationa about the prefix [read](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix).
+
+```ts lineNumbers
+type SecureCookie = {
+  flag: "secure"
+  options: {
+    maxAge?: number | undefined
+    expires?: Date | undefined
+    domain?: string | undefined
+    path?: string | undefined
+    httpOnly?: boolean | undefined
+    partitioned?: boolean | undefined
+    priority?: "low" | "medium" | "high" | undefined
+    sameSite?: boolean | "lax" | "strict" | "none" | undefined
+  }
+}
+```
+
+###### `host`
+
+This flag it the mose secure, but is less flexible, when `host` flag is set in a development environment (HTTP) it is disable because secure cookios only can be transmitted in a HTTPS, additionally it adds the `__Host-` prefix to the cookies, for more detailed informationa about the prefix [read](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix).
+
+- Only sent over HTTPS
+- Path must be `/`
+- No Domain attribute (prevents subdomain access)
+
+```ts lineNumbers
+type HostCookie = {
+  flag: "host"
+  options: {
+    maxAge?: number | undefined
+    expires?: Date | undefined
+    httpOnly?: boolean | undefined
+    partitioned?: boolean | undefined
+    priority?: "low" | "medium" | "high" | undefined
+    sameSite?: boolean | "lax" | "strict" | "none" | undefined
+  }
+}
+```
 
 #### Returns
 
@@ -84,56 +242,192 @@ Creates a new Aura Auth instance configured for your environment and providers.
 | ---------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `handlers` | HTTP handlers (from`createRouter`) | Route handlers you can mount in your app to expose authentication endpoints (`/signIn/:oauth`, `/callback/:oauth`, `/session`, etc.). Mount at your desired base path (default: `/auth`). |
 
-#### Example
+##### `handlers`
 
-```ts title="auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
+The HTTP handlers are the functions which will controll, add logic and follow the OAuth flow to add authorization via OAuth 2.0, currenlty is exported the `GET` and `POST` methods.
 
-const auth = createAuth({
-  oauth: ["github"],
-})
+<Callout>
+
+The HTTP handlers should be implemented by any runtime which supports native Response and Request browswer APIs and use the HTTP handlers to oauth management.
+
+</Callout>
+
+The endpoints supported by the handlers are:
+
+##### `GET /auth/signIn/:oauth`
+
+Initiates the OAuth authorization flow. where `:oauth` is the id of the Oauth Provider
+
+#### `GET /auth/callback/:oauth`
+
+Handles the OAuth callback after user authorization. where `:oauth` is the id of the OAuth Provider, is must be equal that the `/auth/signIn/:oauth`
+
+#### `GET /auth/session`
+
+returns the current user session, with the following structure:
+
+```json lineNumbers
+{
+  sub: string
+  name?: string
+  email?: string
+  image?: string
+  integrations: string[]
+  version: number
+}
 ```
 
-## Default Routes
+##### `GET /auth/csrfToken`
 
-When you create an auth instance, the following endpoints are commonly available (mount path is configurable):
+it returns a json which the csrfToken to mitigate CSRF Attacks and used by http methods which could have important operations and logic (`POST`, `PATCH` and `DELETE`). This token is used and required by `/auth/signOut` endpoint to close the active user session. the response follows the next structure:
 
-| Route            | Method | Description                           |
-| ---------------- | ------ | ------------------------------------- |
-| `/auth/signin`   | GET    | Initiates the OAuth sign-in flow      |
-| `/auth/callback` | GET    | Handles the OAuth callback            |
-| `/auth/session`  | GET    | Returns current session informationon |
+```json lineNumbers
+{
+  csrfToken: string
+}
+```
+
+##### `POST /auth/signOut`
+
+It implements `CSRF Tokens` as security, so, it expects to pass the `X-CSRF-TOKEN` header and `csrfToken` cookie to verify the csrfToken passed.
+
+> The csrfToken are signed to ensure integrity of the csrfToken and can't be replicated.
+
+```ts lineNumbers
+new Request("/auth/signOut", {
+  method: "POST",
+  headers: {
+    "X-CSRF-Token": "...",
+    Cookie: "...",
+  },
+})
+```
 
 <Callout type="info">
   All routes are relative to your configured base path (default: <code>/auth</code>).
 </Callout>
 
-## Configuration
+---
 
-### Multiple OAuth Providers
+## Environment Variables
 
-You can define multiple providers easily:
+Aura Auth required some environment variables to create the OAuth flow and security measures. The environments required are:
 
-```ts title="auth.ts" lineNumbers
+- `AURA_AUTH_SECRET`: opaque value used to sign and encrypt user's session
+- `AURA_AUTH_{PROVIDER}_CLIENT_ID`
+- `AURA_AUTH-{PROVIDER}_CLIENT_SECRET`
+
+> Aura Auth loads the environment variables that follows the previous patterns.
+
+### Example
+
+```bash title=".env" lineNumbers
+# GitHub OAuth
+AURA_AUTH_GITHUB_CLIENT_ID=Iv1.1234567890abcdef
+AURA_AUTH_GITHUB_CLIENT_SECRET=0123456789abcdef...
+
+# Custom Provider
+AURA_AUTH_CUSTOM_CLIENT_ID=your_client_id
+AURA_AUTH_CUSTOM_CLIENT_SECRET=your_client_secret
+```
+
+<Callout type="warn">Never commit `.env` files to version control. Add them to `.gitignore`.</Callout>
+
+---
+
+## Errors
+
+In the OAuth 2.0 workflow is possible that happens some erros during the workflow, so, Aura Auth follows the responses provided by [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749) which returns the errors via URL or Body json with the `error` and `error_description` fields.
+
+OAuth 2.0 and its extensions defines three cases erros during the `Authorization`, `Access Token` and `Revocation Tokens` flow.
+
+### `AuthorizationErrorResponse` [#authorization-error-response]
+
+OAuth 2.0 authorization errors as defined in [RFC 6749 §4.1.2.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1):
+
+- `invalid_request`
+- `unauthorized_client`
+- `access_denied`
+- `unsupported_response_type`
+- `invalid_scope`
+- `server_error`
+- `temporarily_unavailable`
+
+### `AccessTokenErrorResponse` [#access-token-error-response]
+
+OAuth 2.0 access token errors as defined in [RFC 6749 §5.2](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2):
+
+- `invalid_request`
+- `invalid_client`
+- `invalid_grant`
+- `unauthorized_client`
+- `unsupported_grant_type`
+- `invalid_scope`
+
+### `TokenRevocationErrorResponse` [#token-Revocation-error-response]
+
+Session invalidation errors:
+
+- `invalid_session_token`
+
+---
+
+## Usage
+
+### With `GitHub`
+
+```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
-const auth = createAuth({
+export const auth = createAuth({
+  oauth: ["github"],
+})
+```
+
+### With `Custom Provider`
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
   oauth: [
-    "github",
     {
-      id: "oauth-integration",
-      name: "OAuth",
-      authorizeURL: "https://example.com/oauth/authorize",
-      accessToken: "https://example.com/oauth/token",
+      id: "custom",
+      name: "Custom OAuth",
+      authorizeURL: "https://oauth.example.com/authorize",
+      accessToken: "https://oauth.example.com/access_token",
+      userInfo: "https://oauth.example.com/userinfo",
       scope: "profile email",
       responseType: "code",
-      userInfo: "https://example.com/oauth/userinfo",
-      clientId: process.env.AURA_AUTH_GITHUB_CLIENT_ID!,
-      clientSecret: process.env.AURA_AUTH_GITHUB_CLIENT_SECRET!,
+      clientId: process.env.AURA_AUTH_CUSTOM_CLIENT_ID!,
+      clientSecret: process.env.AURA_AUTH_CUSTOM_CLIENT_SECRET!,
+      profile: (profile) => ({
+        sub: profile.id,
+        name: profile.full_name,
+        email: profile.email_address,
+        image: profile.avatar_url,
+      }),
     },
   ],
 })
 ```
+
+### With `Cookies`
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  cookies: {
+    name: "my-app",
+    flag: process.env.NODE_ENV === "production" ? "host" : "standard",
+    sameSite: "strict",
+  },
+})
+```
+
+---
 
 ## Best Practices
 
