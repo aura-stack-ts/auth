@@ -6,7 +6,13 @@ description: Aura Auth is a modern, type-safe authentication for TypeScript — 
 ## What is Aura Auth
 
 **Aura Auth** is an open-source authentication and authorization library for modern TypeScript applications.  
-Inspired by [Auth.js](https://authjs.dev/), it provides a type-safe and framework-agnostic API to implement secure authentication flows with an emphasis on **developer experience**, **security**, and **modularity**.
+Inspired by [Auth.js](https://authjs.dev/), it delivers a **type-safe**, **framework-agnostic**, and **modular** API to implement secure authentication flows with first-class support for OAuth 2.0.
+
+Aura Auth focuses on three core pillars:
+
+- **Security** — strong, opinionated defaults
+- **Developer Experience** — simple ergonomics, complete TypeScript support
+- **Modularity** — use only the features you need
 
 <Callout type="info">
   This project is under active development. Aura Auth is framework-agnostic and targets native TypeScript runtimes. If you'd like
@@ -15,9 +21,11 @@ Inspired by [Auth.js](https://authjs.dev/), it provides a type-safe and framewor
 
 ## Why Aura Auth exist ?
 
-Aura Auth exist thanks to Auth.js, which Auth.js was one of the most important and useful authentication libraries for JavaScript applications during the last years, providing a wide range of Authentication methods for modern web apps and specially in `OAuth 2.0` and `OpenId Connect` flows.
+Aura Auth exists thanks to Auth.js, which has been one of the most important and useful authentication libraries for JavaScript applications in recent years, providing a wide range of authentication methods for modern web apps, especially for `OAuth 2.0` and `OpenID Connect` flows.
 
-But, on September 26 of 2025, was announced that Auth.js was leave to main for the core maintainer team and now is a side of Better Auth (Authentication framework for TypeScript), so, as previous Developer Experience contributor on Auth.js I have deciced to create a new alternative authentication library for TypeScript applications inspired on Auth.js.
+However, on September 26, 2025, it was announced that the core maintainer team would be stepping away from Auth.js, which has now become a side project of Better Auth (an authentication framework for TypeScript). Consequently, as a previous Developer Experience contributor to Auth.js, the decision was made to create a new alternative authentication library for TypeScript applications, inspired by Auth.js.
+
+Aura Auth is the spiritual successor to Auth.js — designed for the next generation of TypeScript applications.
 
 ## Features
 
@@ -32,7 +40,7 @@ But, on September 26 of 2025, was announced that Auth.js was leave to main for t
     Built from small, focused packages — use only what you need (auth handlers, JOSE helpers, cookie utilities).
   </Card>
   <Card title="Secure by default" icon="shield">
-    Enforces opinionated defaults for secure cookies, PKCE, state validation, and token verification.
+    Strong defaults for PKCE, state validation, secure cookies, token verification, redirect validation, and CSRF protection.
   </Card>
 </Cards>
 
@@ -42,6 +50,21 @@ But, on September 26 of 2025, was announced that Auth.js was leave to main for t
   <Card title="GitHub">Github OAuth Provider</Card>
 </Cards>
 
+Additional providers such as **Google**, **Discord**, **Twitter/X**, and **Spotify** are planned.
+
 ## Secure by default (Philosophy)
 
-The philosophy is provide a easy, powerful and secure agnostic-framework authentication library for TypeScript based on web standards flow like `OAuth 2.0` and `OpenId Connect` (coming soon).
+Aura Auth is built on a simple philosophy:
+
+> Provide a framework-agnostic, secure, and ergonomic authentication system — powered by open web standards like **OAuth 2.0** and **OpenID Connect** (coming soon).
+
+Security is not optional. Aura Auth enforces best practices by default:
+
+- PKCE on all supported OAuth flows
+- Mandatory state parameters
+- Cookie security (HTTP-only, Secure, SameSite)
+- CSRF protection via JWS
+- Verified redirect URLs
+- Strong cryptographic guarantees
+
+Aura Auth lets developers focus on building products — not re-implementing the same security layers again and again.
