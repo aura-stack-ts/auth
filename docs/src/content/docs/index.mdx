@@ -1,23 +1,37 @@
 ---
-title: What is Aura Auth
-description: Modern, type-safe authentication for TypeScript — built for security, extensibility, and developer experience.
+title: Overview
+description: Aura Auth is a modern, type-safe authentication for TypeScript — built for security, extensibility, and developer experience.
 ---
 
-## What is `@aura-stack/auth`
+## What is Aura Auth
 
 **Aura Auth** is an open-source authentication and authorization library for modern TypeScript applications.  
-Inspired by [Auth.js](https://authjs.dev/), it provides a type-safe and framework-agnostic API to implement secure authentication flows with an emphasis on **developer experience**, **security**, and **modularity**.
+Inspired by [Auth.js](https://authjs.dev/), it delivers a **type-safe**, **framework-agnostic**, and **modular** API to implement secure authentication flows with first-class support for OAuth 2.0.
+
+Aura Auth focuses on three core pillars:
+
+- **Security** — strong, opinionated defaults
+- **Developer Experience** — simple ergonomics, complete TypeScript support
+- **Modularity** — use only the features you need
 
 <Callout type="info">
   This project is under active development. Aura Auth is framework-agnostic and targets native TypeScript runtimes. If you'd like
   to contribute framework adapters (Express, Hono, Next.js, etc.), contributions and PRs are always welcome.
 </Callout>
 
-## Highlights
+## Why Aura Auth exist ?
+
+Aura Auth exists thanks to Auth.js, which has been one of the most important and useful authentication libraries for JavaScript applications in recent years, providing a wide range of authentication methods for modern web apps, especially for `OAuth 2.0` and `OpenID Connect` flows.
+
+However, on September 26, 2025, it was announced that the core maintainer team would be stepping away from Auth.js, which has now become a side project of Better Auth (an authentication framework for TypeScript). Consequently, as a previous Developer Experience contributor to Auth.js, the decision was made to create a new alternative authentication library for TypeScript applications, inspired by Auth.js.
+
+Aura Auth is the spiritual successor to Auth.js — designed for the next generation of TypeScript applications.
+
+## Features
 
 <Cards>
   <Card title="OAuth 2.0" icon="lock">
-    Utilities for common OAuth 2.0 flows (authorization URL, token exchange, userinfo) with examples for popular providers.
+    Utilities for common OAuth 2.0 flows (authorization URL, access token, userinfo) with examples for popular providers.
   </Card>
   <Card title="Type-first API" icon="code">
     Written entirely in TypeScript with strong types, full IntelliSense, and predictable ergonomics.
@@ -26,60 +40,31 @@ Inspired by [Auth.js](https://authjs.dev/), it provides a type-safe and framewor
     Built from small, focused packages — use only what you need (auth handlers, JOSE helpers, cookie utilities).
   </Card>
   <Card title="Secure by default" icon="shield">
-    Enforces opinionated defaults for secure cookies, PKCE, state validation, and token verification.
+    Strong defaults for PKCE, state validation, secure cookies, token verification, redirect validation, and CSRF protection.
   </Card>
 </Cards>
 
-## Getting started
+## OAuth providers
 
-This guide walks you through installing and setting up a basic authentication flow using **Aura Auth**.
+<Cards>
+  <Card title="GitHub">Github OAuth Provider</Card>
+</Cards>
 
-### Install
+Additional providers such as **Google**, **Discord**, **Twitter/X**, and **Spotify** are planned.
 
-We recommend using `pnpm` in monorepos for optimal performance, but `npm` and `yarn` are also supported.
+## Secure by default (Philosophy)
 
-```bash
-npm install @aura-stack/auth
+Aura Auth is built on a simple philosophy:
 
-```
+> Provide a framework-agnostic, secure, and ergonomic authentication system — powered by open web standards like **OAuth 2.0** and **OpenID Connect** (coming soon).
 
-<Callout type="info">Using `pnpm` in a monorepo improves install performance and disk usage.</Callout>
+Security is not optional. Aura Auth enforces best practices by default:
 
-### Environment setup
+- PKCE on all supported OAuth flows
+- Mandatory state parameters
+- Cookie security (HTTP-only, Secure, SameSite)
+- CSRF protection via JWS
+- Verified redirect URLs
+- Strong cryptographic guarantees
 
-Store all secrets and provider credentials as environment variables.
-By convention, Aura Auth uses the following naming pattern:
-
-- `AURA_AUTH_{PROVIDER}_CLIENT_ID`
-- `AURA_AUTH_{PROVIDER}_CLIENT_SECRET`
-- `AURA_AUTH_SECRET` (used to sign and encrypt sessions)
-
-Create a .env file (do not commit it):
-
-```bash title=".env"
-# 32-byte (256-bit) secret used to sign and encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-
-# GitHub OAuth credentials
-AURA_AUTH_GITHUB_CLIENT_ID=your_github_client_id
-AURA_AUTH_GITHUB_CLIENT_SECRET=your_github_client_secret
-```
-
-<Callout type="warn">Never commit your `.env` file. Always use a secret manager in production.</Callout>
-
-### Create an Auth instance
-
-Use `createAuth` to configure providers and obtain HTTP handlers that can be integrated into your router or framework.
-
-```ts title="auth.ts"
-import { createAuth } from "@aura-stack/auth"
-
-const auth = createAuth({
-  oauth: [],
-})
-
-export const { handlers } = auth
-```
-
-The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, etc.).
-You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+Aura Auth lets developers focus on building products — not re-implementing the same security layers again and again.

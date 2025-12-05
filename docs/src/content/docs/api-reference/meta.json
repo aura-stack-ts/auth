@@ -1,5 +1,5 @@
 {
-  "title": "Core Packages",
+  "title": "API Reference",
   "pages": ["core", "jose"],
   "defaultOpen": false
 }

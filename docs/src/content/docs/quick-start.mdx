@@ -1,0 +1,127 @@
+---
+title: Quick Start
+description: Getting started to Aura Auth authentication library to Typescript application which supports backend APIs
+---
+
+## What you'll learn
+
+This quick start guide covers the basics of setting up authentication using Aura Auth.
+
+- [Getting Started](#getting-started)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Aura Auth instance](#auth-instance)
+
+## Quick Start
+
+This guide walks you through installing Aura Auth, configuring your environment, and creating your first authentication setup using OAuth providers such as GitHub or Google.
+
+<Steps>
+
+<Step>
+
+### Installation
+
+Install the package. Using **pnpm** is recommended for monorepos due to improved speed and disk efficiency, but `npm` and `yarn` work as well.
+
+```npm
+npm install @aura-stack/auth
+```
+
+<Callout type="info">If you're working inside a monorepo, prefer `pnpm` for optimal performance.</Callout>
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Store secrets and provider credentials in environment variables.
+Aura Auth follows this naming convention:
+
+- `AURA_AUTH_{PROVIDER}_CLIENT_ID`
+- `AURA_AUTH_{PROVIDER}_CLIENT_SECRET`
+- `AURA_AUTH_SECRET` (used to sign and encrypt sessions/csrf tokens)
+
+Create a .env file (do not commit it):
+
+```bash title=".env"
+# 32-byte (256-bit) secret used to sign and encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+
+# GitHub OAuth credentials
+AURA_AUTH_GITHUB_CLIENT_ID=your_github_client_id
+AURA_AUTH_GITHUB_CLIENT_SECRET=your_github_client_secret
+```
+
+</Step>
+
+<Callout type="warn">Never commit your `.env` file. Always use a secret manager in production.</Callout>
+
+<Step>
+
+### Create an Auth instance [#auth-instance]
+
+The `createAuth` function is used to create the Aura Auth instance configuration. This defines the [`OAuth Providers`](/docs/oauth) to be consumed, cookie configuration options, and other settings to control the library's behavior and flows.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+const auth = createAuth({
+  oauth: [],
+})
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Once the Aura Instance is configured, HTTP handlers (`GET` and `POST`) are available for integration into routers or frameworks.
+
+The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`, and `/csrfToken`).
+These can be mounted in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+const auth = createAuth({
+  oauth: [],
+})
+
+export const {
+  handlers: { GET, POST },
+} = auth
+```
+
+These handlers internally provide:
+
+The usage of the HTTP handlers depends of the library and frameworks integration, just, Aura Auth provides the endpoint for the `OAuth 2.0` flows which includes:
+
+| Route              | Description                                   |
+| ------------------ | --------------------------------------------- |
+| `/signIn/:oauth`   | Starts the OAuth flow (Authorization Request) |
+| `/callback/:oauth` | Completes the OAuth flow and issues a session |
+| `/session`         | Returns the current session                   |
+| `/signOut`         | invalidates the active session                |
+| `/csrfToken`       | Generates a CSRF token (for forms)            |
+
+</Step>
+
+<Step>
+
+### Set up HTTP Handlers
+
+Now integrate the handlers into your framework or router.
+
+<Callout>
+  Aura Auth exposes *standard OAuth 2.0 flows*, but does not enforce a routing framework. You decide how and where to mount the
+  provided endpoints.
+</Callout>
+
+Examples of usage in different integrations (Express, Hono, Next.js, etc.) are available in the Integrations section.
+
+</Step>
+
+</Steps>

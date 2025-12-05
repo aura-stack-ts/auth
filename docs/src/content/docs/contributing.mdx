@@ -1,60 +1,62 @@
 ---
-title: Contributing
+title: Contributing to Aura Auth
 description: Learn how to contribute to Aura Stack Auth
 ---
 
 Thank you for considering contributing to Aura Stack Auth! It's people like you that make this project such a great tool for the community.
 
-## Code of Conduct
+## What you'll learn
 
-This project and everyone participating in it is governed by a code of conduct. By participating, you are expected to uphold this code. Please be respectful, inclusive, and considerate in all interactions.
-
-### Our Standards
-
-- **Be respectful**: Treat everyone with respect and kindness
-- **Be inclusive**: Welcome and support people of all backgrounds
-- **Be constructive**: Provide constructive feedback and be open to receiving it
-- **Be collaborative**: Work together towards common goals
-- **Be patient**: Remember that everyone has different skill levels and learning curves
+- [Getting started](#getting-started)
+- [Contribute](#contribute)
+- [Development workflow](#development-workflow)
 
 ## Getting Started
 
-### Setting Up Your Development Environment
+The following steps outline how to set up the local environment.
 
 <Steps>
 
 <Step>
 
-### Fork the Repository
+### Fork the repository
 
-Go to the [Aura Stack Auth repository](https://github.com/aura-stack-js/auth) and click the "Fork" button.
+The [Aura Auth repository](https://github.com/aura-stack-js/auth) should be forked by clicking the "Fork" button in the top right corner.
 
 </Step>
 
 <Step>
 
-### Clone Your Fork
+### Clone your fork
+
+Clone your fork locally:
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/auth.git
 cd auth
 ```
 
+If you're new to contributing on GitHub, see [Contributing to a project](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project).
+
 </Step>
 
 <Step>
 
-### Add Upstream Remote
+### Add upstream remote
+
+An upstream remote repository should be configured to keep the fork in sync. See [GitHub docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork).
 
 ```bash
-git remote add upstream https://github.com/aura-stack-js/auth.git
+git remote add upstream https://github.com/aura-stack-ts/auth.git
 ```
 
 </Step>
 
 <Step>
 
-### Install Dependencies
+### Install dependencies
+
+Aura Auth uses [pnpm](https://pnpm.io/) as its package manager.
 
 ```bash
 pnpm install
@@ -62,86 +64,55 @@ pnpm install
 
 </Step>
 
-<Step>
-
-### Build All Packages
-
-```bash
-pnpm build
-```
-
-</Step>
-
-<Step>
-
-### Run Tests
-
-```bash
-pnpm test
-```
-
-</Step>
-
-<Callout type="info">If all tests pass, you're ready to start contributing! 🎉</Callout>
-
 </Steps>
 
-## How Can I Contribute?
+## Contribute
 
-### Reporting Bugs
-
-Before creating bug reports, please check the [issue tracker](https://github.com/aura-stack-js/auth/issues) as you might find that you don't need to create one.
-
-When creating a bug report, include:
-
-- **Clear and descriptive title**
-- **Exact steps to reproduce the problem**
-- **Specific examples** to demonstrate the steps
-- **Behavior you observed** and what you expected
-- **Screenshots or GIFs** if applicable
-- **Environment details**: OS, Node.js version, package version
-
-### Your First Code Contribution
-
-Unsure where to begin? Look for issues labeled:
-
-- `good first issue` - Issues that are good for newcomers
-- `help wanted` - Issues that need assistance
-
-## Pull Request Process
+Once the scope of the contribution is defined, changes can be implemented.
 
 <Steps>
 
 <Step>
 
-### Create a New Branch
+### Create a new branch
+
+Always keep your fork synced with upstream before starting new work:
 
 ```bash
-git checkout -b feature/your-feature-name
+# syncronize the repo
+git switch master && git pull upstream master
+
+# create a new branch to work in.
+git switch -c feature/your-feature-name
 ```
 
-Use a descriptive branch name:
+</Step>
 
-- `feature/` - New features
-- `fix/` - Bug fixes
-- `docs/` - Documentation changes
-- `refactor/` - Code refactoring
+<Step>
+
+### implement changes
+
+Changes are implemented in the development environment.
+
+Packages server:
+
+```bash
+pnpm dev
+```
+
+Documentation server
+
+```bash
+pnpm dev:docs
+```
 
 </Step>
 
 <Step>
 
-### Make Your Changes
+### Write or update tests
 
-Write your code, following the project's code style and conventions.
-
-</Step>
-
-<Step>
-
-### Write or Update Tests
-
-Ensure your changes are covered by tests:
+Tests must be written or updated to ensure changes are covered.
 
 ```bash
 # Run tests
@@ -155,41 +126,45 @@ pnpm test:coverage
 
 <Step>
 
-### Format Your Code
+### Code style
+
+Type checking and formatting must be verified.
 
 ```bash
+pnpm type-check
+```
+
+Format codebase:
+
+```bash
+# format code
 pnpm format
+
+# check formating
+pnpm format:check
 ```
 
 </Step>
 
 <Step>
 
-### Commit Your Changes
+### Commit changes
 
-Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+Changes should be committed following the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
 ```bash
 git commit -m "feat(auth): add support for OAuth 2.0 PKCE flow"
 ```
 
-</Step>
-
-<Step>
-
-### Push to Your Fork
+Push to the fork:
 
 ```bash
 git push origin feature/your-feature-name
 ```
 
-</Step>
+Open a pull request
 
-<Step>
-
-### Open a Pull Request
-
-Go to GitHub and open a Pull Request with:
+Go to GitHub and open a [Pull Request](https://github.com/aura-stack-ts/auth/pulls) with:
 
 - Clear and descriptive title
 - Reference to related issues
@@ -197,12 +172,6 @@ Go to GitHub and open a Pull Request with:
 - Screenshots or GIFs for UI changes (if applicable)
 
 </Step>
-
-<Callout type="warn">
-  **Pull Request Guidelines:** - Use a clear and descriptive title - Reference any related issues in the description - Provide a
-  comprehensive description of the changes - Ensure all tests pass - Keep pull requests focused on a single concern - Update
-  documentation if needed
-</Callout>
 
 </Steps>
 
@@ -237,20 +206,25 @@ pnpm test:watch
 pnpm test:coverage
 ```
 
-### Code Style
+### Best practices
 
-We use **Prettier** for code formatting.
-
-- **Format code**: `pnpm format`
-- **Check formatting**: `pnpm format:check`
-
-#### Guidelines
-
-- Use TypeScript for all new code
-- Write meaningful variable and function names
-- Add TsDoc comments for public APIs
-- Keep functions small and focused
-- Write tests for new features
-- Follow existing code patterns
+- TypeScript should be used for all new code.
+- Variable and function names should be meaningful.
+- TSDoc comments should be added for public APIs.
+- Functions should be kept small and focused.
+- Tests must be written for new features.
+- Existing code patterns should be followed.
 
 Your contributions help make authentication easier and more secure for developers everywhere.
+
+### Need help ?
+
+If you're unsure where to start:
+
+- Browse the [issue tracker](https://github.com/aura-stack-ts/auth/issues)
+- Look for labels:
+  - good first issue
+  - help wanted
+- Open a new issue if you have questions or suggestions.
+
+Thank you again for contributing to Aura Auth.

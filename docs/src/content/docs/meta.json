@@ -1,4 +1,14 @@
 {
   "title": "Documentation",
-  "pages": ["---Introduction---", "index", "quick-start", "packages", "---Contributing---", "contributing"]
+  "pages": [
+    "---Introduction---",
+    "index",
+    "quick-start",
+    "oauth",
+    "concepts",
+    "api-reference",
+    "---Contributing---",
+    "contributing"
+  ],
+  "root": true
 }
