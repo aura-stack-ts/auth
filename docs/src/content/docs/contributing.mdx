@@ -13,7 +13,7 @@ Thank you for considering contributing to Aura Stack Auth! It's people like you 
 
 ## Getting Started
 
-setting up local environment.
+The following steps outline how to set up the local environment.
 
 <Steps>
 
@@ -21,7 +21,7 @@ setting up local environment.
 
 ### Fork the repository
 
-Go to the [Aura Auth repository](https://github.com/aura-stack-js/auth) and click the "Fork" button in top right.
+The [Aura Auth repository](https://github.com/aura-stack-js/auth) should be forked by clicking the "Fork" button in the top right corner.
 
 </Step>
 
@@ -29,12 +29,14 @@ Go to the [Aura Auth repository](https://github.com/aura-stack-js/auth) and clic
 
 ### Clone your fork
 
-Clone and configure fork. [Contributing to a project](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project)
+Clone your fork locally:
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/auth.git
 cd auth
 ```
+
+If you're new to contributing on GitHub, see [Contributing to a project](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project).
 
 </Step>
 
@@ -42,7 +44,7 @@ cd auth
 
 ### Add upstream remote
 
-Configure a remote repository for a fork [GitHub docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork).
+An upstream remote repository should be configured to keep the fork in sync. See [GitHub docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork).
 
 ```bash
 git remote add upstream https://github.com/aura-stack-ts/auth.git
@@ -54,7 +56,7 @@ git remote add upstream https://github.com/aura-stack-ts/auth.git
 
 ### Install dependencies
 
-Use [pnpm](https://pnpm.io/) package manager to install the dependencies.
+Aura Auth uses [pnpm](https://pnpm.io/) as its package manager.
 
 ```bash
 pnpm install
@@ -66,7 +68,7 @@ pnpm install
 
 ## Contribute
 
-Once you know what you want ton contribute, it's time to make changes.
+Once the scope of the contribution is defined, changes can be implemented.
 
 <Steps>
 
@@ -74,8 +76,10 @@ Once you know what you want ton contribute, it's time to make changes.
 
 ### Create a new branch
 
+Always keep your fork synced with upstream before starting new work:
+
 ```bash
-# syncronize your repo
+# syncronize the repo
 git switch master && git pull upstream master
 
 # create a new branch to work in.
@@ -86,9 +90,9 @@ git switch -c feature/your-feature-name
 
 <Step>
 
-### Make your changes
+### implement changes
 
-Make your changes in the development environment
+Changes are implemented in the development environment.
 
 Packages server:
 
@@ -96,7 +100,7 @@ Packages server:
 pnpm dev
 ```
 
-Doc server
+Documentation server
 
 ```bash
 pnpm dev:docs
@@ -108,7 +112,7 @@ pnpm dev:docs
 
 ### Write or update tests
 
-Ensure your changes are covered by tests:
+Tests must be written or updated to ensure changes are covered.
 
 ```bash
 # Run tests
@@ -124,13 +128,13 @@ pnpm test:coverage
 
 ### Code style
 
-Verify the type chekhing
+Type checking and formatting must be verified.
 
 ```bash
 pnpm type-check
 ```
 
-Format codebase
+Format codebase:
 
 ```bash
 # format code
@@ -144,15 +148,15 @@ pnpm format:check
 
 <Step>
 
-### Commit your changes
+### Commit changes
 
-Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+Changes should be committed following the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
 ```bash
 git commit -m "feat(auth): add support for OAuth 2.0 PKCE flow"
 ```
 
-Push to your fork
+Push to the fork:
 
 ```bash
 git push origin feature/your-feature-name
@@ -204,21 +208,23 @@ pnpm test:coverage
 
 ### Best practices
 
-- Use TypeScript for all new code
-- Write meaningful variable and function names
-- Add TsDoc comments for public APIs
-- Keep functions small and focused
-- Write tests for new features
-- Follow existing code patterns
+- TypeScript should be used for all new code.
+- Variable and function names should be meaningful.
+- TSDoc comments should be added for public APIs.
+- Functions should be kept small and focused.
+- Tests must be written for new features.
+- Existing code patterns should be followed.
 
 Your contributions help make authentication easier and more secure for developers everywhere.
 
 ### Need help ?
 
-Unsure where to begin? Look for issues labeled:
+If you're unsure where to start:
 
-- Open an [issue](https://github.com/aura-stack-ts/auth/issues) with questions and look issues.
-- `good first issue` - Issues that are good for newcomers
-- `help wanted` - Issues that need assistance
+- Browse the [issue tracker](https://github.com/aura-stack-ts/auth/issues)
+- Look for labels:
+  - good first issue
+  - help wanted
+- Open a new issue if you have questions or suggestions.
 
-Thank you for contributing to Aura Auth.
+Thank you again for contributing to Aura Auth.
