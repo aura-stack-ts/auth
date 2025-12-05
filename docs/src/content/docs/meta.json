@@ -4,14 +4,12 @@
     "---Introduction---",
     "index",
     "quick-start",
-    "---Configuration---",
-    "...configuration",
+    "configuration",
     "oauth",
     "concepts",
-    "---Contributing---",
-    "contributing",
     "api-reference",
-    "api"
+    "---Contributing---",
+    "contributing"
   ],
   "root": true
 }

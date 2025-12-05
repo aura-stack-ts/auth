@@ -5,16 +5,16 @@ description: Getting started to Aura Auth authentication library to Typescript a
 
 ## What you'll learn
 
-Through this quick start guide you are going to learn and understand the basics of how to set authentication using Aura Auth
+This quick start guide covers the basics of setting up authentication using Aura Auth.
 
 - [Getting Started](#getting-started)
   - [Installation](#installation)
   - [Environment setup](#environment-setup)
   - [Aura Auth instance](#auth-instance)
 
-## Getting Started
+## Quick Start
 
-This guide walks you through installation, set up environment variables and create a basic authentication instance using Aura Auth for typescript projects and connection to the famous OAuth third party providers (`GitHub`, `Google`, etc).
+This guide walks you through installing Aura Auth, configuring your environment, and creating your first authentication setup using OAuth providers such as GitHub or Google.
 
 <Steps>
 
@@ -22,13 +22,13 @@ This guide walks you through installation, set up environment variables and crea
 
 ### Installation
 
-Install the package. It's recommended use `pnpm` in monorepos for optimal performance, but `npm` and `yarn` are also supported.
+Install the package. Using **pnpm** is recommended for monorepos due to improved speed and disk efficiency, but `npm` and `yarn` work as well.
 
 ```npm
 npm install @aura-stack/auth
 ```
 
-<Callout type="info">Using `pnpm` in a monorepo improves install performance and disk usage.</Callout>
+<Callout type="info">If you're working inside a monorepo, prefer `pnpm` for optimal performance.</Callout>
 
 </Step>
 
@@ -36,8 +36,8 @@ npm install @aura-stack/auth
 
 ### Environment setup
 
-Store all secrets and provider credentials as environment variables.
-By convention, Aura Auth uses the following naming pattern:
+Store secrets and provider credentials in environment variables.
+Aura Auth follows this naming convention:
 
 - `AURA_AUTH_{PROVIDER}_CLIENT_ID`
 - `AURA_AUTH_{PROVIDER}_CLIENT_SECRET`
@@ -62,7 +62,7 @@ AURA_AUTH_GITHUB_CLIENT_SECRET=your_github_client_secret
 
 ### Create an Auth instance [#auth-instance]
 
-Use `createAuth` function to create the Aura Auth instance configuration which defines the [`OAuth Providers`](/docs/oauth) to be consumed, the cookie configurtion options and more configuration options to control the behavior and flows of the library.
+The `createAuth` function is used to create the Aura Auth instance configuration. This defines the [`OAuth Providers`](/docs/oauth) to be consumed, cookie configuration options, and other settings to control the library's behavior and flows.
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -78,10 +78,10 @@ const auth = createAuth({
 
 ### Get HTTP Handlers
 
-Once the Aura Instance was configured, it's ready to obtain HTTP handlers (`GET` and `POST`) that can be integrated into routers or frameworks.
+Once the Aura Instance is configured, HTTP handlers (`GET` and `POST`) are available for integration into routers or frameworks.
 
-The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut` and `/csrfToken`).
-You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`, and `/csrfToken`).
+These can be mounted in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -95,24 +95,32 @@ export const {
 } = auth
 ```
 
+These handlers internally provide:
+
+The usage of the HTTP handlers depends of the library and frameworks integration, just, Aura Auth provides the endpoint for the `OAuth 2.0` flows which includes:
+
+| Route              | Description                                   |
+| ------------------ | --------------------------------------------- |
+| `/signIn/:oauth`   | Starts the OAuth flow (Authorization Request) |
+| `/callback/:oauth` | Completes the OAuth flow and issues a session |
+| `/session`         | Returns the current session                   |
+| `/signOut`         | invalidates the active session                |
+| `/csrfToken`       | Generates a CSRF token (for forms)            |
+
 </Step>
 
 <Step>
 
 ### Set up HTTP Handlers
 
-Consume the HTTP handlers defined previously to access to Aura Auth authentication flow to `OAuth 2.0`.
+Now integrate the handlers into your framework or router.
 
 <Callout>
-
-The usage of the HTTP handlers depends of the library and frameworks integration, just, Aura Auth provides the endpoint for the `OAuth 2.0` flows which includes:
-
-- `/signIn/:oauth`: Authentication to a `oauth` provider an known as `Authorization flow` in `OAuth 2.0`
-- `/callback/:oauth`: Get the access token an as well-known as `Access Token flow` in `OAuth 2.0`
-- `/session`: Get session of the active session
-- `/signOut`: Signout the active session
-
+  Aura Auth exposes *standard OAuth 2.0 flows*, but does not enforce a routing framework. You decide how and where to mount the
+  provided endpoints.
 </Callout>
+
+Examples of usage in different integrations (Express, Hono, Next.js, etc.) are available in the Integrations section.
 
 </Step>
 
