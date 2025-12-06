@@ -50,8 +50,8 @@ export const verifyCSRF = async (cookie: string, header: string): Promise<boolea
     try {
         const { token: cookieToken } = await verifyJWS(cookie)
         const { token: headerToken } = await verifyJWS(header)
-        const cookieBuffer = Buffer.from(cookieToken as string)
-        const headerBuffer = Buffer.from(headerToken as string)
+        const cookieBuffer = Buffer.from(cookieToken)
+        const headerBuffer = Buffer.from(headerToken)
         if (!equals(headerBuffer.length, cookieBuffer.length)) {
             throw new InvalidCsrfTokenError()
         }

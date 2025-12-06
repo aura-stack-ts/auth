@@ -1,8 +1,15 @@
 import { parse, serialize, type SerializeOptions } from "cookie"
-import { AuthError } from "./error.js"
-import { isRequest } from "./assert.js"
-import { encodeJWT, type JWTPayload } from "./jose.js"
-import type { CookieName, CookieOptions, CookieOptionsInternal, LiteralUnion, StandardCookie } from "@/@types/index.js"
+import { AuthError } from "@/error.js"
+import { isRequest } from "@/assert.js"
+import type { JWTPayload } from "@/jose.js"
+import type {
+    AuthConfigInternal,
+    CookieName,
+    CookieOptions,
+    CookieOptionsInternal,
+    LiteralUnion,
+    StandardCookie,
+} from "@/@types/index.js"
 
 export { parse } from "cookie"
 
@@ -131,9 +138,13 @@ export const getCookie = (
  * @param session - The JWT payload to be encoded in the session cookie
  * @returns The serialized session cookie string
  */
-export const createSessionCookie = async (session: JWTPayload, cookieOptions: CookieOptionsInternal) => {
+export const createSessionCookie = async (
+    session: JWTPayload,
+    cookieOptions: CookieOptionsInternal,
+    jose: AuthConfigInternal["jose"]
+) => {
     try {
-        const encoded = await encodeJWT(session)
+        const encoded = await jose.encodeJWT(session)
         return setCookie("sessionToken", encoded, cookieOptions)
     } catch (error) {
         // @ts-ignore

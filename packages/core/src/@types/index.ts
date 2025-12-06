@@ -3,6 +3,7 @@ import type { OAuthIntegrations } from "@/oauth/index.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import { SESSION_VERSION } from "@/actions/session/session.js"
 import { SerializeOptions } from "cookie"
+import { createJoseInstance } from "@/jose.js"
 
 /**
  * Standardized user profile returned by OAuth integrations after fetching user information
@@ -124,11 +125,19 @@ export interface AuthConfig {
      * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
      */
     cookies?: CookieOptions
+    /**
+     * Secret used to sign and verify JWT tokens for session and csrf protection.
+     * If not provided, it will load from the environment variable `AURA_AUTH_SECRET`, but if it
+     * doesn't exist, it will throw an error during the initialization of the Auth module.
+     */
+    secret?: string
 }
 
 export interface AuthConfigInternal {
     oauth: Record<LiteralUnion<OAuthIntegrations>, OAuthSecureConfig>
     cookies: CookieOptions
+    secret: string
+    jose: Awaited<ReturnType<typeof createJoseInstance>>
 }
 
 /**

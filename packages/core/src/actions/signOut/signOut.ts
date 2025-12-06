@@ -1,14 +1,13 @@
 import z from "zod"
 import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
-import { decodeJWT } from "@/jose.js"
 import { verifyCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
 import { AuraResponse } from "@/response.js"
-import { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
-import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
-import { createRedirectTo } from "../signIn/authorization.js"
-import { InvalidCsrfTokenError, InvalidRedirectToError } from "@/error.js"
 import { getNormalizedOriginPath } from "@/utils.js"
+import { createRedirectTo } from "@/actions/signIn/authorization.js"
+import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
+import { InvalidCsrfTokenError, InvalidRedirectToError } from "@/error.js"
+import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 
 const config = createEndpointConfig({
     schemas: {
@@ -22,7 +21,7 @@ const config = createEndpointConfig({
 /**
  * @see https://datatracker.ietf.org/doc/html/rfc7009
  */
-export const signOutAction = ({ cookies }: AuthConfigInternal) => {
+export const signOutAction = ({ cookies, jose }: AuthConfigInternal) => {
     return createEndpoint(
         "POST",
         "/signOut",
@@ -39,7 +38,7 @@ export const signOutAction = ({ cookies }: AuthConfigInternal) => {
                     throw new Error("Missing CSRF token or session token")
                 }
                 await verifyCSRF(csrfToken, header)
-                await decodeJWT(session)
+                await jose.decodeJWT(session)
 
                 const normalizedOriginPath = getNormalizedOriginPath(request.url)
                 const redirectTo = createRedirectTo(
