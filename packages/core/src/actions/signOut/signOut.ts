@@ -7,12 +7,14 @@ import { AuraResponse } from "@/response.js"
 import { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
 import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
 import { createRedirectTo } from "../signIn/authorization.js"
-import { InvalidCsrfTokenError } from "@/error.js"
+import { InvalidCsrfTokenError, InvalidRedirectToError } from "@/error.js"
+import { getNormalizedOriginPath } from "@/utils.js"
 
 const config = createEndpointConfig({
     schemas: {
         searchParams: z.object({
             token_type_hint: z.literal("session_token"),
+            redirectTo: z.string().optional(),
         }),
     },
 })
@@ -38,14 +40,13 @@ export const signOutAction = ({ cookies }: AuthConfigInternal) => {
                 }
                 await verifyCSRF(csrfToken, header)
                 await decodeJWT(session)
-                const url = new URL(request.url)
-                /**
-                 * @todo: Allows user to redirect to a custom URL after sign out
-                 */
+
+                const normalizedOriginPath = getNormalizedOriginPath(request.url)
                 const redirectTo = createRedirectTo(
-                    new Request(`${url.origin}${url.pathname}`, {
+                    new Request(normalizedOriginPath, {
                         headers: ctx.headers,
-                    })
+                    }),
+                    ctx.searchParams.redirectTo
                 )
                 const headers = new Headers(cacheControl)
                 headers.append("Set-Cookie", expireCookie("sessionToken", cookiesOptions))
@@ -63,6 +64,16 @@ export const signOutAction = ({ cookies }: AuthConfigInternal) => {
                             error_description: "The provided CSRF token is invalid or has expired",
                         },
                         { status: statusCode.UNAUTHORIZED }
+                    )
+                }
+                if (error instanceof InvalidRedirectToError) {
+                    const { type, message } = error
+                    return AuraResponse.json<OAuthErrorResponse<"signOut">>(
+                        {
+                            error: type,
+                            error_description: message,
+                        },
+                        { status: statusCode.BAD_REQUEST }
                     )
                 }
                 return AuraResponse.json<OAuthErrorResponse<"signOut">>(

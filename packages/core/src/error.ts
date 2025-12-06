@@ -20,6 +20,13 @@ export class InvalidCsrfTokenError extends AuthError {
     }
 }
 
+export class InvalidRedirectToError extends AuthError {
+    constructor(message: string = "The redirectTo parameter does not match the hosted origin.") {
+        super("invalid_redirect_to", message)
+        this.name = "InvalidRedirectToError"
+    }
+}
+
 /**
  * Verifies if the provided error is an instance of AuthError.
  *

@@ -118,3 +118,22 @@ export const onErrorHandler: RouterConfig["onError"] = (error) => {
     }
     return Response.json({ error: "server_error", error_description: "An unexpected error occurred" }, { status: 500 })
 }
+
+/**
+ * Extracts and normalizes the origin and pathname from a URL string.
+ * Removes query parameters and hash fragments for a clean path.
+ * Falls back to the original string if URL parsing fails.
+ *
+ * @param path - The URL or path string to process
+ * @returns The normalized URL with origin and pathname, or the original path
+ */
+export const getNormalizedOriginPath = (path: string): string => {
+    try {
+        const url = new URL(path)
+        url.hash = ""
+        url.search = ""
+        return `${url.origin}${url.pathname}`
+    } catch {
+        return sanitizeURL(path)
+    }
+}
