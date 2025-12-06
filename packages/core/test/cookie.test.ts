@@ -8,25 +8,25 @@ describe("setCookie", () => {
     test("set state cookie with default options", () => {
         const cookie = setCookie("state", "xyz123")
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("aura-stack.state=xyz123; Max-Age=1296000; Path=/; HttpOnly; SameSite=Lax")
+        expect(cookie).toEqual("aura-auth.state=xyz123; Max-Age=1296000; Path=/; HttpOnly; SameSite=Lax")
     })
 
     test("set csrfToken cookie with disabled httpOnly flag on cookie", () => {
         const cookie = setCookie("csrfToken", "xyz123", { httpOnly: false })
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("aura-stack.csrfToken=xyz123; Max-Age=1296000; Path=/; SameSite=Lax")
+        expect(cookie).toEqual("aura-auth.csrfToken=xyz123; Max-Age=1296000; Path=/; SameSite=Lax")
     })
 
     test("set pkce cookie with secure flag on cookie", () => {
         const cookie = setCookie("pkce", "xyz123", { secure: true })
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("__Secure-aura-stack.pkce=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
+        expect(cookie).toEqual("__Secure-aura-auth.pkce=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 
     test("set custom cookie with default options", () => {
         const cookie = setCookie("customCookie", "customValue")
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("aura-stack.customCookie=customValue; Max-Age=1296000; Path=/; HttpOnly; SameSite=Lax")
+        expect(cookie).toEqual("aura-auth.customCookie=customValue; Max-Age=1296000; Path=/; HttpOnly; SameSite=Lax")
     })
 
     test("set session cookie and retrieve it from a client-sent Cookie header", () => {
@@ -61,14 +61,14 @@ describe("setCookie", () => {
         const cookie = setCookie("csrfToken", "secureValue", { secure: true })
         expect(cookie).toBeDefined()
         expect(cookie).toEqual(
-            "__Secure-aura-stack.csrfToken=secureValue; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax"
+            "__Secure-aura-auth.csrfToken=secureValue; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax"
         )
     })
 
     test("host cookie", () => {
         const cookie = setCookie("csrfToken", "hostValue", { prefix: "__Host-", secure: true })
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("__Host-aura-stack.csrfToken=hostValue; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
+        expect(cookie).toEqual("__Host-aura-auth.csrfToken=hostValue; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 })
 
@@ -387,6 +387,42 @@ describe("secureCookieOptions", () => {
                 sameSite: "lax",
                 name: COOKIE_NAME,
                 prefix: "",
+            },
+        },
+        {
+            description: "custom cookie name with secure flag in a secure connection",
+            request: https,
+            options: {
+                flag: "secure",
+                name: "aura-stack-auth-cookie",
+            },
+            expected: {
+                secure: true,
+                httpOnly: true,
+                maxAge: 1296000,
+                path: "/",
+                sameSite: "lax",
+                name: "aura-stack-auth-cookie",
+                prefix: "__Secure-",
+            },
+        },
+        {
+            description: "set sameSite to strict with host flag in a secure connection",
+            request: https,
+            options: {
+                flag: "host",
+                options: {
+                    sameSite: "strict",
+                },
+            },
+            expected: {
+                secure: true,
+                httpOnly: true,
+                maxAge: 1296000,
+                path: "/",
+                sameSite: "strict",
+                name: COOKIE_NAME,
+                prefix: "__Host-",
             },
         },
     ]

@@ -8,7 +8,7 @@ describe("csrfTokenAction", () => {
         const token = await response.json()
 
         expect(response.status).toBe(200)
-        expect(response.headers.get("Set-Cookie")).toMatch(/__Host-aura-stack.csrfToken=/)
+        expect(response.headers.get("Set-Cookie")).toMatch(/__Host-aura-auth.csrfToken=/)
         expect(token).toHaveProperty("csrfToken")
     })
 
@@ -24,7 +24,7 @@ describe("csrfTokenAction", () => {
                 },
             })
         )
-        expect(refetch.headers.get("Set-Cookie")).toMatch(/__Host-aura-stack.csrfToken=/)
+        expect(refetch.headers.get("Set-Cookie")).toMatch(/__Host-aura-auth.csrfToken=/)
         const refetchToken = await refetch.json()
         expect(refetchToken.csrfToken).toBe(token.csrfToken)
     })
@@ -42,7 +42,7 @@ describe("csrfTokenAction", () => {
         const token = await response.json()
         expect(token).toHaveProperty("csrfToken")
         expect(token.csrfToken).not.toBe(invalidCookie)
-        expect(response.headers.get("Set-Cookie")).toMatch(/__Host-aura-stack.csrfToken=/)
+        expect(response.headers.get("Set-Cookie")).toMatch(/__Host-aura-auth.csrfToken=/)
     })
 
     test("generate a CSRF token in a http connection", async () => {
@@ -50,6 +50,6 @@ describe("csrfTokenAction", () => {
         const token = await response.json()
 
         expect(token).toHaveProperty("csrfToken")
-        expect(response.headers.get("Set-Cookie")).toMatch(/aura-stack.csrfToken=/)
+        expect(response.headers.get("Set-Cookie")).toMatch(/aura-auth.csrfToken=/)
     })
 })
