@@ -46,34 +46,52 @@ export const createRedirectURI = (requestURL: string, oauth: string) => {
 }
 
 /**
- * Verifies if the request's origin matches the expected origin. It checks the 'Referer' header of the request
- * with the origin where is hosted the authentication flow. If they do not match, it throws an AuthError to avoid
+ * Verifies if the request's origin matches the expected origin. It accepts the redirectTo search
+ * parameter for redirection. It checks the 'Referer' header of the request with the origin where
+ * the authentication flow is hosted. If they do not match, it throws an AuthError to avoid
  * potential `Open URL Redirection` attacks.
  *
+ * @todo: Should the function throw an error or not ?
+ *
  * @param request The incoming request object
- * @param hosted The expected origin URL
  * @returns The pathname of the referer URL if origins match
  */
-export const createRedirectTo = (request: Request) => {
+export const createRedirectTo = (request: Request, redirectTo?: string) => {
     try {
+        const hostedURL = new URL(request.url)
         const origin = request.headers.get("Origin")
         const referer = request.headers.get("Referer")
-        if (!referer) return "/"
-        if (!isValidURL(referer) || !isValidURL(request.url)) {
-            throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin (potential CSRF).")
+        if (redirectTo) {
+            if (redirectTo.startsWith("/")) {
+                return sanitizeURL(redirectTo)
+            }
+            const redirectToURL = new URL(sanitizeURL(redirectTo))
+            if (!isValidURL(redirectTo) || !equals(redirectToURL.origin, hostedURL.origin)) {
+                throw new AuthError(
+                    ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST,
+                    "The redirectTo parameter does not match the hosted origin."
+                )
+            }
+            return sanitizeURL(redirectToURL.pathname)
         }
-        const hostedURL = new URL(request.url)
-        if (origin && (!isValidURL(origin) || !equals(new URL(origin).origin, hostedURL.origin))) {
-            throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin (potential CSRF).")
+        if (referer) {
+            const refererURL = new URL(sanitizeURL(referer))
+            if (!isValidURL(referer) || !equals(refererURL.origin, hostedURL.origin)) {
+                throw new AuthError(
+                    ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST,
+                    "The referer of the request does not match the hosted origin."
+                )
+            }
+            return sanitizeURL(refererURL.pathname)
         }
-        const refererURL = new URL(sanitizeURL(referer))
-        if (!equals(hostedURL.origin, refererURL.origin)) {
-            throw new AuthError(
-                ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST,
-                "The origin of the request does not match the hosted origin."
-            )
+        if (origin) {
+            const originURL = new URL(sanitizeURL(origin))
+            if (!isValidURL(origin) || !equals(originURL.origin, hostedURL.origin)) {
+                throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin (potential CSRF).")
+            }
+            return sanitizeURL(originURL.pathname)
         }
-        return sanitizeURL(refererURL.pathname)
+        return "/"
     } catch (error) {
         if (isAuthError(error)) {
             throw error

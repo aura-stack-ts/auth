@@ -12,6 +12,7 @@ const signInConfig = (oauth: AuthConfigInternal["oauth"]) => {
         schemas: {
             params: z.object({
                 oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[]),
+                redirectTo: z.string().optional(),
             }),
         },
     })
@@ -29,7 +30,11 @@ export const signInAction = ({ oauth: oauthIntegrations, cookies }: AuthConfigIn
                 const redirectURI = createRedirectURI(request.url, oauth)
                 const stateCookie = setCookie("state", state, oauthCookie(cookieOptions))
                 const redirectURICookie = setCookie("redirect_uri", redirectURI, oauthCookie(cookieOptions))
-                const redirectToCookie = setCookie("redirect_to", createRedirectTo(request), oauthCookie(cookieOptions))
+                const redirectToCookie = setCookie(
+                    "redirect_to",
+                    createRedirectTo(request, ctx.params.redirectTo),
+                    oauthCookie(cookieOptions)
+                )
 
                 const { codeVerifier, codeChallenge, method } = await createPKCE()
                 const codeVerifierCookie = setCookie("code_verifier", codeVerifier, oauthCookie(cookieOptions))
