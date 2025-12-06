@@ -374,10 +374,9 @@ Create a Key derivation which implements HKDF
 #### Signature
 
 ```ts lineNumbers
-import type { BinaryLike, KeyObject } from "node:crypto"
-
+import type { SecretInput } from "@aura-stack/jose"
 function deriveKey(
-  secret: BinaryLike | KeyObject | string,
+  secret: SecretInput,
   info: string,
   len: number
 ): {
@@ -404,10 +403,10 @@ Creates a key derivation function that includes verification for the key length.
 #### Signature
 
 ```ts lineNumbers
-import type { BinaryLike, KeyObject } from "node:crypto"
+import type { SecretInput } from "@aura-stack/jose"
 
 function createDeriveKey(
-  secret: BinaryLike | KeyObject | string,
+  secret: SecretInput,
   info: string,
   len: number
 ): {
@@ -436,12 +435,11 @@ const databaseKey = createDeriveKey(secret, "database key", 64)
 Flexible secret key input type.
 
 ```ts lineNumbers
-type SecretInput = CryptoKey | KeyObject | string | Uint8Array
+type SecretInput = KeyObject | Uint8Array | string
 ```
 
 Accepts:
 
-- `CryptoKey` - Web Crypto API key
 - `KeyObject` - Node.js crypto key
 - `string` - String secret (converted internally)
 - `Uint8Array` - Binary secret

@@ -1,11 +1,11 @@
 import crypto from "node:crypto"
 import { describe, test, expect } from "vitest"
 import type { JWTPayload } from "jose"
-import { createJWS, signJWS, verifyJWS } from "@/sign.js"
-import { createJWE, encryptJWE, decryptJWE } from "@/encrypt.js"
 import { createJWT } from "@/index.js"
-import { deriveKey, createDeriveKey } from "@/deriveKey.js"
 import { createSecret } from "@/secret.js"
+import { createJWS, signJWS, verifyJWS } from "@/sign.js"
+import { deriveKey, createDeriveKey } from "@/deriveKey.js"
+import { createJWE, encryptJWE, decryptJWE } from "@/encrypt.js"
 
 const payload: JWTPayload = {
     sub: "user-123",

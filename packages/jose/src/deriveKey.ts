@@ -1,5 +1,6 @@
-import { hkdfSync, randomBytes, type BinaryLike, type KeyObject } from "node:crypto"
+import { hkdfSync, randomBytes } from "node:crypto"
 import { createSecret } from "@/secret.js"
+import type { SecretInput } from "@/index.js"
 
 /**
  * Generate a derived key using HKDF (HMAC-based Extract-and-Expand Key Derivation Function)
@@ -9,7 +10,7 @@ import { createSecret } from "@/secret.js"
  * @param length Size of the derived key in bytes (default is 32 bytes)
  * @returns Derived key as Uint8Array and base64 encoded string
  */
-export const deriveKey = (secret: BinaryLike | KeyObject | string, info: string, length: number = 32) => {
+export const deriveKey = (secret: SecretInput, info: string, length: number = 32) => {
     try {
         const salt = randomBytes(length)
         const key = hkdfSync("SHA256", secret, salt, info, length)
@@ -30,7 +31,7 @@ export const deriveKey = (secret: BinaryLike | KeyObject | string, info: string,
  * @param secret - The secret as a string or Uint8Array
  * @returns The secret in Uint8Array format
  */
-export const createDeriveKey = (secret: BinaryLike | KeyObject | string, info?: string, length: number = 32) => {
-    const secretKey = createSecret(secret as Uint8Array)
+export const createDeriveKey = (secret: SecretInput, info?: string, length: number = 32) => {
+    const secretKey = createSecret(secret)
     return deriveKey(secretKey, info ?? "Aura Jose secret derivation", length)
 }
