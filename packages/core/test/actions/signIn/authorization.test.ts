@@ -230,26 +230,29 @@ describe("createRedirectTo", () => {
             },
             {
                 description: "with redirectTo parameter provided",
-                request: new Request(`${signInURL}?redirectTo=/auth/signIn`),
+                request: new Request(signInURL),
+                redirectTo: "/auth/signIn",
                 expected: "/auth/signIn",
             },
             {
                 description: "with redirectTo parameter matching hosted origin",
-                request: new Request(`${signInURL}?redirectTo=https://example.com/auth/signIn`),
+                request: new Request(signInURL),
+                redirectTo: "https://example.com/auth/signIn",
                 expected: "/auth/signIn",
             },
             {
                 description: "with redirectTo parameter overriding referer header",
-                request: new Request(`${signInURL}?redirectTo=/auth/signIn`, {
+                request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/dashboard" },
                 }),
+                redirectTo: "/auth/signIn",
                 expected: "/auth/signIn",
             },
         ]
 
-        for (const { description, request, expected } of testCases) {
+        for (const { description, request, expected, redirectTo: redirectToParam } of testCases) {
             test(description, () => {
-                const redirectTo = createRedirectTo(request)
+                const redirectTo = createRedirectTo(request, redirectToParam)
                 expect(redirectTo).toBe(expected)
             })
         }
@@ -421,24 +424,27 @@ describe("createRedirectTo", () => {
             },
             {
                 description: "with redirectTo parameter containing full URL with query",
-                request: new Request(`${signInURL}?redirectTo=https://example.com/auth/signIn?next=123`),
+                request: new Request(signInURL),
+                redirectTo: "https://example.com/auth/signIn?next=123",
                 expected: /The redirectTo parameter does not match the hosted origin./,
             },
             {
                 description: "with redirectTo parameter containing full URL with different origin",
-                request: new Request(`${signInURL}?redirectTo=https://malicious.com/auth/signIn`),
+                request: new Request(signInURL),
+                redirectTo: "https://malicious.com/auth/signIn",
                 expected: /The redirectTo parameter does not match the hosted origin./,
             },
             {
                 description: "with redirectTo parameter containing invalid URL",
-                request: new Request(`${signInURL}?redirectTo=ht!tp://invalid-url`),
+                request: new Request(signInURL),
+                redirectTo: "ht!tp://invalid-url",
                 expected: /Invalid origin \(potential CSRF\)./,
             },
         ]
 
-        for (const { description, request, expected } of testCases) {
+        for (const { description, request, expected, redirectTo } of testCases) {
             test(description, () => {
-                expect(() => createRedirectTo(request)).toThrow(expected)
+                expect(() => createRedirectTo(request, redirectTo)).toThrow(expected)
             })
         }
     })

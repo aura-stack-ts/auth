@@ -36,7 +36,8 @@ describe("signIn action", () => {
                 const request = await GET(new Request(url))
                 const headers = new Headers(request.headers)
 
-                const stateCookie = getCookie(request, "state", { secure: url.startsWith("https://") })
+                const isSecure = url.startsWith("https://")
+                const stateCookie = getCookie(request, "state", { secure: isSecure, prefix: isSecure ? "__Secure-" : "" })
                 const location = headers.get("Location") as string
                 const searchParams = new URL(location).searchParams
 

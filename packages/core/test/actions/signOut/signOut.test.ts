@@ -129,4 +129,40 @@ describe("signOut action", async () => {
             error_description: "The provided sessionToken is invalid or has already expired",
         })
     })
+
+    test("valid sessionToken cookie with redirectTo parameter", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token&redirectTo=/custom-logout-page", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}; __Host-aura-auth.csrfToken=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                },
+            })
+        )
+        expect(request.status).toBe(202)
+        expect(await request.json()).toEqual({ message: "Signed out successfully" })
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.sessionToken=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrfToken=;")
+        expect(request.headers.get("Location")).toBe("/custom-logout-page")
+    })
+
+    test("valid sessionToken cookie with invalid redirectTo parameter", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token&redirectTo=https://malicious.com", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}; __Host-aura-auth.csrfToken=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                },
+            })
+        )
+        expect(request.status).toBe(400)
+        expect(await request.json()).toEqual({
+            error: "invalid_redirect_to",
+            error_description: "The redirectTo parameter does not match the hosted origin.",
+        })
+    })
 })

@@ -1,7 +1,7 @@
 import { isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
-import { equals, sanitizeURL, toCastCase } from "@/utils.js"
-import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
+import { equals, getNormalizedOriginPath, sanitizeURL, toCastCase } from "@/utils.js"
+import { AuthError, ERROR_RESPONSE, InvalidRedirectToError, isAuthError } from "@/error.js"
 import type { OAuthSecureConfig } from "@/@types/index.js"
 
 /**
@@ -51,26 +51,22 @@ export const createRedirectURI = (requestURL: string, oauth: string) => {
  * the authentication flow is hosted. If they do not match, it throws an AuthError to avoid
  * potential `Open URL Redirection` attacks.
  *
- * @todo: Should the function throw an error or not ?
- *
  * @param request The incoming request object
+ * @param redirectTo Optional redirectTo parameter to override the referer
  * @returns The pathname of the referer URL if origins match
  */
 export const createRedirectTo = (request: Request, redirectTo?: string) => {
     try {
-        const hostedURL = new URL(request.url)
+        const hostedURL = new URL(getNormalizedOriginPath(request.url))
         const origin = request.headers.get("Origin")
         const referer = request.headers.get("Referer")
         if (redirectTo) {
             if (redirectTo.startsWith("/")) {
                 return sanitizeURL(redirectTo)
             }
-            const redirectToURL = new URL(sanitizeURL(redirectTo))
+            const redirectToURL = new URL(sanitizeURL(getNormalizedOriginPath(redirectTo)))
             if (!isValidURL(redirectTo) || !equals(redirectToURL.origin, hostedURL.origin)) {
-                throw new AuthError(
-                    ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST,
-                    "The redirectTo parameter does not match the hosted origin."
-                )
+                throw new InvalidRedirectToError()
             }
             return sanitizeURL(redirectToURL.pathname)
         }
@@ -85,7 +81,7 @@ export const createRedirectTo = (request: Request, redirectTo?: string) => {
             return sanitizeURL(refererURL.pathname)
         }
         if (origin) {
-            const originURL = new URL(sanitizeURL(origin))
+            const originURL = new URL(sanitizeURL(getNormalizedOriginPath(origin)))
             if (!isValidURL(origin) || !equals(originURL.origin, hostedURL.origin)) {
                 throw new AuthError(ERROR_RESPONSE.AUTHORIZATION.INVALID_REQUEST, "Invalid origin (potential CSRF).")
             }

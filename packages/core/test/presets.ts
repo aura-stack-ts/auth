@@ -30,7 +30,5 @@ export const hostCookieOptions: CookieOptionsInternal = { secure: true, prefix: 
 
 export const { GET, POST } = createAuth({
     oauth: [oauthCustomService],
-    cookies: {
-        flag: "host",
-    },
+    cookies: {},
 }).handlers

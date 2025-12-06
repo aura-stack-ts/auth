@@ -9,7 +9,6 @@ export const isRequest = (value: unknown): value is Request => {
 export const isValidURL = (value: string): boolean => {
     if (value.includes("\r\n") || value.includes("\n") || value.includes("\r")) return false
     const regex =
-        ///^https?:\/\/(?:[a-zA-Z0-9._-]+|localhost|\[[0-9a-fA-F:]+\])(?::\d{1,5})?(?:\/[a-zA-Z0-9._~!$&'()*+,;=:@-]*)*\/?$/
-        /^(https?:\/\/)(localhost|\d{1,3}(?:\.\d{1,3}){3}|[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)+)(:\d{1,5})?(\/[a-zA-Z0-9._~!$&'()*+,;=:@/-]*)?$/
+        /^https?:\/\/(?:[a-zA-Z0-9._-]+|localhost|\[[0-9a-fA-F:]+\])(?::\d{1,5})?(?:\/[a-zA-Z0-9._~!$&'()*+,;=:@-]*)*\/?$/
     return regex.test(value)
 }
