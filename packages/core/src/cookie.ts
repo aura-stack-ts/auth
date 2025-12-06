@@ -9,7 +9,7 @@ export { parse } from "cookie"
 /**
  * Prefix for all cookies set by Aura Auth.
  */
-export const COOKIE_NAME = "aura-stack"
+export const COOKIE_NAME = "aura-auth"
 
 /**
  * Default cookie options used by Aura Auth.
@@ -171,11 +171,14 @@ export const secureCookieOptions = (request: Request, cookieOptions: CookieOptio
         const options = cookieOptions.options as StandardCookie["options"]
         if (options?.secure) {
             console.warn(
-                "[WARNING]: TThe 'Secure' attribute will be disabled for this cookie. Serve over HTTPS to enforce Secure cookies."
+                "[WARNING]: The 'Secure' attribute will be disabled for this cookie. Serve over HTTPS to enforce Secure cookies."
             )
         }
         if (options?.sameSite == "none") {
             console.warn("[WARNING]: SameSite=None without a secure connection can be blocked by browsers.")
+        }
+        if (process.env.NODE_ENV === "production") {
+            console.warn("[WARNING]: In production, ensure cookies are served over HTTPS to maintain security.")
         }
         return {
             ...defaultCookieOptions,

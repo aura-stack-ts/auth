@@ -13,7 +13,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: "aura_auth.sessionToken=invalidtoken",
+                    Cookie: "aura-auth.sessionToken=invalidtoken",
                 },
             })
         )
@@ -27,7 +27,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
                 },
             })
         )
@@ -45,7 +45,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
                 },
             })
         )
@@ -62,7 +62,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
                 },
             })
         )
@@ -76,7 +76,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
                 },
             })
         )
@@ -92,11 +92,11 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("http://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-stack.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
                 },
             })
         )
-        expect(request.headers.get("Set-Cookie")).toMatch("aura-stack.sessionToken=;")
+        expect(request.headers.get("Set-Cookie")).toMatch("aura-auth.sessionToken=;")
     })
 
     test("invalid access from https", async () => {
@@ -104,10 +104,10 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `aura-stack.sessionToken=${sessionToken}`,
+                    Cookie: `aura-auth.sessionToken=${sessionToken}`,
                 },
             })
         )
-        expect(request.headers.get("Set-Cookie")).toMatch("aura-stack.sessionToken=;")
+        expect(request.headers.get("Set-Cookie")).toMatch("aura-auth.sessionToken=;")
     })
 })
