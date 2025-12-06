@@ -10,7 +10,7 @@ export * from "@/sign.js"
 export * from "@/encrypt.js"
 export * from "@/deriveKey.js"
 
-export type SecretInput = CryptoKey | KeyObject | string | Uint8Array
+export type SecretInput = KeyObject | string | Uint8Array
 
 /**
  * Encode a JWT signed and encrypted token. The token first signed using JWS
