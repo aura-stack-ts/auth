@@ -28,6 +28,8 @@ export const signOutAction = createEndpoint(
     async (ctx) => {
         const {
             request,
+            headers,
+            searchParams: { redirectTo },
             context: { cookies },
         } = ctx
         try {
@@ -37,7 +39,7 @@ export const signOutAction = createEndpoint(
                 ...cookiesOptions,
                 prefix: cookiesOptions.secure ? "__Host-" : "",
             })
-            const header = ctx.headers.get("X-CSRF-Token")
+            const header = headers.get("X-CSRF-Token")
             if (!header || !session || !csrfToken) {
                 throw new Error("Missing CSRF token or session token")
             }
@@ -45,20 +47,23 @@ export const signOutAction = createEndpoint(
             await decodeJWT(session)
 
             const normalizedOriginPath = getNormalizedOriginPath(request.url)
-            const redirectTo = createRedirectTo(
+            const location = createRedirectTo(
                 new Request(normalizedOriginPath, {
-                    headers: ctx.headers,
+                    headers,
                 }),
-                ctx.searchParams.redirectTo
+                redirectTo
             )
-            const headers = new Headers(cacheControl)
-            headers.append("Set-Cookie", expireCookie("sessionToken", cookiesOptions))
-            headers.append(
+            const responseHeaders = new Headers(cacheControl)
+            responseHeaders.append("Set-Cookie", expireCookie("sessionToken", cookiesOptions))
+            responseHeaders.append(
                 "Set-Cookie",
                 expireCookie("csrfToken", { ...cookiesOptions, prefix: cookiesOptions.secure ? "__Host-" : "" })
             )
-            headers.append("Location", redirectTo)
-            return Response.json({ message: "Signed out successfully" }, { status: statusCode.ACCEPTED, headers })
+            responseHeaders.append("Location", location)
+            return Response.json(
+                { message: "Signed out successfully" },
+                { status: statusCode.ACCEPTED, headers: responseHeaders }
+            )
         } catch (error) {
             if (error instanceof InvalidCsrfTokenError) {
                 return AuraResponse.json<OAuthErrorResponse<"signOut">>(
