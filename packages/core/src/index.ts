@@ -4,17 +4,16 @@ import { onErrorHandler } from "./utils.js"
 import { defaultCookieConfig } from "@/cookie.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import type { AuthConfig, AuthConfigInternal } from "@/@types/index.js"
+import type { AuthConfig } from "@/@types/index.js"
 
-const routerConfig: RouterConfig = {
-    basePath: "/auth",
-    onError: onErrorHandler,
-}
-
-const createInternalConfig = (authConfig?: AuthConfig): AuthConfigInternal => {
+const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     return {
-        oauth: createOAuthIntegrations(authConfig?.oauth),
-        cookies: authConfig?.cookies ?? defaultCookieConfig,
+        basePath: "/auth",
+        onError: onErrorHandler,
+        context: {
+            oauth: createOAuthIntegrations(authConfig?.oauth),
+            cookies: authConfig?.cookies ?? defaultCookieConfig,
+        },
     }
 }
 
@@ -43,8 +42,8 @@ const createInternalConfig = (authConfig?: AuthConfig): AuthConfigInternal => {
 export const createAuth = (authConfig: AuthConfig) => {
     const config = createInternalConfig(authConfig)
     const router = createRouter(
-        [signInAction(config), callbackAction(config), sessionAction(config), signOutAction(config), csrfTokenAction(config)],
-        routerConfig
+        [signInAction(config.context.oauth), callbackAction(config.context.oauth), sessionAction, signOutAction, csrfTokenAction],
+        config
     )
     return {
         handlers: router,
