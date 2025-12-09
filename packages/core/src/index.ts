@@ -9,7 +9,7 @@ import type { AuthConfig } from "@/@types/index.js"
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     return {
-        basePath: "/auth",
+        basePath: authConfig?.basePath ?? "/auth",
         onError: onErrorHandler,
         context: {
             oauth: createOAuthIntegrations(authConfig?.oauth),
