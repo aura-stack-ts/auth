@@ -23,12 +23,16 @@ const callbackConfig = (oauth: AuthConfigInternal["oauth"]) => {
         },
     })
 }
-export const callbackAction = ({ oauth: oauthIntegrations, cookies }: AuthConfigInternal) => {
+export const callbackAction = (oauth: AuthConfigInternal["oauth"]) => {
     return createEndpoint(
         "GET",
         "/callback/:oauth",
-        async (request, ctx) => {
-            const oauth = ctx.params.oauth
+        async (ctx) => {
+            const {
+                request,
+                params: { oauth },
+                context: { oauth: oauthIntegrations, cookies },
+            } = ctx
             try {
                 const isErrorResponse = OAuthAuthorizationErrorResponse.safeParse(ctx.searchParams)
                 if (isErrorResponse.success) {
@@ -101,6 +105,6 @@ export const callbackAction = ({ oauth: oauthIntegrations, cookies }: AuthConfig
                 )
             }
         },
-        callbackConfig(oauthIntegrations)
+        callbackConfig(oauth)
     )
 }
