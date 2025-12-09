@@ -6,14 +6,19 @@ const getSession = async () => {
     const headersList = new Headers(await headers())
     const session = await fetch("http://localhost:3000/auth/session", {
         headers: headersList,
+        cache: "no-store",
     })
     const response = await session.json()
     return response
 }
 
 const getCSRFToken = async () => {
+    const cookieStore = await cookies()
     const csrfResponse = await fetch("http://localhost:3000/auth/csrfToken", {
         method: "GET",
+        headers: {
+            Cookie: cookieStore.toString(),
+        },
     })
     const csrfData = await csrfResponse.json()
     return csrfData.csrfToken
@@ -36,13 +41,13 @@ const signOut = async () => {
     const signOutResponse = await fetch("http://localhost:3000/auth/signOut?token_type_hint=session_token", {
         method: "POST",
         headers: headersList,
-        credentials: "include",
         body: JSON.stringify({}),
+        cache: "no-cache",
     })
     const response = await signOutResponse.json()
     if (signOutResponse.status === 202) {
-        cookieStore.delete("aura-stack.sessionToken")
-        cookieStore.delete("aura-stack.csrfToken")
+        cookieStore.delete("aura-auth.sessionToken")
+        cookieStore.delete("aura-auth.csrfToken")
         redirect("/")
     }
     return response
