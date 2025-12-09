@@ -1,6 +1,7 @@
 import "dotenv/config"
 import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { onErrorHandler } from "./utils.js"
+import { createJoseInstance } from "@/jose.js"
 import { defaultCookieConfig } from "@/cookie.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
@@ -13,6 +14,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
         context: {
             oauth: createOAuthIntegrations(authConfig?.oauth),
             cookies: authConfig?.cookies ?? defaultCookieConfig,
+            jose: createJoseInstance(authConfig?.secret),
         },
     }
 }
@@ -47,5 +49,6 @@ export const createAuth = (authConfig: AuthConfig) => {
     )
     return {
         handlers: router,
+        jose: config.context.jose,
     }
 }

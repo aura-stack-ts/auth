@@ -1,6 +1,5 @@
 import { createEndpoint } from "@aura-stack/router"
 import { equals } from "@/utils.js"
-import { decodeJWT } from "@/jose.js"
 import { AuthError } from "@/error.js"
 import { cacheControl } from "@/headers.js"
 import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
@@ -11,12 +10,12 @@ export const SESSION_VERSION = "v0.1.0"
 export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
     const {
         request,
-        context: { cookies },
+        context: { cookies, jose },
     } = ctx
     const cookieOptions = secureCookieOptions(request, cookies)
     try {
         const session = getCookie(request, "sessionToken", cookieOptions)
-        const decoded = (await decodeJWT(session)) as OAuthUserProfile
+        const decoded = (await jose.decodeJWT(session)) as OAuthUserProfile
         const user: OAuthUserProfileInternal = {
             sub: decoded.sub,
             email: decoded.email,

@@ -6,12 +6,12 @@ import { getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 export const csrfTokenAction = createEndpoint("GET", "/csrfToken", async (ctx) => {
     const {
         request,
-        context: { cookies },
+        context: { cookies, jose },
     } = ctx
     const cookieOptions = secureCookieOptions(request, { ...cookies, flag: "host" })
 
     const existingCSRFToken = getCookie(request, "csrfToken", cookieOptions, true)
-    const csrfToken = await createCSRF(existingCSRFToken)
+    const csrfToken = await createCSRF(jose, existingCSRFToken)
 
     const headers = new Headers(cacheControl)
     headers.set("Set-Cookie", setCookie("csrfToken", csrfToken, cookieOptions))

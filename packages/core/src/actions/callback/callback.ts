@@ -1,13 +1,13 @@
 import z from "zod"
 import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
-import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { cacheControl } from "@/headers.js"
 import { getUserInfo } from "./userinfo.js"
 import { AuraResponse } from "@/response.js"
 import { createAccessToken } from "./access-token.js"
-import { SESSION_VERSION } from "../session/session.js"
+import { SESSION_VERSION } from "@/actions/session/session.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
+import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
 import { createSessionCookie, expireCookie, getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
@@ -43,7 +43,7 @@ export const callbackAction = (oauth: AuthConfigInternal["oauth"]) => {
                 request,
                 params: { oauth },
                 searchParams: { code, state },
-                context: { oauth: oauthIntegrations, cookies },
+                context: { oauth: oauthIntegrations, cookies, jose },
             } = ctx
             try {
                 const oauthConfig = oauthIntegrations[oauth]
@@ -77,10 +77,11 @@ export const callbackAction = (oauth: AuthConfigInternal["oauth"]) => {
                         integrations: [oauth],
                         version: SESSION_VERSION,
                     } as never as JWTPayload,
-                    cookieOptions
+                    cookieOptions,
+                    jose
                 )
 
-                const csrfToken = await createCSRF()
+                const csrfToken = await createCSRF(jose)
                 const csrfCookie = setCookie(
                     "csrfToken",
                     csrfToken,
