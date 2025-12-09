@@ -5,21 +5,17 @@ import { createJoseInstance } from "@/jose.js"
 import { defaultCookieConfig } from "@/cookie.js"
 import { createOAuthIntegrations } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import type { AuthConfig, AuthConfigInternal } from "@/@types/index.js"
+import type { AuthConfig } from "@/@types/index.js"
 
-const routerConfig: RouterConfig = {
-    basePath: "/auth",
-    onError: onErrorHandler,
-}
-
-const createInternalConfig = (authConfig: AuthConfig): AuthConfigInternal => {
-    const jose = createJoseInstance(authConfig.secret)
-
+const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     return {
-        oauth: createOAuthIntegrations(authConfig.oauth),
-        cookies: authConfig.cookies ?? defaultCookieConfig,
-        secret: authConfig.secret ?? process.env.AURA_AUTH_SECRET!,
-        jose,
+        basePath: "/auth",
+        onError: onErrorHandler,
+        context: {
+            oauth: createOAuthIntegrations(authConfig?.oauth),
+            cookies: authConfig?.cookies ?? defaultCookieConfig,
+            jose: createJoseInstance(authConfig?.secret),
+        },
     }
 }
 
@@ -48,10 +44,11 @@ const createInternalConfig = (authConfig: AuthConfig): AuthConfigInternal => {
 export const createAuth = (authConfig: AuthConfig) => {
     const config = createInternalConfig(authConfig)
     const router = createRouter(
-        [signInAction(config), callbackAction(config), sessionAction(config), signOutAction(config), csrfTokenAction(config)],
-        routerConfig
+        [signInAction(config.context.oauth), callbackAction(config.context.oauth), sessionAction, signOutAction, csrfTokenAction],
+        config
     )
     return {
         handlers: router,
+        jose: config.context.jose,
     }
 }

@@ -21,23 +21,32 @@ const callbackConfig = (oauth: AuthConfigInternal["oauth"]) => {
                 oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[]),
             }),
         },
+        middlewares: [
+            (ctx) => {
+                const response = OAuthAuthorizationErrorResponse.safeParse(ctx.searchParams)
+                if (response.success) {
+                    const { error, error_description } = response.data
+                    throw new AuthError(error, error_description ?? "OAuth Authorization Error")
+                }
+                return ctx
+            },
+        ],
     })
 }
-export const callbackAction = ({ oauth: oauthIntegrations, cookies, jose }: AuthConfigInternal) => {
+
+export const callbackAction = (oauth: AuthConfigInternal["oauth"]) => {
     return createEndpoint(
         "GET",
         "/callback/:oauth",
-        async (request, ctx) => {
-            const oauth = ctx.params.oauth
+        async (ctx) => {
+            const {
+                request,
+                params: { oauth },
+                searchParams: { code, state },
+                context: { oauth: oauthIntegrations, cookies, jose },
+            } = ctx
             try {
-                const isErrorResponse = OAuthAuthorizationErrorResponse.safeParse(ctx.searchParams)
-                if (isErrorResponse.success) {
-                    const { error, error_description } = isErrorResponse.data
-                    throw new AuthError(error, error_description ?? "OAuth Authorization Error")
-                }
-
                 const oauthConfig = oauthIntegrations[oauth]
-                const { code, state } = ctx.searchParams
 
                 const cookieOptions = secureCookieOptions(request, cookies)
                 const cookieState = getCookie(request, "state", cookieOptions)
@@ -72,7 +81,7 @@ export const callbackAction = ({ oauth: oauthIntegrations, cookies, jose }: Auth
                     jose
                 )
 
-                const csrfToken = await createCSRF()
+                const csrfToken = await createCSRF(jose)
                 const csrfCookie = setCookie(
                     "csrfToken",
                     csrfToken,
@@ -102,6 +111,6 @@ export const callbackAction = ({ oauth: oauthIntegrations, cookies, jose }: Auth
                 )
             }
         },
-        callbackConfig(oauthIntegrations)
+        callbackConfig(oauth)
     )
 }

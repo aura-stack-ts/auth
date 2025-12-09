@@ -1,8 +1,10 @@
-import { GET, sessionPayload } from "@test/presets.js"
+import { GET, jose, sessionPayload } from "@test/presets.js"
 import { describe, test, expect, vi } from "vitest"
-import { encodeJWT, type JWTPayload } from "@/jose.js"
+import { type JWTPayload } from "@/jose.js"
 
 describe("sessionAction", () => {
+    const { encodeJWT } = jose
+
     test("sessionToken cookie not found", async () => {
         const request = await GET(new Request("https://example.com/auth/session"))
         expect(request.status).toBe(401)
@@ -54,7 +56,7 @@ describe("sessionAction", () => {
     })
 
     test("expired sessionToken cookie", async () => {
-        const decodeJWTMock = vi.spyOn(await import("@/jose.js"), "decodeJWT").mockImplementation(() => {
+        const decodeJWTMock = vi.spyOn(jose, "decodeJWT").mockImplementation(async () => {
             throw new Error("Token expired")
         })
 

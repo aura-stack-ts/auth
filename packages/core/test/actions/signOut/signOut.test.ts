@@ -1,10 +1,10 @@
 import { describe, test, expect, vi } from "vitest"
-import { encodeJWT } from "@/jose.js"
 import { createCSRF } from "@/secure.js"
-import { POST, sessionPayload } from "@test/presets.js"
+import { POST, jose, sessionPayload } from "@test/presets.js"
 
 describe("signOut action", async () => {
-    const csrf = await createCSRF()
+    const csrf = await createCSRF(jose)
+    const { encodeJWT } = jose
 
     test("sessionToken cookie not present", async () => {
         const response = await POST(
@@ -39,7 +39,7 @@ describe("signOut action", async () => {
     })
 
     test("expired sessionToken cookie", async () => {
-        const decodeJWTMock = vi.spyOn(await import("@/jose.js"), "decodeJWT").mockImplementation(() => {
+        const decodeJWTMock = vi.spyOn(await import("@/jose.js"), "createJoseInstance").mockImplementation(() => {
             throw new Error("Token expired")
         })
 

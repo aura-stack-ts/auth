@@ -18,12 +18,16 @@ const signInConfig = (oauth: AuthConfigInternal["oauth"]) => {
     })
 }
 
-export const signInAction = ({ oauth: oauthIntegrations, cookies }: AuthConfigInternal) => {
+export const signInAction = (oauth: AuthConfigInternal["oauth"]) => {
     return createEndpoint(
         "GET",
         "/signIn/:oauth",
-        async (request, ctx) => {
-            const oauth = ctx.params.oauth
+        async (ctx) => {
+            const {
+                request,
+                params: { oauth, redirectTo },
+                context: { oauth: oauthIntegrations, cookies },
+            } = ctx
             try {
                 const cookieOptions = secureCookieOptions(request, cookies)
                 const state = generateSecure()
@@ -32,7 +36,7 @@ export const signInAction = ({ oauth: oauthIntegrations, cookies }: AuthConfigIn
                 const redirectURICookie = setCookie("redirect_uri", redirectURI, oauthCookie(cookieOptions))
                 const redirectToCookie = setCookie(
                     "redirect_to",
-                    createRedirectTo(request, ctx.params.redirectTo),
+                    createRedirectTo(request, redirectTo),
                     oauthCookie(cookieOptions)
                 )
 
@@ -68,6 +72,6 @@ export const signInAction = ({ oauth: oauthIntegrations, cookies }: AuthConfigIn
                 )
             }
         },
-        signInConfig(oauthIntegrations)
+        signInConfig(oauth)
     )
 }
