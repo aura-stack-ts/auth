@@ -1,4 +1,4 @@
-import { OAuthConfig } from "@/@types/index.js"
+import type { OAuthConfig } from "@/@types/index.js"
 
 /**
  * @see [Discord - Nameplate Object](https://discord.com/developers/docs/resources/user#nameplate-nameplate-structure)
@@ -65,11 +65,20 @@ export const discord: OAuthConfig<DiscordProfile> = {
     scope: "identify email",
     responseType: "code",
     profile(profile) {
+        let image = ""
+        if (profile.avatar === null) {
+            const index = profile.discriminator === "0" ? (BigInt(profile.id) >> 22n) % 6n : Number(profile.discriminator) % 5
+            image = `https://cdn.discordapp.com/embed/avatars/${index}.png`
+        } else {
+            const format = profile.avatar.startsWith("a_") ? "gif" : "png"
+            image = `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.${format}`
+        }
         return {
             sub: profile.id,
-            name: profile.username,
+            // https://discord.com/developers/docs/change-log#display-names
+            name: profile.global_name ?? profile.username,
             email: profile.email ?? "",
-            image: profile.avatar ?? "",
+            image,
         }
     },
 }
