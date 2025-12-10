@@ -1,7 +1,7 @@
 import { createAuth } from "@aura-stack/auth"
 
 const auth = createAuth({
-    oauth: ["github", "bitbucket"],
+    oauth: ["github", "bitbucket", "figma"],
 })
 
 const {

@@ -28,13 +28,13 @@ Through this quick start guide you are going to learn and understand the basics 
 
 ### Creating an OAuth app
 
-The first step is create and register an [`GitHub OAuth App`](https://github.com/settings/developers) to grant to have access to the user's accessible resources like `Get Authenticated User` (Used by Aura Auth), `Repositories`, `Organizations`, etc. for more detailed information read [Creating an OAuth app](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app) and [Get authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user).
+The first step is create and register an [`GitHub OAuth App`](https://github.com/settings/developers) to grant to have access to the user's accessible resources like `Get Authenticated User` (Used by Aura Auth), `Repositories`, `Organizations`, etc. For more detailed information read [Creating an OAuth app](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app) and [Get authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user).
 
 Registering an GitHub OAuth app includes:
 
 - `Application name`: The application name showed when the user tries to grant to the app.
-- `Homepage URL`: the home url of the website
-- `Authorization callback URL`: the URL which the Github will redirect, it should end in `/auth/callback/github` for local and production environment, read [Redirect URLs](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#redirect-urls).
+- `Homepage URL`: The home url of the website
+- `Authorization callback URL`: The URL which the Github will redirect, it should end in `/auth/callback/github` for local and production environment, read [Redirect URLs](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#redirect-urls).
   - Local environment: `http://localhost:3000/auth/callback/github`
   - Production environment: production set the URL of the application.
 

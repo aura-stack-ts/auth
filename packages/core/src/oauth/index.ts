@@ -6,13 +6,16 @@
 import type { LiteralUnion, OAuthSecureConfig } from "@/@types/index.js"
 import { github } from "./github.js"
 import { bitbucket } from "./bitbucket.js"
+import { figma } from "./figma.js"
 
 export { github } from "./github.js"
 export { bitbucket } from "./bitbucket.js"
+export { figma } from "./figma.js"
 
 export const integrations = {
     github,
     bitbucket,
+    figma,
 }
 
 const defineOAuthEnvironment = (oauth: string) => {

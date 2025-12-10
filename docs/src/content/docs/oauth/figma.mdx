@@ -1,0 +1,136 @@
+---
+title: Figma Authorization Provider
+description: Configure the Figma OAuth 2.0 provider in Aura Auth for authentication and authorization.
+---
+
+## Figma
+
+Set up `Figma` authorization provider to the authentication instance to Aura Auth.
+
+---
+
+## What you'll learn
+
+Through this quick start guide you are going to learn and understand the basics and how to set up `Figma` provider to Aura Auth.
+
+- [Figma OAuth App](#figma-oauth-app)
+  - [Creating an OAuth App](#creating-an-oauth-app)
+- [Figma Aura Auth](#figma-aura-auth)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Configure the provider](#configure-the-provider)
+  - [Get HTTP handlers](#get-http-handlers)
+- [Resources](#resources)
+
+---
+
+<Steps>
+
+<Step>
+
+## Figma OAuth App
+
+### Creating an OAuth App
+
+The first step is to create and register a [`Figma OAuth App`](https://www.figma.com/developers/apps) to grant access to the user's accessible resources like `Users` (Used by Aura Auth), `Files`, `Comments`, etc. For more detailed information read [Create an OAuth App](https://developers.figma.com/docs/rest-api/authentication/#create-an-oauth-app), [Scopes](https://developers.figma.com/docs/rest-api/scopes/) and [Users Endpoints](https://developers.figma.com/docs/rest-api/users-endpoints/)
+
+Creating a Figma OAuth app includes:
+
+- `Name`: The application name shown when the user tries to grant access to the app.
+- `Owner`: Owner of the OAuth App, in this section a `team` or an `organization` can be selected.
+
+Once the OAuth App is created, the App's credentials can be accessed and updated. The new values needed are:
+
+- `OAuth credentials/Redirect URLs`: The URL to which Figma OAuth will redirect, it should end in `/auth/callback/figma` for local and production environments.
+  - Local environment: `http://localhost:3000/auth/callback/figma`.
+  - Production environment: Set the URL of your production application.
+- `OAuth scopes`: The scopes which the application can access. By default, Aura Auth uses `current_user:read`. Read about [OAuth scopes](https://developers.figma.com/docs/rest-api/scopes/).
+
+</Step>
+
+<Step>
+
+## Figma Aura Auth
+
+### Installation
+
+Install the package using a package manager like `npm`, `pnpm` or `yarn`.
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Now, it's time to create and consume the Figma credentials required and used by Aura Auth, which include the `client Id` and `client Secret` and write them into a `.env` file.
+
+Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+
+```bash title=".env" lineNumbers
+# Figma Credentials
+AURA_AUTH_FIGMA_CLIENT_ID="figma_client_id"
+AURA_AUTH_FIGMA_CLIENT_SECRET="figma_client_secret"
+
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+```
+
+<Callout type="warning">
+  The `AURA_AUTH_SECRET` is recommended to be a random and high entropy key to avoid attackers deciphering the secret used by the
+  Aura Auth application.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the provider
+
+Set the `oauth` option of the `createAuth` instance and writing `"figma"` name.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["figma"],
+})
+
+export const { handlers } = auth
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
+
+```ts title="backend.ts" lineNumbers
+import { handlers } from "@/auth"
+
+export const { GET, POST } = handlers
+```
+
+<Callout>
+  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
+  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+</Callout>
+
+</Step>
+
+</Steps>
+
+---
+
+## Resources
+
+- [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [Figma - REST API Introduction](https://developers.figma.com/docs/rest-api/)
+- [Figma - OAuth App](https://www.figma.com/developers/apps/)
+- [Figma - Create an OAuth App](https://developers.figma.com/docs/rest-api/authentication/#create-an-oauth-app)
+- [Figma - OAuth Scopes](https://developers.figma.com/docs/rest-api/scopes/)
