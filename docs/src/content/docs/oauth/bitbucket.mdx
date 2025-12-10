@@ -1,0 +1,142 @@
+---
+title: Bitbucket Authorization Provider
+description: Configure the Bitbucket OAuth 2.0 provider in Aura Auth for authentication and authorization.
+---
+
+## Bitbucket
+
+Set up `Bitbucket` authorization provider to the authentication instance to Aura Auth.
+
+---
+
+## What you'll learn
+
+Through this quick start guide you are going to learn and understand the basics and how to set up `Bitbucket` provider to Aura Auth.
+
+- [Bitbucket OAuth Consumers](#bitbucket-oauth-consumers)
+  - [Register a Workspace](#register-a-workspace)
+  - [Create an OAuth Consumer](#create-an-oauth-consumer)
+- [Bitbucket Aura Auth](#bitbucket-aura-auth)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Configure the provider](#configure-the-provider)
+  - [Get HTTP handlers](#get-http-handlers)
+- [Resources](#resources)
+
+<Steps>
+
+<Step>
+
+## Bitbucket OAuth Consumers
+
+### Register a Workspace
+
+The first step is create or have a Bitbucket Workspace, go to [`Bitbucket Home`](https://bitbucket.org/) to create a [`Workspace`](https://bitbucket.org/account/workspaces/). A workspace is a centralized area where your team or personal account manages repositories and settings.
+
+### Create an OAuth Consumer
+
+Once a workspace is created, register an OAuth 2.0 consumer at **OAuth Consumers Settings** `https://bitbucket.org/{workspace-name}/workspace/settings/api` to grant access to Bitbucket resources like `Account` (User by Aura Auth), `Projects`, `Repositories`, `Workspaces`, etc. For more detailed information read [Bitbucket Cloud REST APIs Intro](https://developer.atlassian.com/cloud/bitbucket/rest/intro/) and [Get current user](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/).
+
+To generate an OAuth consumer the workspaces settings includes:
+
+- `name`: The application name shown when the user tries to grant access to the app.
+- `description`: An optional description of what the consumer does
+- `Callback URL`: The URL to which Bitbucket OAuth will redirect, it should end in `/auth/callback/bitbucket` for local and production environments.
+  - Local environment: `http://localhost:3000/auth/callback/bitbucket`.
+  - Production environment: Set the URL of your production application.
+- `URL`: Optional URL where users can learn more about your application.
+- `Permissions`: Select scopes based on your application's needs. Aura Auth typically uses:
+  - `account`
+  - `email`
+
+Full scopes reference [Bitbucket OAuth 2.0 Scopes](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#bitbucket-oauth-2-0-scopes) and for more information about how to create an OAuth 2.0 Consumer on Bitbucket read [Use OAuth on Bitbucket Cloud](https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/) and [Guides OAuth 2.0](https://developer.atlassian.com/cloud/bitbucket/oauth-2/).
+
+</Step>
+
+<Step>
+
+## Bitbucket Aura Auth
+
+### Installation
+
+Install the package using a package manager like `npm`, `pnpm` or `yarn`.
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Now, it's time to create and consume the Bitbucket credentials required and used by Aura Auth, which include the `client Id` and `client Secret` and write them into a `.env` file.
+
+Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+
+```bash title=".env" lineNumbers
+# Bitbucket Credentials
+AURA_AUTH_BITBUCKET_CLIENT_ID="bitbucket_client_id"
+AURA_AUTH_BITBUCKET_CLIENT_SECRET="bitbucket_client_secret"
+
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+```
+
+<Callout type="warning">
+  The `AURA_AUTH_SECRET` is recommended to be a random and high entropy key to avoid attackers deciphering the secret used by the
+  Aura Auth application.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the provider
+
+Set the `oauth` option of the `createAuth` instance and writing `"bitbucket"` name.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["bitbucket"],
+})
+
+export const { handlers } = auth
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
+
+```ts title="backend.ts" lineNumbers
+import { handlers } from "@/auth"
+
+export const { GET, POST } = handlers
+```
+
+<Callout>
+  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
+  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+</Callout>
+
+</Step>
+
+</Steps>
+
+## Resources
+
+- [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [Bitbucket - Official App](https://bitbucket.org/)
+- [Bitbucket - Workspaces](https://bitbucket.org/account/workspaces/)
+- [Bitbucket - Workspace Settings](https://bitbucket.org/{workspace-name}/workspace/settings/)
+- [Bitbucket - OAuth 2.0](https://developer.atlassian.com/cloud/bitbucket/oauth-2/)
+- [Bitbucket - Use OAuth on Bitbucket Cloud](https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/)
+- [Bitbucket - Cloud REST API](https://developer.atlassian.com/cloud/bitbucket/rest/intro/)
+- [Bitbucket - User Endpoint](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-users-endpoint)

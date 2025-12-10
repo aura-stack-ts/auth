@@ -1,5 +1,5 @@
 {
   "title": "OAuth Providers",
-  "pages": ["github"],
+  "pages": ["github", "bitbucket"],
   "defaultOpen": false
 }
