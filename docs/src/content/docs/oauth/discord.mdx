@@ -1,0 +1,132 @@
+---
+title: Discord Authorization Provider
+description: Configure the Discord OAuth 2.0 provider in Aura Auth for authentication and authorization.
+---
+
+## Discord
+
+Set up `Discord` authorization provider to the authentication instance to Aura Auth.
+
+---
+
+## What you'll learn
+
+Through this quick start guide you are going to learn and understand the basics and how to set up `Discord` provider to Aura Auth.
+
+- [Discord OAuth App](#discord-oauth-app)
+  - [Register a Developer Application](#register-a-developer-application)
+- [Discord Aura Auth](#discord-aura-auth)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Configure the provider](#configure-the-provider)
+  - [Get HTTP handlers](#get-http-handlers)
+- [Resources](#resources)
+
+---
+
+<Steps>
+
+<Step>
+
+## Discord OAuth App
+
+### Register a Developer Application
+
+The first step is register a [`Developer Application`](https://discord.com/developers/applications) to grant to have acces to the user's accessible resources like `Get current User` (Used by Aura Auth), `Message`, `Subscription`, `Channel`, etc. For more detailed information read [OAuth 2](https://discord.com/developers/docs/topics/oauth2).
+
+Registering a Discord a Developer application includes:
+
+- `Name`: The application name shown when the user tries to grant access to the app.
+- `Redirects`: The URL to which Discord OAuth will redirect, it should end in `/auth/callback/discord` for local and production environments.
+  - Local environment: `http://localhost:3000/auth/callback/discord`.
+  - Production environment: Set the URL of your production application.
+
+</Step>
+
+<Step>
+
+## Discord Aura Auth
+
+### Installation
+
+Install the package using a package manager like `npm`, `pnpm` or `yarn`.
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Now, it's time to create and consume the Discord credentials required and used by Aura Auth, which include the `client Id` and `client Secret` and write them into a `.env` file.
+
+Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+
+```bash title=".env" lineNumbers
+# Discord Credentials
+AURA_AUTH_DISCORD_CLIENT_ID="discord_client_id"
+AURA_AUTH_DISCORD_CLIENT_SECRET="discord_client_secret"
+
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+```
+
+<Callout type="warning">
+  The `AURA_AUTH_SECRET` is recommended to be a random and high entropy key to avoid attackers deciphering the secret used by the
+  Aura Auth application.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the provider
+
+Set the `oauth` option of the `createAuth` instance and writing `"discord"` name.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["discord"],
+})
+
+export const { handlers } = auth
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
+
+```ts title="backend.ts" lineNumbers
+import { handlers } from "@/auth"
+
+export const { GET, POST } = handlers
+```
+
+<Callout>
+  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
+  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+</Callout>
+
+</Step>
+
+</Steps>
+
+---
+
+## Resources
+
+- [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [Discord - Applications](https://discord.com/developers/applications)
+- [Discord - OAuth2](https://discord.com/developers/docs/topics/oauth2)
+- [Discord - Get Current User](https://discord.com/developers/docs/resources/user#get-current-user)
+- [Discord - User Object](https://discord.com/developers/docs/resources/user#user-object)
+- [Discord - OAuth2 Scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes)

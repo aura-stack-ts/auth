@@ -78,6 +78,9 @@ export default async function Home() {
                 <form action="/auth/signIn/figma" method="GET">
                     <button className="border border-solid border-gray-400 h-10">SignIn with Figma</button>
                 </form>
+                <form action="/auth/signIn/discord" method="GET">
+                    <button className="border border-solid border-gray-400 h-10">SignIn with Discord</button>
+                </form>
             </main>
         </div>
     )
