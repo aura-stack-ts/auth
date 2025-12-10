@@ -5,11 +5,14 @@
  */
 import type { LiteralUnion, OAuthSecureConfig } from "@/@types/index.js"
 import { github } from "./github.js"
+import { bitbucket } from "./bitbucket.js"
 
 export { github } from "./github.js"
+export { bitbucket } from "./bitbucket.js"
 
 export const integrations = {
     github,
+    bitbucket,
 }
 
 const defineOAuthEnvironment = (oauth: string) => {

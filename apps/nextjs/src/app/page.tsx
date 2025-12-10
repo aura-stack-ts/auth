@@ -72,6 +72,9 @@ export default async function Home() {
                 <form action="/auth/signIn/github" method="GET">
                     <button className="border border-solid border-gray-400 h-10">SignIn with Github</button>
                 </form>
+                <form action="/auth/signIn/bitbucket" method="GET">
+                    <button className="border border-solid border-gray-400 h-10">SignIn with Bitbucket</button>
+                </form>
             </main>
         </div>
     )
