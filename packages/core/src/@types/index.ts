@@ -1,9 +1,10 @@
 import { z } from "zod/v4"
-import type { OAuthIntegrations } from "@/oauth/index.js"
-import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
-import { SESSION_VERSION } from "@/actions/session/session.js"
 import { SerializeOptions } from "cookie"
 import { createJoseInstance } from "@/jose.js"
+import { SESSION_VERSION } from "@/actions/session/session.js"
+import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
+import type { RoutePattern } from "@aura-stack/router"
+import type { OAuthIntegrations } from "@/oauth/index.js"
 
 /**
  * Standardized user profile returned by OAuth integrations after fetching user information
@@ -131,6 +132,10 @@ export interface AuthConfig {
      * doesn't exist, it will throw an error during the initialization of the Auth module.
      */
     secret?: string
+    /**
+     * Base path for all authentication routes. Default is `/auth`.
+     */
+    basePath?: RoutePattern
 }
 
 export interface AuthConfigInternal {
