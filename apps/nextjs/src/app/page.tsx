@@ -19,6 +19,7 @@ const getCSRFToken = async () => {
         headers: {
             Cookie: cookieStore.toString(),
         },
+        cache: "no-store",
     })
     const csrfData = await csrfResponse.json()
     return csrfData.csrfToken
@@ -42,7 +43,7 @@ const signOut = async () => {
         method: "POST",
         headers: headersList,
         body: JSON.stringify({}),
-        cache: "no-cache",
+        cache: "no-store",
     })
     const response = await signOutResponse.json()
     if (signOutResponse.status === 202) {
@@ -80,6 +81,9 @@ export default async function Home() {
                 </form>
                 <form action="/auth/signIn/discord" method="GET">
                     <button className="border border-solid border-gray-400 h-10">SignIn with Discord</button>
+                </form>
+                <form action="/auth/signIn/gitlab" method="GET">
+                    <button className="border border-solid border-gray-400 h-10">SignIn with GitLab</button>
                 </form>
             </main>
         </div>
