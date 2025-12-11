@@ -8,17 +8,20 @@ import { github } from "./github.js"
 import { bitbucket } from "./bitbucket.js"
 import { figma } from "./figma.js"
 import { discord } from "./discord.js"
+import { gitlab } from "./gitlab.js"
 
 export { github } from "./github.js"
 export { bitbucket } from "./bitbucket.js"
 export { figma } from "./figma.js"
 export { discord } from "./discord.js"
+export { gitlab } from "./gitlab.js"
 
 export const integrations = {
     github,
     bitbucket,
     figma,
     discord,
+    gitlab,
 }
 
 const defineOAuthEnvironment = (oauth: string) => {

@@ -1,5 +1,5 @@
 {
   "title": "OAuth Providers",
-  "pages": ["github", "bitbucket", "figma", "discord"],
+  "pages": ["github", "bitbucket", "figma", "discord", "gitlab"],
   "defaultOpen": false
 }

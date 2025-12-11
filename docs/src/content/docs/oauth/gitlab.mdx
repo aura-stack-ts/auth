@@ -1,0 +1,128 @@
+---
+title: GitLab Authorization Provider
+description: Configure the GitLab OAuth 2.0 provider in Aura Auth for authentication and authorization.
+---
+
+## GitLab
+
+Set up `GitLab` authorization provider to the authentication instance to Aura Auth.
+
+---
+
+## What you'll learn
+
+Through this quick start guide you are going to learn and understand the basics and how to set up `GitLab` provider to Aura Auth.
+
+- [GitLab OAuth App](#GitLab-oauth-app)
+  - [Creating an OAuth App](#creating-an-oauth-app)
+- [GitLab Aura Auth](#GitLab-aura-auth)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Configure the provider](#configure-the-provider)
+  - [Get HTTP handlers](#get-http-handlers)
+- [Resources](#resources)
+
+---
+
+<Steps>
+
+<Step>
+
+## GitLab OAuth App
+
+### Creating a GitLab OAuth Application
+
+The first step is to create and register a [`GitLab Application`](https://gitlab.com/-/user_settings/applications) to grant access to the user's accessible resources like `User` (Used by Aura Auth), `Commits`, `Deployments`, etc. For more detailed information read [OAuth 2.0 identity provider API](OAuth 2.0 identity provider API), [OAuth Scopes](https://docs.gitlab.com/integration/oauth_provider/#view-all-authorized-applications) and [Get the current user](https://docs.gitlab.com/api/users/#get-the-current-user).
+
+Creating a GitLab OAuth app includes:
+
+- `Name`: The application name shown when the user tries to grant access to the app.
+- `Redirect URI`: The URL to which GitLab OAuth will redirect, it should end in `/auth/callback/GitLab` for local and production environments.
+  - Local environment: `http://localhost:3000/auth/callback/GitLab`.
+  - Production environment: Set the URL of your production application.
+- `Scopes`: Select scopes based on your application's needs. Aura Auth uses `read_user`
+
+</Step>
+
+<Step>
+
+## GitLab Aura Auth
+
+### Installation
+
+Install the package using a package manager like `npm`, `pnpm` or `yarn`.
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Now, it's time to create and consume the GitLab credentials required and used by Aura Auth, which include the `client Id` and `client Secret` and write them into a `.env` file.
+
+Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+
+```bash title=".env" lineNumbers
+# GitLab Credentials
+AURA_AUTH_GITLAB_CLIENT_ID="gitlab_client_id"
+AURA_AUTH_GITLAB_CLIENT_SECRET="gitlab_client_secret"
+
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+```
+
+<Callout type="warning">
+  The `AURA_AUTH_SECRET` is recommended to be a random and high entropy key to avoid attackers deciphering the secret used by the
+  Aura Auth application.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the provider
+
+Set the `oauth` option of the `createAuth` instance and writing `"gitlab"` name.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["gitlab"],
+})
+
+export const { handlers } = auth
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
+
+```ts title="backend.ts" lineNumbers
+import { handlers } from "@/auth"
+
+export const { GET, POST } = handlers
+```
+
+<Callout>
+  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
+  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+</Callout>
+
+</Step>
+
+</Steps>
+
+---
+
+## Resources
+
+- [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
