@@ -1,5 +1,5 @@
 import { integrations } from "@aura-stack/auth/oauth/index"
-import { OAuthProvider } from "./@types/props"
+import { OAuthProvider } from "@/app/lib/@types/props"
 
 export const providers = Object.entries(integrations).reduce((previous, [oauth, config]) => {
     const clientIdInput = Boolean(process.env[`AURA_AUTH_${oauth.toUpperCase()}_CLIENT_ID`])

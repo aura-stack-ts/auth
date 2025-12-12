@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { signOut, useAuth } from "./server"
-import { OAuthProviders } from "./ui/oauth-providers"
-import { providers } from "./lib/providers"
+import { providers } from "@/app/lib/providers"
+import { OAuthProviders } from "@/app/ui/oauth-providers"
 
 export default async function Home() {
     const session = await useAuth()
