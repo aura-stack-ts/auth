@@ -15,14 +15,14 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
     const cookieOptions = secureCookieOptions(request, cookies)
     try {
         const session = getCookie(request, "sessionToken", cookieOptions)
-        const decoded = (await jose.decodeJWT(session)) as OAuthUserProfile
+        const decoded = (await jose.decodeJWT(session)) as OAuthUserProfile as OAuthUserProfileInternal
         const user: OAuthUserProfileInternal = {
             sub: decoded.sub,
             email: decoded.email,
             name: decoded.name,
             image: decoded.image,
-            integrations: (decoded as any).integrations,
-            version: (decoded as any).version,
+            integrations: decoded.integrations,
+            version: decoded.version,
         }
         if (!equals(user.version, SESSION_VERSION)) {
             throw new AuthError("session_version", "Session version mismatch")

@@ -29,6 +29,11 @@
       "types": "./dist/oauth/*.d.ts",
       "import": "./dist/oauth/*.js",
       "require": "./dist/oauth/*.cjs"
+    },
+    "./types": {
+      "types": "./dist/@types/index.d.ts",
+      "import": "./dist/@types/index.js",
+      "require": "./dist/@types/index.cjs"
     }
   },
   "keywords": [

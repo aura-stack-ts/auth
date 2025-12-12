@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import { hostCookieOptions } from "./presets.js"
-import { setCookie, getCookie, secureCookieOptions, COOKIE_NAME } from "@/cookie.js"
 import type { SerializeOptions } from "cookie"
+import { setCookie, getCookie, secureCookieOptions, COOKIE_NAME } from "@/cookie.js"
 import type { CookieOptions, CookieOptionsInternal } from "@/@types/index.js"
 
 describe("setCookie", () => {
