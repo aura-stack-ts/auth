@@ -1,11 +1,11 @@
 import crypto from "node:crypto"
 import { describe, test, expect } from "vitest"
-import type { JWTPayload } from "jose"
 import { createJWT } from "@/index.js"
 import { createSecret } from "@/secret.js"
 import { createJWS, signJWS, verifyJWS } from "@/sign.js"
 import { deriveKey, createDeriveKey } from "@/deriveKey.js"
 import { createJWE, encryptJWE, decryptJWE } from "@/encrypt.js"
+import type { JWTPayload } from "jose"
 
 const payload: JWTPayload = {
     sub: "user-123",
@@ -189,10 +189,21 @@ describe("createDeriveKey", () => {
 describe("deriveKey", () => {
     test("deriveKey", () => {
         const secret = "my-secret-password-123"
-        const derivedKey1 = deriveKey(secret, "derive-1")
-        const derivedKey2 = deriveKey(secret, "derive-2")
+        const derivedKey1 = deriveKey(secret, "salt-1", "info-1")
+        const derivedKey2 = deriveKey(secret, "salt-2", "info-2")
         expect(derivedKey1).toBeDefined()
         expect(derivedKey2).toBeDefined()
         expect(derivedKey1).not.toBe(derivedKey2)
+    })
+
+    test("create deterministic derived keys", () => {
+        const salt = "deterministic-salt"
+        const info = "deterministic-info"
+        const secretKey = crypto.randomBytes(32)
+        const { derivedKey: derivedKey1 } = deriveKey(secretKey, salt, info)
+        const { derivedKey: derivedKey2 } = deriveKey(secretKey, salt, info)
+        const { derivedKey: derivedKey3 } = deriveKey(secretKey, salt, info)
+        expect(derivedKey1).toEqual(derivedKey2)
+        expect(derivedKey2).toEqual(derivedKey3)
     })
 })
