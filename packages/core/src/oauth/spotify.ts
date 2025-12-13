@@ -1,30 +1,30 @@
 import type { OAuthConfig } from "@/@types/index.js"
 
 interface Image {
-    url: string;
-    height: number;
-    width: number;
+    url: string
+    height: number
+    width: number
 }
 
 /**
  * @see [Spotify - User Object](https://developer.spotify.com/documentation/web-api/reference/object-model/#user-object-private)
  */
 export interface SpotifyProfile {
-    id: string;
-    display_name: string;
-    email: string;
-    type: string;
-    uri: string;
-    country: string;
-    href: string;
-    images: Image[];
-    product: string;
+    id: string
+    display_name: string
+    email: string
+    type: string
+    uri: string
+    country: string
+    href: string
+    images: Image[]
+    product: string
     explicit_content: {
-        filter_enabled: boolean,
+        filter_enabled: boolean
         filter_locked: boolean
-    },
-    external_urls: { spotify: string; };
-    followers: { href: string; total: number; };
+    }
+    external_urls: { spotify: string }
+    followers: { href: string; total: number }
 }
 
 /**
@@ -49,5 +49,5 @@ export const spotify: OAuthConfig<SpotifyProfile> = {
             email: profile.email,
             image: profile.images?.[0]?.url,
         }
-    }
+    },
 }
