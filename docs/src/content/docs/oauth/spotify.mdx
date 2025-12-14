@@ -1,0 +1,143 @@
+---
+title: Spotify Authorization Provider
+description: Configure the Spotify OAuth 2.0 provider in Aura Auth for authentication and authorization.
+---
+
+## Spotify
+
+Set up the `Spotify` authorization provider for the authentication instance in Aura Auth.
+
+---
+
+## What you'll learn
+
+Through this quick start guide, you will learn and understand the basics of how to set up the `Spotify` provider for Aura Auth.
+
+- [Spotify OAuth App](#spotify-oauth-app)
+  - [Creating an OAuth App](#creating-a-spotify-oauth-application)
+- [Spotify Aura Auth](#spotify-aura-auth)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Configure the provider](#configure-the-provider)
+  - [Get HTTP handlers](#get-http-handlers)
+- [Resources](#resources)
+
+---
+
+<Steps>
+
+<Step>
+
+## Spotify OAuth App
+
+### Creating a Spotify OAuth Application
+
+The first step is to create and register a [`Spotify App`](https://developer.spotify.com/dashboard) to grant access to the user's accessible resources like `Get Current User's Profile` (Used by Aura Auth), `Playlists`, `Playbacks`, `Libraries`, etc. For more detailed information read [Getting started with Web API](https://developer.spotify.com/documentation/web-api/tutorials/getting-started), [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), and [Scopes](https://developer.spotify.com/documentation/web-api/concepts/scopes).
+
+Creating a Spotify OAuth app includes:
+
+- `App name`: The application name shown when the user tries to grant access to the app.
+- `App description`: The description of the Spotify application.
+- `Redirect URIs`: The URL to which Spotify OAuth will redirect. It should end in `/auth/callback/spotify` for local and production environments.
+  - Local environment: `http://192.168.x.y:3000/auth/callback/spotify`.
+  - Production environment: Set the URL of your production application.
+
+    <Callout type="warning">
+      Spotify only accepts HTTPS URIs, or explicit IPv4 or IPv6 addresses. Localhost is not allowed to be registered. For more
+      detailed information about Redirect URIs, refer to the [official
+      documentation](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri).
+    </Callout>
+
+- `Scopes`: Select scopes based on your application's needs. Aura Auth uses:
+  - `user-read-email`
+  - `user-read-private`
+
+</Step>
+
+<Step>
+
+## Spotify Aura Auth
+
+### Installation
+
+Install the package using a package manager like `npm`, `pnpm` or `yarn`.
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Now, it's time to set up the Spotify credentials required by Aura Auth, which include the `client Id` and `client Secret`, and write them into a `.env` file.
+
+Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+
+```bash title=".env" lineNumbers
+# Spotify Credentials
+AURA_AUTH_SPOTIFY_CLIENT_ID="spotify_client_id"
+AURA_AUTH_SPOTIFY_CLIENT_SECRET="spotify_client_secret"
+
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+```
+
+<Callout type="warning">
+  The `AURA_AUTH_SECRET` is recommended to be a random and high entropy key to avoid attackers deciphering the secret used by the
+  Aura Auth application.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the provider
+
+Set the `oauth` option of the `createAuth` instance by writing the `"spotify"` provider name.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["spotify"],
+})
+
+export const { handlers } = auth
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Use the HTTP handlers to consume the authentication logic and flow from the Aura Auth library to integrate it into routers and frameworks.
+
+```ts title="backend.ts" lineNumbers
+import { handlers } from "@/auth"
+
+export const { GET, POST } = handlers
+```
+
+<Callout>
+  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
+  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+</Callout>
+
+</Step>
+
+</Steps>
+
+---
+
+## Resources
+
+- [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [Spotify - Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+- [Spotify - Getting started with Web API](https://developer.spotify.com/documentation/web-api/tutorials/getting-started)
+- [Spotify - Get Current User's Profile](https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile)
+- [Spotify - Scopes](https://developer.spotify.com/documentation/web-api/concepts/scopes)
+- [Spotify - Redirect URIs](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
