@@ -29,10 +29,10 @@ export interface SpotifyProfile {
 
 /**
  * @see [Spotify - Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
- * @see [Spotify - Get Current User's Profile](https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile)
  * @see [Spotify - Getting started with Web API](https://developer.spotify.com/documentation/web-api/tutorials/getting-started)
- * @see [Spotify - Redirect URIs](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
+ * @see [Spotify - Get Current User's Profile](https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile)
  * @see [Spotify - Scopes](https://developer.spotify.com/documentation/web-api/concepts/scopes)
+ * @see [Spotify - Redirect URIs](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
  */
 export const spotify: OAuthConfig<SpotifyProfile> = {
     id: "spotify",
