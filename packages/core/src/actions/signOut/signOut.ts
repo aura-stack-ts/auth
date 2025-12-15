@@ -29,10 +29,10 @@ export const signOutAction = createEndpoint(
             request,
             headers,
             searchParams: { redirectTo },
-            context: { cookies, jose },
+            context: { cookies, jose, trustedProxyHeaders },
         } = ctx
         try {
-            const cookiesOptions = secureCookieOptions(request, cookies)
+            const cookiesOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
             const session = getCookie(request, "sessionToken", cookiesOptions)
             const csrfToken = getCookie(request, "csrfToken", {
                 ...cookiesOptions,

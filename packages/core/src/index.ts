@@ -15,6 +15,8 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
             oauth: createOAuthIntegrations(authConfig?.oauth),
             cookies: authConfig?.cookies ?? defaultCookieConfig,
             jose: createJoseInstance(authConfig?.secret),
+            basePath: authConfig?.basePath ?? "/auth",
+            trustedProxyHeaders: !!authConfig?.trustedProxyHeaders,
         },
     }
 }

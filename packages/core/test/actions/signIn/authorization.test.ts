@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { oauthCustomService } from "@test/presets.js"
-import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/actions/signIn/authorization.js"
+import { createAuthorizationURL, createRedirectTo, createRedirectURI, getOriginURL } from "@/actions/signIn/authorization.js"
 
 describe("createRedirectURI", () => {
     const testCases = [
@@ -56,7 +56,7 @@ describe("createRedirectURI", () => {
 
     for (const { description, requestURL, oauth, expected } of testCases) {
         test(description, () => {
-            const redirectURI = createRedirectURI(requestURL, oauth)
+            const redirectURI = createRedirectURI(new Request(requestURL), oauth, "/auth")
             expect(redirectURI).toBe(expected)
         })
     }
@@ -248,11 +248,71 @@ describe("createRedirectTo", () => {
                 redirectTo: "/auth/signIn",
                 expected: "/auth/signIn",
             },
+            {
+                description: "with localhost and without redirectTo parameter",
+                request: new Request("http://localhost:3000/auth/signIn/github"),
+                redirectTo: "/",
+                expected: "/",
+            },
+            {
+                description: "with localhost and referer header",
+                request: new Request("http://localhost:3000/auth/signIn/github", {
+                    headers: { Referer: "http://localhost:3000/dashboard" },
+                }),
+                redirectTo: "/dashboard",
+                expected: "/dashboard",
+            },
+            {
+                description: "with Ipv4 address and without referer header",
+                request: new Request("http://192.168.0.1/auth/signIn/github"),
+                redirectTo: "/",
+                expected: "/",
+            },
+            {
+                description: "with Ipv4 address and referer header",
+                request: new Request("http://192.168.0.1/auth/signIn/github", {
+                    headers: { Referer: "http://192.168.0.1/dashboard" },
+                }),
+                redirectTo: "/dashboard",
+                expected: "/dashboard",
+            },
+            {
+                description: "with IPv4 address and referer header",
+                request: new Request("https://192.168.0.1/auth/signIn/github", {
+                    headers: { Referer: "https://192.168.0.1/dashboard" },
+                }),
+                redirectTo: "/dashboard",
+                expected: "/dashboard",
+            },
+            {
+                description: "with trusted proxy headers enabled",
+                request: new Request("http:/localhost:3000/auth/signIn/github", {
+                    headers: {
+                        "X-Forwarded-Proto": "https",
+                        "X-Forwarded-Host": "http://192.168.0.1",
+                    },
+                }),
+                trustedProxyHeaders: true,
+                redirectTo: "/",
+                expected: "/",
+            },
+            {
+                description: "with trusted proxy headers disabled",
+                request: new Request("http:/localhost:3000/auth/signIn/github", {
+                    headers: {
+                        "X-Forwarded-Proto": "https",
+                        "X-Forwarded-Host": "http://192.168.0.1",
+                    },
+                }),
+                trustedProxyHeaders: false,
+                redirectTo: "/",
+                expected: "/",
+            },
         ]
 
-        for (const { description, request, expected, redirectTo: redirectToParam } of testCases) {
+        for (const { description, request, expected, redirectTo: redirectToParam, trustedProxyHeaders } of testCases) {
             test(description, () => {
-                const redirectTo = createRedirectTo(request, redirectToParam)
+                const redirectTo = createRedirectTo(request, redirectToParam, trustedProxyHeaders)
                 expect(redirectTo).toBe(expected)
             })
         }
@@ -448,4 +508,67 @@ describe("createRedirectTo", () => {
             })
         }
     })
+})
+
+describe("getOriginURL", () => {
+    const testCases = [
+        {
+            description: "with standard URL",
+            request: new Request("https://example.com/auth/signIn/github"),
+            trustedProxyHeaders: false,
+            expected: "https://example.com/auth/signIn/github",
+        },
+        {
+            description: "with localhost URL",
+            request: new Request("http://localhost:3000/auth/signIn/github"),
+            trustedProxyHeaders: false,
+            expected: "http://localhost:3000/auth/signIn/github",
+        },
+        {
+            description: "with IP address URL",
+            request: new Request("http://192.168.0.1/auth/signIn/github"),
+            trustedProxyHeaders: false,
+            expected: "http://192.168.0.1/auth/signIn/github",
+        },
+        {
+            description: "without trusted proxy headers",
+            request: new Request("http://localhost:3000/auth/signIn/github", {
+                headers: {
+                    "X-Forwarded-Proto": "https",
+                    "X-Forwarded-Host": "example.com",
+                },
+            }),
+            trustedProxyHeaders: false,
+            expected: "http://localhost:3000/auth/signIn/github",
+        },
+        {
+            description: "with trusted proxy headers",
+            request: new Request("http://localhost:3000/auth/signIn/github", {
+                headers: {
+                    "X-Forwarded-Proto": "https",
+                    "X-Forwarded-Host": "example.com",
+                },
+            }),
+            trustedProxyHeaders: true,
+            expected: "https://example.com/auth/signIn/github",
+        },
+        {
+            description: "with localhost and trusted proxy headers",
+            request: new Request("http://localhost:3000/auth/signIn/github", {
+                headers: {
+                    "X-Forwarded-Proto": "http",
+                    "X-Forwarded-Host": "192.168.0.1",
+                }
+            }),
+            trustedProxyHeaders: true,
+            expected: "http://192.168.0.1/auth/signIn/github",
+        }
+    ]
+
+    for(const { description, request, trustedProxyHeaders, expected } of testCases) {
+        test(description, () => {
+            const originURL = getOriginURL(request, trustedProxyHeaders)
+            expect(originURL.href).toBe(expected)
+        })
+    }
 })

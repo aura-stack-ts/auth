@@ -5,6 +5,7 @@ const oauth = Object.keys(integrations) as Array<keyof typeof integrations>
 
 const auth = createAuth({
     oauth,
+    trustedProxyHeaders: true,
 })
 
 const {
