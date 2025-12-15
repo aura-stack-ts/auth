@@ -33,17 +33,31 @@ export const createAuthorizationURL = (
     return `${authorizeURL}?${searchParams}`
 }
 
+export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) => {
+    const headers = request.headers
+    if (trustedProxyHeaders) {
+        const protocol = headers.get("X-Forwarded-Proto") ?? headers.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? "http"
+        const host =
+            headers.get("X-Forwarded-Host") ??
+            headers.get("Host") ??
+            headers.get("Forwarded")?.match(/host=([^;]+)/i)?.[1] ??
+            null
+        return new URL(`${protocol}://${host}${getNormalizedOriginPath(new URL(request.url).pathname)}`)
+    } else {
+        return new URL(getNormalizedOriginPath(request.url))
+    }
+}
+
 /**
  * Creates the redirect URI for the OAuth callback based on the original request URL and the OAuth provider.
  *
  * @param requestURL - the original request URL
  * @param oauth - OAuth provider name
  * @returns The redirect URI for the OAuth callback.
- * @todo: update the default `/auth` path to use the configured `basePath` from `createAuth`
  */
-export const createRedirectURI = (requestURL: string, oauth: string) => {
-    const url = new URL(requestURL)
-    return `${url.origin}/auth/callback/${oauth}`
+export const createRedirectURI = (request: Request, oauth: string, basePath: string, trustedProxyHeaders?: boolean) => {
+    const url = getOriginURL(request, trustedProxyHeaders)
+    return `${url.origin}${basePath}/callback/${oauth}`
 }
 
 /**
@@ -56,11 +70,12 @@ export const createRedirectURI = (requestURL: string, oauth: string) => {
  * @param redirectTo Optional redirectTo parameter to override the referer
  * @returns The pathname of the referer URL if origins match
  */
-export const createRedirectTo = (request: Request, redirectTo?: string) => {
+export const createRedirectTo = (request: Request, redirectTo?: string, trustedProxyHeaders?: boolean) => {
     try {
-        const hostedURL = new URL(getNormalizedOriginPath(request.url))
-        const origin = request.headers.get("Origin")
-        const referer = request.headers.get("Referer")
+        const headers = request.headers
+        const origin = headers.get("Origin")
+        const referer = headers.get("Referer")
+        let hostedURL = getOriginURL(request, trustedProxyHeaders)
         if (redirectTo) {
             if (redirectTo.startsWith("/")) {
                 return sanitizeURL(redirectTo)

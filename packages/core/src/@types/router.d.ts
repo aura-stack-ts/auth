@@ -8,6 +8,7 @@ declare module "@aura-stack/router" {
         oauth: ReturnType<typeof createOAuthIntegrations>
         cookies: CookieOptions
         jose: ReturnType<typeof createJoseInstance>
+        basePath: string
         trustedProxyHeaders?: boolean
     }
 }

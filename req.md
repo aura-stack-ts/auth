@@ -1,0 +1,7 @@
+https://accounts.spotify.com/authorize?scope=user-read-email+user-read-private
+response_type=token
+client_id=072cf079077141e09ee65f078643d1a9
+redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcallback%2Fspotify
+state=2LY5DZdtcE4EEgecgxalLz_zQVYm-gcnUJshqIOO_8Q
+code_challenge=NBCoxV4muZy4twZ8oJhXNMpJZ-AIIXvSTpa67Qytai4
+code_challenge_method=S256
