@@ -43,12 +43,12 @@ export const callbackAction = (oauth: AuthConfigInternal["oauth"]) => {
                 request,
                 params: { oauth },
                 searchParams: { code, state },
-                context: { oauth: oauthIntegrations, cookies, jose },
+                context: { oauth: oauthIntegrations, cookies, jose, trustedProxyHeaders },
             } = ctx
             try {
                 const oauthConfig = oauthIntegrations[oauth]
 
-                const cookieOptions = secureCookieOptions(request, cookies)
+                const cookieOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
                 const cookieState = getCookie(request, "state", cookieOptions)
                 const cookieRedirectTo = getCookie(request, "redirect_to", cookieOptions)
                 const cookieRedirectURI = getCookie(request, "redirect_uri", cookieOptions)
@@ -85,10 +85,14 @@ export const callbackAction = (oauth: AuthConfigInternal["oauth"]) => {
                 const csrfCookie = setCookie(
                     "csrfToken",
                     csrfToken,
-                    secureCookieOptions(request, {
-                        ...cookies,
-                        flag: "host",
-                    })
+                    secureCookieOptions(
+                        request,
+                        {
+                            ...cookies,
+                            flag: "host",
+                        },
+                        trustedProxyHeaders
+                    )
                 )
                 headers.set("Set-Cookie", sessionCookie)
                 headers.append("Set-Cookie", expireCookie("state", cookieOptions))

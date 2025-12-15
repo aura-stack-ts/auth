@@ -136,6 +136,20 @@ export interface AuthConfig {
      * Base path for all authentication routes. Default is `/auth`.
      */
     basePath?: RoutePattern
+    /**
+     * Enable trusted proxy headers for scenarios where the application is behind a reverse proxy or load balancer.
+     * This setting allows Aura Auth to correctly interpret headers like `X-Forwarded-For` and `X-Forwarded-Proto`
+     * to determine the original client IP address and protocol.
+     *
+     * Default is `false`. Enable this option only if you are certain that your application is behind a trusted proxy.
+     * Misconfiguration can lead to security vulnerabilities, such as incorrect handling of secure cookies or
+     * inaccurate client IP logging.
+     *
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
+     */
+    trustedProxyHeaders?: boolean
 }
 
 export interface AuthConfigInternal {

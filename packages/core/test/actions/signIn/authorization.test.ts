@@ -248,6 +248,42 @@ describe("createRedirectTo", () => {
                 redirectTo: "/auth/signIn",
                 expected: "/auth/signIn",
             },
+            {
+                description: "with localhost and without redirectTo parameter",
+                request: new Request("http://localhost:3000/auth/signIn/github"),
+                redirectTo: "/",
+                expected: "/",
+            },
+            {
+                description: "with localhost and referer header",
+                request: new Request("http://localhost:3000/auth/signIn/github", {
+                    headers: { Referer: "http://localhost:3000/dashboard" },
+                }),
+                redirectTo: "/dashboard",
+                expected: "/dashboard",
+            },
+            {
+                description: "with Ipv4 address and without referer header",
+                request: new Request("http://192.168.0.1/auth/signIn/github"),
+                redirectTo: "/",
+                expected: "/",
+            },
+            {
+                description: "with Ipv4 address and referer header",
+                request: new Request("http://192.168.0.1/auth/signIn/github", {
+                    headers: { Referer: "http://192.168.0.1/dashboard" },
+                }),
+                redirectTo: "/dashboard",
+                expected: "/dashboard",
+            },
+            {
+                description: "with Ipv4 address and referer header",
+                request: new Request("https://192.168.0.1/auth/signIn/github", {
+                    headers: { Referer: "https://192.168.0.1/dashboard" },
+                }),
+                redirectTo: "/dashboard",
+                expected: "/dashboard",
+            },
         ]
 
         for (const { description, request, expected, redirectTo: redirectToParam } of testCases) {

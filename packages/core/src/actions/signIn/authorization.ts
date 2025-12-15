@@ -39,6 +39,7 @@ export const createAuthorizationURL = (
  * @param requestURL - the original request URL
  * @param oauth - OAuth provider name
  * @returns The redirect URI for the OAuth callback.
+ * @todo: update the default `/auth` path to use the configured `basePath` from `createAuth`
  */
 export const createRedirectURI = (requestURL: string, oauth: string) => {
     const url = new URL(requestURL)

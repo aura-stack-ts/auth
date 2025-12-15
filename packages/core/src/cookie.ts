@@ -164,12 +164,17 @@ export const createSessionCookie = async (
  * @param cookieOptions Cookie options from the Aura Auth configuration
  * @returns The finalized cookie options to be used for setting cookies
  */
-export const secureCookieOptions = (request: Request, cookieOptions: CookieOptions): CookieOptionsInternal => {
+export const secureCookieOptions = (
+    request: Request,
+    cookieOptions: CookieOptions,
+    trustedProxyHeaders?: boolean
+): CookieOptionsInternal => {
     const name = cookieOptions.name ?? COOKIE_NAME
-    const isSecure =
-        request.url.startsWith("https://") ||
-        request.headers.get("X-Forwarded-Proto") === "https" ||
-        request.headers.get("Forwarded")?.includes("proto=https")
+    const isSecure = trustedProxyHeaders
+        ? request.url.startsWith("https://") ||
+          request.headers.get("X-Forwarded-Proto") === "https" ||
+          request.headers.get("Forwarded")?.includes("proto=https")
+        : request.url.startsWith("https://")
     if (!cookieOptions.options?.httpOnly) {
         console.warn(
             "[WARNING]: Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk."

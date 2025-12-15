@@ -10,9 +10,9 @@ export const SESSION_VERSION = "v0.1.0"
 export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
     const {
         request,
-        context: { cookies, jose },
+        context: { cookies, jose, trustedProxyHeaders },
     } = ctx
-    const cookieOptions = secureCookieOptions(request, cookies)
+    const cookieOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
     try {
         const session = getCookie(request, "sessionToken", cookieOptions)
         const decoded = (await jose.decodeJWT(session)) as OAuthUserProfile as OAuthUserProfileInternal
