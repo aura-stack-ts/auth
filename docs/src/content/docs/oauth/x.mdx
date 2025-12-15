@@ -1,0 +1,144 @@
+---
+title: X (Twitter) Authorization Provider
+description: Configure the X OAuth 2.0 provider in Aura Auth for authentication and authorization.
+---
+
+## X (Twitter)
+
+Set up the `X` authorization provider for the authentication instance in Aura Auth.
+
+---
+
+## What you'll learn
+
+Through this quick start guide, you will learn and understand the basics of how to set up the `X` provider for Aura Auth.
+
+- [X OAuth App](#x-oauth-app)
+  - [Creating an OAuth App](#creating-a-x-oauth-application)
+- [X Aura Auth](#x-aura-auth)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Configure the provider](#configure-the-provider)
+  - [Get HTTP handlers](#get-http-handlers)
+- [Resources](#resources)
+
+---
+
+<Steps>
+
+<Step>
+
+## X OAuth App
+
+### Creating an X OAuth Application
+
+The first step is to create and register an [`X App`](https://developer.x.com/en/portal/projects-and-apps) to grant access to the user's accessible resources like `Get my User` (used by Aura Auth), `Posts`, `Likes`, `Lists`, etc. For more detailed information, read the [X Developer Portal](https://developer.x.com/en/portal/dashboard), [Get my User](https://docs.x.com/x-api/users/get-my-user), and [OAuth 2.0 Scopes](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code#scopes).
+
+Creating an X OAuth app includes:
+
+- `App name`: X's app name.
+- `App permissions`: Permissions available to the X app. The options include:
+  - `Read`.
+  - `Read and write` (Recommended).
+  - `Read and write and Direct message`.
+- `Type of App`: Enables the app to work with OAuth 2.0 authentication.
+  - `Native App`: Public client with the OAuth 2.0 authorization code flow that implements PKCE. For more details, read [PKCE](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code). This is the option supported by Aura Auth.
+  - `Web App, Automated App or Bot`: Confidential client, which implements the `client_credentials` grant type in the authorization. For more details, read [Application only](https://docs.x.com/fundamentals/authentication/oauth-2-0/application-only).
+- `Callback URI`: The URL to which X OAuth will redirect. It should end in `/auth/callback/x` for local and production environments.
+  - Local environment: `http://localhost:3000/auth/callback/x`.
+  - Production environment: Set the URL of your production application.
+- `Website URL (Required)`: The URL of the app.
+- `Organization Name (Optional)`: The application name shown when the user tries to grant access to the app.
+- `Organization URL (Optional)`: The link shown when users authorize your app.
+- `Terms of service (Required)`: The link to the terms of service shown to the user.
+- `Privacy policy (Required)`: The link to the privacy policy shown to the user.
+
+</Step>
+
+<Step>
+
+## X Aura Auth
+
+### Installation
+
+Install the package using a package manager like `npm`, `pnpm` or `yarn`.
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Now, it's time to set up the X credentials required by Aura Auth, which include the `client Id` and `client Secret`, and write them into a `.env` file.
+
+Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+
+```bash title=".env" lineNumbers
+# X Credentials
+AURA_AUTH_X_CLIENT_ID="x_client_id"
+AURA_AUTH_X_CLIENT_SECRET="x_client_secret"
+
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+```
+
+<Callout type="warning">
+  The `AURA_AUTH_SECRET` is recommended to be a random and high entropy key to avoid attackers deciphering the secret used by the
+  Aura Auth application.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the provider
+
+Set the `oauth` option of the `createAuth` instance by writing the `"x"` provider name.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["x"],
+})
+
+export const { handlers } = auth
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Use the HTTP handlers to consume the authentication logic and flow from the Aura Auth library to integrate it into routers and frameworks.
+
+```ts title="backend.ts" lineNumbers
+import { handlers } from "@/auth"
+
+export const { GET, POST } = handlers
+```
+
+<Callout>
+  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
+  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+</Callout>
+
+</Step>
+
+</Steps>
+
+---
+
+## Resources
+
+- [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [X - Developer Portal](https://developer.x.com/en/portal/projects-and-apps)
+- [X - Get my User](https://docs.x.com/x-api/users/get-my-user)
+- [X - OAuth 2.0 Authorization Code Flow with PKCE](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code)
+- [X - OAuth 2.0 Scopes](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code#scopes)
+- [X - OAuth 2.0 Bearer Token](https://docs.x.com/fundamentals/authentication/oauth-2-0/application-only)

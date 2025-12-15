@@ -10,6 +10,7 @@ import { figma } from "./figma.js"
 import { discord } from "./discord.js"
 import { gitlab } from "./gitlab.js"
 import { spotify } from "./spotify.js"
+import { x } from "./x.js"
 
 export { github } from "./github.js"
 export { bitbucket } from "./bitbucket.js"
@@ -17,6 +18,7 @@ export { figma } from "./figma.js"
 export { discord } from "./discord.js"
 export { gitlab } from "./gitlab.js"
 export { spotify } from "./spotify.js"
+export { x } from "./x.js"
 
 export const integrations = {
     github,
@@ -25,6 +27,7 @@ export const integrations = {
     discord,
     gitlab,
     spotify,
+    x,
 }
 
 const defineOAuthEnvironment = (oauth: string) => {
