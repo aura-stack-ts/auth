@@ -25,10 +25,11 @@ export const createAccessToken = async (
     }
     const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data
     try {
-        const response = await fetch(accessToken, {
+        const request = new Request(accessToken, {
             method: "POST",
             headers: {
                 Accept: "application/json",
+
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams({
@@ -40,6 +41,7 @@ export const createAccessToken = async (
                 code_verifier: codeVerifier,
             }).toString(),
         })
+        const response = await fetch(request)
         const json = await response.json()
         const token = OAuthAccessTokenResponse.safeParse(json)
         if (!token.success) {
