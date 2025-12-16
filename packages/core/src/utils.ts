@@ -137,3 +137,8 @@ export const getNormalizedOriginPath = (path: string): string => {
         return sanitizeURL(path)
     }
 }
+
+
+export const toISOString = (date: Date | string | number): string => {
+    return new Date(date).toISOString()
+}

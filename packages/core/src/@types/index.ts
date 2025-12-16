@@ -16,6 +16,11 @@ export interface OAuthUserProfile {
     image?: string
 }
 
+export interface User {
+    user: OAuthUserProfile
+    expires: string
+}
+
 export interface OAuthConfig<Profile extends object = {}> {
     id: string
     name: string

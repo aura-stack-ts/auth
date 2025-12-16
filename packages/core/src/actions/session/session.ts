@@ -1,4 +1,5 @@
 import { createEndpoint } from "@aura-stack/router"
+import { toISOString } from "@/utils.js"
 import { cacheControl } from "@/headers.js"
 import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
 import type { OAuthUserProfile } from "@/@types/index.js"
@@ -19,9 +20,8 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
             jti?: string
             nbf?: number
         }
-
         const headers = new Headers(cacheControl)
-        return Response.json({ user, authenticated: true }, { headers })
+        return Response.json({ user, expires: toISOString(exp! * 1000) }, { headers })
     } catch {
         const headers = new Headers(cacheControl)
         const sessionCookie = expireCookie("sessionToken", cookieOptions)

@@ -35,7 +35,7 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(200)
-        expect(await request.json()).toEqual({ user: sessionPayload, authenticated: true })
+        expect(await request.json()).toEqual({ user: sessionPayload, expires: expect.any(String) })
     })
 
     test("expired sessionToken cookie", async () => {
@@ -183,7 +183,7 @@ describe("sessionAction", () => {
         const { id, ...rest } = userInfoMock
         expect(session).toEqual({
             user: { sub: id, ...rest },
-            authenticated: true,
+            expires: expect.any(String),
         })
     })
 })
