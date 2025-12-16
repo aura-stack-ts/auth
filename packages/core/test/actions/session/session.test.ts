@@ -1,6 +1,7 @@
-import { GET, jose, sessionPayload } from "@test/presets.js"
+import { getCookie, setCookie } from "@/cookie.js"
+import { createPKCE } from "@/secure.js"
+import { GET, jose, secureCookieOptions, sessionPayload } from "@test/presets.js"
 import { describe, test, expect, vi } from "vitest"
-import { type JWTPayload } from "@/jose.js"
 
 describe("sessionAction", () => {
     const { encodeJWT } = jose
@@ -34,25 +35,7 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(200)
-        expect(await request.json()).toEqual({ user: sessionPayload, authenticated: true })
-    })
-
-    test("valid sessionToken cookie with incorrect version", async () => {
-        const payload: JWTPayload = {
-            ...sessionPayload,
-            version: "incorrect_version",
-        }
-        const sessionToken = await encodeJWT(payload)
-
-        const request = await GET(
-            new Request("https://example.com/auth/session", {
-                headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
-                },
-            })
-        )
-        expect(request.status).toBe(401)
-        expect(await request.json()).toEqual({ authenticated: false, message: "Unauthorized" })
+        expect(await request.json()).toEqual({ user: sessionPayload, expires: expect.any(String) })
     })
 
     test("expired sessionToken cookie", async () => {
@@ -111,5 +94,96 @@ describe("sessionAction", () => {
             })
         )
         expect(request.headers.get("Set-Cookie")).toMatch("aura-auth.sessionToken=;")
+    })
+
+    test("update default profile function", async () => {
+        const mockFetch = vi.fn()
+
+        vi.stubGlobal("fetch", mockFetch)
+
+        const accessTokenMock = {
+            access_token: "access_123",
+            token_type: "Bearer",
+        }
+
+        /**
+         * Mock user info response. For this case it simulates the profile function
+         */
+        const userInfoMock = {
+            id: "user_123",
+            email: "john.doe@example.com",
+            name: "John Doe",
+            image: "https://example.com/john-doe.jpg",
+            username: "johndoe",
+            nickname: "johnny",
+            email_verified: true,
+        }
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => accessTokenMock,
+        })
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => userInfoMock,
+        })
+
+        const state = setCookie("state", "abc", secureCookieOptions)
+        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-profile", secureCookieOptions)
+        const redirectTo = setCookie("redirect_to", "/auth", secureCookieOptions)
+        const { codeVerifier } = await createPKCE()
+        const codeVerifierCookie = setCookie("code_verifier", codeVerifier, secureCookieOptions)
+
+        const response = await GET(
+            new Request("https://example.com/auth/callback/oauth-profile?code=auth_code_123&state=abc", {
+                headers: {
+                    Cookie: [state, redirectURI, redirectTo, codeVerifierCookie].join("; "),
+                },
+            })
+        )
+
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                client_id: "oauth_client_id",
+                client_secret: "oauth_client_secret",
+                code: "auth_code_123",
+                redirect_uri: "https://example.com/auth/callback/oauth-profile",
+                grant_type: "authorization_code",
+                code_verifier: codeVerifier,
+            }).toString(),
+        })
+
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: "Bearer access_123",
+            },
+        })
+        expect(fetch).toHaveBeenCalledTimes(2)
+        expect(response.status).toBe(302)
+        expect(response.headers.get("Location")).toBe("/auth")
+        const sessionToken = getCookie(response, "sessionToken", { secure: true })
+        expect(sessionToken).toBeDefined()
+
+        const requestSession = await GET(
+            new Request("https://example.com/auth/session", {
+                headers: {
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
+                },
+            })
+        )
+        const session = await requestSession.json()
+        const { id, ...rest } = userInfoMock
+        expect(session).toEqual({
+            user: { sub: id, ...rest },
+            expires: expect.any(String),
+        })
     })
 })

@@ -1,11 +1,8 @@
 import { createEndpoint } from "@aura-stack/router"
-import { equals } from "@/utils.js"
-import { AuthError } from "@/error.js"
+import { toISOString } from "@/utils.js"
 import { cacheControl } from "@/headers.js"
 import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
-import type { OAuthUserProfile, OAuthUserProfileInternal } from "@/@types/index.js"
-
-export const SESSION_VERSION = "v0.1.0"
+import type { OAuthUserProfile } from "@/@types/index.js"
 
 export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
     const {
@@ -15,20 +12,16 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
     const cookieOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
     try {
         const session = getCookie(request, "sessionToken", cookieOptions)
-        const decoded = (await jose.decodeJWT(session)) as OAuthUserProfile as OAuthUserProfileInternal
-        const user: OAuthUserProfileInternal = {
-            sub: decoded.sub,
-            email: decoded.email,
-            name: decoded.name,
-            image: decoded.image,
-            integrations: decoded.integrations,
-            version: decoded.version,
-        }
-        if (!equals(user.version, SESSION_VERSION)) {
-            throw new AuthError("session_version", "Session version mismatch")
+        const decoded = await jose.decodeJWT(session)
+
+        const { exp, iat, jti, nbf, ...user } = decoded as OAuthUserProfile & {
+            exp?: number
+            iat?: number
+            jti?: string
+            nbf?: number
         }
         const headers = new Headers(cacheControl)
-        return Response.json({ user, authenticated: true }, { headers })
+        return Response.json({ user, expires: toISOString(exp! * 1000) }, { headers })
     } catch {
         const headers = new Headers(cacheControl)
         const sessionCookie = expireCookie("sessionToken", cookieOptions)
