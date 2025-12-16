@@ -1,4 +1,4 @@
-import { z } from "zod/v4"
+import { string, z } from "zod/v4"
 import { SerializeOptions } from "cookie"
 import { createJoseInstance } from "@/jose.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"

@@ -30,7 +30,7 @@ export const oauthCustomServiceProfile: OAuthSecureConfig = {
             nickname: profile.nickname,
             email_verified: profile.email_verified,
         }
-    }
+    },
 }
 
 export const sessionPayload: JWTPayload = {

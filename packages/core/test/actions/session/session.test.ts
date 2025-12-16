@@ -172,17 +172,18 @@ describe("sessionAction", () => {
         const sessionToken = getCookie(response, "sessionToken", { secure: true })
         expect(sessionToken).toBeDefined()
 
-        console.log("headers:", response.headers, ", decode: ", await jose.decodeJWT(sessionToken))
-        const requestSession = await GET(new Request("https://example.com/auth/session", {
-            headers: {
-                Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
-            }
-        }))
+        const requestSession = await GET(
+            new Request("https://example.com/auth/session", {
+                headers: {
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
+                },
+            })
+        )
         const session = await requestSession.json()
         const { id, ...rest } = userInfoMock
         expect(session).toEqual({
             user: { sub: id, ...rest },
-            authenticated: true
+            authenticated: true,
         })
     })
 })
