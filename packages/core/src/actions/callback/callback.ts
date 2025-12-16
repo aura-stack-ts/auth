@@ -5,7 +5,6 @@ import { cacheControl } from "@/headers.js"
 import { getUserInfo } from "./userinfo.js"
 import { AuraResponse } from "@/response.js"
 import { createAccessToken } from "./access-token.js"
-import { SESSION_VERSION } from "@/actions/session/session.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
@@ -71,15 +70,7 @@ export const callbackAction = (oauth: AuthConfigInternal["oauth"]) => {
                 headers.set("Location", sanitized)
                 const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
 
-                const sessionCookie = await createSessionCookie(
-                    {
-                        ...userInfo,
-                        integrations: [oauth],
-                        version: SESSION_VERSION,
-                    } as never as JWTPayload,
-                    cookieOptions,
-                    jose
-                )
+                const sessionCookie = await createSessionCookie(userInfo as JWTPayload, cookieOptions, jose)
 
                 const csrfToken = await createCSRF(jose)
                 const csrfCookie = setCookie(

@@ -1,7 +1,6 @@
 import { z } from "zod/v4"
 import { SerializeOptions } from "cookie"
 import { createJoseInstance } from "@/jose.js"
-import { SESSION_VERSION } from "@/actions/session/session.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import type { RoutePattern } from "@aura-stack/router"
 import type { OAuthIntegrations } from "@/oauth/index.js"
@@ -15,15 +14,6 @@ export interface OAuthUserProfile {
     name?: string
     email?: string
     image?: string
-}
-
-/**
- * Internal OAuth user profile used in the session payload, extending the standard OAuthUserProfile
- * with additional fields such as `integrations` and `version`.
- */
-export interface OAuthUserProfileInternal extends OAuthUserProfile {
-    integrations: LiteralUnion<OAuthIntegrations>[]
-    version: typeof SESSION_VERSION
 }
 
 export interface OAuthConfig<Profile extends object = {}> {

@@ -1,5 +1,4 @@
 import { createAuth } from "@/index.js"
-import { SESSION_VERSION } from "@/actions/session/session.js"
 import { CookieOptionsInternal, OAuthSecureConfig } from "@/@types/index.js"
 import type { JWTPayload } from "@/jose.js"
 
@@ -15,13 +14,30 @@ export const oauthCustomService: OAuthSecureConfig = {
     clientSecret: "oauth_client_secret",
 }
 
+/**
+ * @todo: Is this needed?
+ */
+export const oauthCustomServiceProfile: OAuthSecureConfig = {
+    ...oauthCustomService,
+    id: "oauth-profile",
+    profile(profile: any) {
+        return {
+            sub: profile.id,
+            name: profile.name,
+            email: profile.email,
+            image: profile.image,
+            username: profile.username,
+            nickname: profile.nickname,
+            email_verified: profile.email_verified,
+        }
+    }
+}
+
 export const sessionPayload: JWTPayload = {
     sub: "1234567890",
     email: "john@example.com",
     name: "John Doe",
     image: "https://example.com/image.jpg",
-    integrations: ["github"],
-    version: SESSION_VERSION,
 }
 
 export const secureCookieOptions: CookieOptionsInternal = { secure: true, prefix: "__Secure-" }
@@ -32,7 +48,7 @@ export const {
     handlers: { GET, POST },
     jose,
 } = createAuth({
-    oauth: [oauthCustomService],
+    oauth: [oauthCustomService, oauthCustomServiceProfile],
     cookies: {},
     secret: process.env.AURA_AUTH_SECRET,
 })

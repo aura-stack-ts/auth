@@ -558,14 +558,14 @@ describe("getOriginURL", () => {
                 headers: {
                     "X-Forwarded-Proto": "http",
                     "X-Forwarded-Host": "192.168.0.1",
-                }
+                },
             }),
             trustedProxyHeaders: true,
             expected: "http://192.168.0.1/auth/signIn/github",
-        }
+        },
     ]
 
-    for(const { description, request, trustedProxyHeaders, expected } of testCases) {
+    for (const { description, request, trustedProxyHeaders, expected } of testCases) {
         test(description, () => {
             const originURL = getOriginURL(request, trustedProxyHeaders)
             expect(originURL.href).toBe(expected)
