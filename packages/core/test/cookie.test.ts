@@ -2,7 +2,7 @@ import { describe, test, expect } from "vitest"
 import { hostCookieOptions } from "./presets.js"
 import type { SerializeOptions } from "cookie"
 import { setCookie, getCookie, secureCookieOptions, COOKIE_NAME } from "@/cookie.js"
-import type { CookieOptions, CookieOptionsInternal } from "@/@types/index.js"
+import type { CookieConfig, CookieConfigInternal } from "@/@types/index.js"
 
 describe("setCookie", () => {
     test("set state cookie with default options", () => {
@@ -133,7 +133,7 @@ describe("secureCookieOptions", () => {
     const http = new Request("http://localhost:3000")
     const https = new Request("https://www.example.com")
 
-    const testCases: Array<{ description: string; request: Request; options: CookieOptions; expected: CookieOptionsInternal }> = [
+    const testCases: Array<{ description: string; request: Request; options: CookieConfig; expected: CookieConfigInternal }> = [
         {
             description: "override httpOnly in a secure connection with standard flag",
             request: https,

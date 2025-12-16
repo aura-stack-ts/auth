@@ -96,7 +96,7 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                 if (isAuthError(error)) {
                     const { type, message } = error
                     return AuraResponse.json<AuthorizationError>(
-                        { error: type, error_description: message },
+                        { error: type as AuthorizationError["error"], error_description: message },
                         { status: statusCode.BAD_REQUEST }
                     )
                 }

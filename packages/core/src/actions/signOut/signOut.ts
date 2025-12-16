@@ -77,7 +77,7 @@ export const signOutAction = createEndpoint(
                 const { type, message } = error
                 return AuraResponse.json<SignOutError>(
                     {
-                        error: type,
+                        error: type as SignOutError["error"],
                         error_description: message,
                     },
                     { status: statusCode.BAD_REQUEST }
