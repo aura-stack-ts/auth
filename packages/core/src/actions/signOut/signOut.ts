@@ -7,7 +7,7 @@ import { getNormalizedOriginPath } from "@/utils.js"
 import { createRedirectTo } from "@/actions/signIn/authorization.js"
 import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
 import { InvalidCsrfTokenError, InvalidRedirectToError } from "@/error.js"
-import type { OAuthErrorResponse } from "@/@types/index.js"
+import type { SignOutError } from "@/@types/index.js"
 
 const config = createEndpointConfig({
     schemas: {
@@ -65,7 +65,7 @@ export const signOutAction = createEndpoint(
             )
         } catch (error) {
             if (error instanceof InvalidCsrfTokenError) {
-                return AuraResponse.json<OAuthErrorResponse<"signOut">>(
+                return AuraResponse.json<SignOutError>(
                     {
                         error: "invalid_csrf_token",
                         error_description: "The provided CSRF token is invalid or has expired",
@@ -75,7 +75,7 @@ export const signOutAction = createEndpoint(
             }
             if (error instanceof InvalidRedirectToError) {
                 const { type, message } = error
-                return AuraResponse.json<OAuthErrorResponse<"signOut">>(
+                return AuraResponse.json<SignOutError>(
                     {
                         error: type,
                         error_description: message,
@@ -83,7 +83,7 @@ export const signOutAction = createEndpoint(
                     { status: statusCode.BAD_REQUEST }
                 )
             }
-            return AuraResponse.json<OAuthErrorResponse<"signOut">>(
+            return AuraResponse.json<SignOutError>(
                 {
                     error: "invalid_session_token",
                     error_description: "The provided sessionToken is invalid or has already expired",

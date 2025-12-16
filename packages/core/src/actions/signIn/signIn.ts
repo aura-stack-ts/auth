@@ -5,9 +5,9 @@ import { createPKCE, generateSecure } from "@/secure.js"
 import { ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { oauthCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 import { createAuthorizationURL, createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.js"
-import type { OAuthErrorResponse, AuthConfigInternal } from "@/@types/index.js"
+import type { AuthorizationError, AuthRuntimeConfig } from "@/@types/index.js"
 
-const signInConfig = (oauth: AuthConfigInternal["oauth"]) => {
+const signInConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
     return createEndpointConfig("/signIn/:oauth", {
         schemas: {
             params: z.object({
@@ -18,7 +18,7 @@ const signInConfig = (oauth: AuthConfigInternal["oauth"]) => {
     })
 }
 
-export const signInAction = (oauth: AuthConfigInternal["oauth"]) => {
+export const signInAction = (oauth: AuthRuntimeConfig["oauth"]) => {
     return createEndpoint(
         "GET",
         "/signIn/:oauth",
@@ -61,13 +61,16 @@ export const signInAction = (oauth: AuthConfigInternal["oauth"]) => {
             } catch (error) {
                 if (isAuthError(error)) {
                     const { type, message } = error
-                    return AuraResponse.json<OAuthErrorResponse<"authorization">>(
+                    return AuraResponse.json<AuthorizationError>(
                         { error: type, error_description: message },
                         { status: statusCode.BAD_REQUEST }
                     )
                 }
-                return AuraResponse.json<OAuthErrorResponse<"authorization">>(
-                    { error: ERROR_RESPONSE.AUTHORIZATION.SERVER_ERROR, error_description: "An unexpected error occurred" },
+                return AuraResponse.json<AuthorizationError>(
+                    {
+                        error: ERROR_RESPONSE.AUTHORIZATION.SERVER_ERROR as AuthorizationError["error"],
+                        error_description: "An unexpected error occurred",
+                    },
                     { status: statusCode.INTERNAL_SERVER_ERROR }
                 )
             }

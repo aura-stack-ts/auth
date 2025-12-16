@@ -1,4 +1,4 @@
-import type { OAuthConfig } from "@/@types/index.js"
+import type { OAuthProviderConfig } from "@/@types/index.js"
 
 interface Image {
     url: string
@@ -34,7 +34,7 @@ export interface SpotifyProfile {
  * @see [Spotify - Scopes](https://developer.spotify.com/documentation/web-api/concepts/scopes)
  * @see [Spotify - Redirect URIs](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
  */
-export const spotify: OAuthConfig<SpotifyProfile> = {
+export const spotify: OAuthProviderConfig<SpotifyProfile> = {
     id: "spotify",
     name: "Spotify",
     authorizeURL: "https://accounts.spotify.com/authorize",

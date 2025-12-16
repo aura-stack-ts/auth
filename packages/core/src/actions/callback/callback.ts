@@ -10,9 +10,9 @@ import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
 import { createSessionCookie, expireCookie, getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
-import type { AuthConfigInternal, OAuthErrorResponse } from "@/@types/index.js"
+import type { AccessTokenError, AuthorizationError, AuthRuntimeConfig } from "@/@types/index.js"
 
-const callbackConfig = (oauth: AuthConfigInternal["oauth"]) => {
+const callbackConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
     return createEndpointConfig("/callback/:oauth", {
         schemas: {
             searchParams: OAuthAuthorizationResponse,
@@ -33,7 +33,7 @@ const callbackConfig = (oauth: AuthConfigInternal["oauth"]) => {
     })
 }
 
-export const callbackAction = (oauth: AuthConfigInternal["oauth"]) => {
+export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
     return createEndpoint(
         "GET",
         "/callback/:oauth",
@@ -95,13 +95,16 @@ export const callbackAction = (oauth: AuthConfigInternal["oauth"]) => {
             } catch (error) {
                 if (isAuthError(error)) {
                     const { type, message } = error
-                    return AuraResponse.json<OAuthErrorResponse<"authorization">>(
+                    return AuraResponse.json<AuthorizationError>(
                         { error: type, error_description: message },
                         { status: statusCode.BAD_REQUEST }
                     )
                 }
-                return AuraResponse.json<OAuthErrorResponse<"token">>(
-                    { error: ERROR_RESPONSE.ACCESS_TOKEN.INVALID_CLIENT, error_description: "An unexpected error occurred" },
+                return AuraResponse.json<AccessTokenError>(
+                    {
+                        error: ERROR_RESPONSE.ACCESS_TOKEN.INVALID_CLIENT as AccessTokenError["error"],
+                        error_description: "An unexpected error occurred",
+                    },
                     { status: statusCode.INTERNAL_SERVER_ERROR }
                 )
             }

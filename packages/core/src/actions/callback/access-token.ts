@@ -1,6 +1,6 @@
 import { AuthError, ERROR_RESPONSE, throwAuthError } from "@/error.js"
 import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
-import type { OAuthSecureConfig } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * Make a request to the OAuth integration to the token endpoint to exchange the authorization code provided
@@ -14,7 +14,7 @@ import type { OAuthSecureConfig } from "@/@types/index.js"
  * @returns The access token response from the OAuth server
  */
 export const createAccessToken = async (
-    oauthConfig: OAuthSecureConfig,
+    oauthConfig: OAuthProviderCredentials,
     redirectURI: string,
     code: string,
     codeVerifier: string

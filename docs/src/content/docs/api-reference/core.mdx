@@ -68,10 +68,10 @@ Creates an authentication instance with handlers for OAuth flows, session manage
 
 Configuration object for authentication settings.
 
-| Parameter | Type                                         | Description                                 |
-| --------- | -------------------------------------------- | ------------------------------------------- |
-| `oauth`   | `(OAuthIntegrations \| OAuthSecureConfig)[]` | Array of OAuth provider configurations      |
-| `cookies` | `CookieOptions`                              | Cookie configuration for session management |
+| Parameter | Type                                                | Description                                 |
+| --------- | --------------------------------------------------- | ------------------------------------------- |
+| `oauth`   | `(OAuthIntegrations \| OAuthProviderCredentials)[]` | Array of OAuth provider configurations      |
+| `cookies` | `CookieOptions`                                     | Cookie configuration for session management |
 
 ##### `oauth`
 
@@ -87,10 +87,10 @@ export const auth = createAuth({
 })
 ```
 
-- Custom OAuth configuration implementations: create custom oauth providers doesn't supported natvely by aura auth, follow the `OAuthSecureConfig` type.
+- Custom OAuth configuration implementations: create custom oauth providers doesn't supported natvely by aura auth, follow the `OAuthProviderCredentials` type.
 
 ```ts lineNumbers
-interface OAuthConfig<Profile extends object = {}> {
+interface OAuthProviderConfig<Profile extends object = {}> {
   id: string
   name: string
   authorizeURL: string
@@ -101,7 +101,7 @@ interface OAuthConfig<Profile extends object = {}> {
   profile?: (profile: Profile) => Promise<OAuthUserProfile> | OAuthUserProfile
 }
 
-interface OAuthSecureConfig extends OAuthConfig {
+interface OAuthProviderCredentials extends OAuthProviderConfig {
   clientId: string
   clientSecret: string
 }

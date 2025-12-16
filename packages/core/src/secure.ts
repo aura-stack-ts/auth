@@ -1,7 +1,7 @@
 import crypto from "node:crypto"
 import { equals } from "./utils.js"
 import { InvalidCsrfTokenError } from "./error.js"
-import { AuthConfigInternal } from "./@types/index.js"
+import { AuthRuntimeConfig } from "./@types/index.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")
@@ -32,7 +32,7 @@ export const createPKCE = async (verifier?: string) => {
  * @param csrfCookie - Optional existing CSRF cookie to verify and reuse
  * @returns Signed CSRF token
  */
-export const createCSRF = async (jose: AuthConfigInternal["jose"], csrfCookie?: string) => {
+export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: string) => {
     try {
         const token = generateSecure(32)
         if (csrfCookie) {
@@ -46,7 +46,7 @@ export const createCSRF = async (jose: AuthConfigInternal["jose"], csrfCookie?: 
     }
 }
 
-export const verifyCSRF = async (jose: AuthConfigInternal["jose"], cookie: string, header: string): Promise<boolean> => {
+export const verifyCSRF = async (jose: AuthRuntimeConfig["jose"], cookie: string, header: string): Promise<boolean> => {
     try {
         const { token: cookieToken } = await jose.verifyJWS(cookie)
         const { token: headerToken } = await jose.verifyJWS(header)

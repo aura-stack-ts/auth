@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
-import { OAuthConfig, OAuthSecureConfig } from "@/@types/index.js"
+import { OAuthProviderConfig, OAuthProviderCredentials } from "@/@types/index.js"
 import { oauthCustomService } from "@test/presets.js"
 
 describe("getUserInfo", () => {
@@ -48,7 +48,7 @@ describe("getUserInfo", () => {
             }))
         )
 
-        const oauthConfig: OAuthConfig<{ username: string; avatar_url: string; uniqueId: string; email: string }> = {
+        const oauthConfig: OAuthProviderConfig<{ username: string; avatar_url: string; uniqueId: string; email: string }> = {
             ...oauthCustomService,
             profile(profile) {
                 return {
@@ -60,7 +60,7 @@ describe("getUserInfo", () => {
             },
         }
 
-        const response = await getUserInfo(oauthConfig as OAuthSecureConfig, "access_token_123")
+        const response = await getUserInfo(oauthConfig as OAuthProviderCredentials, "access_token_123")
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -93,14 +93,16 @@ describe("getUserInfo", () => {
             }))
         )
 
-        const oauthConfig: OAuthConfig = {
+        const oauthConfig: OAuthProviderConfig = {
             ...oauthCustomService,
             profile() {
                 throw new Error("Profile parsing error")
             },
         }
 
-        await expect(getUserInfo(oauthConfig as OAuthSecureConfig, "access_token_123")).rejects.toThrow(/Profile parsing error/)
+        await expect(getUserInfo(oauthConfig as OAuthProviderCredentials, "access_token_123")).rejects.toThrow(
+            /Profile parsing error/
+        )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",

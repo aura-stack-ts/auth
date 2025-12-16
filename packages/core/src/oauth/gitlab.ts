@@ -1,4 +1,4 @@
-import type { OAuthConfig } from "@/@types/index.js"
+import type { OAuthProviderConfig } from "@/@types/index.js"
 
 /**
  * @see [GitLab - Get the current user](https://docs.gitlab.com/api/users/#get-the-current-user)
@@ -59,7 +59,7 @@ export interface GitLabProfile {
  * @see [GitLab - Scopes](https://docs.gitlab.com/integration/oauth_provider/#view-all-authorized-applications)
  * @see [GitLab - Get current user](https://docs.gitlab.com/api/users/#get-the-current-user)
  */
-export const gitlab: OAuthConfig<GitLabProfile> = {
+export const gitlab: OAuthProviderConfig<GitLabProfile> = {
     id: "gitlab",
     name: "GitLab",
     authorizeURL: "https://gitlab.com/oauth/authorize",

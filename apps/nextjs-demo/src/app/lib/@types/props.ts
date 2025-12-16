@@ -1,6 +1,6 @@
-import type { OAuthConfig } from "@aura-stack/auth/types"
+import type { OAuthProviderConfig } from "@aura-stack/auth/types"
 
-export interface OAuthProvider extends Omit<OAuthConfig, "scope"> {
+export interface OAuthProvider extends Omit<OAuthProviderConfig, "scope"> {
     scopes: string[]
     redirectURI: string
     configured: boolean

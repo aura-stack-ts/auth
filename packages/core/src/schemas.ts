@@ -3,7 +3,7 @@ import { object, string, enum as options, number, url } from "zod/v4"
 /**
  * Schema for OAuth Integration Configuration
  */
-export const OAuthConfigSchema = object({
+export const OAuthProviderConfigSchema = object({
     authorizeURL: url(),
     accessToken: url(),
     scope: string().optional(),
@@ -18,7 +18,7 @@ export const OAuthConfigSchema = object({
  * OAuth configuration.
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1
  */
-export const OAuthAuthorization = OAuthConfigSchema.extend({
+export const OAuthAuthorization = OAuthProviderConfigSchema.extend({
     redirectURI: string(),
     state: string(),
     codeChallenge: string(),
@@ -59,7 +59,7 @@ export const OAuthAuthorizationErrorResponse = object({
  * Schema for OAuth Access Token Request and OAuth Configuration
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
  */
-export const OAuthAccessToken = OAuthConfigSchema.extend({
+export const OAuthAccessToken = OAuthProviderConfigSchema.extend({
     redirectURI: string(),
     code: string(),
     codeVerifier: string().min(43).max(128),

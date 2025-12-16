@@ -1,12 +1,12 @@
-import type { ErrorTypes, LiteralUnion } from "./@types/index.js"
+import type { ErrorType, LiteralUnion } from "./@types/index.js"
 
 /**
  * Error class for all Aura Auth errors.
  */
 export class AuthError extends Error {
-    public readonly type: LiteralUnion<ErrorTypes>
+    public readonly type: LiteralUnion<ErrorType>
 
-    constructor(type: LiteralUnion<ErrorTypes>, message: string) {
+    constructor(type: LiteralUnion<ErrorType>, message: string) {
         super(message)
         this.type = type
         this.name = "AuthError"

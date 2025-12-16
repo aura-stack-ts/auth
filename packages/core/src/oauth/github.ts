@@ -1,4 +1,4 @@
-import type { OAuthConfig } from "@/@types/index.js"
+import type { OAuthProviderConfig } from "@/@types/index.js"
 
 /**
  * @see [Get the authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user)
@@ -59,7 +59,7 @@ export interface GitHubProfile {
  * @see [GitHub - Configure your GitHub OAuth Apps](https://github.com/settings/developers)
  * @see [Github - Get the authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user)
  */
-export const github: OAuthConfig<GitHubProfile> = {
+export const github: OAuthProviderConfig<GitHubProfile> = {
     id: "github",
     name: "GitHub",
     authorizeURL: "https://github.com/login/oauth/authorize",
