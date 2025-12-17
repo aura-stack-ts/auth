@@ -198,11 +198,20 @@ export interface AuthConfig {
 }
 
 export type JoseInstance = ReturnType<typeof createJoseInstance>
+/*
+export type JoseInstance = {
+    decodeJWT: (token: string) => Promise<JWTPayload>;
+    encodeJWT: (payload: JWTPayload) => Promise<string>;
+    signJWS: (payload: JWTPayload) => Promise<string>;
+    verifyJWS: (payload: string) => Promise<JWTPayload>;
+}
+*/
 
 /**
  * Internal runtime configuration used within Aura Auth after initialization.
  * All optional fields from AuthConfig are resolved to their default values.
  * @internal
+ * @todo: is this needed?
  */
 export interface AuthRuntimeConfig {
     oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
@@ -210,6 +219,13 @@ export interface AuthRuntimeConfig {
     secret: string
     jose: JoseInstance
 }
+
+export type RouterGlobalContext = Prettify<
+    {
+        basePath: string
+        trustedProxyHeaders: boolean
+    } & Required<Omit<AuthRuntimeConfig, "secret">>
+>
 
 /**
  * Base OAuth error response structure.

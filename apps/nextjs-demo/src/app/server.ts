@@ -2,9 +2,17 @@ import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
 import type { Session } from "@aura-stack/auth/types"
 
-const getCSRFToken = async () => {
+const getBaseUrl = async () => {
     const headersStore = await headers()
-    const csrfResponse = await fetch("http://localhost:3000/auth/csrfToken", {
+    const host = headersStore.get("host") || "localhost:3000"
+    const protocol = headersStore.get("x-forwarded-proto") || "http"
+    return `${protocol}://${host}`
+}
+
+const getCSRFToken = async () => {
+    const baseUrl = await getBaseUrl()
+    const headersStore = await headers()
+    const csrfResponse = await fetch(`${baseUrl}/auth/csrfToken`, {
         method: "GET",
         headers: headersStore,
         cache: "no-store",
@@ -14,10 +22,11 @@ const getCSRFToken = async () => {
 }
 
 export const useAuth = async () => {
+    const baseUrl = await getBaseUrl()
     const headersStore = new Headers(await headers())
     const cookiesStore = await cookies()
     headersStore.set("Cookie", cookiesStore.toString())
-    const session = await fetch("http://localhost:3000/auth/session", {
+    const session = await fetch(`${baseUrl}/auth/session`, {
         headers: headersStore,
         cache: "no-store",
     })
@@ -27,9 +36,10 @@ export const useAuth = async () => {
 
 export const signOut = async () => {
     "use server"
+    const baseUrl = await getBaseUrl()
     const csrf = await getCSRFToken()
     const cookieStore = await cookies()
-    const signOutResponse = await fetch("http://localhost:3000/auth/signOut?token_type_hint=session_token", {
+    const signOutResponse = await fetch(`${baseUrl}/auth/signOut?token_type_hint=session_token`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

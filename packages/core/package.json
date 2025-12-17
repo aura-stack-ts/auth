@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/auth",
-  "version": "0.0.0",
+  "version": "0.1.0-rc.6",
   "private": false,
   "type": "module",
   "description": "Core auth for @aura-stack/auth",
@@ -14,7 +14,16 @@
     "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "clean:cts": "rm -rf dist/*.cts"
+    "clean:cts": "find dist -type f -name \"*.cts\" -delete",
+    "prepublish": "pnpm clean:cts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/@aura-stack/auth"
   },
   "files": [
     "dist"
@@ -41,7 +50,11 @@
     "session",
     "authentication"
   ],
-  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <hernanvid123@gmail.com>",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues"
+  },
   "license": "MIT",
   "dependencies": {
     "@aura-stack/jose": "workspace:*",

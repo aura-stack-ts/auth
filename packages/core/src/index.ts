@@ -7,6 +7,18 @@ import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
 import type { AuthConfig } from "@/@types/index.js"
 
+export type {
+    AuthConfig,
+    JoseInstance,
+    Session,
+    User,
+    CookieConfig,
+    OAuthProvider,
+    OAuthProviderConfig,
+    OAuthProviderCredentials,
+    ErrorType,
+} from "@/@types/index.js"
+
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     return {
         basePath: authConfig?.basePath ?? "/auth",
