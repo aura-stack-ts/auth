@@ -60,7 +60,7 @@ npm install @aura-stack/auth
 
 ## API Reference
 
-### `createAuth(config: AuthConfig)`
+### `createAuth(config: AuthConfig)` [#create-auth]
 
 Creates an authentication instance with handlers for OAuth flows, session management, and CSRF protection.
 
@@ -398,6 +398,8 @@ Aura Auth exposes OAuth provider configurations through the `/oauth/` entry poin
 
 The `/oauth` entry point provides configuration for each OAuth provider and combines all configurations into the `builtInOAuthProviders` object.
 
+### Types
+
 ```ts lineNumbers
 const builtInOAuthProviders = {
   github,
@@ -411,6 +413,8 @@ const builtInOAuthProviders = {
 
 type BuiltInOAuthProvider = keyof typeof builtInOAuthProviders
 ```
+
+### Example
 
 ```ts lineNumbers
 import { builtInOAuthProviders, type builtInOAuthProviders } from "@aura-stack/auth/oauth"

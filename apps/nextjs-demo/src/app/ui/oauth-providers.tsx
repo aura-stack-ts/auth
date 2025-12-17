@@ -124,6 +124,9 @@ export const OAuthProviders = ({ providers, isAuthenticated }: OAuthProvidersPro
                             )}
                         </div>
                     )}
+                    <form action="/auth/signIn/github">
+                        <button>SignIn with Github</button>
+                    </form>
                 </li>
             ))}
 
