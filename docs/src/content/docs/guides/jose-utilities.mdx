@@ -1,0 +1,325 @@
+---
+title: JOSE Utilities Guide
+description: Practical guide to using JOSE utilities returned from createAuth for custom token handling, encryption, and signing
+---
+
+## Overview
+
+The `createAuth()` function returns a `jose` object that provides utilities for JWT signing, verification, encryption, and decryption operations.
+
+The `jose` utilities implement **HKDF (HMAC-based Key Derivation Function)** to derive cryptographic keys from the base secret. This approach ensures the original secret is never directly exposed during signing and encryption operations, following security best practices for key management.
+
+These utilities enable developers to create custom tokens, sign data payloads, and encrypt sensitive information while maintaining cryptographic consistency with the authentication flow.
+
+## What you'll learn
+
+- [Understanding the jose instance](#understanding-the-jose-instance)
+- [Custom API tokens](#custom-api-tokens)
+- [Encrypting sensitive data](#encrypting-sensitive-data)
+- [Signing and verifying data](#signing-and-verifying-data)
+- [Token refresh patterns](#token-refresh-patterns)
+- [Security considerations](#security-considerations)
+
+---
+
+## Understanding the jose instance
+
+The `jose` object returned from `createAuth()` provides four utilities:
+
+```ts title="@/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  secret: process.env.AURA_AUTH_SECRET,
+})
+
+export const { jose } = auth
+```
+
+```ts lineNumbers
+type JoseInstance = {
+  decodeJWT: (token: string) => Promise<JWTPayload>
+  encodeJWT: (payload: JWTPayload) => Promise<string>
+  signJWS: (payload: JWTPayload) => Promise<string>
+  verifyJWS: (payload: string) => Promise<JWTPayload>
+}
+```
+
+<Callout type="info">
+  The jose utilities automatically perform key derivation using the secret from the auth configuration (`AURA_AUTH_SECRET`
+  environment variable or the `secret` option).
+</Callout>
+
+---
+
+## When to use jose utilities
+
+The `jose` instance should be used for:
+
+- **Custom API tokens** with different claims than session tokens
+- **Signed data** for webhooks or API payloads
+- **Encrypted data** for storing sensitive information client-side
+- **Token validation** outside of the authentication flow
+- **Custom claims** for authorization purposes
+
+<Callout type="warn">
+  For standard authentication flows, Aura Auth's built-in session management should be used. The jose utilities are intended only
+  for custom scenarios beyond standard OAuth flows.
+</Callout>
+
+---
+
+## Custom API tokens
+
+Custom API tokens can be created with specific claims and expiration times for fine-grained access control.
+
+### Creating access tokens
+
+```ts title="@/lib/tokens.ts" lineNumbers
+import { jose } from "@/auth"
+
+export async function createAccessToken(userId: string, permissions: string[]) {
+  return await jose.encodeJWT({
+    sub: userId,
+    type: "access",
+    permissions,
+    scope: "api",
+  })
+}
+
+export async function verifyAccessToken(token: string) {
+  try {
+    const payload = await jose.decodeJWT(token)
+
+    if (payload.type !== "access") {
+      throw new Error("Invalid token type")
+    }
+
+    return {
+      userId: payload.sub!,
+      permissions: payload.permissions as string[],
+    }
+  } catch (error) {
+    throw new Error("Invalid or expired token")
+  }
+}
+```
+
+### Using in API routes
+
+```ts title="app/api/protected/route.ts" lineNumbers
+import { verifyAccessToken } from "@/lib/tokens"
+
+export async function GET(request: Request) {
+  const authHeader = request.headers.get("Authorization")
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    return Response.json({ error: "Missing token" }, { status: 401 })
+  }
+
+  const token = authHeader.slice(7)
+
+  try {
+    const { userId, permissions } = await verifyAccessToken(token)
+
+    if (!permissions.includes("read")) {
+      return Response.json({ error: "Insufficient permissions" }, { status: 403 })
+    }
+
+    return Response.json({
+      message: "Success",
+      userId,
+    })
+  } catch (error) {
+    return Response.json({ error: "Invalid token" }, { status: 401 })
+  }
+}
+```
+
+---
+
+## Encrypting sensitive data
+
+The `encodeJWT` method encrypts data before storing it client-side or in cookies, ensuring confidentiality.
+
+### Encrypting user preferences
+
+```ts title="@/lib/preferences.ts" lineNumbers
+import { jose } from "@/auth"
+
+export async function encryptPreferences(userId: string, preferences: object) {
+  return await jose.encodeJWT({
+    sub: userId,
+    type: "preferences",
+    data: preferences,
+  })
+}
+
+export async function decryptPreferences(encrypted: string) {
+  try {
+    const payload = await jose.decodeJWT(encrypted)
+
+    if (payload.type !== "preferences") {
+      throw new Error("Invalid token type")
+    }
+
+    return {
+      userId: payload.sub!,
+      preferences: payload.data as object,
+    }
+  } catch (error) {
+    throw new Error("Failed to decrypt preferences")
+  }
+}
+```
+
+### Storing in cookies
+
+```ts title="app/api/preferences/route.ts" lineNumbers
+import { encryptPreferences, decryptPreferences } from "@/lib/preferences"
+
+export async function POST(request: Request) {
+  const { userId, preferences } = await request.json()
+
+  const encrypted = await encryptPreferences(userId, preferences)
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: {
+      "Set-Cookie": `prefs=${encrypted}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=31536000`,
+      "Content-Type": "application/json",
+    },
+  })
+}
+
+export async function GET(request: Request) {
+  const cookies = request.headers.get("Cookie")
+  const prefsMatch = cookies?.match(/prefs=([^;]+)/)
+
+  if (!prefsMatch) {
+    return Response.json({ error: "No preferences found" }, { status: 404 })
+  }
+
+  try {
+    const { userId, preferences } = await decryptPreferences(prefsMatch[1])
+    return Response.json({ userId, preferences })
+  } catch (error) {
+    return Response.json({ error: "Invalid preferences" }, { status: 400 })
+  }
+}
+```
+
+---
+
+## Signing and verifying data
+
+The `signJWS` and `verifyJWS` methods sign data without encryption, making them ideal for webhooks and publicly verifiable payloads.
+
+### Signing webhook payloads
+
+```ts title="@/lib/webhooks.ts" lineNumbers
+import { jose } from "@/auth"
+
+export async function signWebhook(event: string, data: object) {
+  return await jose.signJWS({
+    event,
+    data,
+    timestamp: Date.now(),
+  })
+}
+
+export async function verifyWebhook(token: string, maxAge = 300000) {
+  try {
+    const payload = await jose.verifyJWS(token)
+
+    const now = Date.now()
+    const timestamp = payload.timestamp as number
+
+    if (now - timestamp > maxAge) {
+      throw new Error("Webhook expired")
+    }
+
+    return {
+      event: payload.event as string,
+      data: payload.data,
+    }
+  } catch (error) {
+    throw new Error("Invalid webhook signature")
+  }
+}
+```
+
+### Sending webhooks
+
+```ts title="@/lib/send-webhook.ts" lineNumbers
+import { signWebhook } from "@/lib/webhooks"
+
+export async function sendWebhook(url: string, event: string, data: object) {
+  const signature = await signWebhook(event, data)
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Webhook-Signature": signature,
+    },
+    body: JSON.stringify({ event, data }),
+  })
+
+  return response.ok
+}
+```
+
+### Verifying webhooks (receiver)
+
+```ts title="app/api/webhooks/route.ts" lineNumbers
+import { verifyWebhook } from "@/lib/webhooks"
+
+export async function POST(request: Request) {
+  const signature = request.headers.get("X-Webhook-Signature")
+
+  if (!signature) {
+    return Response.json({ error: "Missing signature" }, { status: 401 })
+  }
+
+  try {
+    const { event, data } = await verifyWebhook(signature)
+
+    switch (event) {
+      case "user.created":
+        console.log("User created:", data)
+        break
+      case "user.updated":
+        console.log("User updated:", data)
+        break
+      default:
+        return Response.json({ error: "Unknown event" }, { status: 400 })
+    }
+
+    return Response.json({ success: true })
+  } catch (error) {
+    return Response.json({ error: "Invalid signature" }, { status: 401 })
+  }
+}
+```
+
+---
+
+## Best practices
+
+1. **Use the same secret** for all jose utilities (automatically handled by `createAuth`)
+2. **Validate all claims** including type, scope, and custom fields
+3. **Use `encodeJWT` for sensitive data** and `signJWS` for public data
+4. **Handle token expiration** gracefully in your application
+5. **Never log or expose tokens** in error messages or logs
+6. **Use HTTPS exclusively** in production environments
+7. **Store tokens securely** based on your platform (cookies, keychain, etc.)
+8. **Implement token rotation** for long-lived refresh tokens
+
+---
+
+## Related documentation
+
+- [JOSE API Reference](/docs/api-reference/jose) - Complete API documentation
+- [Core API Reference](/docs/api-reference/core) - Authentication configuration
+- [OAuth Concepts](/docs/concepts/oauth) - OAuth 2.0 security principles and flows
