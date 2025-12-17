@@ -66,35 +66,37 @@ export type OAuthProvider<Profile extends Record<string, unknown> = {}> = OAuthP
  * Cookie type with __Secure- prefix, must be Secure.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
  */
-type SecureCookie = { flag: "secure" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "encode">> }
+type SecureCookie = { strategy: "secure" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "encode">> }
 
 /**
  * Cookie type with __Host- prefix, must be Secure, Path=/, no Domain attribute.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
  */
-type HostCookie = { flag: "host" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "path" | "domain" | "encode">> }
+type HostCookie = { strategy: "host" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "path" | "domain" | "encode">> }
 
 /**
  * Standard cookie type without security prefixes.
  * Can be sent over both HTTP and HTTPS connections (default in development).
  */
-export type StandardCookie = { flag?: "standard" } & { options?: Prettify<Omit<SerializeOptions, "encode">> }
+export type StandardCookie = { strategy?: "standard" } & { options?: Prettify<Omit<SerializeOptions, "encode">> }
 
 /**
- * Union type for cookie options based on the specified flag.
+ * Union type for cookie options based on the specified strategy.
  * - `secure`: Cookies are only sent over HTTPS connections
  * - `host`: Cookies use the __Host- prefix and are only sent over HTTPS connections
  * - `standard`: Cookies can be sent over both HTTP and HTTPS connections (default in development)
  */
-export type CookieFlagOptions = StandardCookie | SecureCookie | HostCookie
+export type CookieStrategyOptions = StandardCookie | SecureCookie | HostCookie
 
 /**
  * Configuration options for cookies used in Aura Auth.
  * @see {@link AuthConfig.cookies}
  */
-export type CookieConfig = {
-    name?: string
-} & CookieFlagOptions
+export type CookieConfig = Prettify<
+    {
+        name?: string
+    } & CookieStrategyOptions
+>
 
 /**
  * Internal representation of cookie configuration with all options resolved.
@@ -231,6 +233,6 @@ export type AccessTokenError = OAuthError<z.infer<typeof OAuthAccessTokenErrorRe
  * OAuth 2.0 Token Revocation Error Response Types
  * @see https://datatracker.ietf.org/doc/html/rfc7009#section-2.2.1
  */
-export type SignOutError = OAuthError<"invalid_session_token" | "invalid_csrf_token" | "invalid_redirect_to">
+export type TokenRevocationError = OAuthError<"invalid_session_token" | "invalid_csrf_token" | "invalid_redirect_to">
 
-export type ErrorType = AuthorizationError["error"] | AccessTokenError["error"] | SignOutError["error"]
+export type ErrorType = AuthorizationError["error"] | AccessTokenError["error"] | TokenRevocationError["error"]

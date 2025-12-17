@@ -80,7 +80,7 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                         request,
                         {
                             ...cookies,
-                            flag: "host",
+                            strategy: "host",
                         },
                         trustedProxyHeaders
                     )

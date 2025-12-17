@@ -32,7 +32,7 @@ export const defaultCookieOptions: SerializeOptions = {
  * Default cookie options for "standard" cookies.
  */
 export const defaultCookieConfig: CookieConfig = {
-    flag: "standard",
+    strategy: "standard",
     name: COOKIE_NAME,
     options: defaultCookieOptions,
 }
@@ -204,7 +204,7 @@ export const secureCookieOptions = (
             name,
         }
     }
-    return cookieOptions.flag === "host"
+    return cookieOptions.strategy === "host"
         ? {
               ...defaultCookieOptions,
               ...cookieOptions.options,
