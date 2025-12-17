@@ -1,5 +1,5 @@
 {
-  "title": "Integration Guides",
-  "pages": ["nextjs"],
+  "title": "Guides",
+  "pages": ["nextjs", "jose-utilities"],
   "defaultOpen": false
 }
