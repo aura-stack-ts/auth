@@ -219,6 +219,14 @@ export type RouterGlobalContext = Prettify<
     } & Required<Omit<AuthRuntimeConfig, "secret">>
 >
 
+export interface AuthInstance {
+    handlers: {
+        GET: (request: Request) => Response | Promise<Response>
+        POST: (request: Request) => Response | Promise<Response>
+    }
+    jose: JoseInstance
+}
+
 /**
  * Base OAuth error response structure.
  */
