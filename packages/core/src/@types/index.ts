@@ -198,14 +198,6 @@ export interface AuthConfig {
 }
 
 export type JoseInstance = ReturnType<typeof createJoseInstance>
-/*
-export type JoseInstance = {
-    decodeJWT: (token: string) => Promise<JWTPayload>;
-    encodeJWT: (payload: JWTPayload) => Promise<string>;
-    signJWS: (payload: JWTPayload) => Promise<string>;
-    verifyJWS: (payload: string) => Promise<JWTPayload>;
-}
-*/
 
 /**
  * Internal runtime configuration used within Aura Auth after initialization.
