@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
+import type { Session } from "@aura-stack/auth/types"
 
 const getCSRFToken = async () => {
     const headersStore = await headers()
@@ -21,7 +22,7 @@ export const useAuth = async () => {
         cache: "no-store",
     })
     const response = await session.json()
-    return response
+    return response as Session
 }
 
 export const signOut = async () => {

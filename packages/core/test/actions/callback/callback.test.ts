@@ -19,7 +19,7 @@ describe("callbackAction", () => {
         expect(await response.json()).toEqual({ error: "invalid_request", error_description: "Invalid route parameters" })
     })
 
-    test("unsupported oauth integration", async () => {
+    test("unsupported oauth provider", async () => {
         const response = await GET(new Request("https://example.com/auth/callback/unknown?code=123&state=abc"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
@@ -29,7 +29,7 @@ describe("callbackAction", () => {
     })
 
     test("without cookies", async () => {
-        const response = await GET(new Request("https://example.com/auth/callback/oauth-integration?code=123&state=abc"))
+        const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=123&state=abc"))
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
             error: "invalid_request",
@@ -39,12 +39,12 @@ describe("callbackAction", () => {
 
     test("mismatching state", async () => {
         const state = setCookie("state", "123", secureCookieOptions)
-        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-integration", secureCookieOptions)
+        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-provider", secureCookieOptions)
         const redirectTo = setCookie("redirect_to", "/auth", secureCookieOptions)
         const codeVerifier = setCookie("code_verifier", "verifier_123", secureCookieOptions)
 
         const response = await GET(
-            new Request("https://example.com/auth/callback/oauth-integration?code=123&state=abc", {
+            new Request("https://example.com/auth/callback/oauth-provider?code=123&state=abc", {
                 headers: {
                     Cookie: [state, redirectURI, redirectTo, codeVerifier].join("; "),
                 },
@@ -82,13 +82,13 @@ describe("callbackAction", () => {
         })
 
         const state = setCookie("state", "abc", secureCookieOptions)
-        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-integration", secureCookieOptions)
+        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-provider", secureCookieOptions)
         const redirectTo = setCookie("redirect_to", "/auth", secureCookieOptions)
         const { codeVerifier } = await createPKCE()
         const codeVerifierCookie = setCookie("code_verifier", codeVerifier, secureCookieOptions)
 
         const response = await GET(
-            new Request("https://example.com/auth/callback/oauth-integration?code=auth_code_123&state=abc", {
+            new Request("https://example.com/auth/callback/oauth-provider?code=auth_code_123&state=abc", {
                 headers: {
                     Cookie: [state, redirectURI, redirectTo, codeVerifierCookie].join("; "),
                 },
@@ -105,7 +105,7 @@ describe("callbackAction", () => {
                 client_id: "oauth_client_id",
                 client_secret: "oauth_client_secret",
                 code: "auth_code_123",
-                redirect_uri: "https://example.com/auth/callback/oauth-integration",
+                redirect_uri: "https://example.com/auth/callback/oauth-provider",
                 grant_type: "authorization_code",
                 code_verifier: codeVerifier,
             }).toString(),

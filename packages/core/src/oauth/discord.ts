@@ -1,4 +1,4 @@
-import type { OAuthConfig } from "@/@types/index.js"
+import type { OAuthProviderConfig } from "@/@types/index.js"
 
 /**
  * @see [Discord - Nameplate Object](https://discord.com/developers/docs/resources/user#nameplate-nameplate-structure)
@@ -56,7 +56,7 @@ export interface DiscordProfile {
  * @see [Discord - OAuth2 Scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes)
  * @see [Discord - Image Formatting](https://discord.com/developers/docs/reference#image-formatting)
  */
-export const discord: OAuthConfig<DiscordProfile> = {
+export const discord: OAuthProviderConfig<DiscordProfile> = {
     id: "discord",
     name: "Discord",
     authorizeURL: "https://discord.com/oauth2/authorize",

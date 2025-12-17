@@ -1,4 +1,4 @@
-import type { OAuthConfig } from "@/@types/index.js"
+import type { OAuthProviderConfig } from "@/@types/index.js"
 
 /**
  * @see [X - Get my User](https://docs.x.com/x-api/users/get-my-user)
@@ -19,7 +19,7 @@ export interface XProfile {
  * @see [X - OAuth 2.0 Scopes](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code#scopes)
  * @see [X - OAuth 2.0 Bearer Token](https://docs.x.com/fundamentals/authentication/oauth-2-0/application-only)
  */
-export const x: OAuthConfig<XProfile> = {
+export const x: OAuthProviderConfig<XProfile> = {
     id: "x",
     name: "X",
     authorizeURL: "https://x.com/i/oauth2/authorize",

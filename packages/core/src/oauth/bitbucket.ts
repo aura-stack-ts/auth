@@ -1,4 +1,4 @@
-import type { LiteralUnion, OAuthConfig } from "@/@types/index.js"
+import type { LiteralUnion, OAuthProviderConfig } from "@/@types/index.js"
 
 /**
  * @see [Get current user](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get)
@@ -29,7 +29,7 @@ export interface BitbucketProfile {
  * @see [Bitbucket - Cloud REST API](https://developer.atlassian.com/cloud/bitbucket/rest/intro/)
  * @see [Bitbucket - User Endpoint](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-users-endpoint)
  */
-export const bitbucket: OAuthConfig<BitbucketProfile> = {
+export const bitbucket: OAuthProviderConfig<BitbucketProfile> = {
     id: "bitbucket",
     name: "Bitbucket",
     authorizeURL: "https://bitbucket.org/site/oauth2/authorize",

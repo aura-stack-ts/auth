@@ -1,14 +1,11 @@
-import { createOAuthIntegrations } from "@/oauth/index.ts"
-import type { GlobalContext } from "@aura-stack/router"
-import type { CookieOptions } from "./index.ts"
 import { createJoseInstance } from "@/jose.ts"
+import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
+import type { GlobalContext } from "@aura-stack/router"
+import type { AuthConfig, CookieOptions } from "./index.ts"
 
 declare module "@aura-stack/router" {
-    interface GlobalContext {
-        oauth: ReturnType<typeof createOAuthIntegrations>
-        cookies: CookieOptions
+    interface GlobalContext extends Required<Omit<AuthConfig, "secret" | "oauth">> {
+        oauth: ReturnType<typeof createBuiltInOAuthProviders>
         jose: ReturnType<typeof createJoseInstance>
-        basePath: string
-        trustedProxyHeaders?: boolean
     }
 }

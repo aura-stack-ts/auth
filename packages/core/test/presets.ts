@@ -1,9 +1,9 @@
 import { createAuth } from "@/index.js"
-import { CookieOptionsInternal, OAuthSecureConfig } from "@/@types/index.js"
+import { OAuthProviderCredentials, CookieConfigInternal } from "@/@types/index.js"
 import type { JWTPayload } from "@/jose.js"
 
-export const oauthCustomService: OAuthSecureConfig = {
-    id: "oauth-integration",
+export const oauthCustomService: OAuthProviderCredentials = {
+    id: "oauth-provider",
     name: "OAuth",
     authorizeURL: "https://example.com/oauth/authorize",
     accessToken: "https://example.com/oauth/access_token",
@@ -14,10 +14,7 @@ export const oauthCustomService: OAuthSecureConfig = {
     clientSecret: "oauth_client_secret",
 }
 
-/**
- * @todo: Is this needed?
- */
-export const oauthCustomServiceProfile: OAuthSecureConfig = {
+export const oauthCustomServiceProfile: OAuthProviderCredentials = {
     ...oauthCustomService,
     id: "oauth-profile",
     profile(profile: any) {
@@ -40,9 +37,9 @@ export const sessionPayload: JWTPayload = {
     image: "https://example.com/image.jpg",
 }
 
-export const secureCookieOptions: CookieOptionsInternal = { secure: true, prefix: "__Secure-" }
+export const secureCookieOptions: CookieConfigInternal = { secure: true, prefix: "__Secure-" }
 
-export const hostCookieOptions: CookieOptionsInternal = { secure: true, prefix: "__Host-" }
+export const hostCookieOptions: CookieConfigInternal = { secure: true, prefix: "__Host-" }
 
 export const {
     handlers: { GET, POST },

@@ -67,7 +67,7 @@ describe("createAuthorizationURL", () => {
         test("valid OAuth configuration with all fields", () => {
             const url = createAuthorizationURL(
                 oauthCustomService,
-                "https://example.com/auth/callback/oauth-integration",
+                "https://example.com/auth/callback/oauth-provider",
                 "123",
                 "challenge",
                 "S256"
@@ -76,7 +76,7 @@ describe("createAuthorizationURL", () => {
             const searchParams = new URL(url).searchParams
             expect(searchParams.has("client_secret")).toBeFalsy()
             expect(searchParams.get("client_id")).toBe("oauth_client_id")
-            expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-integration")
+            expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
             expect(searchParams.get("state")).toBe("123")
             expect(searchParams.get("scope")).toBe("profile email")
             expect(searchParams.get("response_type")).toBe("code")

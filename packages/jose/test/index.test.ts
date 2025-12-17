@@ -126,7 +126,6 @@ describe("JWTs", () => {
 
         const jwt = await encodeJWT(payload)
         expect(jwt).toBeDefined()
-
         const decodedPayload = await decodeJWT(jwt)
         expect(decodedPayload.sub).toBe(payload.sub)
         expect(decodedPayload.name).toBe(payload.name)

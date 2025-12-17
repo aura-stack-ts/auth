@@ -2,7 +2,7 @@ import { isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
 import { equals, getNormalizedOriginPath, sanitizeURL, toCastCase } from "@/utils.js"
 import { AuthError, ERROR_RESPONSE, InvalidRedirectToError, isAuthError } from "@/error.js"
-import type { OAuthSecureConfig } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * Constructs the request URI for the Authorization Request to the third-party OAuth service. It includes
@@ -17,7 +17,7 @@ import type { OAuthSecureConfig } from "@/@types/index.js"
  * @param state - A unique string used to maintain state between the request and callback.
  */
 export const createAuthorizationURL = (
-    oauthConfig: OAuthSecureConfig,
+    oauthConfig: OAuthProviderCredentials,
     redirectURI: string,
     state: string,
     codeChallenge: string,

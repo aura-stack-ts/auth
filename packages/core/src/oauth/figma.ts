@@ -1,4 +1,4 @@
-import type { OAuthConfig } from "@/@types/index.js"
+import type { OAuthProviderConfig } from "@/@types/index.js"
 
 /**
  * @see [Figma API - Users](https://developers.figma.com/docs/rest-api/users-types/)
@@ -16,7 +16,7 @@ export interface FigmaProfile {
  * @see [Figma - Create an OAuth App](https://developers.figma.com/docs/rest-api/authentication/#create-an-oauth-app)
  * @see [Figma - OAuth Scopes](https://developers.figma.com/docs/rest-api/scopes/)
  */
-export const figma: OAuthConfig<FigmaProfile> = {
+export const figma: OAuthProviderConfig<FigmaProfile> = {
     id: "figma",
     name: "Figma",
     authorizeURL: "https://www.figma.com/oauth",

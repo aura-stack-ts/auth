@@ -8,7 +8,7 @@ export const csrfTokenAction = createEndpoint("GET", "/csrfToken", async (ctx) =
         request,
         context: { cookies, jose, trustedProxyHeaders },
     } = ctx
-    const cookieOptions = secureCookieOptions(request, { ...cookies, flag: "host" }, trustedProxyHeaders)
+    const cookieOptions = secureCookieOptions(request, { ...cookies, strategy: "host" }, trustedProxyHeaders)
 
     const existingCSRFToken = getCookie(request, "csrfToken", cookieOptions, true)
     const csrfToken = await createCSRF(jose, existingCSRFToken)

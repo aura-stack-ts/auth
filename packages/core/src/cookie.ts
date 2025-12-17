@@ -3,10 +3,10 @@ import { AuthError } from "@/error.js"
 import { isRequest } from "@/assert.js"
 import type { JWTPayload } from "@/jose.js"
 import type {
-    AuthConfigInternal,
+    AuthRuntimeConfig,
     CookieName,
-    CookieOptions,
-    CookieOptionsInternal,
+    CookieConfig,
+    CookieConfigInternal,
     LiteralUnion,
     StandardCookie,
 } from "@/@types/index.js"
@@ -31,13 +31,13 @@ export const defaultCookieOptions: SerializeOptions = {
 /**
  * Default cookie options for "standard" cookies.
  */
-export const defaultCookieConfig: CookieOptions = {
-    flag: "standard",
+export const defaultCookieConfig: CookieConfig = {
+    strategy: "standard",
     name: COOKIE_NAME,
     options: defaultCookieOptions,
 }
 
-export const defaultStandardCookieConfig: CookieOptionsInternal = {
+export const defaultStandardCookieConfig: CookieConfigInternal = {
     secure: false,
     httpOnly: true,
     prefix: "",
@@ -47,7 +47,7 @@ export const defaultStandardCookieConfig: CookieOptionsInternal = {
  * Default cookie options for "secure" cookies.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
  */
-export const defaultSecureCookieConfig: CookieOptionsInternal = {
+export const defaultSecureCookieConfig: CookieConfigInternal = {
     secure: true,
     prefix: "__Secure-",
 }
@@ -56,7 +56,7 @@ export const defaultSecureCookieConfig: CookieOptionsInternal = {
  * Default cookie options for "host" cookies.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
  */
-export const defaultHostCookieConfig: CookieOptionsInternal = {
+export const defaultHostCookieConfig: CookieConfigInternal = {
     secure: true,
     prefix: "__Host-",
     path: "/",
@@ -72,7 +72,7 @@ export const expiredCookieOptions: SerializeOptions = {
     maxAge: 0,
 }
 
-export const defineDefaultCookieOptions = (options?: CookieOptionsInternal): CookieOptionsInternal => {
+export const defineDefaultCookieOptions = (options?: CookieConfigInternal): CookieConfigInternal => {
     return {
         name: options?.name ?? COOKIE_NAME,
         prefix: options?.prefix ?? (options?.secure ? "__Secure-" : ""),
@@ -88,7 +88,7 @@ export const defineDefaultCookieOptions = (options?: CookieOptionsInternal): Coo
  * Cookie attributes are serialized in the following order:
  * Expires, Max-Age, Domain, Path, Secure, HttpOnly, SameSite, Partitioned, Priority.
  */
-export const setCookie = (cookieName: LiteralUnion<CookieName>, value: string, options?: CookieOptionsInternal) => {
+export const setCookie = (cookieName: LiteralUnion<CookieName>, value: string, options?: CookieConfigInternal) => {
     const { prefix, name } = defineDefaultCookieOptions(options)
     const cookieNameWithPrefix = `${prefix}${name}.${cookieName}`
     return serialize(cookieNameWithPrefix, value, {
@@ -109,7 +109,7 @@ export const setCookie = (cookieName: LiteralUnion<CookieName>, value: string, o
 export const getCookie = (
     petition: Request | Response,
     cookie: LiteralUnion<CookieName>,
-    options?: CookieOptionsInternal,
+    options?: CookieConfigInternal,
     optional: boolean = false
 ) => {
     const cookies = isRequest(petition) ? petition.headers.get("Cookie") : petition.headers.getSetCookie().join("; ")
@@ -140,8 +140,8 @@ export const getCookie = (
  */
 export const createSessionCookie = async (
     session: JWTPayload,
-    cookieOptions: CookieOptionsInternal,
-    jose: AuthConfigInternal["jose"]
+    cookieOptions: CookieConfigInternal,
+    jose: AuthRuntimeConfig["jose"]
 ) => {
     try {
         const encoded = await jose.encodeJWT(session)
@@ -166,9 +166,9 @@ export const createSessionCookie = async (
  */
 export const secureCookieOptions = (
     request: Request,
-    cookieOptions: CookieOptions,
+    cookieOptions: CookieConfig,
     trustedProxyHeaders?: boolean
-): CookieOptionsInternal => {
+): CookieConfigInternal => {
     const name = cookieOptions.name ?? COOKIE_NAME
     const isSecure = trustedProxyHeaders
         ? request.url.startsWith("https://") ||
@@ -204,7 +204,7 @@ export const secureCookieOptions = (
             name,
         }
     }
-    return cookieOptions.flag === "host"
+    return cookieOptions.strategy === "host"
         ? {
               ...defaultCookieOptions,
               ...cookieOptions.options,
@@ -221,7 +221,7 @@ export const secureCookieOptions = (
  * @param options cookie options obtained from secureCookieOptions
  * @returns formatted cookie options for an expired cookie
  */
-export const expireCookie = (name: LiteralUnion<CookieName>, options: CookieOptionsInternal) => {
+export const expireCookie = (name: LiteralUnion<CookieName>, options: CookieConfigInternal) => {
     return setCookie(name, "", { ...options, ...expiredCookieOptions })
 }
 
@@ -231,7 +231,7 @@ export const expireCookie = (name: LiteralUnion<CookieName>, options: CookieOpti
  * @param options cookie options obtained from secureCookieOptions
  * @returns formatted cookie options for OAuth cookies
  */
-export const oauthCookie = (options: CookieOptionsInternal): CookieOptionsInternal => {
+export const oauthCookie = (options: CookieConfigInternal): CookieConfigInternal => {
     return {
         ...options,
         secure: options.secure,

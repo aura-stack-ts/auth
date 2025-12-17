@@ -1,7 +1,7 @@
-import { integrations } from "@aura-stack/auth/oauth/index"
+import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 import { OAuthProvider } from "@/app/lib/@types/props"
 
-export const providers = Object.entries(integrations).reduce((previous, [oauth, config]) => {
+export const providers = Object.entries(builtInOAuthProviders).reduce((previous, [oauth, config]) => {
     const clientIdInput = Boolean(process.env[`AURA_AUTH_${oauth.toUpperCase()}_CLIENT_ID`])
     const clientSecretInput = Boolean(process.env[`AURA_AUTH_${oauth.toUpperCase()}_CLIENT_SECRET`])
     const { profile, scope, ...exclude } = config

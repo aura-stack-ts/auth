@@ -2,7 +2,7 @@ import { describe, test, expect } from "vitest"
 import { hostCookieOptions } from "./presets.js"
 import type { SerializeOptions } from "cookie"
 import { setCookie, getCookie, secureCookieOptions, COOKIE_NAME } from "@/cookie.js"
-import type { CookieOptions, CookieOptionsInternal } from "@/@types/index.js"
+import type { CookieConfig, CookieConfigInternal } from "@/@types/index.js"
 
 describe("setCookie", () => {
     test("set state cookie with default options", () => {
@@ -133,12 +133,12 @@ describe("secureCookieOptions", () => {
     const http = new Request("http://localhost:3000")
     const https = new Request("https://www.example.com")
 
-    const testCases: Array<{ description: string; request: Request; options: CookieOptions; expected: CookieOptionsInternal }> = [
+    const testCases: Array<{ description: string; request: Request; options: CookieConfig; expected: CookieConfigInternal }> = [
         {
             description: "override httpOnly in a secure connection with standard flag",
             request: https,
             options: {
-                flag: "standard",
+                strategy: "standard",
                 options: {
                     httpOnly: false,
                 },
@@ -157,7 +157,7 @@ describe("secureCookieOptions", () => {
             description: "override httpOnly in a secure connection with secure flag",
             request: https,
             options: {
-                flag: "secure",
+                strategy: "secure",
                 options: {
                     httpOnly: false,
                 },
@@ -176,7 +176,7 @@ describe("secureCookieOptions", () => {
             description: "override httpOnly in a secure connection with host flag",
             request: https,
             options: {
-                flag: "host",
+                strategy: "host",
                 options: {
                     httpOnly: false,
                 },
@@ -196,7 +196,7 @@ describe("secureCookieOptions", () => {
             description: "disable secure option in a insecure connection with standard flag",
             request: http,
             options: {
-                flag: "standard",
+                strategy: "standard",
                 options: {
                     secure: false,
                 },
@@ -215,7 +215,7 @@ describe("secureCookieOptions", () => {
             description: "disable secure option in a insecure connection with secure flag",
             request: http,
             options: {
-                flag: "secure",
+                strategy: "secure",
             },
             expected: {
                 secure: false,
@@ -231,7 +231,7 @@ describe("secureCookieOptions", () => {
             description: "disable secure option in a insecure connection with host flag",
             request: http,
             options: {
-                flag: "host",
+                strategy: "host",
             },
             expected: {
                 secure: false,
@@ -247,7 +247,7 @@ describe("secureCookieOptions", () => {
             description: "default secure flag in a secure connection",
             request: https,
             options: {
-                flag: "secure",
+                strategy: "secure",
             },
             expected: {
                 secure: true,
@@ -263,7 +263,7 @@ describe("secureCookieOptions", () => {
             description: "default host flag in a secure connection",
             request: https,
             options: {
-                flag: "host",
+                strategy: "host",
             },
             expected: {
                 secure: true,
@@ -280,7 +280,7 @@ describe("secureCookieOptions", () => {
             description: "default secure flag in a insecure connection",
             request: http,
             options: {
-                flag: "secure",
+                strategy: "secure",
             },
             expected: {
                 secure: false,
@@ -296,7 +296,7 @@ describe("secureCookieOptions", () => {
             description: "default host flag in a insecure connection",
             request: http,
             options: {
-                flag: "host",
+                strategy: "host",
             },
             expected: {
                 secure: false,
@@ -312,7 +312,7 @@ describe("secureCookieOptions", () => {
             description: "force to disable secure flag in a secure connection with secure flag",
             request: https,
             options: {
-                flag: "secure",
+                strategy: "secure",
                 options: {
                     secure: false,
                 } as SerializeOptions,
@@ -331,7 +331,7 @@ describe("secureCookieOptions", () => {
             description: "force to custom domain in a secure connection with host flag",
             request: https,
             options: {
-                flag: "host",
+                strategy: "host",
                 options: {
                     domain: "example.com",
                     path: "/dashboard",
@@ -352,7 +352,7 @@ describe("secureCookieOptions", () => {
             description: "force to custom domain in a insecure connection with host flag",
             request: http,
             options: {
-                flag: "host",
+                strategy: "host",
                 options: {
                     domain: "example.com",
                     path: "/dashboard",
@@ -373,7 +373,7 @@ describe("secureCookieOptions", () => {
             description: "disable secure and httpOnly attributes in a insecure connection",
             request: http,
             options: {
-                flag: "standard",
+                strategy: "standard",
                 options: {
                     secure: false,
                     httpOnly: false,
@@ -393,7 +393,7 @@ describe("secureCookieOptions", () => {
             description: "custom cookie name with secure flag in a secure connection",
             request: https,
             options: {
-                flag: "secure",
+                strategy: "secure",
                 name: "aura-stack-auth-cookie",
             },
             expected: {
@@ -410,7 +410,7 @@ describe("secureCookieOptions", () => {
             description: "set sameSite to strict with host flag in a secure connection",
             request: https,
             options: {
-                flag: "host",
+                strategy: "host",
                 options: {
                     sameSite: "strict",
                 },

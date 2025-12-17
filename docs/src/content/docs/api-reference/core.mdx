@@ -68,10 +68,10 @@ Creates an authentication instance with handlers for OAuth flows, session manage
 
 Configuration object for authentication settings.
 
-| Parameter | Type                                         | Description                                 |
-| --------- | -------------------------------------------- | ------------------------------------------- |
-| `oauth`   | `(OAuthIntegrations \| OAuthSecureConfig)[]` | Array of OAuth provider configurations      |
-| `cookies` | `CookieOptions`                              | Cookie configuration for session management |
+| Parameter | Type                                                    | Description                                 |
+| --------- | ------------------------------------------------------- | ------------------------------------------- |
+| `oauth`   | `(BuiltInOAuthProvider  \| OAuthProviderCredentials)[]` | Array of OAuth provider configurations      |
+| `cookies` | `CookieConfig`                                          | Cookie configuration for session management |
 
 ##### `oauth`
 
@@ -87,10 +87,12 @@ export const auth = createAuth({
 })
 ```
 
-- Custom OAuth configuration implementations: create custom oauth providers doesn't supported natvely by aura auth, follow the `OAuthSecureConfig` type.
+- Custom OAuth configuration implementations: create custom oauth providers doesn't supported natvely by aura auth, follow the `OAuthProviderCredentials` type.
 
 ```ts lineNumbers
-interface OAuthConfig<Profile extends object = {}> {
+import type { User } from "@aura-stack/auth/types"
+
+interface OAuthProviderConfig<Profile extends object = {}> {
   id: string
   name: string
   authorizeURL: string
@@ -98,10 +100,10 @@ interface OAuthConfig<Profile extends object = {}> {
   userInfo: string
   scope: string
   responseType: string
-  profile?: (profile: Profile) => Promise<OAuthUserProfile> | OAuthUserProfile
+  profile?: (profile: Profile) => Promise<User> | User
 }
 
-interface OAuthSecureConfig extends OAuthConfig {
+interface OAuthProviderCredentials extends OAuthProviderConfig {
   clientId: string
   clientSecret: string
 }
@@ -109,18 +111,18 @@ interface OAuthSecureConfig extends OAuthConfig {
 
 **Properties**
 
-| Property       | Type       | Description                              |
-| -------------- | ---------- | ---------------------------------------- |
-| `id`           | `string`   | Unique identifier for the provider       |
-| `name`         | `string`   | Display name of the provider             |
-| `authorizeURL` | `string`   | OAuth authorization endpoint             |
-| `accessToken`  | `string`   | Token exchange endpoint                  |
-| `userInfo`     | `string`   | User information endpoint                |
-| `scope`        | `string`   | OAuth scopes to request                  |
-| `responseType` | `string`   | OAuth response type (typically `'code'`) |
-| `clientId`     | `string`   | OAuth client ID                          |
-| `clientSecret` | `string`   | OAuth client secret                      |
-| `profile`      | `function` | Optional profile transformer             |
+| Property       | Type                                    | Description                              |
+| -------------- | --------------------------------------- | ---------------------------------------- |
+| `id`           | `string`                                | Unique identifier for the provider       |
+| `name`         | `string`                                | Display name of the provider             |
+| `authorizeURL` | `string`                                | OAuth authorization endpoint             |
+| `accessToken`  | `string`                                | Token exchange endpoint                  |
+| `userInfo`     | `string`                                | User information endpoint                |
+| `scope`        | `string`                                | OAuth scopes to request                  |
+| `responseType` | `code` \| `refresh_token` \| `id_token` | OAuth response type (typically `'code'`) |
+| `clientId`     | `string`                                | OAuth client ID                          |
+| `clientSecret` | `string`                                | OAuth client secret                      |
+| `profile`      | `function`                              | Optional profile transformer             |
 
 ```ts lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -147,9 +149,11 @@ export const auth = createAuth({
 Cookie configuration management for session management by Aura Auth, the user can modify the obtains based on their needs.
 
 ```ts lineNumbers
-type CookieOptions = {
+import type { StandardCookie, SecureCookie, HostCookie } from "@aura-stack/auth/types"
+
+type CookieConfig = {
   name?: string
-  flag: "standard" | "secure" | "host"
+  strategy: "standard" | "secure" | "host"
   options: StandardCookie | SecureCookie | HostCookie
 }
 ```
@@ -179,7 +183,7 @@ This flag default in development. Standard cookies without security prefix. Can 
 
 ```ts lineNumbers
 type StandardCookie = {
-  flag: "standard"
+  strategy: "standard"
   options: {
     secure?: boolean | undefined
     maxAge?: number | undefined
@@ -200,7 +204,7 @@ when `secure` flag is set in a development environment (HTTP) it is disable beca
 
 ```ts lineNumbers
 type SecureCookie = {
-  flag: "secure"
+  strategy: "secure"
   options: {
     maxAge?: number | undefined
     expires?: Date | undefined
@@ -224,7 +228,7 @@ This flag it the mose secure, but is less flexible, when `host` flag is set in a
 
 ```ts lineNumbers
 type HostCookie = {
-  flag: "host"
+  strategy: "host"
   options: {
     maxAge?: number | undefined
     expires?: Date | undefined
@@ -266,14 +270,17 @@ Handles the OAuth callback after user authorization. where `:oauth` is the id of
 
 returns the current user session, with the following structure:
 
-```json lineNumbers
-{
+```ts lineNumbers
+export interface User {
   sub: string
   name?: string
   email?: string
   image?: string
-  integrations: string[]
-  version: number
+}
+
+export interface Session {
+  user: User
+  expires: string
 }
 ```
 
@@ -341,9 +348,9 @@ In the OAuth 2.0 workflow is possible that happens some erros during the workflo
 
 OAuth 2.0 and its extensions defines three cases erros during the `Authorization`, `Access Token` and `Revocation Tokens` flow.
 
-### `AuthorizationErrorResponse` [#authorization-error-response]
+### `AuthorizationError` [#authorization-error-response]
 
-OAuth 2.0 authorization errors as defined in [RFC 6749 §4.1.2.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1):
+OAuth 2.0 authorization errors as defined in [RFC 6749 #4.1.2.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1):
 
 - `invalid_request`
 - `unauthorized_client`
@@ -353,9 +360,9 @@ OAuth 2.0 authorization errors as defined in [RFC 6749 §4.1.2.1](https://datatr
 - `server_error`
 - `temporarily_unavailable`
 
-### `AccessTokenErrorResponse` [#access-token-error-response]
+### `AccessTokenError` [#access-token-error-response]
 
-OAuth 2.0 access token errors as defined in [RFC 6749 §5.2](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2):
+OAuth 2.0 access token errors as defined in [RFC 6749 #5.2](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2):
 
 - `invalid_request`
 - `invalid_client`
@@ -364,11 +371,13 @@ OAuth 2.0 access token errors as defined in [RFC 6749 §5.2](https://datatracker
 - `unsupported_grant_type`
 - `invalid_scope`
 
-### `TokenRevocationErrorResponse` [#token-Revocation-error-response]
+### `TokenRevocationError` [#token-Revocation-error-response]
 
-Session invalidation errors:
+OAuth 2.0 token revocation error as defined in [RFC 7009 #2.2.1](https://datatracker.ietf.org/doc/html/rfc7009#section-2.2.1)
 
 - `invalid_session_token`
+- `invalid_csrf_token`
+- `invalid_redirect_to`
 
 ---
 
@@ -421,7 +430,7 @@ export const auth = createAuth({
   oauth: ["github"],
   cookies: {
     name: "my-app",
-    flag: process.env.NODE_ENV === "production" ? "host" : "standard",
+    strategy: process.env.NODE_ENV === "production" ? "host" : "standard",
     sameSite: "strict",
   },
 })

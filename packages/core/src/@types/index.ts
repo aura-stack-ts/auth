@@ -1,107 +1,160 @@
 import { z } from "zod/v4"
-import { SerializeOptions } from "cookie"
-import { createJoseInstance } from "@/jose.js"
+import { createJoseInstance, JWTPayload } from "@/jose.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
-import type { RoutePattern } from "@aura-stack/router"
-import type { OAuthIntegrations } from "@/oauth/index.js"
+import type { Prettify, RoutePattern } from "@aura-stack/router"
+import type { SerializeOptions } from "cookie"
+import type { LiteralUnion } from "./utility.js"
+import type { BuiltInOAuthProvider } from "@/oauth/index.js"
+
+export * from "./utility.js"
 
 /**
- * Standardized user profile returned by OAuth integrations after fetching user information
- * and mapping the response to this format by default or via `profile` custom profile function.
+ * Standard JWT claims that are managed internally by the token system.
+ * These fields are typically filtered out before returning user data.
  */
-export interface OAuthUserProfile {
+export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" | "sub" | "aud" | "iss">
+
+/**
+ * Standardized user profile returned by OAuth providers after fetching user information
+ * and mapping the response to this format by default or via the `profile` custom function.
+ */
+export interface User {
     sub: string
     name?: string
     email?: string
     image?: string
 }
 
-export interface User {
-    user: OAuthUserProfile
+/**
+ * Session data returned by the session endpoint.
+ */
+export interface Session {
+    user: User
     expires: string
 }
 
-export interface OAuthConfig<Profile extends object = {}> {
+/**
+ * Configuration for an OAuth provider without credentials.
+ * Use this type when defining provider metadata and endpoints.
+ */
+export interface OAuthProviderConfig<Profile extends object = {}> {
     id: string
     name: string
     authorizeURL: string
     accessToken: string
     userInfo: string
     scope: string
+    //responseType: "code" | "refresh_token" | "id_token"
     responseType: string
-    profile?: (profile: Profile) => OAuthUserProfile | Promise<OAuthUserProfile>
+    profile?: (profile: Profile) => User | Promise<User>
 }
 
-export interface OAuthSecureConfig extends OAuthConfig {
+/**
+ * OAuth provider configuration with client credentials.
+ * Extends OAuthProviderConfig with clientId and clientSecret.
+ */
+export interface OAuthProviderCredentials extends OAuthProviderConfig {
     clientId: string
     clientSecret: string
 }
 
-export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>)
-
-export type Prettify<T> = { [K in keyof T]: T[K] } & {}
+/**
+ * Complete OAuth provider type combining configuration and credentials.
+ */
+export type OAuthProvider<Profile extends Record<string, unknown> = {}> = OAuthProviderConfig<Profile> & OAuthProviderCredentials
 
 /**
  * Cookie type with __Secure- prefix, must be Secure.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
  */
-type SecureCookie = { flag: "secure" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "encode">> }
+export type SecureCookie = { strategy: "secure" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "encode">> }
 
 /**
  * Cookie type with __Host- prefix, must be Secure, Path=/, no Domain attribute.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
  */
-type HostCookie = { flag: "host" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "path" | "domain" | "encode">> }
-
-export type StandardCookie = { flag?: "standard" } & { options?: Prettify<Omit<SerializeOptions, "encode">> }
+export type HostCookie = { strategy: "host" } & {
+    options?: Prettify<Omit<SerializeOptions, "secure" | "path" | "domain" | "encode">>
+}
 
 /**
- * Union type for cookie options based on the specified flag.
- *  - secure: Cookies are only sent over HTTPS connections.
- *  - host: Cookies use the __Host- prefix and are only sent over HTTPS connections.
- *  - standard: Cookies can be sent over both HTTP and HTTPS connections. (default in development)
+ * Standard cookie type without security prefixes.
+ * Can be sent over both HTTP and HTTPS connections (default in development).
  */
-export type CookieFlagOptions = StandardCookie | SecureCookie | HostCookie
+export type StandardCookie = { strategy?: "standard" } & { options?: Prettify<Omit<SerializeOptions, "encode">> }
 
-export type CookieOptions = {
-    name?: string
-} & CookieFlagOptions
+/**
+ * Union type for cookie options based on the specified strategy.
+ * - `secure`: Cookies are only sent over HTTPS connections
+ * - `host`: Cookies use the __Host- prefix and are only sent over HTTPS connections
+ * - `standard`: Cookies can be sent over both HTTP and HTTPS connections (default in development)
+ */
+export type CookieStrategyOptions = StandardCookie | SecureCookie | HostCookie
 
-export type CookieOptionsInternal = {
+/**
+ * Configuration options for cookies used in Aura Auth.
+ * @see {@link AuthConfig.cookies}
+ */
+export type CookieConfig = Prettify<
+    {
+        name?: string
+    } & CookieStrategyOptions
+>
+
+/**
+ * Internal representation of cookie configuration with all options resolved.
+ * @internal
+ */
+export type CookieConfigInternal = {
     name?: string
     prefix?: string
 } & SerializeOptions
 
 /**
- * Names of cookies used by Aura Auth for session management and OAuth flows
+ * Names of cookies used by Aura Auth for session management and OAuth flows.
+ * - `sessionToken`: User session JWT
+ * - `csrfToken`: CSRF protection token
+ * - `state`: OAuth state parameter for CSRF protection
+ * - `code_verifier`: PKCE code verifier for authorization code flow
+ * - `redirect_uri`: OAuth callback URI
+ * - `redirect_to`: Post-authentication redirect path
+ * - `nonce`: OpenID Connect nonce parameter
  */
-export type CookieName = "sessionToken" | "csrfToken" | "state" | "pkce" | "nonce" | "code_verifier"
+export type CookieName = "sessionToken" | "csrfToken" | "state" | "nonce" | "code_verifier" | "redirect_to" | "redirect_uri"
 
+// ============================================================================
+// Auth Configuration Types
+// ============================================================================
+
+/**
+ * Main configuration interface for Aura Auth.
+ * This is the user-facing configuration object passed to `createAuth()`.
+ */
 export interface AuthConfig {
     /**
-     * OAuth integrations available in the authentication and authorization flows. It provides a type-inference
-     * for the OAuth integrations that are supported by Aura Stack Auth; alternatively, you can provide a custom
-     * OAuth third-party authorization service by implementing the `OAuthSecureConfig` interface.
+     * OAuth providers available in the authentication and authorization flows. It provides a type-inference
+     * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
+     * OAuth third-party authorization service by implementing the `OAuthProviderCredentials` interface.
      *
-     * Built-in OAuth integrations:
+     * Built-in OAuth providers:
      * oauth: ["github", "google"]
      *
-     * Custom OAuth integrations:
+     * Custom OAuth providers:
      * oauth: [
      *   {
-     *     id: "oauth-integration",
+     *     id: "oauth-providers",
      *     name: "OAuth",
      *     authorizeURL: "https://example.com/oauth/authorize",
      *     accessToken: "https://example.com/oauth/token",
      *     scope: "profile email",
      *     responseType: "code",
      *     userInfo: "https://example.com/oauth/userinfo",
-     *     clientId: process.env.AURA_AUTH_OAUTH_INTEGRATION_CLIENT_ID!,
-     *     clientSecret: process.env.AURA_AUTH_OAUTH_INTEGRATION_CLIENT_SECRET!,
+     *     clientId: process.env.AURA_AUTH_OAUTH_PROVIDER_CLIENT_ID!,
+     *     clientSecret: process.env.AURA_AUTH_OAUTH_PROVIDER_CLIENT_SECRET!,
      *   }
      * ]
      */
-    oauth: (OAuthIntegrations | OAuthSecureConfig)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -120,7 +173,7 @@ export interface AuthConfig {
      * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
      * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
      */
-    cookies?: CookieOptions
+    cookies?: CookieConfig
     /**
      * Secret used to sign and verify JWT tokens for session and csrf protection.
      * If not provided, it will load from the environment variable `AURA_AUTH_SECRET`, but if it
@@ -147,36 +200,42 @@ export interface AuthConfig {
     trustedProxyHeaders?: boolean
 }
 
-export interface AuthConfigInternal {
-    oauth: Record<LiteralUnion<OAuthIntegrations>, OAuthSecureConfig>
-    cookies: CookieOptions
+/**
+ * Internal runtime configuration used within Aura Auth after initialization.
+ * All optional fields from AuthConfig are resolved to their default values.
+ * @internal
+ */
+export interface AuthRuntimeConfig {
+    oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+    cookies: CookieConfig
     secret: string
     jose: Awaited<ReturnType<typeof createJoseInstance>>
+}
+
+/**
+ * Base OAuth error response structure.
+ */
+export interface OAuthError<T> {
+    error: T
+    error_description?: string
 }
 
 /**
  * OAuth 2.0 Authorization Error Response Types
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1
  */
-export type AuthorizationErrorResponse = z.infer<typeof OAuthAuthorizationErrorResponse>["error"]
+export type AuthorizationError = OAuthError<z.infer<typeof OAuthAuthorizationErrorResponse>["error"]>
 
 /**
  * OAuth 2.0 Access Token Error Response Types
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-5.2
  */
-export type AccessTokenErrorResponse = z.infer<typeof OAuthAccessTokenErrorResponse>["error"]
+export type AccessTokenError = OAuthError<z.infer<typeof OAuthAccessTokenErrorResponse>["error"]>
 
-export type TokenRevocationErrorResponse = "invalid_session_token"
+/**
+ * OAuth 2.0 Token Revocation Error Response Types
+ * @see https://datatracker.ietf.org/doc/html/rfc7009#section-2.2.1
+ */
+export type TokenRevocationError = OAuthError<"invalid_session_token" | "invalid_csrf_token" | "invalid_redirect_to">
 
-export interface OAuthErrorResponse<Errors extends "authorization" | "token" | "signOut"> {
-    error: LiteralUnion<
-        Errors extends "authorization"
-            ? AuthorizationErrorResponse
-            : Errors extends "token"
-              ? AccessTokenErrorResponse
-              : TokenRevocationErrorResponse
-    >
-    error_description?: string
-}
-
-export type ErrorTypes = AuthorizationErrorResponse | AccessTokenErrorResponse | TokenRevocationErrorResponse
+export type ErrorType = AuthorizationError["error"] | AccessTokenError["error"] | TokenRevocationError["error"]
