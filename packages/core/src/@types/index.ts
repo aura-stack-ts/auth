@@ -1,5 +1,5 @@
 import { z } from "zod/v4"
-import { createJoseInstance, JWTPayload } from "@/jose.js"
+import { JWTPayload } from "@/jose.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import type { Prettify, RoutePattern } from "@aura-stack/router"
 import type { SerializeOptions } from "cookie"
