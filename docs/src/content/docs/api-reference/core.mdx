@@ -68,10 +68,13 @@ Creates an authentication instance with handlers for OAuth flows, session manage
 
 Configuration object for authentication settings.
 
-| Parameter | Type                                                    | Description                                 |
-| --------- | ------------------------------------------------------- | ------------------------------------------- |
-| `oauth`   | `(BuiltInOAuthProvider  \| OAuthProviderCredentials)[]` | Array of OAuth provider configurations      |
-| `cookies` | `CookieConfig`                                          | Cookie configuration for session management |
+| Parameter             | Type                                                    | Description                                                                                                                          |
+| --------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `oauth`               | `(BuiltInOAuthProvider  \| OAuthProviderCredentials)[]` | Array of OAuth provider configurations                                                                                               |
+| `cookies`             | `CookieConfig`                                          | Cookie configuration for session management                                                                                          |
+| `secret`              | `string`                                                | Secret value used for signing and encrypting JWTs and CSRF tokens. This option overrides the `AURA_AUTH_SECRET` environment variable |
+| `basePath`            | `/${string}`                                            | Base path for the authentication routes; defaults to `/auth`                                                                         |
+| `trustedProxyHeaders` | `boolean`                                               | Enables proxy headers when the app is behind a proxy                                                                                 |
 
 ##### `oauth`
 
@@ -84,10 +87,14 @@ import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["github"],
+  cookies: {},
+  basePath: "/auth",
+  secret: process.env.AURA_AUTH_SECRET,
+  trustedProxyHeaders: false,
 })
 ```
 
-- Custom OAuth configuration implementations: create custom oauth providers doesn't supported natvely by aura auth, follow the `OAuthProviderCredentials` type.
+- Custom OAuth configuration implementations: create custom oauth providers doesn't supported natvely by aura auth, follow the `OAuthProvider` type.
 
 ```ts lineNumbers
 import type { User } from "@aura-stack/auth/types"
@@ -107,6 +114,10 @@ interface OAuthProviderCredentials extends OAuthProviderConfig {
   clientId: string
   clientSecret: string
 }
+
+type OAuthProvider<Profile extends Record<string, unknown> = {}> = OAuthProviderConfig<Profile> & OAuthProviderCredentials
+
+type BuiltInOAuthProvider = "github" | "bitbucket" | "figma" | "discord" | "gitlab" | "spotify" | "x"
 ```
 
 **Properties**
@@ -240,15 +251,55 @@ type HostCookie = {
 }
 ```
 
+##### `secret`
+
+Secret value used to sign and encrypt JWTs for session management and for CSRF token protection. This configuration overrides the `AURA_AUTH_SECRET` environment variable which is automatically loaded by Aura Auth. If neither option is configured, Aura Auth will throw an error, as this option is required for session management and CSRF protection.
+
+```ts lineNumbers
+type Secret = string
+```
+
+##### `basePath`
+
+Base path used for all authentication routes, including `/signIn/:oauth`, `/session`, etc. This base path defines where the handlers are located in the framework's backend. By default, it is `/auth`.
+
+```ts lineNumbers
+type basePath = `/${string}`
+```
+
+##### `trustedProxyHeaders`
+
+`trustedProxyHeaders` is an experimental option that enables proxy headers for scenarios where the application is behind a reverse proxy or load balancer. This configuration consumes `X-Forwarded-For`, `X-Forwarded-Host`, and `X-Forwarded-Proto` headers to determine the original client IP address and protocol. For more details, read [Proxy headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers#non-standard_headers).
+
+```ts lineNumbers
+type TrustedProxyHeaders = boolean
+```
+
+<Callout type="warning">
+  By default, this is `false`. Enable this option only if you trust the server or reverse proxy. Enabling this on insecure
+  connections can lead to security vulnerabilities, such as incorrect handling of secure cookies or inaccurate client IPs.
+
+This is an experimental option and may change over time. Monitor the library for updates and possible changes to this configuration option.
+
+</Callout>
+
 #### Returns
 
 | Return     | Type                               | Description                                                                                                                                                                               |
 | ---------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `handlers` | HTTP handlers (from`createRouter`) | Route handlers you can mount in your app to expose authentication endpoints (`/signIn/:oauth`, `/callback/:oauth`, `/session`, etc.). Mount at your desired base path (default: `/auth`). |
+| `jose`     | `JoseInstance`                     | Object that exports JOSE utilities for signing and encrypting JWTs and CSRF tokens.                                                                                                       |
 
 ##### `handlers`
 
-The HTTP handlers are the functions which will controll, add logic and follow the OAuth flow to add authorization via OAuth 2.0, currenlty is exported the `GET` and `POST` methods.
+The HTTP handlers are functions that control the logic and flow of the OAuth 2.0 authorization process. Currently, the `GET` and `POST` methods are exported. By default, Aura Auth sets the base path to `/auth`. For configuration details, refer to [basePath](/docs/api-reference/core#basepath).
+
+```ts lineNumbers
+type Handlers = {
+  GET: (req: Request) => Response | Promise<Response>
+  POST: (req: Request) => Response | Promise<Response>
+}
+```
 
 <Callout>
 
@@ -258,17 +309,17 @@ The HTTP handlers should be implemented by any runtime which supports native Res
 
 The endpoints supported by the handlers are:
 
-##### `GET /auth/signIn/:oauth`
+###### `GET /auth/signIn/:oauth`
 
 Initiates the OAuth authorization flow. where `:oauth` is the id of the Oauth Provider
 
-#### `GET /auth/callback/:oauth`
+###### `GET /auth/callback/:oauth`
 
 Handles the OAuth callback after user authorization. where `:oauth` is the id of the OAuth Provider, is must be equal that the `/auth/signIn/:oauth`
 
-#### `GET /auth/session`
+###### `GET /auth/session`
 
-returns the current user session, with the following structure:
+Returns the current user's session. It is created based on the `profile` function from the `OAuthProvider` configuration. By default, the `User` and `Session` structures are:
 
 ```ts lineNumbers
 export interface User {
@@ -284,17 +335,19 @@ export interface Session {
 }
 ```
 
-##### `GET /auth/csrfToken`
+The user's session filters out the JWT standard claims (`exp`, `iat`, `jti`, `nbf`) and only returns the user-facing profile data.
+
+###### `GET /auth/csrfToken`
 
 it returns a json which the csrfToken to mitigate CSRF Attacks and used by http methods which could have important operations and logic (`POST`, `PATCH` and `DELETE`). This token is used and required by `/auth/signOut` endpoint to close the active user session. the response follows the next structure:
 
 ```json lineNumbers
 {
-  csrfToken: string
+  "csrfToken": "string"
 }
 ```
 
-##### `POST /auth/signOut`
+###### `POST /auth/signOut`
 
 It implements `CSRF Tokens` as security, so, it expects to pass the `X-CSRF-TOKEN` header and `csrfToken` cookie to verify the csrfToken passed.
 
@@ -314,6 +367,58 @@ new Request("/auth/signOut", {
   All routes are relative to your configured base path (default: <code>/auth</code>).
 </Callout>
 
+##### `jose`
+
+Object that contains JOSE utilities used internally by Aura Auth for signing and encrypting sessions and CSRF tokens. The Jose utilities implement key derivation for security to avoid using the same secret for both signing and encryption. Two salting options are provided:
+
+```ts lineNumbers
+type JoseInstance = {
+  decodeJWT: (token: string) => Promise<JWTPayload>
+  encodeJWT: (payload: JWTPayload) => Promise<string>
+  signJWS: (payload: JWTPayload) => Promise<string>
+  verifyJWS: (payload: string) => Promise<JWTPayload>
+}
+```
+
+- `AURA_AUTH_SALT`: Environment variable used for salting during key derivation. This is the recommended approach as it provides enhanced security.
+- `secret`: Creates a key hash based on the `secret` value from the configuration or the `AURA_AUTH_SECRET` environment variable.
+
+<Callout>
+  The salt value must be deterministic to ensure session and CSRF tokens remain consistent across server executions. Otherwise,
+  key derivation will generate different values, causing unexpected behavior between restarts.
+</Callout>
+
+The JOSE utilities are provided for users to manipulate session tokens and CSRF tokens according to their needs.
+
+---
+
+## OAuth Providers
+
+Aura Auth exposes OAuth provider configurations through the `/oauth/` entry point. This entry point provides default OAuth provider configurations and profile types (the default object type returned by the `userInfo` endpoint).
+
+The `/oauth` entry point provides configuration for each OAuth provider and combines all configurations into the `builtInOAuthProviders` object.
+
+```ts lineNumbers
+const builtInOAuthProviders = {
+  github,
+  bitbucket,
+  figma,
+  discord,
+  gitlab,
+  spotify,
+  x,
+}
+
+type BuiltInOAuthProvider = keyof typeof builtInOAuthProviders
+```
+
+```ts lineNumbers
+import { builtInOAuthProviders, type builtInOAuthProviders } from "@aura-stack/auth/oauth"
+import { github, type GitHubProfile } from "@aura-stack/auth/oauth/github"
+import { gitlab, type GitLabProfile } from "@aura-stack/auth/oauth/gitlab"
+import { discord, type DiscordProfile, type Nameplate } from "@aura-stack/auth/oauth/discord"
+```
+
 ---
 
 ## Environment Variables
@@ -321,6 +426,7 @@ new Request("/auth/signOut", {
 Aura Auth required some environment variables to create the OAuth flow and security measures. The environments required are:
 
 - `AURA_AUTH_SECRET`: opaque value used to sign and encrypt user's session
+- `AURA_AUTH_SALT`: Salt value used for key derivation to sign and encrypt JWTs and CSRF tokens.
 - `AURA_AUTH_{PROVIDER}_CLIENT_ID`
 - `AURA_AUTH-{PROVIDER}_CLIENT_SECRET`
 
@@ -329,6 +435,12 @@ Aura Auth required some environment variables to create the OAuth flow and secur
 ### Example
 
 ```bash title=".env" lineNumbers
+# Secret
+AURA_AUTH_SECRET="secret"
+
+# Salt
+AURA_AUTH_SALT="salt"
+
 # GitHub OAuth
 AURA_AUTH_GITHUB_CLIENT_ID=Iv1.1234567890abcdef
 AURA_AUTH_GITHUB_CLIENT_SECRET=0123456789abcdef...
@@ -348,36 +460,63 @@ In the OAuth 2.0 workflow is possible that happens some erros during the workflo
 
 OAuth 2.0 and its extensions defines three cases erros during the `Authorization`, `Access Token` and `Revocation Tokens` flow.
 
+All of the OAuth errors follow the next structure:
+
+```ts lineNumbers
+interface OAuthError<T extends string> {
+  error: T
+  error_description?: string
+}
+```
+
+Example
+
+```json
+{
+  "error": "access_denied",
+  "error_description": "User denied authorization"
+}
+```
+
 ### `AuthorizationError` [#authorization-error-response]
 
 OAuth 2.0 authorization errors as defined in [RFC 6749 #4.1.2.1](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1):
 
-- `invalid_request`
-- `unauthorized_client`
-- `access_denied`
-- `unsupported_response_type`
-- `invalid_scope`
-- `server_error`
-- `temporarily_unavailable`
+```ts lineNumbers
+type AuthorizationError = OAuthError<
+  | "invalid_request"
+  | "unauthorized_client"
+  | "access_denied"
+  | "unsupported_response_type"
+  | "invalid_scope"
+  | "server_error"
+  | "temporarily_unavailable"
+>
+```
 
 ### `AccessTokenError` [#access-token-error-response]
 
 OAuth 2.0 access token errors as defined in [RFC 6749 #5.2](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2):
 
-- `invalid_request`
-- `invalid_client`
-- `invalid_grant`
-- `unauthorized_client`
-- `unsupported_grant_type`
-- `invalid_scope`
+```ts lineNumbers
+type AccessTokenError = OAuthError<
+  "invalid_request" | "invalid_client" | "invalid_grant" | "unauthorized_client" | "unsupported_grant_type" | "invalid_scope"
+>
+```
 
 ### `TokenRevocationError` [#token-Revocation-error-response]
 
 OAuth 2.0 token revocation error as defined in [RFC 7009 #2.2.1](https://datatracker.ietf.org/doc/html/rfc7009#section-2.2.1)
 
-- `invalid_session_token`
-- `invalid_csrf_token`
-- `invalid_redirect_to`
+```ts lineNumbers
+type TokenRevocationError = OAuthError<"invalid_session_token" | "invalid_csrf_token" | "invalid_redirect_to">
+```
+
+### `ErrorType`
+
+```ts lineNumbers
+type ErrorType = AuthorizationError["error"] | AccessTokenError["error"] | TokenRevocationError["error"]
+```
 
 ---
 
@@ -397,27 +536,28 @@ export const auth = createAuth({
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
+import type { OAuthProvider } from "@aura-stack/auth/types"
+
+const provider: OAuthProvider = {
+  id: "custom",
+  name: "Custom OAuth",
+  authorizeURL: "https://oauth.example.com/authorize",
+  accessToken: "https://oauth.example.com/access_token",
+  userInfo: "https://oauth.example.com/userinfo",
+  scope: "profile email",
+  responseType: "code",
+  clientId: process.env.AURA_AUTH_CUSTOM_CLIENT_ID!,
+  clientSecret: process.env.AURA_AUTH_CUSTOM_CLIENT_SECRET!,
+  profile: (profile) => ({
+    sub: profile.id,
+    name: profile.full_name,
+    email: profile.email_address,
+    image: profile.avatar_url,
+  }),
+}
 
 export const auth = createAuth({
-  oauth: [
-    {
-      id: "custom",
-      name: "Custom OAuth",
-      authorizeURL: "https://oauth.example.com/authorize",
-      accessToken: "https://oauth.example.com/access_token",
-      userInfo: "https://oauth.example.com/userinfo",
-      scope: "profile email",
-      responseType: "code",
-      clientId: process.env.AURA_AUTH_CUSTOM_CLIENT_ID!,
-      clientSecret: process.env.AURA_AUTH_CUSTOM_CLIENT_SECRET!,
-      profile: (profile) => ({
-        sub: profile.id,
-        name: profile.full_name,
-        email: profile.email_address,
-        image: profile.avatar_url,
-      }),
-    },
-  ],
+  oauth: [provider],
 })
 ```
 
@@ -433,6 +573,39 @@ export const auth = createAuth({
     strategy: process.env.NODE_ENV === "production" ? "host" : "standard",
     sameSite: "strict",
   },
+})
+```
+
+### With `secret`
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  secret: process.env.SECRET_KEY!,
+})
+```
+
+### With `basePath`
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/v1/auth",
+})
+```
+
+### With `trustedProxyHeaders`
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  trustedProxyHeaders: true,
 })
 ```
 

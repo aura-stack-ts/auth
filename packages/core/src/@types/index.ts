@@ -122,10 +122,6 @@ export type CookieConfigInternal = {
  */
 export type CookieName = "sessionToken" | "csrfToken" | "state" | "nonce" | "code_verifier" | "redirect_to" | "redirect_uri"
 
-// ============================================================================
-// Auth Configuration Types
-// ============================================================================
-
 /**
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
@@ -196,9 +192,12 @@ export interface AuthConfig {
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
+     * @experimental
      */
     trustedProxyHeaders?: boolean
 }
+
+export type JoseInstance = ReturnType<typeof createJoseInstance>
 
 /**
  * Internal runtime configuration used within Aura Auth after initialization.
@@ -209,13 +208,13 @@ export interface AuthRuntimeConfig {
     oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
     cookies: CookieConfig
     secret: string
-    jose: Awaited<ReturnType<typeof createJoseInstance>>
+    jose: JoseInstance
 }
 
 /**
  * Base OAuth error response structure.
  */
-export interface OAuthError<T> {
+export interface OAuthError<T extends string> {
     error: T
     error_description?: string
 }
