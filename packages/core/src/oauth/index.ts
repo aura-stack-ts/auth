@@ -1,7 +1,7 @@
 /**
- * @module OAuthIntegrations
+ * @module OAuth Providers
  *
- * This modules re-exports OAuth integrations available in Aura Auth to be used in the Auth instance configuration.
+ * This modules re-exports OAuth providers available in Aura Auth to be used in the Auth instance configuration.
  */
 import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.js"
 import { github } from "./github.js"
@@ -20,7 +20,7 @@ export { gitlab, type GitLabProfile } from "./gitlab.js"
 export { spotify, type SpotifyProfile } from "./spotify.js"
 export { x, type XProfile } from "./x.js"
 
-export const integrations = {
+export const builtInOAuthProviders = {
     github,
     bitbucket,
     figma,
@@ -38,10 +38,10 @@ const defineOAuthEnvironment = (oauth: string) => {
     }
 }
 
-const defineOAuthProviderConfig = (config: OAuthIntegrations | OAuthProviderCredentials) => {
+const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderCredentials) => {
     if (typeof config === "string") {
         const definition = defineOAuthEnvironment(config)
-        const oauthConfig = integrations[config]
+        const oauthConfig = builtInOAuthProviders[config]
         return {
             ...oauthConfig,
             ...definition,
@@ -51,17 +51,17 @@ const defineOAuthProviderConfig = (config: OAuthIntegrations | OAuthProviderCred
 }
 
 /**
- * Constructs OAuth integration configurations from an array of integration names or configurations.
- * It loads the client ID and client secret from environment variables if only the integration name is provided.
+ * Constructs OAuth provider configurations from an array of provider names or configurations.
+ * It loads the client ID and client secret from environment variables if only the provider name is provided.
  *
- * @param oauth - Array of OAuth integration configurations or integration names to be defined from environment variables
- * @returns A record of OAuth integration configurations
+ * @param oauth - Array of OAuth provider configurations or provider names to be defined from environment variables
+ * @returns A record of OAuth provider configurations
  */
-export const createOAuthIntegrations = (oauth: (OAuthIntegrations | OAuthProviderCredentials)[] = []) => {
+export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuthProviderCredentials)[] = []) => {
     return oauth.reduce((previous, config) => {
         const oauthConfig = defineOAuthProviderConfig(config)
         return { ...previous, [oauthConfig.id]: oauthConfig }
-    }, {}) as Record<LiteralUnion<OAuthIntegrations>, OAuthProviderCredentials>
+    }, {}) as Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
 }
 
-export type OAuthIntegrations = keyof typeof integrations
+export type BuiltInOAuthProvider = keyof typeof builtInOAuthProviders

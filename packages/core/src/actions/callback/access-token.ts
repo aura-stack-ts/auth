@@ -3,12 +3,12 @@ import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenRespon
 import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
- * Make a request to the OAuth integration to the token endpoint to exchange the authorization code provided
+ * Make a request to the OAuth provider to the token endpoint to exchange the authorization code provided
  * by the authorization server.
  *
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-5
- * @param oauthConfig - OAuth integration configuration
+ * @param oauthConfig - OAuth provider configuration
  * @param redirectURI - The redirect URI registered in the Resource Owner's authorization request and sent in the authorization code exchange
  * @param code - The authorization code received from the OAuth server
  * @returns The access token response from the OAuth server

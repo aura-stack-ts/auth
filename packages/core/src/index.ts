@@ -3,7 +3,7 @@ import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { onErrorHandler } from "./utils.js"
 import { createJoseInstance } from "@/jose.js"
 import { defaultCookieConfig } from "@/cookie.js"
-import { createOAuthIntegrations } from "@/oauth/index.js"
+import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
 import type { AuthConfig } from "@/@types/index.js"
 
@@ -12,7 +12,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
         basePath: authConfig?.basePath ?? "/auth",
         onError: onErrorHandler,
         context: {
-            oauth: createOAuthIntegrations(authConfig?.oauth),
+            oauth: createBuiltInOAuthProviders(authConfig?.oauth),
             cookies: authConfig?.cookies ?? defaultCookieConfig,
             jose: createJoseInstance(authConfig?.secret),
             basePath: authConfig?.basePath ?? "/auth",
@@ -22,11 +22,11 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
 }
 
 /**
- * Creates the authentication instance with the configuration provided for OAuth integrations.
+ * Creates the authentication instance with the configuration provided for OAuth provider.
  * > NOTE: The handlers returned by this function should be used in the server to handle the authentication routes
  * and within the `/auth` base path
  *
- * @param authConfig - Authentication configuration including OAuth integrations
+ * @param authConfig - Authentication configuration including OAuth provider
  * @returns Authentication instance with handlers to be used in the server
  * @example
  * const auth = createAuth({

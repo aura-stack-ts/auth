@@ -1,7 +1,7 @@
 import { createAuth } from "@aura-stack/auth"
-import { integrations } from "@aura-stack/auth/oauth/index"
+import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 
-const oauth = Object.keys(integrations) as Array<keyof typeof integrations>
+const oauth = Object.keys(builtInOAuthProviders) as Array<keyof typeof builtInOAuthProviders>
 
 const auth = createAuth({
     oauth,

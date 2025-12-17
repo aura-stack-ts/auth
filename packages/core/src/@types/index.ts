@@ -4,7 +4,7 @@ import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "
 import type { Prettify, RoutePattern } from "@aura-stack/router"
 import type { SerializeOptions } from "cookie"
 import type { LiteralUnion } from "./utility.js"
-import type { OAuthIntegrations } from "@/oauth/index.js"
+import type { BuiltInOAuthProvider } from "@/oauth/index.js"
 
 export * from "./utility.js"
 
@@ -15,7 +15,7 @@ export * from "./utility.js"
 export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" | "sub" | "aud" | "iss">
 
 /**
- * Standardized user profile returned by OAuth integrations after fetching user information
+ * Standardized user profile returned by OAuth providers after fetching user information
  * and mapping the response to this format by default or via the `profile` custom function.
  */
 export interface User {
@@ -44,6 +44,7 @@ export interface OAuthProviderConfig<Profile extends object = {}> {
     accessToken: string
     userInfo: string
     scope: string
+    //responseType: "code" | "refresh_token" | "id_token"
     responseType: string
     profile?: (profile: Profile) => User | Promise<User>
 }
@@ -66,13 +67,15 @@ export type OAuthProvider<Profile extends Record<string, unknown> = {}> = OAuthP
  * Cookie type with __Secure- prefix, must be Secure.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
  */
-type SecureCookie = { strategy: "secure" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "encode">> }
+export type SecureCookie = { strategy: "secure" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "encode">> }
 
 /**
  * Cookie type with __Host- prefix, must be Secure, Path=/, no Domain attribute.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
  */
-type HostCookie = { strategy: "host" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "path" | "domain" | "encode">> }
+export type HostCookie = { strategy: "host" } & {
+    options?: Prettify<Omit<SerializeOptions, "secure" | "path" | "domain" | "encode">>
+}
 
 /**
  * Standard cookie type without security prefixes.
@@ -129,29 +132,29 @@ export type CookieName = "sessionToken" | "csrfToken" | "state" | "nonce" | "cod
  */
 export interface AuthConfig {
     /**
-     * OAuth integrations available in the authentication and authorization flows. It provides a type-inference
-     * for the OAuth integrations that are supported by Aura Stack Auth; alternatively, you can provide a custom
+     * OAuth providers available in the authentication and authorization flows. It provides a type-inference
+     * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
      * OAuth third-party authorization service by implementing the `OAuthProviderCredentials` interface.
      *
-     * Built-in OAuth integrations:
+     * Built-in OAuth providers:
      * oauth: ["github", "google"]
      *
-     * Custom OAuth integrations:
+     * Custom OAuth providers:
      * oauth: [
      *   {
-     *     id: "oauth-integration",
+     *     id: "oauth-providers",
      *     name: "OAuth",
      *     authorizeURL: "https://example.com/oauth/authorize",
      *     accessToken: "https://example.com/oauth/token",
      *     scope: "profile email",
      *     responseType: "code",
      *     userInfo: "https://example.com/oauth/userinfo",
-     *     clientId: process.env.AURA_AUTH_OAUTH_INTEGRATION_CLIENT_ID!,
-     *     clientSecret: process.env.AURA_AUTH_OAUTH_INTEGRATION_CLIENT_SECRET!,
+     *     clientId: process.env.AURA_AUTH_OAUTH_PROVIDER_CLIENT_ID!,
+     *     clientSecret: process.env.AURA_AUTH_OAUTH_PROVIDER_CLIENT_SECRET!,
      *   }
      * ]
      */
-    oauth: (OAuthIntegrations | OAuthProviderCredentials)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -203,7 +206,7 @@ export interface AuthConfig {
  * @internal
  */
 export interface AuthRuntimeConfig {
-    oauth: Record<LiteralUnion<OAuthIntegrations>, OAuthProviderCredentials>
+    oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
     cookies: CookieConfig
     secret: string
     jose: Awaited<ReturnType<typeof createJoseInstance>>

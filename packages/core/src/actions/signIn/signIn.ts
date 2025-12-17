@@ -26,7 +26,7 @@ export const signInAction = (oauth: AuthRuntimeConfig["oauth"]) => {
             const {
                 request,
                 params: { oauth, redirectTo },
-                context: { oauth: oauthIntegrations, cookies, trustedProxyHeaders, basePath },
+                context: { oauth: providers, cookies, trustedProxyHeaders, basePath },
             } = ctx
             try {
                 const cookieOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
@@ -43,7 +43,7 @@ export const signInAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                 const { codeVerifier, codeChallenge, method } = await createPKCE()
                 const codeVerifierCookie = setCookie("code_verifier", codeVerifier, oauthCookie(cookieOptions))
 
-                const authorization = createAuthorizationURL(oauthIntegrations[oauth], redirectURI, state, codeChallenge, method)
+                const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method)
                 const headers = new Headers()
                 headers.set("Location", authorization)
                 headers.append("Set-Cookie", stateCookie)

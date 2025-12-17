@@ -11,7 +11,7 @@ describe("createAccessToken", async () => {
         client_id: "oauth_client_id",
         client_secret: "oauth_client_secret",
         code: "authorization_code_123",
-        redirect_uri: "https://myapp.com/auth/callback/oauth-integration",
+        redirect_uri: "https://myapp.com/auth/callback/oauth-provider",
         grant_type: "authorization_code",
         code_verifier: codeVerifier,
     }
@@ -32,7 +32,7 @@ describe("createAccessToken", async () => {
 
         const accessToken = await createAccessToken(
             oauthCustomService,
-            "https://myapp.com/auth/callback/oauth-integration",
+            "https://myapp.com/auth/callback/oauth-provider",
             "authorization_code_123",
             codeVerifier
         )
@@ -82,7 +82,7 @@ describe("createAccessToken", async () => {
         await expect(
             createAccessToken(
                 oauthCustomService,
-                "https://myapp.com/auth/callback/oauth-integration",
+                "https://myapp.com/auth/callback/oauth-provider",
                 "authorization_code_123",
                 codeVerifier
             )
@@ -113,12 +113,7 @@ describe("createAccessToken", async () => {
         )
 
         await expect(
-            createAccessToken(
-                oauthCustomService,
-                "https://myapp.com/auth/callback/oauth-integration",
-                "invalid_code",
-                codeVerifier
-            )
+            createAccessToken(oauthCustomService, "https://myapp.com/auth/callback/oauth-provider", "invalid_code", codeVerifier)
         ).rejects.toThrow(/Invalid grant/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
@@ -150,7 +145,7 @@ describe("createAccessToken", async () => {
         await expect(
             createAccessToken(
                 oauthCustomService,
-                "https://myapp.com/auth/callback/oauth-integration",
+                "https://myapp.com/auth/callback/oauth-provider",
                 "authorization_code_123",
                 codeVerifier
             )

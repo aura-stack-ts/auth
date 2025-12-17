@@ -4,7 +4,7 @@ import { AuthError, throwAuthError } from "@/error.js"
 import type { OAuthProviderCredentials, User } from "@/@types/index.js"
 
 /**
- * Map the default user information fields from the OAuth integration's userinfo response
+ * Map the default user information fields from the OAuth provider's userinfo response
  *
  * @param profile - Raw profile object returned by the userinfo endpoint
  * @returns The standardized OAuth user profile
@@ -21,11 +21,11 @@ const getDefaultUserInfo = (profile: Record<string, any>): User => {
 }
 
 /**
- * Get user information from the OAuth integration's userinfo endpoint using the provided access token.
+ * Get user information from the OAuth provider's userinfo endpoint using the provided access token.
  * The response by default is mapped to the standardized `User` format unless a custom
  * `profile` function is provided in the `oauthConfig`.
  *
- * @param oauthConfig - OAuth integration configuration
+ * @param oauthConfig - OAuth provider configuration
  * @param accessToken - Access Token to access the userinfo endpoint
  * @returns The user information retrieved from the userinfo endpoint
  */

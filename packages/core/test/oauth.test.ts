@@ -1,31 +1,31 @@
 import { describe, test, expect } from "vitest"
-import { createOAuthIntegrations } from "@/oauth/index.js"
+import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { OAuthProviderConfigSchema } from "@/schemas.js"
 import { OAuthProviderCredentials } from "@/@types/index.js"
 import { oauthCustomService } from "./presets.js"
 
-describe("createOAuthIntegrations", () => {
+describe("createBuiltInOAuthProviders", () => {
     test("create oauth config for github", () => {
-        const oauth = createOAuthIntegrations(["github"])
+        const oauth = createBuiltInOAuthProviders(["github"])
         const githubConfig = Object.values(oauth)[0]
         const isValid = OAuthProviderConfigSchema.safeParse(githubConfig)
         expect(isValid.success).toBe(true)
     })
 
     test("create custom oauth config", () => {
-        const oauth = createOAuthIntegrations([oauthCustomService])
+        const oauth = createBuiltInOAuthProviders([oauthCustomService])
         const customConfig = Object.values(oauth)[0]
         const isValid = OAuthProviderConfigSchema.safeParse(customConfig)
         expect(isValid.success).toBe(true)
     })
 
     test("create oauth config with empty array", () => {
-        const oauth = createOAuthIntegrations([])
+        const oauth = createBuiltInOAuthProviders([])
         expect(Object.keys(oauth).length).toBe(0)
     })
 
     test("create oauth config for github and custom", () => {
-        const oauth = createOAuthIntegrations(["github", oauthCustomService])
+        const oauth = createBuiltInOAuthProviders(["github", oauthCustomService])
         for (const config of Object.values(oauth)) {
             const isValid = OAuthProviderConfigSchema.safeParse(config)
             expect(isValid.success).toBe(true)
@@ -33,7 +33,7 @@ describe("createOAuthIntegrations", () => {
     })
 
     test("create oauth config with missing fields", () => {
-        const oauth = createOAuthIntegrations([
+        const oauth = createBuiltInOAuthProviders([
             {
                 id: "oauth",
                 name: "OAuth",
@@ -46,7 +46,7 @@ describe("createOAuthIntegrations", () => {
     })
 
     test("create oauth config with invalid userinfo URL", () => {
-        const oauth = createOAuthIntegrations([
+        const oauth = createBuiltInOAuthProviders([
             {
                 ...oauthCustomService,
                 userInfo: "not-a-valid-url",

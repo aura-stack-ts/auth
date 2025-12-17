@@ -1,7 +1,7 @@
 import { object, string, enum as options, number, url } from "zod/v4"
 
 /**
- * Schema for OAuth Integration Configuration
+ * Schema for OAuth Provider Configuration
  */
 export const OAuthProviderConfigSchema = object({
     authorizeURL: url(),

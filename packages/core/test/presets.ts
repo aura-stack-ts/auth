@@ -3,7 +3,7 @@ import { OAuthProviderCredentials, CookieConfigInternal } from "@/@types/index.j
 import type { JWTPayload } from "@/jose.js"
 
 export const oauthCustomService: OAuthProviderCredentials = {
-    id: "oauth-integration",
+    id: "oauth-provider",
     name: "OAuth",
     authorizeURL: "https://example.com/oauth/authorize",
     accessToken: "https://example.com/oauth/access_token",
@@ -14,9 +14,6 @@ export const oauthCustomService: OAuthProviderCredentials = {
     clientSecret: "oauth_client_secret",
 }
 
-/**
- * @todo: Is this needed?
- */
 export const oauthCustomServiceProfile: OAuthProviderCredentials = {
     ...oauthCustomService,
     id: "oauth-profile",

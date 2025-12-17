@@ -42,10 +42,10 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                 request,
                 params: { oauth },
                 searchParams: { code, state },
-                context: { oauth: oauthIntegrations, cookies, jose, trustedProxyHeaders },
+                context: { oauth: providers, cookies, jose, trustedProxyHeaders },
             } = ctx
             try {
-                const oauthConfig = oauthIntegrations[oauth]
+                const oauthConfig = providers[oauth]
 
                 const cookieOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
                 const cookieState = getCookie(request, "state", cookieOptions)
