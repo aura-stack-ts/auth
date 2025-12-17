@@ -6,8 +6,10 @@
     "quick-start",
     "oauth",
     "concepts",
+    "configuration",
+    "guides",
     "api-reference",
-    "---Contributing---",
+    "---Community---",
     "contributing"
   ],
   "root": true

@@ -11,11 +11,18 @@ With OAuth providers we delegate the authorization to third-party services to ve
 
 For more detailed information about [OAuth 2.0 Authorization Framework](/docs/concepts/oauth)
 
-## Set up
+## Built In OAuth providers
+
+Aura Auth provides the `/oauth` entry point to access the OAuth provider configuration and profile types.
+
+```ts lineNumbers
+import { builtInOAuthProviders, type builtInOAuthProviders } from "@aura-stack/auth/oauth"
+import { github, type GitHubProfile } from "@aura-stack/auth/oauth/github"
+import { gitlab, type GitLabProfile } from "@aura-stack/auth/oauth/gitlab"
+import { discord, type DiscordProfile, type Nameplate } from "@aura-stack/auth/oauth/discord"
+```
 
 These are some of the oauth providers supported by Aura Auth.
-
-### OAuth providers
 
 <Cards>
   <Card title="GitHub" href="/docs/oauth/github">
@@ -29,5 +36,14 @@ These are some of the oauth providers supported by Aura Auth.
   </Card>
   <Card title="Discord" href="/docs/oauth/discord">
     Discord OAuth Provider
+  </Card>
+  <Card title="GitLab" href="/docs/oauth/gitlab">
+    GitLab OAuth Provider
+  </Card>
+  <Card title="X" href="/docs/oauth/x">
+    X (Twitter) OAuth Provider
+  </Card>
+  <Card title="Spotify" href="/docs/oauth/spotify">
+    Spotify OAuth Provider
   </Card>
 </Cards>

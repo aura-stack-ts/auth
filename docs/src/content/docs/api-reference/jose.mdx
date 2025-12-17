@@ -378,6 +378,7 @@ import type { SecretInput } from "@aura-stack/jose"
 
 function deriveKey(
   secret: SecretInput,
+  salt: BinaryLike,
   info: string,
   len: number
 ): {
@@ -392,12 +393,13 @@ function deriveKey(
 import { deriveKey } from "@aura-stack/jose/hkdf"
 
 const secret = "secret-key"
+const salt = "salt"
 
-const sessionKey = deriveKey(secret, "session key", 32)
-const databaseKey = deriveKey(secret, "database key", 64)
+const sessionKey = deriveKey(secret, salt, "session key", 32)
+const databaseKey = deriveKey(secret, salt, "database key", 64)
 ```
 
-### `createDeriveKey(secret, info, len)`
+### `createDeriveKey(secret, salt, info, len)`
 
 Creates a key derivation function that includes verification for the key length. It implements the `deriveKey` function.
 
@@ -408,8 +410,9 @@ import type { SecretInput } from "@aura-stack/jose"
 
 function createDeriveKey(
   secret: SecretInput,
-  info: string,
-  len: number
+  salt?: BinaryLike
+  info?: string,
+  len?: number
 ): {
   key: ArrayBuffer
   deriveKey: Buffer<ArrayBuffer>
@@ -422,9 +425,10 @@ function createDeriveKey(
 import { createDeriveKey } from "@aura-stack/jose/hkdf"
 
 const secret = "secret-key"
+const salt = "salt"
 
-const sessionKey = createDeriveKey(secret, "session key", 32)
-const databaseKey = createDeriveKey(secret, "database key", 64)
+const sessionKey = createDeriveKey(secret, salt, "session key", 32)
+const databaseKey = createDeriveKey(secret, salt, "database key", 64)
 ```
 
 ---

@@ -1,0 +1,5 @@
+{
+  "title": "Guides",
+  "pages": ["nextjs", "jose-utilities"],
+  "defaultOpen": false
+}
