@@ -212,12 +212,13 @@ export interface AuthRuntimeConfig {
     jose: JoseInstance
 }
 
-export type RouterGlobalContext = Prettify<
-    {
-        basePath: string
-        trustedProxyHeaders: boolean
-    } & Required<Omit<AuthRuntimeConfig, "secret">>
->
+export interface RouterGlobalContext {
+    oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+    cookies: CookieConfigInternal
+    jose: JoseInstance
+    basePath: string
+    trustedProxyHeaders: boolean
+}
 
 export interface AuthInstance {
     handlers: {
