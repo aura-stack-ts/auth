@@ -9,6 +9,7 @@ import type { AuthConfig, AuthInstance } from "@/@types/index.js"
 
 export type {
     AuthConfig,
+    AuthInstance,
     JoseInstance,
     Session,
     User,
