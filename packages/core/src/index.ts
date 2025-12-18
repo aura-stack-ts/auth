@@ -5,7 +5,7 @@ import { createJoseInstance } from "@/jose.js"
 import { defaultCookieConfig } from "@/cookie.js"
 import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import type { AuthConfig, AuthInstance } from "@/@types/index.js"
+import type { AuthConfig } from "@/@types/index.js"
 
 export type {
     AuthConfig,
@@ -56,12 +56,13 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
  *   }]
  * })
  */
-export const createAuth = (authConfig: AuthConfig): AuthInstance => {
+export const createAuth = (authConfig: AuthConfig) => {
     const config = createInternalConfig(authConfig)
     const router = createRouter(
         [signInAction(config.context.oauth), callbackAction(config.context.oauth), sessionAction, signOutAction, csrfTokenAction],
         config
     )
+
     return {
         handlers: router,
         jose: config.context.jose,

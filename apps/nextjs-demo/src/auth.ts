@@ -1,9 +1,9 @@
-import { createAuth, type AuthInstance } from "@aura-stack/auth"
-import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
+import { createAuth } from "@aura-stack/auth"
+//import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 
-export const oauth = Object.keys(builtInOAuthProviders) as Array<keyof typeof builtInOAuthProviders>
+//export const oauth = Object.keys(builtInOAuthProviders) as Array<keyof typeof builtInOAuthProviders>
 
-export const auth: AuthInstance = createAuth({
+export const auth = createAuth({
     oauth: ["github"],
     trustedProxyHeaders: true,
 })
