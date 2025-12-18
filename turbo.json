@@ -7,7 +7,7 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "!.turbo/**"]
+      "outputs": ["dist/**", "!.turbo/**", ".next/**"]
     },
     "test": {
       "dependsOn": ["^test"],
@@ -28,5 +28,6 @@
   },
   "ui": "tui",
   "cacheDir": ".turbo/cache",
-  "globalDependencies": ["tsconfig.json"]
+  "globalDependencies": [".env", "tsconfig.json"],
+  "globalEnv": [".env"]
 }
