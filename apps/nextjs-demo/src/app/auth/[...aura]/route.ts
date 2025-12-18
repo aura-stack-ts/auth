@@ -1,7 +1,8 @@
 import { createAuth } from "@aura-stack/auth"
 
 const auth = createAuth({
-    oauth: ["github"]
+    oauth: ["github"],
+    secret: process.env.AURA_AUTH_SECRET ?? process.env.NEXT_PUBLIC_AURA_AUTH_SECRET,
 })
 
 export const GET = async (request: Request) => {

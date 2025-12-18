@@ -15,7 +15,7 @@ export type { JWTPayload } from "@aura-stack/jose/jose"
  */
 export const createJoseInstance = (secret?: string) => {
     secret ??= process.env.AURA_AUTH_SECRET!
-    if(!secret) {
+    if (!secret) {
         throw new AuthError("JOSE_INIT_ERROR", "AURA_AUTH_SECRET environment variable is not set and no secret was provided.")
     }
 
