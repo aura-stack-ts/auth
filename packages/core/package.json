@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/auth",
-  "version": "0.1.0-rc.6",
+  "version": "0.1.0-rc.7",
   "private": false,
   "type": "module",
   "description": "Core auth for @aura-stack/auth",

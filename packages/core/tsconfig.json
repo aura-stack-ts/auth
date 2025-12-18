@@ -4,7 +4,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@test/*": ["./test/*"]
-    }
+    },
+    "baseUrl": ".",
   },
   "include": ["src", "test", "src/@types/router.d.ts"],
   "exclude": ["dist", "node_modules"]
