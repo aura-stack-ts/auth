@@ -31,6 +31,7 @@ export const useAuth = async () => {
         cache: "no-store",
     })
     const response = await session.json()
+    console.log("Session response:", response)
     return response as Session
 }
 

@@ -6,6 +6,6 @@
       "@test/*": ["./test/*"]
     }
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "src/@types/router.d.ts"],
   "exclude": ["dist", "node_modules"]
 }
