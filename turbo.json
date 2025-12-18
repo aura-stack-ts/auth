@@ -7,6 +7,8 @@
     },
     "build": {
       "dependsOn": ["^build"],
+      "inputs": [".env"],
+      "env": ["AURA_AUTH_*"],
       "outputs": ["dist/**", "!.turbo/**", ".next/**"]
     },
     "test": {
