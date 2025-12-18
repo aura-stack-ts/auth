@@ -4,7 +4,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@test/*": ["./test/*"]
-    }
+    },
+    "baseUrl": "."
   },
   "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]

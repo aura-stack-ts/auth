@@ -7,7 +7,9 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "!.turbo/**"]
+      "inputs": [".env"],
+      "env": ["AURA_AUTH_*"],
+      "outputs": ["dist/**", "!.turbo/**", ".next/**"]
     },
     "test": {
       "dependsOn": ["^test"],
@@ -28,5 +30,6 @@
   },
   "ui": "tui",
   "cacheDir": ".turbo/cache",
-  "globalDependencies": ["tsconfig.json"]
+  "globalDependencies": [".env", "tsconfig.json"],
+  "globalEnv": [".env"]
 }

@@ -1,9 +1,8 @@
 import { z } from "zod/v4"
-import { createJoseInstance, JWTPayload } from "@/jose.js"
+import { JWTPayload } from "@/jose.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
-import type { Prettify, RoutePattern } from "@aura-stack/router"
 import type { SerializeOptions } from "cookie"
-import type { LiteralUnion } from "./utility.js"
+import type { LiteralUnion, Prettify } from "./utility.js"
 import type { BuiltInOAuthProvider } from "@/oauth/index.js"
 
 export * from "./utility.js"
@@ -179,7 +178,7 @@ export interface AuthConfig {
     /**
      * Base path for all authentication routes. Default is `/auth`.
      */
-    basePath?: RoutePattern
+    basePath?: `/${string}`
     /**
      * Enable trusted proxy headers for scenarios where the application is behind a reverse proxy or load balancer.
      * This setting allows Aura Auth to correctly interpret headers like `X-Forwarded-For` and `X-Forwarded-Proto`
@@ -196,18 +195,39 @@ export interface AuthConfig {
      */
     trustedProxyHeaders?: boolean
 }
-
-export type JoseInstance = ReturnType<typeof createJoseInstance>
+export interface JoseInstance {
+    decodeJWT: (token: string) => Promise<JWTPayload>
+    encodeJWT: (payload: JWTPayload) => Promise<string>
+    signJWS: (payload: JWTPayload) => Promise<string>
+    verifyJWS: (payload: string) => Promise<JWTPayload>
+}
 
 /**
  * Internal runtime configuration used within Aura Auth after initialization.
  * All optional fields from AuthConfig are resolved to their default values.
  * @internal
+ * @todo: is this needed?
  */
 export interface AuthRuntimeConfig {
     oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
     cookies: CookieConfig
     secret: string
+    jose: JoseInstance
+}
+
+export interface RouterGlobalContext {
+    oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+    cookies: CookieConfigInternal
+    jose: JoseInstance
+    basePath: string
+    trustedProxyHeaders: boolean
+}
+
+export interface AuthInstance {
+    handlers: {
+        GET: (request: Request) => Response | Promise<Response>
+        POST: (request: Request) => Response | Promise<Response>
+    }
     jose: JoseInstance
 }
 
