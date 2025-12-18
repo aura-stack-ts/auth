@@ -5,8 +5,8 @@
       "@/*": ["./src/*"],
       "@test/*": ["./test/*"]
     },
-    "baseUrl": ".",
+    "baseUrl": "."
   },
-  "include": ["src", "test", "src/@types/router.d.ts"],
+  "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]
 }

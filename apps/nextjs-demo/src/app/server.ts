@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
-import type { Session } from "@aura-stack/auth/types"
 
 const getBaseUrl = async () => {
     const headersStore = await headers()
@@ -22,17 +21,24 @@ const getCSRFToken = async () => {
 }
 
 export const useAuth = async () => {
-    const baseUrl = await getBaseUrl()
-    const headersStore = new Headers(await headers())
-    const cookiesStore = await cookies()
-    headersStore.set("Cookie", cookiesStore.toString())
-    const session = await fetch(`${baseUrl}/auth/session`, {
-        headers: headersStore,
-        cache: "no-store",
-    })
-    const response = await session.json()
-    console.log("Session response:", response)
-    return response as Session
+    try {
+        const baseUrl = await getBaseUrl()
+        const headersStore = new Headers(await headers())
+        const cookiesStore = await cookies()
+        headersStore.set("Cookie", cookiesStore.toString())
+        const session = await fetch(`${baseUrl}/auth/session`, {
+            headers: headersStore,
+            cache: "no-store",
+        })
+        const response = await session.json()
+        console.log("Session response:", response)
+        return response
+    } catch {
+        return {
+            message: "Unnauthorized",
+            authenticated: false,
+        }
+    }
 }
 
 export const signOut = async () => {
