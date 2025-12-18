@@ -9,8 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.0] - 2025-12-28
+
 ### Added
 
-- Reconsidered the package's purpose and renamed it from `@aura-stack/session` to `@aura-stack/jose`. The package now focuses on implementing standardized processes for [signing (JWS)](https://datatracker.ietf.org/doc/html/rfc7515), [encrypting (JWE)](https://datatracker.ietf.org/doc/html/rfc7516), and [handling JWTs](https://datatracker.ietf.org/doc/html/rfc7519). This provides robust utilities for creating, signing, encrypting, verifying, and decrypting JWTs through a clear, modular API. [#3](https://github.com/aura-stack-ts/auth/pull/3)
+- Added salting support to `deriveKey` and `createDeriveKey` for HKDF-based key derivation from a secret value. [#30](https://github.com/aura-stack-ts/auth/pull/30)
 
-- Introduced the `@aura-stack/session` package to manage signed and encrypted JWTs via `encode` and `decode` functions, and to manage sessions using cookie helpers `setCookie` and `getCookie`. [#1](https://github.com/aura-stack-ts/auth/pull/1)
+- Introduced `deriveKey` and `createDeriveKey` for HKDF (HMAC-based Extract-and-Expand Key Derivation Function) so applications can derive multiple independent keys from a single secret without using the original secret directly. [#15](https://github.com/aura-stack-ts/auth/pull/15)
+
+- Renamed the package from `@aura-stack/session` to `@aura-stack/jose` to focus on standardized JWT workflows: [signing (JWS)](https://datatracker.ietf.org/doc/html/rfc7515), [encrypting (JWE)](https://datatracker.ietf.org/doc/html/rfc7516), and [handling JWTs](https://datatracker.ietf.org/doc/html/rfc7519). The package now offers modular utilities to create, sign, encrypt, verify, and decrypt JWTs. [#3](https://github.com/aura-stack-ts/auth/pull/3)
+
+- Introduced the `@aura-stack/session` package to manage signed and encrypted JWTs via `encode` and `decode`, and to manage sessions with cookie helpers `setCookie` and `getCookie`. [#1](https://github.com/aura-stack-ts/auth/pull/1)
