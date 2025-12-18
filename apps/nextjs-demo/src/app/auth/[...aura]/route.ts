@@ -1,8 +1,5 @@
-// Is this the error ?
-import { handlers } from "@/auth"
-//export const { GET, POST } = handlers
+import { auth } from "@/auth"
 
-export const GET = async (req: Request) => {
-    console.log("handlers: ", handlers, "GET: ", await handlers?.GET(req))
-    return Response.json({ message: "Auth route is not configured." }, { status: 501 })
-}
+export const {
+    handlers: { GET, POST },
+} = auth

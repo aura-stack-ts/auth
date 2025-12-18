@@ -7,5 +7,3 @@ export const auth: AuthInstance = createAuth({
     oauth,
     trustedProxyHeaders: true,
 })
-
-export const { handlers, jose } = auth
