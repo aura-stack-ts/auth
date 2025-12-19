@@ -47,7 +47,7 @@ export const Features = () => {
                     <Link
                         key={feature.title}
                         href="/docs"
-                        className="px-6 py-8 group md:nth-[3]:border-r-0 md:nth-[4]:border-b-0 md:nth-[5]:border-b-0"
+                        className="px-6 py-8 group hover:bg-primary-foreground/10 lg:nth-[3]:border-r-0 lg:nth-[4]:border-b-0 lg:nth-[5]:border-b-0"
                     >
                         <div className="mb-4">
                             <div className="size-10 flex items-center justify-center border-border rounded-lg bg-border">

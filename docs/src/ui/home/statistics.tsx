@@ -34,11 +34,11 @@ export const Statistics = () => {
                 title="Statistics"
                 description="Discover the innovative features that position Aura Auth as the top choice for contemporary authentication solutions."
             />
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3">
                 {statistics.map((stat) => (
                     <Link
                         key={stat.label}
-                        className="px-6 py-12 flex flex-col items-center justify-center gap-3 text-center border-b border-border last:border-b-0 md:border-r md:border-b-0 md:last:border-r-0"
+                        className="px-6 py-12 flex flex-col items-center justify-center gap-3 text-center border-b border-border last:border-b-0 md:border-r md:border-b-0 md:last:border-r-0 hover:bg-primary-foreground/10"
                         href={stat.link}
                         target="_blank"
                     >
