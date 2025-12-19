@@ -114,6 +114,9 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
     devDependencies:
+      '@halvaradop/tailwindcss-utilities':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@tailwindcss/postcss':
         specifier: ^4.1.16
         version: 4.1.16
@@ -421,6 +424,9 @@ packages:
 
   '@formatjs/intl-localematcher@0.6.2':
     resolution: {integrity: sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA==}
+
+  '@halvaradop/tailwindcss-utilities@1.0.0':
+    resolution: {integrity: sha512-tWohTj+ppgLXdXDd6HE8vd9gtg6WluBExaAjA3wGW1HkTBOXjG2/ThKxeq1AiwvaXK+QXv+mgK5OSXGnLnMJqg==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -3065,6 +3071,8 @@ snapshots:
   '@formatjs/intl-localematcher@0.6.2':
     dependencies:
       tslib: 2.8.1
+
+  '@halvaradop/tailwindcss-utilities@1.0.0': {}
 
   '@humanfs/core@0.19.1': {}
 
