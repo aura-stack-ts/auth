@@ -3,7 +3,7 @@ import { FlickeringGrid } from "@/ui/flickering-grid"
 
 export const SectionHeader = ({ title, description }: SectionProps) => {
     return (
-        <div className=" w-full px-6 py-16 text-left relative overflow-hidden border-b border-border rounded-lg bg-background">
+        <div className=" w-full px-6 py-16 text-left relative overflow-hidden border-b border-border">
             <h3 className="text-3xl text-primary font-semibold tracking-wider">{title}</h3>
             <p className="mt-2 text-base font-medium tracking-wider text-primary-foreground">{description}</p>
             <FlickeringGrid

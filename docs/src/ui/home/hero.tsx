@@ -26,7 +26,7 @@ export const Hero = () => {
                 </AnimatedShinyText>
             </div>
             <div className="mt-8 mb-16 text-center">
-                <h1 className="mb-6 text-5xl font-semibold leading-[1.1] tracking-tight text-transparent bg-clip-text bg-linear-to-r from-red-500 to-blue-800 md:text-6xl lg:text-7xl xl:text-8xl">
+                <h1 className="w-fit mx-auto mb-6 text-5xl font-semibold leading-[1.1] tracking-tight text-transparent bg-clip-text bg-linear-to-r from-purple-600 via-emerald-500 to-blue-400 md:text-6xl lg:text-7xl xl:text-8xl">
                     Aura Auth
                 </h1>
                 <p className="max-w-2xl mb-10 mx-auto text-base text-primary-foreground leading-relaxed md:text-lg lg:text-xl">

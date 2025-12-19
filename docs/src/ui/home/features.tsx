@@ -50,7 +50,7 @@ export const Features = () => {
                         className="px-6 py-8 group md:nth-[3]:border-r-0 md:nth-[4]:border-b-0 md:nth-[5]:border-b-0"
                     >
                         <div className="mb-4">
-                            <div className="size-10 flex items-center justify-center rounded-lg border-slate-500/30 bg-slate-500/20">
+                            <div className="size-10 flex items-center justify-center border-border rounded-lg bg-border">
                                 <feature.icon className="size-5" />
                             </div>
                         </div>

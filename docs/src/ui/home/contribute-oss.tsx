@@ -6,9 +6,9 @@ export const ContributeOpenSource = () => {
     return (
         <section className="h-[500px] w-full relative flex flex-col items-center justify-center overflow-hidden">
             <Ripple />
-            <div className="px-6 text-center text-5xl font-medium tracking-tighter whitespace-pre-wrap text-white relative z-10">
+            <div className="px-6 text-center text-5xl font-medium tracking-tighter whitespace-pre-wrap text-primary relative z-10">
                 <h3 className="font-medium uppercase tracking-wider ">Join Our Community</h3>
-                <p className="mt-2 text-xs font-medium uppercase tracking-wider text-neutral-500">
+                <p className="mt-2 text-xs font-medium uppercase tracking-wider text-primary-foreground">
                     Help us build the future of authentication. Contribute code, report issues, or share your ideas with our
                     growing community of developers.
                 </p>
