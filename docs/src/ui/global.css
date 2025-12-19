@@ -4,5 +4,6 @@
 @import "@halvaradop/tailwindcss-utilities";
 
 @theme {
-    --color-border: #e5e7eb;
+    --color-border: oklch(26.9% 0 0);
+    --breakpoint-base: 56.25rem;
 }
