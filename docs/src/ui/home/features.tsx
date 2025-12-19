@@ -54,9 +54,9 @@ export const Features = () => {
                                 <feature.icon className="size-5" />
                             </div>
                         </div>
-                        <h3 className="mb-2 text-sm font-semibold text-white">{feature.title}</h3>
-                        <p className="mb-3 text-xs text-neutral-400 leading-relaxed">{feature.desc}</p>
-                        <div className="inline-flex items-center gap-1 text-xs text-neutral-500 transition-colors group-hover:text-neutral-400">
+                        <h3 className="mb-2 text-lg font-semibold text-primary">{feature.title}</h3>
+                        <p className="mb-3 text-base text-primary-foreground leading-relaxed">{feature.desc}</p>
+                        <div className="inline-flex items-center gap-1 text-sm text-primary transition-colors group-hover:text-primary-foreground">
                             Learn more <ArrowRight className="size-3" />
                         </div>
                     </Link>

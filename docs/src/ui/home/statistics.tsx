@@ -38,11 +38,11 @@ export const Statistics = () => {
                         href={stat.link}
                         target="_blank"
                     >
-                        <div className="flex items-center">
-                            <stat.icon className="size-6 text-neutral-500" />
-                            <span className="text-4xl font-semibold text-white tracking-tight">{stat.value}</span>
+                        <div className="flex items-center gap-x-2 text-primary-foreground">
+                            <stat.icon className="size-6" />
+                            <span className="text-4xl font-semibold tracking-tight">{stat.value}</span>
                         </div>
-                        <p className="text-xs text-neutral-500">{stat.label}</p>
+                        <p className="text-base text-primary">{stat.label}</p>
                     </Link>
                 ))}
             </div>
