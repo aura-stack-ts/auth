@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { getMDXComponents } from "@/mdx-components"
 import type { Metadata } from "next"
 import { createRelativeLink } from "fumadocs-ui/mdx"
+import { LLMCopyButton, ViewOptions } from "@/components/ai/page-actions"
 
 export default async function Page(props: Readonly<PageProps<"/docs/[[...slug]]">>) {
     const params = await props.params
@@ -16,6 +17,13 @@ export default async function Page(props: Readonly<PageProps<"/docs/[[...slug]]"
         <DocsPage toc={page.data.toc} full={page.data.full}>
             <DocsTitle>{page.data.title}</DocsTitle>
             <DocsDescription>{page.data.description}</DocsDescription>
+            <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+                <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+                <ViewOptions
+                    markdownUrl={`${page.url}.mdx`}
+                    githubUrl={`https://github.com/aura-stack-ts/auth/blob/master/docs/src/content/docs/${page.path}`}
+                />
+            </div>
             <DocsBody>
                 <Mdx
                     components={getMDXComponents({
