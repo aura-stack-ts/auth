@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - "packages/**"
+      - "pnpm-lock.yaml"
 
 jobs:
   type-check:
+    name: Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +22,8 @@ jobs:
       - run: pnpm type-check
 
   test:
+    name: Test
     runs-on: ubuntu-latest
-    needs: type-check
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,8 +36,9 @@ jobs:
       - run: pnpm test
 
   build:
+    name: Build
     runs-on: ubuntu-latest
-    needs: test
+    needs: [type-check, test]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
