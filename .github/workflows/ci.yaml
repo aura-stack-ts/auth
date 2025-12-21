@@ -16,8 +16,6 @@ jobs:
         with:
           node-version: "20.x"
       - uses: pnpm/action-setup@v4
-        with:
-          version: "10.x"
       - run: pnpm install --frozen-lockfile
       - run: pnpm type-check
 
@@ -30,8 +28,6 @@ jobs:
         with:
           node-version: "20.x"
       - uses: pnpm/action-setup@v4
-        with:
-          version: "10.x"
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
 
@@ -45,7 +41,5 @@ jobs:
         with:
           node-version: "20.x"
       - uses: pnpm/action-setup@v4
-        with:
-          version: "10.x"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
