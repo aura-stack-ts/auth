@@ -1,11 +1,8 @@
 import path from "node:path"
-import crypto from "node:crypto"
 import { defineConfig } from "vitest/config"
+import { generateSecure } from "./src/secure.js"
 
-/**
- * For a strange reason, crypto.randomBytes function is not generating a correct length
- */
-const SECRET_KEY = crypto.randomBytes(24).toString("base64")
+const SECRET_KEY = generateSecure()
 
 export default defineConfig({
     test: {
