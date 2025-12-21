@@ -1,6 +1,8 @@
 import crypto from "node:crypto"
 import { jwtVerify, SignJWT, type JWTPayload } from "jose"
 import { createSecret } from "@/secret.js"
+import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.js"
+import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.js"
 import type { SecretInput } from "@/index.js"
 
 /**
@@ -17,16 +19,26 @@ import type { SecretInput } from "@/index.js"
  * @returns Signed JWT string
  */
 export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise<string> => {
-    const secretKey = createSecret(secret)
-    const jti = crypto.randomBytes(32).toString("base64")
+    try {
+        if (isInvalidPayload(payload)) {
+            throw new InvalidPayloadError("The payload must be a non-empty object")
+        }
+        const secretKey = createSecret(secret)
+        const jti = crypto.randomBytes(32).toString("base64")
 
-    return new SignJWT(payload)
-        .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-        .setIssuedAt()
-        .setNotBefore("0s")
-        .setExpirationTime("15d")
-        .setJti(jti)
-        .sign(secretKey)
+        return new SignJWT(payload)
+            .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+            .setIssuedAt()
+            .setNotBefore("0s")
+            .setExpirationTime("15d")
+            .setJti(jti)
+            .sign(secretKey)
+    } catch (error) {
+        if (isAuraJoseError(error)) {
+            throw error
+        }
+        throw new JWSSigningError("JWS signing failed", { cause: error })
+    }
 }
 
 /**
@@ -40,12 +52,17 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
  */
 export const verifyJWS = async (token: string, secret: SecretInput): Promise<JWTPayload> => {
     try {
+        if(isFalsy(token)) {
+            throw new InvalidPayloadError("The token must be a non-empty string")
+        } 
         const secretKey = createSecret(secret)
         const { payload } = await jwtVerify(token, secretKey)
         return payload
     } catch (error) {
-        // @ts-ignore
-        throw new Error("Invalid JWS", { cause: error })
+        if (isAuraJoseError(error)) {
+            throw error
+        }
+        throw new JWSVerificationError("JWS signature verification failed", { cause: error })
     }
 }
 

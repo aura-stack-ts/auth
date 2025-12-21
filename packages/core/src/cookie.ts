@@ -147,7 +147,6 @@ export const createSessionCookie = async (
         const encoded = await jose.encodeJWT(session)
         return setCookie("sessionToken", encoded, cookieOptions)
     } catch (error) {
-        // @ts-ignore
         throw new AuthError("server_error", "Failed to create session cookie", { cause: error })
     }
 }

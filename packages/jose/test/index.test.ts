@@ -44,7 +44,7 @@ describe("JWSs", () => {
 
     test("fail JWT to try to verify an invalid JWS", async () => {
         const { verifyJWS } = createJWS("my-secret-key")
-        await expect(verifyJWS("invalid.jwt.token")).rejects.toThrow("Invalid JWS")
+        await expect(verifyJWS("invalid.jwt.token")).rejects.toThrow("Secret string must be at least 32 characters long")
     })
 
     test("fail JWT to try to verify a JWS with invalid secret", async () => {
@@ -55,7 +55,13 @@ describe("JWSs", () => {
         expect(jws).toBeDefined()
 
         const { verifyJWS } = createJWS("wrong-secret-key")
-        await expect(verifyJWS(jws)).rejects.toThrow("Invalid JWS")
+        await expect(verifyJWS(jws)).rejects.toThrow("Secret string must be at least 32 characters long")
+    })
+
+    test("fail JWT with invalid format JWS", async () => {
+        const secretKey = crypto.randomBytes(32)
+        const { signJWS } = createJWS(secretKey)
+        await expect(signJWS(undefined as any)).rejects.toThrow("The payload must be a non-empty object")
     })
 })
 
@@ -139,11 +145,8 @@ describe("JWTs", () => {
     })
 
     test("createJWT with invalid secret", async () => {
-        /**
-         * Jose expects a secret of at least 32 bytes for HS256
-         */
         const { encodeJWT } = createJWT("short")
-        await expect(encodeJWT(payload)).rejects.toThrow()
+        await expect(encodeJWT(payload)).rejects.toThrow("Secret string must be at least 32 characters long")
     })
 })
 

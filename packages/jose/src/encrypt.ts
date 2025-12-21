@@ -1,10 +1,12 @@
 import crypto from "node:crypto"
 import { EncryptJWT, jwtDecrypt } from "jose"
 import { createSecret } from "@/secret.js"
+import { isAuraJoseError, isFalsy } from "@/assert.js"
+import { InvalidPayloadError, JWEDecryptionError } from "@/errors.js"
 import type { SecretInput } from "@/index.js"
 
 export interface EncryptedPayload {
-    token: string
+    payload: string
 }
 
 /**
@@ -19,16 +21,26 @@ export interface EncryptedPayload {
  * @returns Encrypted JWT string
  */
 export const encryptJWE = async (payload: string, secret: SecretInput) => {
-    const secretKey = createSecret(secret)
-    const jti = crypto.randomBytes(32).toString("base64")
+    try {
+        if(isFalsy(payload)) {
+            throw new InvalidPayloadError("The payload must be a non-empty string")
+        }
+        const secretKey = createSecret(secret)
+        const jti = crypto.randomBytes(32).toString("base64")
 
-    return new EncryptJWT({ token: payload })
-        .setProtectedHeader({ alg: "dir", enc: "A256GCM", typ: "JWT", cty: "JWT" })
-        .setIssuedAt()
-        .setNotBefore("0s")
-        .setExpirationTime("15d")
-        .setJti(jti)
-        .encrypt(secretKey)
+        return new EncryptJWT({ payload })
+            .setProtectedHeader({ alg: "dir", enc: "A256GCM", typ: "JWT", cty: "JWT" })
+            .setIssuedAt()
+            .setNotBefore("0s")
+            .setExpirationTime("15d")
+            .setJti(jti)
+            .encrypt(secretKey)
+    } catch (error) {
+        if (isAuraJoseError(error)) {
+            throw error
+        }
+        throw new JWEDecryptionError("JWE encryption failed", { cause: error })
+    }
 }
 
 /**
@@ -40,12 +52,17 @@ export const encryptJWE = async (payload: string, secret: SecretInput) => {
  */
 export const decryptJWE = async (token: string, secret: SecretInput) => {
     try {
+        if(isFalsy(token)) {
+            throw new InvalidPayloadError("The token must be a non-empty string")
+        }
         const secretKey = createSecret(secret)
         const { payload } = await jwtDecrypt<EncryptedPayload>(token, secretKey)
-        return payload.token
+        return payload.payload
     } catch (error) {
-        // @ts-ignore
-        throw new Error("Invalid JWE", { cause: error })
+        if (isAuraJoseError(error)) {
+            throw error
+        }
+        throw new JWEDecryptionError("JWE decryption verification failed", { cause: error })
     }
 }
 

@@ -6,8 +6,8 @@ import type { ErrorType, LiteralUnion } from "./@types/index.js"
 export class AuthError extends Error {
     public readonly type: LiteralUnion<ErrorType>
 
-    constructor(type: LiteralUnion<ErrorType>, message: string) {
-        super(message)
+    constructor(type: LiteralUnion<ErrorType>, message: string, cause?: ErrorOptions) {
+        super(message, cause)
         this.type = type
         this.name = "AuthError"
     }
