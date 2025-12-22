@@ -16,7 +16,15 @@ describe("callbackAction", () => {
     test("endpoint without code and state", async () => {
         const response = await GET(new Request("https://example.com/auth/callback/unknown"))
         expect(response.status).toBe(422)
-        expect(await response.json()).toEqual({ error: "invalid_request", error_description: "Invalid route parameters" })
+        expect(await response.json()).toEqual({
+            error: "invalid_request",
+            error_description: {
+                oauth: {
+                    code: "invalid_value",
+                    message: "The OAuth provider is not supported or invalid.",
+                },
+            },
+        })
     })
 
     test("unsupported oauth provider", async () => {
@@ -24,7 +32,12 @@ describe("callbackAction", () => {
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
             error: "invalid_request",
-            error_description: "Invalid route parameters",
+            error_description: {
+                oauth: {
+                    code: "invalid_value",
+                    message: "The OAuth provider is not supported or invalid.",
+                },
+            },
         })
     })
 

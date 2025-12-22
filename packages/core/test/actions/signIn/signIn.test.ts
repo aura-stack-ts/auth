@@ -8,7 +8,12 @@ describe("signIn action", () => {
         expect(request.status).toBe(422)
         expect(await request.json()).toEqual({
             error: "invalid_request",
-            error_description: "Invalid route parameters",
+            error_description: {
+                oauth: {
+                    code: "invalid_value",
+                    message: "The OAuth provider is not supported or invalid.",
+                },
+            },
         })
     })
 

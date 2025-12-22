@@ -1,5 +1,5 @@
-import { parse, serialize, type SerializeOptions } from "cookie"
-import { AuthError } from "@/error.js"
+import { parse, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
+import { AuthError } from "@/errors.js"
 import { isRequest } from "@/assert.js"
 import type { JWTPayload } from "@/jose.js"
 import type {
@@ -10,8 +10,6 @@ import type {
     LiteralUnion,
     StandardCookie,
 } from "@/@types/index.js"
-
-export { parse } from "cookie"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -87,6 +85,7 @@ export const defineDefaultCookieOptions = (options?: CookieConfigInternal): Cook
  *
  * Cookie attributes are serialized in the following order:
  * Expires, Max-Age, Domain, Path, Secure, HttpOnly, SameSite, Partitioned, Priority.
+ * @deprecated
  */
 export const setCookie = (cookieName: LiteralUnion<CookieName>, value: string, options?: CookieConfigInternal) => {
     const { prefix, name } = defineDefaultCookieOptions(options)

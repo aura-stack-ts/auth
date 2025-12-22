@@ -58,8 +58,7 @@
   "license": "MIT",
   "dependencies": {
     "@aura-stack/jose": "workspace:*",
-    "@aura-stack/router": "^0.4.0",
-    "cookie": "^1.0.2",
+    "@aura-stack/router": "^0.5.0",
     "dotenv": "^17.2.3",
     "zod": "^4.1.12"
   },
