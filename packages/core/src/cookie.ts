@@ -1,7 +1,7 @@
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "cookie"
 import { AuthError } from "@/error.js"
 import type { JWTPayload } from "@/jose.js"
-import type { AuthRuntimeConfig, CookieName, LiteralUnion, StandardCookie, CookieStoreConfig } from "@/@types/index.js"
+import type { AuthRuntimeConfig, CookieName, LiteralUnion, CookieStoreConfig, CookieConfig } from "@/@types/index.js"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -24,19 +24,21 @@ export const defaultStandardCookieConfig: SerializeOptions = {
 }
 
 /**
- * Default cookie options for "secure" cookies.
+ * Default cookie options for "__Secure-" cookies.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
  */
 export const defaultSecureCookieConfig: SerializeOptions = {
     secure: true,
+    httpOnly: true
 }
 
 /**
- * Default cookie options for "host" cookies.
+ * Default cookie options for "__Host-" cookies.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
  */
 export const defaultHostCookieConfig: SerializeOptions = {
     secure: true,
+    httpOnly: true,
     path: "/",
     domain: undefined,
 }
@@ -136,6 +138,7 @@ export const createSessionCookie = async (
     }
 }
 
+
 /**
  * Defines the cookie configuration based on the request security and cookie options passed
  * in the Aura Auth configuration (`createAuth` function). This function ensures the correct
@@ -154,32 +157,36 @@ export const defineSecureCookieOptions = (
     attributes: SerializeOptions,
     strategy: "host" | "secure" | "standard"
 ): SerializeOptions => {
-    if (!attributes?.httpOnly) {
+    if (!attributes.httpOnly) {
         console.warn(
             "[WARNING]: Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk."
         )
     }
-    if (attributes?.domain === "*") {
+    if (attributes.domain === "*") {
+        attributes.domain = undefined
         console.warn("[WARNING]: Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.")
-    }
+    } 
     if (!useSecure) {
-        const options = attributes
-        if (options?.secure) {
+        if (attributes.secure) {
             console.warn(
                 "[WARNING]: The 'Secure' attribute will be disabled for this cookie. Serve over HTTPS to enforce Secure cookies."
             )
         }
-        if (options?.sameSite == "none") {
-            console.warn("[WARNING]: SameSite=None without a secure connection can be blocked by browsers.")
+        if (attributes.sameSite == "none") {
+            attributes.sameSite = "lax"
+            console.warn("[WARNING]: SameSite=None requires Secure attribute. Changing SameSite to 'Lax'.")
         }
         if (process.env.NODE_ENV === "production") {
             console.warn("[WARNING]: In production, ensure cookies are served over HTTPS to maintain security.")
         }
+        if(strategy === "host") {
+            console.warn("[WARNING]: __Host- cookies require a secure context. Falling back to standard cookie settings.")
+        }
         return {
             ...defaultCookieOptions,
             ...attributes,
-            sameSite: options?.sameSite === "none" ? "lax" : (options?.sameSite ?? "lax"),
-            ...defaultStandardCookieConfig,
+            ...defaultStandardCookieConfig
+
         }
     }
     return strategy === "host"
@@ -200,7 +207,7 @@ export const defineSecureCookieOptions = (
 export const createCookieStore = (
     useSecure: boolean,
     prefix?: string,
-    overrides?: Partial<CookieStoreConfig>
+    overrides?: CookieConfig["overrides"]
 ): CookieStoreConfig => {
     prefix ??= COOKIE_NAME
     const securePrefix = useSecure ? "__Secure-" : ""
@@ -214,7 +221,7 @@ export const createCookieStore = (
                     ...defaultCookieOptions,
                     ...overrides?.sessionToken?.attributes,
                 },
-                overrides?.sessionToken?.attributes.strategy ?? "secure"
+                overrides?.sessionToken?.attributes?.strategy ?? "secure"
             ),
         },
         state: {
@@ -225,7 +232,7 @@ export const createCookieStore = (
                     ...oauthCookieOptions,
                     ...overrides?.state?.attributes,
                 },
-                overrides?.state?.attributes.strategy ?? "secure"
+                overrides?.state?.attributes?.strategy ?? "secure"
             ),
         },
         csrfToken: {
@@ -234,11 +241,9 @@ export const createCookieStore = (
                 useSecure,
                 {
                     ...overrides?.csrfToken?.attributes,
-                    httpOnly: true,
-                    path: "/",
-                    domain: undefined,
-                },
-                overrides?.csrfToken?.attributes.strategy ?? "host"
+                    ...defaultHostCookieConfig
+                },                
+                overrides?.csrfToken?.attributes?.strategy ?? "host"
             ),
         },
         redirect_to: {
@@ -249,7 +254,7 @@ export const createCookieStore = (
                     ...oauthCookieOptions,
                     ...overrides?.redirect_to?.attributes,
                 },
-                overrides?.redirect_to?.attributes.strategy ?? "secure"
+                overrides?.redirect_to?.attributes?.strategy ?? "secure"
             ),
         },
         redirect_uri: {
@@ -260,7 +265,7 @@ export const createCookieStore = (
                     ...oauthCookieOptions,
                     ...overrides?.redirect_uri?.attributes,
                 },
-                overrides?.redirect_uri?.attributes.strategy ?? "secure"
+                overrides?.redirect_uri?.attributes?.strategy ?? "secure"
             ),
         },
         code_verifier: {
@@ -271,7 +276,7 @@ export const createCookieStore = (
                     ...oauthCookieOptions,
                     ...overrides?.code_verifier?.attributes,
                 },
-                overrides?.code_verifier?.attributes.strategy ?? "secure"
+                overrides?.code_verifier?.attributes?.strategy ?? "secure"
             ),
         },
     }

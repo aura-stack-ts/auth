@@ -135,7 +135,7 @@ describe("defineSecureCookieOptions", () => {
             strategy: "standard",
             expected: {
                 secure: true,
-                httpOnly: false,
+                httpOnly: true,
                 maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
@@ -150,7 +150,7 @@ describe("defineSecureCookieOptions", () => {
             strategy: "secure",
             expected: {
                 secure: true,
-                httpOnly: false,
+                httpOnly: true,
                 maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
@@ -165,7 +165,7 @@ describe("defineSecureCookieOptions", () => {
             },
             expected: {
                 secure: true,
-                httpOnly: false,
+                httpOnly: true,
                 maxAge: 1296000,
                 path: "/",
                 sameSite: "lax",
@@ -233,7 +233,6 @@ describe("defineSecureCookieOptions", () => {
             attributes: {},
             expected: {
                 secure: true,
-
                 httpOnly: true,
                 maxAge: 1296000,
                 path: "/",
@@ -274,7 +273,6 @@ describe("defineSecureCookieOptions", () => {
             attributes: {
                 secure: false,
             },
-
             expected: {
                 secure: true,
                 httpOnly: true,
