@@ -6,9 +6,15 @@ import { getUserInfo } from "./userinfo.js"
 import { AuraResponse } from "@/response.js"
 import { createAccessToken } from "./access-token.js"
 import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
-import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
+import { equals, isValidRelativePath, sanitizeURL, useSecureCookies } from "@/utils.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
-import { createSessionCookie, expireCookie, getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import {
+    createCookieStore,
+    createSessionCookie,
+    expiresCookie,
+    setCookie,
+    unstable__get_cookie,
+} from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AccessTokenError, AuthorizationError, AuthRuntimeConfig } from "@/@types/index.js"
 
@@ -42,16 +48,27 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                 request,
                 params: { oauth },
                 searchParams: { code, state },
-                context: { oauth: providers, cookies, jose, trustedProxyHeaders },
+                context: { oauth: providers, jose, trustedProxyHeaders },
             } = ctx
             try {
+                const useSecure = useSecureCookies(request, trustedProxyHeaders)
+                /**
+                 * @todo: pass the new cookie configuration option
+                 */
+                const cookieStore = createCookieStore(useSecure)
                 const oauthConfig = providers[oauth]
 
-                const cookieOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
+                /*
                 const cookieState = getCookie(request, "state", cookieOptions)
                 const cookieRedirectTo = getCookie(request, "redirect_to", cookieOptions)
                 const cookieRedirectURI = getCookie(request, "redirect_uri", cookieOptions)
                 const codeVerifier = getCookie(request, "code_verifier", cookieOptions)
+                */
+
+                const cookieState = unstable__get_cookie(request, cookieStore.state.name)
+                const cookieRedirectTo = unstable__get_cookie(request, cookieStore.redirect_to.name)
+                const cookieRedirectURI = unstable__get_cookie(request, cookieStore.redirect_uri.name)
+                const codeVerifier = unstable__get_cookie(request, cookieStore.code_verifier.name)
 
                 if (!equals(cookieState, state)) {
                     throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Mismatching state")
@@ -70,26 +87,20 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                 headers.set("Location", sanitized)
                 const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
 
-                const sessionCookie = await createSessionCookie(userInfo as JWTPayload, cookieOptions, jose)
+                const sessionCookie = await createSessionCookie(
+                    userInfo as JWTPayload,
+                    cookieStore.sessionToken.name,
+                    cookieStore.sessionToken.attributes,
+                    jose
+                )
 
                 const csrfToken = await createCSRF(jose)
-                const csrfCookie = setCookie(
-                    "csrfToken",
-                    csrfToken,
-                    secureCookieOptions(
-                        request,
-                        {
-                            ...cookies,
-                            strategy: "host",
-                        },
-                        trustedProxyHeaders
-                    )
-                )
+                const csrfCookie = setCookie(cookieStore.csrfToken.name, csrfToken, cookieStore.csrfToken.attributes)
                 headers.set("Set-Cookie", sessionCookie)
-                headers.append("Set-Cookie", expireCookie("state", cookieOptions))
-                headers.append("Set-Cookie", expireCookie("redirect_uri", cookieOptions))
-                headers.append("Set-Cookie", expireCookie("redirect_to", cookieOptions))
-                headers.append("Set-Cookie", expireCookie("code_verifier", cookieOptions))
+                headers.append("Set-Cookie", expiresCookie(cookieStore.state.name))
+                headers.append("Set-Cookie", expiresCookie(cookieStore.redirect_uri.name))
+                headers.append("Set-Cookie", expiresCookie(cookieStore.redirect_to.name))
+                headers.append("Set-Cookie", expiresCookie(cookieStore.code_verifier.name))
                 headers.append("Set-Cookie", csrfCookie)
                 return Response.json({ oauth }, { status: 302, headers })
             } catch (error) {

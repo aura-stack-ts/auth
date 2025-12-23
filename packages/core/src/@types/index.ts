@@ -119,7 +119,7 @@ export type CookieConfigInternal = {
  * - `redirect_to`: Post-authentication redirect path
  * - `nonce`: OpenID Connect nonce parameter
  */
-export type CookieName = "sessionToken" | "csrfToken" | "state" | "nonce" | "code_verifier" | "redirect_to" | "redirect_uri"
+export type CookieName = "sessionToken" | "csrfToken" | "state" | "code_verifier" | "redirect_to" | "redirect_uri"
 
 /**
  * Main configuration interface for Aura Auth.
@@ -195,6 +195,9 @@ export interface AuthConfig {
      */
     trustedProxyHeaders?: boolean
 }
+
+export type CookieStoreConfig = Record<CookieName, { name: string; attributes: SerializeOptions }>
+
 export interface JoseInstance {
     decodeJWT: (token: string) => Promise<JWTPayload>
     encodeJWT: (payload: JWTPayload) => Promise<string>

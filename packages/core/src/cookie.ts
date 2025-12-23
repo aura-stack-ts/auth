@@ -1,4 +1,4 @@
-import { parse, serialize, type SerializeOptions } from "cookie"
+import { parse, parseSetCookie, serialize, type SerializeOptions } from "cookie"
 import { AuthError } from "@/error.js"
 import { isRequest } from "@/assert.js"
 import type { JWTPayload } from "@/jose.js"
@@ -9,6 +9,7 @@ import type {
     CookieConfigInternal,
     LiteralUnion,
     StandardCookie,
+    CookieStoreConfig,
 } from "@/@types/index.js"
 
 export { parse } from "cookie"
@@ -82,24 +83,20 @@ export const defineDefaultCookieOptions = (options?: CookieConfigInternal): Cook
 }
 
 /**
- * Set a cookie with the given name, value and `CookieOptionsInternal`; supports secure
+ * Set a cookie with the given name, value and `SerializeOptions`; supports secure
  * cookies with the `__Secure-` and `__Host-` prefixes.
  *
  * Cookie attributes are serialized in the following order:
  * Expires, Max-Age, Domain, Path, Secure, HttpOnly, SameSite, Partitioned, Priority.
  */
-export const setCookie = (cookieName: LiteralUnion<CookieName>, value: string, options?: CookieConfigInternal) => {
-    const { prefix, name } = defineDefaultCookieOptions(options)
-    const cookieNameWithPrefix = `${prefix}${name}.${cookieName}`
-    return serialize(cookieNameWithPrefix, value, {
-        ...defaultCookieOptions,
-        ...options,
-    })
+export const setCookie = (cookieName: string, value: string, options?: SerializeOptions) => {
+    return serialize(cookieName, value, options)
 }
 
 /**
  * Get a cookie by name from the request.
  *
+ * @deprecated
  * @param request The incoming request object
  * @param cookie Cookie name to retrieve
  * @param options Cookie options to define the prefix and other attributes
@@ -131,6 +128,30 @@ export const getCookie = (
     return value
 }
 
+export const unstable__get_cookie = (request: Request, cookieName: string) => {
+    const cookies = request.headers.get("Cookie")
+    if (!cookies) {
+        throw new AuthError("invalid_request", "No cookies found. There is no active session")
+    }
+    const value = parse(cookies)[cookieName]
+    if (!value) {
+        throw new AuthError("invalid_request", `Cookie "${cookieName}" not found. There is no active session`)
+    }
+    return value
+}
+
+export const unstable__get_set_cookie = (response: Response, cookieName: string) => {
+    const cookies = response.headers.getSetCookie()
+    if (!cookies) {
+        throw new AuthError("invalid_request", "No cookies found in response.")
+    }
+    const strCookie = cookies.find((cookie) => cookie.startsWith(`${cookieName}=`))
+    if (!strCookie) {
+        throw new AuthError("invalid_request", `Cookie "${cookieName}" not found in response.`)
+    }
+    return parseSetCookie(strCookie).value
+}
+
 /**
  * Create a session cookie containing a signed and encrypted JWT, using the
  * `@aura-stack/jose` package for the encoding.
@@ -140,12 +161,13 @@ export const getCookie = (
  */
 export const createSessionCookie = async (
     session: JWTPayload,
-    cookieOptions: CookieConfigInternal,
+    cookieName: string,
+    attributes: SerializeOptions,
     jose: AuthRuntimeConfig["jose"]
 ) => {
     try {
         const encoded = await jose.encodeJWT(session)
-        return setCookie("sessionToken", encoded, cookieOptions)
+        return setCookie(cookieName, encoded, attributes)
     } catch (error) {
         // @ts-ignore
         throw new AuthError("server_error", "Failed to create session cookie", { cause: error })
@@ -221,8 +243,16 @@ export const secureCookieOptions = (
  * @param options cookie options obtained from secureCookieOptions
  * @returns formatted cookie options for an expired cookie
  */
-export const expireCookie = (name: LiteralUnion<CookieName>, options: CookieConfigInternal) => {
-    return setCookie(name, "", { ...options, ...expiredCookieOptions })
+export const expiresCookie = (name: LiteralUnion<CookieName>) => {
+    return setCookie(name, "", {
+        sameSite: "lax",
+        domain: undefined,
+        expires: new Date(0),
+        maxAge: 0,
+        secure: true,
+        httpOnly: true,
+        path: "/",
+    })
 }
 
 /**
@@ -238,5 +268,137 @@ export const oauthCookie = (options: CookieConfigInternal): CookieConfigInternal
         httpOnly: options.httpOnly,
         maxAge: 5 * 60,
         expires: new Date(Date.now() + 5 * 60 * 1000),
+    }
+}
+
+const oauthCookieOptions: SerializeOptions = {
+    httpOnly: true,
+    maxAge: 5 * 60,
+    sameSite: "lax",
+    expires: new Date(Date.now() + 5 * 60 * 1000),
+}
+
+export const defineSecureCookieOptions = (
+    useSecure: boolean,
+    attributes: SerializeOptions,
+    strategy: "host" | "secure" | "standard"
+): SerializeOptions => {
+    if (!attributes?.httpOnly) {
+        console.warn(
+            "[WARNING]: Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk."
+        )
+    }
+    if ((attributes as StandardCookie["options"])?.domain === "*") {
+        console.warn("[WARNING]: Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.")
+    }
+    if (!useSecure) {
+        const options = attributes
+        if (options?.secure) {
+            console.warn(
+                "[WARNING]: The 'Secure' attribute will be disabled for this cookie. Serve over HTTPS to enforce Secure cookies."
+            )
+        }
+        if (options?.sameSite == "none") {
+            console.warn("[WARNING]: SameSite=None without a secure connection can be blocked by browsers.")
+        }
+        if (process.env.NODE_ENV === "production") {
+            console.warn("[WARNING]: In production, ensure cookies are served over HTTPS to maintain security.")
+        }
+        return {
+            ...defaultCookieOptions,
+            ...attributes,
+            sameSite: options?.sameSite === "none" ? "lax" : (options?.sameSite ?? "lax"),
+            ...defaultStandardCookieConfig,
+        }
+    }
+    return strategy === "host"
+        ? {
+              ...defaultCookieOptions,
+              ...attributes,
+              ...defaultHostCookieConfig,
+          }
+        : { ...defaultCookieOptions, ...attributes, ...defaultSecureCookieConfig }
+}
+
+/**
+ * @experimental
+ * @param useSecure
+ * @param name
+ * @param config
+ * @returns
+ */
+export const createCookieStore = (useSecure: boolean, name?: string, config?: Partial<CookieStoreConfig>): CookieStoreConfig => {
+    name ??= COOKIE_NAME
+    const securePrefix = useSecure ? "__Secure-" : ""
+    const hostPrefix = useSecure ? "__Host-" : ""
+    return {
+        sessionToken: {
+            name: `${securePrefix}${name}.${config?.sessionToken?.name ?? "sessionToken"}`,
+            attributes: defineSecureCookieOptions(
+                useSecure,
+                {
+                    ...defaultCookieOptions,
+                    ...config?.sessionToken?.attributes,
+                },
+                "standard"
+            ),
+        },
+        state: {
+            name: `${securePrefix}${name}.${config?.state?.name ?? "state"}`,
+            attributes: defineSecureCookieOptions(
+                useSecure,
+                {
+                    ...oauthCookieOptions,
+                    ...config?.state?.attributes,
+                },
+                "standard"
+            ),
+        },
+        csrfToken: {
+            name: `${hostPrefix}${name}.${config?.csrfToken?.name ?? "csrfToken"}`,
+            attributes: defineSecureCookieOptions(
+                useSecure,
+                {
+                    ...config?.csrfToken?.attributes,
+                    httpOnly: true,
+                    path: "/",
+                    domain: undefined,
+                },
+                "host"
+            ),
+        },
+        redirect_to: {
+            name: `${securePrefix}${name}.${config?.redirect_to?.name ?? "redirect_to"}`,
+            attributes: defineSecureCookieOptions(
+                useSecure,
+                {
+                    ...oauthCookieOptions,
+                    ...config?.redirect_to?.attributes,
+                },
+                "standard"
+            ),
+        },
+        redirect_uri: {
+            name: `${securePrefix}${name}.${config?.redirect_uri?.name ?? "redirect_uri"}`,
+            attributes: defineSecureCookieOptions(
+                useSecure,
+                {
+                    ...oauthCookieOptions,
+                    ...config?.redirect_uri?.attributes,
+                },
+                "standard"
+            ),
+        },
+        code_verifier: {
+            name: `${securePrefix}${name}.${config?.code_verifier?.name ?? "code_verifier"}`,
+            attributes: defineSecureCookieOptions(
+                useSecure,
+                {
+                    ...oauthCookieOptions,
+                    ...config?.code_verifier?.attributes,
+                },
+                "standard"
+            ),
+        },
     }
 }

@@ -1,131 +1,128 @@
 import { describe, test, expect } from "vitest"
-import { hostCookieOptions } from "./presets.js"
 import type { SerializeOptions } from "cookie"
-import { setCookie, getCookie, secureCookieOptions, COOKIE_NAME } from "@/cookie.js"
+import {
+    setCookie,
+    secureCookieOptions,
+    COOKIE_NAME,
+    createCookieStore,
+    unstable__get_cookie,
+    unstable__get_set_cookie,
+} from "@/cookie.js"
 import type { CookieConfig, CookieConfigInternal } from "@/@types/index.js"
+
+const cookieStore = createCookieStore(true)
 
 describe("setCookie", () => {
     test("set state cookie with default options", () => {
-        const cookie = setCookie("state", "xyz123")
+        const { expires, ...exclude } = cookieStore.state.attributes
+        const cookie = setCookie("state", "xyz123", exclude)   
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("aura-auth.state=xyz123; Max-Age=1296000; Path=/; HttpOnly; SameSite=Lax")
+        expect(cookie).toEqual("state=xyz123; Max-Age=300; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 
     test("set csrfToken cookie with disabled httpOnly flag on cookie", () => {
-        const cookie = setCookie("csrfToken", "xyz123", { httpOnly: false })
+        const { expires, ...exclude } = cookieStore.csrfToken.attributes
+        const cookie = setCookie(cookieStore.csrfToken.name, "xyz123", exclude)
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("aura-auth.csrfToken=xyz123; Max-Age=1296000; Path=/; SameSite=Lax")
+        expect(cookie).toEqual("__Host-aura-auth.csrfToken=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 
     test("set pkce cookie with secure flag on cookie", () => {
-        const cookie = setCookie("pkce", "xyz123", { secure: true })
+        const { expires, ...exclude } = cookieStore.code_verifier.attributes
+        const cookie = setCookie(cookieStore.code_verifier.name, "xyz123", exclude)
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("__Secure-aura-auth.pkce=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
+        expect(cookie).toEqual("__Secure-aura-auth.code_verifier=xyz123; Max-Age=300; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 
     test("set custom cookie with default options", () => {
         const cookie = setCookie("customCookie", "customValue")
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("aura-auth.customCookie=customValue; Max-Age=1296000; Path=/; HttpOnly; SameSite=Lax")
+        expect(cookie).toEqual("customCookie=customValue")
     })
 
     test("set session cookie and retrieve it from a client-sent Cookie header", () => {
-        const session = setCookie("sessionToken", "userId:1", { httpOnly: false })
+        const session = setCookie(cookieStore.sessionToken.name, "userId:1", { httpOnly: false })
         const headers = new Headers()
         headers.set("Cookie", session)
         const request = new Request("http://localhost", { headers })
-        const cookie = getCookie(request, "sessionToken")
+        const cookie = unstable__get_cookie(request, cookieStore.sessionToken.name)
         expect(cookie).toBeDefined()
         expect(cookie).toBe("userId:1")
     })
 
     test("retrieve multiple cookies from Cookie header and compare values", () => {
-        const sessionCookie = setCookie("sessionToken", "session-1")
-        const stateCookie = setCookie("state", "state-1")
+        const sessionCookie = setCookie(cookieStore.sessionToken.name, "session-1")
+        const stateCookie = setCookie(cookieStore.state.name, "state-1")
         const headers = new Headers()
         headers.set("Cookie", `${stateCookie}; ${sessionCookie}`)
         const req = new Request("http://localhost", { headers })
-        const session = getCookie(req, "sessionToken")
-        const state = getCookie(req, "state")
+        const session = unstable__get_cookie(req, cookieStore.sessionToken.name)
+        const state = unstable__get_cookie(req, cookieStore.state.name)
         expect(session).toBe("session-1")
         expect(state).toBe("state-1")
     })
 
     test("getCookie throws when no Cookie header is present", () => {
         const headers = new Headers()
-        const req = new Request("http://localhost", { headers })
-        expect(() => getCookie(req, "sessionToken")).toThrow()
-    })
-
-    test("secure cookie", () => {
-        const cookie = setCookie("csrfToken", "secureValue", { secure: true })
-        expect(cookie).toBeDefined()
-        expect(cookie).toEqual(
-            "__Secure-aura-auth.csrfToken=secureValue; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax"
-        )
-    })
-
-    test("host cookie", () => {
-        const cookie = setCookie("csrfToken", "hostValue", { prefix: "__Host-", secure: true })
-        expect(cookie).toBeDefined()
-        expect(cookie).toEqual("__Host-aura-auth.csrfToken=hostValue; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
+        const request = new Request("http://localhost", { headers })
+        expect(() => unstable__get_cookie(request, cookieStore.sessionToken.name)).toThrow()
     })
 })
 
 describe("getCookie", () => {
     test("retrieve sessionToken from a request without secure", () => {
-        const sessionCookie = setCookie("sessionToken", "session", { secure: false })
+        const sessionCookie = setCookie(cookieStore.sessionToken.name, "session", { secure: false })
         const request = new Request("http://localhost", {
             headers: {
                 Cookie: sessionCookie,
             },
         })
-        expect(getCookie(request, "sessionToken")).toBe("session")
+        expect(unstable__get_cookie(request, cookieStore.sessionToken.name)).toBe("session")
     })
 
     test("retrieve sessionToken from a request with __Secure- prefix", () => {
-        const sessionCookie = setCookie("sessionToken", "session", { secure: true })
+        const sessionCookie = setCookie(cookieStore.sessionToken.name, "session", { secure: true })
         const request = new Request("https://www.example.com", {
             headers: {
                 Cookie: sessionCookie,
             },
         })
-        expect(getCookie(request, "sessionToken", { secure: true })).toBe("session")
+        expect(unstable__get_cookie(request, cookieStore.sessionToken.name)).toBe("session")
     })
 
     test("retrieve sessionToken from a request with __Host- prefix", () => {
-        const sessionCookie = setCookie("sessionToken", "session", hostCookieOptions)
+        const sessionCookie = setCookie(cookieStore.sessionToken.name, "session")
         const request = new Request("https://www.example.com", {
             headers: {
                 Cookie: sessionCookie,
             },
         })
-        expect(getCookie(request, "sessionToken", hostCookieOptions)).toBe("session")
+        expect(unstable__get_cookie(request, cookieStore.sessionToken.name)).toBe("session")
     })
 
     test("getCookie throws when cookie is not found", () => {
-        const sessionCookie = setCookie("sessionToken", "session")
+        const sessionCookie = setCookie(cookieStore.sessionToken.name, "session")
         const request = new Request("http://localhost", {
             headers: {
                 Cookie: sessionCookie,
             },
         })
-        expect(() => getCookie(request, "nonExistentCookie")).toThrow()
+        expect(() => unstable__get_cookie(request, "nonExistentCookie")).toThrow()
     })
 
     test("getCookie throws when no Cookie header is present", () => {
         const request = new Request("http://localhost")
-        expect(() => getCookie(request, "sessionToken")).toThrow()
+        expect(() => unstable__get_cookie(request, cookieStore.sessionToken.name)).toThrow()
     })
 
     test("retrieve cookie from Response Set-Cookie header", () => {
-        const sessionCookie = setCookie("sessionToken", "sessionValue")
+        const sessionCookie = setCookie(cookieStore.sessionToken.name, "sessionValue")
         const response = new Response(null, {
             headers: {
                 "Set-Cookie": sessionCookie,
             },
         })
-        expect(getCookie(response, "sessionToken")).toBe("sessionValue")
+        expect(unstable__get_set_cookie(response, cookieStore.sessionToken.name)).toBe("sessionValue")
     })
 })
 

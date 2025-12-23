@@ -3,9 +3,10 @@ import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/ro
 import { AuraResponse } from "@/response.js"
 import { createPKCE, generateSecure } from "@/secure.js"
 import { ERROR_RESPONSE, isAuthError } from "@/error.js"
-import { oauthCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import { createCookieStore, setCookie } from "@/cookie.js"
 import { createAuthorizationURL, createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.js"
 import type { AuthorizationError, AuthRuntimeConfig } from "@/@types/index.js"
+import { useSecureCookies } from "@/utils.js"
 
 const signInConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
     return createEndpointConfig("/signIn/:oauth", {
@@ -26,22 +27,33 @@ export const signInAction = (oauth: AuthRuntimeConfig["oauth"]) => {
             const {
                 request,
                 params: { oauth, redirectTo },
-                context: { oauth: providers, cookies, trustedProxyHeaders, basePath },
+                context: { oauth: providers, trustedProxyHeaders, basePath },
             } = ctx
             try {
-                const cookieOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
+                const useSecure = useSecureCookies(request, trustedProxyHeaders)
+                const cookieStore = createCookieStore(useSecure)
+
                 const state = generateSecure()
                 const redirectURI = createRedirectURI(request, oauth, basePath, trustedProxyHeaders)
-                const stateCookie = setCookie("state", state, oauthCookie(cookieOptions))
-                const redirectURICookie = setCookie("redirect_uri", redirectURI, oauthCookie(cookieOptions))
+                const stateCookie = setCookie(cookieStore.state.name, state, cookieStore.state.attributes)
+
+                const redirectURICookie = setCookie(
+                    cookieStore.redirect_uri.name,
+                    redirectURI,
+                    cookieStore.redirect_uri.attributes
+                )
                 const redirectToCookie = setCookie(
-                    "redirect_to",
+                    cookieStore.redirect_to.name,
                     createRedirectTo(request, redirectTo, trustedProxyHeaders),
-                    oauthCookie(cookieOptions)
+                    cookieStore.redirect_to.attributes
                 )
 
                 const { codeVerifier, codeChallenge, method } = await createPKCE()
-                const codeVerifierCookie = setCookie("code_verifier", codeVerifier, oauthCookie(cookieOptions))
+                const codeVerifierCookie = setCookie(
+                    cookieStore.code_verifier.name,
+                    codeVerifier,
+                    cookieStore.code_verifier.attributes
+                )
 
                 const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method)
                 const headers = new Headers()
@@ -59,6 +71,7 @@ export const signInAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                     }
                 )
             } catch (error) {
+                console.log("signIn error: ", error)
                 if (isAuthError(error)) {
                     const { type, message } = error
                     return AuraResponse.json<AuthorizationError>(

@@ -141,3 +141,11 @@ export const getNormalizedOriginPath = (path: string): string => {
 export const toISOString = (date: Date | string | number): string => {
     return new Date(date).toISOString()
 }
+
+export const useSecureCookies = (request: Request, trustedProxyHeaders: boolean): boolean => {
+    return trustedProxyHeaders
+        ? request.url.startsWith("https://") ||
+              request.headers.get("X-Forwarded-Proto") === "https" ||
+              (request.headers.get("Forwarded")?.includes("proto=https") ?? false)
+        : request.url.startsWith("https://")
+}

@@ -1,19 +1,29 @@
 import { createEndpoint } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
-import { getCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import { useSecureCookies } from "@/utils.js"
+import { createCookieStore, setCookie, unstable__get_cookie } from "@/cookie.js"
+
+const getCSRFToken = (request: Request, cookieName: string) => {
+    try {
+        return unstable__get_cookie(request, cookieName)
+    } catch {
+        return undefined
+    }
+}
 
 export const csrfTokenAction = createEndpoint("GET", "/csrfToken", async (ctx) => {
     const {
         request,
-        context: { cookies, jose, trustedProxyHeaders },
+        context: { jose, trustedProxyHeaders },
     } = ctx
-    const cookieOptions = secureCookieOptions(request, { ...cookies, strategy: "host" }, trustedProxyHeaders)
+    const useSecure = useSecureCookies(request, trustedProxyHeaders)
+    const cookieStore = createCookieStore(useSecure)
 
-    const existingCSRFToken = getCookie(request, "csrfToken", cookieOptions, true)
-    const csrfToken = await createCSRF(jose, existingCSRFToken)
+    const token = getCSRFToken(request, cookieStore.csrfToken.name)
+    const csrfToken = await createCSRF(jose, token)
 
     const headers = new Headers(cacheControl)
-    headers.set("Set-Cookie", setCookie("csrfToken", csrfToken, cookieOptions))
+    headers.append("Set-Cookie", setCookie(cookieStore.csrfToken.name, csrfToken, cookieStore.csrfToken.attributes))
     return Response.json({ csrfToken }, { headers })
 })
