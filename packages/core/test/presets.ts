@@ -1,5 +1,5 @@
 import { createAuth } from "@/index.js"
-import { OAuthProviderCredentials, CookieConfigInternal } from "@/@types/index.js"
+import { OAuthProviderCredentials } from "@/@types/index.js"
 import type { JWTPayload } from "@/jose.js"
 
 export const oauthCustomService: OAuthProviderCredentials = {
@@ -36,10 +36,6 @@ export const sessionPayload: JWTPayload = {
     name: "John Doe",
     image: "https://example.com/image.jpg",
 }
-
-export const secureCookieOptions: CookieConfigInternal = { secure: true, prefix: "__Secure-" }
-
-export const hostCookieOptions: CookieConfigInternal = { secure: true, prefix: "__Host-" }
 
 export const {
     handlers: { GET, POST },

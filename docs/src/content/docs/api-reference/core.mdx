@@ -15,6 +15,12 @@ import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["github"],
+  secret: process.env.AURA_SECRET!,
+  basePath: "/auth",
+  cookies: {
+    prefix: "aura-auth",
+  },
+  trustedProxyHeaders: true,
 })
 ```
 
@@ -46,7 +52,7 @@ Through this api reference documentation you are going to learn and understand f
 - **Type-safe API** — Built entirely in TypeScript with strong type inference.
 - **Secure sessions** — Backed by JOSE (`JWT`, `JWS`, and `JWE`) for signing and encryption.
 - **Framework agnostic** — Works seamlessly with any HTTP framework or runtime.
-- **Router integration** — Compatible with [`@aura-stack/router`](https://github.com/aura-stack-ts/router) for effortless endpoint mounting.
+- **Router integration** — Compatible with [`@aura-stack/router`](https://aura-stack-router.vercel.app/docs) for effortless endpoint mounting.
 
 ---
 
@@ -87,10 +93,6 @@ import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["github"],
-  cookies: {},
-  basePath: "/auth",
-  secret: process.env.AURA_AUTH_SECRET,
-  trustedProxyHeaders: false,
 })
 ```
 
@@ -157,31 +159,87 @@ export const auth = createAuth({
 
 ##### `cookies`
 
-Cookie configuration management for session management by Aura Auth, the user can modify the obtains based on their needs.
+Cookie configuration management for granural per-cookie for all internal cookies used by Aura Auth (e.g., `state`, `redirect_to`, `code_verifier`, `sessionToken`, and `csrfToken`) using the overrides object.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  cookies: {
+    prefix: "aura-auth",
+    overrides: {
+      sessionToken: {
+        name: "session",
+        attributes: {
+          priority: "high",
+          sameSite: "strict",
+        },
+      },
+    },
+  },
+})
+```
 
 ```ts lineNumbers
 import type { StandardCookie, SecureCookie, HostCookie } from "@aura-stack/auth/types"
 
-type CookieConfig = {
-  name?: string
-  strategy: "standard" | "secure" | "host"
-  options: StandardCookie | SecureCookie | HostCookie
+type CookieStrategyAttributes = StandardCookie | SecureCookie | HostCookie
+
+type CookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
+
+interface CookieConfig {
+  prefix?: string
+  overrides?: Partial<CookieStoreConfig>
 }
 ```
 
-###### `name`
+###### `prefix`
 
-Define the name of the cookie to be storaged for signing and encrypting JWTs, by default the name is `aura-stack`
+Define the prefix name to be added to all of the cookies used by Aura Auth, by default is `aura-stack`.
+
+```ts lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  cookies: {
+    prefix: "aura-auth",
+  },
+})
+```
+
+###### `overrides`
+
+This configuration option overrides the default cookie attributes or cookie name to the cookies used by Aura Auth. The cookies used are: `sessionToken`, `csrfToken`, `state`, `code_verifier`, `redirect_to`, and `redirect_uri`.
+
+```ts lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  cookies: {
+    overrides: {
+      sessionToken: {},
+      csrfToken: {},
+      state: {},
+      redirect_to: {}
+      redirect_uri: {}
+      code_verifier: {}
+    },
+  },
+})
+```
 
 <Callout type="warning">
 
-This configuration option is critical, we recommended to the user be caution and be careful with the options passed to the `cookie` options to avoid information leak, cookie attacks and more vulnerabilities exposed by the cookies. So Aura Auth is not resposible for any bad cookie configuration and vulnerabilities caused by this option. For detailed information about cookie management read [RFC - HTTP State Management Mechanism](https://datatracker.ietf.org/doc/html/rfc6265).
+This configuration option is critical, we recommended to the user be caution and be careful with the options passed to the `cookies.overrides` options to avoid information leak, cookie attacks and more vulnerabilities exposed by the cookies. So Aura Auth is not resposible for any bad cookie configuration and vulnerabilities caused by this option. For detailed information about cookie management read [RFC - HTTP State Management Mechanism](https://datatracker.ietf.org/doc/html/rfc6265).
 
 For that reason Aura Auth, provides secure by default, disabling cases which the cookie configuration options is not recommended and bad configured with `httpOnly` always to true to be unaccessible by JavaScript.
 
 </Callout>
 
-Aura Auth provides three flags to users with the options available per flag, removind the recommended options per flag and good practices.
+Aura Auth provides granular per-cookie management with a series of [cookie attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#attributes) to customize cookie behavior. For type safety, a `strategy` field is provided that recommends appropriate attributes for cookie prefixes (`__Secure-` and `__Host-`). The supported values are `standard`, `secure`, and `host`, with `standard` as the default.
 
 <Callout type="warn">
   **Security Warning:** Choose the appropriate cookie flag for your environment. Use `host` or `secure` in production for maximum
@@ -195,17 +253,15 @@ This flag default in development. Standard cookies without security prefix. Can 
 ```ts lineNumbers
 type StandardCookie = {
   strategy: "standard"
-  options: {
-    secure?: boolean | undefined
-    maxAge?: number | undefined
-    expires?: Date | undefined
-    domain?: string | undefined
-    path?: string | undefined
-    httpOnly?: boolean | undefined
-    partitioned?: boolean | undefined
-    priority?: "low" | "medium" | "high" | undefined
-    sameSite?: boolean | "lax" | "strict" | "none" | undefined
-  }
+  secure?: boolean | undefined
+  maxAge?: number | undefined
+  expires?: Date | undefined
+  domain?: string | undefined
+  path?: string | undefined
+  httpOnly?: boolean | undefined
+  partitioned?: boolean | undefined
+  priority?: "low" | "medium" | "high" | undefined
+  sameSite?: boolean | "lax" | "strict" | "none" | undefined
 }
 ```
 
@@ -216,16 +272,14 @@ when `secure` flag is set in a development environment (HTTP) it is disable beca
 ```ts lineNumbers
 type SecureCookie = {
   strategy: "secure"
-  options: {
-    maxAge?: number | undefined
-    expires?: Date | undefined
-    domain?: string | undefined
-    path?: string | undefined
-    httpOnly?: boolean | undefined
-    partitioned?: boolean | undefined
-    priority?: "low" | "medium" | "high" | undefined
-    sameSite?: boolean | "lax" | "strict" | "none" | undefined
-  }
+  maxAge?: number | undefined
+  expires?: Date | undefined
+  domain?: string | undefined
+  path?: string | undefined
+  httpOnly?: boolean | undefined
+  partitioned?: boolean | undefined
+  priority?: "low" | "medium" | "high" | undefined
+  sameSite?: boolean | "lax" | "strict" | "none" | undefined
 }
 ```
 
@@ -240,14 +294,12 @@ This flag it the mose secure, but is less flexible, when `host` flag is set in a
 ```ts lineNumbers
 type HostCookie = {
   strategy: "host"
-  options: {
-    maxAge?: number | undefined
-    expires?: Date | undefined
-    httpOnly?: boolean | undefined
-    partitioned?: boolean | undefined
-    priority?: "low" | "medium" | "high" | undefined
-    sameSite?: boolean | "lax" | "strict" | "none" | undefined
-  }
+  maxAge?: number | undefined
+  expires?: Date | undefined
+  httpOnly?: boolean | undefined
+  partitioned?: boolean | undefined
+  priority?: "low" | "medium" | "high" | undefined
+  sameSite?: boolean | "lax" | "strict" | "none" | undefined
 }
 ```
 
@@ -573,9 +625,20 @@ import { createAuth } from "@aura-stack/auth"
 export const auth = createAuth({
   oauth: ["github"],
   cookies: {
-    name: "my-app",
-    strategy: process.env.NODE_ENV === "production" ? "host" : "standard",
-    sameSite: "strict",
+    prefix: "my-app",
+    overrides: {
+      sessionToken: {
+        name: "session",
+        attributes: {
+          strategy: "host",
+          partitioned: true,
+        },
+      },
+      csrfToken: {
+        name: "csrf_token",
+        attributes: {},
+      },
+    },
   },
 })
 ```

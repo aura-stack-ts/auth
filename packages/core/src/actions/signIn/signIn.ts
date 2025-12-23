@@ -1,9 +1,9 @@
 import z from "zod"
 import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
+import { setCookie } from "@/cookie.js"
 import { AuraResponse } from "@/response.js"
 import { createPKCE, generateSecure } from "@/secure.js"
 import { ERROR_RESPONSE, isAuthError } from "@/error.js"
-import { oauthCookie, secureCookieOptions, setCookie } from "@/cookie.js"
 import { createAuthorizationURL, createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.js"
 import type { AuthorizationError, AuthRuntimeConfig } from "@/@types/index.js"
 
@@ -29,19 +29,19 @@ export const signInAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                 context: { oauth: providers, cookies, trustedProxyHeaders, basePath },
             } = ctx
             try {
-                const cookieOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
                 const state = generateSecure()
                 const redirectURI = createRedirectURI(request, oauth, basePath, trustedProxyHeaders)
-                const stateCookie = setCookie("state", state, oauthCookie(cookieOptions))
-                const redirectURICookie = setCookie("redirect_uri", redirectURI, oauthCookie(cookieOptions))
+                const stateCookie = setCookie(cookies.state.name, state, cookies.state.attributes)
+
+                const redirectURICookie = setCookie(cookies.redirect_uri.name, redirectURI, cookies.redirect_uri.attributes)
                 const redirectToCookie = setCookie(
-                    "redirect_to",
+                    cookies.redirect_to.name,
                     createRedirectTo(request, redirectTo, trustedProxyHeaders),
-                    oauthCookie(cookieOptions)
+                    cookies.redirect_to.attributes
                 )
 
                 const { codeVerifier, codeChallenge, method } = await createPKCE()
-                const codeVerifierCookie = setCookie("code_verifier", codeVerifier, oauthCookie(cookieOptions))
+                const codeVerifierCookie = setCookie(cookies.code_verifier.name, codeVerifier, cookies.code_verifier.attributes)
 
                 const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method)
                 const headers = new Headers()
