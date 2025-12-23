@@ -4,9 +4,9 @@ import { verifyCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
 import { AuraResponse } from "@/response.js"
 import { createRedirectTo } from "@/actions/signIn/authorization.js"
-import { getNormalizedOriginPath, useSecureCookies } from "@/utils.js"
+import { getNormalizedOriginPath } from "@/utils.js"
 import { InvalidCsrfTokenError, InvalidRedirectToError } from "@/error.js"
-import { createCookieStore, expiresCookie, unstable__get_cookie } from "@/cookie.js"
+import { expiresCookie, unstable__get_cookie } from "@/cookie.js"
 import type { TokenRevocationError } from "@/@types/index.js"
 
 const config = createEndpointConfig({
@@ -29,14 +29,11 @@ export const signOutAction = createEndpoint(
             request,
             headers,
             searchParams: { redirectTo },
-            context: { jose, trustedProxyHeaders },
+            context: { jose, cookies },
         } = ctx
         try {
-            const useSecure = useSecureCookies(request, trustedProxyHeaders)
-            const cookieStore = createCookieStore(useSecure)
-
-            const session = unstable__get_cookie(request, cookieStore.sessionToken.name)
-            const csrfToken = unstable__get_cookie(request, cookieStore.csrfToken.name)
+            const session = unstable__get_cookie(request, cookies.sessionToken.name)
+            const csrfToken = unstable__get_cookie(request, cookies.csrfToken.name)
             const header = headers.get("X-CSRF-Token")
             if (!header || !session || !csrfToken) {
                 throw new Error("Missing CSRF token or session token")
@@ -52,8 +49,8 @@ export const signOutAction = createEndpoint(
                 redirectTo
             )
             const responseHeaders = new Headers(cacheControl)
-            responseHeaders.append("Set-Cookie", expiresCookie(cookieStore.sessionToken.name))
-            responseHeaders.append("Set-Cookie", expiresCookie(cookieStore.csrfToken.name))
+            responseHeaders.append("Set-Cookie", expiresCookie(cookies.sessionToken.name))
+            responseHeaders.append("Set-Cookie", expiresCookie(cookies.csrfToken.name))
             responseHeaders.append("Location", location)
             return Response.json(
                 { message: "Signed out successfully" },

@@ -2,20 +2,18 @@ import { describe, test, expect } from "vitest"
 import type { SerializeOptions } from "cookie"
 import {
     setCookie,
-    secureCookieOptions,
-    COOKIE_NAME,
     createCookieStore,
     unstable__get_cookie,
     unstable__get_set_cookie,
+    defineSecureCookieOptions,
 } from "@/cookie.js"
-import type { CookieConfig, CookieConfigInternal } from "@/@types/index.js"
 
 const cookieStore = createCookieStore(true)
 
 describe("setCookie", () => {
     test("set state cookie with default options", () => {
         const { expires, ...exclude } = cookieStore.state.attributes
-        const cookie = setCookie("state", "xyz123", exclude)   
+        const cookie = setCookie("state", "xyz123", exclude)
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("state=xyz123; Max-Age=300; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
@@ -127,307 +125,249 @@ describe("getCookie", () => {
 })
 
 describe("secureCookieOptions", () => {
-    const http = new Request("http://localhost:3000")
-    const https = new Request("https://www.example.com")
-
-    const testCases: Array<{ description: string; request: Request; options: CookieConfig; expected: CookieConfigInternal }> = [
+    const testCases: Array<{
+        description: string
+        useSecure: boolean
+        attributes: SerializeOptions
+        strategy: "secure" | "host" | "standard"
+        expected: SerializeOptions
+    }> = [
         {
             description: "override httpOnly in a secure connection with standard flag",
-            request: https,
-            options: {
-                strategy: "standard",
-                options: {
-                    httpOnly: false,
-                },
-            },
-            expected: {
-                secure: true,
+            useSecure: true,
+            attributes: {
                 httpOnly: false,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "__Secure-",
+            },
+            strategy: "standard",
+            expected: {
+
+                    secure: true,
+                    httpOnly: false,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
+                
             },
         },
         {
             description: "override httpOnly in a secure connection with secure flag",
-            request: https,
-            options: {
-                strategy: "secure",
-                options: {
-                    httpOnly: false,
-                },
-            },
-            expected: {
-                secure: true,
+            useSecure: true,
+            attributes: {
                 httpOnly: false,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "__Secure-",
+            },
+            strategy: "secure",
+            expected: {
+
+                    secure: true,
+                    httpOnly: false,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
             },
         },
         {
             description: "override httpOnly in a secure connection with host flag",
-            request: https,
-            options: {
-                strategy: "host",
-                options: {
-                    httpOnly: false,
-                },
+            useSecure: true,
+            strategy: "host",
+            attributes: {
+                httpOnly: false,
             },
             expected: {
-                secure: true,
-                httpOnly: false,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                domain: undefined,
-                name: COOKIE_NAME,
-                prefix: "__Host-",
+                    secure: true,
+                    httpOnly: false,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
+                    domain: undefined,
             },
         },
         {
             description: "disable secure option in a insecure connection with standard flag",
-            request: http,
-            options: {
-                strategy: "standard",
-                options: {
+            useSecure: false,
+            strategy: "standard",
+            attributes:{
                     secure: false,
-                },
             },
             expected: {
-                secure: false,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "",
+                    secure: false,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
             },
         },
         {
             description: "disable secure option in a insecure connection with secure flag",
-            request: http,
-            options: {
-                strategy: "secure",
-            },
+            useSecure: false,
+            strategy: "secure",
+            attributes: {},
             expected: {
-                secure: false,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "",
+                    secure: false,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
             },
         },
         {
             description: "disable secure option in a insecure connection with host flag",
-            request: http,
-            options: {
-                strategy: "host",
+            useSecure: false,
+            strategy: "host",
+            attributes: {
             },
             expected: {
-                secure: false,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "",
+                    secure: false,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
             },
         },
         {
             description: "default secure flag in a secure connection",
-            request: https,
-            options: {
-                strategy: "secure",
+            useSecure: true,
+            strategy: "secure",
+            attributes: {
             },
             expected: {
-                secure: true,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "__Secure-",
+                    secure: true,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
             },
         },
         {
             description: "default host flag in a secure connection",
-            request: https,
-            options: {
-                strategy: "host",
+            useSecure: true,
+            strategy: "host",
+            attributes: {
             },
             expected: {
-                secure: true,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                domain: undefined,
-                name: COOKIE_NAME,
-                prefix: "__Host-",
+                    secure: true,
+
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
+                    domain: undefined,
             },
         },
         {
             description: "default secure flag in a insecure connection",
-            request: http,
-            options: {
-                strategy: "secure",
+            useSecure: false,
+            strategy: "secure",
+            attributes: {
             },
             expected: {
-                secure: false,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "",
+                    secure: false,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
             },
         },
         {
             description: "default host flag in a insecure connection",
-            request: http,
-            options: {
-                strategy: "host",
+            useSecure: false,
+            strategy: "host",
+            attributes: {
             },
             expected: {
-                secure: false,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "",
+                    secure: false,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
             },
         },
         {
             description: "force to disable secure flag in a secure connection with secure flag",
-            request: https,
-            options: {
-                strategy: "secure",
-                options: {
-                    secure: false,
-                } as SerializeOptions,
+            useSecure: true,
+            strategy: "secure",
+            attributes: {
+                secure: false,
             },
+
             expected: {
-                secure: true,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "__Secure-",
+                    secure: true,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
             },
         },
         {
             description: "force to custom domain in a secure connection with host flag",
-            request: https,
-            options: {
-                strategy: "host",
-                options: {
+            useSecure: true,
+            strategy: "host",
+            attributes: {
                     domain: "example.com",
                     path: "/dashboard",
-                } as SerializeOptions,
             },
             expected: {
-                secure: true,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                domain: undefined,
-                name: COOKIE_NAME,
-                prefix: "__Host-",
+                    secure: true,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
+                    domain: undefined,
             },
         },
         {
             description: "force to custom domain in a insecure connection with host flag",
-            request: http,
-            options: {
-                strategy: "host",
-                options: {
+            useSecure: false,
+            strategy: "host",
+            attributes: {
                     domain: "example.com",
                     path: "/dashboard",
-                } as SerializeOptions,
             },
             expected: {
-                secure: false,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/dashboard",
-                sameSite: "lax",
-                domain: "example.com",
-                name: COOKIE_NAME,
-                prefix: "",
+                    secure: false,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/dashboard",
+                    sameSite: "lax",
+                    domain: "example.com",
             },
         },
         {
             description: "disable secure and httpOnly attributes in a insecure connection",
-            request: http,
-            options: {
-                strategy: "standard",
-                options: {
-                    secure: false,
-                    httpOnly: false,
-                },
-            },
-            expected: {
+            useSecure: false,
+            strategy: "standard",
+            attributes: {
                 secure: false,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: COOKIE_NAME,
-                prefix: "",
-            },
-        },
-        {
-            description: "custom cookie name with secure flag in a secure connection",
-            request: https,
-            options: {
-                strategy: "secure",
-                name: "aura-stack-auth-cookie",
+                    httpOnly: false,
             },
             expected: {
-                secure: true,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "lax",
-                name: "aura-stack-auth-cookie",
-                prefix: "__Secure-",
+                    secure: false,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "lax",
             },
         },
         {
             description: "set sameSite to strict with host flag in a secure connection",
-            request: https,
-            options: {
-                strategy: "host",
-                options: {
-                    sameSite: "strict",
-                },
+            useSecure: true,
+            strategy: "host",
+            attributes: {
+                sameSite: "strict",
             },
             expected: {
-                secure: true,
-                httpOnly: true,
-                maxAge: 1296000,
-                path: "/",
-                sameSite: "strict",
-                name: COOKIE_NAME,
-                prefix: "__Host-",
+                    secure: true,
+                    httpOnly: true,
+                    maxAge: 1296000,
+                    path: "/",
+                    sameSite: "strict",
             },
         },
     ]
 
-    for (const { description, request, options, expected } of testCases) {
+    for (const { description, useSecure, strategy, attributes, expected } of testCases) {
         test(description, () => {
-            const config = secureCookieOptions(request, options)
-            expect(config).toEqual<SerializeOptions>(expected)
+            const config = defineSecureCookieOptions(useSecure, attributes, strategy)
+            expect(config).toEqual(expected)
         })
     }
 })

@@ -2,17 +2,15 @@ import { parse, parseSetCookie, serialize, type SerializeOptions } from "cookie"
 import { AuthError } from "@/error.js"
 import { isRequest } from "@/assert.js"
 import type { JWTPayload } from "@/jose.js"
-import type {
-    AuthRuntimeConfig,
-    CookieName,
-    CookieConfig,
-    CookieConfigInternal,
-    LiteralUnion,
-    StandardCookie,
-    CookieStoreConfig,
-} from "@/@types/index.js"
+import type { AuthRuntimeConfig, CookieName, LiteralUnion, StandardCookie, CookieStoreConfig } from "@/@types/index.js"
 
 export { parse } from "cookie"
+
+/**
+ * Just used for avoiding ts errors in this file
+ * @todo: drop once CookieConfig is fixed
+ */
+type CookieConfigInternal = any
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -32,7 +30,7 @@ export const defaultCookieOptions: SerializeOptions = {
 /**
  * Default cookie options for "standard" cookies.
  */
-export const defaultCookieConfig: CookieConfig = {
+export const defaultCookieConfig = {
     strategy: "standard",
     name: COOKIE_NAME,
     options: defaultCookieOptions,
@@ -41,7 +39,7 @@ export const defaultCookieConfig: CookieConfig = {
 export const defaultStandardCookieConfig: CookieConfigInternal = {
     secure: false,
     httpOnly: true,
-    prefix: "",
+    //prefix: "",
 }
 
 /**
@@ -50,7 +48,7 @@ export const defaultStandardCookieConfig: CookieConfigInternal = {
  */
 export const defaultSecureCookieConfig: CookieConfigInternal = {
     secure: true,
-    prefix: "__Secure-",
+    //prefix: "__Secure-",
 }
 
 /**
@@ -59,7 +57,7 @@ export const defaultSecureCookieConfig: CookieConfigInternal = {
  */
 export const defaultHostCookieConfig: CookieConfigInternal = {
     secure: true,
-    prefix: "__Host-",
+    //prefix: "__Host-",
     path: "/",
     domain: undefined,
 }
@@ -188,7 +186,7 @@ export const createSessionCookie = async (
  */
 export const secureCookieOptions = (
     request: Request,
-    cookieOptions: CookieConfig,
+    cookieOptions: CookieStoreConfig[keyof CookieStoreConfig],
     trustedProxyHeaders?: boolean
 ): CookieConfigInternal => {
     const name = cookieOptions.name ?? COOKIE_NAME
@@ -197,16 +195,16 @@ export const secureCookieOptions = (
           request.headers.get("X-Forwarded-Proto") === "https" ||
           request.headers.get("Forwarded")?.includes("proto=https")
         : request.url.startsWith("https://")
-    if (!cookieOptions.options?.httpOnly) {
+    if (!cookieOptions?.attributes.httpOnly) {
         console.warn(
             "[WARNING]: Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk."
         )
     }
-    if ((cookieOptions.options as StandardCookie["options"])?.domain === "*") {
+    if ((cookieOptions?.attributes as StandardCookie)?.domain === "*") {
         console.warn("[WARNING]: Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.")
     }
     if (!isSecure) {
-        const options = cookieOptions.options as StandardCookie["options"]
+        const options = cookieOptions?.attributes as StandardCookie
         if (options?.secure) {
             console.warn(
                 "[WARNING]: The 'Secure' attribute will be disabled for this cookie. Serve over HTTPS to enforce Secure cookies."
@@ -220,20 +218,20 @@ export const secureCookieOptions = (
         }
         return {
             ...defaultCookieOptions,
-            ...cookieOptions.options,
+            ...cookieOptions.attributes,
             sameSite: options?.sameSite === "none" ? "lax" : (options?.sameSite ?? "lax"),
             ...defaultStandardCookieConfig,
             name,
         }
     }
-    return cookieOptions.strategy === "host"
+    return cookieOptions.attributes.strategy === "host"
         ? {
               ...defaultCookieOptions,
-              ...cookieOptions.options,
+              ...cookieOptions.attributes,
               ...defaultHostCookieConfig,
               name,
           }
-        : { ...defaultCookieOptions, ...cookieOptions.options, ...defaultSecureCookieConfig, name }
+        : { ...defaultCookieOptions, ...cookieOptions.attributes, ...defaultSecureCookieConfig, name }
 }
 
 /**
@@ -288,7 +286,7 @@ export const defineSecureCookieOptions = (
             "[WARNING]: Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk."
         )
     }
-    if ((attributes as StandardCookie["options"])?.domain === "*") {
+    if ((attributes as StandardCookie)?.domain === "*") {
         console.warn("[WARNING]: Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.")
     }
     if (!useSecure) {
@@ -327,39 +325,43 @@ export const defineSecureCookieOptions = (
  * @param config
  * @returns
  */
-export const createCookieStore = (useSecure: boolean, name?: string, config?: Partial<CookieStoreConfig>): CookieStoreConfig => {
+export const createCookieStore = (
+    useSecure: boolean,
+    name?: string,
+    overrides?: Partial<CookieStoreConfig>
+): CookieStoreConfig => {
     name ??= COOKIE_NAME
     const securePrefix = useSecure ? "__Secure-" : ""
     const hostPrefix = useSecure ? "__Host-" : ""
     return {
         sessionToken: {
-            name: `${securePrefix}${name}.${config?.sessionToken?.name ?? "sessionToken"}`,
+            name: `${securePrefix}${name}.${overrides?.sessionToken?.name ?? "sessionToken"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...defaultCookieOptions,
-                    ...config?.sessionToken?.attributes,
+                    ...overrides?.sessionToken?.attributes,
                 },
                 "standard"
             ),
         },
         state: {
-            name: `${securePrefix}${name}.${config?.state?.name ?? "state"}`,
+            name: `${securePrefix}${name}.${overrides?.state?.name ?? "state"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...config?.state?.attributes,
+                    ...overrides?.state?.attributes,
                 },
                 "standard"
             ),
         },
         csrfToken: {
-            name: `${hostPrefix}${name}.${config?.csrfToken?.name ?? "csrfToken"}`,
+            name: `${hostPrefix}${name}.${overrides?.csrfToken?.name ?? "csrfToken"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
-                    ...config?.csrfToken?.attributes,
+                    ...overrides?.csrfToken?.attributes,
                     httpOnly: true,
                     path: "/",
                     domain: undefined,
@@ -368,34 +370,34 @@ export const createCookieStore = (useSecure: boolean, name?: string, config?: Pa
             ),
         },
         redirect_to: {
-            name: `${securePrefix}${name}.${config?.redirect_to?.name ?? "redirect_to"}`,
+            name: `${securePrefix}${name}.${overrides?.redirect_to?.name ?? "redirect_to"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...config?.redirect_to?.attributes,
+                    ...overrides?.redirect_to?.attributes,
                 },
                 "standard"
             ),
         },
         redirect_uri: {
-            name: `${securePrefix}${name}.${config?.redirect_uri?.name ?? "redirect_uri"}`,
+            name: `${securePrefix}${name}.${overrides?.redirect_uri?.name ?? "redirect_uri"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...config?.redirect_uri?.attributes,
+                    ...overrides?.redirect_uri?.attributes,
                 },
                 "standard"
             ),
         },
         code_verifier: {
-            name: `${securePrefix}${name}.${config?.code_verifier?.name ?? "code_verifier"}`,
+            name: `${securePrefix}${name}.${overrides?.code_verifier?.name ?? "code_verifier"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...config?.code_verifier?.attributes,
+                    ...overrides?.code_verifier?.attributes,
                 },
                 "standard"
             ),
