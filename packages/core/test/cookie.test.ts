@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
-import type { SerializeOptions } from "cookie"
 import { setCookie, createCookieStore, getCookie, getSetCookie, defineSecureCookieOptions } from "@/cookie.js"
+import type { SerializeOptions } from "cookie"
 
 const cookieStore = createCookieStore(true)
 

@@ -29,7 +29,7 @@ export const defaultStandardCookieConfig: SerializeOptions = {
  */
 export const defaultSecureCookieConfig: SerializeOptions = {
     secure: true,
-    httpOnly: true
+    httpOnly: true,
 }
 
 /**
@@ -138,7 +138,6 @@ export const createSessionCookie = async (
     }
 }
 
-
 /**
  * Defines the cookie configuration based on the request security and cookie options passed
  * in the Aura Auth configuration (`createAuth` function). This function ensures the correct
@@ -165,7 +164,7 @@ export const defineSecureCookieOptions = (
     if (attributes.domain === "*") {
         attributes.domain = undefined
         console.warn("[WARNING]: Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.")
-    } 
+    }
     if (!useSecure) {
         if (attributes.secure) {
             console.warn(
@@ -179,14 +178,13 @@ export const defineSecureCookieOptions = (
         if (process.env.NODE_ENV === "production") {
             console.warn("[WARNING]: In production, ensure cookies are served over HTTPS to maintain security.")
         }
-        if(strategy === "host") {
+        if (strategy === "host") {
             console.warn("[WARNING]: __Host- cookies require a secure context. Falling back to standard cookie settings.")
         }
         return {
             ...defaultCookieOptions,
             ...attributes,
-            ...defaultStandardCookieConfig
-
+            ...defaultStandardCookieConfig,
         }
     }
     return strategy === "host"
@@ -241,8 +239,8 @@ export const createCookieStore = (
                 useSecure,
                 {
                     ...overrides?.csrfToken?.attributes,
-                    ...defaultHostCookieConfig
-                },                
+                    ...defaultHostCookieConfig,
+                },
                 overrides?.csrfToken?.attributes?.strategy ?? "host"
             ),
         },
