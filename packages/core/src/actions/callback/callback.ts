@@ -8,7 +8,7 @@ import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
 import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
-import { createSessionCookie, expiresCookie, setCookie, unstable__get_cookie } from "@/cookie.js"
+import { createSessionCookie, expiresCookie, setCookie, getCookie } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AccessTokenError, AuthorizationError, AuthRuntimeConfig } from "@/@types/index.js"
 
@@ -46,10 +46,10 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
             } = ctx
             try {
                 const oauthConfig = providers[oauth]
-                const cookieState = unstable__get_cookie(request, cookies.state.name)
-                const cookieRedirectTo = unstable__get_cookie(request, cookies.redirect_to.name)
-                const cookieRedirectURI = unstable__get_cookie(request, cookies.redirect_uri.name)
-                const codeVerifier = unstable__get_cookie(request, cookies.code_verifier.name)
+                const cookieState = getCookie(request, cookies.state.name)
+                const cookieRedirectTo = getCookie(request, cookies.redirect_to.name)
+                const cookieRedirectURI = getCookie(request, cookies.redirect_uri.name)
+                const codeVerifier = getCookie(request, cookies.code_verifier.name)
 
                 if (!equals(cookieState, state)) {
                     throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Mismatching state")

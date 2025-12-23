@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { GET } from "@test/presets.js"
-import { unstable__get_set_cookie } from "@/cookie.js"
+import { getSetCookie } from "@/cookie.js"
 
 describe("signIn action", () => {
     test("unsupported oauth provider", async () => {
@@ -36,7 +36,7 @@ describe("signIn action", () => {
                 const request = await GET(new Request(url))
                 const headers = new Headers(request.headers)
 
-                const stateCookie = unstable__get_set_cookie(request, "__Secure-aura-auth.state")
+                const stateCookie = getSetCookie(request, "__Secure-aura-auth.state")
                 const location = headers.get("Location") as string
                 const searchParams = new URL(location).searchParams
 

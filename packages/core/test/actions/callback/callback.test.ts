@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { GET } from "@test/presets.js"
 import { createPKCE } from "@/secure.js"
-import { setCookie, unstable__get_set_cookie } from "@/cookie.js"
+import { setCookie, getSetCookie } from "@/cookie.js"
 
 describe("callbackAction", () => {
     test("invalid endpoint", async () => {
@@ -121,9 +121,9 @@ describe("callbackAction", () => {
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
 
-        expect(unstable__get_set_cookie(response, "__Secure-aura-auth.sessionToken")).toBeDefined()
-        expect(unstable__get_set_cookie(response, "__Secure-aura-auth.state")).toEqual("")
-        expect(unstable__get_set_cookie(response, "__Secure-aura-auth.redirect_to")).toEqual("")
-        expect(unstable__get_set_cookie(response, "__Secure-aura-auth.redirect_uri")).toEqual("")
+        expect(getSetCookie(response, "__Secure-aura-auth.sessionToken")).toBeDefined()
+        expect(getSetCookie(response, "__Secure-aura-auth.state")).toEqual("")
+        expect(getSetCookie(response, "__Secure-aura-auth.redirect_to")).toEqual("")
+        expect(getSetCookie(response, "__Secure-aura-auth.redirect_uri")).toEqual("")
     })
 })

@@ -1,7 +1,7 @@
 import { createEndpoint } from "@aura-stack/router"
 import { cacheControl } from "@/headers.js"
 import { toISOString } from "@/utils.js"
-import { expiresCookie, unstable__get_cookie } from "@/cookie.js"
+import { expiresCookie, getCookie } from "@/cookie.js"
 import type { JWTStandardClaims, Session, User } from "@/@types/index.js"
 
 export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
@@ -10,7 +10,7 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
         context: { jose, cookies },
     } = ctx
     try {
-        const session = unstable__get_cookie(request, cookies.sessionToken.name)
+        const session = getCookie(request, cookies.sessionToken.name)
         const decoded = await jose.decodeJWT(session)
 
         const { exp, iat, jti, nbf, ...user } = decoded as User & JWTStandardClaims

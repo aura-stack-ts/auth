@@ -1,11 +1,11 @@
 import { createEndpoint } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
-import { setCookie, unstable__get_cookie } from "@/cookie.js"
+import { setCookie, getCookie } from "@/cookie.js"
 
 const getCSRFToken = (request: Request, cookieName: string) => {
     try {
-        return unstable__get_cookie(request, cookieName)
+        return getCookie(request, cookieName)
     } catch {
         return undefined
     }

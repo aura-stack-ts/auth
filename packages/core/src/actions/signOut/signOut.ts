@@ -6,7 +6,7 @@ import { AuraResponse } from "@/response.js"
 import { createRedirectTo } from "@/actions/signIn/authorization.js"
 import { getNormalizedOriginPath } from "@/utils.js"
 import { InvalidCsrfTokenError, InvalidRedirectToError } from "@/error.js"
-import { expiresCookie, unstable__get_cookie } from "@/cookie.js"
+import { expiresCookie, getCookie } from "@/cookie.js"
 import type { TokenRevocationError } from "@/@types/index.js"
 
 const config = createEndpointConfig({
@@ -32,8 +32,8 @@ export const signOutAction = createEndpoint(
             context: { jose, cookies },
         } = ctx
         try {
-            const session = unstable__get_cookie(request, cookies.sessionToken.name)
-            const csrfToken = unstable__get_cookie(request, cookies.csrfToken.name)
+            const session = getCookie(request, cookies.sessionToken.name)
+            const csrfToken = getCookie(request, cookies.csrfToken.name)
             const header = headers.get("X-CSRF-Token")
             if (!header || !session || !csrfToken) {
                 throw new Error("Missing CSRF token or session token")

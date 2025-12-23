@@ -1,4 +1,4 @@
-import { setCookie, unstable__get_set_cookie } from "@/cookie.js"
+import { setCookie, getSetCookie } from "@/cookie.js"
 import { createPKCE } from "@/secure.js"
 import { GET, jose, sessionPayload } from "@test/presets.js"
 import { describe, test, expect, vi } from "vitest"
@@ -168,7 +168,7 @@ describe("sessionAction", () => {
         expect(fetch).toHaveBeenCalledTimes(2)
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
-        const sessionToken = unstable__get_set_cookie(response, "__Secure-aura-auth.sessionToken")
+        const sessionToken = getSetCookie(response, "__Secure-aura-auth.sessionToken")
         expect(sessionToken).toBeDefined()
 
         const requestSession = await GET(

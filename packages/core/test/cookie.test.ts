@@ -1,12 +1,6 @@
 import { describe, test, expect } from "vitest"
 import type { SerializeOptions } from "cookie"
-import {
-    setCookie,
-    createCookieStore,
-    unstable__get_cookie,
-    unstable__get_set_cookie,
-    defineSecureCookieOptions,
-} from "@/cookie.js"
+import { setCookie, createCookieStore, getCookie, getSetCookie, defineSecureCookieOptions } from "@/cookie.js"
 
 const cookieStore = createCookieStore(true)
 
@@ -43,7 +37,7 @@ describe("setCookie", () => {
         const headers = new Headers()
         headers.set("Cookie", session)
         const request = new Request("http://localhost", { headers })
-        const cookie = unstable__get_cookie(request, cookieStore.sessionToken.name)
+        const cookie = getCookie(request, cookieStore.sessionToken.name)
         expect(cookie).toBeDefined()
         expect(cookie).toBe("userId:1")
     })
@@ -54,8 +48,8 @@ describe("setCookie", () => {
         const headers = new Headers()
         headers.set("Cookie", `${stateCookie}; ${sessionCookie}`)
         const req = new Request("http://localhost", { headers })
-        const session = unstable__get_cookie(req, cookieStore.sessionToken.name)
-        const state = unstable__get_cookie(req, cookieStore.state.name)
+        const session = getCookie(req, cookieStore.sessionToken.name)
+        const state = getCookie(req, cookieStore.state.name)
         expect(session).toBe("session-1")
         expect(state).toBe("state-1")
     })
@@ -63,7 +57,7 @@ describe("setCookie", () => {
     test("getCookie throws when no Cookie header is present", () => {
         const headers = new Headers()
         const request = new Request("http://localhost", { headers })
-        expect(() => unstable__get_cookie(request, cookieStore.sessionToken.name)).toThrow()
+        expect(() => getCookie(request, cookieStore.sessionToken.name)).toThrow()
     })
 })
 
@@ -75,7 +69,7 @@ describe("getCookie", () => {
                 Cookie: sessionCookie,
             },
         })
-        expect(unstable__get_cookie(request, cookieStore.sessionToken.name)).toBe("session")
+        expect(getCookie(request, cookieStore.sessionToken.name)).toBe("session")
     })
 
     test("retrieve sessionToken from a request with __Secure- prefix", () => {
@@ -85,7 +79,7 @@ describe("getCookie", () => {
                 Cookie: sessionCookie,
             },
         })
-        expect(unstable__get_cookie(request, cookieStore.sessionToken.name)).toBe("session")
+        expect(getCookie(request, cookieStore.sessionToken.name)).toBe("session")
     })
 
     test("retrieve sessionToken from a request with __Host- prefix", () => {
@@ -95,7 +89,7 @@ describe("getCookie", () => {
                 Cookie: sessionCookie,
             },
         })
-        expect(unstable__get_cookie(request, cookieStore.sessionToken.name)).toBe("session")
+        expect(getCookie(request, cookieStore.sessionToken.name)).toBe("session")
     })
 
     test("getCookie throws when cookie is not found", () => {
@@ -105,12 +99,12 @@ describe("getCookie", () => {
                 Cookie: sessionCookie,
             },
         })
-        expect(() => unstable__get_cookie(request, "nonExistentCookie")).toThrow()
+        expect(() => getCookie(request, "nonExistentCookie")).toThrow()
     })
 
     test("getCookie throws when no Cookie header is present", () => {
         const request = new Request("http://localhost")
-        expect(() => unstable__get_cookie(request, cookieStore.sessionToken.name)).toThrow()
+        expect(() => getCookie(request, cookieStore.sessionToken.name)).toThrow()
     })
 
     test("retrieve cookie from Response Set-Cookie header", () => {
@@ -120,11 +114,11 @@ describe("getCookie", () => {
                 "Set-Cookie": sessionCookie,
             },
         })
-        expect(unstable__get_set_cookie(response, cookieStore.sessionToken.name)).toBe("sessionValue")
+        expect(getSetCookie(response, cookieStore.sessionToken.name)).toBe("sessionValue")
     })
 })
 
-describe("secureCookieOptions", () => {
+describe("defineSecureCookieOptions", () => {
     const testCases: Array<{
         description: string
         useSecure: boolean
