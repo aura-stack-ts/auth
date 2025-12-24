@@ -154,11 +154,8 @@ importers:
         specifier: workspace:*
         version: link:../jose
       '@aura-stack/router':
-        specifier: ^0.4.0
-        version: 0.4.0
-      cookie:
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: ^0.5.0
+        version: 0.5.0
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -192,8 +189,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@aura-stack/router@0.4.0':
-    resolution: {integrity: sha512-FdjzTj7sfppRgzaGOZyPzZ90dkPmvIqjh8qbJsOAGyMUSaPn1sP6F0u65rSdyXpYkDdM/CprIDT05kAoSIfrgg==}
+  '@aura-stack/router@0.5.0':
+    resolution: {integrity: sha512-CuiBaoJz8C035rfwHI+V1GYQhVYA6rA0LrMJMJeIBb/il5XfG/Xb0lrMGJQNfneGmwc6KgbNPVLyMiksGvOAYA==}
 
   '@babel/helper-string-parser@7.27.1':
     resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
@@ -1502,8 +1499,8 @@ packages:
     resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
     engines: {node: ^14.18.0 || >=16.10.0}
 
-  cookie@1.0.2:
-    resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
+  cookie@1.1.1:
+    resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
     engines: {node: '>=18'}
 
   cross-spawn@7.0.6:
@@ -2911,7 +2908,9 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@aura-stack/router@0.4.0': {}
+  '@aura-stack/router@0.5.0':
+    dependencies:
+      cookie: 1.1.1
 
   '@babel/helper-string-parser@7.27.1': {}
 
@@ -4051,7 +4050,7 @@ snapshots:
 
   consola@3.4.2: {}
 
-  cookie@1.0.2: {}
+  cookie@1.1.1: {}
 
   cross-spawn@7.0.6:
     dependencies:
