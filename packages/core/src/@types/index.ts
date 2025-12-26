@@ -1,7 +1,7 @@
 import { z } from "zod/v4"
 import { JWTPayload } from "@/jose.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
-import type { SerializeOptions } from "@aura-stack/router/cookie"
+import type { SerializeOptions } from "cookie"
 import type { LiteralUnion, Prettify } from "./utility.js"
 import type { BuiltInOAuthProvider } from "@/oauth/index.js"
 
