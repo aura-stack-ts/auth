@@ -1,7 +1,7 @@
 import { isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
 import { equals, getNormalizedOriginPath, sanitizeURL, toCastCase } from "@/utils.js"
-import { AuthError, ERROR_RESPONSE, InvalidRedirectToError, isAuthError } from "@/error.js"
+import { AuthError, ERROR_RESPONSE, InvalidRedirectToError, isAuthError } from "@/errors.js"
 import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**

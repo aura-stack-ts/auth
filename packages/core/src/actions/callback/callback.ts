@@ -1,14 +1,14 @@
 import z from "zod"
-import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
+import { createEndpoint, createEndpointConfig, HeadersBuilder, statusCode } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
 import { AuraResponse } from "@/response.js"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
-import { AuthError, ERROR_RESPONSE, isAuthError } from "@/error.js"
+import { AuthError, ERROR_RESPONSE, isAuthError } from "@/errors.js"
 import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
-import { createSessionCookie, expiresCookie, setCookie, getCookie } from "@/cookie.js"
+import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AccessTokenError, AuthorizationError, AuthRuntimeConfig } from "@/@types/index.js"
 
@@ -17,7 +17,7 @@ const callbackConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
         schemas: {
             searchParams: OAuthAuthorizationResponse,
             params: z.object({
-                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[]),
+                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
             }),
         },
         middlewares: [
@@ -64,26 +64,22 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                     )
                 }
 
-                const headers = new Headers(cacheControl)
-                headers.set("Location", sanitized)
                 const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
 
-                const sessionCookie = await createSessionCookie(
-                    userInfo as JWTPayload,
-                    cookies.sessionToken.name,
-                    cookies.sessionToken.attributes,
-                    jose
-                )
+                const sessionCookie = await createSessionCookie(userInfo as JWTPayload, jose)
 
                 const csrfToken = await createCSRF(jose)
-                const csrfCookie = setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
-                headers.set("Set-Cookie", sessionCookie)
-                headers.append("Set-Cookie", expiresCookie(cookies.state.name))
-                headers.append("Set-Cookie", expiresCookie(cookies.redirect_uri.name))
-                headers.append("Set-Cookie", expiresCookie(cookies.redirect_to.name))
-                headers.append("Set-Cookie", expiresCookie(cookies.code_verifier.name))
-                headers.append("Set-Cookie", csrfCookie)
-                return Response.json({ oauth }, { status: 302, headers })
+
+                const headers = new HeadersBuilder(cacheControl)
+                    .setHeader("Location", sanitized)
+                    .setCookie(cookies.sessionToken.name, sessionCookie, cookies.sessionToken.attributes)
+                    .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
+                    .setCookie(cookies.state.name, "", expiredCookieAttributes)
+                    .setCookie(cookies.redirect_uri.name, "", expiredCookieAttributes)
+                    .setCookie(cookies.redirect_to.name, "", expiredCookieAttributes)
+                    .setCookie(cookies.code_verifier.name, "", expiredCookieAttributes)
+                    .toHeaders()
+                return Response.json({ oauth }, { status: 302, headers: headers })
             } catch (error) {
                 if (isAuthError(error)) {
                     const { type, message } = error

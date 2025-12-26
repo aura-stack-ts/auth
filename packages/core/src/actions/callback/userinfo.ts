@@ -1,6 +1,6 @@
 import { generateSecure } from "@/secure.js"
 import { OAuthErrorResponse } from "@/schemas.js"
-import { AuthError, throwAuthError } from "@/error.js"
+import { AuthError, throwAuthError } from "@/errors.js"
 import type { OAuthProviderCredentials, User } from "@/@types/index.js"
 
 /**

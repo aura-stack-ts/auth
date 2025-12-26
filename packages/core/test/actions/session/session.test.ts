@@ -1,4 +1,4 @@
-import { setCookie, getSetCookie } from "@/cookie.js"
+import { setCookie, getSetCookie, createCookieStore } from "@/cookie.js"
 import { createPKCE } from "@/secure.js"
 import { GET, jose, sessionPayload } from "@test/presets.js"
 import { describe, test, expect, vi } from "vitest"
@@ -98,6 +98,7 @@ describe("sessionAction", () => {
 
     test("update default profile function", async () => {
         const mockFetch = vi.fn()
+        const cookies = createCookieStore(true)
 
         vi.stubGlobal("fetch", mockFetch)
 
@@ -129,11 +130,15 @@ describe("sessionAction", () => {
             json: async () => userInfoMock,
         })
 
-        const state = setCookie("__Secure-aura-auth.state", "abc")
-        const redirectURI = setCookie("__Secure-aura-auth.redirect_uri", "https://example.com/auth/callback/oauth-profile")
-        const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth")
+        const state = setCookie("__Secure-aura-auth.state", "abc", cookies.state.attributes)
+        const redirectURI = setCookie(
+            "__Secure-aura-auth.redirect_uri",
+            "https://example.com/auth/callback/oauth-profile",
+            cookies.redirect_uri.attributes
+        )
+        const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth", cookies.redirect_to.attributes)
         const { codeVerifier } = await createPKCE()
-        const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier)
+        const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier, cookies.code_verifier.attributes)
         const response = await GET(
             new Request("https://example.com/auth/callback/oauth-profile?code=auth_code_123&state=abc", {
                 headers: {

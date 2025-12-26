@@ -1,7 +1,7 @@
-import { parse, parseSetCookie, serialize, type SerializeOptions } from "cookie"
-import { AuthError } from "@/error.js"
+import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
+import { AuthError } from "@/errors.js"
 import type { JWTPayload } from "@/jose.js"
-import type { AuthRuntimeConfig, CookieName, LiteralUnion, CookieStoreConfig, CookieConfig } from "@/@types/index.js"
+import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig } from "@/@types/index.js"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -64,18 +64,10 @@ export const setCookie = (cookieName: string, value: string, options?: Serialize
     return serialize(cookieName, value, options)
 }
 
-/**
- * Expire a cookie by setting its value to an empty string and applying expired cookie options.
- *
- * @param name The name of the cookie to expire
- * @param options cookie options obtained from secureCookieOptions
- * @returns formatted cookie options for an expired cookie
- */
-export const expiresCookie = (name: LiteralUnion<CookieName>) => {
-    return setCookie(name, "", {
-        expires: new Date(0),
-        maxAge: 0,
-    })
+export const expiredCookieAttributes: SerializeOptions = {
+    ...defaultCookieOptions,
+    expires: new Date(0),
+    maxAge: 0,
 }
 
 /**
@@ -123,15 +115,10 @@ export const getSetCookie = (response: Response, cookieName: string) => {
  * @param session - The JWT payload to be encoded in the session cookie
  * @returns The serialized session cookie string
  */
-export const createSessionCookie = async (
-    session: JWTPayload,
-    cookieName: string,
-    attributes: SerializeOptions,
-    jose: AuthRuntimeConfig["jose"]
-) => {
+export const createSessionCookie = async (session: JWTPayload, jose: AuthRuntimeConfig["jose"]) => {
     try {
         const encoded = await jose.encodeJWT(session)
-        return setCookie(cookieName, encoded, attributes)
+        return encoded
     } catch (error) {
         // @ts-ignore
         throw new AuthError("server_error", "Failed to create session cookie", { cause: error })
