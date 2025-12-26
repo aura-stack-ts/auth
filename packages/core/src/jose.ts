@@ -1,7 +1,7 @@
 import "dotenv/config"
 import { createJWT, createJWS, createDeriveKey } from "@aura-stack/jose"
 import { createDerivedSalt } from "./secure.js"
-import { AuthError } from "./error.js"
+import { AuthError } from "./errors.js"
 export type { JWTPayload } from "@aura-stack/jose/jose"
 
 /**

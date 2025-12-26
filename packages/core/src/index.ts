@@ -34,7 +34,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
         middlewares: [
             (ctx) => {
                 const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
-                const cookies = createCookieStore(useSecure, authConfig?.cookies?.prefix, authConfig?.cookies?.overrides)
+                const cookies = createCookieStore(useSecure, authConfig?.cookies?.prefix, authConfig?.cookies?.overrides ?? {})
                 ctx.context.cookies = cookies
                 return ctx
             },

@@ -16,7 +16,33 @@ describe("callbackAction", () => {
     test("endpoint without code and state", async () => {
         const response = await GET(new Request("https://example.com/auth/callback/unknown"))
         expect(response.status).toBe(422)
-        expect(await response.json()).toEqual({ error: "invalid_request", error_description: "Invalid route parameters" })
+        expect(await response.json()).toEqual({
+            error: "invalid_request",
+            errors: {
+                oauth: {
+                    code: "invalid_value",
+                    message: "The OAuth provider is not supported or invalid.",
+                },
+            },
+        })
+    })
+
+    test("supported oauth provider endpoint without code and state", async () => {
+        const response = await GET(new Request("https://example.com/auth/callback/oauth-provider"))
+        expect(response.status).toBe(422)
+        expect(await response.json()).toEqual({
+            error: "invalid_request",
+            errors: {
+                code: {
+                    code: "invalid_type",
+                    message: "Missing code parameter in the OAuth authorization response.",
+                },
+                state: {
+                    code: "invalid_type",
+                    message: "Missing state parameter in the OAuth authorization response.",
+                },
+            },
+        })
     })
 
     test("unsupported oauth provider", async () => {
@@ -24,7 +50,12 @@ describe("callbackAction", () => {
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
             error: "invalid_request",
-            error_description: "Invalid route parameters",
+            errors: {
+                oauth: {
+                    code: "invalid_value",
+                    message: "The OAuth provider is not supported or invalid.",
+                },
+            },
         })
     })
 

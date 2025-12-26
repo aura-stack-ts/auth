@@ -1,7 +1,7 @@
-import { createEndpoint } from "@aura-stack/router"
-import { cacheControl } from "@/headers.js"
+import { createEndpoint, HeadersBuilder } from "@aura-stack/router"
 import { toISOString } from "@/utils.js"
-import { expiresCookie, getCookie } from "@/cookie.js"
+import { cacheControl } from "@/headers.js"
+import { expiredCookieAttributes, getCookie } from "@/cookie.js"
 import type { JWTStandardClaims, Session, User } from "@/@types/index.js"
 
 export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
@@ -16,10 +16,10 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
         const { exp, iat, jti, nbf, ...user } = decoded as User & JWTStandardClaims
         const headers = new Headers(cacheControl)
         return Response.json({ user, expires: toISOString(exp! * 1000) } as Session, { headers })
-    } catch {
-        const headers = new Headers(cacheControl)
-        const sessionCookie = expiresCookie(cookies.sessionToken.name)
-        headers.set("Set-Cookie", sessionCookie)
+    } catch (error) {
+        const headers = new HeadersBuilder(cacheControl)
+            .setCookie(cookies.sessionToken.name, "", expiredCookieAttributes)
+            .toHeaders()
         return Response.json({ authenticated: false, message: "Unauthorized" }, { status: 401, headers })
     }
 })
