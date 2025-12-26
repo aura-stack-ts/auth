@@ -1,5 +1,5 @@
-import { isRouterError, RouterConfig } from "@aura-stack/router"
-import { isAuthError } from "./error.js"
+import { isAuthError } from "./errors.js"
+import { isInvalidZodSchemaError, isRouterError, RouterConfig } from "@aura-stack/router"
 
 export const toSnakeCase = (str: string) => {
     return str
@@ -116,6 +116,9 @@ export const onErrorHandler: RouterConfig["onError"] = (error) => {
         const { type, message } = error
         return Response.json({ error: type, error_description: message }, { status: 400 })
     }
+    if (isInvalidZodSchemaError(error)) {
+        return Response.json({ error: "invalid_request", errors: error.errors }, { status: 422 })
+    }
     return Response.json({ error: "server_error", error_description: "An unexpected error occurred" }, { status: 500 })
 }
 
@@ -140,4 +143,12 @@ export const getNormalizedOriginPath = (path: string): string => {
 
 export const toISOString = (date: Date | string | number): string => {
     return new Date(date).toISOString()
+}
+
+export const useSecureCookies = (request: Request, trustedProxyHeaders: boolean): boolean => {
+    return trustedProxyHeaders
+        ? request.url.startsWith("https://") ||
+              request.headers.get("X-Forwarded-Proto") === "https" ||
+              (request.headers.get("Forwarded")?.includes("proto=https") ?? false)
+        : request.url.startsWith("https://")
 }

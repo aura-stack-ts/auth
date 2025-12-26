@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { GET } from "@test/presets.js"
-import { getCookie } from "@/cookie.js"
+import { getSetCookie } from "@/cookie.js"
 
 describe("signIn action", () => {
     test("unsupported oauth provider", async () => {
@@ -8,7 +8,12 @@ describe("signIn action", () => {
         expect(request.status).toBe(422)
         expect(await request.json()).toEqual({
             error: "invalid_request",
-            error_description: "Invalid route parameters",
+            errors: {
+                oauth: {
+                    code: "invalid_value",
+                    message: "The OAuth provider is not supported or invalid.",
+                },
+            },
         })
     })
 
@@ -36,8 +41,7 @@ describe("signIn action", () => {
                 const request = await GET(new Request(url))
                 const headers = new Headers(request.headers)
 
-                const isSecure = url.startsWith("https://")
-                const stateCookie = getCookie(request, "state", { secure: isSecure, prefix: isSecure ? "__Secure-" : "" })
+                const stateCookie = getSetCookie(request, "__Secure-aura-auth.state")
                 const location = headers.get("Location") as string
                 const searchParams = new URL(location).searchParams
 

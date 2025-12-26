@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { GET } from "@test/presets.js"
-import { defaultHostCookieConfig, setCookie } from "@/cookie.js"
+import { setCookie } from "@/cookie.js"
 
 describe("csrfTokenAction", () => {
     test("generates a CSRF token and sets it in a cookie", async () => {
@@ -20,7 +20,7 @@ describe("csrfTokenAction", () => {
             new Request("https://example.com/auth/csrfToken", {
                 method: "GET",
                 headers: {
-                    Cookie: setCookie("csrfToken", token.csrfToken, { ...defaultHostCookieConfig }),
+                    Cookie: setCookie("__Host-aura-auth.csrfToken", token.csrfToken),
                 },
             })
         )
@@ -35,7 +35,7 @@ describe("csrfTokenAction", () => {
             new Request("https://example.com/auth/csrfToken", {
                 method: "GET",
                 headers: {
-                    Cookie: setCookie("csrfToken", invalidCookie, { ...defaultHostCookieConfig }),
+                    Cookie: setCookie("__Host-aura-auth.csrfToken", invalidCookie),
                 },
             })
         )

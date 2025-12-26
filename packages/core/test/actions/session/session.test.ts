@@ -1,6 +1,6 @@
-import { getCookie, setCookie } from "@/cookie.js"
+import { setCookie, getSetCookie, createCookieStore } from "@/cookie.js"
 import { createPKCE } from "@/secure.js"
-import { GET, jose, secureCookieOptions, sessionPayload } from "@test/presets.js"
+import { GET, jose, sessionPayload } from "@test/presets.js"
 import { describe, test, expect, vi } from "vitest"
 
 describe("sessionAction", () => {
@@ -98,6 +98,7 @@ describe("sessionAction", () => {
 
     test("update default profile function", async () => {
         const mockFetch = vi.fn()
+        const cookies = createCookieStore(true)
 
         vi.stubGlobal("fetch", mockFetch)
 
@@ -129,12 +130,15 @@ describe("sessionAction", () => {
             json: async () => userInfoMock,
         })
 
-        const state = setCookie("state", "abc", secureCookieOptions)
-        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-profile", secureCookieOptions)
-        const redirectTo = setCookie("redirect_to", "/auth", secureCookieOptions)
+        const state = setCookie("__Secure-aura-auth.state", "abc", cookies.state.attributes)
+        const redirectURI = setCookie(
+            "__Secure-aura-auth.redirect_uri",
+            "https://example.com/auth/callback/oauth-profile",
+            cookies.redirect_uri.attributes
+        )
+        const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth", cookies.redirect_to.attributes)
         const { codeVerifier } = await createPKCE()
-        const codeVerifierCookie = setCookie("code_verifier", codeVerifier, secureCookieOptions)
-
+        const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier, cookies.code_verifier.attributes)
         const response = await GET(
             new Request("https://example.com/auth/callback/oauth-profile?code=auth_code_123&state=abc", {
                 headers: {
@@ -169,7 +173,7 @@ describe("sessionAction", () => {
         expect(fetch).toHaveBeenCalledTimes(2)
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
-        const sessionToken = getCookie(response, "sessionToken", { secure: true })
+        const sessionToken = getSetCookie(response, "__Secure-aura-auth.sessionToken")
         expect(sessionToken).toBeDefined()
 
         const requestSession = await GET(

@@ -31,8 +31,8 @@ export const OAuthAuthorization = OAuthProviderConfigSchema.extend({
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2
  */
 export const OAuthAuthorizationResponse = object({
-    state: string(),
-    code: string(),
+    state: string("Missing state parameter in the OAuth authorization response."),
+    code: string("Missing code parameter in the OAuth authorization response."),
 })
 
 /**

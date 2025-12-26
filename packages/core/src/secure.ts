@@ -1,6 +1,6 @@
 import crypto from "node:crypto"
 import { equals } from "./utils.js"
-import { InvalidCsrfTokenError } from "./error.js"
+import { InvalidCsrfTokenError } from "./errors.js"
 import { AuthRuntimeConfig } from "./@types/index.js"
 
 export const generateSecure = (length: number = 32) => {

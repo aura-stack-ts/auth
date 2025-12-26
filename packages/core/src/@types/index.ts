@@ -1,7 +1,7 @@
 import { z } from "zod/v4"
 import { JWTPayload } from "@/jose.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
-import type { SerializeOptions } from "cookie"
+import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { LiteralUnion, Prettify } from "./utility.js"
 import type { BuiltInOAuthProvider } from "@/oauth/index.js"
 
@@ -66,21 +66,19 @@ export type OAuthProvider<Profile extends Record<string, unknown> = {}> = OAuthP
  * Cookie type with __Secure- prefix, must be Secure.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
  */
-export type SecureCookie = { strategy: "secure" } & { options?: Prettify<Omit<SerializeOptions, "secure" | "encode">> }
+export type SecureCookie = { strategy: "secure" } & Prettify<Omit<SerializeOptions, "secure" | "encode">>
 
 /**
  * Cookie type with __Host- prefix, must be Secure, Path=/, no Domain attribute.
  * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
  */
-export type HostCookie = { strategy: "host" } & {
-    options?: Prettify<Omit<SerializeOptions, "secure" | "path" | "domain" | "encode">>
-}
+export type HostCookie = { strategy: "host" } & Prettify<Omit<SerializeOptions, "secure" | "path" | "domain" | "encode">>
 
 /**
  * Standard cookie type without security prefixes.
  * Can be sent over both HTTP and HTTPS connections (default in development).
  */
-export type StandardCookie = { strategy?: "standard" } & { options?: Prettify<Omit<SerializeOptions, "encode">> }
+export type StandardCookie = { strategy?: "standard" } & Prettify<Omit<SerializeOptions, "encode">>
 
 /**
  * Union type for cookie options based on the specified strategy.
@@ -88,26 +86,7 @@ export type StandardCookie = { strategy?: "standard" } & { options?: Prettify<Om
  * - `host`: Cookies use the __Host- prefix and are only sent over HTTPS connections
  * - `standard`: Cookies can be sent over both HTTP and HTTPS connections (default in development)
  */
-export type CookieStrategyOptions = StandardCookie | SecureCookie | HostCookie
-
-/**
- * Configuration options for cookies used in Aura Auth.
- * @see {@link AuthConfig.cookies}
- */
-export type CookieConfig = Prettify<
-    {
-        name?: string
-    } & CookieStrategyOptions
->
-
-/**
- * Internal representation of cookie configuration with all options resolved.
- * @internal
- */
-export type CookieConfigInternal = {
-    name?: string
-    prefix?: string
-} & SerializeOptions
+export type CookieStrategyAttributes = StandardCookie | SecureCookie | HostCookie
 
 /**
  * Names of cookies used by Aura Auth for session management and OAuth flows.
@@ -119,7 +98,17 @@ export type CookieConfigInternal = {
  * - `redirect_to`: Post-authentication redirect path
  * - `nonce`: OpenID Connect nonce parameter
  */
-export type CookieName = "sessionToken" | "csrfToken" | "state" | "nonce" | "code_verifier" | "redirect_to" | "redirect_uri"
+export type CookieName = "sessionToken" | "csrfToken" | "state" | "code_verifier" | "redirect_to" | "redirect_uri"
+
+export type CookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
+
+export interface CookieConfig {
+    /**
+     * Prefix to be added to all cookie names. By default "aura-stack".
+     */
+    prefix?: string
+    overrides?: Partial<CookieStoreConfig>
+}
 
 /**
  * Main configuration interface for Aura Auth.
@@ -168,7 +157,7 @@ export interface AuthConfig {
      * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix
      * @see https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__host-prefix
      */
-    cookies?: CookieConfig
+    cookies?: Partial<CookieConfig>
     /**
      * Secret used to sign and verify JWT tokens for session and csrf protection.
      * If not provided, it will load from the environment variable `AURA_AUTH_SECRET`, but if it
@@ -195,6 +184,7 @@ export interface AuthConfig {
      */
     trustedProxyHeaders?: boolean
 }
+
 export interface JoseInstance {
     decodeJWT: (token: string) => Promise<JWTPayload>
     encodeJWT: (payload: JWTPayload) => Promise<string>
@@ -217,7 +207,7 @@ export interface AuthRuntimeConfig {
 
 export interface RouterGlobalContext {
     oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
-    cookies: CookieConfigInternal
+    cookies: CookieStoreConfig
     jose: JoseInstance
     basePath: string
     trustedProxyHeaders: boolean

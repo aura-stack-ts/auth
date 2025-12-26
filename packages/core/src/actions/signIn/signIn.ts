@@ -2,8 +2,7 @@ import z from "zod"
 import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
 import { AuraResponse } from "@/response.js"
 import { createPKCE, generateSecure } from "@/secure.js"
-import { ERROR_RESPONSE, isAuthError } from "@/error.js"
-import { oauthCookie, secureCookieOptions, setCookie } from "@/cookie.js"
+import { ERROR_RESPONSE, isAuthError } from "@/errors.js"
 import { createAuthorizationURL, createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.js"
 import type { AuthorizationError, AuthRuntimeConfig } from "@/@types/index.js"
 
@@ -11,10 +10,15 @@ const signInConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
     return createEndpointConfig("/signIn/:oauth", {
         schemas: {
             params: z.object({
-                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[]),
+                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
                 redirectTo: z.string().optional(),
             }),
         },
+        middlewares: [
+            (ctx) => {
+                return ctx
+            },
+        ],
     })
 }
 
@@ -25,32 +29,25 @@ export const signInAction = (oauth: AuthRuntimeConfig["oauth"]) => {
         async (ctx) => {
             const {
                 request,
+                headers: headersBuilder,
                 params: { oauth, redirectTo },
                 context: { oauth: providers, cookies, trustedProxyHeaders, basePath },
             } = ctx
             try {
-                const cookieOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
                 const state = generateSecure()
                 const redirectURI = createRedirectURI(request, oauth, basePath, trustedProxyHeaders)
-                const stateCookie = setCookie("state", state, oauthCookie(cookieOptions))
-                const redirectURICookie = setCookie("redirect_uri", redirectURI, oauthCookie(cookieOptions))
-                const redirectToCookie = setCookie(
-                    "redirect_to",
-                    createRedirectTo(request, redirectTo, trustedProxyHeaders),
-                    oauthCookie(cookieOptions)
-                )
+                const redirectToValue = createRedirectTo(request, redirectTo, trustedProxyHeaders)
 
                 const { codeVerifier, codeChallenge, method } = await createPKCE()
-                const codeVerifierCookie = setCookie("code_verifier", codeVerifier, oauthCookie(cookieOptions))
-
                 const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method)
-                const headers = new Headers()
-                headers.set("Location", authorization)
-                headers.append("Set-Cookie", stateCookie)
-                headers.append("Set-Cookie", redirectURICookie)
-                headers.append("Set-Cookie", redirectToCookie)
-                headers.append("Set-Cookie", codeVerifierCookie)
 
+                const headers = headersBuilder
+                    .setHeader("Location", authorization)
+                    .setCookie(cookies.state.name, state, cookies.state.attributes)
+                    .setCookie(cookies.redirect_uri.name, redirectURI, cookies.redirect_uri.attributes)
+                    .setCookie(cookies.redirect_to.name, redirectToValue, cookies.redirect_to.attributes)
+                    .setCookie(cookies.code_verifier.name, codeVerifier, cookies.code_verifier.attributes)
+                    .toHeaders()
                 return Response.json(
                     { oauth },
                     {

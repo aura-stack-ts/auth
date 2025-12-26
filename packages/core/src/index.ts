@@ -1,11 +1,11 @@
 import "dotenv/config"
 import { createRouter, type RouterConfig } from "@aura-stack/router"
-import { onErrorHandler } from "./utils.js"
+import { onErrorHandler, useSecureCookies } from "@/utils.js"
 import { createJoseInstance } from "@/jose.js"
-import { defaultCookieConfig } from "@/cookie.js"
+import { createCookieStore } from "@/cookie.js"
 import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import type { AuthConfig, AuthInstance } from "@/@types/index.js"
+import type { AuthConfig, AuthInstance, CookieStoreConfig } from "@/@types/index.js"
 
 export type {
     AuthConfig,
@@ -26,11 +26,19 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
         onError: onErrorHandler,
         context: {
             oauth: createBuiltInOAuthProviders(authConfig?.oauth),
-            cookies: authConfig?.cookies ?? defaultCookieConfig,
+            cookies: {} as CookieStoreConfig,
             jose: createJoseInstance(authConfig?.secret),
             basePath: authConfig?.basePath ?? "/auth",
             trustedProxyHeaders: !!authConfig?.trustedProxyHeaders,
         },
+        middlewares: [
+            (ctx) => {
+                const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
+                const cookies = createCookieStore(useSecure, authConfig?.cookies?.prefix, authConfig?.cookies?.overrides ?? {})
+                ctx.context.cookies = cookies
+                return ctx
+            },
+        ],
     }
 }
 

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { AuthError } from "@/error.js"
+import { AuthError } from "@/errors.js"
 import { createPKCE } from "@/secure.js"
 import { oauthCustomService } from "@test/presets.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"

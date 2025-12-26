@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
+import { GET } from "@test/presets.js"
 import { createPKCE } from "@/secure.js"
-import { getCookie, setCookie } from "@/cookie.js"
-import { GET, secureCookieOptions } from "@test/presets.js"
+import { setCookie, getSetCookie } from "@/cookie.js"
 
 describe("callbackAction", () => {
     test("invalid endpoint", async () => {
@@ -16,7 +16,33 @@ describe("callbackAction", () => {
     test("endpoint without code and state", async () => {
         const response = await GET(new Request("https://example.com/auth/callback/unknown"))
         expect(response.status).toBe(422)
-        expect(await response.json()).toEqual({ error: "invalid_request", error_description: "Invalid route parameters" })
+        expect(await response.json()).toEqual({
+            error: "invalid_request",
+            errors: {
+                oauth: {
+                    code: "invalid_value",
+                    message: "The OAuth provider is not supported or invalid.",
+                },
+            },
+        })
+    })
+
+    test("supported oauth provider endpoint without code and state", async () => {
+        const response = await GET(new Request("https://example.com/auth/callback/oauth-provider"))
+        expect(response.status).toBe(422)
+        expect(await response.json()).toEqual({
+            error: "invalid_request",
+            errors: {
+                code: {
+                    code: "invalid_type",
+                    message: "Missing code parameter in the OAuth authorization response.",
+                },
+                state: {
+                    code: "invalid_type",
+                    message: "Missing state parameter in the OAuth authorization response.",
+                },
+            },
+        })
     })
 
     test("unsupported oauth provider", async () => {
@@ -24,7 +50,12 @@ describe("callbackAction", () => {
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
             error: "invalid_request",
-            error_description: "Invalid route parameters",
+            errors: {
+                oauth: {
+                    code: "invalid_value",
+                    message: "The OAuth provider is not supported or invalid.",
+                },
+            },
         })
     })
 
@@ -38,10 +69,10 @@ describe("callbackAction", () => {
     })
 
     test("mismatching state", async () => {
-        const state = setCookie("state", "123", secureCookieOptions)
-        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-provider", secureCookieOptions)
-        const redirectTo = setCookie("redirect_to", "/auth", secureCookieOptions)
-        const codeVerifier = setCookie("code_verifier", "verifier_123", secureCookieOptions)
+        const state = setCookie("__Secure-aura-auth.state", "123")
+        const redirectURI = setCookie("__Secure-aura-auth.redirect_uri", "https://example.com/auth/callback/oauth-provider")
+        const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth")
+        const codeVerifier = setCookie("__Secure-aura-auth.code_verifier", "verifier_123")
 
         const response = await GET(
             new Request("https://example.com/auth/callback/oauth-provider?code=123&state=abc", {
@@ -81,12 +112,11 @@ describe("callbackAction", () => {
             json: async () => userInfoMock,
         })
 
-        const state = setCookie("state", "abc", secureCookieOptions)
-        const redirectURI = setCookie("redirect_uri", "https://example.com/auth/callback/oauth-provider", secureCookieOptions)
-        const redirectTo = setCookie("redirect_to", "/auth", secureCookieOptions)
+        const state = setCookie("__Secure-aura-auth.state", "abc")
+        const redirectURI = setCookie("__Secure-aura-auth.redirect_uri", "https://example.com/auth/callback/oauth-provider")
+        const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth")
         const { codeVerifier } = await createPKCE()
-        const codeVerifierCookie = setCookie("code_verifier", codeVerifier, secureCookieOptions)
-
+        const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier)
         const response = await GET(
             new Request("https://example.com/auth/callback/oauth-provider?code=auth_code_123&state=abc", {
                 headers: {
@@ -122,9 +152,9 @@ describe("callbackAction", () => {
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
 
-        expect(getCookie(response, "sessionToken", { secure: true })).toBeDefined()
-        expect(getCookie(response, "state", { secure: true })).toEqual("")
-        expect(getCookie(response, "redirect_to", { secure: true })).toEqual("")
-        expect(getCookie(response, "redirect_uri", { secure: true })).toEqual("")
+        expect(getSetCookie(response, "__Secure-aura-auth.sessionToken")).toBeDefined()
+        expect(getSetCookie(response, "__Secure-aura-auth.state")).toEqual("")
+        expect(getSetCookie(response, "__Secure-aura-auth.redirect_to")).toEqual("")
+        expect(getSetCookie(response, "__Secure-aura-auth.redirect_uri")).toEqual("")
     })
 })

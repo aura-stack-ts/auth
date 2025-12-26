@@ -1,4 +1,4 @@
-import { AuthError, ERROR_RESPONSE, throwAuthError } from "@/error.js"
+import { AuthError, ERROR_RESPONSE, throwAuthError } from "@/errors.js"
 import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
 import type { OAuthProviderCredentials } from "@/@types/index.js"
 

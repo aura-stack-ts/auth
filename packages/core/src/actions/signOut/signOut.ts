@@ -1,12 +1,12 @@
 import z from "zod"
-import { createEndpoint, createEndpointConfig, statusCode } from "@aura-stack/router"
+import { createEndpoint, createEndpointConfig, HeadersBuilder, statusCode } from "@aura-stack/router"
 import { verifyCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
 import { AuraResponse } from "@/response.js"
-import { getNormalizedOriginPath } from "@/utils.js"
 import { createRedirectTo } from "@/actions/signIn/authorization.js"
-import { expireCookie, getCookie, secureCookieOptions } from "@/cookie.js"
-import { InvalidCsrfTokenError, InvalidRedirectToError } from "@/error.js"
+import { getNormalizedOriginPath } from "@/utils.js"
+import { InvalidCsrfTokenError, InvalidRedirectToError } from "@/errors.js"
+import { expiredCookieAttributes } from "@/cookie.js"
 import type { TokenRevocationError } from "@/@types/index.js"
 
 const config = createEndpointConfig({
@@ -29,16 +29,12 @@ export const signOutAction = createEndpoint(
             request,
             headers,
             searchParams: { redirectTo },
-            context: { cookies, jose, trustedProxyHeaders },
+            context: { jose, cookies },
         } = ctx
         try {
-            const cookiesOptions = secureCookieOptions(request, cookies, trustedProxyHeaders)
-            const session = getCookie(request, "sessionToken", cookiesOptions)
-            const csrfToken = getCookie(request, "csrfToken", {
-                ...cookiesOptions,
-                prefix: cookiesOptions.secure ? "__Host-" : "",
-            })
-            const header = headers.get("X-CSRF-Token")
+            const session = headers.getCookie(cookies.sessionToken.name)
+            const csrfToken = headers.getCookie(cookies.csrfToken.name)
+            const header = headers.getHeader("X-CSRF-Token")
             if (!header || !session || !csrfToken) {
                 throw new Error("Missing CSRF token or session token")
             }
@@ -48,21 +44,16 @@ export const signOutAction = createEndpoint(
             const normalizedOriginPath = getNormalizedOriginPath(request.url)
             const location = createRedirectTo(
                 new Request(normalizedOriginPath, {
-                    headers,
+                    headers: headers.toHeaders(),
                 }),
                 redirectTo
             )
-            const responseHeaders = new Headers(cacheControl)
-            responseHeaders.append("Set-Cookie", expireCookie("sessionToken", cookiesOptions))
-            responseHeaders.append(
-                "Set-Cookie",
-                expireCookie("csrfToken", { ...cookiesOptions, prefix: cookiesOptions.secure ? "__Host-" : "" })
-            )
-            responseHeaders.append("Location", location)
-            return Response.json(
-                { message: "Signed out successfully" },
-                { status: statusCode.ACCEPTED, headers: responseHeaders }
-            )
+            const headersList = new HeadersBuilder(cacheControl)
+                .setHeader("Location", location)
+                .setCookie(cookies.csrfToken.name, "", expiredCookieAttributes)
+                .setCookie(cookies.sessionToken.name, "", expiredCookieAttributes)
+                .toHeaders()
+            return Response.json({ message: "Signed out successfully" }, { status: statusCode.ACCEPTED, headers: headersList })
         } catch (error) {
             if (error instanceof InvalidCsrfTokenError) {
                 return AuraResponse.json<TokenRevocationError>(
