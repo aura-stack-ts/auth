@@ -179,7 +179,7 @@ describe("sessionAction", () => {
         const requestSession = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: sessionToken!,
+                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
                 },
             })
         )
