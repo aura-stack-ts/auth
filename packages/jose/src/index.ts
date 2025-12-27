@@ -81,7 +81,6 @@ export const decodeJWT = async (token: string, secret: SecretInput | DerivedKeyI
  * @returns JWT handler object with `signJWS/encryptJWE` and `verifyJWS/decryptJWE` methods
  */
 export const createJWT = (secret: SecretInput | DerivedKeyInput) => {
-
     return {
         encodeJWT: async (payload: JWTPayload) => encodeJWT(payload, secret),
         decodeJWT: async (token: string) => decodeJWT(token, secret),

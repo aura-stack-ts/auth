@@ -74,7 +74,6 @@ export const verifyJWS = async (token: string, secret: SecretInput): Promise<JWT
  * @returns signJWS and verifyJWS functions
  */
 export const createJWS = (secret: SecretInput) => {
-
     return {
         signJWS: (payload: JWTPayload) => signJWS(payload, secret),
         verifyJWS: (payload: string) => verifyJWS(payload, secret),

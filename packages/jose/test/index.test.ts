@@ -150,10 +150,11 @@ describe("JWTs", () => {
     })
 
     test("create a signed and encrypted JWT using createJWT with separate JWS and JWE secrets", async () => {
-        const jwsSecretKey = crypto.randomBytes(32)
-        const jweSecretKey = crypto.randomBytes(32)
+        const secret = crypto.randomBytes(32)
+        const { derivedKey: derivedSigningKey } = createDeriveKey(secret, "salt", "signing")
+        const { derivedKey: derivedEncryptionKey } = createDeriveKey(secret, "salt", "encryption")
 
-        const { encodeJWT, decodeJWT } = createJWT({ jws: jwsSecretKey, jwe: jweSecretKey })
+        const { encodeJWT, decodeJWT } = createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey })
 
         const jwt = await encodeJWT(payload)
         expect(jwt).toBeDefined()

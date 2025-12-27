@@ -20,10 +20,11 @@ export const createJoseInstance = (secret?: string) => {
     }
 
     const salt = process.env.AURA_AUTH_SALT ?? createDerivedSalt(secret)
-    const { derivedKey: derivedSessionKey } = createDeriveKey(secret, salt, "session")
+    const { derivedKey: derivedSigningKey } = createDeriveKey(secret, salt, "signing")
+    const { derivedKey: derivedEncryptionKey } = createDeriveKey(secret, salt, "encryption")
     const { derivedKey: derivedCsrfTokenKey } = createDeriveKey(secret, salt, "csrfToken")
 
-    const { decodeJWT, encodeJWT } = createJWT(derivedSessionKey)
+    const { decodeJWT, encodeJWT } = createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey })
     const { signJWS, verifyJWS } = createJWS(derivedCsrfTokenKey)
 
     return {
