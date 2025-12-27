@@ -1,7 +1,7 @@
 import { isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
-import { equals, formatZodError, getNormalizedOriginPath, sanitizeURL, toCastCase } from "@/utils.js"
 import { AuthInternalError, AuthSecurityError, isAuthSecurityError } from "@/errors.js"
+import { equals, formatZodError, getNormalizedOriginPath, sanitizeURL, toCastCase } from "@/utils.js"
 import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
@@ -26,7 +26,6 @@ export const createAuthorizationURL = (
     const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state, codeChallenge, codeChallengeMethod })
     if (!parsed.success) {
         const msg = JSON.stringify(formatZodError(parsed.error), null, 2)
-        console.log("OAuth Authorization URL Creation Error:", msg)
         throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", msg)
     }
     const { authorizeURL, ...options } = parsed.data

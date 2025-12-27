@@ -190,6 +190,8 @@ export interface JoseInstance {
     encodeJWT: (payload: JWTPayload) => Promise<string>
     signJWS: (payload: JWTPayload) => Promise<string>
     verifyJWS: (payload: string) => Promise<JWTPayload>
+    encryptJWE: (payload: string) => Promise<string>
+    decryptJWE: (payload: string) => Promise<string>
 }
 
 /**

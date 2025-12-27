@@ -1,7 +1,7 @@
+import { formatZodError } from "@/utils.js"
 import { AuthInternalError, OAuthProtocolError } from "@/errors.js"
 import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
 import type { OAuthProviderCredentials } from "@/@types/index.js"
-import { formatZodError } from "@/utils.js"
 
 /**
  * Make a request to the OAuth provider to the token endpoint to exchange the authorization code provided
@@ -22,7 +22,7 @@ export const createAccessToken = async (
 ) => {
     const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code, codeVerifier })
     if (!parsed.success) {
-        const msg = formatZodError(parsed.error).toString()
+        const msg = JSON.stringify(formatZodError(parsed.error), null, 2)
         throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", msg)
     }
     const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data

@@ -52,9 +52,9 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
  */
 export const verifyJWS = async (token: string, secret: SecretInput): Promise<JWTPayload> => {
     try {
-        if(isFalsy(token)) {
+        if (isFalsy(token)) {
             throw new InvalidPayloadError("The token must be a non-empty string")
-        } 
+        }
         const secretKey = createSecret(secret)
         const { payload } = await jwtVerify(token, secretKey)
         return payload
