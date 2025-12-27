@@ -7,12 +7,14 @@ import { createJWE } from "@/encrypt.js"
 import { isAuraJoseError } from "@/assert.js"
 import { JWTDecodingError, JWTEncodingError } from "./errors.js"
 import type { KeyObject } from "node:crypto"
+import { getSecrets } from "./secret.js"
 
 export * from "@/sign.js"
 export * from "@/encrypt.js"
 export * from "@/deriveKey.js"
 
 export type SecretInput = KeyObject | Uint8Array | string
+export type DerivedKeyInput = { jws: SecretInput; jwe: SecretInput }
 
 /**
  * Encode a JWT signed and encrypted token. The token first signed using JWS
@@ -28,10 +30,11 @@ export type SecretInput = KeyObject | Uint8Array | string
  * @param secret - Secret key used for both signing and encrypting the JWT
  * @returns Promise resolving to the signed and encrypted JWT string
  */
-export const encodeJWT = async (token: JWTPayload, secret: SecretInput) => {
+export const encodeJWT = async (token: JWTPayload, secret: SecretInput | DerivedKeyInput) => {
     try {
-        const { signJWS } = createJWS(secret)
-        const { encryptJWE } = createJWE(secret)
+        const { jweSecret, jwsSecret } = getSecrets(secret)
+        const { signJWS } = createJWS(jwsSecret)
+        const { encryptJWE } = createJWE(jweSecret)
         const signed = await signJWS(token)
         return await encryptJWE(signed)
     } catch (error) {
@@ -54,10 +57,11 @@ export const encodeJWT = async (token: JWTPayload, secret: SecretInput) => {
  * @param secret
  * @returns
  */
-export const decodeJWT = async (token: string, secret: SecretInput) => {
+export const decodeJWT = async (token: string, secret: SecretInput | DerivedKeyInput) => {
     try {
-        const { verifyJWS } = createJWS(secret)
-        const { decryptJWE } = createJWE(secret)
+        const { jweSecret, jwsSecret } = getSecrets(secret)
+        const { verifyJWS } = createJWS(jwsSecret)
+        const { decryptJWE } = createJWE(jweSecret)
         const decrypted = await decryptJWE(token)
         return await verifyJWS(decrypted)
     } catch (error) {
@@ -76,7 +80,8 @@ export const decodeJWT = async (token: string, secret: SecretInput) => {
  * @param secret - Secret key used for signing, verifying, encrypting and decrypting the JWT
  * @returns JWT handler object with `signJWS/encryptJWE` and `verifyJWS/decryptJWE` methods
  */
-export const createJWT = (secret: SecretInput) => {
+export const createJWT = (secret: SecretInput | DerivedKeyInput) => {
+
     return {
         encodeJWT: async (payload: JWTPayload) => encodeJWT(payload, secret),
         decodeJWT: async (token: string) => decodeJWT(token, secret),

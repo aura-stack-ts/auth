@@ -12,11 +12,14 @@ export const isFalsy = (value: unknown): boolean => {
     return value === null || value === undefined || value === false || value === 0 || value === "" || Number.isNaN(value)
 }
 
+export const isObject = (value: unknown): value is Record<string, unknown> => {
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
 export const isInvalidPayload = (payload: unknown): boolean => {
     return (
         isFalsy(payload) ||
-        typeof payload !== "object" ||
-        Array.isArray(payload) ||
+        !isObject(payload) ||
         (typeof payload === "object" && payload !== null && !Array.isArray(payload) && Object.keys(payload).length === 0)
     )
 }

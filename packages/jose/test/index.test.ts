@@ -148,6 +148,20 @@ describe("JWTs", () => {
         const { encodeJWT } = createJWT("short")
         await expect(encodeJWT(payload)).rejects.toThrow("Secret string must be at least 32 characters long")
     })
+
+    test("create a signed and encrypted JWT using createJWT with separate JWS and JWE secrets", async () => {
+        const jwsSecretKey = crypto.randomBytes(32)
+        const jweSecretKey = crypto.randomBytes(32)
+
+        const { encodeJWT, decodeJWT } = createJWT({ jws: jwsSecretKey, jwe: jweSecretKey })
+
+        const jwt = await encodeJWT(payload)
+        expect(jwt).toBeDefined()
+        const decodedPayload = await decodeJWT(jwt)
+        expect(decodedPayload.sub).toBe(payload.sub)
+        expect(decodedPayload.name).toBe(payload.name)
+        expect(decodedPayload.email).toBe(payload.email)
+    })
 })
 
 describe("createSecret", () => {

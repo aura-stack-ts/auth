@@ -22,7 +22,7 @@ export interface EncryptedPayload {
  */
 export const encryptJWE = async (payload: string, secret: SecretInput) => {
     try {
-        if(isFalsy(payload)) {
+        if (isFalsy(payload)) {
             throw new InvalidPayloadError("The payload must be a non-empty string")
         }
         const secretKey = createSecret(secret)
@@ -52,7 +52,7 @@ export const encryptJWE = async (payload: string, secret: SecretInput) => {
  */
 export const decryptJWE = async (token: string, secret: SecretInput) => {
     try {
-        if(isFalsy(token)) {
+        if (isFalsy(token)) {
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
