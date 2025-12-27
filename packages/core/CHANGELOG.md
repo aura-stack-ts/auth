@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Re-export the `encryptJWE` and `decryptJWE` functions for JWEs (Json Web Encryption) from the `jose` instance created from `createAuth` function. These functions are used internally for session and csrf token management and can be consumed for external reasons designed by the users. [#45](https://github.com/aura-stack-ts/auth/pull/45)
+
 ### Changed
 
 - Updated `cookies` configuration option in `createAuth` function to support granular per-cookie settings for all internal cookies used by Aura Auth (e.g., `state`, `redirect_to`, `code_verifier`, `sessionToken`, and `csrfToken`) using the overrides object. Renamed `name` to `prefix` field to add to all of the cookies (without cookie prefixes). [#43](https://github.com/aura-stack-ts/auth/pull/43)
