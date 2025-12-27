@@ -7,8 +7,9 @@ describe("signIn action", () => {
         const request = await GET(new Request("http://example.com/auth/signIn/unsupported"))
         expect(request.status).toBe(422)
         expect(await request.json()).toEqual({
-            error: "invalid_request",
-            errors: {
+            type: "ROUTER_ERROR",
+            code: "INVALID_REQUEST",
+            message: {
                 oauth: {
                     code: "invalid_value",
                     message: "The OAuth provider is not supported or invalid.",

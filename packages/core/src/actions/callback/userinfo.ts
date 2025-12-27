@@ -1,6 +1,6 @@
 import { generateSecure } from "@/secure.js"
 import { OAuthErrorResponse } from "@/schemas.js"
-import { AuthError, throwAuthError } from "@/errors.js"
+import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/errors.js"
 import type { OAuthProviderCredentials, User } from "@/@types/index.js"
 
 /**
@@ -42,10 +42,19 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
         const json = await response.json()
         const { success, data } = OAuthErrorResponse.safeParse(json)
         if (success) {
-            throw new AuthError(data.error, data?.error_description ?? "An error occurred while fetching user information.")
+            throw new OAuthProtocolError(
+                data.error,
+                data?.error_description ?? "An error occurred while fetching user information."
+            )
         }
         return oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
     } catch (error) {
-        throw throwAuthError(error, "Failed to retrieve userinfo")
+        if(isOAuthProtocolError(error)) {
+            throw error
+        }
+        if(isNativeError(error)) {
+            throw new OAuthProtocolError("invalid_request", error.message, "", { cause: error })
+        }
+        throw new OAuthProtocolError("invalid_request", "Failed to fetch user information.", "", { cause: error })
     }
 }

@@ -1,7 +1,7 @@
 import "dotenv/config"
 import { createJWT, createJWS, createDeriveKey } from "@aura-stack/jose"
 import { createDerivedSalt } from "./secure.js"
-import { AuthError } from "./errors.js"
+import { AuthInternalError } from "./errors.js"
 export type { JWTPayload } from "@aura-stack/jose/jose"
 
 /**
@@ -16,7 +16,7 @@ export type { JWTPayload } from "@aura-stack/jose/jose"
 export const createJoseInstance = (secret?: string) => {
     secret ??= process.env.AURA_AUTH_SECRET!
     if (!secret) {
-        throw new AuthError("JOSE_INIT_ERROR", "AURA_AUTH_SECRET environment variable is not set and no secret was provided.")
+        throw new AuthInternalError("JOSE_INITIALIZATION_FAILED", "AURA_AUTH_SECRET environment variable is not set and no secret was provided.")
     }
 
     const salt = process.env.AURA_AUTH_SALT ?? createDerivedSalt(secret)

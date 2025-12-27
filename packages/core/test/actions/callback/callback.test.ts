@@ -8,8 +8,9 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/callback/invalid"))
         expect(response.status).toBe(404)
         expect(await response.json()).toEqual({
-            error: "invalid_request",
-            error_description: "No route found for path: /callback/invalid",
+            type: "ROUTER_ERROR",
+            code: "ROUTER_INTERNAL_ERROR",
+            message: "No route found for path: /callback/invalid",
         })
     })
 
@@ -17,8 +18,9 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/auth/callback/unknown"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
-            error: "invalid_request",
-            errors: {
+            type: "ROUTER_ERROR",
+            code: "INVALID_REQUEST",
+            message: {
                 oauth: {
                     code: "invalid_value",
                     message: "The OAuth provider is not supported or invalid.",
@@ -31,8 +33,9 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/auth/callback/oauth-provider"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
-            error: "invalid_request",
-            errors: {
+            type: "ROUTER_ERROR",
+            code: "INVALID_REQUEST",
+            message: {
                 code: {
                     code: "invalid_type",
                     message: "Missing code parameter in the OAuth authorization response.",
@@ -49,8 +52,9 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/auth/callback/unknown?code=123&state=abc"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
-            error: "invalid_request",
-            errors: {
+            type: "ROUTER_ERROR",
+            code: "INVALID_REQUEST",
+            message: {
                 oauth: {
                     code: "invalid_value",
                     message: "The OAuth provider is not supported or invalid.",
@@ -63,8 +67,9 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=123&state=abc"))
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
-            error: "invalid_request",
-            error_description: "No cookies found. There is no active session",
+            type: "AUTH_INTERNAL_ERROR",
+            code: "COOKIE_NOT_FOUND",
+            message: "No cookies found. There is no active session",
         })
     })
 
@@ -82,7 +87,11 @@ describe("callbackAction", () => {
             })
         )
         expect(response.status).toBe(400)
-        expect(await response.json()).toEqual({ error: "invalid_request", error_description: "Mismatching state" })
+        expect(await response.json()).toEqual({
+            type: "AUTH_SECURITY_ERROR",
+            code: "MISMATCHING_STATE",
+            message: "The provided state passed in the OAuth response does not match the stored state.",
+        })
     })
 
     test("callback action workflow", async () => {

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { AuthError } from "@/errors.js"
+import { AuthInternalError } from "@/errors.js"
 import { createPKCE } from "@/secure.js"
 import { oauthCustomService } from "@test/presets.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
@@ -67,7 +67,7 @@ describe("createAccessToken", async () => {
                 "authorization_code_123",
                 codeVerifier
             )
-        ).rejects.toBeInstanceOf(AuthError)
+        ).rejects.toBeInstanceOf(AuthInternalError)
         expect(fetch).not.toHaveBeenCalled()
     })
 

@@ -15,10 +15,11 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
-            error: "invalid_session_token",
-            error_description: "The provided sessionToken is invalid or has already expired",
+            type: "AUTH_SECURITY_ERROR",
+            code: "SESSION_TOKEN_MISSING",
+            message: "The sessionToken is missing.",
         })
     })
 
@@ -31,10 +32,11 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(request.status).toBe(401)
+        expect(request.status).toBe(400)
         expect(await request.json()).toEqual({
-            error: "invalid_session_token",
-            error_description: "The provided sessionToken is invalid or has already expired",
+            type: "AUTH_SECURITY_ERROR",
+            code: "CSRF_TOKEN_MISSING",
+            message: "The CSRF header is missing.",
         })
     })
 
@@ -52,10 +54,11 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(request.status).toBe(401)
+        expect(request.status).toBe(400)
         expect(await request.json()).toEqual({
-            error: "invalid_session_token",
-            error_description: "The provided sessionToken is invalid or has already expired",
+            type: "AUTH_SECURITY_ERROR",
+            code: "CSRF_TOKEN_MISSING",
+            message: "The CSRF token is missing.",
         })
         decodeJWTMock.mockRestore()
     })
@@ -123,10 +126,11 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(request.status).toBe(401)
+        expect(request.status).toBe(400)
         expect(await request.json()).toEqual({
-            error: "invalid_session_token",
-            error_description: "The provided sessionToken is invalid or has already expired",
+            type: "AUTH_SECURITY_ERROR",
+            code: "CSRF_TOKEN_MISSING",
+            message: "The CSRF token is missing.",
         })
     })
 
@@ -161,8 +165,9 @@ describe("signOut action", async () => {
         )
         expect(request.status).toBe(400)
         expect(await request.json()).toEqual({
-            error: "invalid_redirect_to",
-            error_description: "The redirectTo parameter does not match the hosted origin.",
+            type: "AUTH_SECURITY_ERROR",
+            code: "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
+            message: "The redirectTo parameter does not match the hosted origin.",
         })
     })
 })

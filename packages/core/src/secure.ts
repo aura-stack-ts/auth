@@ -1,7 +1,7 @@
 import crypto from "node:crypto"
 import { equals } from "./utils.js"
-import { InvalidCsrfTokenError } from "./errors.js"
 import { AuthRuntimeConfig } from "./@types/index.js"
+import { AuthSecurityError } from "./errors.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")
@@ -53,14 +53,14 @@ export const verifyCSRF = async (jose: AuthRuntimeConfig["jose"], cookie: string
         const cookieBuffer = Buffer.from(cookieToken as string)
         const headerBuffer = Buffer.from(headerToken as string)
         if (!equals(headerBuffer.length, cookieBuffer.length)) {
-            throw new InvalidCsrfTokenError()
+            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
         }
         if (!crypto.timingSafeEqual(cookieBuffer, headerBuffer)) {
-            throw new InvalidCsrfTokenError()
+            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
         }
         return true
     } catch {
-        throw new InvalidCsrfTokenError()
+        throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
     }
 }
 

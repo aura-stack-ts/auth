@@ -245,6 +245,23 @@ export type AccessTokenError = OAuthError<z.infer<typeof OAuthAccessTokenErrorRe
  * OAuth 2.0 Token Revocation Error Response Types
  * @see https://datatracker.ietf.org/doc/html/rfc7009#section-2.2.1
  */
-export type TokenRevocationError = OAuthError<"invalid_session_token" | "invalid_csrf_token" | "invalid_redirect_to">
+export type TokenRevocationError = OAuthError<"invalid_session_token">
 
 export type ErrorType = AuthorizationError["error"] | AccessTokenError["error"] | TokenRevocationError["error"]
+
+export type AuthInternalErrorCode =
+    | "INVALID_OAUTH_CONFIGURATION"
+    | "INVALID_JWT_TOKEN"
+    | "JOSE_INITIALIZATION_FAILED"
+    | "SESSION_STORE_NOT_INITIALIZED"
+    | "COOKIE_STORE_NOT_INITIALIZED"
+    | "COOKIE_PARSING_FAILED"
+    | "COOKIE_NOT_FOUND"
+
+export type AuthSecurityErrorCode =
+    | "INVALID_STATE"
+    | "MISMATCHING_STATE"
+    | "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED"
+    | "CSRF_TOKEN_INVALID"
+    | "CSRF_TOKEN_MISSING"
+    | "SESSION_TOKEN_MISSING"
