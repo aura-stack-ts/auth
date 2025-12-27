@@ -2,8 +2,10 @@
  * @module @aura-stack/jose
  */
 import { JWTPayload } from "jose"
-import { createJWE } from "@/encrypt.js"
 import { createJWS } from "@/sign.js"
+import { createJWE } from "@/encrypt.js"
+import { isAuraJoseError } from "@/assert.js"
+import { JWTDecodingError, JWTEncodingError } from "./errors.js"
 import type { KeyObject } from "node:crypto"
 
 export * from "@/sign.js"
@@ -33,8 +35,10 @@ export const encodeJWT = async (token: JWTPayload, secret: SecretInput) => {
         const signed = await signJWS(token)
         return await encryptJWE(signed)
     } catch (error) {
-        // @ts-ignore
-        throw new Error("Failed to encode JWT", { cause: error })
+        if (isAuraJoseError(error)) {
+            throw error
+        }
+        throw new JWTEncodingError("JWT encoding failed", { cause: error })
     }
 }
 
@@ -57,8 +61,10 @@ export const decodeJWT = async (token: string, secret: SecretInput) => {
         const decrypted = await decryptJWE(token)
         return await verifyJWS(decrypted)
     } catch (error) {
-        // @ts-ignore
-        throw new Error("Failed to decode JWT", { cause: error })
+        if (isAuraJoseError(error)) {
+            throw error
+        }
+        throw new JWTDecodingError("JWT decoding failed", { cause: error })
     }
 }
 

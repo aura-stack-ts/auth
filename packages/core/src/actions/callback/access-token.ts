@@ -1,6 +1,7 @@
-import { AuthError, ERROR_RESPONSE, throwAuthError } from "@/errors.js"
+import { AuthInternalError, OAuthProtocolError } from "@/errors.js"
 import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
 import type { OAuthProviderCredentials } from "@/@types/index.js"
+import { formatZodError } from "@/utils.js"
 
 /**
  * Make a request to the OAuth provider to the token endpoint to exchange the authorization code provided
@@ -21,7 +22,8 @@ export const createAccessToken = async (
 ) => {
     const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code, codeVerifier })
     if (!parsed.success) {
-        throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_REQUEST, "Invalid OAuth configuration")
+        const msg = formatZodError(parsed.error).toString()
+        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", msg)
     }
     const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data
     try {
@@ -45,12 +47,16 @@ export const createAccessToken = async (
         if (!token.success) {
             const { success, data } = OAuthAccessTokenErrorResponse.safeParse(json)
             if (!success) {
-                throw new AuthError(ERROR_RESPONSE.ACCESS_TOKEN.INVALID_GRANT, "Invalid access token response format")
+                throw new OAuthProtocolError("INVALID_REQUEST", "Invalid access token response format")
             }
-            throw new AuthError(data.error, data?.error_description ?? "Failed to retrieve access token")
+            throw new OAuthProtocolError(data.error, data?.error_description ?? "Failed to retrieve access token")
         }
         return token.data
     } catch (error) {
-        throw throwAuthError(error, "Failed to create access token")
+        /**
+         * @todo: review error handling here
+         */
+        //throw throwAuthError(error, "Failed to create access token")
+        throw error
     }
 }

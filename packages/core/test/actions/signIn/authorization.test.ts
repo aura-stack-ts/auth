@@ -96,7 +96,7 @@ describe("createAuthorizationURL", () => {
                     clientSecret: "2",
                 },
                 redirectURL: "https://example.com/auth/callback",
-                expected: /Invalid OAuth configuration/,
+                expected: /.*"clientId".*/,
             },
             {
                 description: "missing clientSecret",
@@ -109,7 +109,7 @@ describe("createAuthorizationURL", () => {
                     clientId: "1",
                 },
                 redirectURL: "https://example.com/auth/callback",
-                expected: /Invalid OAuth configuration/,
+                expected: /.*"clientSecret".* /,
             },
         ]
 

@@ -1,5 +1,5 @@
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
-import { AuthError } from "@/errors.js"
+import { AuthInternalError } from "@/errors.js"
 import type { JWTPayload } from "@/jose.js"
 import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig } from "@/@types/index.js"
 
@@ -80,11 +80,11 @@ export const expiredCookieAttributes: SerializeOptions = {
 export const getCookie = (request: Request, cookieName: string) => {
     const cookies = request.headers.get("Cookie")
     if (!cookies) {
-        throw new AuthError("invalid_request", "No cookies found. There is no active session")
+        throw new AuthInternalError("COOKIE_NOT_FOUND", "No cookies found. There is no active session")
     }
     const value = parse(cookies)[cookieName]
     if (!value) {
-        throw new AuthError("invalid_request", `Cookie "${cookieName}" not found. There is no active session`)
+        throw new AuthInternalError("COOKIE_NOT_FOUND", `Cookie "${cookieName}" not found. There is no active session`)
     }
     return value
 }
@@ -99,11 +99,11 @@ export const getCookie = (request: Request, cookieName: string) => {
 export const getSetCookie = (response: Response, cookieName: string) => {
     const cookies = response.headers.getSetCookie()
     if (!cookies) {
-        throw new AuthError("invalid_request", "No cookies found in response.")
+        throw new AuthInternalError("COOKIE_NOT_FOUND", "No cookies found in response.")
     }
     const strCookie = cookies.find((cookie) => cookie.startsWith(`${cookieName}=`))
     if (!strCookie) {
-        throw new AuthError("invalid_request", `Cookie "${cookieName}" not found in response.`)
+        throw new AuthInternalError("COOKIE_NOT_FOUND", `Cookie "${cookieName}" not found in response.`)
     }
     return parseSetCookie(strCookie).value
 }
@@ -120,8 +120,7 @@ export const createSessionCookie = async (session: JWTPayload, jose: AuthRuntime
         const encoded = await jose.encodeJWT(session)
         return encoded
     } catch (error) {
-        // @ts-ignore
-        throw new AuthError("server_error", "Failed to create session cookie", { cause: error })
+        throw new AuthInternalError("INVALID_JWT_TOKEN", "Failed to create session cookie", { cause: error })
     }
 }
 

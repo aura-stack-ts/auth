@@ -20,7 +20,6 @@ export const deriveKey = (secret: SecretInput, salt: BinaryLike, info: string, l
             derivedKey,
         }
     } catch (error) {
-        // @ts-ignore
         throw new Error("Failed to create a derived key (HKDF)", { cause: error })
     }
 }

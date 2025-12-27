@@ -1,13 +1,13 @@
-import { object, string, enum as options, number, url } from "zod/v4"
+import { object, string, enum as options, number, httpUrl } from "zod/v4"
 
 /**
  * Schema for OAuth Provider Configuration
  */
 export const OAuthProviderConfigSchema = object({
-    authorizeURL: url(),
-    accessToken: url(),
+    authorizeURL: httpUrl(),
+    accessToken: httpUrl(),
     scope: string().optional(),
-    userInfo: url(),
+    userInfo: httpUrl(),
     responseType: options(["code", "token", "id_token"]),
     clientId: string(),
     clientSecret: string(),

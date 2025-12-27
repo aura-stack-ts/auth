@@ -1,79 +1,74 @@
-import type { ErrorType, LiteralUnion } from "./@types/index.js"
+import type { AuthInternalErrorCode, AuthSecurityErrorCode, ErrorType, LiteralUnion } from "@/@types/index.js"
 
 /**
- * Error class for all Aura Auth errors.
+ * The object returned by the class to users its:
+ *   - type: "OAUTH_PROTOCOL_ERROR" to identify the error type
+ *   - error: A short error code
+ *   - description: A human-readable description of the error. The description is obtained from the message property of the Error class
+ *   - errorURI: A URI with more information about the error
  */
-export class AuthError extends Error {
-    public readonly type: LiteralUnion<ErrorType>
+export class OAuthProtocolError extends Error {
+    readonly type = "OAUTH_PROTOCOL_ERROR"
+    public readonly error: string
+    public readonly errorURI?: string
 
-    constructor(type: LiteralUnion<ErrorType>, message: string) {
-        super(message)
-        this.type = type
-        this.name = "AuthError"
-    }
-}
-
-export class InvalidCsrfTokenError extends AuthError {
-    constructor(message: string = "The provided CSRF token is invalid or has expired") {
-        super("invalid_csrf_token", message)
-        this.name = "InvalidCsrfTokenError"
-    }
-}
-
-export class InvalidRedirectToError extends AuthError {
-    constructor(message: string = "The redirectTo parameter does not match the hosted origin.") {
-        super("invalid_redirect_to", message)
-        this.name = "InvalidRedirectToError"
+    constructor(error: LiteralUnion<Uppercase<ErrorType>>, description?: string, errorURI?: string, options?: ErrorOptions) {
+        super(description, options)
+        this.error = error
+        this.errorURI = errorURI
+        this.name = new.target.name
+        Error.captureStackTrace(this, new.target)
     }
 }
 
 /**
- * Verifies if the provided error is an instance of AuthError.
- *
- * @param error The error to be checked
- * @returns True if the error is an instance of AuthError, false otherwise
+ * The object returned when an internal error occurs in the Aura Auth library.
+ *   - type: "AUTH_INTERNAL_ERROR" to identify the error type
+ *   - message: A human-readable description of the error. The description is obtained from the message property of the Error class
+ *   - code: An optional error code that can be used to identify the specific error, for example, LIKE "ERR_AUTH_INTERNAL_ERROR"
  */
-export const isAuthError = (error: unknown): error is AuthError => {
-    return error instanceof AuthError
-}
+export class AuthInternalError extends Error {
+    readonly type = "AUTH_INTERNAL_ERROR"
+    readonly code: string
 
-/**
- * Captures and Error and verifies if it's an AuthError, rethrowing it if so.
- * If it's a different type of error, it wraps it in a new AuthError with the provided message.
- *
- * @param error The error to be processed
- * @param message The error message to be used if wrapping the error
- */
-export const throwAuthError = (error: unknown, message?: string) => {
-    if (error instanceof Error) {
-        if (isAuthError(error)) {
-            throw error
-        }
-        throw new AuthError("invalid_request", error.message ?? message)
+    constructor(code: AuthInternalErrorCode, message?: string, options?: ErrorOptions) {
+        super(message, options)
+        this.code = code
+        this.name = new.target.name
+        Error.captureStackTrace(this, new.target)
     }
 }
 
 /**
- * Errores responses returned by the OAuth flows including Authorization and Access Token errors.
- * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1
- * @see https://datatracker.ietf.org/doc/html/rfc6749#section-5.2
+ * The object returned when a security error occurs in the Aura Auth library.
+ *   - type: "AUTH_SECURITY_ERROR" to identify the error type
+ *   - message: A human-readable description of the error. The description is obtained from the message property of the Error class
+ *   - code: An optional error code that can be used to identify the specific error, for example, LIKE "ERR_AUTH_SECURITY_ERROR"
  */
-export const ERROR_RESPONSE = {
-    AUTHORIZATION: {
-        INVALID_REQUEST: "invalid_request",
-        UNAUTHORIZED_CLIENT: "unauthorized_client",
-        ACCESS_DENIED: "access_denied",
-        UNSUPPORTED_RESPONSE_TYPE: "unsupported_response_type",
-        INVALID_SCOPE: "invalid_scope",
-        SERVER_ERROR: "server_error",
-        TEMPORARILY_UNAVAILABLE: "temporarily_unavailable",
-    },
-    ACCESS_TOKEN: {
-        INVALID_REQUEST: "invalid_request",
-        INVALID_CLIENT: "invalid_client",
-        INVALID_GRANT: "invalid_grant",
-        UNAUTHORIZED_CLIENT: "unauthorized_client",
-        UNSUPPORTED_GRANT_TYPE: "unsupported_grant_type",
-        INVALID_SCOPE: "invalid_scope",
-    },
+export class AuthSecurityError extends Error {
+    readonly type = "AUTH_SECURITY_ERROR"
+    readonly code: string
+
+    constructor(code: AuthSecurityErrorCode, message?: string, options?: ErrorOptions) {
+        super(message, options)
+        this.code = code
+        this.name = new.target.name
+        Error.captureStackTrace(this, new.target)
+    }
+}
+
+export const isNativeError = (error: unknown): error is Error => {
+    return error instanceof Error
+}
+
+export const isOAuthProtocolError = (error: unknown): error is OAuthProtocolError => {
+    return error instanceof OAuthProtocolError
+}
+
+export const isAuthInternalError = (error: unknown): error is AuthInternalError => {
+    return error instanceof AuthInternalError
+}
+
+export const isAuthSecurityError = (error: unknown): error is AuthSecurityError => {
+    return error instanceof AuthSecurityError
 }
