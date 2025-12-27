@@ -49,10 +49,10 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
         }
         return oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
     } catch (error) {
-        if(isOAuthProtocolError(error)) {
+        if (isOAuthProtocolError(error)) {
             throw error
         }
-        if(isNativeError(error)) {
+        if (isNativeError(error)) {
             throw new OAuthProtocolError("invalid_request", error.message, "", { cause: error })
         }
         throw new OAuthProtocolError("invalid_request", "Failed to fetch user information.", "", { cause: error })

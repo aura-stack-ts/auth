@@ -111,10 +111,7 @@ export const isValidRelativePath = (path: string | undefined | null): boolean =>
 export const onErrorHandler: RouterConfig["onError"] = (error) => {
     if (isRouterError(error)) {
         const { message, status, statusText } = error
-        return Response.json(
-            { type: "ROUTER_ERROR", code: "ROUTER_INTERNAL_ERROR", message },
-            { status, statusText }
-        )
+        return Response.json({ type: "ROUTER_ERROR", code: "ROUTER_INTERNAL_ERROR", message }, { status, statusText })
     }
     if (isInvalidZodSchemaError(error)) {
         return Response.json({ type: "ROUTER_ERROR", code: "INVALID_REQUEST", message: error.errors }, { status: 422 })
