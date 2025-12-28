@@ -1,25 +1,25 @@
-import { OAuthProviderConfig } from "@/@types/index.js";
+import { OAuthProviderConfig } from "@/@types/index.js"
 
 /**
  * @see [Strava - SummaryClub](https://developers.strava.com/docs/reference/#api-models-SummaryClub)
  */
 export interface SummaryClub {
     id: number
-        resource_state: number
-        name: string
-        profile_medium: string
-        cover_photo: string
-        cover_photo_small: string
-        sport_type: "cycling" | "running" | "triathlon" | "other"
-        activity_types: string[]
-        city: string
-        state: string
-        country: string
-        private: boolean
-        member_count: number
-        featured: boolean
-        verified: boolean
-        url: string
+    resource_state: number
+    name: string
+    profile_medium: string
+    cover_photo: string
+    cover_photo_small: string
+    sport_type: "cycling" | "running" | "triathlon" | "other"
+    activity_types: string[]
+    city: string
+    state: string
+    country: string
+    private: boolean
+    member_count: number
+    featured: boolean
+    verified: boolean
+    url: string
 }
 
 /**
@@ -67,6 +67,7 @@ export interface StravaProfile {
 
 /**
  * @see [Strava - Getting Started with the Strava API](https://developers.strava.com/docs/getting-started/)
+ * @see [Strava - My Applications](https://www.strava.com/settings/api)
  * @see [Strava - Authentication](https://developers.strava.com/docs/authentication/)
  * @see [Strava - API Application](https://www.strava.com/settings/api)
  * @see [Strava - API Reference](https://developers.strava.com/docs/reference/)
@@ -86,5 +87,5 @@ export const strava: OAuthProviderConfig<StravaProfile> = {
             image: profile.profile,
             email: "",
         }
-    }
+    },
 }
