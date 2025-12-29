@@ -1,4 +1,4 @@
-import { object, string, enum as options, number, httpUrl } from "zod/v4"
+import { object, string, enum as options, number, httpUrl, array } from "zod/v4"
 
 /**
  * Schema for OAuth Provider Configuration
@@ -75,7 +75,7 @@ export const OAuthAccessTokenResponse = object({
     token_type: string(),
     expires_in: number().optional(),
     refresh_token: string().optional(),
-    scope: string().optional(),
+    scope: string().or(array(string())).optional(),
 })
 
 /**
