@@ -1,5 +1,5 @@
 import crypto from "node:crypto"
-import { EncryptJWT, jwtDecrypt, type JWTDecryptOptions } from "jose"
+import { EncryptJWT, jwtDecrypt, CompactEncrypt, type JWTDecryptOptions } from "jose"
 import { createSecret } from "@/secret.js"
 import { isAuraJoseError, isFalsy } from "@/assert.js"
 import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.js"
@@ -7,6 +7,11 @@ import type { SecretInput } from "@/index.js"
 
 export interface EncryptedPayload {
     payload: string
+}
+
+export interface EncryptOptions {
+    nbf?: string | number | Date
+    exp?: string | number | Date
 }
 
 /**
@@ -20,7 +25,7 @@ export interface EncryptedPayload {
  * @param secret - Secret key to encrypt the JWT (CryptoKey, KeyObject, string or Uint8Array)
  * @returns Encrypted JWT string
  */
-export const encryptJWE = async (payload: string, secret: SecretInput) => {
+export const encryptJWE = async (payload: string, secret: SecretInput, options?: EncryptOptions) => {
     try {
         if (isFalsy(payload)) {
             throw new InvalidPayloadError("The payload must be a non-empty string")
@@ -31,8 +36,8 @@ export const encryptJWE = async (payload: string, secret: SecretInput) => {
         return new EncryptJWT({ payload })
             .setProtectedHeader({ alg: "dir", enc: "A256GCM", typ: "JWT", cty: "JWT" })
             .setIssuedAt()
-            .setNotBefore("0s")
-            .setExpirationTime("15d")
+            .setNotBefore(options?.nbf ?? "0s")
+            .setExpirationTime(options?.exp ?? "15d")
             .setJti(jti)
             .encrypt(secretKey)
     } catch (error) {
@@ -75,7 +80,7 @@ export const decryptJWE = async (token: string, secret: SecretInput, options?: J
  */
 export const createJWE = (secret: SecretInput) => {
     return {
-        encryptJWE: (payload: string) => encryptJWE(payload, secret),
+        encryptJWE: (payload: string, options?: EncryptOptions) => encryptJWE(payload, secret, options),
         decryptJWE: (payload: string, options?: JWTDecryptOptions) => decryptJWE(payload, secret, options),
     }
 }

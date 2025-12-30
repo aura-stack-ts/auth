@@ -29,8 +29,8 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
         return new SignJWT(payload)
             .setProtectedHeader({ alg: "HS256", typ: "JWT" })
             .setIssuedAt()
-            .setNotBefore("0s")
-            .setExpirationTime("15d")
+            .setNotBefore(payload.nbf ?? "0s")
+            .setExpirationTime(payload.exp ?? "15d")
             .setJti(jti)
             .sign(secretKey)
     } catch (error) {
