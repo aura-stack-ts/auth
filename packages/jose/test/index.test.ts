@@ -63,6 +63,20 @@ describe("JWSs", () => {
         const { signJWS } = createJWS(secretKey)
         await expect(signJWS(undefined as any)).rejects.toThrow("The payload must be a non-empty object")
     })
+
+    test("set audience in a JWS and verify it", async () => {
+        const secretKey = crypto.randomBytes(32)
+        const jws = await signJWS({ aud: "client_id_123", name: "John Doe" }, secretKey)
+        expect(await verifyJWS(jws, secretKey, { audience: "client_id_123" })).toMatchObject({ name: "John Doe" })
+    })
+
+    test("fail JWT to verify a JWS with incorrect audience", async () => {
+        const secretKey = crypto.randomBytes(32)
+        const jws = await signJWS({ aud: "client_id_123", name: "John Doe" }, secretKey)
+        await expect(verifyJWS(jws, secretKey, { audience: "wrong_audience" })).rejects.toThrow(
+            "JWS signature verification failed"
+        )
+    })
 })
 
 describe("JWEs", () => {

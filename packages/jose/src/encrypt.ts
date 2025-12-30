@@ -1,8 +1,8 @@
 import crypto from "node:crypto"
-import { EncryptJWT, jwtDecrypt } from "jose"
+import { EncryptJWT, jwtDecrypt, type JWTDecryptOptions } from "jose"
 import { createSecret } from "@/secret.js"
 import { isAuraJoseError, isFalsy } from "@/assert.js"
-import { InvalidPayloadError, JWEDecryptionError } from "@/errors.js"
+import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.js"
 import type { SecretInput } from "@/index.js"
 
 export interface EncryptedPayload {
@@ -39,7 +39,7 @@ export const encryptJWE = async (payload: string, secret: SecretInput) => {
         if (isAuraJoseError(error)) {
             throw error
         }
-        throw new JWEDecryptionError("JWE encryption failed", { cause: error })
+        throw new JWEEncryptionError("JWE encryption failed", { cause: error })
     }
 }
 
@@ -50,13 +50,13 @@ export const encryptJWE = async (payload: string, secret: SecretInput) => {
  * @param secret - Secret key to decrypt the JWT (CryptoKey, KeyObject, string or Uint8Array)
  * @returns Decrypted JWT payload string
  */
-export const decryptJWE = async (token: string, secret: SecretInput) => {
+export const decryptJWE = async (token: string, secret: SecretInput, options?: JWTDecryptOptions) => {
     try {
         if (isFalsy(token)) {
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
-        const { payload } = await jwtDecrypt<EncryptedPayload>(token, secretKey)
+        const { payload } = await jwtDecrypt<EncryptedPayload>(token, secretKey, options)
         return payload.payload
     } catch (error) {
         if (isAuraJoseError(error)) {
@@ -76,6 +76,6 @@ export const decryptJWE = async (token: string, secret: SecretInput) => {
 export const createJWE = (secret: SecretInput) => {
     return {
         encryptJWE: (payload: string) => encryptJWE(payload, secret),
-        decryptJWE: (payload: string) => decryptJWE(payload, secret),
+        decryptJWE: (payload: string, options?: JWTDecryptOptions) => decryptJWE(payload, secret, options),
     }
 }
