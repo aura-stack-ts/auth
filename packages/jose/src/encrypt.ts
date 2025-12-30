@@ -1,5 +1,5 @@
 import crypto from "node:crypto"
-import { EncryptJWT, jwtDecrypt, CompactEncrypt, type JWTDecryptOptions } from "jose"
+import { EncryptJWT, jwtDecrypt, type JWTDecryptOptions } from "jose"
 import { createSecret } from "@/secret.js"
 import { isAuraJoseError, isFalsy } from "@/assert.js"
 import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.js"

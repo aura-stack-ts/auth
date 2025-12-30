@@ -130,7 +130,9 @@ describe("JWEs", () => {
         const secretKey = crypto.randomBytes(32)
         const jws = await signJWS({ aud: "client_id_123", name: "John Doe" }, secretKey)
         const jwe = await encryptJWE(jws, secretKey)
-        await expect(decryptJWE(jwe, secretKey, { audience: "wrong_audience" })).rejects.toThrow("JWE decryption verification failed")
+        await expect(decryptJWE(jwe, secretKey, { audience: "wrong_audience" })).rejects.toThrow(
+            "JWE decryption verification failed"
+        )
     })
 })
 
