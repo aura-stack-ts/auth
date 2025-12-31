@@ -26,7 +26,7 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
             throw new InvalidPayloadError("The payload must be a non-empty object")
         }
         const secretKey = createSecret(secret)
-        const jti = crypto.randomBytes(32).toString("base64")
+        const jti = crypto.randomBytes(32).toString("base64url")
 
         return new SignJWT(payload)
             .setProtectedHeader({ alg: "HS256", typ: "JWT" })

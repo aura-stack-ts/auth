@@ -33,7 +33,7 @@ export const encryptJWE = async (payload: string, secret: SecretInput, options?:
             throw new InvalidPayloadError("The payload must be a non-empty string")
         }
         const secretKey = createSecret(secret)
-        const jti = crypto.randomBytes(32).toString("base64")
+        const jti = crypto.randomBytes(32).toString("base64url")
 
         return new EncryptJWT({ payload })
             .setProtectedHeader({ alg: "dir", enc: "A256GCM", typ: "JWT", cty: "JWT" })
