@@ -5,6 +5,8 @@ import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.js"
 import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.js"
 import type { SecretInput } from "@/index.js"
 
+export type { JWTVerifyOptions } from "jose"
+
 /**
  * Sign a standard JWT token with the following claims:
  *  - alg: algorithm used to sign the JWT

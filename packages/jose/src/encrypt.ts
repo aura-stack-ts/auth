@@ -5,6 +5,8 @@ import { isAuraJoseError, isFalsy } from "@/assert.js"
 import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.js"
 import type { SecretInput } from "@/index.js"
 
+export type { JWTDecryptOptions } from "jose"
+
 export interface EncryptedPayload {
     payload: string
 }

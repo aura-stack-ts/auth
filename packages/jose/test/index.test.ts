@@ -77,6 +77,14 @@ describe("JWSs", () => {
             "JWS signature verification failed"
         )
     })
+
+    test("set expiration time in the payload of a JWS and verify it", async () => {
+        const secretKey = crypto.randomBytes(32)
+        const now = Math.floor(Date.now() / 1000)
+        const exp = now + 60
+        const jws = await signJWS({ exp, name: "John Doe" }, secretKey)
+        expect(await verifyJWS(jws, secretKey)).toMatchObject({ name: "John Doe", exp })
+    })
 })
 
 describe("JWEs", () => {
