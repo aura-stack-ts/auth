@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added configuration options for signature verification and decryption via `verifyJWS` and `decryptJWE` functions. [#48](https://github.com/aura-stack-ts/auth/pull/48)
+
 - Added Key derivation support to `createJWT`, `encodeJWT` and `decodeJWT` functions which allows to pass the separated keys for signing and encrypting the JWTs using the `jws` and `jwe` properties as argument in the functions. [#45](https://github.com/aura-stack-ts/auth/pull/45)
 
 ---
