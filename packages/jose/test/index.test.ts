@@ -63,6 +63,28 @@ describe("JWSs", () => {
         const { signJWS } = createJWS(secretKey)
         await expect(signJWS(undefined as any)).rejects.toThrow("The payload must be a non-empty object")
     })
+
+    test("set audience in a JWS and verify it", async () => {
+        const secretKey = crypto.randomBytes(32)
+        const jws = await signJWS({ aud: "client_id_123", name: "John Doe" }, secretKey)
+        expect(await verifyJWS(jws, secretKey, { audience: "client_id_123" })).toMatchObject({ name: "John Doe" })
+    })
+
+    test("fail JWT to verify a JWS with incorrect audience", async () => {
+        const secretKey = crypto.randomBytes(32)
+        const jws = await signJWS({ aud: "client_id_123", name: "John Doe" }, secretKey)
+        await expect(verifyJWS(jws, secretKey, { audience: "wrong_audience" })).rejects.toThrow(
+            "JWS signature verification failed"
+        )
+    })
+
+    test("set expiration time in the payload of a JWS and verify it", async () => {
+        const secretKey = crypto.randomBytes(32)
+        const now = Math.floor(Date.now() / 1000)
+        const exp = now + 60
+        const jws = await signJWS({ exp, name: "John Doe" }, secretKey)
+        expect(await verifyJWS(jws, secretKey)).toMatchObject({ name: "John Doe", exp })
+    })
 })
 
 describe("JWEs", () => {
@@ -102,6 +124,23 @@ describe("JWEs", () => {
 
         const { decryptJWE } = createJWE(derivedKey)
         await expect(decryptJWE("header.payload.signature")).rejects.toThrow()
+    })
+
+    test("set audience in a JWE and decrypt it", async () => {
+        const secretKey = crypto.randomBytes(32)
+        const jwe = await encryptJWE(JSON.stringify({ aud: "client_id_123", name: "John Doe" }), secretKey)
+        const decrypted = await decryptJWE(jwe, secretKey)
+        const payload = JSON.parse(decrypted) as JWTPayload
+        expect(payload).toMatchObject({ aud: "client_id_123", name: "John Doe" })
+    })
+
+    test("fail JWT to verify a JWE with incorrect audience", async () => {
+        const secretKey = crypto.randomBytes(32)
+        const jws = await signJWS({ aud: "client_id_123", name: "John Doe" }, secretKey)
+        const jwe = await encryptJWE(jws, secretKey)
+        await expect(decryptJWE(jwe, secretKey, { audience: "wrong_audience" })).rejects.toThrow(
+            "JWE decryption verification failed"
+        )
     })
 })
 

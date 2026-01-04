@@ -1,9 +1,11 @@
 import crypto from "node:crypto"
-import { jwtVerify, SignJWT, type JWTPayload } from "jose"
+import { jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
 import { createSecret } from "@/secret.js"
 import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.js"
 import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.js"
 import type { SecretInput } from "@/index.js"
+
+export type { JWTVerifyOptions } from "jose"
 
 /**
  * Sign a standard JWT token with the following claims:
@@ -24,13 +26,13 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
             throw new InvalidPayloadError("The payload must be a non-empty object")
         }
         const secretKey = createSecret(secret)
-        const jti = crypto.randomBytes(32).toString("base64")
+        const jti = crypto.randomBytes(32).toString("base64url")
 
         return new SignJWT(payload)
             .setProtectedHeader({ alg: "HS256", typ: "JWT" })
             .setIssuedAt()
-            .setNotBefore("0s")
-            .setExpirationTime("15d")
+            .setNotBefore(payload.nbf ?? "0s")
+            .setExpirationTime(payload.exp ?? "15d")
             .setJti(jti)
             .sign(secretKey)
     } catch (error) {
@@ -50,13 +52,13 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
  * @param secret - CryptoKey or KeyObject used to verify the JWT
  * @returns verify and return the payload of the JWT
  */
-export const verifyJWS = async (token: string, secret: SecretInput): Promise<JWTPayload> => {
+export const verifyJWS = async (token: string, secret: SecretInput, options?: JWTVerifyOptions): Promise<JWTPayload> => {
     try {
         if (isFalsy(token)) {
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
-        const { payload } = await jwtVerify(token, secretKey)
+        const { payload } = await jwtVerify(token, secretKey, options)
         return payload
     } catch (error) {
         if (isAuraJoseError(error)) {
@@ -76,6 +78,6 @@ export const verifyJWS = async (token: string, secret: SecretInput): Promise<JWT
 export const createJWS = (secret: SecretInput) => {
     return {
         signJWS: (payload: JWTPayload) => signJWS(payload, secret),
-        verifyJWS: (payload: string) => verifyJWS(payload, secret),
+        verifyJWS: (payload: string, options?: JWTVerifyOptions) => verifyJWS(payload, secret, options),
     }
 }
