@@ -12,6 +12,7 @@ import { gitlab } from "./gitlab.js"
 import { spotify } from "./spotify.js"
 import { x } from "./x.js"
 import { strava } from "./strava.js"
+import { notion } from "./notion.js"
 
 export { github, type GitHubProfile } from "./github.js"
 export { bitbucket, type BitbucketProfile } from "./bitbucket.js"
@@ -21,6 +22,7 @@ export { gitlab, type GitLabProfile } from "./gitlab.js"
 export { spotify, type SpotifyProfile } from "./spotify.js"
 export { x, type XProfile } from "./x.js"
 export { strava, type StravaProfile, type SummaryClub, type SummaryGear } from "./strava.js"
+export { notion, type NotionProfile, type Bot, type Owner, type Person, type User } from "./notion.js"
 
 export const builtInOAuthProviders = {
     github,
@@ -31,6 +33,7 @@ export const builtInOAuthProviders = {
     spotify,
     x,
     strava,
+    notion,
 }
 
 const defineOAuthEnvironment = (oauth: string) => {
