@@ -66,6 +66,7 @@ export interface StravaProfile {
 }
 
 /**
+ * Strava OAuth Provider
  * @see [Strava - Getting Started with the Strava API](https://developers.strava.com/docs/getting-started/)
  * @see [Strava - My Applications](https://www.strava.com/settings/api)
  * @see [Strava - Authentication](https://developers.strava.com/docs/authentication/)

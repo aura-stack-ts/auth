@@ -13,6 +13,7 @@ export interface XProfile {
 }
 
 /**
+ * X (Twitter) OAuth Provider
  * @see [X - Developer Portal](https://developer.x.com/en/portal/projects-and-apps)
  * @see [X - Get my User](https://docs.x.com/x-api/users/get-my-user)
  * @see [X - OAuth 2.0 Authorization Code Flow with PKCE](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code)

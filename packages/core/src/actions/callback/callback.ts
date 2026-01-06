@@ -67,7 +67,7 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
             }
 
             const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
-            const sessionCookie = await createSessionCookie(userInfo as JWTPayload, jose)
+            const sessionCookie = await createSessionCookie(jose, userInfo as JWTPayload)
             const csrfToken = await createCSRF(jose)
 
             const headers = new HeadersBuilder(cacheControl)

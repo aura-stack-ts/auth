@@ -54,6 +54,8 @@ export interface GitLabProfile {
 }
 
 /**
+ * GitLab OAuth Provider
+ * 
  * @see [GitLab - Applications](https://gitlab.com/-/user_settings/applications)
  * @see [GitLab - OAuth 2.0 identify provider API](https://docs.gitlab.com/api/oauth2/)
  * @see [GitLab - Scopes](https://docs.gitlab.com/integration/oauth_provider/#view-all-authorized-applications)

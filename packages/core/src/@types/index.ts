@@ -193,26 +193,20 @@ export interface JoseInstance {
     decryptJWE: (payload: string) => Promise<string>
 }
 
-/**
- * Internal runtime configuration used within Aura Auth after initialization.
- * All optional fields from AuthConfig are resolved to their default values.
- * @internal
- * @todo: is this needed?
- */
-export interface AuthRuntimeConfig {
-    oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
-    cookies: CookieConfig
-    secret: string
-    jose: JoseInstance
-}
-
 export interface RouterGlobalContext {
     oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
     cookies: CookieStoreConfig
     jose: JoseInstance
+    secret?: string
     basePath: string
     trustedProxyHeaders: boolean
 }
+
+/**
+ * Internal runtime configuration used within Aura Auth after initialization.
+ * All optional fields from AuthConfig are resolved to their default values.
+ */
+export type AuthRuntimeConfig = RouterGlobalContext
 
 export interface AuthInstance {
     handlers: {

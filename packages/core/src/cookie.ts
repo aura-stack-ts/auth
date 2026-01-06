@@ -112,10 +112,11 @@ export const getSetCookie = (response: Response, cookieName: string) => {
  * Create a session cookie containing a signed and encrypted JWT, using the
  * `@aura-stack/jose` package for the encoding.
  *
+ * @param jose - Jose Instance
  * @param session - The JWT payload to be encoded in the session cookie
  * @returns The serialized session cookie string
  */
-export const createSessionCookie = async (session: JWTPayload, jose: AuthRuntimeConfig["jose"]) => {
+export const createSessionCookie = async (jose: AuthRuntimeConfig["jose"], session: JWTPayload) => {
     try {
         const encoded = await jose.encodeJWT(session)
         return encoded
