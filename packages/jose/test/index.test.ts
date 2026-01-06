@@ -61,7 +61,7 @@ describe("JWSs", () => {
     test("fail JWT with invalid format JWS", async () => {
         const secretKey = crypto.randomBytes(32)
         const { signJWS } = createJWS(secretKey)
-        await expect(signJWS(undefined as any)).rejects.toThrow("The payload must be a non-empty object")
+        await expect(signJWS(undefined as unknown as JWTPayload)).rejects.toThrow("The payload must be a non-empty object")
     })
 
     test("set audience in a JWS and verify it", async () => {
@@ -206,8 +206,8 @@ describe("JWTs", () => {
 
 describe("createSecret", () => {
     test("createSecret without secret", () => {
-        const secret: any = undefined
-        expect(() => createSecret(secret)).toThrow("Secret is required")
+        const secret = undefined
+        expect(() => createSecret(secret as unknown as string)).toThrow("Secret is required")
     })
 
     test("createSecret with string secret with at least 32 bytes", () => {

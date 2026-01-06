@@ -1,6 +1,6 @@
 import type { OAuthProviderConfig } from "@/@types/index.js"
 
-interface Image {
+export interface Image {
     url: string
     height: number
     width: number

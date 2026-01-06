@@ -1,9 +1,9 @@
 import { z } from "zod/v4"
-import { JWTPayload } from "@/jose.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { LiteralUnion, Prettify } from "./utility.js"
+import type { JWTPayload } from "@/jose.js"
 import type { BuiltInOAuthProvider } from "@/oauth/index.js"
+import type { LiteralUnion, Prettify } from "@/@types/utility.js"
 
 export * from "./utility.js"
 
@@ -19,9 +19,9 @@ export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" |
  */
 export interface User {
     sub: string
-    name?: string
-    email?: string
-    image?: string
+    name?: string | null
+    email?: string | null
+    image?: string | null
 }
 
 /**
@@ -43,8 +43,7 @@ export interface OAuthProviderConfig<Profile extends object = {}> {
     accessToken: string
     userInfo: string
     scope: string
-    //responseType: "code" | "refresh_token" | "id_token"
-    responseType: string
+    responseType: "code" | "token" | "refresh_token" | "id_token"
     profile?: (profile: Profile) => User | Promise<User>
 }
 
@@ -52,7 +51,7 @@ export interface OAuthProviderConfig<Profile extends object = {}> {
  * OAuth provider configuration with client credentials.
  * Extends OAuthProviderConfig with clientId and clientSecret.
  */
-export interface OAuthProviderCredentials extends OAuthProviderConfig {
+export interface OAuthProviderCredentials<Profile extends object = {}> extends OAuthProviderConfig<Profile> {
     clientId: string
     clientSecret: string
 }

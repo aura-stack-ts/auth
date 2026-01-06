@@ -14,7 +14,7 @@ export const toUpperCase = (str: string) => {
     return str.toUpperCase()
 }
 
-export const toCastCase = <Obj extends Record<string, any>, Type extends "snake" | "upper">(
+export const toCastCase = <Obj extends Record<string, string>, Type extends "snake" | "upper">(
     obj: Obj,
     type: Type = "snake" as Type
 ) => {
