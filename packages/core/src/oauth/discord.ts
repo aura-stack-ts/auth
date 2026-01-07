@@ -50,7 +50,7 @@ export interface DiscordProfile {
 
 /**
  * Discord OAuth Provider
- * 
+ *
  * @see [Discord - Applications](https://discord.com/developers/applications)
  * @see [Discord - OAuth2](https://discord.com/developers/docs/topics/oauth2)
  * @see [Discord - Get Current User](https://discord.com/developers/docs/resources/user#get-current-user)

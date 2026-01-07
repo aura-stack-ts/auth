@@ -1,3 +1,5 @@
+import type { JWTPayloadWithToken } from "@/@types/index.js"
+
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
 }
@@ -11,4 +13,8 @@ export const isValidURL = (value: string): boolean => {
     const regex =
         /^https?:\/\/(?:[a-zA-Z0-9._-]+|localhost|\[[0-9a-fA-F:]+\])(?::\d{1,5})?(?:\/[a-zA-Z0-9._~!$&'()*+,;=:@-]*)*\/?$/
     return regex.test(value)
+}
+
+export const isJWTPayloadWithToken = (payload: unknown): payload is JWTPayloadWithToken => {
+    return typeof payload === "object" && payload !== null && "token" in payload && typeof payload?.token === "string"
 }

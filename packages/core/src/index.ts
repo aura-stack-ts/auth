@@ -5,7 +5,7 @@ import { createJoseInstance } from "@/jose.js"
 import { createCookieStore } from "@/cookie.js"
 import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import type { AuthConfig, AuthInstance, CookieStoreConfig } from "@/@types/index.js"
+import type { AuthConfig, AuthInstance } from "@/@types/index.js"
 
 export type {
     AuthConfig,
@@ -21,16 +21,18 @@ export type {
 } from "@/@types/index.js"
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
+    const useSecure = authConfig?.trustedProxyHeaders ?? false
+
     return {
         basePath: authConfig?.basePath ?? "/auth",
         onError: onErrorHandler,
         context: {
             oauth: createBuiltInOAuthProviders(authConfig?.oauth),
-            cookies: {} as CookieStoreConfig,
+            cookies: createCookieStore(useSecure, authConfig?.cookies?.prefix, authConfig?.cookies?.overrides ?? {}),
             jose: createJoseInstance(authConfig?.secret),
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
-            trustedProxyHeaders: !!authConfig?.trustedProxyHeaders,
+            trustedProxyHeaders: useSecure,
         },
         middlewares: [
             (ctx) => {
@@ -70,8 +72,13 @@ export const createAuth = (authConfig: AuthConfig): AuthInstance => {
     const router = createRouter(
         [signInAction(config.context.oauth), callbackAction(config.context.oauth), sessionAction, signOutAction, csrfTokenAction],
         config
-    ) as AuthInstance["handlers"]
+    )
 
+    /**
+     * Return the auth instance with handlers and jose instance.
+     * This type is asserted to AuthInstance to ensure correct typing when the package is published on npm.
+     * Trust me.
+     */
     return {
         handlers: router,
         jose: config.context.jose,

@@ -12,6 +12,9 @@ import { gitlab } from "./gitlab.js"
 import { spotify } from "./spotify.js"
 import { x } from "./x.js"
 import { strava } from "./strava.js"
+import { OAuthEnvSchema } from "@/schemas.js"
+import { AuthInternalError } from "@/errors.js"
+import { formatZodError } from "@/utils.js"
 
 export * from "./github.js"
 export * from "./bitbucket.js"
@@ -31,14 +34,19 @@ export const builtInOAuthProviders = {
     spotify,
     x,
     strava,
-}
+} as const
 
 const defineOAuthEnvironment = (oauth: string) => {
     const env = process.env
-    return {
+    const loadEnvs = OAuthEnvSchema.safeParse({
         clientId: env[`AURA_AUTH_${oauth.toUpperCase()}_CLIENT_ID`],
         clientSecret: env[`AURA_AUTH_${oauth.toUpperCase()}_CLIENT_SECRET`],
+    })
+    if (!loadEnvs.success) {
+        const msg = JSON.stringify(formatZodError(loadEnvs.error), null, 2)
+        throw new AuthInternalError("INVALID_ENVIRONMENT_CONFIGURATION", msg)
     }
+    return loadEnvs.data
 }
 
 const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderCredentials) => {

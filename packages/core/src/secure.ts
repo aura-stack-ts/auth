@@ -2,6 +2,7 @@ import crypto from "node:crypto"
 import { equals } from "./utils.js"
 import { AuthRuntimeConfig } from "./@types/index.js"
 import { AuthSecurityError } from "./errors.js"
+import { isJWTPayloadWithToken } from "./assert.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")
@@ -48,10 +49,18 @@ export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: s
 
 export const verifyCSRF = async (jose: AuthRuntimeConfig["jose"], cookie: string, header: string): Promise<boolean> => {
     try {
-        const { token: cookieToken } = await jose.verifyJWS(cookie)
-        const { token: headerToken } = await jose.verifyJWS(header)
-        const cookieBuffer = Buffer.from(cookieToken as string)
-        const headerBuffer = Buffer.from(headerToken as string)
+        const cookiePayload = await jose.verifyJWS(cookie)
+        const headerPayload = await jose.verifyJWS(header)
+
+        if (!isJWTPayloadWithToken(cookiePayload)) {
+            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "Cookie payload missing token field.")
+        }
+        if (!isJWTPayloadWithToken(headerPayload)) {
+            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "Header payload missing token field.")
+        }
+
+        const cookieBuffer = Buffer.from(cookiePayload.token)
+        const headerBuffer = Buffer.from(headerPayload.token)
         if (!equals(headerBuffer.length, cookieBuffer.length)) {
             throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
         }

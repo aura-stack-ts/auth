@@ -1,5 +1,5 @@
 import { z } from "zod/v4"
-import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
+import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.js"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { JWTPayload } from "@/jose.js"
 import type { BuiltInOAuthProvider } from "@/oauth/index.js"
@@ -12,6 +12,11 @@ export * from "./utility.js"
  * These fields are typically filtered out before returning user data.
  */
 export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" | "sub" | "aud" | "iss">
+
+/**
+ * JWT payload structure that includes a mandatory `token` field used to verify CSRF Tokens
+ */
+export type JWTPayloadWithToken = JWTPayload & { token: string }
 
 /**
  * Standardized user profile returned by OAuth providers after fetching user information
@@ -59,7 +64,7 @@ export interface OAuthProviderCredentials<Profile extends object = {}> extends O
 /**
  * Complete OAuth provider type combining configuration and credentials.
  */
-export type OAuthProvider<Profile extends Record<string, unknown> = {}> = OAuthProviderConfig<Profile> & OAuthProviderCredentials
+export type OAuthProvider<Profile extends object = {}> = OAuthProviderCredentials<Profile>
 
 /**
  * Cookie type with __Secure- prefix, must be Secure.
@@ -252,6 +257,7 @@ export type AuthInternalErrorCode =
     | "COOKIE_STORE_NOT_INITIALIZED"
     | "COOKIE_PARSING_FAILED"
     | "COOKIE_NOT_FOUND"
+    | "INVALID_ENVIRONMENT_CONFIGURATION"
 
 export type AuthSecurityErrorCode =
     | "INVALID_STATE"
@@ -260,3 +266,7 @@ export type AuthSecurityErrorCode =
     | "CSRF_TOKEN_INVALID"
     | "CSRF_TOKEN_MISSING"
     | "SESSION_TOKEN_MISSING"
+
+export type OAuthEnv = z.infer<typeof OAuthEnvSchema>
+
+export type APIErrorMap = Record<string, { code: string; message: string }>
