@@ -36,11 +36,23 @@ export const builtInOAuthProviders = {
     strava,
 } as const
 
+/**
+ * Loads OAuth provider credentials from environment variables based on the provider name.
+ * Supported patterns for environment variables are:
+ *   - `AURA_AUTH_{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
+ *   - `AUTH_{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
+ *   - `{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
+ *
+ * @param oauth The name of the OAuth provider
+ * @returns The credentials for the specified OAuth provider
+ */
 const defineOAuthEnvironment = (oauth: string) => {
     const env = process.env
+    const clientIdSuffix = `${oauth.toUpperCase()}_CLIENT_ID`
+    const clientSecretSuffix = `${oauth.toUpperCase()}_CLIENT_SECRET`
     const loadEnvs = OAuthEnvSchema.safeParse({
-        clientId: env[`AURA_AUTH_${oauth.toUpperCase()}_CLIENT_ID`],
-        clientSecret: env[`AURA_AUTH_${oauth.toUpperCase()}_CLIENT_SECRET`],
+        clientId: env[`AURA_AUTH_${clientIdSuffix}`] ?? env[`AUTH_${clientIdSuffix}`] ?? env[`${clientIdSuffix}`],
+        clientSecret: env[`AURA_AUTH_${clientSecretSuffix}`] ?? env[`AUTH_${clientSecretSuffix}`] ?? env[`${clientSecretSuffix}`],
     })
     if (!loadEnvs.success) {
         const msg = JSON.stringify(formatZodError(loadEnvs.error), null, 2)
