@@ -49,12 +49,15 @@ export interface DiscordProfile {
 }
 
 /**
+ * Discord OAuth Provider
+ *
  * @see [Discord - Applications](https://discord.com/developers/applications)
  * @see [Discord - OAuth2](https://discord.com/developers/docs/topics/oauth2)
  * @see [Discord - Get Current User](https://discord.com/developers/docs/resources/user#get-current-user)
  * @see [Discord - User Object](https://discord.com/developers/docs/resources/user#user-object)
  * @see [Discord - OAuth2 Scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes)
  * @see [Discord - Image Formatting](https://discord.com/developers/docs/reference#image-formatting)
+ * @see [Discord - Display Names](https://discord.com/developers/docs/change-log#display-names)
  */
 export const discord: OAuthProviderConfig<DiscordProfile> = {
     id: "discord",
@@ -75,7 +78,6 @@ export const discord: OAuthProviderConfig<DiscordProfile> = {
         }
         return {
             sub: profile.id,
-            // https://discord.com/developers/docs/change-log#display-names
             name: profile.global_name ?? profile.username,
             email: profile.email ?? "",
             image,

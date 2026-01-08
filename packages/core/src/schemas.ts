@@ -1,4 +1,4 @@
-import { object, string, enum as options, number, httpUrl } from "zod/v4"
+import { object, string, enum as options, number, httpUrl, z } from "zod/v4"
 
 /**
  * Schema for OAuth Provider Configuration
@@ -102,4 +102,9 @@ export const OAuthAccessTokenErrorResponse = object({
 export const OAuthErrorResponse = object({
     error: string(),
     error_description: string().optional(),
+})
+
+export const OAuthEnvSchema = object({
+    clientId: z.string().min(1, "OAuth Client ID is required in the environment variables."),
+    clientSecret: z.string().min(1, "OAuth Client Secret is required in the environment variables."),
 })

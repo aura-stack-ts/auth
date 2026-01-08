@@ -11,6 +11,7 @@ export interface FigmaProfile {
 }
 
 /**
+ * Figma OAuth Provider
  * @see [Figma - REST API Introduction](https://developers.figma.com/docs/rest-api/)
  * @see [Figma - OAuth App](https://www.figma.com/developers/apps/)
  * @see [Figma - Create an OAuth App](https://developers.figma.com/docs/rest-api/authentication/#create-an-oauth-app)

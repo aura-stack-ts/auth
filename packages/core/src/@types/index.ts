@@ -1,9 +1,9 @@
 import { z } from "zod/v4"
-import { JWTPayload } from "@/jose.js"
-import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.js"
+import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.js"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { LiteralUnion, Prettify } from "./utility.js"
+import type { JWTPayload } from "@/jose.js"
 import type { BuiltInOAuthProvider } from "@/oauth/index.js"
+import type { LiteralUnion, Prettify } from "@/@types/utility.js"
 
 export * from "./utility.js"
 
@@ -14,14 +14,19 @@ export * from "./utility.js"
 export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" | "sub" | "aud" | "iss">
 
 /**
+ * JWT payload structure that includes a mandatory `token` field used to verify CSRF Tokens
+ */
+export type JWTPayloadWithToken = JWTPayload & { token: string }
+
+/**
  * Standardized user profile returned by OAuth providers after fetching user information
  * and mapping the response to this format by default or via the `profile` custom function.
  */
 export interface User {
     sub: string
-    name?: string
-    email?: string
-    image?: string
+    name?: string | null
+    email?: string | null
+    image?: string | null
 }
 
 /**
@@ -43,8 +48,7 @@ export interface OAuthProviderConfig<Profile extends object = {}> {
     accessToken: string
     userInfo: string
     scope: string
-    //responseType: "code" | "refresh_token" | "id_token"
-    responseType: string
+    responseType: "code" | "token" | "refresh_token" | "id_token"
     profile?: (profile: Profile) => User | Promise<User>
 }
 
@@ -52,7 +56,7 @@ export interface OAuthProviderConfig<Profile extends object = {}> {
  * OAuth provider configuration with client credentials.
  * Extends OAuthProviderConfig with clientId and clientSecret.
  */
-export interface OAuthProviderCredentials extends OAuthProviderConfig {
+export interface OAuthProviderCredentials<Profile extends object = {}> extends OAuthProviderConfig<Profile> {
     clientId: string
     clientSecret: string
 }
@@ -60,7 +64,7 @@ export interface OAuthProviderCredentials extends OAuthProviderConfig {
 /**
  * Complete OAuth provider type combining configuration and credentials.
  */
-export type OAuthProvider<Profile extends Record<string, unknown> = {}> = OAuthProviderConfig<Profile> & OAuthProviderCredentials
+export type OAuthProvider<Profile extends object = {}> = OAuthProviderCredentials<Profile>
 
 /**
  * Cookie type with __Secure- prefix, must be Secure.
@@ -194,26 +198,20 @@ export interface JoseInstance {
     decryptJWE: (payload: string) => Promise<string>
 }
 
-/**
- * Internal runtime configuration used within Aura Auth after initialization.
- * All optional fields from AuthConfig are resolved to their default values.
- * @internal
- * @todo: is this needed?
- */
-export interface AuthRuntimeConfig {
-    oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
-    cookies: CookieConfig
-    secret: string
-    jose: JoseInstance
-}
-
 export interface RouterGlobalContext {
     oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
     cookies: CookieStoreConfig
     jose: JoseInstance
+    secret?: string
     basePath: string
     trustedProxyHeaders: boolean
 }
+
+/**
+ * Internal runtime configuration used within Aura Auth after initialization.
+ * All optional fields from AuthConfig are resolved to their default values.
+ */
+export type AuthRuntimeConfig = RouterGlobalContext
 
 export interface AuthInstance {
     handlers: {
@@ -259,6 +257,7 @@ export type AuthInternalErrorCode =
     | "COOKIE_STORE_NOT_INITIALIZED"
     | "COOKIE_PARSING_FAILED"
     | "COOKIE_NOT_FOUND"
+    | "INVALID_ENVIRONMENT_CONFIGURATION"
 
 export type AuthSecurityErrorCode =
     | "INVALID_STATE"
@@ -267,3 +266,7 @@ export type AuthSecurityErrorCode =
     | "CSRF_TOKEN_INVALID"
     | "CSRF_TOKEN_MISSING"
     | "SESSION_TOKEN_MISSING"
+
+export type OAuthEnv = z.infer<typeof OAuthEnvSchema>
+
+export type APIErrorMap = Record<string, { code: string; message: string }>

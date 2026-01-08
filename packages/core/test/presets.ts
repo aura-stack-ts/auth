@@ -14,10 +14,10 @@ export const oauthCustomService: OAuthProviderCredentials = {
     clientSecret: "oauth_client_secret",
 }
 
-export const oauthCustomServiceProfile: OAuthProviderCredentials = {
+export const oauthCustomServiceProfile: OAuthProviderCredentials<Record<string, string>> = {
     ...oauthCustomService,
     id: "oauth-profile",
-    profile(profile: any) {
+    profile(profile) {
         return {
             sub: profile.id,
             name: profile.name,

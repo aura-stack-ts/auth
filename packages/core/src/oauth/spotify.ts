@@ -1,6 +1,6 @@
 import type { OAuthProviderConfig } from "@/@types/index.js"
 
-interface Image {
+export interface Image {
     url: string
     height: number
     width: number
@@ -28,6 +28,8 @@ export interface SpotifyProfile {
 }
 
 /**
+ * Spotify OAuth Provider
+ *
  * @see [Spotify - Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
  * @see [Spotify - Getting started with Web API](https://developer.spotify.com/documentation/web-api/tutorials/getting-started)
  * @see [Spotify - Get Current User's Profile](https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile)

@@ -9,7 +9,7 @@ import type { OAuthProviderCredentials, User } from "@/@types/index.js"
  * @param profile - Raw profile object returned by the userinfo endpoint
  * @returns The standardized OAuth user profile
  */
-const getDefaultUserInfo = (profile: Record<string, any>): User => {
+const getDefaultUserInfo = (profile: Record<string, string>): User => {
     const sub = generateSecure(16)
 
     return {

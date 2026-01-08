@@ -12,11 +12,6 @@ const signInConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
                 redirectTo: z.string().optional(),
             }),
         },
-        middlewares: [
-            (ctx) => {
-                return ctx
-            },
-        ],
     })
 }
 

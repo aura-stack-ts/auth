@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { oauthCustomService } from "@test/presets.js"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI, getOriginURL } from "@/actions/signIn/authorization.js"
+import type { OAuthProviderCredentials } from "@/index.js"
 
 describe("createRedirectURI", () => {
     const testCases = [
@@ -115,9 +116,15 @@ describe("createAuthorizationURL", () => {
 
         for (const { description, oauthConfig, redirectURL, expected } of testCases) {
             test(description, () => {
-                expect(() => createAuthorizationURL(oauthConfig as any, redirectURL, "123", "challenge", "S256")).toThrow(
-                    expected
-                )
+                expect(() =>
+                    createAuthorizationURL(
+                        oauthConfig as unknown as OAuthProviderCredentials,
+                        redirectURL,
+                        "123",
+                        "challenge",
+                        "S256"
+                    )
+                ).toThrow(expected)
             })
         }
     })

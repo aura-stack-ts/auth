@@ -1,6 +1,7 @@
 import { ZodError } from "zod"
 import { isInvalidZodSchemaError, isRouterError, RouterConfig } from "@aura-stack/router"
 import { isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "./errors.js"
+import { APIErrorMap } from "./@types/index.js"
 
 export const toSnakeCase = (str: string) => {
     return str
@@ -14,7 +15,7 @@ export const toUpperCase = (str: string) => {
     return str.toUpperCase()
 }
 
-export const toCastCase = <Obj extends Record<string, any>, Type extends "snake" | "upper">(
+export const toCastCase = <Obj extends Record<string, string>, Type extends "snake" | "upper">(
     obj: Obj,
     type: Type = "snake" as Type
 ) => {
@@ -116,10 +117,6 @@ export const onErrorHandler: RouterConfig["onError"] = (error) => {
     if (isInvalidZodSchemaError(error)) {
         return Response.json({ type: "ROUTER_ERROR", code: "INVALID_REQUEST", message: error.errors }, { status: 422 })
     }
-
-    /**
-     * New error handling
-     */
     if (isOAuthProtocolError(error)) {
         const { error: errorCode, message, type, errorURI } = error
         return Response.json(
@@ -177,7 +174,7 @@ export const useSecureCookies = (request: Request, trustedProxyHeaders: boolean)
         : request.url.startsWith("https://")
 }
 
-export const formatZodError = (error: ZodError<Record<string, unknown>>) => {
+export const formatZodError = <T extends Record<string, unknown> = Record<string, unknown>>(error: ZodError<T>): APIErrorMap => {
     if (!error.issues || error.issues.length === 0) {
         return {}
     }

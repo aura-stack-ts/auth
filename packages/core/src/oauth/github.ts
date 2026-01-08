@@ -54,6 +54,7 @@ export interface GitHubProfile {
 
 /**
  * GitHub OAuth Provider
+ *
  * @see [GitHub - Creating an OAuth App](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
  * @see [GitHub - Authorizing OAuth Apps](https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps)
  * @see [GitHub - Configure your GitHub OAuth Apps](https://github.com/settings/developers)
