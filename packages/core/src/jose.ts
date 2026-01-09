@@ -14,7 +14,8 @@ export type { JWTPayload } from "@aura-stack/jose/jose"
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
  */
 export const createJoseInstance = (secret?: string) => {
-    secret ??= process.env.AURA_AUTH_SECRET!
+    const env = process.env
+    secret ??= env.AURA_AUTH_SECRET! ?? env.AUTH_SECRET!
     if (!secret) {
         throw new AuthInternalError(
             "JOSE_INITIALIZATION_FAILED",
@@ -22,7 +23,7 @@ export const createJoseInstance = (secret?: string) => {
         )
     }
 
-    const salt = process.env.AURA_AUTH_SALT ?? createDerivedSalt(secret)
+    const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT ?? createDerivedSalt(secret)
     const { derivedKey: derivedSigningKey } = createDeriveKey(secret, salt, "signing")
     const { derivedKey: derivedEncryptionKey } = createDeriveKey(secret, salt, "encryption")
     const { derivedKey: derivedCsrfTokenKey } = createDeriveKey(secret, salt, "csrfToken")
