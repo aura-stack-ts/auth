@@ -28,6 +28,7 @@ describe("getUserInfo", () => {
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
+            signal: expect.any(AbortSignal),
         })
         expect(response).toEqual(mockResponse)
     })
@@ -68,6 +69,7 @@ describe("getUserInfo", () => {
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
+            signal: expect.any(AbortSignal),
         })
         expect(response).toEqual({
             sub: "12345",
@@ -110,6 +112,7 @@ describe("getUserInfo", () => {
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
+            signal: expect.any(AbortSignal),
         })
     })
 
@@ -135,6 +138,7 @@ describe("getUserInfo", () => {
                 Accept: "application/json",
                 Authorization: "Bearer invalid_access_token",
             },
+            signal: expect.any(AbortSignal),
         })
     })
 
@@ -154,6 +158,7 @@ describe("getUserInfo", () => {
                 Accept: "application/json",
                 Authorization: "Bearer access_token",
             },
+            signal: expect.any(AbortSignal),
         })
     })
 })

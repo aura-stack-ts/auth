@@ -148,6 +148,7 @@ describe("callbackAction", () => {
                 grant_type: "authorization_code",
                 code_verifier: codeVerifier,
             }).toString(),
+            signal: expect.any(AbortSignal),
         })
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
@@ -156,6 +157,7 @@ describe("callbackAction", () => {
                 Accept: "application/json",
                 Authorization: "Bearer access_123",
             },
+            signal: expect.any(AbortSignal),
         })
         expect(fetch).toHaveBeenCalledTimes(2)
         expect(response.status).toBe(302)

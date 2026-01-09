@@ -1,3 +1,4 @@
+import { fetchAsync } from "@/request.js"
 import { formatZodError } from "@/utils.js"
 import { AuthInternalError, OAuthProtocolError } from "@/errors.js"
 import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
@@ -27,7 +28,7 @@ export const createAccessToken = async (
     }
     const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data
     try {
-        const response = await fetch(accessToken, {
+        const response = await fetchAsync(accessToken, {
             method: "POST",
             headers: {
                 Accept: "application/json",

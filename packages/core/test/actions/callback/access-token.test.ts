@@ -44,6 +44,7 @@ describe("createAccessToken", async () => {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams(bodyParams).toString(),
+            signal: expect.any(AbortSignal),
         })
         expect(accessToken).toEqual(mockResponse)
     })
@@ -95,6 +96,7 @@ describe("createAccessToken", async () => {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams(bodyParams).toString(),
+            signal: expect.any(AbortSignal),
         })
     })
 
@@ -126,6 +128,7 @@ describe("createAccessToken", async () => {
                 ...bodyParams,
                 code: "invalid_code",
             }).toString(),
+            signal: expect.any(AbortSignal),
         })
     })
 
@@ -158,6 +161,7 @@ describe("createAccessToken", async () => {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams(bodyParams).toString(),
+            signal: expect.any(AbortSignal),
         })
     })
 })

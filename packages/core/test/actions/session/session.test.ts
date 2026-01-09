@@ -1,7 +1,12 @@
-import { setCookie, getSetCookie, createCookieStore } from "@/cookie.js"
+import { describe, test, expect, vi, afterEach } from "vitest"
 import { createPKCE } from "@/secure.js"
 import { GET, jose, sessionPayload } from "@test/presets.js"
-import { describe, test, expect, vi } from "vitest"
+import { setCookie, getSetCookie, createCookieStore } from "@/cookie.js"
+
+afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+})
 
 describe("sessionAction", () => {
     const { encodeJWT } = jose
@@ -98,9 +103,9 @@ describe("sessionAction", () => {
 
     test("update default profile function", async () => {
         const mockFetch = vi.fn()
-        const cookies = createCookieStore(true)
-
         vi.stubGlobal("fetch", mockFetch)
+
+        const cookies = createCookieStore(true)
 
         const accessTokenMock = {
             access_token: "access_123",
@@ -147,7 +152,7 @@ describe("sessionAction", () => {
             })
         )
 
-        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -161,16 +166,18 @@ describe("sessionAction", () => {
                 grant_type: "authorization_code",
                 code_verifier: codeVerifier,
             }).toString(),
+            signal: expect.any(AbortSignal),
         })
 
-        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
                 Accept: "application/json",
                 Authorization: "Bearer access_123",
             },
+            signal: expect.any(AbortSignal),
         })
-        expect(fetch).toHaveBeenCalledTimes(2)
+        expect(mockFetch).toHaveBeenCalledTimes(2)
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
         const sessionToken = getSetCookie(response, "__Secure-aura-auth.sessionToken")
