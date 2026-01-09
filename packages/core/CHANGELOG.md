@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added new patterns for automatic loading of environment variables for secure and OAuth credentials. The `AURA_` prefix is now optional for all environment variables required by Aura Auth. [#51](https://github.com/aura-stack-ts/auth/pull/51)
+
 - Re-export the `encryptJWE` and `decryptJWE` functions for JWEs (Json Web Encryption) from the `jose` instance created from `createAuth` function. These functions are used internally for session and csrf token management and can be consumed for external reasons designed by the users. [#45](https://github.com/aura-stack-ts/auth/pull/45)
 
 ### Changed
