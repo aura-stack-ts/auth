@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Implemented timeout handling for `fetch` request used to communicate with external services during OAuth flows and user information retrieval. The implementation introduces a time limit for requests, ensuring they are canceled if they exceed the configured timeout.
+- Implemented timeout handling for `fetch` request used to communicate with external services during OAuth flows and user information retrieval. The implementation introduces a time limit for requests, ensuring they are canceled if they exceed the configured timeout. [#53](https://github.com/aura-stack-ts/auth/pull/53)
 
 ---
 
