@@ -1,3 +1,4 @@
+import { fetchAsync } from "@/request.js"
 import { generateSecure } from "@/secure.js"
 import { OAuthErrorResponse } from "@/schemas.js"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/errors.js"
@@ -32,7 +33,7 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
 export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string) => {
     const userinfoEndpoint = oauthConfig.userInfo
     try {
-        const response = await fetch(userinfoEndpoint, {
+        const response = await fetchAsync(userinfoEndpoint, {
             method: "GET",
             headers: {
                 Accept: "application/json",
