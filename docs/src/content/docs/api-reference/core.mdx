@@ -239,7 +239,7 @@ For that reason Aura Auth, provides secure by default, disabling cases which the
 
 </Callout>
 
-Aura Auth provides granular per-cookie management with a series of [cookie attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#attributes) to customize cookie behavior. For type safety, a `strategy` field is provided that recommends appropriate attributes for cookie prefixes (`__Secure-` and `__Host-`). The supported values are `standard`, `secure`, and `host`, with `standard` as the default.
+Aura Auth provides granular per-cookie management with a series of [cookie attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#attributes) to customize cookie behavior. For type safety, an optional `strategy` field is provided that recommends appropriate attributes for cookie prefixes (`__Secure-` and `__Host-`). The supported values are `standard`, `secure`, and `host`, with `standard` as the default.
 
 <Callout type="warn">
   **Security Warning:** Choose the appropriate cookie flag for your environment. Use `host` or `secure` in production for maximum
