@@ -50,6 +50,7 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
  * @see https://datatracker.ietf.org/doc/html/rfc7519#section-6 Unsecured JWTs
  * @param token - JWT string to verify
  * @param secret - CryptoKey or KeyObject used to verify the JWT
+ * @param options - Additional JWT verification options
  * @returns verify and return the payload of the JWT
  */
 export const verifyJWS = async (token: string, secret: SecretInput, options?: JWTVerifyOptions): Promise<JWTPayload> => {
