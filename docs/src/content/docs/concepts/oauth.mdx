@@ -97,6 +97,19 @@ For **public** applications (like SPAs or mobile apps) that cannot safely custod
 
 </Callout>
 
+**Request using cURL**
+
+```bash
+curl -G "https://service.api/oauth/authorize" \
+  --data-urlencode "redirect_uri=http://localhost:3000/auth/callback/:provider" \
+  --data-urlencode "state=state_123" \
+  --data-urlencode "scope=read:user" \
+  --data-urlencode "response_type=code" \
+  --data-urlencode "client_id=id_123" \
+  --data-urlencode "code_challenge=challenge_123" \
+  --data-urlencode "code_challenge_method=S256"
+```
+
 </Step>
 
 <Step>
@@ -107,6 +120,12 @@ Once the **User** successfully authenticates and **grants consent** to the Autho
 
 - `code`: A short-lived, single-use **Authorization Code**.
 - `state`: The original opaque value sent by the client. **The client must validate that this value matches** the one generated in step 1.
+
+```http
+HTTP/2 302 Found
+location: http://localhost:3000/auth/callback/:provider?code=code_123&state=state_123
+cache-control: no-store
+```
 
 </Step>
 
@@ -123,6 +142,19 @@ This is the most security-critical step. The **Client** takes the received code 
 - `client_secret`: The Client's confidential secret. **(Optional, if PKCE is used)**.
 - `code_verifier`: The un-hashed value of the `code_challenge`. **(Required if PKCE is used)**.
 
+**Request using cURL**
+
+```bash
+curl -X POST "https://service.api/oauth/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  --data-urlencode "client_id=id_123" \
+  --data-urlencode "client_secret=secret_123" \
+  --data-urlencode "code=code_123_abc" \
+  --data-urlencode "redirect_uri=http://localhost:3000/auth/callback/:provider" \
+  --data-urlencode "grant_type=authorization_code" \
+  --data-urlencode "code_verifier=verifier_123"
+```
+
 </Step>
 
 <Step>
@@ -136,6 +168,44 @@ If the Authorization Server confirms the validity of the code and (if applicable
 - `expires_in`: The lifespan of the Access Token (e.g., 3600 seconds). **Tokens should be short-lived.**
 - `refresh_token` (Optional): A long-lived token used to request a new Access Token without requiring the user to log in again. **Must be stored extremely securely.**
 - `scope` (Optional): The permissions that were finally granted.
+
+```http
+HTTP/2 200 OK
+content-type: application/json; charset=utf-8
+cache-control: no-store
+pragma: no-cache
+
+{
+  "access_token": "token_123",
+  "token_type": "bearer",
+  "expires_in": 3600,
+  "refresh_token": "refresh_token_123",
+  "scope": "read:user"
+}
+```
+
+</Step>
+
+<Step>
+
+### Fetching Protected Resources
+
+Once the OAuth workflow is completed, the `access_token` is used to authenticate requests to the Resource Server (API) to retrieve protected data.
+
+<Callout>
+  **Security Note:** For enhanced security, Aura Auth does not store the raw `access_token` in the browser. Instead, the token is
+  exchanged during the initial server-side interaction with the API. The retrieved user data is then encapsulated into a secure,
+  encrypted, and signed JWT cookie called `sessionToken` (by default) to manage the local session.
+</Callout>
+
+**Request using cURL**
+
+To access the protected user profile endpoint, the `access_token` must be sent in the `Authorization` header using the `Bearer` schema.
+
+```bash
+curl -H "Authorization: Bearer token_123" \
+  "https://service.api/users/me"
+```
 
 </Step>
 
