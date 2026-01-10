@@ -42,7 +42,9 @@ type JoseInstance = {
   decodeJWT: (token: string) => Promise<JWTPayload>
   encodeJWT: (payload: JWTPayload) => Promise<string>
   signJWS: (payload: JWTPayload) => Promise<string>
-  verifyJWS: (payload: string) => Promise<JWTPayload>
+  verifyJWS: (payload: string, options?: JWTVerifyOptions) => Promise<JWTPayload>
+  encryptJWE: (payload: string, options?: EncryptOptions) => Promise<string>
+  decryptJWE: (payload: string, options?: JWTDecryptOptions) => Promise<string>
 }
 ```
 
