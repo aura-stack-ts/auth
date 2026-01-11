@@ -165,7 +165,7 @@ export interface AuthConfig {
     cookies?: Partial<CookieConfig>
     /**
      * Secret used to sign and verify JWT tokens for session and csrf protection.
-     * If not provided, it will load from the environment variable `AURA_AUTH_SECRET`, but if it
+     * If not provided, it will load from the environment variable `AURA_AUTH_SECRET` or `AUTH_SECRET`, but if it
      * doesn't exist, it will throw an error during the initialization of the Auth module.
      */
     secret?: string
