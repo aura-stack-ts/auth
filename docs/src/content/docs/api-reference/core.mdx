@@ -305,7 +305,7 @@ type HostCookie = {
 
 ##### `secret`
 
-Secret value used to sign and encrypt JWTs for session management and for CSRF token protection. This configuration overrides the `AURA_AUTH_SECRET` environment variable which is automatically loaded by Aura Auth. If neither option is configured, Aura Auth will throw an error, as this option is required for session management and CSRF protection.
+Secret value used to sign and encrypt JWTs for session management and for CSRF token protection. This configuration overrides the `AURA_AUTH_SECRET` or `AUTH_SECRET` environment variable which is automatically loaded by Aura Auth. If neither option is configured, Aura Auth will throw an error, as this option is required for session management and CSRF protection.
 
 ```ts lineNumbers
 type Secret = string
@@ -334,6 +334,15 @@ type TrustedProxyHeaders = boolean
 This is an experimental option and may change over time. Monitor the library for updates and possible changes to this configuration option.
 
 </Callout>
+
+Aura Auth reads proxy headers to determine if connection is secure:
+
+| Header              | Purpose               | Example                        |
+| ------------------- | --------------------- | ------------------------------ |
+| `X-Forwarded-Proto` | Protocol (HTTP/HTTPS) | `https`                        |
+| `X-Forwarded-For`   | Client IP             | `203.0.113.45`                 |
+| `X-Forwarded-Host`  | Original host         | `example.com`                  |
+| `Forwarded`         | RFC 7239 standard     | `for=203.0.113.45;proto=https` |
 
 #### Returns
 

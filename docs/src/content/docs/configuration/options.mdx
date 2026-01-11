@@ -1,0 +1,160 @@
+---
+title: Configuration Options
+description: Configure and customize the default Auth behavior by createAuth function.
+---
+
+## Configuration Options
+
+### `basePath`
+
+Base path prefix where Aura Auth endpoints are mounted and exposed to your routing system. Defaults to `/auth`.
+
+<Callout type="warning">The `basePath` must start with a leading `/`.</Callout>
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  basePath: "/auth",
+})
+```
+
+### `cookies`
+
+Per-cookie configuration to override Aura Auth's defaults. You can set a cookie name prefix and adjust the cookies Aura Auth uses internally. See [API Reference](/docs/api-reference/core#cookies) for details.
+
+Supported cookies: `sessionToken`, `csrfToken`, `state`, `code_verifier`, `redirect_to`, and `redirect_uri`. Set per-cookie attributes as needed. For autocomplete and safer suggestions, set the `strategy` field, which provides type-safe defaults that follow cookie best practices.
+
+<Callout type="warning">
+  This option is security-sensitive. Misconfigured `cookies.overrides` can leak data or weaken protections. Aura Auth is not
+  responsible for insecure overrides. Review [RFC 6265](https://datatracker.ietf.org/doc/html/rfc6265) and keep `httpOnly` enabled
+  so cookies stay inaccessible to JavaScript.
+</Callout>
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  cookies: {
+    prefix: "aura-auth",
+    overrides: {
+      sessionToken: {
+        name: "sessionToken",
+        attributes: {},
+      },
+    },
+  },
+})
+```
+
+### `oauth`
+
+Configures OAuth providers for an auth instance. Aura Auth's built-in providers can be used, or custom providers supplied.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+})
+```
+
+#### Built-in OAuth Providers
+
+Aura Auth ships ready-to-use OAuth providers. The `oauth` option in `createAuth` autocompletes these provider IDs (names are lowercase).
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+})
+```
+
+#### Custom OAuth Providers
+
+Provider configs are available via `@aura-stack/auth/oauth/index` (all providers) or `@aura-stack/auth/oauth/:provider` (specific). See [OAuth Providers](/docs/oauth) for details. Custom providers must implement `OAuthProvider`.
+
+```ts title="@/auth" lineNumbers
+import { createAuth, type OAuthProvider } from "@aura-stack/auth"
+import { github } from "@aura-stack/auth/oauth/index"
+
+export const auth = createAuth({
+  oauth: [
+    {
+      ...github,
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    } as OAuthProvider,
+  ],
+})
+```
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [
+    {
+      id: "github",
+      name: "GitHub",
+      authorizeURL: "https://github.com/login/oauth/authorize",
+      accessToken: "https://github.com/login/oauth/access_token",
+      userInfo: "https://api.github.com/user",
+      scope: "read:user user:email",
+      responseType: "code",
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    },
+  ],
+})
+```
+
+### `secret`
+
+Secret used to sign, encrypt, and hash JWTs, CSRF tokens, and other sensitive values.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  secret: "secret-key",
+})
+```
+
+AURA_AUTH_SECRET`or`AUTH_SECRET` environment variables are loaded automatically. If neither is set, an error is thrown during Auth initialization.
+
+To generate a secret value:
+
+```bash lineNumbers
+# Using Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# Using OpenSSL
+openssl rand -base64 32
+```
+
+### `trustedProxyHeaders` [#trusted-proxy-headers]
+
+Enables Aura Auth to read proxy headers when an application runs behind reverse proxies, load balancers, or CDNs to detect the original client protocol and IP.
+
+<Callout type="warning">
+  **Experimental:** Enable only when deployed behind a **trusted proxy**. Misuse causes incorrect cookie security or IP spoofing
+  vulnerabilities. This is an experimental option and may change over time. Monitor the library for updates and possible changes
+  to this configuration option.
+</Callout>
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedProxyHeaders: true,
+})
+```
+
+**When to Enable**: reverse proxy (Nginx, Apache); platforms with automatic proxying (Vercel, Netlify, Heroku); load balancer (AWS ALB, Google Cloud LB); CDN (Cloudflare)
+**When NOT to Enable**: localhost or direct internet connection; untrusted or misconfigured proxy; unclear infrastructure setup
