@@ -1,9 +1,9 @@
 ---
 title: Configuration Options
-description: Configure and customize the default Auth behavior by createAuth function.
+description: Configure and customize Aura Auth defaults via createAuth.
 ---
 
-## Configuration Options
+## `createAuth` configuration options
 
 ### `basePath`
 
@@ -92,6 +92,8 @@ export const auth = createAuth({
 })
 ```
 
+**or**
+
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
@@ -125,7 +127,7 @@ export const auth = createAuth({
 })
 ```
 
-AURA_AUTH_SECRET`or`AUTH_SECRET` environment variables are loaded automatically. If neither is set, an error is thrown during Auth initialization.
+`AURA_AUTH_SECRET`or`AUTH_SECRET` environment variables are loaded automatically. If neither is set, an error is thrown during Auth initialization.
 
 To generate a secret value:
 
@@ -157,4 +159,5 @@ export const auth = createAuth({
 ```
 
 **When to Enable**: reverse proxy (Nginx, Apache); platforms with automatic proxying (Vercel, Netlify, Heroku); load balancer (AWS ALB, Google Cloud LB); CDN (Cloudflare)
+
 **When NOT to Enable**: localhost or direct internet connection; untrusted or misconfigured proxy; unclear infrastructure setup
