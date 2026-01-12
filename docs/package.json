@@ -13,25 +13,25 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "fumadocs-core": "16.0.6",
-    "fumadocs-mdx": "13.0.3",
-    "fumadocs-typescript": "^4.0.12",
-    "fumadocs-ui": "16.0.6",
+    "fumadocs-core": "^16.4.6",
+    "fumadocs-mdx": "^14.2.4",
+    "fumadocs-typescript": "^5.0.1",
+    "fumadocs-ui": "^16.4.6",
     "lucide-react": "^0.548.0",
-    "next": "16.0.10",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "next": "catalog:next",
+    "react": "catalog:react",
+    "react-dom": "catalog:react"
   },
   "devDependencies": {
     "@halvaradop/tailwindcss-utilities": "^1.0.0",
-    "@tailwindcss/postcss": "^4.1.16",
+    "@tailwindcss/postcss": "catalog:tailwindcss",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.9.2",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
+    "@types/node": "catalog:node",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.16",
-    "typescript": "^5.9.3"
+    "tailwindcss": "catalog:tailwindcss",
+    "typescript": "catalog:typescript"
   },
   "packageManager": "pnpm@10.15.0"
 }
