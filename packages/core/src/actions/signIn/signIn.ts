@@ -36,9 +36,9 @@ export const signInAction = (oauth: AuthRuntimeConfig["oauth"]) => {
             const headers = headersBuilder
                 .setHeader("Location", authorization)
                 .setCookie(cookies.state.name, state, cookies.state.attributes)
-                .setCookie(cookies.redirect_uri.name, redirectURI, cookies.redirect_uri.attributes)
-                .setCookie(cookies.redirect_to.name, redirectToValue, cookies.redirect_to.attributes)
-                .setCookie(cookies.code_verifier.name, codeVerifier, cookies.code_verifier.attributes)
+                .setCookie(cookies.redirectURI.name, redirectURI, cookies.redirectURI.attributes)
+                .setCookie(cookies.redirectTo.name, redirectToValue, cookies.redirectTo.attributes)
+                .setCookie(cookies.codeVerifier.name, codeVerifier, cookies.codeVerifier.attributes)
                 .toHeaders()
             return Response.json(
                 { oauth },

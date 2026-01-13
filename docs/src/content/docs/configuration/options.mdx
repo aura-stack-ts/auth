@@ -24,7 +24,7 @@ export const auth = createAuth({
 
 Per-cookie configuration to override Aura Auth's defaults. You can set a cookie name prefix and adjust the cookies Aura Auth uses internally. See [API Reference](/docs/api-reference/core#cookies) for details.
 
-Supported cookies: `sessionToken`, `csrfToken`, `state`, `code_verifier`, `redirect_to`, and `redirect_uri`. Set per-cookie attributes as needed. For autocomplete and safer suggestions, set the `strategy` field, which provides type-safe defaults that follow cookie best practices.
+Supported cookies: `sessionToken`, `csrfToken`, `state`, `codeVerifier`, `redirectTo`, and `redirectURI`. Set per-cookie attributes as needed. For autocomplete and safer suggestions, set the `strategy` field, which provides type-safe defaults that follow cookie best practices.
 
 <Callout type="warning">
   This option is security-sensitive. Misconfigured `cookies.overrides` can leak data or weaken protections. Aura Auth is not
@@ -41,7 +41,7 @@ export const auth = createAuth({
     prefix: "aura-auth",
     overrides: {
       sessionToken: {
-        name: "sessionToken",
+        name: "session_token",
         attributes: {},
       },
     },
@@ -61,7 +61,7 @@ export const auth = createAuth({
 })
 ```
 
-#### Built-in OAuth Providers
+##### Built-in OAuth Providers
 
 Aura Auth ships ready-to-use OAuth providers. The `oauth` option in `createAuth` autocompletes these provider IDs (names are lowercase).
 
@@ -73,7 +73,7 @@ export const auth = createAuth({
 })
 ```
 
-#### Custom OAuth Providers
+##### Custom OAuth Providers
 
 Provider configs are available via `@aura-stack/auth/oauth/index` (all providers) or `@aura-stack/auth/oauth/:provider` (specific). See [OAuth Providers](/docs/oauth) for details. Custom providers must implement `OAuthProvider`.
 

@@ -170,7 +170,7 @@ export const auth = createAuth({
     prefix: "aura-auth",
     overrides: {
       sessionToken: {
-        name: "session",
+        name: "session_token",
         attributes: {
           priority: "high",
           sameSite: "strict",
@@ -211,7 +211,7 @@ export const auth = createAuth({
 
 ###### `overrides`
 
-This configuration option overrides the default cookie attributes or cookie name to the cookies used by Aura Auth. The cookies used are: `sessionToken`, `csrfToken`, `state`, `code_verifier`, `redirect_to`, and `redirect_uri`.
+This configuration option overrides the default cookie attributes or cookie name to the cookies used by Aura Auth. The cookies used are: `sessionToken`, `csrfToken`, `state`, `codeVerifier`, `redirectTo`, and `redirectURI`.
 
 ```ts lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -223,9 +223,9 @@ export const auth = createAuth({
       sessionToken: {},
       csrfToken: {},
       state: {},
-      redirect_to: {}
-      redirect_uri: {}
-      code_verifier: {}
+      redirectTo: {}
+      redirectURI: {}
+      codeVerifier: {}
     },
   },
 })
@@ -437,7 +437,9 @@ type JoseInstance = {
   decodeJWT: (token: string) => Promise<JWTPayload>
   encodeJWT: (payload: JWTPayload) => Promise<string>
   signJWS: (payload: JWTPayload) => Promise<string>
-  verifyJWS: (payload: string) => Promise<JWTPayload>
+  verifyJWS: (payload: string, options?: JWTVerifyOptions) => Promise<JWTPayload>
+  encryptJWE: (payload: string, options?: EncryptOptions) => Promise<string>
+  decryptJWE: (payload: string, options?: JWTDecryptOptions) => Promise<string>
 }
 ```
 
@@ -637,7 +639,7 @@ export const auth = createAuth({
     prefix: "my-app",
     overrides: {
       sessionToken: {
-        name: "session",
+        name: "session_token",
         attributes: {
           strategy: "host",
           partitioned: true,
