@@ -12,6 +12,7 @@ import { gitlab } from "./gitlab.js"
 import { spotify } from "./spotify.js"
 import { x } from "./x.js"
 import { strava } from "./strava.js"
+import { atlassian } from "./atlassian.js"
 import { OAuthEnvSchema } from "@/schemas.js"
 import { AuthInternalError } from "@/errors.js"
 import { formatZodError } from "@/utils.js"
@@ -24,6 +25,7 @@ export * from "./gitlab.js"
 export * from "./spotify.js"
 export * from "./x.js"
 export * from "./strava.js"
+export * from "./atlassian.js"
 
 export const builtInOAuthProviders = {
     github,
@@ -34,6 +36,7 @@ export const builtInOAuthProviders = {
     spotify,
     x,
     strava,
+    atlassian,
 } as const
 
 /**
