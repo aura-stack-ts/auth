@@ -8,7 +8,7 @@ describe("csrfTokenAction", () => {
         const token = await response.json()
 
         expect(response.status).toBe(200)
-        expect(response.headers.get("Set-Cookie")).toMatch(/__Host-aura-auth.csrfToken=/)
+        expect(response.headers.get("Set-Cookie")).toMatch(/__Host-aura-auth.csrf_token=/)
         expect(token).toHaveProperty("csrfToken")
     })
 
@@ -20,11 +20,11 @@ describe("csrfTokenAction", () => {
             new Request("https://example.com/auth/csrfToken", {
                 method: "GET",
                 headers: {
-                    Cookie: setCookie("__Host-aura-auth.csrfToken", token.csrfToken),
+                    Cookie: setCookie("__Host-aura-auth.csrf_token", token.csrfToken),
                 },
             })
         )
-        expect(refetch.headers.get("Set-Cookie")).toMatch(/__Host-aura-auth.csrfToken=/)
+        expect(refetch.headers.get("Set-Cookie")).toMatch(/__Host-aura-auth.csrf_token=/)
         const refetchToken = await refetch.json()
         expect(refetchToken.csrfToken).toBe(token.csrfToken)
     })
@@ -35,14 +35,14 @@ describe("csrfTokenAction", () => {
             new Request("https://example.com/auth/csrfToken", {
                 method: "GET",
                 headers: {
-                    Cookie: setCookie("__Host-aura-auth.csrfToken", invalidCookie),
+                    Cookie: setCookie("__Host-aura-auth.csrf_token", invalidCookie),
                 },
             })
         )
         const token = await response.json()
         expect(token).toHaveProperty("csrfToken")
         expect(token.csrfToken).not.toBe(invalidCookie)
-        expect(response.headers.get("Set-Cookie")).toMatch(/__Host-aura-auth.csrfToken=/)
+        expect(response.headers.get("Set-Cookie")).toMatch(/__Host-aura-auth.csrf_token=/)
     })
 
     test("generate a CSRF token in a http connection", async () => {
@@ -50,6 +50,6 @@ describe("csrfTokenAction", () => {
         const token = await response.json()
 
         expect(token).toHaveProperty("csrfToken")
-        expect(response.headers.get("Set-Cookie")).toMatch(/aura-auth.csrfToken=/)
+        expect(response.headers.get("Set-Cookie")).toMatch(/aura-auth.csrf_token=/)
     })
 })

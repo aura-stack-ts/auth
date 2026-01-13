@@ -163,7 +163,7 @@ describe("callbackAction", () => {
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
 
-        expect(getSetCookie(response, "__Secure-aura-auth.sessionToken")).toBeDefined()
+        expect(getSetCookie(response, "__Secure-aura-auth.session_token")).toBeDefined()
         expect(getSetCookie(response, "__Secure-aura-auth.state")).toEqual("")
         expect(getSetCookie(response, "__Secure-aura-auth.redirect_to")).toEqual("")
         expect(getSetCookie(response, "__Secure-aura-auth.redirect_uri")).toEqual("")

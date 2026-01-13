@@ -199,7 +199,7 @@ export const createCookieStore = (
     const hostPrefix = useSecure ? "__Host-" : ""
     return {
         sessionToken: {
-            name: `${securePrefix}${prefix}.${overrides?.sessionToken?.name ?? "sessionToken"}`,
+            name: `${securePrefix}${prefix}.${overrides?.sessionToken?.name ?? "session_token"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
@@ -221,7 +221,7 @@ export const createCookieStore = (
             ),
         },
         csrfToken: {
-            name: `${hostPrefix}${prefix}.${overrides?.csrfToken?.name ?? "csrfToken"}`,
+            name: `${hostPrefix}${prefix}.${overrides?.csrfToken?.name ?? "csrf_token"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
@@ -231,37 +231,37 @@ export const createCookieStore = (
                 overrides?.csrfToken?.attributes?.strategy ?? "host"
             ),
         },
-        redirect_to: {
-            name: `${securePrefix}${prefix}.${overrides?.redirect_to?.name ?? "redirect_to"}`,
+        redirectTo: {
+            name: `${securePrefix}${prefix}.${overrides?.redirectTo?.name ?? "redirect_to"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...overrides?.redirect_to?.attributes,
+                    ...overrides?.redirectTo?.attributes,
                 },
-                overrides?.redirect_to?.attributes?.strategy ?? "secure"
+                overrides?.redirectTo?.attributes?.strategy ?? "secure"
             ),
         },
-        redirect_uri: {
-            name: `${securePrefix}${prefix}.${overrides?.redirect_uri?.name ?? "redirect_uri"}`,
+        redirectURI: {
+            name: `${securePrefix}${prefix}.${overrides?.redirectURI?.name ?? "redirect_uri"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...overrides?.redirect_uri?.attributes,
+                    ...overrides?.redirectURI?.attributes,
                 },
-                overrides?.redirect_uri?.attributes?.strategy ?? "secure"
+                overrides?.redirectURI?.attributes?.strategy ?? "secure"
             ),
         },
-        code_verifier: {
-            name: `${securePrefix}${prefix}.${overrides?.code_verifier?.name ?? "code_verifier"}`,
+        codeVerifier: {
+            name: `${securePrefix}${prefix}.${overrides?.codeVerifier?.name ?? "code_verifier"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...overrides?.code_verifier?.attributes,
+                    ...overrides?.codeVerifier?.attributes,
                 },
-                overrides?.code_verifier?.attributes?.strategy ?? "secure"
+                overrides?.codeVerifier?.attributes?.strategy ?? "secure"
             ),
         },
     }

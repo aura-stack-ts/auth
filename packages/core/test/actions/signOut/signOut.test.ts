@@ -28,7 +28,7 @@ describe("signOut action", async () => {
             new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=invalid_token; __Host-aura-auth.csrfToken=${csrf}`,
+                    Cookie: `__Secure-aura-auth.session_token=invalid_token; __Host-aura-auth.csrf_token=${csrf}`,
                 },
             })
         )
@@ -50,7 +50,7 @@ describe("signOut action", async () => {
             new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -69,15 +69,15 @@ describe("signOut action", async () => {
             new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}; __Host-aura-auth.csrfToken=${csrf}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
                     "X-CSRF-Token": csrf,
                 },
             })
         )
         expect(request.status).toBe(202)
         expect(await request.json()).toEqual({ message: "Signed out successfully" })
-        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.sessionToken=;")
-        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrfToken=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
     })
 
     test("valid sessionToken cookie with valid csrfToken in a secure connection with referer", async () => {
@@ -86,7 +86,7 @@ describe("signOut action", async () => {
             new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}; __Host-aura-auth.csrfToken=${csrf}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
                     "X-CSRF-Token": csrf,
                     Referer: "https://example.com/auth/form",
                 },
@@ -94,8 +94,8 @@ describe("signOut action", async () => {
         )
         expect(request.status).toBe(202)
         expect(await request.json()).toEqual({ message: "Signed out successfully" })
-        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.sessionToken=;")
-        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrfToken=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
         expect(request.headers.get("Location")).toContain("/auth/form")
     })
 
@@ -105,15 +105,15 @@ describe("signOut action", async () => {
             new Request("http://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-auth.sessionToken=${sessionToken}; aura-auth.csrfToken=${csrf}`,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrf}`,
                     "X-CSRF-Token": csrf,
                 },
             })
         )
         expect(request.status).toBe(202)
         expect(await request.json()).toEqual({ message: "Signed out successfully" })
-        expect(request.headers.get("Set-Cookie")).toContain("aura-auth.sessionToken=;")
-        expect(request.headers.get("Set-Cookie")).toContain("aura-auth.csrfToken=;")
+        expect(request.headers.get("Set-Cookie")).toContain("aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("aura-auth.csrf_token=;")
     })
 
     test("valid sessionToken cookie with missing csrfToken", async () => {
@@ -122,7 +122,7 @@ describe("signOut action", async () => {
             new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -140,15 +140,15 @@ describe("signOut action", async () => {
             new Request("https://example.com/auth/signOut?token_type_hint=session_token&redirectTo=/custom-logout-page", {
                 method: "POST",
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}; __Host-aura-auth.csrfToken=${csrf}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
                     "X-CSRF-Token": csrf,
                 },
             })
         )
         expect(request.status).toBe(202)
         expect(await request.json()).toEqual({ message: "Signed out successfully" })
-        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.sessionToken=;")
-        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrfToken=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
         expect(request.headers.get("Location")).toBe("/custom-logout-page")
     })
 
@@ -158,7 +158,7 @@ describe("signOut action", async () => {
             new Request("https://example.com/auth/signOut?token_type_hint=session_token&redirectTo=https://malicious.com", {
                 method: "POST",
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}; __Host-aura-auth.csrfToken=${csrf}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
                     "X-CSRF-Token": csrf,
                 },
             })
