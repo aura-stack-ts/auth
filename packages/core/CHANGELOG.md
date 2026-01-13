@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Updated the cookie naming for standardized cookie naming for both internal and external cookies used by Aura Auth. The new configuration API improves developer experience by exposing all cookie options to users in camelCase, while maintaining snake_case naming internally where required by implementation details. [#58](https://github.com/aura-stack-ts/auth/pull/58)
+
 - Update `JoseInstance` to provide full types for all parameters supported by the `verifyJWS`, `encryptJWE`, and `decryptJWE` functions exposed in the `jose` object by `createAuth` auth instance. [#55](https://github.com/aura-stack-ts/auth/pull/55)
 
 ---

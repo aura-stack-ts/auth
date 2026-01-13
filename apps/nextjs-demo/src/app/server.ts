@@ -40,6 +40,9 @@ export const useAuth = async () => {
     }
 }
 
+/**
+ * @todo: implement a proper cookie management. It includes the name of the cookies
+ */
 export const signOut = async () => {
     "use server"
     const baseUrl = await getBaseUrl()
@@ -57,8 +60,8 @@ export const signOut = async () => {
     })
     const response = await signOutResponse.json()
     if (signOutResponse.status === 202) {
-        cookieStore.delete("aura-auth.sessionToken")
-        cookieStore.delete("aura-auth.csrfToken")
+        cookieStore.delete("aura-auth.session_token")
+        cookieStore.delete("aura-auth.csrf_token")
         redirect("/")
     }
     return response
