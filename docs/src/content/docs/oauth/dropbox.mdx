@@ -1,0 +1,155 @@
+---
+title: Dropbox Authorization Provider
+description: Add Dropbox authorization provider to Aura Auth to authentication and authorize
+---
+
+## Dropbox
+
+Set up `Dropbox` authorization provider to the authentication instance to Aura Auth.
+
+---
+
+## What you'll learn
+
+Through this quick start guide you are going to learn and understand the basics and how to set up `Dropbox` provider to Aura Auth.
+
+- [Dropbox OAuth App](#dropbox-oauth-app)
+  - [Creating an OAuth App](#creating-an-oauth-app)
+- [Dropbox Aura Auth](#dropbox-aura-auth)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Configure the provider](#configure-the-provider)
+  - [Get HTTP handlers](#get-http-handlers)
+- [Resources](#resources)
+
+---
+
+<Steps>
+
+<Step>
+
+## Dropbox OAuth App
+
+### Creating an OAuth app
+
+The first step is to create and register a [`Dropbox App`](https://www.dropbox.com/developers/apps) to grant access to the user's accessible resources
+like `Get Current Account` (used by Aura Auth), `Files`, `Sharing`, etc. For more detailed information, read the [OAuth Guide](https://developers.dropbox.com/oauth-guide), [Dropbox API v2](https://www.dropbox.com/developers/documentation/http/documentation), and [My Apps Panel](https://www.dropbox.com/developers/apps).
+
+Registering a Dropbox OAuth app includes:
+
+- `Choose an API`: Select the `Scoped access` option.
+- `Choose the type of access you need`: Select `Full Dropbox` to access all files and folders in a user's Dropbox.
+- `Name your app`: The application name shown when the user grants access to the app.
+
+Once these values are filled in, the app is registered. Now configure the OAuth app.
+
+#### Settings Panel
+
+- `Redirect URIs`: The URL where Dropbox redirects after authorization. It should end with `/auth/callback/dropbox` for both local and production environments.
+  - Local environment: `http://localhost:3000/auth/callback/dropbox`
+  - Production environment: Set the URL of your application.
+- `Allow public clients (Implicit Grant & PKCE)`: Select the `Allow` option.
+
+#### Permissions Panel
+
+- `Scope`: By default, the scope for an OAuth App is `account_info.read`, which allows retrieving basic information about your Dropbox account such as username, email, and country. This is required by default by Aura Auth.
+
+#### Branding Panel
+
+- `App Name`: The application name shown when the user grants access to the app. This overrides the `Name your app` value from the first step.
+- `Description`: An optional description of what the app does.
+- `App website`: The home URL of your website.
+- `Privacy policy URL`: Your privacy policy URL.
+- `App icons`: Set icons for the consent screen.
+  - Icon 64x64
+  - Icon 256x256
+
+</Step>
+
+<Step>
+
+## Dropbox Aura Auth
+
+### Installation
+
+install the package using a package manager like `npm`, `pnpm` or `yarn`
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Now, it's time to create and consume the Dropbox credentials required and used by Aura Auth, it include the `client Id` and `client Secret` and write them into a `.env` file.
+
+Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+
+```bash title=".env" lineNumbers
+# Dropbox Credentials
+AURA_AUTH_DROPBOX_CLIENT_ID="dropbox_client_id"
+AURA_AUTH_DROPBOX_CLIENT_SECRET="dropbox_client_secret"
+
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+```
+
+<Callout type="warning">
+  The `AURA_AUTH_SECRET` will recommended to be random and high antropy key to avoid attackers decifer the secret used by the Aura
+  Auth application.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the provider
+
+Set the `oauth` option of the `createAuth` instance and writing `"dropbox"` name.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["dropbox"],
+})
+
+export const { handlers } = auth
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
+
+```ts title="backend.ts" lineNumbers
+import { handlers } from "@/auth"
+
+export const { GET, POST } = handlers
+```
+
+<Callout>
+  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
+  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+</Callout>
+
+</Step>
+
+</Steps>
+
+---
+
+## Resources
+
+- [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [Dropbox - OAuth Guide](https://developers.dropbox.com/oauth-guide)
+- [Dropbox - API v2](https://www.dropbox.com/developers/documentation/http/documentation)
+- [Dropbox - Get Current Account](https://www.dropbox.com/developers/documentation/http/documentation#users-get_current_account)
+- [Dropbox - My Apps](https://www.dropbox.com/developers/apps)
+- [Dropbox - Developer Guide](https://www.dropbox.com/developers/reference/developer-guide)
