@@ -1,15 +1,31 @@
-import { redirect } from "react-router"
 import type { Session } from "@aura-stack/auth"
 
-export const getBaseUrl = (headers: Headers): string => {
-    const host = headers.get("host") || "localhost:5174"
-    const protocol = headers.get("x-forwarded-proto") || "http"
-    return `${protocol}://${host}`
+export const getSession = async (request: Request): Promise<Session | null> => {
+    const getBaseURL = () => {
+        const host = window.location.host
+        return `${window.location.protocol}//${host}`
+    }
+
+    try {
+        const baseURL = getBaseURL()
+        const response = await fetch(`${baseURL}/auth/session`, {
+            headers: request.headers,
+            cache: "no-store",
+        })
+        const session = await response.json()
+        return session
+    } catch (error) {
+        return null
+    }
 }
 
 export const getCSRFToken = async (request: Request): Promise<string> => {
-    const baseURL = getBaseUrl(request.headers)
+    const getBaseURL = () => {
+        const host = window.location.host
+        return `${window.location.protocol}//${host}`
+    }
     try {
+        const baseURL = getBaseURL()
         const response = await fetch(`${baseURL}/auth/csrfToken`, {
             method: "GET",
             headers: request.headers,
@@ -28,42 +44,26 @@ export const getCSRFToken = async (request: Request): Promise<string> => {
 }
 
 export const signOut = async (request: Request) => {
-    const baseURL = getBaseUrl(request.headers)
+    const getBaseURL = () => {
+        const host = window.location.host
+        return `${window.location.protocol}//${host}`
+    }
 
     try {
+        const baseURL = getBaseURL()
         const csrfToken = await getCSRFToken(request)
         const response = await fetch(`${baseURL}/auth/signOut?token_type_hint=session_token`, {
             method: "POST",
+            cache: "no-store",
             headers: {
                 "X-CSRF-Token": csrfToken,
                 "Content-Type": "application/json",
                 Cookie: request.headers.get("Cookie") ?? "",
             },
             body: JSON.stringify({}),
-            cache: "no-store",
         })
-        if (response.status === 202) {
-            return redirect("/", {
-                headers: response.headers,
-            })
-        }
-        return await response.json()
-    } catch (error) {
-        throw error
-    }
-}
-
-export const getSession = async (request: Request): Promise<Session | null> => {
-    const baseURL = getBaseUrl(request.headers)
-    try {
-        const response = await fetch(`${baseURL}/auth/session`, {
-            headers: request.headers,
-            cache: "no-store",
-        })
-        if (!response.ok) {
-            return null
-        }
-        return await response.json()
+        const session = await response.json()
+        return session
     } catch (error) {
         return null
     }
