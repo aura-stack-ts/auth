@@ -1,10 +1,23 @@
 import { Form } from "react-router"
-import type { SessionCardProps } from "~/@types/props"
+import { getSession, signOut } from "~/actions/auth"
+import type { Route } from "./+types/server"
 
-export const SessionCard = ({ title, session, isAuthenticated }: SessionCardProps) => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+    const session = await getSession(request)
+    return session
+}
+
+export const action = async ({ request }: Route.ActionArgs) => {
+    return await signOut(request)
+}
+
+const Server = ({ loaderData }: Route.ComponentProps) => {
+    const session = loaderData
+    const isAuthenticated = !!session?.user
+
     return (
         <section className="pt-8 p-6 relative border border-solid border-zinc-200 rounded-lg dark:border-zinc-800 bg-white dark:bg-zinc-900">
-            <span className="py-0.5 px-2 text-xs absolute -top-3 left-0 rounded-full bg-blue-500">{title}</span>
+            <span className="py-0.5 px-2 text-xs absolute -top-3 left-0 rounded-full bg-blue-500">Server Side</span>
             <div className="border border-solid border-zinc-200 rounded-lg relative dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
                 <h2 className="mb-4 text-lg font-semibold">Session Status</h2>
                 <div className="mb-4 flex items-center gap-2">
@@ -46,3 +59,5 @@ export const SessionCard = ({ title, session, isAuthenticated }: SessionCardProp
         </section>
     )
 }
+
+export default Server

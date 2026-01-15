@@ -1,4 +1,5 @@
 import { createContext, use, useEffect, useState, type Dispatch, type PropsWithChildren, type SetStateAction } from "react"
+import { getSession } from "~/actions/auth.client"
 import type { Session } from "@aura-stack/auth"
 
 interface AuthContextValue {
@@ -15,23 +16,13 @@ export const AuthContext = createContext<AuthContextValue | undefined>(undefined
 
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
+    const isAuthenticated = !!session?.user
 
     useEffect(() => {
-        const controller = new AbortController()
         if (!session) {
-            const getBaseURL = () => {
-                const host = window.location.host
-                return `${window.location.protocol}//${host}`
-            }
-
             const fetchSession = async () => {
                 try {
-                    const baseURL = getBaseURL()
-                    const response = await fetch(`${baseURL}/auth/session`, {
-                        cache: "no-store",
-                        signal: controller.signal,
-                    })
-                    const session = await response.json()
+                    const session = await getSession()
                     setSession(session)
                 } catch {
                     setSession(null)
@@ -39,10 +30,8 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
             }
             fetchSession()
         }
-
-        return () => controller.abort()
     }, [])
-    return <AuthContext value={{ session, setSession, isAuthenticated: true }}>{children}</AuthContext>
+    return <AuthContext value={{ session, setSession, isAuthenticated }}>{children}</AuthContext>
 }
 
 export const useSession = () => {

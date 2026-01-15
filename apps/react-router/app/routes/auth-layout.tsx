@@ -1,15 +1,11 @@
 import { Outlet } from "react-router"
 import { AuthProvider } from "~/contexts/auth"
-import { getSession } from "~/lib/auth.client"
+import { getSession } from "~/actions/auth"
 import type { Route } from "./+types/auth-layout"
 
-export const clientLoader = async ({ request }: Route.LoaderArgs) => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
     const session = await getSession(request)
     return session
-}
-
-export const HydrateFallback = () => {
-    return <p>Loading...</p>
 }
 
 const AuthLayout = ({ loaderData }: Route.ComponentProps) => {

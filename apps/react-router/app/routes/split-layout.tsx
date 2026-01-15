@@ -1,27 +1,15 @@
-import { providers } from "~/lib/providers"
-import { getSession, signOut } from "~/lib/auth.server"
-import { ClientSession } from "~/components/client-session"
+import { Outlet } from "react-router"
 import { OAuthProviders } from "~/components/oauth-providers"
-import type { Route } from "./+types"
-import { SessionCard } from "~/components/session-card"
+import { providers as providersList } from "~/lib/providers"
+import type { Route } from "./+types/split-layout"
 
-export const loader = async ({ request }: Route.LoaderArgs) => {
-    const session = await getSession(request)
-    const providersList = providers(process.env)
-    return {
-        session,
-        providers: providersList,
-    }
+export const loader = async () => {
+    const providers = providersList(process.env)
+    return providers
 }
 
-export const action = async ({ request }: Route.ActionArgs) => {
-    return await signOut(request)
-}
-
-const Index = ({ loaderData }: Route.ComponentProps) => {
-    const { session, providers } = loaderData
-
-    const isAuthenticated = session?.user
+const SplitLayout = ({ loaderData }: Route.ComponentProps) => {
+    const providers = loaderData
     const configuredProviders = providers.filter((p) => p.configured)
 
     return (
@@ -39,8 +27,7 @@ const Index = ({ loaderData }: Route.ComponentProps) => {
                 </div>
                 <section className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                     <section className="flex flex-col gap-6">
-                        <SessionCard title="Server Side" session={session} isAuthenticated={!!isAuthenticated} />
-                        <ClientSession />
+                        <Outlet />
                     </section>
                     <section className="flex flex-col gap-6">
                         <div className="border border-solid border-zinc-200 rounded-lg bg-white dark:border-zinc-800 dark:bg-zinc-900 p-6">
@@ -60,7 +47,7 @@ const Index = ({ loaderData }: Route.ComponentProps) => {
                         </div>
                         <div className="border border-solid border-zinc-200 rounded-lg bg-white dark:border-zinc-800 dark:bg-zinc-900 p-6">
                             <h2 className="mb-4 text-lg font-semibold">Available OAuth Providers</h2>
-                            <OAuthProviders providers={providers} isAuthenticated={!!isAuthenticated} />
+                            <OAuthProviders providers={providers} isAuthenticated={false} />
                         </div>
                         <div className="border border-solid border-zinc-200 rounded-lg bg-white dark:border-zinc-800 dark:bg-zinc-900 p-6">
                             <h2 className="mb-4 text-lg font-semibold">Implementation Details</h2>
@@ -95,4 +82,4 @@ const Index = ({ loaderData }: Route.ComponentProps) => {
     )
 }
 
-export default Index
+export default SplitLayout
