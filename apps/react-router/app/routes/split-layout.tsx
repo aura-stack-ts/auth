@@ -2,14 +2,17 @@ import { Outlet } from "react-router"
 import { OAuthProviders } from "~/components/oauth-providers"
 import { providers as providersList } from "~/lib/providers"
 import type { Route } from "./+types/split-layout"
+import { getSession } from "~/actions/auth"
 
-export const loader = async () => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+    const session = await getSession(request)
     const providers = providersList(process.env)
-    return providers
+    return { session, providers }
 }
 
 const SplitLayout = ({ loaderData }: Route.ComponentProps) => {
-    const providers = loaderData
+    const { session, providers } = loaderData
+    const isAuthenticated = Boolean(session && session?.user)
     const configuredProviders = providers.filter((p) => p.configured)
 
     return (
@@ -17,9 +20,9 @@ const SplitLayout = ({ loaderData }: Route.ComponentProps) => {
             <section className="w-full min-h-screen max-w-5xl py-16 px-8 flex flex-col gap-8">
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-4">
-                        <img className="dark:invert" src="/favicon.ico" alt="React Router v7 logo" width={120} height={24} />
-                        <span className="text-2xl font-bold">+</span>
                         <h1 className="text-2xl font-bold">Aura Auth</h1>
+                        <span className="text-2xl font-bold">+</span>
+                        <img className="dark:invert" src="/favicon.ico" alt="React Router v7 logo" />
                     </div>
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">
                         Demonstration of Aura Auth authentication with OAuth 2.0 providers
@@ -47,7 +50,7 @@ const SplitLayout = ({ loaderData }: Route.ComponentProps) => {
                         </div>
                         <div className="border border-solid border-zinc-200 rounded-lg bg-white dark:border-zinc-800 dark:bg-zinc-900 p-6">
                             <h2 className="mb-4 text-lg font-semibold">Available OAuth Providers</h2>
-                            <OAuthProviders providers={providers} isAuthenticated={false} />
+                            <OAuthProviders providers={providers} isAuthenticated={isAuthenticated} />
                         </div>
                         <div className="border border-solid border-zinc-200 rounded-lg bg-white dark:border-zinc-800 dark:bg-zinc-900 p-6">
                             <h2 className="mb-4 text-lg font-semibold">Implementation Details</h2>

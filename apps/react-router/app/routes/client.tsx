@@ -1,8 +1,9 @@
-import { Form } from "react-router"
+import { Form, Link } from "react-router"
 import { useSession } from "~/contexts/auth"
 import { getSession as getSessionServer, signOut as signOutServer } from "~/actions/auth"
 import { signOut as signOutClient } from "~/actions/auth.client"
 import type { Route } from "./+types/client"
+import { useTransition } from "react"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
     const session = await getSessionServer(request)
@@ -10,15 +11,19 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 }
 
 export const action = async ({ request }: Route.ActionArgs) => {
-    const nose = await signOutServer(request)
-    return nose
+    return await signOutServer(request, "/client")
 }
 
 const Client = () => {
-    const { session, isAuthenticated } = useSession()
+    const [isPending, startTransition] = useTransition()
+    const { session, setSession, isAuthenticated } = useSession()
 
     const signOutAction = async () => {
-        await signOutClient()
+        if (isPending) return
+        startTransition(async () => {
+            const process = await signOutClient()
+            setSession((previous) => (process?.message ? null : previous))
+        })
     }
 
     return (
@@ -46,14 +51,19 @@ const Client = () => {
                         <Form method="POST">
                             <button
                                 className="w-full px-4 py-3 rounded-lg text-white font-medium transition-colors bg-red-600 hover:bg-red-700"
+                                disabled={isPending}
                                 type="submit"
                             >
-                                🔒 Secure Sign Out (with loaders)
+                                {isPending ? "Signing out..." : "🔒 Secure Sign Out (with loaders)"}
                             </button>
                         </Form>
                         <form action={signOutAction} method="POST">
-                            <button className="w-full px-4 py-3 border border-solid border-zinc-300 rounded-lg  transition-colors dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                                🔒 Secure Sign Out (with React Actions)
+                            <button
+                                className="w-full px-4 py-3 border border-solid border-zinc-300 rounded-lg  transition-colors dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                disabled={isPending}
+                                type="submit"
+                            >
+                                {isPending ? "Signing out..." : "🔒 Secure Sign Out (with React Actions)"}
                             </button>
                         </form>
                         <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-2">
@@ -62,6 +72,12 @@ const Client = () => {
                     </div>
                 </div>
             )}
+            <Link
+                to="/"
+                className="inline-block w-full px-4 py-3 rounded-lg text-white font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-center"
+            >
+                Go to Server
+            </Link>
         </section>
     )
 }

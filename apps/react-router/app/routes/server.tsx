@@ -1,4 +1,4 @@
-import { Form } from "react-router"
+import { Form, Link } from "react-router"
 import { getSession, signOut } from "~/actions/auth"
 import type { Route } from "./+types/server"
 
@@ -16,7 +16,7 @@ const Server = ({ loaderData }: Route.ComponentProps) => {
     const isAuthenticated = !!session?.user
 
     return (
-        <section className="pt-8 p-6 relative border border-solid border-zinc-200 rounded-lg dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <section className="pt-8 p-6 relative border border-solid border-zinc-200 rounded-lg space-y-4 dark:border-zinc-800 bg-white dark:bg-zinc-900">
             <span className="py-0.5 px-2 text-xs absolute -top-3 left-0 rounded-full bg-blue-500">Server Side</span>
             <div className="border border-solid border-zinc-200 rounded-lg relative dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
                 <h2 className="mb-4 text-lg font-semibold">Session Status</h2>
@@ -56,6 +56,12 @@ const Server = ({ loaderData }: Route.ComponentProps) => {
                     </div>
                 </div>
             )}
+            <Link
+                to="/client"
+                className="inline-block w-full px-4 py-3 rounded-lg text-white font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-center"
+            >
+                Go to Client
+            </Link>
         </section>
     )
 }

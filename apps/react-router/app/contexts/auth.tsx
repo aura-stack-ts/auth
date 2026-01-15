@@ -19,18 +19,18 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     const isAuthenticated = !!session?.user
 
     useEffect(() => {
-        if (!session) {
-            const fetchSession = async () => {
-                try {
-                    const session = await getSession()
-                    setSession(session)
-                } catch {
-                    setSession(null)
-                }
+        if (defaultSession) return
+        const fetchSession = async () => {
+            try {
+                const session = await getSession()
+                setSession(session)
+            } catch {
+                setSession(null)
             }
-            fetchSession()
         }
+        fetchSession()
     }, [])
+
     return <AuthContext value={{ session, setSession, isAuthenticated }}>{children}</AuthContext>
 }
 

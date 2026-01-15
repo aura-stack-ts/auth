@@ -14,11 +14,9 @@ export const getCSRFToken = async (request: Request): Promise<string> => {
             headers: request.headers,
             cache: "no-store",
         })
-
         if (!response.ok) {
             throw new Error(`Failed to fetch CSRF token: ${response.status}`)
         }
-
         const data = await response.json()
         return data.csrfToken
     } catch (error) {
@@ -26,7 +24,7 @@ export const getCSRFToken = async (request: Request): Promise<string> => {
     }
 }
 
-export const signOut = async (request: Request) => {
+export const signOut = async (request: Request, redirectTo: string = "/") => {
     const baseURL = getBaseURL(request.url)
     try {
         const csrfToken = await getCSRFToken(request)
@@ -41,11 +39,12 @@ export const signOut = async (request: Request) => {
             cache: "no-store",
         })
         if (response.status === 202) {
-            return redirect("/", {
+            return redirect(redirectTo, {
                 headers: response.headers,
             })
         }
-        return await response.json()
+        const data = await response.json()
+        return data
     } catch (error) {
         throw error
     }
@@ -61,7 +60,8 @@ export const getSession = async (request: Request): Promise<Session | null> => {
         if (!response.ok) {
             return null
         }
-        return await response.json()
+        const session = await response.json()
+        return session
     } catch (error) {
         return null
     }
