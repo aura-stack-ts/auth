@@ -16,12 +16,12 @@ describe("setCookie", () => {
         const { expires, ...exclude } = cookieStore.csrfToken.attributes
         const cookie = setCookie(cookieStore.csrfToken.name, "xyz123", exclude)
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("__Host-aura-auth.csrfToken=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
+        expect(cookie).toEqual("__Host-aura-auth.csrf_token=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 
     test("set pkce cookie with secure flag on cookie", () => {
-        const { expires, ...exclude } = cookieStore.code_verifier.attributes
-        const cookie = setCookie(cookieStore.code_verifier.name, "xyz123", exclude)
+        const { expires, ...exclude } = cookieStore.codeVerifier.attributes
+        const cookie = setCookie(cookieStore.codeVerifier.name, "xyz123", exclude)
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("__Secure-aura-auth.code_verifier=xyz123; Max-Age=300; Path=/; HttpOnly; Secure; SameSite=Lax")
     })

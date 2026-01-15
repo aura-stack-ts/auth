@@ -103,7 +103,7 @@ export type CookieStrategyAttributes = StandardCookie | SecureCookie | HostCooki
  * - `redirect_to`: Post-authentication redirect path
  * - `nonce`: OpenID Connect nonce parameter
  */
-export type CookieName = "sessionToken" | "csrfToken" | "state" | "code_verifier" | "redirect_to" | "redirect_uri"
+export type CookieName = "sessionToken" | "csrfToken" | "state" | "codeVerifier" | "redirectTo" | "redirectURI"
 
 export type CookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
 

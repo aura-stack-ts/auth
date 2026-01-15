@@ -46,9 +46,9 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
 
             const oauthConfig = providers[oauth]
             const cookieState = getCookie(request, cookies.state.name)
-            const cookieRedirectTo = getCookie(request, cookies.redirect_to.name)
-            const cookieRedirectURI = getCookie(request, cookies.redirect_uri.name)
-            const codeVerifier = getCookie(request, cookies.code_verifier.name)
+            const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
+            const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
+            const codeVerifier = getCookie(request, cookies.codeVerifier.name)
 
             if (!equals(cookieState, state)) {
                 throw new AuthSecurityError(
@@ -75,9 +75,9 @@ export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
                 .setCookie(cookies.sessionToken.name, sessionCookie, cookies.sessionToken.attributes)
                 .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
                 .setCookie(cookies.state.name, "", expiredCookieAttributes)
-                .setCookie(cookies.redirect_uri.name, "", expiredCookieAttributes)
-                .setCookie(cookies.redirect_to.name, "", expiredCookieAttributes)
-                .setCookie(cookies.code_verifier.name, "", expiredCookieAttributes)
+                .setCookie(cookies.redirectURI.name, "", expiredCookieAttributes)
+                .setCookie(cookies.redirectTo.name, "", expiredCookieAttributes)
+                .setCookie(cookies.codeVerifier.name, "", expiredCookieAttributes)
                 .toHeaders()
             return Response.json({ oauth }, { status: 302, headers: headers })
         },

@@ -21,7 +21,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: "aura-auth.sessionToken=invalidtoken",
+                    Cookie: "aura-auth.session_token=invalidtoken",
                 },
             })
         )
@@ -35,7 +35,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -52,7 +52,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -66,7 +66,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -82,11 +82,11 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("http://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
-        expect(request.headers.get("Set-Cookie")).toMatch("aura-auth.sessionToken=;")
+        expect(request.headers.get("Set-Cookie")).toMatch("aura-auth.session_token=;")
     })
 
     test("invalid access from https", async () => {
@@ -94,11 +94,11 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `aura-auth.sessionToken=${sessionToken}`,
+                    Cookie: `aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
-        expect(request.headers.get("Set-Cookie")).toMatch("aura-auth.sessionToken=;")
+        expect(request.headers.get("Set-Cookie")).toMatch("aura-auth.session_token=;")
     })
 
     test("update default profile function", async () => {
@@ -139,11 +139,11 @@ describe("sessionAction", () => {
         const redirectURI = setCookie(
             "__Secure-aura-auth.redirect_uri",
             "https://example.com/auth/callback/oauth-profile",
-            cookies.redirect_uri.attributes
+            cookies.redirectURI.attributes
         )
-        const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth", cookies.redirect_to.attributes)
+        const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth", cookies.redirectTo.attributes)
         const { codeVerifier } = await createPKCE()
-        const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier, cookies.code_verifier.attributes)
+        const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier, cookies.codeVerifier.attributes)
         const response = await GET(
             new Request("https://example.com/auth/callback/oauth-profile?code=auth_code_123&state=abc", {
                 headers: {
@@ -180,13 +180,13 @@ describe("sessionAction", () => {
         expect(mockFetch).toHaveBeenCalledTimes(2)
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
-        const sessionToken = getSetCookie(response, "__Secure-aura-auth.sessionToken")
+        const sessionToken = getSetCookie(response, "__Secure-aura-auth.session_token")
         expect(sessionToken).toBeDefined()
 
         const requestSession = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-auth.sessionToken=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
