@@ -9,38 +9,75 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignInRouteImport } from './routes/signIn'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsersProfileRouteImport } from './routes/users/profile'
+import { Route as AuthSplatRouteImport } from './routes/auth/$'
 
+const SignInRoute = SignInRouteImport.update({
+  id: '/signIn',
+  path: '/signIn',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersProfileRoute = UsersProfileRouteImport.update({
+  id: '/users/profile',
+  path: '/users/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSplatRoute = AuthSplatRouteImport.update({
+  id: '/auth/$',
+  path: '/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/signIn': typeof SignInRoute
+  '/auth/$': typeof AuthSplatRoute
+  '/users/profile': typeof UsersProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/signIn': typeof SignInRoute
+  '/auth/$': typeof AuthSplatRoute
+  '/users/profile': typeof UsersProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/signIn': typeof SignInRoute
+  '/auth/$': typeof AuthSplatRoute
+  '/users/profile': typeof UsersProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/signIn' | '/auth/$' | '/users/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/signIn' | '/auth/$' | '/users/profile'
+  id: '__root__' | '/' | '/signIn' | '/auth/$' | '/users/profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SignInRoute: typeof SignInRoute
+  AuthSplatRoute: typeof AuthSplatRoute
+  UsersProfileRoute: typeof UsersProfileRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signIn': {
+      id: '/signIn'
+      path: '/signIn'
+      fullPath: '/signIn'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +85,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users/profile': {
+      id: '/users/profile'
+      path: '/users/profile'
+      fullPath: '/users/profile'
+      preLoaderRoute: typeof UsersProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/$': {
+      id: '/auth/$'
+      path: '/auth/$'
+      fullPath: '/auth/$'
+      preLoaderRoute: typeof AuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SignInRoute: SignInRoute,
+  AuthSplatRoute: AuthSplatRoute,
+  UsersProfileRoute: UsersProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
