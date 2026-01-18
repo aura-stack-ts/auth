@@ -1,0 +1,133 @@
+---
+title: Mailchimp Authorization Provider
+description: Add Mailchimp authorization provider to Aura Auth to authentication and authorize
+---
+
+## Mailchimp
+
+Set up `Mailchimp` authorization provider to the authentication instance to Aura Auth.
+
+---
+
+## What you'll learn
+
+Through this quick start guide you are going to learn and understand the basics and how to set up `Mailchimp` provider to Aura Auth.
+
+- [Mailchimp OAuth App](#mailchimp-oauth-app)
+  - [Creating an OAuth App](#creating-an-oauth-app)
+- [Mailchimp Aura Auth](#mailchimp-aura-auth)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Configure the provider](#configure-the-provider)
+  - [Get HTTP handlers](#get-http-handlers)
+- [Resources](#resources)
+
+---
+
+<Steps>
+
+<Step>
+
+## Mailchimp OAuth App
+
+### Creating an OAuth app
+
+The first step is create and register a [`Mailchimp App`](https://us4.admin.mailchimp.com/account/oauth2/) to grant to have access to the user's accessible resources like `Metadata` (Used by Aura Auth), `Campaigns`, `Facebook Ads`, etc. For more detailed information read [Access Data on Behalf of Other Users with OAuth 2](https://mailchimp.com/developer/marketing/guides/access-user-data-oauth-2/) and [Marketing API](https://mailchimp.com/developer/marketing/api/).
+
+Registering an Mailchimp OAuth app includes:
+
+- `App name`: The application name showed when the user tries to grant to the app.
+- `App description`: An optional description of what the consumer does
+- `Company/organization`: name of the responsible of the application.
+- `App website`: link to the creator's website for detailed data related to the creator.
+
+- `Homepage URL`: The home url of the website
+- `Redirect URI`: The URL which the Mailchimp will redirect, it should end in `/auth/callback/Mailchimp` for local and production environment.
+  - Local environment: `http://192.168.241.106:3000/auth/callback/mailchimp`
+  - Production environment: production set the URL of the application.
+
+</Step>
+
+<Step>
+
+## Mailchimp Aura Auth
+
+### Installation
+
+install the package using a package manager like `npm`, `pnpm` or `yarn`
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Now, it's time to create and consume the Mailchimp credentials required and used by Aura Auth, it include the `client Id` and `client Secret` and write them into a `.env` file.
+
+Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+
+```bash title=".env" lineNumbers
+# Mailchimp Credentials
+AURA_AUTH_MAILCHIMP_CLIENT_ID="mailchimp_client_id"
+AURA_AUTH_MAILCHIMP_CLIENT_SECRET="Mmilchimp_client_secret"
+
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+```
+
+<Callout type="warning">
+  The `AURA_AUTH_SECRET` will recommended to be random and high antropy key to avoid attackers decifer the secret used by the Aura
+  Auth application.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the provider
+
+Set the `oauth` option of the `createAuth` instance and writing `"mailchimp"` name.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["mailchimp"],
+})
+
+export const { handlers } = auth
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
+
+```ts title="backend.ts" lineNumbers
+import { handlers } from "@/auth"
+
+export const { GET, POST } = handlers
+```
+
+<Callout>
+  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
+  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+</Callout>
+
+</Step>
+
+</Steps>
+
+---
+
+## Resources
+
+- [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [Mailchimp - Access Data on Behalf of Other Users with OAuth 2](https://mailchimp.com/developer/marketing/guides/access-user-data-oauth-2/)
