@@ -6,7 +6,7 @@ const getBaseURL = (request: Request) => {
     return `${url.protocol}//${url.host}`
 }
 
-export const getSession = async (request: Request, cookies: string) => {
+export const getSessionServer = async (request: Request, cookies: string) => {
     const baseURL = getBaseURL(request)
     const response = await fetch(`${baseURL}/auth/session`, {
         method: "GET",
@@ -17,7 +17,7 @@ export const getSession = async (request: Request, cookies: string) => {
     return session
 }
 
-export const getCsrfToken = async (request: Request, headers: HeadersInit) => {
+export const getCsrfTokenServer = async (request: Request, headers: HeadersInit) => {
     const baseURL = getBaseURL(request)
     const response = await fetch(`${baseURL}/auth/csrfToken`, {
         method: "GET",
@@ -28,27 +28,27 @@ export const getCsrfToken = async (request: Request, headers: HeadersInit) => {
     return json.csrfToken
 }
 
-const serverFn = createServerFn({ method: "GET" }).handler(async () => {
+export const getSession = createServerFn({ method: "GET" }).handler(async () => {
     const request = getRequest()
     const cookies = getCookies()
     const cookieStr = Object.entries(cookies)
         .map(([key, value]) => `${key}=${value}`)
         .join("; ")
-    const session = await getSession(request, cookieStr)
+    const session = await getSessionServer(request, cookieStr)
     return session
 })
 
-export const getCsrfServerFn = createServerFn({ method: "GET" }).handler(async () => {
+export const getCsrfToken = createServerFn({ method: "GET" }).handler(async () => {
     const request = getRequest()
     const headers = getRequestHeaders()
-    const csrfToken = await getCsrfToken(request, headers)
+    const csrfToken = await getCsrfTokenServer(request, headers)
     return csrfToken
 })
 
 export const signOut = createServerFn({ method: "POST" }).handler(async () => {
     const request = getRequest()
     const baseURL = getBaseURL(request)
-    const csrfToken = await getCsrfServerFn()
+    const csrfToken = await getCsrfTokenServer(request, getRequestHeaders())
     const cookies = getCookies()
     const cookieStr = Object.entries(cookies)
         .map(([key, value]) => `${key}=${value}`)
