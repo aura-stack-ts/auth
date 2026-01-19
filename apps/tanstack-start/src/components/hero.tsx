@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { Button } from "./ui/button"
 
 export const Hero = () => {
@@ -23,11 +24,13 @@ export const Hero = () => {
                 applications faster than ever.
             </p>
             <div className="flex items-center gap-4 relative z-10 mb-16">
-                <Button size="lg" aria-label="Get started with the template">
-                    Get started
+                <Button size="lg" aria-label="Get started with the template" asChild>
+                    <Link to="/signIn">Get started</Link>
                 </Button>
-                <Button variant="outline" size="lg" aria-label="Get started with the template">
-                    GitHub
+                <Button variant="outline" size="lg" aria-label="Get started with the template" asChild>
+                    <a href="https://github.com/aura-stack-ts/auth" target="_blank">
+                        GitHub
+                    </a>
                 </Button>
             </div>
             <span className="border-primary absolute -left-px -top-px block size-2 border-l-2 border-t-2" />

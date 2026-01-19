@@ -7,10 +7,12 @@ export const Header = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     return (
-        <header className="fixed top-0 w-full z-50 border-b border-gray-800/50 bg-black/80 backdrop-blur-md">
+        <header className="fixed top-0 w-full z-50 border-b border-muted bg-black/80 backdrop-blur-md">
             <nav className="w-11/12 max-w-5xl mx-auto py-4">
                 <div className="flex items-center justify-between">
-                    <div className="text-xl font-semibold text-white">Aura Auth</div>
+                    <Link to="/" className="text-xl font-semibold text-white">
+                        Aura Auth
+                    </Link>
                     <div className="hidden md:flex items-center justify-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                         <a
                             href="https://aura-stack-auth.vercel.app/docs"
