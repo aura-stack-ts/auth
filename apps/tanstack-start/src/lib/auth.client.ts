@@ -1,3 +1,4 @@
+import { AUTH_API_ENDPOINTS } from "./constants"
 import type { Session } from "@aura-stack/auth"
 
 export const getBaseURL = () => {
@@ -6,7 +7,7 @@ export const getBaseURL = () => {
 
 export const getCSRFToken = async (): Promise<string> => {
     const baseURL = getBaseURL()
-    const response = await fetch(`${baseURL}/auth/csrfToken`, {
+    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.CSRF_TOKEN}`, {
         method: "GET",
         cache: "no-store",
     })
@@ -16,7 +17,7 @@ export const getCSRFToken = async (): Promise<string> => {
 
 export const getSession = async (): Promise<Session | null> => {
     const baseURL = getBaseURL()
-    const response = await fetch(`${baseURL}/auth/session`, {
+    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SESSION}`, {
         cache: "no-store",
         credentials: "include",
     })
@@ -28,7 +29,7 @@ export const signOut = async () => {
     try {
         const baseURL = getBaseURL()
         const csrfToken = await getCSRFToken()
-        const response = await fetch(`${baseURL}/auth/signOut?token_type_hint=session_token`, {
+        const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SIGN_OUT}?token_type_hint=session_token`, {
             method: "POST",
             cache: "no-store",
             headers: {

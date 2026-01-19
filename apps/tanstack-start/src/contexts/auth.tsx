@@ -1,5 +1,5 @@
 import { createContext, use, useEffect, useState } from "react"
-import { getSession } from "@/lib/auth"
+import { getSession } from "@/lib/auth.client"
 import type { Session } from "@aura-stack/auth"
 import type { AuthContextValue } from "@/@types/types"
 import type { AuthProviderProps } from "@/@types/props"
@@ -12,7 +12,8 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     const isAuthenticated = !!session?.user
 
     useEffect(() => {
-        if (defaultSession) {
+        if (defaultSession !== undefined) {
+            setSession(defaultSession)
             setIsLoading(false)
             return
         }
@@ -39,3 +40,4 @@ export const useSession = () => {
     }
     return ctx
 }
+

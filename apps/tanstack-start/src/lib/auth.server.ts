@@ -1,25 +1,37 @@
 import { createServerFn } from "@tanstack/react-start"
 import { getCookies, getRequest, getRequestHeaders, setResponseHeader } from "@tanstack/react-start/server"
+import { AUTH_API_ENDPOINTS } from "./constants"
+import type { Session } from "@aura-stack/auth"
 
 const getBaseURL = (request: Request) => {
     const url = new URL(request.url)
     return `${url.protocol}//${url.host}`
 }
 
-export const getSessionServer = async (request: Request, cookies: string) => {
+const cookiesToString = (cookies: Record<string, string | undefined>) => {
+    return Object.entries(cookies)
+        .filter(([_, value]) => value !== undefined)
+        .map(([key, value]) => `${key}=${value}`)
+        .join("; ")
+}
+
+export const getSessionRequest = async (request: Request, cookies: string): Promise<Session | null> => {
     const baseURL = getBaseURL(request)
-    const response = await fetch(`${baseURL}/auth/session`, {
+    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SESSION}`, {
         method: "GET",
         cache: "no-store",
         headers: { cookie: cookies },
     })
+    if (!response.ok) {
+        return null
+    }
     const session = await response.json()
     return session
 }
 
-export const getCsrfTokenServer = async (request: Request, headers: HeadersInit) => {
+export const getCsrfTokenRequest = async (request: Request, headers: HeadersInit) => {
     const baseURL = getBaseURL(request)
-    const response = await fetch(`${baseURL}/auth/csrfToken`, {
+    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.CSRF_TOKEN}`, {
         method: "GET",
         cache: "no-store",
         headers,
@@ -31,29 +43,26 @@ export const getCsrfTokenServer = async (request: Request, headers: HeadersInit)
 export const getSession = createServerFn({ method: "GET" }).handler(async () => {
     const request = getRequest()
     const cookies = getCookies()
-    const cookieStr = Object.entries(cookies)
-        .map(([key, value]) => `${key}=${value}`)
-        .join("; ")
-    const session = await getSessionServer(request, cookieStr)
+    const cookieStr = cookiesToString(cookies)
+    const session = await getSessionRequest(request, cookieStr)
     return session
 })
 
 export const getCsrfToken = createServerFn({ method: "GET" }).handler(async () => {
     const request = getRequest()
     const headers = getRequestHeaders()
-    const csrfToken = await getCsrfTokenServer(request, headers)
+    const csrfToken = await getCsrfTokenRequest(request, headers)
     return csrfToken
 })
 
 export const signOut = createServerFn({ method: "POST" }).handler(async () => {
     const request = getRequest()
     const baseURL = getBaseURL(request)
-    const csrfToken = await getCsrfTokenServer(request, getRequestHeaders())
+    const csrfToken = await getCsrfTokenRequest(request, getRequestHeaders())
     const cookies = getCookies()
-    const cookieStr = Object.entries(cookies)
-        .map(([key, value]) => `${key}=${value}`)
-        .join("; ")
-    const response = await fetch(`${baseURL}/auth/signOut?token_type_hint=session_token`, {
+    const cookieStr = cookiesToString(cookies)
+
+    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SIGN_OUT}?token_type_hint=session_token`, {
         method: "POST",
         cache: "no-store",
         headers: {
@@ -65,3 +74,4 @@ export const signOut = createServerFn({ method: "POST" }).handler(async () => {
     })
     setResponseHeader("Set-Cookie", response.headers.getSetCookie())
 })
+

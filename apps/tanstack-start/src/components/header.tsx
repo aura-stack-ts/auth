@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useRouter } from "@tanstack/react-router"
 import { Button } from "./ui/button"
-import { signOut } from "@/lib/auth"
+import { signOut } from "@/lib/auth.client"
 import { Menu, X } from "lucide-react"
 import { useSession } from "@/contexts/auth"
 
