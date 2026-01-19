@@ -1,17 +1,18 @@
 import { useState } from "react"
 import { Link, useRouter } from "@tanstack/react-router"
 import { Button } from "./ui/button"
-import { signOut } from "@/lib/auth.client"
 import { Menu, X } from "lucide-react"
+import { signOut } from "@/lib/auth.client"
 import { useSession } from "@/contexts/auth"
 
 export const Header = () => {
-    const { isAuthenticated, isLoading } = useSession()
+    const { isAuthenticated, isLoading, setSession } = useSession()
     const router = useRouter()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     const handleSignOut = async () => {
         await signOut()
+        setSession(null)
         router.navigate({ to: "/" })
     }
 
@@ -26,24 +27,27 @@ export const Header = () => {
                         <a
                             href="https://aura-stack-auth.vercel.app/docs"
                             className="text-sm text-white/60 hover:text-white transition-colors"
+                            target="_blank"
                         >
                             Documentation
                         </a>
                         <a
                             href="https://github.com/aura-stack-ts/auth"
                             className="text-sm text-white/60 hover:text-white transition-colors"
+                            target="_blank"
                         >
                             Repository
                         </a>
                         <a
                             href="https://discord.com/invite/anXExMR5"
                             className="text-sm text-white/60 hover:text-white transition-colors"
+                            target="_blank"
                         >
                             Discord
                         </a>
                     </div>
                     {!isLoading && !isAuthenticated && (
-                        <Button variant="outline" size="sm" asChild>
+                        <Button className="hidden md:flex" variant="outline" size="sm" asChild>
                             <Link to="/signIn">Sign In</Link>
                         </Button>
                     )}
@@ -80,6 +84,7 @@ export const Header = () => {
                         <a
                             href="https://github.com/aura-stack-ts/auth"
                             className="text-sm text-white/60 hover:text-white transition-colors py-2"
+                            target="_blank"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Repository
@@ -87,6 +92,7 @@ export const Header = () => {
                         <a
                             href="https://discord.com/invite/anXExMR5"
                             className="text-sm text-white/60 hover:text-white transition-colors py-2"
+                            target="_blank"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Discord
