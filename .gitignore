@@ -145,3 +145,17 @@ vite.config.ts.timestamp-*
 
 # React Router
 .react-router
+
+# TanStack Start
+.DS_Store
+dist
+dist-ssr
+*.local
+count.txt
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+todos.json
