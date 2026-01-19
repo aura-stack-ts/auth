@@ -35,7 +35,7 @@ function RouteComponent() {
                 </CardHeader>
                 <CardContent className="grid gap-3">
                     {identities.map((identity) => (
-                        <SignIn key={identity.id} identity={identity.name} />
+                        <SignIn key={identity.id} id={identity.id} name={identity.name} />
                     ))}
                     <div className="relative my-4">
                         <div className="absolute inset-0 flex items-center">

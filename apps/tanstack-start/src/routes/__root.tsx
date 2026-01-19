@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react"
+import { type PropsWithChildren } from "react"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
@@ -39,9 +39,11 @@ function RootDocument({ children }: PropsWithChildren) {
                 <HeadContent />
             </head>
             <body>
-                <Header />
-                <AuthProvider>{children}</AuthProvider>
-                <Footer />
+                <AuthProvider>
+                    <Header />
+                    {children}
+                    <Footer />
+                </AuthProvider>
                 <TanStackDevtools
                     config={{
                         position: "bottom-right",

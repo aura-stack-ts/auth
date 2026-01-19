@@ -18,6 +18,7 @@ export const getSession = async (): Promise<Session | null> => {
     const baseURL = getBaseURL()
     const response = await fetch(`${baseURL}/auth/session`, {
         cache: "no-store",
+        credentials: "include",
     })
     const session = await response.json()
     return session

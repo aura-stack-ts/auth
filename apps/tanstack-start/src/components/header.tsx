@@ -1,10 +1,19 @@
 import { useState } from "react"
+import { Link, useRouter } from "@tanstack/react-router"
 import { Button } from "./ui/button"
+import { signOut } from "@/lib/auth"
 import { Menu, X } from "lucide-react"
-import { Link } from "@tanstack/react-router"
+import { useSession } from "@/contexts/auth"
 
 export const Header = () => {
+    const { isAuthenticated, isLoading } = useSession()
+    const router = useRouter()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+    const handleSignOut = async () => {
+        await signOut()
+        router.navigate({ to: "/" })
+    }
 
     return (
         <header className="fixed top-0 w-full z-50 border-b border-muted bg-black/80 backdrop-blur-md">
@@ -33,11 +42,21 @@ export const Header = () => {
                             Discord
                         </a>
                     </div>
-                    <div className="hidden md:flex items-center gap-4">
+                    {!isLoading && !isAuthenticated && (
                         <Button variant="outline" size="sm" asChild>
                             <Link to="/signIn">Sign In</Link>
                         </Button>
-                    </div>
+                    )}
+                    {isAuthenticated && (
+                        <div className="hidden md:flex items-center gap-x-2">
+                            <Button variant="outline" size="sm" onClick={handleSignOut}>
+                                Sign Out
+                            </Button>
+                            <Button size="sm" asChild>
+                                <Link to="/users/profile">Profile</Link>
+                            </Button>
+                        </div>
+                    )}
                     <button
                         type="button"
                         className="md:hidden text-white"
@@ -73,9 +92,21 @@ export const Header = () => {
                             Discord
                         </a>
                         <div className="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
-                            <Button type="button" variant="ghost" size="sm" asChild>
-                                <Link to="/signIn">Sign in</Link>
-                            </Button>
+                            {!isLoading && !isAuthenticated && (
+                                <Button type="button" variant="ghost" size="sm" asChild>
+                                    <Link to="/signIn">Sign in</Link>
+                                </Button>
+                            )}
+                            {isAuthenticated && (
+                                <div className="flex flex-col items-center gap-y-3 md:hidden">
+                                    <Button className="w-full" variant="outline" size="sm" onClick={handleSignOut}>
+                                        Sign Out
+                                    </Button>
+                                    <Button className="w-full" size="sm" asChild>
+                                        <Link to="/users/profile">Profile</Link>
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

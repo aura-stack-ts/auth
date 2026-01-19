@@ -1,33 +1,37 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import { getSession } from "@/lib/auth.server"
 import { Server, Smartphone } from "lucide-react"
+import { GetSessionClient } from "@/components/get-session-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export const Route = createFileRoute("/users/profile")({
     component: RouteComponent,
+    beforeLoad: async () => {
+        const session = await getSession()
+        if (!session?.user) {
+            throw redirect({ to: "/signIn" })
+        }
+        return session
+    },
 })
 
 function RouteComponent() {
-    const user = {
-        name: "Hernan",
-        email: "hernan@example.com",
-        image: "",
-        sub: "user_123456789",
-        role: "admin",
-    }
+    const session = Route.useRouteContext()
+    const user = session.user
 
     return (
         <div className="pt-22 pb-6 min-h-screen bg-black">
             <main className="w-11/12 max-w-5xl mx-auto container space-y-8">
-                <div className="grid gap-8 md:grid-cols-[300px_1fr]">
+                <div className="grid gap-6 base:grid-cols-[auto_1fr]">
                     <aside className="space-y-6">
                         <Card className="overflow-hidden border-muted shadow-md bg-[#121212]">
                             <CardContent className="p-6 relative">
                                 <figure className="w-24 h-24 rounded-full border-4 border-background bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground shadow-lg overflow-hidden">
                                     {user.image ? (
-                                        <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                                        <img src={user.image} alt={user?.name ?? "user"} className="w-full h-full object-cover" />
                                     ) : (
-                                        <span>{user.name.charAt(0)}</span>
+                                        <span>{user?.name?.charAt(0)}</span>
                                     )}
                                 </figure>
                                 <div className="mt-6 space-y-1">
@@ -97,26 +101,32 @@ function RouteComponent() {
                                                 <TableCell className="font-medium font-mono text-xs text-muted-foreground">
                                                     user.sub
                                                 </TableCell>
-                                                <TableCell className="font-mono text-xs">{user.sub}</TableCell>
+                                                <TableCell className="w-full max-w-0 font-mono text-xs truncate">
+                                                    {user?.sub}
+                                                </TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell className="font-medium font-mono text-xs text-muted-foreground">
                                                     user.name
                                                 </TableCell>
-                                                <TableCell className="font-mono text-xs">{user.name}</TableCell>
+                                                <TableCell className="w-full max-w-0 font-mono text-xs truncate">
+                                                    {user.name}
+                                                </TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell className="font-medium font-mono text-xs text-muted-foreground">
                                                     user.email
                                                 </TableCell>
-                                                <TableCell className="font-mono text-xs">{user.email}</TableCell>
+                                                <TableCell className="w-full max-w-0 font-mono text-xs truncate">
+                                                    {user.email ?? "No email provided"}
+                                                </TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell className="font-medium font-mono text-xs text-muted-foreground">
                                                     user.image
                                                 </TableCell>
-                                                <TableCell className="font-mono text-xs text-muted-foreground italic">
-                                                    {user.image || "No image provided"}
+                                                <TableCell className="w-full max-w-0 font-mono text-xs truncate">
+                                                    {user?.image ?? "No image provided"}
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
@@ -124,55 +134,7 @@ function RouteComponent() {
                                 </div>
                             </CardContent>
                         </Card>
-                        <Card className="border-muted shadow-md bg-[#121212]">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Smartphone className="w-5 h-5 text-[#a855f7]" />
-                                    Client Loader Data
-                                </CardTitle>
-                                <CardDescription>Session data available to the client-side via React hooks.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="rounded-md border">
-                                    <Table>
-                                        <TableHeader className="bg-muted/50">
-                                            <TableRow>
-                                                <TableHead className="w-50">Property</TableHead>
-                                                <TableHead>Value</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            <TableRow>
-                                                <TableCell className="font-medium font-mono text-xs text-muted-foreground">
-                                                    user.sub
-                                                </TableCell>
-                                                <TableCell className="font-mono text-xs">{user.sub}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell className="font-medium font-mono text-xs text-muted-foreground">
-                                                    user.name
-                                                </TableCell>
-                                                <TableCell className="font-mono text-xs">{user.name}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell className="font-medium font-mono text-xs text-muted-foreground">
-                                                    user.email
-                                                </TableCell>
-                                                <TableCell className="font-mono text-xs">{user.email}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell className="font-medium font-mono text-xs text-muted-foreground">
-                                                    user.image
-                                                </TableCell>
-                                                <TableCell className="font-mono text-xs text-muted-foreground italic">
-                                                    {user.image || "No image provided"}
-                                                </TableCell>
-                                            </TableRow>
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <GetSessionClient />
                     </div>
                 </div>
             </main>
