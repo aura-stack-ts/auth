@@ -199,8 +199,10 @@ export interface JoseInstance {
     decryptJWE: (payload: string, options?: JWTDecryptOptions) => Promise<string>
 }
 
+export type OAuthProviderRecord = Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+
 export interface RouterGlobalContext {
-    oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+    oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
     jose: JoseInstance
     secret?: string

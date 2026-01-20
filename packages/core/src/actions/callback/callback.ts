@@ -1,4 +1,4 @@
-import z from "zod"
+import { object, enum as options } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
@@ -9,15 +9,15 @@ import { createAccessToken } from "@/actions/callback/access-token.js"
 import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.js"
 import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
 import type { JWTPayload } from "@/jose.js"
-import type { AuthRuntimeConfig } from "@/@types/index.js"
+import type { OAuthProviderRecord } from "@/@types/index.js"
 
-const callbackConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
+const callbackConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/callback/:oauth", {
         schemas: {
-            searchParams: OAuthAuthorizationResponse,
-            params: z.object({
-                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
+            params: object({
+                oauth: options(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
             }),
+            searchParams: OAuthAuthorizationResponse,
         },
         middlewares: [
             (ctx) => {
@@ -32,7 +32,7 @@ const callbackConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
     })
 }
 
-export const callbackAction = (oauth: AuthRuntimeConfig["oauth"]) => {
+export const callbackAction = (oauth: OAuthProviderRecord) => {
     return createEndpoint(
         "GET",
         "/callback/:oauth",

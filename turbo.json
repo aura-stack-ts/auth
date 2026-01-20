@@ -9,7 +9,7 @@
       "dependsOn": ["^build"],
       "inputs": [".env"],
       "env": ["AURA_AUTH_*"],
-      "outputs": ["dist/**", "!.turbo/**", ".next/**"]
+      "outputs": ["dist/**", "!.turbo/**", ".next/**", ".tanstack/**", ".output/**", ".react-router/**"]
     },
     "test": {
       "dependsOn": ["^test"],
@@ -28,7 +28,7 @@
       "dependsOn": ["^type-check"]
     }
   },
-  "ui": "tui",
+  "ui": "stream",
   "cacheDir": ".turbo/cache",
   "globalDependencies": [".env", "tsconfig.json"],
   "globalEnv": [".env"]

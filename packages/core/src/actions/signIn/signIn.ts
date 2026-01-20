@@ -1,4 +1,4 @@
-import z from "zod"
+import { object, enum as options, string } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { cacheControl } from "@/headers.js"
 import { createPKCE, generateSecure } from "@/secure.js"
@@ -8,12 +8,12 @@ import type { AuthRuntimeConfig } from "@/@types/index.js"
 const signInConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
     return createEndpointConfig("/signIn/:oauth", {
         schemas: {
-            params: z.object({
-                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
+            params: object({
+                oauth: options(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
             }),
-            searchParams: z.object({
-                redirectTo: z.string().optional(),
-            })
+            searchParams: object({
+                redirectTo: string().optional(),
+            }),
         },
     })
 }
