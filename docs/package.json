@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
     "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache",
-    "start": "next start"
+    "start": "next start",
+    "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
@@ -16,7 +17,7 @@
     "fumadocs-mdx": "^14.2.4",
     "fumadocs-typescript": "^5.0.1",
     "fumadocs-ui": "^16.4.6",
-    "lucide-react": "^0.548.0",
+    "lucide-react": "catalog:lucide-react",
     "next": "catalog:next",
     "react": "catalog:react",
     "react-dom": "catalog:react"

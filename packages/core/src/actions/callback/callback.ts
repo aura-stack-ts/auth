@@ -1,4 +1,4 @@
-import { object, enum as options } from "zod/v4"
+import { object, enum as options, string } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
@@ -7,7 +7,7 @@ import { AuthSecurityError, OAuthProtocolError } from "@/errors.js"
 import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.js"
-import { OAuthAuthorizationErrorResponse, OAuthAuthorizationResponse } from "@/schemas.js"
+import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import type { JWTPayload } from "@/jose.js"
 import type { OAuthProviderRecord } from "@/@types/index.js"
 
@@ -17,7 +17,10 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
             params: object({
                 oauth: options(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
             }),
-            searchParams: OAuthAuthorizationResponse,
+            searchParams: object({
+                code: string(),
+                state: string()
+            }),
         },
         middlewares: [
             (ctx) => {

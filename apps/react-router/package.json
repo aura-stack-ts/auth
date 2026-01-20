@@ -21,13 +21,13 @@
   "devDependencies": {
     "@aura-stack/auth": "workspace:*",
     "@react-router/dev": "7.12.0",
-    "@tailwindcss/vite": "^4.1.13",
+    "@tailwindcss/vite": "catalog:@tailwindcss/vite",
     "@types/node": "catalog:node",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
     "tailwindcss": "catalog:tailwindcss",
     "typescript": "catalog:typescript",
-    "vite": "^7.1.7",
+    "vite": "catalog:vite",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

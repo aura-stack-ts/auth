@@ -23,3 +23,15 @@ catalogs:
   tailwindcss:
     tailwindcss: ^4.1.18
     "@tailwindcss/postcss": ^4.1.16
+
+  "@tailwindcss/vite":
+    "@tailwindcss/vite": ^4.0.6
+
+  zod:
+    zod: ^4.3.5
+
+  vite:
+    vite: ^7.1.7
+
+  lucide-react:
+    lucide-react: ^0.561.0
