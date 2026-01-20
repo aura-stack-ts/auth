@@ -21,13 +21,13 @@ You can run the documentation locally for development or contribution.
 ### From the repository root
 
 ```bash
-pnpm dev --filter=nextjs
+pnpm dev --filter=nextjs-demo
 ```
 
 ### Or manually from the root directory
 
 ```bash
-cd apps/nextjs
+cd apps/nextjs-demo
 pnpm install
 pnpm dev
 ```

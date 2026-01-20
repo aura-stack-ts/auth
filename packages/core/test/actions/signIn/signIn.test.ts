@@ -35,6 +35,11 @@ describe("signIn action", () => {
                 url: "https://anotherdomain.com/auth/signIn/oauth-provider",
                 expected: "https://anotherdomain.com/auth/callback/oauth-provider",
             },
+            {
+                description: "with redirectTo parameter",
+                url: "http://localhost:3000/auth/signIn/oauth-provider?redirectTo=/dashboard",
+                expected: "http://localhost:3000/auth/callback/oauth-provider",
+            }
         ]
 
         for (const { description, url, expected } of testCases) {
@@ -42,7 +47,13 @@ describe("signIn action", () => {
                 const request = await GET(new Request(url))
                 const headers = new Headers(request.headers)
 
-                const stateCookie = getSetCookie(request, "__Secure-aura-auth.state")
+                /**
+                 * @todo: review state parameter handling and cookie management.
+                 * If the connection is https, the cookie should have the Secure attribute.
+                 */
+                const stateCookie = getSetCookie(request, `aura-auth.state`)
+                const redirectToCookie = getSetCookie(request, `aura-auth.redirect_to`)
+
                 const location = headers.get("Location") as string
                 const searchParams = new URL(location).searchParams
 
@@ -51,6 +62,7 @@ describe("signIn action", () => {
                 expect(searchParams.get("client_id")).toBe("oauth_client_id")
                 expect(searchParams.get("redirect_uri")).toMatch(expected)
                 expect(stateCookie).toBeDefined()
+                expect(redirectToCookie).toEqual(url.includes("redirectTo") ? expect.stringContaining("/dashboard") : "/")
             })
         }
     })

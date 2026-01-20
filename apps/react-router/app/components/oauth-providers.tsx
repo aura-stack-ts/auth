@@ -102,6 +102,7 @@ export const OAuthProviders = ({ providers, isAuthenticated }: OAuthProvidersPro
                             </div>
                             {provider.configured && !isAuthenticated && (
                                 <Form action={`auth/signIn/${provider.id}`} method="GET" className="mt-3">
+                                    <input type="hidden" name="redirectTo" value="/" />
                                     <button className="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium transition-colors flex items-center justify-center gap-2">
                                         SignIn with {provider.name}
                                     </button>
