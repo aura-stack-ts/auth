@@ -40,4 +40,3 @@ export const useSession = () => {
     }
     return ctx
 }
-

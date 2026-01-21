@@ -1,4 +1,4 @@
-import crypto from "node:crypto"
+import crypto from "crypto"
 import { jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
 import { createSecret } from "@/secret.js"
 import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.js"

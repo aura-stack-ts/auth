@@ -39,7 +39,7 @@ describe("signIn action", () => {
                 description: "with redirectTo parameter",
                 url: "http://localhost:3000/auth/signIn/oauth-provider?redirectTo=/dashboard",
                 expected: "http://localhost:3000/auth/callback/oauth-provider",
-            }
+            },
         ]
 
         for (const { description, url, expected } of testCases) {

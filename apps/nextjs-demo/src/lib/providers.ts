@@ -1,5 +1,5 @@
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
-import { OAuthProvider } from "@/app/lib/@types/props"
+import type { OAuthProvider } from "@/@types/props"
 
 export const providers = Object.entries(builtInOAuthProviders).reduce((previous, [oauth, config]) => {
     const env = process.env

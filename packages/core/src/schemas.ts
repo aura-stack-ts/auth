@@ -1,13 +1,13 @@
-import { object, string, enum as options, number, httpUrl, z, null as nullable } from "zod/v4"
+import { object, string, enum as options, number, z, null as nullable } from "zod"
 
 /**
  * Schema for OAuth Provider Configuration
  */
 export const OAuthProviderConfigSchema = object({
-    authorizeURL: httpUrl(),
-    accessToken: httpUrl(),
+    authorizeURL: string().url(),
+    accessToken: string().url(),
     scope: string().optional(),
-    userInfo: httpUrl(),
+    userInfo: string().url(),
     responseType: options(["code", "token", "id_token"]),
     clientId: string(),
     clientSecret: string(),
@@ -31,8 +31,8 @@ export const OAuthAuthorization = OAuthProviderConfigSchema.extend({
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2
  */
 export const OAuthAuthorizationResponse = object({
-    state: string("Missing state parameter in the OAuth authorization response."),
-    code: string("Missing code parameter in the OAuth authorization response."),
+    state: string({ message: "Missing state parameter in the OAuth authorization response." }),
+    code: string({ message: "Missing code parameter in the OAuth authorization response." }),
 })
 
 /**

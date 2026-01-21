@@ -1,4 +1,4 @@
-import crypto from "node:crypto"
+import crypto from "crypto"
 import { describe, test, expect } from "vitest"
 import { createJWT } from "@/index.js"
 import { createSecret } from "@/secret.js"

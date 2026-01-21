@@ -1,4 +1,4 @@
-import { OAuthProviderConfig } from "@/@types/index.js"
+import type { OAuthProviderConfig } from "@/@types/index.js"
 
 export interface Login {
     email: string

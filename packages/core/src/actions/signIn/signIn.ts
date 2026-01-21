@@ -1,24 +1,27 @@
-import z from "zod"
+import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { cacheControl } from "@/headers.js"
 import { createPKCE, generateSecure } from "@/secure.js"
 import { createAuthorizationURL, createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.js"
-import type { AuthRuntimeConfig } from "@/@types/index.js"
+import type { OAuthProviderRecord } from "@/@types/index.js"
 
-const signInConfig = (oauth: AuthRuntimeConfig["oauth"]) => {
+const signInConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/signIn/:oauth", {
         schemas: {
             params: z.object({
-                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
+                oauth: z.enum(
+                    Object.keys(oauth) as (keyof OAuthProviderRecord)[],
+                    "The OAuth provider is not supported or invalid."
+                ),
             }),
             searchParams: z.object({
                 redirectTo: z.string().optional(),
-            })
+            }),
         },
     })
 }
 
-export const signInAction = (oauth: AuthRuntimeConfig["oauth"]) => {
+export const signInAction = (oauth: OAuthProviderRecord) => {
     return createEndpoint(
         "GET",
         "/signIn/:oauth",

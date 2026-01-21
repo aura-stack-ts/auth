@@ -1,4 +1,4 @@
-import { z } from "zod/v4"
+import { z } from "zod"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.js"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { JWTVerifyOptions, EncryptOptions, JWTDecryptOptions } from "@aura-stack/jose"
@@ -199,8 +199,10 @@ export interface JoseInstance {
     decryptJWE: (payload: string, options?: JWTDecryptOptions) => Promise<string>
 }
 
+export type OAuthProviderRecord = Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+
 export interface RouterGlobalContext {
-    oauth: Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+    oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
     jose: JoseInstance
     secret?: string

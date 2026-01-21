@@ -74,4 +74,3 @@ export const signOut = createServerFn({ method: "POST" }).handler(async () => {
     })
     setResponseHeader("Set-Cookie", response.headers.getSetCookie())
 })
-

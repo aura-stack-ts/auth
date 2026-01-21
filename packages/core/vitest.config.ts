@@ -1,8 +1,8 @@
-import path from "node:path"
+import crypto from "crypto"
+import path from "path"
 import { defineConfig } from "vitest/config"
-import { generateSecure } from "./src/secure.js"
 
-const SECRET_KEY = generateSecure()
+const SECRET_KEY = crypto.randomBytes(32).toString("base64url")
 
 export default defineConfig({
     test: {
