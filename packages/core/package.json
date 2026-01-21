@@ -60,12 +60,12 @@
     "@aura-stack/jose": "workspace:*",
     "@aura-stack/router": "^0.5.0",
     "dotenv": "^17.2.3",
-    "zod": "catalog:zod"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsup-config": "workspace:*",
-    "@types/node": "catalog:node",
-    "typescript": "catalog:typescript"
+    "typescript": "catalog:typescript",
+    "@types/node": "catalog:node"
   }
 }

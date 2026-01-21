@@ -1,4 +1,4 @@
-import { z } from "zod/v4"
+import { z } from "zod"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.js"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { JWTVerifyOptions, EncryptOptions, JWTDecryptOptions } from "@aura-stack/jose"

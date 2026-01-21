@@ -9,7 +9,10 @@ const signInConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/signIn/:oauth", {
         schemas: {
             params: z.object({
-                oauth: z.enum(Object.keys(oauth) as (keyof OAuthProviderRecord)[], "The OAuth provider is not supported or invalid."),
+                oauth: z.enum(
+                    Object.keys(oauth) as (keyof OAuthProviderRecord)[],
+                    "The OAuth provider is not supported or invalid."
+                ),
             }),
             searchParams: z.object({
                 redirectTo: z.string().optional(),

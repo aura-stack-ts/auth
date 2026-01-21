@@ -13,7 +13,7 @@ export * from "@/sign.js"
 export * from "@/encrypt.js"
 export * from "@/deriveKey.js"
 
-export type SecretInput = KeyObject |Uint8Array | string
+export type SecretInput = KeyObject | Uint8Array | string
 export type DerivedKeyInput = { jws: SecretInput; jwe: SecretInput }
 
 /**

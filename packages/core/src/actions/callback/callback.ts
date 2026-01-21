@@ -15,11 +15,14 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/callback/:oauth", {
         schemas: {
             params: z.object({
-                oauth: z.enum(Object.keys(oauth) as (keyof OAuthProviderRecord)[], "The OAuth provider is not supported or invalid."),
+                oauth: z.enum(
+                    Object.keys(oauth) as (keyof OAuthProviderRecord)[],
+                    "The OAuth provider is not supported or invalid."
+                ),
             }),
             searchParams: z.object({
                 code: z.string({ error: "The authorization code is required." }),
-                state: z.string({ error: "The state parameter is required." })
+                state: z.string({ error: "The state parameter is required." }),
             }),
         },
         middlewares: [
