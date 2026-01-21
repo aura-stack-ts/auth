@@ -21,8 +21,8 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
                 ),
             }),
             searchParams: z.object({
-                code: z.string({ error: "The authorization code is required." }),
-                state: z.string({ error: "The state parameter is required." }),
+                code: z.string("Missing code parameter in the OAuth authorization response."),
+                state: z.string("Missing state parameter in the OAuth authorization response."),
             }),
         },
         middlewares: [
