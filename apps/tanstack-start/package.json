@@ -32,7 +32,7 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "catalog:tailwindcss",
     "vite-tsconfig-paths": "^6.0.2",
-    "zod": "catalog:zod"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@aura-stack/auth": "workspace:*",

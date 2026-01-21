@@ -1,0 +1,4 @@
+{
+  "installCommand": "cd ../../ && pnpm install",
+  "buildCommand": "cd ../../ && turbo run build --filter=./packages/* && turbo run build --filter=nextjs"
+}

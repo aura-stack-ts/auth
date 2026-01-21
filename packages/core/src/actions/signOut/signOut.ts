@@ -1,4 +1,4 @@
-import { object, literal, string } from "zod/v4"
+import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder, statusCode } from "@aura-stack/router"
 import { verifyCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
@@ -9,9 +9,9 @@ import { createRedirectTo } from "@/actions/signIn/authorization.js"
 
 const config = createEndpointConfig({
     schemas: {
-        searchParams: object({
-            token_type_hint: literal("session_token"),
-            redirectTo: string().optional(),
+        searchParams: z.object({
+            token_type_hint: z.literal("session_token"),
+            redirectTo: z.string().optional(),
         }),
     },
 })

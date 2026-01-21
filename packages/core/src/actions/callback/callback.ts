@@ -1,4 +1,3 @@
-//import { object, enum as options, string } from "zod/v4"
 import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
@@ -16,7 +15,7 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/callback/:oauth", {
         schemas: {
             params: z.object({
-                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
+                oauth: z.enum(Object.keys(oauth) as (keyof OAuthProviderRecord)[], "The OAuth provider is not supported or invalid."),
             }),
             searchParams: z.object({
                 code: z.string({ error: "The authorization code is required." }),

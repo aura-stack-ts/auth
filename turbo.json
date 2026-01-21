@@ -25,7 +25,9 @@
       "outputLogs": "new-only"
     },
     "type-check": {
-      "dependsOn": ["^type-check"]
+      "dependsOn": ["^type-check"],
+      "outputLogs": "new-only",
+      "persistent": false
     }
   },
   "ui": "stream",
