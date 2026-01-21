@@ -1,4 +1,4 @@
-import { BinaryLike, hkdfSync } from "node:crypto"
+import { hkdfSync, type BinaryLike } from "crypto"
 import { createSecret } from "@/secret.js"
 import type { SecretInput } from "@/index.js"
 

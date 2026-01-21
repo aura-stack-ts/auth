@@ -1,8 +1,8 @@
-import crypto from "node:crypto"
-import { equals } from "./utils.js"
-import { AuthRuntimeConfig } from "./@types/index.js"
-import { AuthSecurityError } from "./errors.js"
-import { isJWTPayloadWithToken } from "./assert.js"
+import crypto from "crypto"
+import { equals } from "@/utils.js"
+import { AuthSecurityError } from "@/errors.js"
+import { isJWTPayloadWithToken } from "@/assert.js"
+import { AuthRuntimeConfig } from "@/@types/index.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")

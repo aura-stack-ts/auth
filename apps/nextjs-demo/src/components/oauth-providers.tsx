@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { OAuthProvidersProps } from "@/app/lib/@types/props"
+import type { OAuthProvidersProps } from "@/@types/props"
 
 export const OAuthProviders = ({ providers, isAuthenticated }: OAuthProvidersProps) => {
     const [selectedProvider, setSelectedProvider] = useState<string | null>(null)

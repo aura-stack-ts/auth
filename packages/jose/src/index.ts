@@ -3,17 +3,17 @@
  */
 import { JWTPayload } from "jose"
 import { createJWS } from "@/sign.js"
+import { getSecrets } from "@/secret.js"
 import { createJWE } from "@/encrypt.js"
 import { isAuraJoseError } from "@/assert.js"
 import { JWTDecodingError, JWTEncodingError } from "./errors.js"
-import type { KeyObject } from "node:crypto"
-import { getSecrets } from "./secret.js"
+import type { KeyObject } from "crypto"
 
 export * from "@/sign.js"
 export * from "@/encrypt.js"
 export * from "@/deriveKey.js"
 
-export type SecretInput = KeyObject | Uint8Array | string
+export type SecretInput = KeyObject |Uint8Array | string
 export type DerivedKeyInput = { jws: SecretInput; jwe: SecretInput }
 
 /**

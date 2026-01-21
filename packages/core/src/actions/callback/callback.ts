@@ -1,25 +1,26 @@
-import { object, enum as options, string } from "zod/v4"
+//import { object, enum as options, string } from "zod/v4"
+import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
+import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import { AuthSecurityError, OAuthProtocolError } from "@/errors.js"
 import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.js"
-import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import type { JWTPayload } from "@/jose.js"
 import type { OAuthProviderRecord } from "@/@types/index.js"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/callback/:oauth", {
         schemas: {
-            params: object({
-                oauth: options(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
+            params: z.object({
+                oauth: z.enum(Object.keys(oauth) as (keyof typeof oauth)[], "The OAuth provider is not supported or invalid."),
             }),
-            searchParams: object({
-                code: string(),
-                state: string()
+            searchParams: z.object({
+                code: z.string({ error: "The authorization code is required." }),
+                state: z.string({ error: "The state parameter is required." })
             }),
         },
         middlewares: [

@@ -1,0 +1,4 @@
+{
+  "buildCommand": "turbo run build --filter=nextjs... --ui=stream",
+  "framework": "nextjs"
+}

@@ -1,4 +1,4 @@
-import { Options } from "tsup"
+import type { Options } from "tsup"
 
 /**
  * Tsup base configuration used by Aura Auth packages

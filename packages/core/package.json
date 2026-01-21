@@ -64,6 +64,8 @@
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsup-config": "workspace:*"
+    "@aura-stack/tsup-config": "workspace:*",
+    "@types/node": "catalog:node",
+    "typescript": "catalog:typescript"
   }
 }
