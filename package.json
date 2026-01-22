@@ -45,5 +45,11 @@
     "typescript": "catalog:typescript",
     "vitest": "^4.0.14"
   },
-  "packageManager": "pnpm@10.15.0"
+  "packageManager": "pnpm@10.15.0",
+  "pnpm": {
+    "overrides": {
+      "seroval": "^1.4.1",
+      "lodash-es": "^4.17.23"
+    }
+  }
 }
