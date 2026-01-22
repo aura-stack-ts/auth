@@ -5,6 +5,17 @@ description: Overview of Aura Auth architecture, data flow, and key responsibili
 
 Aura Auth is built with a modular architecture enabling flexibility across different JavaScript environments.
 
+## What you'll learn
+
+This architecture concept guide covers the architecture, data flow, and key responsibilities of Aura Auth.
+
+- [High-Level Overview](#high-level-overview)
+- [Key Components](#key-components)
+- [Data Flow: OAuth Sign-In](#data-flow-oauth-sign-in)
+- [Responsibilities](#responsibilities)
+- [Security Model Integration](#security-model-integration)
+- [Resources](#resources)
+
 ## High-Level Overview
 
 At its core, Aura Auth transforms configuration into a set of standard HTTP handlers. It does not strictly depend on any specific server framework (like Express or Hono) but instead communicates using standard Web API objects ([`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) and [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response)).
@@ -12,28 +23,32 @@ At its core, Aura Auth transforms configuration into a set of standard HTTP hand
 ```mermaid
 graph TD
     User[User / Client] -->|HTTP Request| Adapter[Framework Adapter / Router]
-    Adapter -->|Request| AuthCore[createAuth]
+    Adapter -->|HTTP Request| AuthCore[createAuth]
     AuthCore -->|Reads Config| Router[createRouter]
-    Router -->|Executes Action| Action[Auth Actions]
-    Action -->|Response| Adapter
+    Router -->|Dispatches| Action[Auth Actions]
+    Action -->|HTTP Response| Adapter
     Adapter -->|HTTP Response| User
 ```
+
+This design allows Aura Auth to integrate seamlessly with any environment that supports the Fetch API, including Node.js, serverless platforms, and edge runtimes.
 
 ## Key Components
 
 ### 1. The Core (`createAuth`)
 
-The entry point of the library. It accepts the `AuthConfig` and initializes the internal context, including:
+`createAuth` is the public entry point of the library. It consumes the `AuthConfig` object and initializes all internal systems required to handle authentication flows.
 
 - **OAuth Providers**: Set the OAuth providers to be consumed in the flow from the built-in oauth providers or custom oauth providers.
 - **Cookie Store**: Granular cookie management that includes prefix name, cookie names and override attributes.
-- **Secret**: Opaque value used to signing, encrypt and hash the session, csrfTokens and more internal secrets.
-- **Base Path**: Path route where is located the `GET` and `POST` handlers.
+- **Secret**: Accepts root secrets used for deterministic key derivation. These inputs are not used directly but serve as the basis for signing, encryption, and integrity verification.
+- **Base Path**: Defines the mount path under which all authentication handlers are exposed.
 - **Trusted Proxy Headers**: Detects the origin of the request when the application is behind a reverse proxy.
 
 ### 2. The Router (`@aura-stack/router`)
 
 Aura Auth uses a lightweight internal router mechanism to dispatch requests to the correct "Action".
+
+> The router itself is framework-agnostic and operates purely on `Request` and `Response` objects.
 
 #### Actions
 
@@ -41,57 +56,55 @@ Actions are the units of logic that handle specific authentication tasks.
 
 - **SignIn Action**: Prepares the authorization OAuth flow based on the OAuth 2.0 standard.
 - **Callback Action**: Validates the provider's response, exchanges codes for tokens, and creates the session.
-- **Session Action**: Reads the session cookie, verifies the JWT integrity, and returns user data.
+- **Session Action**: Verifies the session cookie, validates token integrity, and returns authenticated user data.
 - **CsrfToken Action**: Emits CSRF tokens for the critical signOut action.
-- **SignOut Action**: Invalidates cookies.
+- **SignOut Action**: IInvalidates the active session and clears relevant cookies.
 
 ## Data Flow: OAuth Sign-In
 
-The following diagram illustrates the flow of data during a standard OAuth sign-in process.
+The following diagram illustrates the flow of data during a standard OAuth sign-in process, highlighting the interaction between the browser, your application, and the OAuth provider.
 
 ```mermaid
 sequenceDiagram
     participant User
     participant App as Application
     participant Auth as Aura Auth
-    participant Provider as OAuth Provider (e.g., GitHub)
+    participant Provider as OAuth Provider
 
-    User->>App: Click "Sign In"
-    App->>Auth: GET /auth/signIn/github
-    Auth->>Auth: Generate State & CSRF
-    Auth->>User: Redirect to Provider (Set Cookie: state, code_verifier, redirect_uri)
-    User->>Provider: Authorization Request GET https://github.com/login/oauth/authorize?params
-    Provider-->>User: Grant Access?
-    User->>Provider: Approve
-    Provider->>Auth: Redirect to /auth/callback/github?code=123&state=abc
-    Auth->>Auth: Validate State & Code
-    Auth->>Provider: Exchange Tokens POST https://github.com/login/oauth/access_token
-    Provider->>Provider: Validate Credentials (client_secret, code, code_verifier)
-    Provider->>Auth: Return Access Token { access_token: 123, token_type: "bearer" }
-    Auth->>Provider: User Info GET https://api.github.com/user
-    Auth->>Auth: Create Session JWT (sub, name, email, image)
-    Auth->>App: Redirect to Callback URL (Set Cookie: session_token)
+    User->>App: Initiate sign-in
+    App->>Auth: GET /auth/signIn/:provider
+    Auth->>Auth: Generate state, PKCE, and CSRF values
+    Auth->>User: Redirect to Provider (set temporary cookies)
+    User->>Provider: Authorization request
+    Provider-->>User: User consent
+    Provider->>Auth: Redirect to /auth/callback/:provider
+    Auth->>Auth: Validate state and PKCE
+    Auth->>Provider: Token exchange
+    Provider->>Auth: Access token response
+    Auth->>Provider: Fetch user profile
+    Auth->>Auth: Create session
+    Auth->>App: Redirect with session cookie
 ```
 
 ## Responsibilities
 
-| Component   | Responsibility                                              |
-| :---------- | :---------------------------------------------------------- |
-| **Config**  | Defines providers, secrets, and cookie settings.            |
-| **Context** | Holds shared state like the JOSE instance and Cookie Store. |
-| **Actions** | Implements the core logic for each auth route.              |
+| Component        | Responsibility                                                             |
+| :--------------- | :------------------------------------------------------------------------- |
+| **Config**       | Defines providers, secrets, and cookie settings.                           |
+| **Core Context** | Holds derived cryptographic keys, provider registry, and shared utilities. |
+| **Router**       | Dispatches requests to the correct authentication action.                  |
+| **Actions**      | Implements the core logic for each auth route.                             |
 
-## Security Model Integration
+## Security Integration
 
-The architecture deeply integrates security:
+Security concerns are deeply integrated into Aura Auth’s architecture but documented separately to maintain clarity.
 
-- **Cookies** are encrypted or signed.
-- **State** checks prevent CSRF during OAuth flows.
-- **PKCE** is used where applicable to secure the code exchange.
-- **CSRF Token** is used to prevent cross-site request forgery attacks.
-- **Key Derivation** creates deterministic derivation keys for security. Different keys are used for `signing`, `encryption`, and `csrfTokens`.
-- **AURA_AUTH_SECRET** is an opaque value used to sign, encrypt, and hash the session, tokens, and salt values.
-- **AURA_AUTH_SALT** is an opaque and deterministic value used to create derivation keys.
+Key concepts include:
+
+- Deterministic key derivation from root secrets
+- Encrypted and/or signed cookies
+- CSRF protection for state-changing requests
+- PKCE enforcement for OAuth flows
 
 ## Resources
 
