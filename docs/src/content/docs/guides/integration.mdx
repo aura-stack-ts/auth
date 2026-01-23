@@ -3,13 +3,16 @@ title: Integration Guide
 description: Learn how to integrate Aura Auth with any JavaScript library or framework
 ---
 
-Aura Auth is a framework-agnostic and modular API to implement authentication and authorization flows for TypeScript applications based on the web standards communications and protocols that includes ([`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) and [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response)) Web Interfaces and [OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749) protocol.
+Aura Auth is a **framework-agnostic and modular authentication system** designed for TypeScript applications. It is built on **Web Standards**—including the [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) and [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) interfaces—and implements the [OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749).
+
+Aura Auth can be integrated into any JavaScript runtime that supports server-side request handling.
 
 <Callout>
-  The library or framework that wants to implement Aura Auth should include at least support for server or backend
-  applications. This is because Aura Auth interacts with the integration via `GET` and `POST` handlers which communicate with the Aura
-  Auth internal workflow.
+  The integrating library or framework must support server or backend execution. Aura Auth communicates exclusively through `GET`
+  and `POST` HTTP handlers that must be mounted on a server.
 </Callout>
+
+For reference implementations, see [Aura Auth Apps](https://github.com/aura-stack-ts/auth/tree/master/apps).
 
 ---
 
@@ -20,8 +23,8 @@ This guide explains and demonstrates how to integrate Aura Auth with any framewo
 - [Core Concepts](#core-concepts)
   - [Aura Auth Instance](#aura-auth-instance)
   - [HTTP Handlers](#http-handlers)
-  - [Server](#server)
-  - [Client](#client)
+  - [Server Integration](#server)
+  - [Client Integration](#client)
 - [Resources](#resources)
 
 ---
@@ -30,7 +33,7 @@ This guide explains and demonstrates how to integrate Aura Auth with any framewo
 
 ### Aura Auth Instance
 
-The `createAuth` function is the entry function of the package which creates the Aura Auth instance configuration that defines the behavior, the options and values to be supported by the Auth Instance this includes the definitions of the [OAuth Providers](/docs/oauth) to be consumed, [Cookie Management](/docs/guides/cookie-management) and more configurable options, for more details read [createAuth API Reference](/docs/api-reference/core#create-auth).
+The `createAuth` function is the entry function of the package which creates the Aura Auth instance configuration. It defines the behavior, options, and values to be supported by the Auth Instance. This includes the definitions of the [OAuth Providers](/docs/oauth) to be consumed, [Cookie Management](/docs/guides/cookie-management), and more configurable options. For more details, read the [createAuth API Reference](/docs/api-reference/core#create-auth).
 
 ```ts title="@/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -40,15 +43,20 @@ export const auth = createAuth({
 })
 ```
 
-> It's recommended to name the auth file to `auth.ts`
+> It is recommended to place this configuration in a file named `auth.ts`
 
-The `createAuth` function returns `jose` and `handlers` objects that contains a powerful utilities and important functions to the Aura Auth flow.
+The Auth Instance exposes two main objects:
+
+- `handlers`: HTTP handlers required for the authentication flow
+- `jose`: cryptographic utilities used internally and by integrations
+
+For all configuration options, see [createAuth API Reference](/docs/api-reference/core#create-auth)
 
 ### HTTP Handlers
 
-The HTTP handlers are the HTTP methods supported in the Aura Auth flow (`GET` and `POST`) which includes pre-built routes used in the Auth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `signOut` and `csrfToken`) and must be mounted to the router or backend to have a complete and full support to authentication and authorization provided by Aura Auth.
+Aura Auth exposes pre-built HTTP handlers for the OAuth and session lifecycle. These handlers must be mounted on the server router used by the integrating framework
 
-By default the handlers must be mounted in the `/auth` route of the server backend of the integration. However, it's possible to rewrite it using `basePath` configuration option in the `createAuth` function.
+By default, the handlers are mounted under the `/auth` route on the backend server. However, this can be customized by setting the `basePath` option in the `createAuth` function.
 
 ```ts title="@/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -72,15 +80,16 @@ These handlers internally provide:
 | `/csrfToken`       | Generates a CSRF token (for forms)            |
 
 <Callout type="warning">
-  The usage of the HTTP handlers depends of the library and frameworks integration, just, Aura Auth provides the endpoint for the
-  `Aura Auth` flows.
+  Aura Auth provides the handlers, but mounting them correctly depends on the integrating framework.
 </Callout>
 
 ### Server
 
 #### Mount HTTP Handlers
 
-The integration should provide support to the server or backend application. Because it is required to mount the HTTP Handlers (`handlers`) obtained by the Aura Auth instance via `createAuth` that includes `GET` and `POST` HTTP handlers that must be mounted in a server or router that dispatches the actions made by the interaction between the web application (client) and the Aura Auth flows.
+The integration must provide support for the server or backend application. Specifically, it is required to mount the HTTP handlers (`handlers`) returned by the Aura Auth instance created via `createAuth`.
+
+These handlers expose the `GET` and `POST` endpoints that implement the Aura Auth protocol and must be registered in a server framework or router capable of dispatching incoming HTTP requests. They handle all interactions between the client application and the Aura Auth authentication flows, including redirects, callbacks, and session-related operations.
 
 ```ts title="@/server.ts" lineNumbers
 import { handlers } from "@/auth"
@@ -102,13 +111,13 @@ export const authRequest = (request: Request) => {
 }
 ```
 
-#### Sign In [#sign-in-server]
+#### Sign In (Server) [#sign-in-server]
 
-To sign in, simply redirect the user's browser to the sign-in endpoint for the chosen provider. See [Sign In in Client](#sign-in-client).
+Signing in is initiated by redirecting the user to the sign-in endpoint. See [Sign In (Client)](#sign-in-client)
 
-#### Get session [#get-session-server]
+#### Get Session (Server) [#get-session-server]
 
-To get the current or active session in the server side fetch to `/session` endpoint. See [Get Session in Server](#get-session-server)
+To retrieve the active session on the server, request the `/session` endpoint. See [Get Session (Client)](#get-session-client)
 
 ```ts title="@/auth/server.ts" lineNumbers
 export const getSession = async () => {
@@ -129,18 +138,20 @@ export const getSession = async () => {
 ```
 
 <Callout type="warning">
-  In the Server Side is required to manipulate directly the headers and cookies using the built-in functions to the library and
-  frameworks, due to headers aren't loaded automatically. In this case `getBaseURL` and `getCookies` aren't real functions, it
-  simulates built-in functions that allows to extract data of the request.
+  On the server side, headers and cookies must be accessed and manipulated explicitly using the built-in APIs provided by the
+  runtime or framework in use. Unlike client-side environments, request headers and cookies are not loaded automatically and must
+  be read directly from the incoming request.
 </Callout>
 
-#### CSRF Token [#csrf-token-server]
+#### CSRF Token (Server) [#csrf-token-server]
 
-For critical and mutation actions (like Sign Out), Aura Auth employs a CSRF protection mechanism that ensures that critical actions are made by the original user. Otherwise, if the CSRF Token is not provided the action isn't going to be possible. For more details read [CSRF Protection](/docs/concepts/security-model#csrf-protection). See [CSRF Token in Client](#csrf-token-client).
+For critical, state-changing actions (such as **Sign Out**), Aura Auth enforces a CSRF protection mechanism to ensure that these operations are initiated by the original user. If a valid CSRF token is not provided, the action will be rejected. For more details, see [CSRF Protection](/docs/concepts/security-model#csrf-protection). and refer also to [CSRF Token in Client](#csrf-token-client).
 
-##### Get CSRF Token [!toc]
-
-Once is fetched the `/csrfToken` endpoint Aura Auth internally verifies if the token was generated before or not. If it was, its verified, otherwise is generated and stored in `csrf_token` cookie.
+<Callout>
+  Once the `/csrfToken` endpoint is requested, Aura Auth internally verifies whether a CSRF token has already been generated for
+  the current session. If a token exists, it is validated and reused; otherwise, a new token is generated and stored in the
+  `csrf_token` cookie.
+</Callout>
 
 ```ts title="@/auth/server.ts" lineNumbers
 export const getCsrfToken = async () => {
@@ -158,14 +169,12 @@ export const getCsrfToken = async () => {
 ```
 
 <Callout type="warning">
-  In the Server Side is required to manipulate directly the headers and cookies using the built-in functions to the library and
-  frameworks, due to headers aren't loaded automatically. In this case `getBaseURL` and `getHeaders` aren't real functions, it
-  simulates built-in functions that allows to extract data of the request.
+  On the server side, headers and cookies must be accessed and manipulated explicitly using the built-in APIs provided by the
+  runtime or framework in use. Unlike client-side environments, request headers and cookies are not loaded automatically and must
+  be read directly from the incoming request.
 </Callout>
 
-#### Sign Out [#sign-out-server]
-
-To sign out the active session, the request must `POST` to `/signOut` endpoint. The request must include the CSRF token, preferably via the `X-CSRF-Token` header. See [Sign Out in Client](#sign-out-client).
+#### Sign Out (Server) [#sign-out-server]
 
 ```ts title="@/auth/server.ts" lineNumbers
 export const signOut = () => {
@@ -188,28 +197,27 @@ export const signOut = () => {
 ```
 
 <Callout type="warning">
-  In the Server Side is required to manipulate directly the headers and cookies using the built-in functions to the library and
-  frameworks, due to headers aren't loaded automatically. In this case `getBaseURL`, `getCookies` and `setHeaders` aren't real
-  functions, it simulates built-in functions that allows to extract data of the request.
+  The request `body` and `application/json` content type are currently required due to a temporary limitation in
+  `@aura-stack/router`.
 </Callout>
 
 ---
 
 ### Client
 
-Interacts with the exposed endpoints mounted by the HTTP handlers to communicate and acquire the state of the auth flow including getting the active session, sign out the session, sign-in and get the CSRF Token.
+The client interacts with the endpoints exposed by the mounted HTTP handlers to drive the authentication flow. This includes retrieving the active session, initiating sign-in, signing out the current session, and obtaining the CSRF token required for protected operations.
 
 <Callout>
 
-The browser (client) automatically loads the cookies and headers of the incoming request and response, so, there's no need to set them in the `fetch` request.
+In the browser (client) environment, cookies and relevant headers are automatically included in incoming requests and responses, so they do not need to be explicitly set when using `fetch`.
 
-However, this case is different on the server side, which requires extra cookies and headers manipulation for a correct behavior.
+This behavior differs on the server side, where cookies and headers must be explicitly read from and written to the request and response objects to ensure correct authentication behavior.
 
 </Callout>
 
-#### Sign In [#sign-in-client]
+#### Sign In (Client) [#sign-in-client]
 
-To sign in, simply redirect the user's browser to the sign-in endpoint for the chosen provider.
+Redirect the user to the sign-in endpoint for the selected provider.
 
 ```html title="index.html" lineNumbers
 <form action="/auth/signIn/github">
@@ -224,11 +232,11 @@ To sign in, simply redirect the user's browser to the sign-in endpoint for the c
 <a href="/auth/signIn/github">Sign in with GitHub</a>
 ```
 
-This initiates the OAuth flow, handling the redirect to the provider and the subsequent callback to your server or redirect to the defined path in the `redirectTo` search parameter. For more details about the Built-in oauth providers read [OAuth Providers](/docs/oauth).
+This initiates the OAuth flow, handling the redirect to the selected provider and the subsequent callback to your server, or redirecting to the path defined in the `redirectTo` search parameter.
 
-#### Get session [#get-session-client]
+For more details about the built-in OAuth providers, see [OAuth Providers](/docs/oauth).
 
-To check the current or active session fetch to `/session` endpoint.
+#### Get Session (Client) [#get-session-client]
 
 ```ts title="@/auth/client.ts" lineNumbers
 export const getBaseURL = () => {
@@ -246,13 +254,7 @@ export const getSession = async () => {
 }
 ```
 
-#### CSRF Token [#csrf-token-client]
-
-For critical and mutation actions (like Sign Out), Aura Auth employs a CSRF protection mechanism that ensures that critical actions are made by the original user. Otherwise, if the CSRF Token is not provided the action isn't going to be possible. For more details read [CSRF Protection](/docs/concepts/security-model#csrf-protection).
-
-##### Get CSRF Token [!toc]
-
-Once is fetched the `/csrfToken` endpoint Aura Auth internally verifies if the token was generated before or not. If it was, its verified, otherwise is generated and stored in `csrf_token` cookie.
+#### CSRF Token (Client) [#csrf-token-client]
 
 ```ts title="@/auth/client.ts" lineNumbers
 export const getCsrfToken = async () => {
@@ -263,7 +265,7 @@ export const getCsrfToken = async () => {
 }
 ```
 
-#### Sign Out [#sign-out-client]
+#### Sign Out (Client) [#sign-out-client]
 
 To sign out the active session, the request must `POST` to `/signOut` endpoint. The request must include the CSRF token, preferably via the `X-CSRF-Token` header.
 
