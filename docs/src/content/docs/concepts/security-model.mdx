@@ -1,0 +1,160 @@
+---
+title: Security Model
+description: Deep dive into the security mechanisms protecting Aura Auth
+---
+
+Aura Auth follows a `secure by default` philosophy. It provides strong security guarantees to TypeScript applications while reducing implementation complexity and configuration overhead.
+
+> Aura Auth aims to provide a framework-agnostic, secure, and ergonomic authentication system powered by open web standards such as OAuth 2.0 and OpenID Connect (coming soon).
+
+---
+
+## What you'll learn
+
+This guide explains the security mechanisms, standards, and defensive strategies used by Aura Auth to protect applications and end users.
+
+- [Authentication Standards](#authentication-standards)
+  - [OAuth 2.0](#oauth-2.0)
+- [Token Management](#token-management)
+  - [JWS (JSON Web Signature)](#jws)
+  - [JWE (JSON Web Encryption)](#jwe)
+- [Cookie Security](#cookie-security)
+- [CSRF Protection](#csrf-protection)
+  - [Double Submit Cookie & CSRF Tokens](#double-submit-cookie)
+  - [State Validation](#state-validation)
+- [Redirect Validation](#redirect-validation)
+
+---
+
+## Web Standards
+
+### OAuth 2.0
+
+Aura Auth relies on the standard [OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749). OAuth 2.0 enables applications to access protected resources without requiring users to share credentials directly with the client.
+
+Aura Auth implements a compliant OAuth 2.0 flow with additional security controls, including mandatory PKCE enforcement and strict state validation.
+
+#### PKCE (Proof Key for Code Exchange)
+
+Aura Auth enforces [PKCE (RFC 7636)](https://datatracker.ietf.org/doc/html/rfc7636) flow by default for `authorization` and `access_token` OAuth 2.0 flows, regardless of whether the provider strictly requires it.
+
+PKCE introduces the following parameters:
+
+- `code_verifier`: A cryptographically secure, high-entropy random string.
+- `code_challenge`: A SHA-256 hash of the verifier.
+- `code_challenge_method`: The hashing algorithm used to derive the `code_challenge`.
+
+This mechanism prevents authorization code interception attacks. Providers that do not support PKCE will safely ignore these parameters, as required by the OAuth 2.0 specification.
+
+**Authorization Endpoints**
+
+> RFC 6749 — OAuth 2.0 Authorization Framework
+>
+> "The authorization server MUST ignore unrecognized request parameters. Request and response parameters MUST NOT be included more than once."
+
+**Token Endpoint**
+
+> RFC 6749 — OAuth 2.0 Authorization Framework
+>
+> "The authorization server MUST ignore unrecognized request parameters.”
+
+This behavior allows Aura Auth to enforce PKCE universally without reducing provider compatibility.
+
+---
+
+## Token Management (JWT, JWS, JWE)
+
+Aura Auth uses **stateless tokens** stored in cookies to represent sessions, CSRF tokens, and transient OAuth state. All tokens are protected using standards defined by the **JOSE (JSON Object Signing and Encryption)** family.
+
+Internally, Aura Auth relies on the [`@aura-stack/jose`](/docs/api-reference/jose) package, which provides a constrained and auditable API surface for:
+
+- JWT creation and validation
+- JWS signing and verification
+- JWE encryption and decryption
+- Deterministic key derivation
+
+<Callout>
+  
+For security measures Aura Auth implements key derivation via [`HKDF (RFC 5869)`](https://datatracker.ietf.org/doc/html/rfc5869) functions to extract and derive the keys used for signing, encrypting and CSRF tokens. It ensures that the primary secret key is never used directly and remains unknown to the outside.
+
+- `AURA_AUTH_SECRET` is required and must contain at least **32 bytes of high-entropy data**
+- `AURA_AUTH_SALT` is optional and provides additional deterministic entropy for key derivation
+
+The secret values must be deterministic or rotate with caution. Changing either value invalidates all active sessions and CSRF tokens.
+
+</Callout>
+
+### JWS (JSON Web Signature) [#jws]
+
+The session data stored in `session_token` cookie and CSRF Token in `csrf_token` are signed to ensure integrity. This prevents tampering; appropriate signature verification proves that the token was issued by your server and hasn't been altered. For more detailed information read [Signing API (JWS)](/docs/api-reference/jose#signing-api-jws).
+
+### JWE (JSON Web Encryption) [#jwe]
+
+By default, session tokens in `session_token` are also encrypted. This ensures confidentiality. Even if a user (or attacker) reads the cookie, they cannot see the session contents (like user ID or email) without the `AURA_AUTH_SECRET`. For more detailed information read [Encryption API (JWE)](/docs/api-reference/jose#encryption-api-jwe).
+
+---
+
+## Cookie Security
+
+The secret values in Aura Auth are stateless and stored in cookies, so the cookies are configured with strict security flags automatically to provide `secure by default`.
+
+- **HttpOnly**: Prevents JavaScript access (mitigates XSS).
+- **Secure**: Ensures cookies are only sent over HTTPS (except on localhost).
+- **SameSite**: Defaults to `Lax` to balance security (CSRF protection) with usability.
+- **Domain restrictions**: Wildcard domains are never allowed.
+
+Aura Auth validates all cookie configuration options. If an insecure value is provided through `AuthConfig.cookies`, the library emits a warning and applies a secure override.
+
+Detailed configuration options are documented in [AuthConfig.cookies](/docs/configuration/options#cookies).
+
+---
+
+## CSRF Protection
+
+### Double Submit Cookie & CSRF Tokens [#double-submit-cookie]
+
+For mutating actions (like Sign Out), Aura Auth employs a CSRF protection mechanism that ensures that critical actions are made by the original user. Otherwise, if the CSRF Token is not provided the action isn't going to be possible.
+
+1. A CSRF token is generated and stored in a `csrf_token` cookie.
+2. The client retrieves the token via the `/csrfToken` endpoint.
+3. The token must be sent back in the `X-CSRF-Token` request header.
+4. The server validates::
+   - The CSRF Token must be present in the `Cookie` header.
+   - The CSRF Token must be present in the `X-CSRF-Token` header.
+
+   Once the csrf tokens are sent in these two ways and verified that they match, the critical action is allowed to dispatch.
+
+### State Validation
+
+During OAuth flows, Aura Auth generates a cryptographically secure `state` parameter and stores it in an HttpOnly cookie.
+
+This value is:
+
+- Sent to the provider during the authorization request
+- Validated upon callback
+
+State mismatches result in immediate rejection of the OAuth response, preventing CSRF attacks during sign-in.
+
+```bash
+curl -G "https://service.api/oauth/authorize" \
+  --data-urlencode "state=state_123" \
+```
+
+---
+
+## Redirect Validation
+
+Open Redirect vulnerabilities are a common issue in auth systems. Aura Auth mitigates this by validating the `redirectTo` search parameter and `Referer` and `Origin` headers.
+
+- Validates that the destination URL is relative (starts with `/`) or matches the application's origin.
+- Rejects arbitrary absolute URLs and sets the value to `/`
+
+---
+
+## Resources
+
+- [The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [Proof Key for Code Exchange by OAuth Public Clients](https://datatracker.ietf.org/doc/html/rfc7636)
+- [HMAC-based Extract-and-Expand Key Derivation Function (HKDF)](https://datatracker.ietf.org/doc/html/rfc5869)
+- [Cookie Attributes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#attributes)
+- [Jose Package](/docs/api-reference/jose)
