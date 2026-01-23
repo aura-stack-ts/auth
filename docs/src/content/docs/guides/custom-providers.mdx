@@ -1,0 +1,162 @@
+---
+title: Custom OAuth Providers
+description: Define and extend OAuth providers in Aura Auth
+---
+
+Aura Auth provides **fully compliant support** for the [OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749).
+
+To minimize setup time and reduce implementation risk, Aura Auth ships with a growing set of **built-in OAuth providers** for widely used third-party services (such as GitHub, GitLab, X, Spotify, and others).
+
+However, some organizations rely on **internal OAuth servers** or providers that are not included by default. For these cases, Aura Auth allows **custom OAuth providers** to be defined while preserving the same security guarantees and integration model.
+
+---
+
+## What you'll learn
+
+This guide covers..
+
+---
+
+## OAuth Providers
+
+### Built-in OAuth Providers
+
+Aura Auth exposes a curated set of built-in OAuth providers that follow a consistent and type-safe configuration model.
+
+Built-in providers can be imported in two ways:
+
+- From the provider index (all providers) `@aura-stack/auth/oauth/index`
+- From a provider-specific entry point `@aura-stack/auth/oauth/:provider`
+
+For configuration options, see [`AuthConfig.oauth`](/docs/api-reference/core#oauth).
+
+#### Using the provider index
+
+```ts title="@/auth.ts" lineNumbers
+import { createAuth, type OAuthProviderCredentials } from "@aura-stack/auth"
+import { builtInOAuthProviders, type GitHubProfile } from "@aura-stack/auth/oauth/index"
+
+export const auth = createAuth({
+  oauth: [
+    {
+      ...builtInOAuthProviders.github,
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      profile(profile: GitHubProfile) {
+        return {
+          sub: profile.id.toString(),
+          email: profile.email,
+          image: profile.avatar_url,
+          name: profile.name,
+        }
+      },
+    } as OAuthProviderCredentials,
+  ],
+})
+```
+
+#### Using a provider-specific import
+
+```ts title="@/auth.ts" lineNumbers
+import { createAuth, type OAuthProviderCredentials } from "@aura-stack/auth"
+import { github, type GitHubProfile } from "@aura-stack/auth/oauth/github"
+
+export const auth = createAuth({
+  oauth: [
+    {
+      ...github,
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      profile(profile: GitHubProfile) {
+        return {
+          sub: profile.id.toString(),
+          email: profile.email,
+          image: profile.avatar_url,
+          name: profile.name,
+        }
+      },
+    } as OAuthProviderCredentials,
+  ],
+})
+```
+
+The `profile` function normalizes the provider-specific user profile into Aura Auth’s internal user shape.
+
+### Adding a Custom OAuth Providers
+
+If a required OAuth provider is not included, Aura Auth allows defining a fully custom provider.
+
+To do so, the provider must conform to the `OAuthProviderCredentials` interface. This interface defines the OAuth endpoints, client credentials, scopes, and optional profile mapping logic. For all available fields, see [OAuthProvider API Reference](/docs/api-reference/core#oauth)
+
+#### Minimal custom provider
+
+```ts title="@/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [
+    {
+      id: "custom",
+      name: "Custom Provider",
+      authorizeURL: "https://custom.com/authorization",
+      accessToken: "https://custom.com/access_token",
+      userInfo: "https://api.custom.com/v1/user",
+      scope: "user:email user:profile",
+      responseType: "code",
+      clientId: process.env.CLIENT_ID!,
+      clientSecret: process.env.CLIENT_SECRET!,
+    },
+  ],
+})
+```
+
+This configuration is sufficient when the provider returns a user profile compatible with Aura Auth’s default expectations.
+
+#### Custom Provider with Profile Mapping
+
+```ts title="@/auth.ts" lineNumbers
+import { createAuth, type OAuthProviderCredentials } from "@aura-stack/auth"
+
+interface CustomProvider {
+  id: number
+  username: string
+  email: string
+  name: string
+  avatar_url: string
+  web_url: string
+}
+
+const provider: OAuthProviderCredentials<CustomProvider> = {
+  id: "custom",
+  name: "Custom Provider",
+  authorizeURL: "https://custom.com/authorization",
+  accessToken: "https://custom.com/access_token",
+  userInfo: "https://api.custom.com/v1/user",
+  scope: "user:email user:profile",
+  responseType: "code",
+  clientId: process.env.CLIENT_ID!,
+  clientSecret: process.env.CLIENT_SECRET!,
+  profile(profile: CustomProvider) {
+    return {
+      sub: profile.id.toString(),
+      name: profile.name,
+      email: profile.email,
+      avatar: profile.avatar_url,
+    }
+  },
+}
+
+export const auth = createAuth({
+  oauth: [provider as OAuthProviderCredentials],
+})
+```
+
+The `profile` function is responsible for returning a stable and unique sub identifier, which is used internally for session and user identity.
+
+---
+
+## Resources
+
+- [The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [OAuth Configuration API Reference](/docs/api-reference/core#oauth)
+- [Built-in OAuth Providers](/docs/oauth)
