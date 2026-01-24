@@ -1,7 +1,15 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+useHead({
+    htmlAttrs: {
+        class: "dark",
+    },
+})
+</script>
 
 <template>
     <main>
-        <NuxtPage />
+        <NuxtLayout>
+            <NuxtPage />
+        </NuxtLayout>
     </main>
 </template>
