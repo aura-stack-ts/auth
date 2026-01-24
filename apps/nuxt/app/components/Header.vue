@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import {} from "lucide-vue-next"
-import { Button } from "@/components/ui/button.vue"
-
 const isOpen = ref(false)
 
 const toggleMenu = () => {
+    console.log("toggling menu")
     isOpen.value = !isOpen.value
 }
 
@@ -24,29 +22,34 @@ const closeMenu = () => {
                 <a class="text-sm text-white/60 transition-colors hover:text-white" href="/">Repository</a>
                 <a class="text-sm text-white/60 transition-colors hover:text-white" href="/">Discord</a>
             </ul>
-            <Button variant="outline"> nose </Button>
+            <Button variant="outline" @click="toggleMenu">nose</Button>
         </nav>
-        <div className="md:hidden bg-black/95 backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]">
-            <div className="px-6 py-4 flex flex-col gap-4">
-                <NuxtLink to="/signIn" className="text-sm text-white/60 hover:text-white transition-colors py-2">
+        <nav
+            class="md:hidden bg-black/95 backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]"
+            v-if="isOpen"
+        >
+            <div class="px-6 py-4 flex flex-col gap-4">
+                <NuxtLink to="/signIn" class="text-sm text-white/60 hover:text-white transition-colors py-2" @click="closeMenu">
                     Getting started
                 </NuxtLink>
                 <a
                     href="https://github.com/aura-stack-ts/auth"
-                    className="text-sm text-white/60 hover:text-white transition-colors py-2"
+                    class="text-sm text-white/60 hover:text-white transition-colors py-2"
                     target="_blank"
+                    @click="closeMenu"
                 >
                     Repository
                 </a>
                 <a
                     href="https://discord.com/invite/anXExMR5"
-                    className="text-sm text-white/60 hover:text-white transition-colors py-2"
+                    class="text-sm text-white/60 hover:text-white transition-colors py-2"
                     target="_blank"
+                    @click="closeMenu"
                 >
                     Discord
                 </a>
-                <div className="flex flex-col gap-2 pt-4 border-t border-gray-800/50"></div>
+                <div class="flex flex-col gap-2 pt-4 border-t border-gray-800/50"></div>
             </div>
-        </div>
+        </nav>
     </header>
 </template>
