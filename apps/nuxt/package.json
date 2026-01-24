@@ -11,9 +11,13 @@
     "prepare": "nuxt prepare"
   },
   "dependencies": {
+    "@aura-stack/auth": "workspace:*",
     "nuxt": "^4.3.0",
     "vue": "^3.5.27",
-    "vue-router": "^4.6.4",
-    "@aura-stack/auth": "workspace:*"
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:@tailwindcss/vite",
+    "tailwindcss": "catalog:tailwindcss"
   }
 }
