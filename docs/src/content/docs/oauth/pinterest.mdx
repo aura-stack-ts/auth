@@ -1,0 +1,141 @@
+---
+title: Pinterest Authorization Provider
+description: Add Pinterest authorization provider to Aura Auth to authentication and authorize
+---
+
+## Pinterest
+
+Set up `Pinterest` authorization provider to the authentication instance to Aura Auth.
+
+---
+
+## What you'll learn
+
+Through this quick start guide you are going to learn and understand the basics and how to set up `Pinterest` provider to Aura Auth.
+
+- [Pinterest OAuth App](#pinterest-oauth-app)
+  - [Creating an OAuth App](#creating-an-oauth-app)
+- [Pinterest Aura Auth](#pinterest-aura-auth)
+  - [Installation](#installation)
+  - [Environment setup](#environment-setup)
+  - [Configure the provider](#configure-the-provider)
+  - [Get HTTP handlers](#get-http-handlers)
+- [Resources](#resources)
+
+---
+
+<Steps>
+
+<Step>
+
+## Pinterest OAuth App
+
+### Creating an OAuth app
+
+The first step is to create and register a [`Pinterest App`](https://developers.pinterest.com/apps/) to grant access to the user's accessible resources like `Get User Account` (used by Aura Auth), `Media`, `Boards`, etc. For more detailed information, read [Connect App](https://developers.pinterest.com/docs/getting-started/connect-app/), [Console Apps](https://developers.pinterest.com/apps/), and [Scopes](https://developers.pinterest.com/docs/getting-started/set-up-authentication-and-authorization/#which-scopes-do-you-need).
+
+Registering a Pinterest OAuth app includes:
+
+- `Application name`: The application name shown when the user tries to grant access to the app.
+- `Company name`: Name of the organization shown when the user tries to grant access to the app.
+- `Company website or App link`: The home URL of the website.
+- `Link to Privacy policy`: The link to the privacy policy of the app.
+- `App purpose`: What the app does.
+- `Developer purpose`: Select the purpose of the Pinterest App.
+  - I am developing an app for my organization/personal use
+  - I am creating an app just to get access
+
+Once the app details are configured, the app is in `Trial access`, which tells Pinterest that the app needs to be reviewed. The confirmation or rejection is sent to the email.
+
+- `Redirect URIs`: The URL to which Pinterest will redirect. It should end in `/auth/callback/pinterest` for local and production environments. Read [Configure your app's redirect URI](https://developers.pinterest.com/docs/getting-started/connect-app/#configure-your-apps-redirect-uri).
+  - Local environment: `http://localhost:3000/auth/callback/pinterest`
+  - Production environment: Set the URL of the application.
+- `API scopes`: The scope of the app.
+
+</Step>
+
+<Step>
+
+## Pinterest Aura Auth
+
+### Installation
+
+install the package using a package manager like `npm`, `pnpm` or `yarn`
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Now, it's time to create and consume the Pinterest credentials required and used by Aura Auth, it include the `client Id` and `client Secret` and write them into a `.env` file.
+
+Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+
+```bash title=".env" lineNumbers
+# Pinterest Credentials
+AURA_AUTH_PINTEREST_CLIENT_ID="pinterest_client_id"
+AURA_AUTH_PINTEREST_CLIENT_SECRET="pinterest_client_secret"
+
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+```
+
+<Callout type="warning">
+  The `AURA_AUTH_SECRET` will recommended to be random and high antropy key to avoid attackers decifer the secret used by the Aura
+  Auth application.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Configure the provider
+
+Set the `oauth` option of the `createAuth` instance and writing `"pinterest"` name.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["pinterest"],
+})
+
+export const { handlers } = auth
+```
+
+</Step>
+
+<Step>
+
+### Get HTTP Handlers
+
+Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
+
+```ts title="backend.ts" lineNumbers
+import { handlers } from "@/auth"
+
+export const { GET, POST } = handlers
+```
+
+<Callout>
+  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
+  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
+</Callout>
+
+</Step>
+
+</Steps>
+
+---
+
+## Resources
+
+- [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
+- [Pinterest - Connect App](https://developers.pinterest.com/docs/getting-started/connect-app/)
+- [Pinterest - My Apps](https://developers.pinterest.com/apps/)
+- [Pinterest - Get User Account](https://developers.pinterest.com/docs/api/v5/user_account-get)

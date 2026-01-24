@@ -13,6 +13,7 @@ import { spotify } from "./spotify.js"
 import { x } from "./x.js"
 import { strava } from "./strava.js"
 import { mailchimp } from "./mailchimp.js"
+import { pinterest } from "./pinterest.js"
 import { OAuthEnvSchema } from "@/schemas.js"
 import { AuthInternalError } from "@/errors.js"
 import { formatZodError } from "@/utils.js"
@@ -26,6 +27,7 @@ export * from "./spotify.js"
 export * from "./x.js"
 export * from "./strava.js"
 export * from "./mailchimp.js"
+export * from "./pinterest.js"
 
 export const builtInOAuthProviders = {
     github,
@@ -37,6 +39,7 @@ export const builtInOAuthProviders = {
     x,
     strava,
     mailchimp,
+    pinterest,
 } as const
 
 /**
