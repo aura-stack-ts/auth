@@ -26,7 +26,7 @@ export const useAuth = () => {
     }
 
     const signIn = (provider: string) => {
-        window.location.href = `/api/auth/signin/${provider}`
+        window.location.href = `/api/auth/signIn/${provider}`
     }
 
     const signOut = async () => {

@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { X, Menu } from "lucide-vue-next"
+
 const isOpen = ref(false)
+const { loading, isAuthenticated, signOut } = useAuth()
 
 const toggleMenu = () => {
-    console.log("toggling menu")
     isOpen.value = !isOpen.value
 }
 
@@ -18,18 +20,43 @@ const closeMenu = () => {
             <ul
                 class="hidden md:flex items-center justify-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
             >
-                <a class="text-sm text-white/60 transition-colors hover:text-white" href="/">Documentation</a>
-                <a class="text-sm text-white/60 transition-colors hover:text-white" href="/">Repository</a>
-                <a class="text-sm text-white/60 transition-colors hover:text-white" href="/">Discord</a>
+                <a
+                    href="https://aura-stack-auth.vercel.app/docs"
+                    className="text-sm text-white/60 hover:text-white transition-colors"
+                    target="_blank"
+                >
+                    Documentation
+                </a>
+                <a
+                    href="https://github.com/aura-stack-ts/auth"
+                    className="text-sm text-white/60 hover:text-white transition-colors"
+                    target="_blank"
+                >
+                    Repository
+                </a>
+                <a
+                    href="https://discord.com/invite/anXExMR5"
+                    className="text-sm text-white/60 hover:text-white transition-colors"
+                    target="_blank"
+                >
+                    Discord
+                </a>
             </ul>
-            <Button variant="outline" @click="toggleMenu">nose</Button>
+            <Button v-if="!loading && !isAuthenticated" class="hidden md:flex" variant="outline" size="sm" as-child>
+                <NuxtLink to="/">Sign In</NuxtLink>
+            </Button>
+            <Button v-if="isAuthenticated" class="hidden md:flex" variant="outline" size="sm" @click="signOut">Sign Out</Button>
+            <Button class="md:hidden text-white" variant="outline" aria-label="Toggle menu" @click="toggleMenu">
+                <Menu v-if="!isOpen" />
+                <X v-else />
+            </Button>
         </nav>
         <nav
             class="md:hidden bg-black/95 backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]"
             v-if="isOpen"
         >
             <div class="px-6 py-4 flex flex-col gap-4">
-                <NuxtLink to="/signIn" class="text-sm text-white/60 hover:text-white transition-colors py-2" @click="closeMenu">
+                <NuxtLink to="/" class="text-sm text-white/60 hover:text-white transition-colors py-2" @click="closeMenu">
                     Getting started
                 </NuxtLink>
                 <a
@@ -48,7 +75,14 @@ const closeMenu = () => {
                 >
                     Discord
                 </a>
-                <div class="flex flex-col gap-2 pt-4 border-t border-gray-800/50"></div>
+                <div class="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
+                    <Button v-if="!loading && !isAuthenticated" class="md:hidden" variant="outline" size="sm" as-child>
+                        <NuxtLink to="/">Sign In</NuxtLink>
+                    </Button>
+                    <Button v-if="isAuthenticated" class="md:hidden" variant="outline" size="sm" @click="signOut"
+                        >Sign Out</Button
+                    >
+                </div>
             </div>
         </nav>
     </header>
