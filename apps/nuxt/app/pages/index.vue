@@ -22,20 +22,20 @@ onMounted(() => {
             <div class="w-11/12 max-w-5xl mx-auto py-24 px-6 md:border-x border-muted space-y-8">
                 <div class="space-y-4 max-w-3xl">
                     <div
-                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-white/60"
+                        class="px-3 py-1 inline-flex items-center gap-2 text-xs font-mono text-foreground rounded-full border border-muted"
                     >
                         <span class="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
                         Integration Example
                     </div>
-                    <h1 class="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tighter text-white">
+                    <h1 class="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-7xl">
                         Nuxt Auth Powered by<br />
                         <span
-                            class="bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text text-transparent italic font-serif"
+                            class="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text"
                         >
                             Aura Auth core
                         </span>
                     </h1>
-                    <p class="text-lg text-foreground max-w-xl leading-relaxed">
+                    <p class="max-w-xl text-lg text-foreground leading-relaxed">
                         This example demonstrates how to integrate Aura Auth into a Nuxt application. It showcases how to use the
                         useAuth composable to manage session state on the client side.
                     </p>
@@ -57,10 +57,10 @@ onMounted(() => {
                         </p>
                     </div>
                 </div>
-                <div class="p-8 md:p-12 flex items-center justify-center bg-black">
+                <div class="p-8 flex items-center justify-center bg-black md:p-12">
                     <div v-if="loading" class="flex flex-col items-center gap-4 py-8">
-                        <div class="h-8 w-8 border-2 border-white/10 border-t-white rounded-full animate-spin"></div>
-                        <span class="text-xs font-mono text-white/20 uppercase tracking-widest">Syncing state</span>
+                        <div class="size-8 border-2 border-muted rounded-full animate-spin" />
+                        <span class="text-xs font-mono text-foreground uppercase tracking-widest">Syncing state</span>
                     </div>
                     <div v-else class="w-full max-w-sm space-y-6">
                         <transition name="fade" mode="out-in">
@@ -68,10 +68,10 @@ onMounted(() => {
                                 <div class="py-3 px-2 border border-muted rounded-md space-y-3">
                                     <div class="flex items-center justify-between">
                                         <span class="text-xs font-mono">session active</span>
-                                        <LayoutDashboard class="size-4 text-white/20" />
+                                        <LayoutDashboard class="size-4 text-foreground" />
                                     </div>
                                     <div class="flex items-center gap-4">
-                                        <div class="h-14 w-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
+                                        <div class="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
                                             <div
                                                 class="h-full w-full rounded-full bg-black flex items-center justify-center text-xl font-bold"
                                             >
