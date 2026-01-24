@@ -8,9 +8,8 @@ export default defineEventHandler(async (event) => {
             statusCode: 405,
             statusMessage: `Method ${method} Not Allowed`,
         })
-    }    
+    }
     const webRequest = toWebRequest(event)
     const response = await handler(webRequest)
     return response
 })
-
