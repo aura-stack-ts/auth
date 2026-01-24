@@ -1,75 +1,49 @@
-# Nuxt Minimal Starter
+<div align="center">
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+<h1>Aura Auth + Nuxt</h1>
 
-## Setup
+**Demonstration app**
 
-Make sure to install dependencies:
+[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Nuxt](https://nuxt.com/)
+
+</div>
+
+---
+
+## Overview
+
+This project contains a demonstration of Aura Auth authentication with [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/oauth) with [Nuxt](https://nuxt.com/) app.
+
+## Getting Started
+
+You can run the documentation locally for development or contribution.
+
+### From the repository root
 
 ```bash
-# npm
-npm install
+pnpm dev --filter=nuxt
+```
 
-# pnpm
+### Or manually from the root directory
+
+```bash
+cd apps/nuxt
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+Once started, open your browser at `http://localhost:3000` to view the app.
 
-Build the application for production:
+## Documentation
 
-```bash
-# npm
-npm run build
+Visit the [**official documentation website**](https://aura-stack-auth.vercel.app).
 
-# pnpm
-pnpm build
+## License
 
-# yarn
-yarn build
+Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
-# bun
-bun run build
-```
+---
 
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/aura-stack-ts">Aura Stack team</a>
+</p>
