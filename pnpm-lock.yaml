@@ -9,46 +9,10 @@ catalogs:
     '@tailwindcss/vite':
       specifier: ^4.0.6
       version: 4.1.18
-  lucide-react:
-    lucide-react:
-      specifier: ^0.561.0
-      version: 0.561.0
-  next:
-    next:
-      specifier: ^16.1.1
-      version: 16.1.4
-  node:
-    '@types/node':
-      specifier: ^24.9.2
-      version: 24.10.9
-  react:
-    '@types/react':
-      specifier: ^19.2.7
-      version: 19.2.9
-    '@types/react-dom':
-      specifier: ^19.2.3
-      version: 19.2.3
-    react:
-      specifier: ^19.2.3
-      version: 19.2.3
-    react-dom:
-      specifier: ^19.2.3
-      version: 19.2.3
   tailwindcss:
-    '@tailwindcss/postcss':
-      specifier: ^4.1.16
-      version: 4.1.18
     tailwindcss:
-      specifier: ^4.1.18
+      specifier: 4.1.18
       version: 4.1.18
-  typescript:
-    typescript:
-      specifier: ^5.9.2
-      version: 5.9.3
-  vite:
-    vite:
-      specifier: ^7.1.7
-      version: 7.3.1
 
 overrides:
   seroval: ^1.4.1
@@ -264,7 +228,7 @@ importers:
         version: 0.561.0(react@19.2.3)
       nitro:
         specifier: npm:nitro-nightly@latest
-        version: nitro-nightly@3.0.1-20260124-164818-9c7d5000(chokidar@5.0.0)(ioredis@5.9.2)(lru-cache@11.2.4)(rollup@4.55.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+        version: nitro-nightly@3.0.1-20260124-165031-9c6abf17(chokidar@5.0.0)(ioredis@5.9.2)(lru-cache@11.2.4)(rollup@4.55.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       react:
         specifier: catalog:react
         version: 19.2.3
@@ -5505,8 +5469,8 @@ packages:
   nf3@0.3.6:
     resolution: {integrity: sha512-/XRUUILTAyuy1XunyVQuqGp8aEmZ2TfRTn8Rji+FA4xqv20qzL4jV7Reqbuey2XucKgPeRVcEYGScmJM0UnB6Q==}
 
-  nitro-nightly@3.0.1-20260124-164818-9c7d5000:
-    resolution: {integrity: sha512-UWYfMQCCqrO3H1FIee0kso3jbyrL0rfS3rlbOrxfzn7VQptfY89gposi3gMOh5wVTyxCloBj9DvHFwZeooyr6w==}
+  nitro-nightly@3.0.1-20260124-165031-9c6abf17:
+    resolution: {integrity: sha512-MTRYUZ+X8ZrRvN3PWK27OrrfULZRGEGYJdNwiAmDy6jqcAOM98fBChxZUTVMQtZMd6IanEIpPLB6zmGvVVgkOw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -13030,7 +12994,7 @@ snapshots:
 
   nf3@0.3.6: {}
 
-  nitro-nightly@3.0.1-20260124-164818-9c7d5000(chokidar@5.0.0)(ioredis@5.9.2)(lru-cache@11.2.4)(rollup@4.55.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
+  nitro-nightly@3.0.1-20260124-165031-9c6abf17(chokidar@5.0.0)(ioredis@5.9.2)(lru-cache@11.2.4)(rollup@4.55.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.3(srvx@0.10.1)
