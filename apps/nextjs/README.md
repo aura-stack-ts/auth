@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1>Next.js + Aura Auth</h1>
+<h1>Aura Auth + Next.js</h1>
 
 **Demonstration app**
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project contains a demonstration of Aura Auth authentication with [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/oauth) with [Next.js](https://nextjs.org/) app
+This project contains a demonstration of Aura Auth authentication with [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) with [Next.js](https://nextjs.org/) app
 
 ## Getting Started
 
@@ -21,13 +21,13 @@ You can run the documentation locally for development or contribution.
 ### From the repository root
 
 ```bash
-pnpm dev --filter=nextjs-demo
+pnpm dev --filter=nextjs
 ```
 
 ### Or manually from the root directory
 
 ```bash
-cd apps/nextjs-demo
+cd apps/nextjs
 pnpm install
 pnpm dev
 ```
