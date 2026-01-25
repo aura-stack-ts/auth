@@ -1,4 +1,5 @@
-import type { OAuthProviderConfig } from "@aura-stack/auth/types"
+import type { PropsWithChildren } from "react"
+import type { OAuthProviderConfig, Session } from "@aura-stack/auth/types"
 
 export interface OAuthProvider extends Omit<OAuthProviderConfig, "scope"> {
     scopes: string[]
@@ -11,4 +12,8 @@ export interface OAuthProvider extends Omit<OAuthProviderConfig, "scope"> {
 export interface OAuthProvidersProps {
     providers: OAuthProvider[]
     isAuthenticated: boolean
+}
+
+export interface AuthProviderProps extends PropsWithChildren {
+    session?: Session | null
 }

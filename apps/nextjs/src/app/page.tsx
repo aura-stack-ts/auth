@@ -1,13 +1,13 @@
 import Image from "next/image"
-import { signOut, useAuth } from "./server"
+import { signOut, getSession } from "../lib/server"
 import { providers } from "@/lib/providers"
 import { OAuthProviders } from "@/components/oauth-providers"
 
 export default async function Home() {
-    const session = await useAuth()
+    const session = await getSession()
 
     const configuredProviders = providers.filter((p) => p.configured)
-    const isAuthenticated = session?.user
+    const isAuthenticated = !!session?.user
 
     return (
         <main className="flex min-h-screen items-center justify-center font-sans bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
