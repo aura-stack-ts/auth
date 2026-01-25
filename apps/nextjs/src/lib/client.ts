@@ -33,7 +33,7 @@ export const signOut = async () => {
         method: "POST",
         headers: {
             "X-CSRF-Token": csrfToken,
-        }
+        },
     })
     const session = await response.json()
     return session

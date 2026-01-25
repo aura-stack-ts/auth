@@ -1,4 +1,5 @@
-import { createContext, use, useState, useEffect, useMemo } from "react"
+"use client"
+import { createContext, use, useState, useEffect } from "react"
 import { getSession, signIn as signInClient, signOut as signOutClient } from "@/lib/client"
 import type { Session } from "@aura-stack/auth"
 import type { AuthContextValue } from "@/@types/types"

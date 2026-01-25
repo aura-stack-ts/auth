@@ -8,7 +8,7 @@ import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
 const getCSRFToken = async () => {
     const headersStore = await headers()
     const csrfToken = await createRequest("/auth/csrfToken", {
-        headers: Object.fromEntries(headersStore.entries())
+        headers: Object.fromEntries(headersStore.entries()),
     })
     const json = await csrfToken.json()
     return json.csrfToken
@@ -17,9 +17,9 @@ const getCSRFToken = async () => {
 export const getSession = async () => {
     const cookiesStore = await cookies()
     const response = await createRequest("/auth/session", {
-        headers: { "Cookie": cookiesStore.toString() }
+        headers: { Cookie: cookiesStore.toString() },
     })
-    const session = await response.json() as Session
+    const session = (await response.json()) as Session
     return session
 }
 
@@ -36,13 +36,13 @@ export const signOut = async () => {
     const response = await createRequest("/auth/signOut?token_type_hint=session_token", {
         method: "POST",
         headers: {
-            "Cookie": cookieStore.toString(),
+            Cookie: cookieStore.toString(),
             "X-CSRF-Token": csrfToken,
-        }
+        },
     })
-    if(response.status === 202) {
+    if (response.status === 202) {
         const setCookies = response.headers.getSetCookie()
-        for(const cookie of setCookies) {
+        for (const cookie of setCookies) {
             const [nameValue] = cookie.split("; ")
             cookieStore.set(nameValue.split("=")[0], "")
         }

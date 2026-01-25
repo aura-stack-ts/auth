@@ -10,6 +10,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "lucide-react": "^0.563.0",
     "next": "catalog:next",
     "react": "catalog:react",
     "react-dom": "catalog:react"

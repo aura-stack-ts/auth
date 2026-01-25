@@ -1,16 +1,12 @@
-import { headers } from "next/headers"
-
-export const getBaseURLServer = async () => {
-    "use server"
-    const headersStore = await headers()
-    const host = headersStore.get("host") || "localhost:3000"
-    const protocol = headersStore.get("x-forwarded-proto") || "http"
+export const getBaseURLServer = async (headers: Headers) => {
+    const host = headers.get("host") || "localhost:3000"
+    const protocol = headers.get("x-forwarded-proto") || "http"
     return `${protocol}://${host}`
 }
 
 export const createRequest = async (endpoint: string, init?: RequestInit, timeout: number = 5000) => {
     const isServer = typeof window === "undefined"
-    const baseURL = isServer ? await getBaseURLServer() : window.location.origin
+    const baseURL = isServer ? await getBaseURLServer(new Headers(init?.headers)) : window.location.origin
     const { method = "GET", headers, body = {}, ...options } = init ?? {}
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeout)
