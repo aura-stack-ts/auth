@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
+import type { PropsWithChildren } from "react"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Header } from "@/components/header"
 import { AuthProvider } from "@/contexts/auth"
-import "./globals.css"
 import { Footer } from "@/components/footer"
+import "./globals.css"
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -55,9 +56,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
     children,
-}: Readonly<{
-    children: React.ReactNode
-}>) {
+}: Readonly<PropsWithChildren>) {
     return (
         <html className="dark" lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}>
