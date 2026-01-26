@@ -33,8 +33,8 @@ export const Hero = async () => {
                             </span>
                         </h1>
                         <p className="max-w-xl text-lg text-foreground leading-relaxed">
-                            This example demonstrates how to integrate Aura Auth Core into a Next.js application. It showcases how
-                            to use the useSession hook to manage session state on the client side.
+                            This example demonstrates how to integrate Aura Auth Core into a Next.js application. It showcases
+                            OAuth providers, server-side session management, and seamless client-server state synchronization.
                         </p>
                     </div>
                 </div>
