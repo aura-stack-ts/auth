@@ -24,17 +24,17 @@ export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redir
     window.location.href = `${baseURL}/auth/signIn/${provider}?${new URLSearchParams({ redirectTo })}`
 }
 
-/**
- * @todo: add redirectTo parameter support
- */
-export const signOut = async () => {
+export const signOut = async (redirectTo: string = "/") => {
     const csrfToken = await getCSRFToken()
-    const response = await createRequest("/auth/signOut?token_type_hint=session_token", {
-        method: "POST",
-        headers: {
-            "X-CSRF-Token": csrfToken,
-        },
-    })
+    const response = await createRequest(
+        `/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
+        {
+            method: "POST",
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        }
+    )
     const session = await response.json()
     return session
 }

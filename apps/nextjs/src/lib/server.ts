@@ -1,6 +1,7 @@
+"use server"
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
-import { createRequest, getBaseURLServer } from "./request"
+import { createRequest } from "./request"
 import type { Session } from "@aura-stack/auth"
 import type { LiteralUnion } from "@aura-stack/auth/types"
 import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
@@ -25,8 +26,7 @@ export const getSession = async () => {
 
 export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
     "use server"
-    const baseURL = await getBaseURLServer()
-    return Response.redirect(`${baseURL}/auth/signIn/${provider}?${new URLSearchParams({ redirectTo }).toString()}`, 302)
+    return redirect(`/auth/signIn/${provider}?${new URLSearchParams({ redirectTo }).toString()}`)
 }
 
 export const signOut = async () => {
@@ -54,7 +54,7 @@ export const signOut = async () => {
 /**
  * @experimental
  */
-export const createAuthServer = () => {
+export const createAuthServer = async () => {
     return {
         getSession,
         signIn,

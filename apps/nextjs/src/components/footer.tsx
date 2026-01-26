@@ -33,7 +33,7 @@ export const Footer = () => {
     ]
     return (
         <footer className="relative border-t bg-black">
-            <div className="w-11/12 mx-auto max-w-5xl md:border-x">
+            <div className="w-11/12 mx-auto max-w-5xl border-x border-muted">
                 <div className="py-10 px-6 max-w-5xl grid grid-cols-6 gap-6">
                     <div className="col-span-6 flex flex-col gap-5 md:col-span-4">
                         <a href="" className="w-max opacity-25">

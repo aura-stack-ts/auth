@@ -1,24 +1,25 @@
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
-import { Button } from "./ui/button"
+import { Button } from "@/components/ui/button"
+import { getSession, signIn } from "@/lib/server"
+import { SessionClient } from "./session-client"
+
 const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, builtInOAuthProviders.bitbucket]
 
-export const Hero = () => {
-    const session = {
-        user: {
-            id: "123456",
-            name: "John Doe",
-            email: " nose",
-            image: "",
-        },
-    }
+export const Hero = async () => {
+    const session = await getSession()
     const loading = false
-    const isAuthenticated = false
+    const isAuthenticated = session?.user !== undefined
+
+    const signInAction = async (providerId: string) => {
+        "use server"
+        await signIn(providerId)
+    }
 
     return (
         <main className="flex-1 bg-black">
             <section className="border-b border-muted">
-                <div className="w-11/12 max-w-5xl mx-auto py-24 px-6 md:border-x border-muted space-y-8">
+                <div className="w-11/12 max-w-5xl mx-auto py-24 px-6 border-x border-muted space-y-8">
                     <div className="space-y-4 max-w-3xl">
                         <div className="px-3 py-1 inline-flex items-center gap-2 text-xs font-mono text-foreground rounded-full border border-muted">
                             <span className="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
@@ -27,7 +28,7 @@ export const Hero = () => {
                         <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-7xl">
                             Next.js Auth Powered by
                             <br />
-                            <span className="text-transparent italic font-serif bg-gradient-to-r from-white via-white/80 to-white/40 bg-clip-text">
+                            <span className="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text">
                                 Aura Auth Core
                             </span>
                         </h1>
@@ -38,9 +39,8 @@ export const Hero = () => {
                     </div>
                 </div>
             </section>
-
             <section className="overflow-hidden">
-                <div className="w-11/12 max-w-5xl mx-auto md:border-x border-muted grid grid-cols-1 md:grid-cols-2">
+                <div className="w-11/12 max-w-5xl mx-auto border-x border-muted grid grid-cols-1 md:grid-cols-2">
                     <div className="p-8 md:p-12 border-b md:border-b-0 md:border-r border-muted space-y-12 bg-white/1">
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-foreground">
@@ -64,32 +64,36 @@ export const Hero = () => {
                         ) : (
                             <div className="w-full max-w-sm space-y-6">
                                 {isAuthenticated ? (
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                        <div className="py-3 px-2 border border-muted rounded-md space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-xs font-mono">session active</span>
-                                                <LayoutDashboard className="size-4 text-foreground" />
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
-                                                    <div className="h-full w-full rounded-full bg-black flex items-center justify-center text-xl font-bold">
-                                                        {session?.user?.name?.[0] || "?"}
+                                    <>
+                                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                            <div className="py-3 px-2 border border-muted rounded-md space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs font-mono italic">server session active</span>
+                                                    <LayoutDashboard className="size-4 text-foreground" />
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
+                                                        <div className="h-full w-full rounded-full bg-black flex items-center justify-center text-xl font-bold">
+                                                            {session?.user?.name?.[0] || "?"}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-lg font-medium text-white">{session?.user?.name}</p>
+                                                        <p className="text-xs text-white/40 font-mono">{session?.user?.email}</p>
                                                     </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-lg font-medium text-white">{session?.user?.name}</p>
-                                                    <p className="text-xs text-white/40 font-mono">{session?.user?.email}</p>
-                                                </div>
-                                            </div>
-                                            <div className="pt-3 border-t border-muted">
-                                                <div className="flex justify-between items-center text-[10px] font-mono">
-                                                    <span className="text-white/20 uppercase">ID</span>
-                                                    <span className="text-white/60 truncate max-w-37.5">{session?.user?.id}</span>
+                                                <div className="pt-3 border-t border-muted">
+                                                    <div className="flex justify-between items-center text-[10px] font-mono">
+                                                        <span className="text-white/20 uppercase">ID</span>
+                                                        <span className="text-white/60 truncate max-w-37.5">
+                                                            {session?.user?.sub}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <button>Sign Out</button>
-                                    </div>
+                                        <SessionClient />
+                                    </>
                                 ) : (
                                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                         <div className="space-y-4 text-center">
@@ -99,9 +103,15 @@ export const Hero = () => {
                                             </p>
                                             <div className="flex flex-col gap-y-2">
                                                 {providers.map((provider) => (
-                                                    <Button variant="outline" size="sm" key={provider.id}>
-                                                        Sign In with {provider.name}
-                                                    </Button>
+                                                    <form
+                                                        className="w-full"
+                                                        action={signInAction.bind(null, provider.id)}
+                                                        key={provider.id}
+                                                    >
+                                                        <Button className="w-full" variant="outline" size="sm" key={provider.id}>
+                                                            Sign In with {provider.name}
+                                                        </Button>
+                                                    </form>
                                                 ))}
                                             </div>
                                         </div>
