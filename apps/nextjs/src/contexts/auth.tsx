@@ -1,21 +1,23 @@
 "use client"
 import { createContext, use, useState, useEffect } from "react"
-import { getSession, signIn as signInClient, signOut as signOutClient } from "@/lib/client"
+import { createAuthClient } from "@/lib/client"
 import type { Session } from "@aura-stack/auth"
 import type { AuthContextValue } from "@/@types/types"
 import type { AuthProviderProps } from "@/@types/props"
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+const { signIn: signInClient, signOut: signOutClient, getSession } = createAuthClient()
+
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState(defaultSession === undefined)
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
     const isAuthenticated = Boolean(session?.user)
 
-    const signOut = async () => {
+    const signOut = async (...args: Parameters<typeof signOutClient>) => {
         setIsLoading(true)
         try {
-            await signOutClient()
+            await signOutClient(...args)
             setSession(null)
         } finally {
             setIsLoading(false)

@@ -1,14 +1,14 @@
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 import { Button } from "@/components/ui/button"
-import { getSession, signIn } from "@/lib/server"
-import { SessionClient } from "./session-client"
+import { createAuthServer } from "@/lib/server"
+import { SessionClient } from "./get-session-client"
 
 const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, builtInOAuthProviders.bitbucket]
 
 export const Hero = async () => {
+    const { getSession, signIn } = await createAuthServer()
     const session = await getSession()
-    const loading = false
     const isAuthenticated = session?.user !== undefined
 
     const signInAction = async (providerId: string) => {
@@ -56,69 +56,62 @@ export const Hero = async () => {
                         </div>
                     </div>
                     <div className="p-8 flex items-center justify-center bg-black md:p-12">
-                        {loading ? (
-                            <div className="flex flex-col items-center gap-4 py-8">
-                                <div className="size-8 border-2 border-muted rounded-full animate-spin" />
-                                <span className="text-xs font-mono text-foreground uppercase tracking-widest">Syncing state</span>
-                            </div>
-                        ) : (
-                            <div className="w-full max-w-sm space-y-6">
-                                {isAuthenticated ? (
-                                    <>
-                                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                            <div className="py-3 px-2 border border-muted rounded-md space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-xs font-mono italic">server session active</span>
-                                                    <LayoutDashboard className="size-4 text-foreground" />
-                                                </div>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
-                                                        <div className="h-full w-full rounded-full bg-black flex items-center justify-center text-xl font-bold">
-                                                            {session?.user?.name?.[0] || "?"}
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-lg font-medium text-white">{session?.user?.name}</p>
-                                                        <p className="text-xs text-white/40 font-mono">{session?.user?.email}</p>
+                        <div className="w-full max-w-sm space-y-6">
+                            {isAuthenticated ? (
+                                <>
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                        <div className="py-3 px-2 border border-muted rounded-md space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-mono italic">server session active</span>
+                                                <LayoutDashboard className="size-4 text-foreground" />
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <div className="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
+                                                    <div className="h-full w-full rounded-full bg-black flex items-center justify-center text-xl font-bold">
+                                                        {session?.user?.name?.[0] || "?"}
                                                     </div>
                                                 </div>
-                                                <div className="pt-3 border-t border-muted">
-                                                    <div className="flex justify-between items-center text-[10px] font-mono">
-                                                        <span className="text-white/20 uppercase">ID</span>
-                                                        <span className="text-white/60 truncate max-w-37.5">
-                                                            {session?.user?.sub}
-                                                        </span>
-                                                    </div>
+                                                <div>
+                                                    <p className="text-lg font-medium text-white">{session?.user?.name}</p>
+                                                    <p className="text-xs text-white/40 font-mono">{session?.user?.email}</p>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <SessionClient />
-                                    </>
-                                ) : (
-                                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                        <div className="space-y-4 text-center">
-                                            <h2 className="text-2xl font-semibold text-white">Sign in to continue</h2>
-                                            <p className="text-sm text-white/40">
-                                                Choose a provider below to authenticate and start your session.
-                                            </p>
-                                            <div className="flex flex-col gap-y-2">
-                                                {providers.map((provider) => (
-                                                    <form
-                                                        className="w-full"
-                                                        action={signInAction.bind(null, provider.id)}
-                                                        key={provider.id}
-                                                    >
-                                                        <Button className="w-full" variant="outline" size="sm" key={provider.id}>
-                                                            Sign In with {provider.name}
-                                                        </Button>
-                                                    </form>
-                                                ))}
+                                            <div className="pt-3 border-t border-muted">
+                                                <div className="flex justify-between items-center text-[10px] font-mono">
+                                                    <span className="text-white/20 uppercase">ID</span>
+                                                    <span className="text-white/60 truncate max-w-37.5">
+                                                        {session?.user?.sub}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        )}
+                                    <SessionClient />
+                                </>
+                            ) : (
+                                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="space-y-4 text-center">
+                                        <h2 className="text-2xl font-semibold text-white">Sign in to continue</h2>
+                                        <p className="text-sm text-white/40">
+                                            Choose a provider below to authenticate and start your session.
+                                        </p>
+                                        <div className="flex flex-col gap-y-2">
+                                            {providers.map((provider) => (
+                                                <form
+                                                    className="w-full"
+                                                    action={signInAction.bind(null, provider.id)}
+                                                    key={provider.id}
+                                                >
+                                                    <Button className="w-full" variant="outline" size="sm" key={provider.id}>
+                                                        Sign In with {provider.name}
+                                                    </Button>
+                                                </form>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </section>
