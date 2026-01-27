@@ -9,7 +9,7 @@ const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, b
 export default async function Home() {
     const { getSession, signIn } = await createAuthServer()
     const session = await getSession()
-    const isAuthenticated = session?.user !== undefined
+    const isAuthenticated = Boolean(session && session?.user)
 
     const signInAction = async (providerId: string) => {
         "use server"

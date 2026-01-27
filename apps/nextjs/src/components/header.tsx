@@ -1,4 +1,5 @@
 "use client"
+
 import Link from "next/link"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button"
 export const Header = () => {
     const router = useRouter()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { isAuthenticated, isLoading, signOut } = useAuthClient()
+    const { isAuthenticated, isLoading, signOut, signIn } = useAuthClient()
 
     const handleSignOut = async () => {
         signOut()
@@ -77,11 +78,11 @@ export const Header = () => {
                 <div className="md:hidden bg-black/95 backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]">
                     <div className="px-6 py-4 flex flex-col gap-4">
                         <Link
-                            href="/signIn"
+                            href="https://aura-stack-auth.vercel.app/docs"
                             className="text-sm text-muted-foreground hover:text-white transition-colors py-2"
                             onClick={() => setMobileMenuOpen(false)}
                         >
-                            Getting started
+                            Documentation
                         </Link>
                         <a
                             href="https://github.com/aura-stack-ts/auth"
@@ -102,7 +103,7 @@ export const Header = () => {
                         <div className="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
                             {!isLoading && !isAuthenticated && (
                                 <>
-                                    <Button type="button">
+                                    <Button type="button" asChild onClick={() => signIn("github")}>
                                         <Link href="/">Sign in with GitHub</Link>
                                     </Button>
                                 </>

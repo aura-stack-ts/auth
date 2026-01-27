@@ -1,4 +1,5 @@
 "use client"
+
 import { useAuthClient } from "@/contexts/auth"
 import { LayoutDashboard } from "lucide-react"
 

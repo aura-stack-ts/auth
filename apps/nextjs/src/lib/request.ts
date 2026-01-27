@@ -1,5 +1,5 @@
 export const getBaseURLServer = async (headers: Headers) => {
-    const host = headers.get("host") || "localhost:3000"
+    const host = headers.get("x-forwarded-host") || "localhost:3000"
     const protocol = headers.get("x-forwarded-proto") || "http"
     return `${protocol}://${host}`
 }

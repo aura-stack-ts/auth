@@ -15,10 +15,15 @@ const getCSRFToken = async () => {
     return json.csrfToken
 }
 
-const getSession = async () => {
+const getSession = async (): Promise<Session | null> => {
+    "use server"
     const cookiesStore = await cookies()
-    const response = await createRequest("/auth/session", {
-        headers: { Cookie: cookiesStore.toString() },
+    const headersStore = await headers()
+    const response = await createRequest(`/auth/session`, {
+        headers: {
+            ...Object.fromEntries(headersStore.entries()),
+            Cookie: cookiesStore.toString(),
+        },
     })
     const session = (await response.json()) as Session
     return session
@@ -31,14 +36,16 @@ const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: 
 
 const signOut = async (redirectTo: string = "/") => {
     "use server"
+    const cookiesStore = await cookies()
+    const headersStore = await headers()
     const csrfToken = await getCSRFToken()
-    const cookieStore = await cookies()
     const response = await createRequest(
         `/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
         {
             method: "POST",
             headers: {
-                Cookie: cookieStore.toString(),
+                ...Object.fromEntries(headersStore.entries()),
+                Cookie: cookiesStore.toString(),
                 "X-CSRF-Token": csrfToken,
             },
         }
@@ -47,7 +54,7 @@ const signOut = async (redirectTo: string = "/") => {
         const setCookies = response.headers.getSetCookie()
         for (const cookie of setCookies) {
             const [nameValue] = cookie.split("; ")
-            cookieStore.set(nameValue.split("=")[0], "")
+            cookiesStore.set(nameValue.split("=")[0], "")
         }
         redirect(redirectTo)
     }

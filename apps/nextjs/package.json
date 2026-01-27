@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
     "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache",
-    "start": "next start"
+    "start": "next start",
+    "typegen": "next typegen"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
