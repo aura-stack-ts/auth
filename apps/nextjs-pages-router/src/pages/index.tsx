@@ -1,28 +1,21 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
+import { getSession } from "@/lib/server"
+import { Session } from "@aura-stack/auth"
 
-const geistSans = Geist({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
-})
+const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, builtInOAuthProviders.bitbucket]
 
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
-})
-
-export default function Home() {
-    const session = {
-        user: {
-            name: "John Doe",
-            email: "",
-            sub: "1234567890",
-            image: "",
-        },
+export const getServerSideProps: GetServerSideProps<{ session: Session | null }> = async ({ req, res }) => {
+    const session = await getSession(req)
+    return {
+        props: { session },
     }
-    const providers = [] as any[]
-    const isAuthenticated = false
+}
+
+export default function Home({ session }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const isAuthenticated = session?.user !== undefined
 
     return (
         <main className="flex-1 bg-black">
@@ -34,15 +27,16 @@ export default function Home() {
                             Integration Example
                         </div>
                         <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-7xl">
-                            Next.js Auth Powered by
+                            Next.js Pages Router Auth Powered by
                             <br />
                             <span className="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text">
                                 Aura Auth Core
                             </span>
                         </h1>
                         <p className="max-w-xl text-lg text-foreground leading-relaxed">
-                            This example demonstrates how to integrate Aura Auth Core into a Next.js application. It showcases
-                            OAuth providers, server-side session management, and seamless client-server state synchronization.
+                            This example demonstrates how to integrate Aura Auth Core into a Next.js Pages Router application. It
+                            showcases OAuth providers, server-side session management, and seamless client-server state
+                            synchronization.
                         </p>
                     </div>
                 </div>
