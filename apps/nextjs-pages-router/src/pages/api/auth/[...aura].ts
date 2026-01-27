@@ -7,21 +7,38 @@ const getBaseURL = (request: NextApiRequest) => {
     return `${protocol}://${host}`
 }
 
-export const handler = async (request: NextApiRequest, response: NextApiResponse) => {
-    const method = request.method ?? "GET"
-    const handler = handlers[method as keyof typeof handlers]
-    if (!handler) {
-        response.status(405).json({ error: `Method ${method} Not Allowed` })
-        return
+export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+    const method = req.method ?? "GET"
+    const handlerAction = handlers[method as keyof typeof handlers]
+
+    if (!handlerAction) {
+        return res.status(405).json({ error: `Method ${method} Not Allowed` })
     }
-    const url = new URL(request.url!, getBaseURL(request))
-    const toHandlerResponse = await handler(new Request(url, {
+
+    const url = new URL(req.url!, getBaseURL(req))
+    const fetchRequest = new Request(url, {
         method,
-        headers: { ...request.headers as HeadersInit },
-        body: request.method === "GET" ? undefined : request.body,
-    }))
-    const json = await toHandlerResponse.json()
-    return response.json(json)
+        headers: new Headers(req.headers as Record<string, string>),
+        body: method !== "GET" && req.body ? JSON.stringify(req.body) : undefined,
+    })
+    try {
+        const response = await handlerAction(fetchRequest)
+        if (response.status >= 300 && response.status < 400) {
+            const location = response.headers.get("location")
+            if (location) {
+                res.setHeaders(response.headers)
+                return res.redirect(response.status, location)
+            }
+        }
+        response.headers.forEach((value, key) => {
+            res.setHeader(key, value)
+        })
+        res.setHeaders(response.headers)
+        const data = await response.json()
+        return res.status(response.status).json(data)
+    } catch (error) {
+        return res.status(500).json({ error: "Internal Server Error" })
+    }
 }
 
 export default handler

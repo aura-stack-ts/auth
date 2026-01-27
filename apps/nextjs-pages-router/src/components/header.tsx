@@ -1,27 +1,18 @@
 import Link from "next/link"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
-//import { useAuthClient } from "@/contexts/auth"
+import { useAuth } from "@/contexts/auth"
 import { useRouter } from "next/router"
 import { Button } from "@/components/ui/button"
 
-const useAuthClient = () => {
-    return {
-        isAuthenticated: false,
-        isLoading: false,
-        signIn: (provider: string) => {},
-        signOut: () => {},
-    }
-}
-
 export const Header = () => {
-    //const router = useRouter()
+    const router = useRouter()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { isAuthenticated, isLoading, signOut, signIn } = useAuthClient()
+    const { isAuthenticated, isLoading, signOut, signIn } = useAuth()
 
     const handleSignOut = async () => {
-        signOut()
-        //router.push("/")
+        await signOut()
+        router.push("/")
     }
 
     return (
@@ -87,6 +78,7 @@ export const Header = () => {
                         <Link
                             href="https://aura-stack-auth.vercel.app/docs"
                             className="text-sm text-muted-foreground hover:text-white transition-colors py-2"
+                            target="_blank"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Documentation

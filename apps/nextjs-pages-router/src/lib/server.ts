@@ -1,7 +1,6 @@
 import type { NextApiRequest } from "next"
 import type { Session } from "@aura-stack/auth"
-import { IncomingMessage } from "http"
-
+import type { IncomingMessage } from "http"
 
 export const getBaseURL = (request: NextApiRequest | IncomingMessage) => {
     const protocol = request.headers["x-forwarded-proto"] ?? "http"
@@ -9,42 +8,24 @@ export const getBaseURL = (request: NextApiRequest | IncomingMessage) => {
     return `${protocol}://${host}`
 }
 
-export const getSession = async (request: IncomingMessage): Promise<Session | null> => {
-    const baseURL = getBaseURL(request)
-    const headers = new Headers(request.headers as Record<string, string>)
-    const response = await fetch(`${baseURL}/api/auth/session`, {
-        headers,
-    })
-    const session = (await response.json()) as Session
-    return session
-}
-
-
-const signOut = async (redirectTo: string = "/") => {
-    /*
-    const cookiesStore = await cookies()
-    const headersStore = await headers()
-    const csrfToken = await getCSRFToken()
-    const response = await createRequest(
-        `/api/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
-        {
-            method: "POST",
-            headers: {
-                ...Object.fromEntries(headersStore.entries()),
-                Cookie: cookiesStore.toString(),
-                "X-CSRF-Token": csrfToken,
-            },
+/**
+ * Standard server-side auth function to retrieve the current session.
+ * Compatible with getServerSideProps and API routes.
+ */
+export async function auth(req: IncomingMessage | NextApiRequest): Promise<Session | null> {
+    const baseURL = getBaseURL(req)
+    const headers = new Headers(req.headers as Record<string, string>)
+    try {
+        const response = await fetch(`${baseURL}/api/auth/session`, {
+            headers,
+            cache: "no-store",
+        })
+        if (!response.ok) {
+            return null
         }
-    )
-    if (response.status === 202) {
-        const setCookies = response.headers.getSetCookie()
-        for (const cookie of setCookies) {
-            const [nameValue] = cookie.split("; ")
-            cookiesStore.set(nameValue.split("=")[0], "")
-        }
-        redirect(redirectTo)
+        const session = (await response.json()) as Session
+        return session && session.user ? session : null
+    } catch (error) {
+        return null
     }
-    return response.json()
-    */
-    return null
 }
