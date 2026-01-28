@@ -1,26 +1,21 @@
 import { createContext, use, useState, useEffect } from "react"
 import { authClient } from "@/lib/client"
 import type { Session } from "@aura-stack/auth"
+import type { AuthProviderProps } from "@/@types/props"
 
 export interface AuthContextValue {
     session: Session | null
     isAuthenticated: boolean
     isLoading: boolean
-    signIn: typeof authClient.signIn
-    signOut: typeof authClient.signOut
+    signIn: ReturnType<typeof authClient>["signIn"]
+    signOut: ReturnType<typeof authClient>["signOut"]
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-const { getSession, signIn: signInClient, signOut: signOutClient } = authClient
+const { getSession, signIn: signInClient, signOut: signOutClient } = authClient()
 
-export const AuthProvider = ({ 
-    children, 
-    session: defaultSession 
-}: { 
-    children: React.ReactNode, 
-    session?: Session | null 
-}) => {
+export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState(defaultSession === undefined)
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
     const isAuthenticated = Boolean(session?.user)
@@ -31,7 +26,6 @@ export const AuthProvider = ({
             await signOutClient(...args)
             setSession(null)
         } catch (error) {
-            console.error("Sign out failed:", error)
         } finally {
             setIsLoading(false)
         }
@@ -42,7 +36,6 @@ export const AuthProvider = ({
         try {
             return await signInClient(...args)
         } catch (error) {
-            console.error("Sign in failed:", error)
             setIsLoading(false)
         }
     }
@@ -69,13 +62,15 @@ export const AuthProvider = ({
     }, [defaultSession])
 
     return (
-        <AuthContext value={{ 
-            session, 
-            isAuthenticated, 
-            isLoading, 
-            signIn, 
-            signOut 
-        }}>
+        <AuthContext
+            value={{
+                session,
+                isAuthenticated,
+                isLoading,
+                signIn,
+                signOut,
+            }}
+        >
             {children}
         </AuthContext>
     )

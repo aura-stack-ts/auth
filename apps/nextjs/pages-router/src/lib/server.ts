@@ -1,22 +1,16 @@
 import type { NextApiRequest } from "next"
 import type { Session } from "@aura-stack/auth"
 import type { IncomingMessage } from "http"
-
-export const getBaseURL = (request: NextApiRequest | IncomingMessage) => {
-    const protocol = request.headers["x-forwarded-proto"] ?? "http"
-    const host = request.headers["x-forwarded-host"] ?? request.headers.host
-    return `${protocol}://${host}`
-}
+import { createRequest } from "./request"
 
 /**
  * Standard server-side auth function to retrieve the current session.
  * Compatible with getServerSideProps and API routes.
  */
-export async function auth(req: IncomingMessage | NextApiRequest): Promise<Session | null> {
-    const baseURL = getBaseURL(req)
+export async function getSession(req: IncomingMessage | NextApiRequest): Promise<Session | null> {
     const headers = new Headers(req.headers as Record<string, string>)
     try {
-        const response = await fetch(`${baseURL}/api/auth/session`, {
+        const response = await createRequest(`/api/auth/session`, {
             headers,
             cache: "no-store",
         })

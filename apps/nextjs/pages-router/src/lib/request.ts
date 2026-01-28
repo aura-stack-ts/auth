@@ -17,6 +17,7 @@ export const createRequest = async (endpoint: string, init?: RequestInit, timeou
         headers: {
             ...(body ? { "Content-Type": "application/json" } : {}),
             ...headers,
+            "Cookie": headers instanceof Headers ? headers.get("Cookie") ?? "" : (headers as Record<string, string>)?.Cookie ?? "",
         },
         body: method === "GET" ? undefined : JSON.stringify(body),
         cache: "no-store",

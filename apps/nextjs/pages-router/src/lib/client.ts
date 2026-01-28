@@ -35,11 +35,9 @@ export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>): Prom
 
 export const signOut = async (options?: { redirectTo?: string }): Promise<void> => {
     const { redirectTo = "/" } = options ?? {}
-    const baseURL = getBaseURL()
-    const csrfToken = await getCsrfToken()
-    
-    const response = await fetch(
-        `${baseURL}/api/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
+    const csrfToken = await getCsrfToken()    
+    const response = await createRequest(
+        `/api/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
         {
             method: "POST",
             headers: {
@@ -55,9 +53,9 @@ export const signOut = async (options?: { redirectTo?: string }): Promise<void> 
 }
 
 
-export const authClient = {
+export const authClient = () => ({
     getCsrfToken,
     getSession,
     signIn,
     signOut,
-}
+})
