@@ -1,7 +1,7 @@
+import { createRequest } from "./request"
 import type { NextApiRequest } from "next"
 import type { Session } from "@aura-stack/auth"
 import type { IncomingMessage } from "http"
-import { createRequest } from "./request"
 
 /**
  * Standard server-side auth function to retrieve the current session.

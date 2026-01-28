@@ -21,13 +21,13 @@ You can run the documentation locally for development or contribution.
 ### From the repository root
 
 ```bash
-pnpm dev --filter=nextjs-pages-router
+pnpm dev --filter=pages-router
 ```
 
 ### Or manually from the root directory
 
 ```bash
-cd apps/nextjs-pages-router
+cd apps/pages-router
 pnpm install
 pnpm dev
 ```
