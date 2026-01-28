@@ -1,16 +1,17 @@
-import { getSession } from "~/actions/auth"
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 import { Button } from "~/components/ui/button"
-import type { Route } from "./+types/index"
+import { getSession } from "~/actions/auth.server"
+import { createAuthClient } from "~/actions/auth.client"
 import { GetSessionClient } from "~/components/get-session-client"
+import type { Route } from "./+types/index"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
     const session = await getSession(request)
     return { session }
 }
 
-const SplitLayout = ({ loaderData }: Route.ComponentProps) => {
+const IndexPage = ({ loaderData }: Route.ComponentProps) => {
     const { session } = loaderData
     const isAuthenticated = Boolean(session && session?.user)
     const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, builtInOAuthProviders.bitbucket]
@@ -96,7 +97,13 @@ const SplitLayout = ({ loaderData }: Route.ComponentProps) => {
                                         </p>
                                         <div className="flex flex-col gap-y-2">
                                             {providers.map((provider) => (
-                                                <Button className="w-full" variant="outline" size="sm" key={provider.id}>
+                                                <Button
+                                                    className="w-full"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    key={provider.id}
+                                                    onClick={() => createAuthClient.signIn(provider.id)}
+                                                >
                                                     Sign In with {provider.name}
                                                 </Button>
                                             ))}
@@ -112,4 +119,4 @@ const SplitLayout = ({ loaderData }: Route.ComponentProps) => {
     )
 }
 
-export default SplitLayout
+export default IndexPage

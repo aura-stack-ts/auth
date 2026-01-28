@@ -24,6 +24,10 @@ export const getCSRFToken = async (request: Request): Promise<string> => {
     }
 }
 
+export const signIn = async (providerId: string) => {
+    return redirect(`/auth/signIn/${providerId}`)
+}
+
 export const signOut = async (request: Request, redirectTo: string = "/") => {
     const baseURL = getBaseURL(request.url)
     try {

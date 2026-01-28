@@ -1,5 +1,5 @@
 import { Outlet } from "react-router"
-import { getSession } from "~/actions/auth"
+import { getSession } from "~/actions/auth.server"
 import { Header } from "~/components/header"
 import { Footer } from "~/components/footer"
 import { AuthProvider } from "~/contexts/auth"
