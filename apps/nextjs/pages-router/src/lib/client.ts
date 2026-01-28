@@ -47,16 +47,11 @@ export const signOut = async (options?: { redirectTo?: string }): Promise<void> 
             },
         }
     )
-
     if (response.redirected) {
         window.location.href = response.url
         return
     }
-
-    const data = await response.json()
-    if (data.url) {
-        window.location.href = data.url
-    }
+    await response.json()
 }
 
 
