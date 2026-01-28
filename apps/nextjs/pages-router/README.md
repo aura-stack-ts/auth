@@ -1,40 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+<div align="center">
+
+<h1>Aura Auth + Next.js Pages Router</h1>
+
+**Integration Example App**
+
+[Official Docs](https://aura-stack-auth.vercel.app/docs/oauth) · [Next.js](https://nextjs.org/)
+
+</div>
+
+---
+
+## Overview
+
+This project contains a demonstration of Aura Auth authentication with [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) with [Next.js](https://nextjs.org/) app
 
 ## Getting Started
 
-First, run the development server:
+You can run the documentation locally for development or contribution.
+
+### From the repository root
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm dev --filter=nextjs-pages-router
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Or manually from the root directory
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```bash
+cd apps/nextjs-pages-router
+pnpm install
+pnpm dev
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Once started, open your browser at `http://localhost:3000` to view the app.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Visit the [**official documentation website**](https://aura-stack-auth.vercel.app).
 
-## Learn More
+## License
 
-To learn more about Next.js, take a look at the following resources:
+Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/aura-stack-ts">Aura Stack team</a>
+</p>
