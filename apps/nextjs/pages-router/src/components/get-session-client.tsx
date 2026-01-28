@@ -1,8 +1,8 @@
-import { useAuth } from "@/contexts/auth"
+import { useAuthClient } from "@/contexts/auth"
 import { LayoutDashboard } from "lucide-react"
 
 export const SessionClient = () => {
-    const { session } = useAuth()
+    const { session } = useAuthClient()
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">

@@ -23,3 +23,7 @@ export async function getSession(req: IncomingMessage | NextApiRequest): Promise
         return null
     }
 }
+
+export const authServer = {
+    getSession,
+}

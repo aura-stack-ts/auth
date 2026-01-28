@@ -2,15 +2,15 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { Session } from "@aura-stack/auth"
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
-import { getSession } from "@/lib/server"
-import { authClient } from "@/lib/client"
+import { authServer } from "@/lib/server"
 import { Button } from "@/components/ui/button"
 import { SessionClient } from "@/components/get-session-client"
+import { useAuthClient } from "@/contexts/auth"
 
 const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, builtInOAuthProviders.bitbucket]
 
 export const getServerSideProps: GetServerSideProps<{ session: Session | null }> = async ({ req }) => {
-    const session = await getSession(req)
+    const session = await authServer.getSession(req)
     return {
         props: { session },
     }
@@ -18,6 +18,7 @@ export const getServerSideProps: GetServerSideProps<{ session: Session | null }>
 
 export default function Home({ session }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const isAuthenticated = session?.user !== undefined
+    const { signIn } = useAuthClient()
 
     return (
         <main className="flex-1 bg-black">
@@ -106,7 +107,7 @@ export default function Home({ session }: InferGetServerSidePropsType<typeof get
                                                     variant="outline"
                                                     size="sm"
                                                     key={provider.id}
-                                                    onClick={() => authClient.signIn(provider.id)}
+                                                    onClick={() => signIn(provider.id)}
                                                 >
                                                     Sign In with {provider.name}
                                                 </Button>

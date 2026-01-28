@@ -7,13 +7,13 @@ export interface AuthContextValue {
     session: Session | null
     isAuthenticated: boolean
     isLoading: boolean
-    signIn: ReturnType<typeof authClient>["signIn"]
-    signOut: ReturnType<typeof authClient>["signOut"]
+    signIn: (typeof authClient)["signIn"]
+    signOut: (typeof authClient)["signOut"]
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-const { getSession, signIn: signInClient, signOut: signOutClient } = authClient()
+const { getSession, signIn: signInClient, signOut: signOutClient } = authClient
 
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState(defaultSession === undefined)
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
 /**
  * Standard hook to access auth state and actions on the client.
  */
-export const useAuth = () => {
+export const useAuthClient = () => {
     const ctx = use(AuthContext)
     if (!ctx) {
         throw new Error("useAuth must be used within an AuthProvider")

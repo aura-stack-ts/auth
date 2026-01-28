@@ -14,7 +14,6 @@ export const getCsrfToken = async (): Promise<string> => {
     return data.csrfToken
 }
 
-
 export const getSession = async (): Promise<Session | null> => {
     try {
         const response = await createRequest("/api/auth/session")
@@ -26,16 +25,13 @@ export const getSession = async (): Promise<Session | null> => {
     }
 }
 
-
 export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>): Promise<void> => {
     const baseURL = getBaseURL()
     window.location.href = `${baseURL}/api/auth/signIn/${provider}`
 }
 
-
-export const signOut = async (options?: { redirectTo?: string }): Promise<void> => {
-    const { redirectTo = "/" } = options ?? {}
-    const csrfToken = await getCsrfToken()    
+export const signOut = async (redirectTo: string = "/"): Promise<void> => {
+    const csrfToken = await getCsrfToken()
     const response = await createRequest(
         `/api/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
         {
@@ -52,10 +48,9 @@ export const signOut = async (options?: { redirectTo?: string }): Promise<void> 
     await response.json()
 }
 
-
-export const authClient = () => ({
+export const authClient = {
     getCsrfToken,
     getSession,
     signIn,
     signOut,
-})
+}
