@@ -1,4 +1,6 @@
 import type { Session } from "@aura-stack/auth"
+import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
+import type { LiteralUnion } from "@aura-stack/auth/types"
 
 export const getBaseURL = () => {
     return typeof window !== "undefined" ? window.location.origin : ""
@@ -23,6 +25,11 @@ export const getSession = async (): Promise<Session | null> => {
     return session
 }
 
+export const signIn = async (provide: LiteralUnion<BuiltInOAuthProvider>) => {
+    const baseURL = getBaseURL()
+    window.location.href = `${baseURL}/auth/signIn/${provide}`
+}
+
 export const signOut = async () => {
     try {
         const baseURL = getBaseURL()
@@ -41,4 +48,10 @@ export const signOut = async () => {
     } catch (error) {
         return null
     }
+}
+
+export const createAuthClient = {
+    getSession,
+    signIn,
+    signOut,
 }
