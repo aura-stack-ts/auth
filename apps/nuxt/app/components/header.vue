@@ -2,7 +2,7 @@
 import { X, Menu } from "lucide-vue-next"
 
 const isOpen = ref(false)
-const { loading, isAuthenticated, signOut } = useAuth()
+const { loading, isAuthenticated, signOut } = useAuthClient()
 
 const toggleMenu = () => {
     isOpen.value = !isOpen.value
