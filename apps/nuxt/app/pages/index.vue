@@ -1,25 +1,22 @@
 <script setup lang="ts">
-import { useAuth } from "~/composables/useAuth"
-import { LayoutDashboard, Fingerprint, Form } from "lucide-vue-next"
+import { useAuthClient } from "~/composables/useAuthClient"
+import { LayoutDashboard, Fingerprint } from "lucide-vue-next"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
+import Button from "~/components/ui/button/Button.vue"
 
-const { session, isAuthenticated, signIn, fetchSession, loading } = useAuth()
+const { session, isAuthenticated, isLoading, signIn, signOut } = useAuthClient()
 
 const providers = {
     github: builtInOAuthProviders.github,
     gitlab: builtInOAuthProviders.gitlab,
     x: builtInOAuthProviders.x,
 }
-
-onMounted(() => {
-    fetchSession()
-})
 </script>
 
 <template>
     <main class="flex-1 bg-black">
         <section class="border-b border-muted">
-            <div class="w-11/12 max-w-5xl mx-auto py-24 px-6 md:border-x border-muted space-y-8">
+            <div class="w-11/12 max-w-5xl mx-auto py-24 px-6 border-x border-muted space-y-8">
                 <div class="space-y-4 max-w-3xl">
                     <div
                         class="px-3 py-1 inline-flex items-center gap-2 text-xs font-mono text-foreground rounded-full border border-muted"
@@ -37,14 +34,13 @@ onMounted(() => {
                     </h1>
                     <p class="max-w-xl text-lg text-foreground leading-relaxed">
                         This example demonstrates how to integrate Aura Auth into a Nuxt application. It showcases how to use the
-                        useAuth composable to manage session state on the client side.
+                        useAuthClient composable to manage session state on the client side.
                     </p>
                 </div>
             </div>
         </section>
-
         <section class="overflow-hidden">
-            <div class="w-11/12 max-w-5xl mx-auto md:border-x border-muted grid grid-cols-1 md:grid-cols-2">
+            <div class="w-11/12 max-w-5xl mx-auto border-x border-muted grid grid-cols-1 md:grid-cols-2">
                 <div class="p-8 md:p-12 border-b md:border-b-0 md:border-r border-muted space-y-12 bg-white/1">
                     <div class="space-y-4">
                         <div class="flex items-center gap-3 text-foreground">
@@ -58,7 +54,7 @@ onMounted(() => {
                     </div>
                 </div>
                 <div class="p-8 flex items-center justify-center bg-black md:p-12">
-                    <div v-if="loading" class="flex flex-col items-center gap-4 py-8">
+                    <div v-if="isLoading" class="flex flex-col items-center gap-4 py-8">
                         <div class="size-8 border-2 border-muted rounded-full animate-spin" />
                         <span class="text-xs font-mono text-foreground uppercase tracking-widest">Syncing state</span>
                     </div>
@@ -90,9 +86,9 @@ onMounted(() => {
                                         </div>
                                     </div>
                                 </div>
-                                <Button variant="outline" size="sm" @click="useAuth().signOut()">Sign Out</Button>
+                                <Button class="w-full" variant="outline" size="sm" @click="signOut()">Sign Out</Button>
                             </div>
-                            <div v-else class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div v-else class="space-y-8">
                                 <div class="space-y-4 text-center">
                                     <h2 class="text-2xl font-semibold text-white">Sign in to continue</h2>
                                     <p class="text-sm text-white/40">

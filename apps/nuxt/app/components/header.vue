@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { X, Menu } from "lucide-vue-next"
+import Button from "~/components/ui/button/Button.vue"
 
 const isOpen = ref(false)
-const { loading, isAuthenticated, signOut } = useAuth()
+const { isLoading, isAuthenticated, signIn, signOut } = useAuthClient()
 
 const toggleMenu = () => {
     isOpen.value = !isOpen.value
@@ -22,30 +23,36 @@ const closeMenu = () => {
             >
                 <a
                     href="https://aura-stack-auth.vercel.app/docs"
-                    className="text-sm text-white/60 hover:text-white transition-colors"
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
                     target="_blank"
                 >
                     Documentation
                 </a>
                 <a
                     href="https://github.com/aura-stack-ts/auth"
-                    className="text-sm text-white/60 hover:text-white transition-colors"
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
                     target="_blank"
                 >
                     Repository
                 </a>
                 <a
                     href="https://discord.com/invite/anXExMR5"
-                    className="text-sm text-white/60 hover:text-white transition-colors"
+                    class="text-sm text-muted-foreground hover:text-white transition-colors"
                     target="_blank"
                 >
                     Discord
                 </a>
             </ul>
-            <Button v-if="!loading && !isAuthenticated" class="hidden md:flex" variant="outline" size="sm" as-child>
-                <NuxtLink to="/">Sign In</NuxtLink>
-            </Button>
-            <Button v-if="isAuthenticated" class="hidden md:flex" variant="outline" size="sm" @click="signOut">Sign Out</Button>
+            <a v-if="!isAuthenticated" class="text-xl font-semibold hidden md:flex" href="https://nuxt.com/">Nuxt</a>
+            <Button
+                v-if="isAuthenticated"
+                class="data-[auth='true']:hidden md:data-[auth='true']:flex"
+                variant="outline"
+                size="sm"
+                :data-auth="isAuthenticated"
+                @click="signOut"
+                >Sign Out</Button
+            >
             <Button class="md:hidden text-white" variant="outline" aria-label="Toggle menu" @click="toggleMenu">
                 <Menu v-if="!isOpen" />
                 <X v-else />
@@ -56,12 +63,16 @@ const closeMenu = () => {
             v-if="isOpen"
         >
             <div class="px-6 py-4 flex flex-col gap-4">
-                <NuxtLink to="/" class="text-sm text-white/60 hover:text-white transition-colors py-2" @click="closeMenu">
-                    Getting started
+                <NuxtLink
+                    to="https://aura-stack-auth.vercel.app/docs"
+                    class="text-sm text-muted-foreground hover:text-white transition-colors py-2"
+                    @click="closeMenu"
+                >
+                    Documentation
                 </NuxtLink>
                 <a
                     href="https://github.com/aura-stack-ts/auth"
-                    class="text-sm text-white/60 hover:text-white transition-colors py-2"
+                    class="text-sm text-muted-foreground hover:text-white transition-colors py-2"
                     target="_blank"
                     @click="closeMenu"
                 >
@@ -69,15 +80,21 @@ const closeMenu = () => {
                 </a>
                 <a
                     href="https://discord.com/invite/anXExMR5"
-                    class="text-sm text-white/60 hover:text-white transition-colors py-2"
+                    class="text-sm text-muted-foreground hover:text-white transition-colors py-2"
                     target="_blank"
                     @click="closeMenu"
                 >
                     Discord
                 </a>
                 <div class="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
-                    <Button v-if="!loading && !isAuthenticated" class="md:hidden" variant="outline" size="sm" as-child>
-                        <NuxtLink to="/">Sign In</NuxtLink>
+                    <Button
+                        v-if="!isLoading && !isAuthenticated"
+                        class="md:hidden"
+                        variant="outline"
+                        size="sm"
+                        @click="signIn('github')"
+                    >
+                        Sign In with GitHub
                     </Button>
                     <Button v-if="isAuthenticated" class="md:hidden" variant="outline" size="sm" @click="signOut"
                         >Sign Out</Button
