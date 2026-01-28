@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { X, Menu } from "lucide-vue-next"
+import Button from "~/components/ui/button/Button.vue"
 
 const isOpen = ref(false)
 const { isLoading, isAuthenticated, signIn, signOut } = useAuthClient()
@@ -42,8 +43,16 @@ const closeMenu = () => {
                     Discord
                 </a>
             </ul>
-            <a class="text-xl font-semibold hidden md:flex" href="https://nuxt.com/">Nuxt</a>
-            <Button v-if="isAuthenticated" class="hidden md:flex" variant="outline" size="sm" @click="signOut">Sign Out</Button>
+            <a v-if="!isAuthenticated" class="text-xl font-semibold hidden md:flex" href="https://nuxt.com/">Nuxt</a>
+            <Button
+                v-if="isAuthenticated"
+                class="data-[auth='true']:hidden md:data-[auth='true']:flex"
+                variant="outline"
+                size="sm"
+                :data-auth="isAuthenticated"
+                @click="signOut"
+                >Sign Out</Button
+            >
             <Button class="md:hidden text-white" variant="outline" aria-label="Toggle menu" @click="toggleMenu">
                 <Menu v-if="!isOpen" />
                 <X v-else />

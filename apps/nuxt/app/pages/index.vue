@@ -2,6 +2,7 @@
 import { useAuthClient } from "~/composables/useAuthClient"
 import { LayoutDashboard, Fingerprint } from "lucide-vue-next"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
+import Button from "~/components/ui/button/Button.vue"
 
 const { session, isAuthenticated, isLoading, signIn, signOut } = useAuthClient()
 
@@ -33,7 +34,7 @@ const providers = {
                     </h1>
                     <p class="max-w-xl text-lg text-foreground leading-relaxed">
                         This example demonstrates how to integrate Aura Auth into a Nuxt application. It showcases how to use the
-                        useAuth composable to manage session state on the client side.
+                        useAuthClient composable to manage session state on the client side.
                     </p>
                 </div>
             </div>
@@ -87,7 +88,7 @@ const providers = {
                                 </div>
                                 <Button class="w-full" variant="outline" size="sm" @click="signOut()">Sign Out</Button>
                             </div>
-                            <div v-else class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div v-else class="space-y-8">
                                 <div class="space-y-4 text-center">
                                     <h2 class="text-2xl font-semibold text-white">Sign in to continue</h2>
                                     <p class="text-sm text-white/40">
