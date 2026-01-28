@@ -15,7 +15,7 @@ const providers = {
 <template>
     <main class="flex-1 bg-black">
         <section class="border-b border-muted">
-            <div class="w-11/12 max-w-5xl mx-auto py-24 px-6 md:border-x border-muted space-y-8">
+            <div class="w-11/12 max-w-5xl mx-auto py-24 px-6 border-x border-muted space-y-8">
                 <div class="space-y-4 max-w-3xl">
                     <div
                         class="px-3 py-1 inline-flex items-center gap-2 text-xs font-mono text-foreground rounded-full border border-muted"
@@ -39,7 +39,7 @@ const providers = {
             </div>
         </section>
         <section class="overflow-hidden">
-            <div class="w-11/12 max-w-5xl mx-auto md:border-x border-muted grid grid-cols-1 md:grid-cols-2">
+            <div class="w-11/12 max-w-5xl mx-auto border-x border-muted grid grid-cols-1 md:grid-cols-2">
                 <div class="p-8 md:p-12 border-b md:border-b-0 md:border-r border-muted space-y-12 bg-white/1">
                     <div class="space-y-4">
                         <div class="flex items-center gap-3 text-foreground">
@@ -85,7 +85,7 @@ const providers = {
                                         </div>
                                     </div>
                                 </div>
-                                <Button variant="outline" size="sm" @click="signOut()">Sign Out</Button>
+                                <Button class="w-full" variant="outline" size="sm" @click="signOut()">Sign Out</Button>
                             </div>
                             <div v-else class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <div class="space-y-4 text-center">

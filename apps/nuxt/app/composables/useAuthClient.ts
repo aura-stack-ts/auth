@@ -22,11 +22,12 @@ export const useAuthClient = () => {
         }
     }
 
-    const signOut = async (redirectTo: string = "/") => {
+    const signOut = async () => {
         isLoading.value = true
         try {
-            await signOutClient(redirectTo)
+            await signOutClient()
             session.value = null
+            window.location.reload()
         } finally {
             isLoading.value = false
         }

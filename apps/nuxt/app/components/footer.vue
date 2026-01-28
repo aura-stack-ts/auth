@@ -33,7 +33,7 @@ const socialLinks = [
 
 <template>
     <footer class="relative border-t bg-black">
-        <div class="w-11/12 mx-auto max-w-5xl md:border-x">
+        <div class="w-11/12 mx-auto max-w-5xl border-x">
             <div class="max-w-5xl py-10 px-6 grid grid-cols-6 gap-6">
                 <div class="col-span-6 flex flex-col gap-5 md:col-span-4">
                     <a href="" class="w-max opacity-25">Aura Auth</a>

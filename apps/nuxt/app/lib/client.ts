@@ -13,13 +13,12 @@ const signIn = async (provider: string, redirectTo: string = "/") => {
     window.location.href = `/api/auth/signIn/${provider}?${new URLSearchParams({ redirectTo })}`
 }
 
-const signOut = async (redirectTo: string = "/") => {
+const signOut = async () => {
     const csrfToken = await getCSRFToken()
-    return await $fetch("/api/auth/signOut", {
+    const session = await $fetch("/api/auth/signOut", {
         method: "POST",
         query: {
             token_type_hint: "session_token",
-            redirectTo,
         },
         headers: {
             "X-CSRF-Token": csrfToken,
