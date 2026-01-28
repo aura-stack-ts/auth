@@ -1,8 +1,8 @@
 <div align="center">
 
-<h1>Aura Auth + Next.js</h1>
+<h1>Aura Auth + Next.js Pages Router</h1>
 
-**Demonstration app**
+**Integration Example App**
 
 [Official Docs](https://aura-stack-auth.vercel.app/docs/oauth) · [Next.js](https://nextjs.org/)
 
@@ -21,13 +21,13 @@ You can run the documentation locally for development or contribution.
 ### From the repository root
 
 ```bash
-pnpm dev --filter=nextjs
+pnpm dev --filter=pages-router
 ```
 
 ### Or manually from the root directory
 
 ```bash
-cd apps/nextjs
+cd apps/pages-router
 pnpm install
 pnpm dev
 ```

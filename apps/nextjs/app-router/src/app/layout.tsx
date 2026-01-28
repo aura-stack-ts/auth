@@ -23,8 +23,8 @@ export const metadata: Metadata = {
     description:
         "Comprehensive authentication for TypeScript applications. Built for speed, security, and developer experience. Powered by Aura Auth Core.",
     keywords: ["Next.js", "Authentication", "Aura Auth", "TypeScript", "OAuth", "Session Management", "Security"],
-    authors: [{ name: "Aura Stack Labs", url: "https://github.com/aura-stack-ts" }],
-    creator: "Aura Stack Labs",
+    authors: [{ name: "Aura Stack", url: "https://github.com/aura-stack-ts" }],
+    creator: "Aura Stack",
     openGraph: {
         type: "website",
         locale: "en_US",

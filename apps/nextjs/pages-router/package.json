@@ -1,18 +1,17 @@
 {
-  "name": "nextjs",
+  "name": "pages-router",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
-    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "typegen": "next typegen"
+    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
+    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
-    "lucide-react": "^0.563.0",
+    "lucide-react": "catalog:lucide-react",
     "next": "catalog:next",
     "react": "catalog:react",
     "react-dom": "catalog:react"

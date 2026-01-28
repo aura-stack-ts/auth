@@ -86,14 +86,14 @@ importers:
         specifier: ^4.0.14
         version: 4.0.17(@types/node@24.10.9)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  apps/nextjs:
+  apps/nextjs/app-router:
     dependencies:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.9)(react@19.2.3)
       lucide-react:
-        specifier: ^0.563.0
-        version: 0.563.0(react@19.2.3)
+        specifier: catalog:lucide-react
+        version: 0.561.0(react@19.2.3)
       next:
         specifier: catalog:next
         version: 16.1.4(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -106,7 +106,50 @@ importers:
     devDependencies:
       '@aura-stack/auth':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../../packages/core
+      '@tailwindcss/postcss':
+        specifier: catalog:tailwindcss
+        version: 4.1.18
+      '@types/node':
+        specifier: catalog:node
+        version: 24.10.9
+      '@types/react':
+        specifier: catalog:react
+        version: 19.2.9
+      '@types/react-dom':
+        specifier: catalog:react
+        version: 19.2.3(@types/react@19.2.9)
+      babel-plugin-react-compiler:
+        specifier: 1.0.0
+        version: 1.0.0
+      tailwindcss:
+        specifier: catalog:tailwindcss
+        version: 4.1.18
+      typescript:
+        specifier: catalog:typescript
+        version: 5.9.3
+
+  apps/nextjs/pages-router:
+    dependencies:
+      '@radix-ui/react-slot':
+        specifier: ^1.2.4
+        version: 1.2.4(@types/react@19.2.9)(react@19.2.3)
+      lucide-react:
+        specifier: catalog:lucide-react
+        version: 0.561.0(react@19.2.3)
+      next:
+        specifier: catalog:next
+        version: 16.1.4(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react:
+        specifier: catalog:react
+        version: 19.2.3
+      react-dom:
+        specifier: catalog:react
+        version: 19.2.3(react@19.2.3)
+    devDependencies:
+      '@aura-stack/auth':
+        specifier: workspace:*
+        version: link:../../../packages/core
       '@tailwindcss/postcss':
         specifier: catalog:tailwindcss
         version: 4.1.18
@@ -273,7 +316,7 @@ importers:
         version: 0.561.0(react@19.2.3)
       nitro:
         specifier: npm:nitro-nightly@latest
-        version: nitro-nightly@3.0.1-20260124-165031-9c6abf17(chokidar@5.0.0)(ioredis@5.9.2)(lru-cache@11.2.4)(rollup@4.55.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+        version: nitro-nightly@3.0.1-20260125-215009-8882bc9e(chokidar@5.0.0)(ioredis@5.9.2)(lru-cache@11.2.4)(rollup@4.55.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       react:
         specifier: catalog:react
         version: 19.2.3
@@ -5151,11 +5194,6 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  lucide-react@0.563.0:
-    resolution: {integrity: sha512-8dXPB2GI4dI8jV4MgUDGBeLdGk8ekfqVZ0BdLcrRzocGgG75ltNEmWS+gE7uokKF/0oSUuczNDT+g9hFJ23FkA==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
   lucide-vue-next@0.563.0:
     resolution: {integrity: sha512-zsE/lCKtmaa7bGfhSpN84br1K9YoQ5pCN+2oKWjQQG3Lo6ufUUKBuHSjNFI6RvUevxaajNXb8XwFUKeTXG3sIA==}
     peerDependencies:
@@ -5522,8 +5560,8 @@ packages:
   nf3@0.3.6:
     resolution: {integrity: sha512-/XRUUILTAyuy1XunyVQuqGp8aEmZ2TfRTn8Rji+FA4xqv20qzL4jV7Reqbuey2XucKgPeRVcEYGScmJM0UnB6Q==}
 
-  nitro-nightly@3.0.1-20260124-165031-9c6abf17:
-    resolution: {integrity: sha512-MTRYUZ+X8ZrRvN3PWK27OrrfULZRGEGYJdNwiAmDy6jqcAOM98fBChxZUTVMQtZMd6IanEIpPLB6zmGvVVgkOw==}
+  nitro-nightly@3.0.1-20260125-215009-8882bc9e:
+    resolution: {integrity: sha512-Bt1dsu1Wq60w+sNFve+VFCSA6amcNRdb3dExk6J/M02FwCXSrcOT2DMzVpm+HRIJyMbJeDNt+09vScXsJWgnXQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -12427,10 +12465,6 @@ snapshots:
     dependencies:
       react: 19.2.3
 
-  lucide-react@0.563.0(react@19.2.3):
-    dependencies:
-      react: 19.2.3
-
   lucide-vue-next@0.563.0(vue@3.5.27(typescript@5.9.3)):
     dependencies:
       vue: 3.5.27(typescript@5.9.3)
@@ -13063,7 +13097,7 @@ snapshots:
 
   nf3@0.3.6: {}
 
-  nitro-nightly@3.0.1-20260124-165031-9c6abf17(chokidar@5.0.0)(ioredis@5.9.2)(lru-cache@11.2.4)(rollup@4.55.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
+  nitro-nightly@3.0.1-20260125-215009-8882bc9e(chokidar@5.0.0)(ioredis@5.9.2)(lru-cache@11.2.4)(rollup@4.55.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.3(srvx@0.10.1)
