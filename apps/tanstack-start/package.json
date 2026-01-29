@@ -31,8 +31,7 @@
     "react-hook-form": "^7.71.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "catalog:tailwindcss",
-    "vite-tsconfig-paths": "^6.0.2",
-    "zod": "^4.1.11"
+    "vite-tsconfig-paths": "^6.0.2"
   },
   "devDependencies": {
     "@aura-stack/auth": "workspace:*",
