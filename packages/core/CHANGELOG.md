@@ -8,7 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.3.0] - 2026-1-29
+
 ### Added
+
+- Added the `Pinterest` OAuth provider to the supported integrations in Aura Auth. [#74](https://github.com/aura-stack-ts/auth/pull/74)
+
+- Added the `Mailchimp` OAuth provider to the supported integrations in Aura Auth. [#62](https://github.com/aura-stack-ts/auth/pull/62)
 
 - Implemented timeout handling for `fetch` request used to communicate with external services during OAuth flows and user information retrieval. The implementation introduces a time limit for requests, ensuring they are canceled if they exceed the configured timeout. [#53](https://github.com/aura-stack-ts/auth/pull/53)
 
@@ -17,6 +25,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Updated the cookie naming for standardized cookie naming for both internal and external cookies used by Aura Auth. The new configuration API improves developer experience by exposing all cookie options to users in camelCase, while maintaining snake_case naming internally where required by implementation details. [#58](https://github.com/aura-stack-ts/auth/pull/58)
 
 - Update `JoseInstance` to provide full types for all parameters supported by the `verifyJWS`, `encryptJWE`, and `decryptJWE` functions exposed in the `jose` object by `createAuth` auth instance. [#55](https://github.com/aura-stack-ts/auth/pull/55)
+
+### Fixed
+
+- Fixed `redirectTo` search parameter passed to the `/auth/signIn/:provider` endpoint being ignored after a successful sign-in flow. Users are now correctly redirected to the provided path. [#65](https://github.com/aura-stack-ts/auth/pull/65)
 
 ---
 
