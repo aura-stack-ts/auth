@@ -22,17 +22,10 @@ const { title, session } = Astro.props;
 		<title>{title}</title>
 	</head>
 	<body class="antialiased bg-black min-h-screen flex flex-col">
-		<!-- <AuthProvider client:load> -->
-			<!-- <Header client:load /> -->
+		<AuthProvider>
+			<!-- <Header > -->
 			<slot />
 			<Footer />
-		<!-- </AuthProvider> -->
+		</AuthProvider>
 	</body>
 </html>
-
-<style is:global>
-	:root {
-		--font-geist-sans: "Geist Sans", sans-serif;
-		--font-geist-mono: "Geist Mono", monospace;
-	}
-</style>

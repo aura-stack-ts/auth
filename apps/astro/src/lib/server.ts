@@ -4,11 +4,11 @@ import type { LiteralUnion } from "@aura-stack/auth/types"
 import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
 
 export const createAuthServer = async (context: {
-    request: Request;
-    cookies: any;
-    redirect: (path: string, status?: number) => any;
+    request: Request
+    cookies: any
+    redirect: (path: string, status?: number) => any
 }) => {
-    const { request, redirect } = context;
+    const { request, redirect } = context
 
     const getCSRFToken = async () => {
         const response = await createRequest("/api/auth/csrfToken", {

@@ -18,7 +18,7 @@ export const createRequest = async (endpoint: string, init?: RequestInit, timeou
             ...(body ? { "Content-Type": "application/json" } : {}),
             ...headers,
         },
-        body: (method === "GET" || !body) ? undefined : JSON.stringify(body),
+        body: method === "GET" || !body ? undefined : JSON.stringify(body),
         cache: "no-store",
         credentials: "include",
     }).finally(() => clearTimeout(timeoutId))
