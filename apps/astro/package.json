@@ -9,6 +9,18 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.16.16"
+    "@astrojs/react": "^4.4.2",
+    "@aura-stack/auth": "workspace:*",
+    "@radix-ui/react-slot": "^1.2.4",
+    "astro": "^5.16.16",
+    "lucide-react": "catalog:lucide-react",
+    "react": "catalog:react",
+    "react-dom": "catalog:react"
+  },
+  "devDependencies": {
+    "tailwindcss": "catalog:tailwindcss",
+    "@tailwindcss/vite": "catalog:@tailwindcss/vite",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react"
   }
 }
