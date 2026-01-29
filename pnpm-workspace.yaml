@@ -10,7 +10,7 @@ catalogs:
   lucide-react:
     lucide-react: ^0.561.0
   next:
-    next: ^16.1.1
+    next: ^16.1.6
   node:
     "@types/node": ^24.9.2
   react:
