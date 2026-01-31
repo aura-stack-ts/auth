@@ -1,7 +1,7 @@
-import { isValidURL } from "@/assert.js"
+import { isRelativeURL, isSameOrigin, isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
 import { AuthInternalError, AuthSecurityError, isAuthSecurityError } from "@/errors.js"
-import { equals, formatZodError, getNormalizedOriginPath, sanitizeURL, toCastCase } from "@/utils.js"
+import { extractPath, formatZodError, getNormalizedOriginPath, toCastCase } from "@/utils.js"
 import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
@@ -76,42 +76,40 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
         const headers = request.headers
         const origin = headers.get("Origin")
         const referer = headers.get("Referer")
-        let hostedURL = getOriginURL(request, trustedProxyHeaders)
+        const hostedOrigin = getOriginURL(request, trustedProxyHeaders).origin
         if (redirectTo) {
-            if (redirectTo.startsWith("/")) {
-                return sanitizeURL(redirectTo)
+            if (isRelativeURL(redirectTo)) {
+                return redirectTo
             }
-            const redirectToURL = new URL(sanitizeURL(getNormalizedOriginPath(redirectTo)))
-            if (!isValidURL(redirectTo) || !equals(redirectToURL.origin, hostedURL.origin)) {
-                throw new AuthSecurityError(
-                    "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
-                    "The redirectTo parameter does not match the hosted origin."
-                )
+            if (isValidURL(redirectTo) && isSameOrigin(redirectTo, hostedOrigin)) {
+                return extractPath(redirectTo)
             }
-            return sanitizeURL(redirectToURL.pathname)
+            console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: The redirectTo parameter does not match the hosted origin.")
+            return "/"
         }
         if (referer) {
-            const refererURL = new URL(sanitizeURL(referer))
-            if (!isValidURL(referer) || !equals(refererURL.origin, hostedURL.origin)) {
-                throw new AuthSecurityError(
-                    "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
-                    "The referer of the request does not match the hosted origin."
-                )
+            if (isRelativeURL(referer)) {
+                return referer
             }
-            return sanitizeURL(refererURL.pathname)
+            if (isValidURL(referer) && isSameOrigin(referer, hostedOrigin)) {
+                return extractPath(referer)
+            }
+            console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: The referer of the request does not match the hosted origin.")
+            return "/"
         }
         if (origin) {
-            const originURL = new URL(sanitizeURL(getNormalizedOriginPath(origin)))
-            if (!isValidURL(origin) || !equals(originURL.origin, hostedURL.origin)) {
-                throw new AuthSecurityError("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", "Invalid origin (potential CSRF).")
+            if (isValidURL(origin) && isSameOrigin(origin, hostedOrigin)) {
+                return extractPath(origin)
             }
-            return sanitizeURL(originURL.pathname)
+            console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: Invalid origin (potential CSRF).")
+            return "/"
         }
         return "/"
     } catch (error) {
         if (isAuthSecurityError(error)) {
             throw error
         }
-        throw new AuthSecurityError("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", "Invalid origin (potential CSRF).")
+        console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: Invalid origin (potential CSRF).")
+        return "/"
     }
 }
