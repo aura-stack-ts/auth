@@ -43,6 +43,7 @@ export const equals = (a: string | number | undefined | null, b: string | number
  *
  * @param url - The URL or path to sanitize
  * @returns The sanitized URL or path
+ * @deprecated
  */
 export const sanitizeURL = (url: string) => {
     try {
@@ -150,6 +151,7 @@ export const onErrorHandler: RouterConfig["onError"] = (error) => {
  *
  * @param path - The URL or path string to process
  * @returns The normalized URL with origin and pathname, or the original path
+ * @deprecated
  */
 export const getNormalizedOriginPath = (path: string): string => {
     try {
@@ -188,4 +190,14 @@ export const formatZodError = <T extends Record<string, unknown> = Record<string
             },
         }
     }, {})
+}
+
+export const extractPath = (url: string): string => {
+    const pathRegex = /^https?:\/\/[a-zA-Z0-9_\-\.]+(:\d+)?(\/.*)$/
+    const match = url.match(pathRegex)
+
+    if (match && match[2]) {
+        return match[2]
+    }
+    return "/"
 }
