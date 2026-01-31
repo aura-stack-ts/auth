@@ -1,6 +1,6 @@
 import { isRelativeURL, isSameOrigin, isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
-import { AuthInternalError, AuthSecurityError, isAuthSecurityError } from "@/errors.js"
+import { AuthInternalError } from "@/errors.js"
 import { extractPath, formatZodError, getNormalizedOriginPath, toCastCase } from "@/utils.js"
 import type { OAuthProviderCredentials } from "@/@types/index.js"
 
@@ -106,9 +106,6 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
         }
         return "/"
     } catch (error) {
-        if (isAuthSecurityError(error)) {
-            throw error
-        }
         console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: Invalid origin (potential CSRF).")
         return "/"
     }

@@ -163,11 +163,9 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(request.status).toBe(400)
+        expect(request.status).toBe(202)
         expect(await request.json()).toEqual({
-            type: "AUTH_SECURITY_ERROR",
-            code: "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
-            message: "The redirectTo parameter does not match the hosted origin.",
+            message: "Signed out successfully"
         })
     })
 })
