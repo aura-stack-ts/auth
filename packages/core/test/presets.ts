@@ -1,4 +1,5 @@
 import { createAuth } from "@/index.js"
+import { createStructuredData } from "@/utils.js"
 import { OAuthProviderCredentials } from "@/@types/index.js"
 import type { JWTPayload } from "@/jose.js"
 
@@ -44,4 +45,15 @@ export const {
     oauth: [oauthCustomService, oauthCustomServiceProfile],
     cookies: {},
     secret: process.env.AURA_AUTH_SECRET,
+    logger: {
+        level: "debug",
+        log({ timestamp, message, structuredData, msgId }) {
+            /**
+             * This is not a real logger implementation.
+             * Replace this with your own logger implementation.
+             */
+            const msg = createStructuredData(structuredData ?? {})
+            console.log(`[debug][${msgId}]: ${timestamp} ${msg} ${message}`)
+        }
+    }
 })

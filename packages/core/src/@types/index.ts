@@ -188,6 +188,22 @@ export interface AuthConfig {
      * @experimental
      */
     trustedProxyHeaders?: boolean
+
+    /**
+     * Optional logger function for structured error and warning logging.
+     * The logger receives log level, error code, and message for each authentication event.
+     *
+     * @example
+     * ```ts
+     * const auth = createAuth({
+     *   oauth: ["github"],
+     *   logger: (level, code, message) => {
+     *     console[level](`[${code}] ${message}`)
+     *   }
+     * })
+     * ```
+     */
+    logger?: Logger
 }
 
 export interface JoseInstance {
@@ -201,6 +217,10 @@ export interface JoseInstance {
 
 export type OAuthProviderRecord = Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
 
+export type InternalLogger = {
+    level: LogLevel
+}
+
 export interface RouterGlobalContext {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
@@ -208,6 +228,7 @@ export interface RouterGlobalContext {
     secret?: string
     basePath: string
     trustedProxyHeaders: boolean
+    logger?: Logger
 }
 
 /**
@@ -274,3 +295,44 @@ export type AuthSecurityErrorCode =
 export type OAuthEnv = z.infer<typeof OAuthEnvSchema>
 
 export type APIErrorMap = Record<string, { code: string; message: string }>
+
+/**
+ * Log level for logger messages.
+ */
+export type LogLevel = "warn" | "error" | "debug" | "info"
+
+export type SyslogSeverity = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+
+/** Defines the Severity between 0 to 7 */
+export type Severity = "emergency" | "alert" | "critical" | "error" | "warning" | "notice" | "info" | "debug"
+
+export interface LogEvent {
+    level: LogLevel
+    code: string
+    message: string
+}
+
+export type SyslogOptions = {
+    facility: 4 | 10
+    severity: Severity
+    timestamp?: string
+    hostname?: string
+    appName?: string
+    procId?: string
+    msgId: string
+    message: string
+    structuredData?: Record<string, string>
+}
+
+/**
+ * Logger function interface for structured logging.
+ * Called when errors or warnings occur during authentication flows.
+ *
+ * @param level - The severity level of the log message
+ * @param code - Error code/type identifier (e.g., "INVALID_OAUTH_CONFIGURATION", "INVALID_JWT_TOKEN")
+ * @param message - Short human-readable description of the error
+ */
+export type Logger = {
+    level: LogLevel
+    log: (args: SyslogOptions) => void
+}

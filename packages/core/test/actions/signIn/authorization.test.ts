@@ -97,7 +97,7 @@ describe("createAuthorizationURL", () => {
                     clientSecret: "2",
                 },
                 redirectURL: "https://example.com/auth/callback",
-                expected: /.*"clientId".*/,
+                expected: "The OAuth provider configuration is invalid.",
             },
             {
                 description: "missing clientSecret",
@@ -110,7 +110,7 @@ describe("createAuthorizationURL", () => {
                     clientId: "1",
                 },
                 redirectURL: "https://example.com/auth/callback",
-                expected: /.*"clientSecret".* /,
+                expected: "The OAuth provider configuration is invalid.",
             },
         ]
 

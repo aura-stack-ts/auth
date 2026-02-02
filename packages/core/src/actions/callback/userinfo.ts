@@ -2,7 +2,7 @@ import { fetchAsync } from "@/request.js"
 import { generateSecure } from "@/secure.js"
 import { OAuthErrorResponse } from "@/schemas.js"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/errors.js"
-import type { OAuthProviderCredentials, User } from "@/@types/index.js"
+import type { Logger, OAuthProviderCredentials, User } from "@/@types/index.js"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response
@@ -30,7 +30,7 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
  * @param accessToken - Access Token to access the userinfo endpoint
  * @returns The user information retrieved from the userinfo endpoint
  */
-export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string) => {
+export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string, logger?: Logger) => {
     const userinfoEndpoint = oauthConfig.userInfo
     try {
         const response = await fetchAsync(userinfoEndpoint, {
@@ -41,11 +41,20 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
             },
         })
         const json = await response.json()
-        const { success, data } = OAuthErrorResponse.safeParse(json)
+        const { success } = OAuthErrorResponse.safeParse(json)
         if (success) {
+            logger?.log({
+                facility: 10,
+                severity: "error",
+                timestamp: new Date().toISOString(),
+                hostname: "aura-auth",
+                appName: "aura-auth",
+                msgId: "OAUTH_USERINFO_ERROR",
+                message: "Error response received from OAuth userinfo endpoint",
+            })
             throw new OAuthProtocolError(
-                data.error,
-                data?.error_description ?? "An error occurred while fetching user information."
+                "OAUTH_USERINFO_ERROR",
+                "An error was received from the OAuth userinfo endpoint.",
             )
         }
         return oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)

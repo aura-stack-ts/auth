@@ -1,7 +1,7 @@
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
 import { AuthInternalError } from "@/errors.js"
 import type { JWTPayload } from "@/jose.js"
-import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig } from "@/@types/index.js"
+import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig, Logger } from "@/@types/index.js"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -141,32 +141,79 @@ export const createSessionCookie = async (jose: AuthRuntimeConfig["jose"], sessi
 export const defineSecureCookieOptions = (
     useSecure: boolean,
     attributes: SerializeOptions,
-    strategy: "host" | "secure" | "standard"
+    strategy: "host" | "secure" | "standard",
+    logger?: Logger
 ): SerializeOptions => {
     if (!attributes.httpOnly) {
-        console.warn(
-            "[WARNING]: Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk."
-        )
+        logger?.log({
+            facility: 10,
+            severity: "critical",
+            timestamp: new Date().toISOString(),
+            hostname: "aura-auth",
+            appName: "aura-auth",
+            msgId: "COOKIE_HTTPONLY_DISABLED",
+            message:
+                "Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk.",
+        })
     }
     if (attributes.domain === "*") {
         attributes.domain = undefined
-        console.warn("[WARNING]: Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.")
+        logger?.log({
+            facility: 10,
+            severity: "critical",
+            timestamp: new Date().toISOString(),
+            hostname: "aura-auth",
+            appName: "aura-auth",
+            msgId: "COOKIE_WILDCARD_DOMAIN",
+            message: "Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.",
+        })
     }
     if (!useSecure) {
         if (attributes.secure) {
-            console.warn(
-                "[WARNING]: The 'Secure' attribute will be disabled for this cookie. Serve over HTTPS to enforce Secure cookies."
-            )
+            logger?.log({
+                facility: 10,
+                severity: "warning",
+                timestamp: new Date().toISOString(),
+                hostname: "aura-auth",
+                appName: "aura-auth",
+                msgId: "COOKIE_SECURE_DISABLED",
+                message:
+                    "Cookie is configured with 'Secure' attribute, but the request is not secure (HTTPS). 'Secure' will be disabled.",
+            })
         }
         if (attributes.sameSite == "none") {
             attributes.sameSite = "lax"
-            console.warn("[WARNING]: SameSite=None requires Secure attribute. Changing SameSite to 'Lax'.")
+            logger?.log({
+                facility: 10,
+                severity: "warning",
+                timestamp: new Date().toISOString(),
+                hostname: "aura-auth",
+                appName: "aura-auth",
+                msgId: "COOKIE_SAMESITE_NONE_WITHOUT_SECURE",
+                message: "Cookie is configured with SameSite=None but without Secure attribute. Changing SameSite to 'Lax'.",
+            })
         }
         if (process.env.NODE_ENV === "production") {
-            console.warn("[WARNING]: In production, ensure cookies are served over HTTPS to maintain security.")
+            logger?.log({
+                facility: 10,
+                severity: "critical",
+                timestamp: new Date().toISOString(),
+                hostname: "aura-auth",
+                appName: "aura-auth",
+                msgId: "COOKIE_INSECURE_IN_PRODUCTION",
+                message: "Cookies are being served over an insecure connection in production. This poses security risks.",
+            })
         }
         if (strategy === "host") {
-            console.warn("[WARNING]: __Host- cookies require a secure context. Falling back to standard cookie settings.")
+            logger?.log({
+                facility: 10,
+                severity: "critical",
+                timestamp: new Date().toISOString(),
+                hostname: "aura-auth",
+                appName: "aura-auth",
+                msgId: "COOKIE_HOST_STRATEGY_INSECURE",
+                message: "__Host- cookies require a secure context. Falling back to standard cookie settings.",
+            })
         }
         return {
             ...defaultCookieOptions,
@@ -192,7 +239,8 @@ export const defineSecureCookieOptions = (
 export const createCookieStore = (
     useSecure: boolean,
     prefix?: string,
-    overrides?: CookieConfig["overrides"]
+    overrides?: CookieConfig["overrides"],
+    logger?: Logger
 ): CookieStoreConfig => {
     prefix ??= COOKIE_NAME
     const securePrefix = useSecure ? "__Secure-" : ""
@@ -206,7 +254,8 @@ export const createCookieStore = (
                     ...defaultCookieOptions,
                     ...overrides?.sessionToken?.attributes,
                 },
-                overrides?.sessionToken?.attributes?.strategy ?? "secure"
+                overrides?.sessionToken?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
         state: {
@@ -217,7 +266,8 @@ export const createCookieStore = (
                     ...oauthCookieOptions,
                     ...overrides?.state?.attributes,
                 },
-                overrides?.state?.attributes?.strategy ?? "secure"
+                overrides?.state?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
         csrfToken: {
@@ -228,7 +278,8 @@ export const createCookieStore = (
                     ...overrides?.csrfToken?.attributes,
                     ...defaultHostCookieConfig,
                 },
-                overrides?.csrfToken?.attributes?.strategy ?? "host"
+                overrides?.csrfToken?.attributes?.strategy ?? "host",
+                logger
             ),
         },
         redirectTo: {
@@ -239,7 +290,8 @@ export const createCookieStore = (
                     ...oauthCookieOptions,
                     ...overrides?.redirectTo?.attributes,
                 },
-                overrides?.redirectTo?.attributes?.strategy ?? "secure"
+                overrides?.redirectTo?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
         redirectURI: {
@@ -250,7 +302,8 @@ export const createCookieStore = (
                     ...oauthCookieOptions,
                     ...overrides?.redirectURI?.attributes,
                 },
-                overrides?.redirectURI?.attributes?.strategy ?? "secure"
+                overrides?.redirectURI?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
         codeVerifier: {
@@ -261,7 +314,8 @@ export const createCookieStore = (
                     ...oauthCookieOptions,
                     ...overrides?.codeVerifier?.attributes,
                 },
-                overrides?.codeVerifier?.attributes?.strategy ?? "secure"
+                overrides?.codeVerifier?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
     }

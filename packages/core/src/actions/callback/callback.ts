@@ -30,8 +30,18 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
             (ctx) => {
                 const response = OAuthAuthorizationErrorResponse.safeParse(ctx.searchParams)
                 if (response.success) {
-                    const { error, error_description } = response.data
-                    throw new OAuthProtocolError(error, error_description ?? "OAuth Authorization Error")
+                    //const { error, error_description } = response.data
+                    /** @todo: map error and error_description */
+                    ctx.context.logger?.log({
+                        facility: 10,
+                        severity: "critical",
+                        timestamp: new Date().toISOString(),
+                        hostname: "aura-auth",
+                        appName: "aura-auth",
+                        msgId: "OAUTH_AUTHORIZATION_ERROR",
+                        message: "OAuth authorization error received",
+                    })
+                    throw new OAuthProtocolError("INVALID_REQUEST", "OAuth Authorization Error")
                 }
                 return ctx
             },
@@ -48,7 +58,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 request,
                 params: { oauth },
                 searchParams: { code, state },
-                context: { oauth: providers, cookies, jose },
+                context: { oauth: providers, cookies, jose, logger },
             } = ctx
 
             const oauthConfig = providers[oauth]
@@ -56,16 +66,34 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
             const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
             const codeVerifier = getCookie(request, cookies.codeVerifier.name)
-
+            
             if (!equals(cookieState, state)) {
+                logger?.log({
+                    facility: 10,
+                    severity: "critical",
+                    timestamp: new Date().toISOString(),
+                    hostname: "aura-auth",
+                    appName: "aura-auth",
+                    msgId: "MISMATCHING_OAUTH_STATE",
+                    message: "The provided state passed in the OAuth response does not match the stored state.",
+                })
                 throw new AuthSecurityError(
                     "MISMATCHING_STATE",
                     "The provided state passed in the OAuth response does not match the stored state."
                 )
             }
 
-            const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier)
+            const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier, logger)
             if (!isRelativeURL(cookieRedirectTo)) {
+                logger?.log({
+                    facility: 10,
+                    severity: "critical",
+                    timestamp: new Date().toISOString(),
+                    hostname: "aura-auth",
+                    appName: "aura-auth",
+                    msgId: "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
+                    message: "Invalid redirect path. Potential open redirect attack detected.",
+                })
                 throw new AuthSecurityError(
                     "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
                     "Invalid redirect path. Potential open redirect attack detected."

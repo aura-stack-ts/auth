@@ -30,14 +30,38 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
                 request,
                 params: { oauth },
                 searchParams: { redirectTo },
-                context: { oauth: providers, cookies, trustedProxyHeaders, basePath },
+                context: { oauth: providers, cookies, trustedProxyHeaders, basePath, logger },
             } = ctx
             const state = generateSecure()
             const redirectURI = createRedirectURI(request, oauth, basePath, trustedProxyHeaders)
-            const redirectToValue = createRedirectTo(request, redirectTo, trustedProxyHeaders)
+            const redirectToValue = createRedirectTo(request, redirectTo, trustedProxyHeaders, logger)
 
             const { codeVerifier, codeChallenge, method } = await createPKCE()
-            const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method)
+            const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method, logger)
+
+            logger?.log({
+                facility: 4,
+                severity: "debug",
+                msgId: "SIGN_IN_INITIATED",
+                message: "Sign-in initiated",
+                structuredData: {
+                    oauth,
+                    redirectURI,
+                    state,
+                    codeChallenge,
+                    codeChallengeMethod: method,
+                    redirectTo: redirectToValue,
+                    authorizationURL: authorization,
+                }
+            })
+            const { profile, ...exclude } = providers[oauth]
+            logger?.log({
+                facility: 4,
+                severity: "debug",
+                msgId: "OAUTH_PROVIDER_CONFIGURED",
+                message: `OAuth provider ${oauth} configured for sign-in.`,
+                structuredData: exclude
+            })
 
             const headers = new HeadersBuilder(cacheControl)
                 .setHeader("Location", authorization)

@@ -2,10 +2,10 @@ import "dotenv/config"
 import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { createJoseInstance } from "@/jose.js"
 import { createCookieStore } from "@/cookie.js"
-import { onErrorHandler, useSecureCookies } from "@/utils.js"
+import { createErrorHandler, useSecureCookies } from "@/utils.js"
 import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import type { AuthConfig, AuthInstance } from "@/@types/index.js"
+import type { AuthConfig, AuthInstance, Logger } from "@/@types/index.js"
 
 export type {
     AuthConfig,
@@ -18,14 +18,34 @@ export type {
     OAuthProviderConfig,
     OAuthProviderCredentials,
     ErrorType,
+    Logger,
+    LogLevel,
 } from "@/@types/index.js"
+
+const createLoggerProxy = (logger?: Logger, authConfig?: AuthConfig) => {
+    if(!logger) return undefined
+    return {
+        level: logger.level,
+        log(args) {
+            if(args.severity === authConfig?.logger?.level) {
+                authConfig?.logger?.log({
+                    ...args,
+                    timestamp: new Date().toISOString(),
+                    appName: "aura-auth",
+                    hostname: "aura-auth",
+                })
+            }
+        },
+    } as Logger
+}
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     const useSecure = authConfig?.trustedProxyHeaders ?? false
+    const logger = authConfig?.logger ?? undefined
 
     return {
         basePath: authConfig?.basePath ?? "/auth",
-        onError: onErrorHandler,
+        onError: createErrorHandler(logger),
         context: {
             oauth: createBuiltInOAuthProviders(authConfig?.oauth),
             cookies: createCookieStore(useSecure, authConfig?.cookies?.prefix, authConfig?.cookies?.overrides ?? {}),
@@ -33,6 +53,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
             trustedProxyHeaders: useSecure,
+            logger: createLoggerProxy(logger, authConfig),
         },
         middlewares: [
             (ctx) => {

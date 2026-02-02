@@ -116,7 +116,7 @@ describe("createAccessToken", async () => {
 
         await expect(
             createAccessToken(oauthCustomService, "https://myapp.com/auth/callback/oauth-provider", "invalid_code", codeVerifier)
-        ).rejects.toThrow(/Invalid grant/)
+        ).rejects.toThrow(/OAuth access token error/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",

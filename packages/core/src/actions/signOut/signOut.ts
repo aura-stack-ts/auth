@@ -27,12 +27,21 @@ export const signOutAction = createEndpoint(
             request,
             headers,
             searchParams: { redirectTo },
-            context: { jose, cookies, trustedProxyHeaders },
+            context: { jose, cookies, trustedProxyHeaders, logger },
         } = ctx
 
         const session = headers.getCookie(cookies.sessionToken.name)
         const csrfToken = headers.getCookie(cookies.csrfToken.name)
         const header = headers.getHeader("X-CSRF-Token")
+
+        logger?.log({
+            facility: 4,
+            severity: "debug",
+            msgId: "SIGN_OUT_ATTEMPT",
+            message: "Sign out attempt received.",
+            structuredData: { session: session ?? "null", csrfToken: csrfToken ?? "null", header: header ?? "null" },
+        })
+
         if (!session) {
             throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
         }
@@ -43,8 +52,19 @@ export const signOutAction = createEndpoint(
             throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF header is missing.")
         }
         await verifyCSRF(jose, csrfToken, header)
+        logger?.log({
+            facility: 4,
+            severity: "info",
+            msgId: "SIGN_OUT_CSRF_VERIFIED",
+            message: "CSRF token verified successfully.",
+        })
         await jose.decodeJWT(session)
-
+        logger?.log({
+            facility: 4,
+            severity: "info",
+            msgId: "SIGN_OUT_SUCCESS",
+            message: "Sign out completed successfully.",
+        })
         const baseURL = getBaseURL(request)
         const location = createRedirectTo(
             new Request(baseURL, {
@@ -53,6 +73,12 @@ export const signOutAction = createEndpoint(
             redirectTo,
             trustedProxyHeaders
         )
+        logger?.log({
+            facility: 4,
+            severity: "debug",
+            msgId: "SIGN_OUT_REDIRECT",
+            message: `Redirecting to ${location}.`,
+        })
         const headersList = new HeadersBuilder(cacheControl)
             .setHeader("Location", location)
             .setCookie(cookies.csrfToken.name, "", expiredCookieAttributes)

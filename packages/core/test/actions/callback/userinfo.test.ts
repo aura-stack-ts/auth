@@ -130,7 +130,7 @@ describe("getUserInfo", () => {
             }))
         )
 
-        await expect(getUserInfo(oauthCustomService, "invalid_access_token")).rejects.toThrow(/Invalid access token/)
+        await expect(getUserInfo(oauthCustomService, "invalid_access_token")).rejects.toThrow(/An error was received from the OAuth userinfo endpoint./)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",

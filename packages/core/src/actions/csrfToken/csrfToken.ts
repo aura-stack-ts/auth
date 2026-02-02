@@ -14,11 +14,24 @@ const getCSRFToken = (request: Request, cookieName: string) => {
 export const csrfTokenAction = createEndpoint("GET", "/csrfToken", async (ctx) => {
     const {
         request,
-        context: { jose, cookies },
+        context: { jose, cookies, logger },
     } = ctx
     const token = getCSRFToken(request, cookies.csrfToken.name)
     const csrfToken = await createCSRF(jose, token)
-
+    logger?.log({
+        facility: 4,
+        severity: "debug",
+        msgId: "CSRF_TOKEN_REQUESTED",
+        message: "CSRF token requested",
+        structuredData: { csrfToken: token ?? "not-found" }
+    })
+    logger?.log({
+        facility: 4,
+        severity: "debug",
+        msgId: "CSRF_TOKEN_ISSUED",
+        message: "Issued new CSRF token",
+        structuredData: { csrfToken }
+    })
     const headers = new Headers(cacheControl)
     headers.append("Set-Cookie", setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes))
     return Response.json({ csrfToken }, { headers })
