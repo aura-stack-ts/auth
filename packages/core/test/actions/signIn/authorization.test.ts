@@ -160,14 +160,14 @@ describe("createRedirectTo", () => {
                 request: new Request(signInURL, {
                     headers: { Referer: "https://example.com//auth///dashboard" },
                 }),
-                expected: "/auth/dashboard",
+                expected: "/",
             },
             {
                 description: "pathname contains invalid segments (parent directory)",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/../admin" },
                 }),
-                expected: "/admin",
+                expected: "/",
             },
             {
                 description: "pathname is root '/' with referer header",
@@ -315,6 +315,13 @@ describe("createRedirectTo", () => {
                 redirectTo: "/",
                 expected: "/",
             },
+            {
+                description: "with redirectTo parameter containing full URL with query",
+                request: new Request(signInURL),
+                trustedProxyHeaders: false,
+                redirectTo: "https://example.com/auth/signIn?next=123",
+                expected: "/auth/signIn?next=123",
+            },
         ]
 
         for (const { description, request, expected, redirectTo: redirectToParam, trustedProxyHeaders } of testCases) {
@@ -332,35 +339,30 @@ describe("createRedirectTo", () => {
                 request: new Request(signInURL, {
                     headers: { Referer: "https://malicious.com/phishing" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "different protocols do not match",
                 request: new Request("https://www.example.com/auth/signIn/google", {
                     headers: { Referer: "http://www.example.com/auth" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "different subdomains do not match",
                 request: new Request("https://example.com/auth/signIn/google", {
                     headers: { Referer: "https://sub.example.com/auth" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "different ports do not match",
                 request: new Request("http://localhost:3000/auth/signIn/google", {
                     headers: { Referer: "http://localhost:4000/auth" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "missing www in hosted URL",
                 request: new Request("https://www.example.com/auth/signIn/google", {
                     headers: { Referer: "https://example.com/auth" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
 
             {
@@ -368,150 +370,119 @@ describe("createRedirectTo", () => {
                 request: new Request(signInURL, {
                     headers: { Referer: "not-a-valid-url" },
                 }),
-                expected: /Invalid origin \(potential CSRF\)./,
             },
             {
                 description: "invalid protocol in Referer URL (unsupported protocol)",
                 request: new Request(signInURL, {
                     headers: { Referer: "ftp://example.com/resource" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "encoded double slash in Referer path",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://%2f%2fexample.com" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "encoded double slash in Referer path",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://%2f%2fevil.com" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "invalid custom protocol in Referer URL",
                 request: new Request(signInURL, {
                     headers: { Referer: "invalid://url" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "invalid path traversal using encoded segments",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/auth/%2e%2e/%2e%2e/admin" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "invalid path traversal using slashes",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://%2F%2Fexample.com" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "invalid Referer with spaces",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/auth path" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "invalid path traversal using encoded dots",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/%2e%2e/%2e%2e/" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "pathname contains invalid segments with backslashes",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://example.com/..\\admin" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "javascript URL injection in Referer query",
                 request: new Request("https://www.example.com/auth/signIn/google", {
                     headers: { Referer: "https://www.example.com?redirectURL=javascript:alert(1)" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "javascript URL injection in Referer",
                 request: new Request(signInURL, {
                     headers: { Referer: "javascript:alert(1)" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "with port in Referer header",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://example.com:3000" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "with IP address in Referer header",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://192.168.1.1/auth" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "with subdomain in Referer header",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://subdomain.example.com/auth" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "with .app domain in Referer header",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://example.app/auth" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
             {
                 description: "with .dev domain in Referer header",
                 request: new Request(signInURL, {
                     headers: { Referer: "https://example.dev/auth" },
                 }),
-                expected: /The referer of the request does not match the hosted origin./,
             },
-            {
-                description: "returns pathname with query when origins match",
-                request: new Request(signInURL, {
-                    headers: { Referer: "https://example.com/auth?next=123" },
-                }),
-                expected: /The referer of the request does not match the hosted origin./,
-            },
-            {
-                description: "with redirectTo parameter containing full URL with query",
-                request: new Request(signInURL),
-                redirectTo: "https://example.com/auth/signIn?next=123",
-                expected: /The redirectTo parameter does not match the hosted origin./,
-            },
+
             {
                 description: "with redirectTo parameter containing full URL with different origin",
                 request: new Request(signInURL),
                 redirectTo: "https://malicious.com/auth/signIn",
-                expected: /The redirectTo parameter does not match the hosted origin./,
             },
             {
                 description: "with redirectTo parameter containing invalid URL",
                 request: new Request(signInURL),
                 redirectTo: "ht!tp://invalid-url",
-                expected: /Invalid origin \(potential CSRF\)./,
             },
         ]
 
-        for (const { description, request, expected, redirectTo } of testCases) {
+        for (const { description, request, redirectTo } of testCases) {
             test(description, () => {
-                expect(() => createRedirectTo(request, redirectTo)).toThrow(expected)
+                expect(createRedirectTo(request, redirectTo)).toEqual("/")
             })
         }
     })
@@ -523,19 +494,19 @@ describe("getOriginURL", () => {
             description: "with standard URL",
             request: new Request("https://example.com/auth/signIn/github"),
             trustedProxyHeaders: false,
-            expected: "https://example.com/auth/signIn/github",
+            expected: "https://example.com",
         },
         {
             description: "with localhost URL",
             request: new Request("http://localhost:3000/auth/signIn/github"),
             trustedProxyHeaders: false,
-            expected: "http://localhost:3000/auth/signIn/github",
+            expected: "http://localhost:3000",
         },
         {
             description: "with IP address URL",
             request: new Request("http://192.168.0.1/auth/signIn/github"),
             trustedProxyHeaders: false,
-            expected: "http://192.168.0.1/auth/signIn/github",
+            expected: "http://192.168.0.1",
         },
         {
             description: "without trusted proxy headers",
@@ -546,7 +517,7 @@ describe("getOriginURL", () => {
                 },
             }),
             trustedProxyHeaders: false,
-            expected: "http://localhost:3000/auth/signIn/github",
+            expected: "http://localhost:3000",
         },
         {
             description: "with trusted proxy headers",
@@ -557,7 +528,7 @@ describe("getOriginURL", () => {
                 },
             }),
             trustedProxyHeaders: true,
-            expected: "https://example.com/auth/signIn/github",
+            expected: "https://example.com",
         },
         {
             description: "with localhost and trusted proxy headers",
@@ -568,14 +539,14 @@ describe("getOriginURL", () => {
                 },
             }),
             trustedProxyHeaders: true,
-            expected: "http://192.168.0.1/auth/signIn/github",
+            expected: "http://192.168.0.1",
         },
     ]
 
     for (const { description, request, trustedProxyHeaders, expected } of testCases) {
         test(description, () => {
             const originURL = getOriginURL(request, trustedProxyHeaders)
-            expect(originURL.href).toBe(expected)
+            expect(originURL).toBe(expected)
         })
     }
 })

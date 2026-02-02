@@ -261,6 +261,7 @@ export type AuthInternalErrorCode =
     | "COOKIE_PARSING_FAILED"
     | "COOKIE_NOT_FOUND"
     | "INVALID_ENVIRONMENT_CONFIGURATION"
+    | "INVALID_URL"
 
 export type AuthSecurityErrorCode =
     | "INVALID_STATE"

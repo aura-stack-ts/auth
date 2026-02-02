@@ -1,9 +1,9 @@
 import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder, statusCode } from "@aura-stack/router"
+import { getBaseURL } from "@/utils.js"
 import { verifyCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
 import { AuthSecurityError } from "@/errors.js"
-import { getNormalizedOriginPath } from "@/utils.js"
 import { expiredCookieAttributes } from "@/cookie.js"
 import { createRedirectTo } from "@/actions/signIn/authorization.js"
 
@@ -27,7 +27,7 @@ export const signOutAction = createEndpoint(
             request,
             headers,
             searchParams: { redirectTo },
-            context: { jose, cookies },
+            context: { jose, cookies, trustedProxyHeaders },
         } = ctx
 
         const session = headers.getCookie(cookies.sessionToken.name)
@@ -45,12 +45,13 @@ export const signOutAction = createEndpoint(
         await verifyCSRF(jose, csrfToken, header)
         await jose.decodeJWT(session)
 
-        const normalizedOriginPath = getNormalizedOriginPath(request.url)
+        const baseURL = getBaseURL(request)
         const location = createRedirectTo(
-            new Request(normalizedOriginPath, {
+            new Request(baseURL, {
                 headers: headers.toHeaders(),
             }),
-            redirectTo
+            redirectTo,
+            trustedProxyHeaders
         )
         const headersList = new HeadersBuilder(cacheControl)
             .setHeader("Location", location)
