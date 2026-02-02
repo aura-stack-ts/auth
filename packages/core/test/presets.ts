@@ -46,14 +46,14 @@ export const {
     cookies: {},
     secret: process.env.AURA_AUTH_SECRET,
     logger: {
-        level: "debug",
-        log({ timestamp, message, structuredData, msgId }) {
+        level: "info",
+        log({ timestamp, message, structuredData, msgId, }) {
             /**
              * This is not a real logger implementation.
              * Replace this with your own logger implementation.
              */
             const msg = createStructuredData(structuredData ?? {})
             console.log(`[debug][${msgId}]: ${timestamp} ${msg} ${message}`)
-        }
-    }
+        },
+    },
 })

@@ -15,9 +15,6 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
         logger?.log({
             facility: 4,
             severity: "info",
-            timestamp: new Date().toISOString(),
-            hostname: "aura-auth",
-            appName: "aura-auth",
             msgId: "AUTH_SESSION_VALID",
             message: `Get session by: ${(decoded as User).sub}`,
         })
@@ -28,9 +25,6 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
         logger?.log({
             facility: 4,
             severity: "notice",
-            timestamp: new Date().toISOString(),
-            hostname: "aura-auth",
-            appName: "aura-auth",
             msgId: "AUTH_SESSION_INVALID",
             message: `Invalid session: ${(error as Error).message}`,
         })

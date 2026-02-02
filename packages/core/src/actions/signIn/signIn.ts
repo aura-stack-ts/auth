@@ -33,7 +33,7 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
                 context: { oauth: providers, cookies, trustedProxyHeaders, basePath, logger },
             } = ctx
             const state = generateSecure()
-            const redirectURI = createRedirectURI(request, oauth, basePath, trustedProxyHeaders)
+            const redirectURI = createRedirectURI(request, oauth, basePath, trustedProxyHeaders, logger)
             const redirectToValue = createRedirectTo(request, redirectTo, trustedProxyHeaders, logger)
 
             const { codeVerifier, codeChallenge, method } = await createPKCE()
@@ -41,26 +41,13 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
 
             logger?.log({
                 facility: 4,
-                severity: "debug",
+                severity: "info",
                 msgId: "SIGN_IN_INITIATED",
                 message: "Sign-in initiated",
                 structuredData: {
-                    oauth,
-                    redirectURI,
-                    state,
-                    codeChallenge,
-                    codeChallengeMethod: method,
-                    redirectTo: redirectToValue,
-                    authorizationURL: authorization,
-                }
-            })
-            const { profile, ...exclude } = providers[oauth]
-            logger?.log({
-                facility: 4,
-                severity: "debug",
-                msgId: "OAUTH_PROVIDER_CONFIGURED",
-                message: `OAuth provider ${oauth} configured for sign-in.`,
-                structuredData: exclude
+                    oauth_provider: oauth,
+                    code_challenge_method: method,
+                },
             })
 
             const headers = new HeadersBuilder(cacheControl)

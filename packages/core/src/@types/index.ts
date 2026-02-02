@@ -189,20 +189,6 @@ export interface AuthConfig {
      */
     trustedProxyHeaders?: boolean
 
-    /**
-     * Optional logger function for structured error and warning logging.
-     * The logger receives log level, error code, and message for each authentication event.
-     *
-     * @example
-     * ```ts
-     * const auth = createAuth({
-     *   oauth: ["github"],
-     *   logger: (level, code, message) => {
-     *     console[level](`[${code}] ${message}`)
-     *   }
-     * })
-     * ```
-     */
     logger?: Logger
 }
 

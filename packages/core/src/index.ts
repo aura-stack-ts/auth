@@ -5,7 +5,7 @@ import { createCookieStore } from "@/cookie.js"
 import { createErrorHandler, useSecureCookies } from "@/utils.js"
 import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import type { AuthConfig, AuthInstance, Logger } from "@/@types/index.js"
+import type { AuthConfig, AuthInstance, Logger, LogLevel } from "@/@types/index.js"
 
 export type {
     AuthConfig,
@@ -22,17 +22,30 @@ export type {
     LogLevel,
 } from "@/@types/index.js"
 
+/**
+ * Maps LogLevel to Severity for filtering
+ */
+const logLevelToSeverity: Record<LogLevel, string[]> = {
+    debug: ["debug"],
+    info: ["info", "notice"],
+    warn: ["warning"],
+    error: ["error", "critical", "alert", "emergency"],
+}
+
 const createLoggerProxy = (logger?: Logger, authConfig?: AuthConfig) => {
-    if(!logger) return undefined
+    if (!logger) return undefined
+    const level = logger.level
+    const allowedSeverities = logLevelToSeverity[level] || []
+
     return {
-        level: logger.level,
+        level,
         log(args) {
-            if(args.severity === authConfig?.logger?.level) {
+            if (allowedSeverities.includes(args.severity)) {
                 authConfig?.logger?.log({
-                    ...args,
                     timestamp: new Date().toISOString(),
                     appName: "aura-auth",
                     hostname: "aura-auth",
+                    ...args,
                 })
             }
         },

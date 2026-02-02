@@ -148,9 +148,6 @@ export const defineSecureCookieOptions = (
         logger?.log({
             facility: 10,
             severity: "critical",
-            timestamp: new Date().toISOString(),
-            hostname: "aura-auth",
-            appName: "aura-auth",
             msgId: "COOKIE_HTTPONLY_DISABLED",
             message:
                 "Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk.",
@@ -161,9 +158,6 @@ export const defineSecureCookieOptions = (
         logger?.log({
             facility: 10,
             severity: "critical",
-            timestamp: new Date().toISOString(),
-            hostname: "aura-auth",
-            appName: "aura-auth",
             msgId: "COOKIE_WILDCARD_DOMAIN",
             message: "Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.",
         })
@@ -173,9 +167,6 @@ export const defineSecureCookieOptions = (
             logger?.log({
                 facility: 10,
                 severity: "warning",
-                timestamp: new Date().toISOString(),
-                hostname: "aura-auth",
-                appName: "aura-auth",
                 msgId: "COOKIE_SECURE_DISABLED",
                 message:
                     "Cookie is configured with 'Secure' attribute, but the request is not secure (HTTPS). 'Secure' will be disabled.",
@@ -186,9 +177,6 @@ export const defineSecureCookieOptions = (
             logger?.log({
                 facility: 10,
                 severity: "warning",
-                timestamp: new Date().toISOString(),
-                hostname: "aura-auth",
-                appName: "aura-auth",
                 msgId: "COOKIE_SAMESITE_NONE_WITHOUT_SECURE",
                 message: "Cookie is configured with SameSite=None but without Secure attribute. Changing SameSite to 'Lax'.",
             })
@@ -197,9 +185,6 @@ export const defineSecureCookieOptions = (
             logger?.log({
                 facility: 10,
                 severity: "critical",
-                timestamp: new Date().toISOString(),
-                hostname: "aura-auth",
-                appName: "aura-auth",
                 msgId: "COOKIE_INSECURE_IN_PRODUCTION",
                 message: "Cookies are being served over an insecure connection in production. This poses security risks.",
             })
@@ -208,9 +193,6 @@ export const defineSecureCookieOptions = (
             logger?.log({
                 facility: 10,
                 severity: "critical",
-                timestamp: new Date().toISOString(),
-                hostname: "aura-auth",
-                appName: "aura-auth",
                 msgId: "COOKIE_HOST_STRATEGY_INSECURE",
                 message: "__Host- cookies require a secure context. Falling back to standard cookie settings.",
             })

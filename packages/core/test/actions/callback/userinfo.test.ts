@@ -103,7 +103,7 @@ describe("getUserInfo", () => {
         }
 
         await expect(getUserInfo(oauthConfig as OAuthProviderCredentials, "access_token_123")).rejects.toThrow(
-            /Profile parsing error/
+            /Failed to fetch user information from OAuth provider/
         )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
@@ -130,7 +130,7 @@ describe("getUserInfo", () => {
             }))
         )
 
-        await expect(getUserInfo(oauthCustomService, "invalid_access_token")).rejects.toThrow(/An error was received from the OAuth userinfo endpoint./)
+        await expect(getUserInfo(oauthCustomService, "invalid_access_token")).rejects.toThrow(/Invalid userinfo response format/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -150,7 +150,9 @@ describe("getUserInfo", () => {
             })
         )
 
-        await expect(getUserInfo(oauthCustomService, "access_token")).rejects.toThrow(/Fetch Network error/)
+        await expect(getUserInfo(oauthCustomService, "access_token")).rejects.toThrow(
+            /Failed to fetch user information from OAuth provider/
+        )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",

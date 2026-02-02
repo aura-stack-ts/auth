@@ -26,16 +26,20 @@ export const createAuthorizationURL = (
 ) => {
     const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state, codeChallenge, codeChallengeMethod })
     if (!parsed.success) {
-        /** The msg should be formatted before pass to the logger */
-        //const msg = JSON.stringify(formatZodError(parsed.error), null, 2)
         logger?.log({
             facility: 10,
             severity: "error",
-            timestamp: new Date().toISOString(),
             hostname: "aura-auth",
             appName: "aura-auth",
             msgId: "INVALID_OAUTH_CONFIGURATION",
             message: "The OAuth provider configuration is invalid.",
+            structuredData: {
+                scope: oauthConfig.scope,
+                redirect_uri: redirectURI,
+                state: state,
+                code_challenge: codeChallenge,
+                code_challenge_method: codeChallengeMethod,
+            },
         })
         throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "The OAuth provider configuration is invalid.")
     }
@@ -45,7 +49,7 @@ export const createAuthorizationURL = (
     return `${authorizeURL}?${searchParams}`
 }
 
-export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) => {
+export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean, logger?: Logger) => {
     let origin = new URL(request.url).origin
     const headers = request.headers
     if (trustedProxyHeaders) {
@@ -58,6 +62,15 @@ export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) =>
         origin = `${protocol}://${host}`
     }
     if (!isValidURL(origin)) {
+        logger?.log({
+            facility: 10,
+            severity: "error",
+            msgId: "INVALID_URL",
+            message: "The constructed origin URL is invalid",
+            structuredData: {
+                origin: origin,
+            },
+        })
         throw new AuthInternalError("INVALID_URL", "The constructed origin URL is invalid.")
     }
     return origin
@@ -70,8 +83,14 @@ export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) =>
  * @param oauth - OAuth provider name
  * @returns The redirect URI for the OAuth callback.
  */
-export const createRedirectURI = (request: Request, oauth: string, basePath: string, trustedProxyHeaders?: boolean) => {
-    const origin = getOriginURL(request, trustedProxyHeaders)
+export const createRedirectURI = (
+    request: Request,
+    oauth: string,
+    basePath: string,
+    trustedProxyHeaders?: boolean,
+    logger?: Logger
+) => {
+    const origin = getOriginURL(request, trustedProxyHeaders, logger)
     return `${origin}${basePath}/callback/${oauth}`
 }
 
@@ -91,7 +110,7 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
         const headers = request.headers
         const origin = headers.get("Origin")
         const referer = headers.get("Referer")
-        const trustedOrigin = getOriginURL(request, trustedProxyHeaders)
+        const trustedOrigin = getOriginURL(request, trustedProxyHeaders, logger)
         if (redirectTo) {
             if (isRelativeURL(redirectTo)) {
                 return redirectTo
@@ -99,13 +118,9 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
             if (isValidURL(redirectTo) && isSameOrigin(redirectTo, trustedOrigin)) {
                 return extractPath(redirectTo)
             }
-            /** @todo: add an emitter */
             logger?.log({
                 facility: 4,
                 severity: "warning",
-                timestamp: new Date().toISOString(),
-                hostname: "aura-auth",
-                appName: "aura-auth",
                 msgId: "OPEN_REDIRECT_ATTACK",
                 message: "The redirectTo parameter does not match the hosted origin.",
             })
@@ -121,9 +136,6 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
             logger?.log({
                 facility: 4,
                 severity: "warning",
-                timestamp: new Date().toISOString(),
-                hostname: "aura-auth",
-                appName: "aura-auth",
                 msgId: "OPEN_REDIRECT_ATTACK",
                 message: "The referer of the request does not match the hosted origin.",
             })
@@ -136,9 +148,6 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
             logger?.log({
                 facility: 4,
                 severity: "warning",
-                timestamp: new Date().toISOString(),
-                hostname: "aura-auth",
-                appName: "aura-auth",
                 msgId: "OPEN_REDIRECT_ATTACK",
                 message: "The origin of the request does not match the hosted origin.",
             })
@@ -149,9 +158,6 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
         logger?.log({
             facility: 4,
             severity: "critical",
-            timestamp: new Date().toISOString(),
-            hostname: "aura-auth",
-            appName: "aura-auth",
             msgId: "OPEN_REDIRECT_ATTACK",
             message: "Invalid origin (potential CSRF).",
         })

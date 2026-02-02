@@ -38,33 +38,83 @@ export const signOutAction = createEndpoint(
             facility: 4,
             severity: "debug",
             msgId: "SIGN_OUT_ATTEMPT",
-            message: "Sign out attempt received.",
-            structuredData: { session: session ?? "null", csrfToken: csrfToken ?? "null", header: header ?? "null" },
+            message: "Sign out attempt received",
+            structuredData: {
+                has_session: session ? "true" : "false",
+                has_csrf_token: csrfToken ? "true" : "false",
+                has_csrf_header: header ? "true" : "false",
+            },
         })
 
         if (!session) {
+            logger?.log({
+                facility: 4,
+                severity: "warning",
+                msgId: "SESSION_TOKEN_MISSING",
+                message: "The sessionToken is missing",
+            })
             throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
         }
         if (!csrfToken) {
+            logger?.log({
+                facility: 4,
+                severity: "warning",
+                msgId: "CSRF_TOKEN_MISSING",
+                message: "The CSRF token is missing from cookies",
+            })
             throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
         }
         if (!header) {
+            logger?.log({
+                facility: 4,
+                severity: "warning",
+                msgId: "CSRF_TOKEN_MISSING",
+                message: "The CSRF header is missing",
+            })
             throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF header is missing.")
         }
-        await verifyCSRF(jose, csrfToken, header)
+        try {
+            await verifyCSRF(jose, csrfToken, header)
+        } catch (error) {
+            logger?.log({
+                facility: 4,
+                severity: "error",
+                msgId: "CSRF_TOKEN_INVALID",
+                message: "CSRF token verification failed",
+                structuredData: {
+                    error_type: error instanceof Error ? error.name : "Unknown",
+                },
+            })
+            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
+        }
         logger?.log({
             facility: 4,
             severity: "info",
             msgId: "SIGN_OUT_CSRF_VERIFIED",
             message: "CSRF token verified successfully.",
         })
-        await jose.decodeJWT(session)
-        logger?.log({
-            facility: 4,
-            severity: "info",
-            msgId: "SIGN_OUT_SUCCESS",
-            message: "Sign out completed successfully.",
-        })
+        try {
+            const decoded = await jose.decodeJWT(session)
+            logger?.log({
+                facility: 4,
+                severity: "info",
+                msgId: "SIGN_OUT_SUCCESS",
+                message: "Sign out completed successfully",
+                structuredData: {
+                    user_sub: (decoded as { sub?: string })?.sub || "unknown",
+                },
+            })
+        } catch (error) {
+            logger?.log({
+                facility: 4,
+                severity: "warning",
+                msgId: "INVALID_JWT_TOKEN",
+                message: "Invalid session token during sign out",
+                structuredData: {
+                    error_type: error instanceof Error ? error.name : "Unknown",
+                },
+            })
+        }
         const baseURL = getBaseURL(request)
         const location = createRedirectTo(
             new Request(baseURL, {

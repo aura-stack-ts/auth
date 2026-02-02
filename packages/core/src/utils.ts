@@ -40,24 +40,41 @@ export const createErrorHandler = (logger?: Logger): RouterConfig["onError"] => 
                 facility: 10,
                 severity: "error",
                 msgId: "ROUTER_INTERNAL_ERROR",
-                message: error.message || "Router error occurred",
-            }) 
+                message: message || "Router error occurred",
+                structuredData: {
+                    status: status?.toString() || "unknown",
+                    statusText: statusText || "unknown",
+                },
+            })
             return Response.json({ type: "ROUTER_ERROR", code: "ROUTER_INTERNAL_ERROR", message }, { status, statusText })
         }
         if (isInvalidZodSchemaError(error)) {
             logger?.log({
                 facility: 10,
-                severity: "error",
-                msgId: "ROUTE_ERROR",
-                message: "Invalid request data",
+                severity: "warning",
+                msgId: "INVALID_REQUEST",
+                message: "Invalid request schema validation failed",
+                structuredData: {
+                    error_count: error.errors?.length?.toString() || "0",
+                },
             })
             return Response.json({ type: "ROUTER_ERROR", code: "INVALID_REQUEST", message: error.errors }, { status: 422 })
         }
         if (isOAuthProtocolError(error)) {
             const { error: errorCode, message, type, errorURI } = error
-            /**
-             * @todo: this should hidden internal error details
-             */
+            const criticalOAuthErrors = ["access_denied", "invalid_client", "unauthorized_client"]
+            const severity = criticalOAuthErrors.includes(errorCode.toLowerCase()) ? "error" : "warning"
+
+            logger?.log({
+                facility: 10,
+                severity,
+                msgId: `OAUTH_${errorCode.toUpperCase()}`,
+                message: message || "OAuth protocol error occurred",
+                structuredData: {
+                    oauth_error: errorCode,
+                    error_uri: errorURI || "",
+                },
+            })
             return Response.json(
                 {
                     type,
@@ -68,8 +85,17 @@ export const createErrorHandler = (logger?: Logger): RouterConfig["onError"] => 
                 { status: 400 }
             )
         }
-        if (isAuthInternalError(error) || isAuthSecurityError(error)) {
+        if (isAuthInternalError(error)) {
             const { type, code, message } = error
+            logger?.log({
+                facility: 10,
+                severity: "error",
+                msgId: code,
+                message: message || "Internal authentication error occurred",
+                structuredData: {
+                    error_type: type,
+                },
+            })
             return Response.json(
                 {
                     type,
@@ -79,6 +105,38 @@ export const createErrorHandler = (logger?: Logger): RouterConfig["onError"] => 
                 { status: 400 }
             )
         }
+        if (isAuthSecurityError(error)) {
+            const { type, code, message } = error
+            const criticalSecurityErrors = ["POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", "MISMATCHING_STATE"]
+            const severity = criticalSecurityErrors.includes(code) ? "critical" : "warning"
+
+            logger?.log({
+                facility: 4,
+                severity,
+                msgId: code,
+                message: message || "Security error occurred",
+                structuredData: {
+                    error_type: type,
+                },
+            })
+            return Response.json(
+                {
+                    type,
+                    code,
+                    message,
+                },
+                { status: 400 }
+            )
+        }
+        logger?.log({
+            facility: 10,
+            severity: "error",
+            msgId: "SERVER_ERROR",
+            message: "An unexpected error occurred",
+            structuredData: {
+                error_name: error instanceof Error ? error.name : "Unknown",
+            },
+        })
         return Response.json(
             { type: "SERVER_ERROR", code: "server_error", message: "An unexpected error occurred" },
             { status: 500 }
@@ -122,6 +180,7 @@ export const onErrorHandler: RouterConfig["onError"] = (error) => {
     }
     return Response.json({ type: "SERVER_ERROR", code: "server_error", message: "An unexpected error occurred" }, { status: 500 })
 }
+
 export const getBaseURL = (request: Request) => {
     const url = new URL(request.url)
     return `${url.origin}${url.pathname}`

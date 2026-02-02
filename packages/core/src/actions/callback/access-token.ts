@@ -27,9 +27,6 @@ export const createAccessToken = async (
         logger?.log({
             facility: 10,
             severity: "error",
-            timestamp: new Date().toISOString(),
-            hostname: "aura-auth",
-            appName: "aura-auth",
             msgId: "INVALID_OAUTH_CONFIGURATION",
             message: "The OAuth provider configuration is invalid.",
         })
@@ -38,18 +35,15 @@ export const createAccessToken = async (
     const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data
     try {
         logger?.log({
-            facility: 4,
+            facility: 10,
             severity: "debug",
             msgId: "OAUTH_ACCESS_TOKEN_REQUEST_INITIATED",
             message: "Initiating OAuth access token request",
             structuredData: {
                 client_id: clientId,
-                client_secret: clientSecret,
-                code: codeParsed,
                 redirect_uri: redirectParsed,
                 grant_type: "authorization_code",
-                code_verifier: codeVerifier,
-            }
+            },
         })
         const response = await fetchAsync(accessToken, {
             method: "POST",
@@ -66,6 +60,20 @@ export const createAccessToken = async (
                 code_verifier: codeVerifier,
             }).toString(),
         })
+
+        if (!response.ok) {
+            logger?.log({
+                facility: 10,
+                severity: "error",
+                msgId: "INVALID_OAUTH_ACCESS_TOKEN_RESPONSE",
+                message: `Invalid access token response format. HTTP ${response.status}`,
+                structuredData: {
+                    status: response.status.toString(),
+                },
+            })
+            throw new OAuthProtocolError("invalid_request", "Invalid access token response")
+        }
+
         const json = await response.json()
         const token = OAuthAccessTokenResponse.safeParse(json)
         if (!token.success) {
@@ -74,33 +82,46 @@ export const createAccessToken = async (
                 logger?.log({
                     facility: 10,
                     severity: "error",
-                    timestamp: new Date().toISOString(),
-                    hostname: "aura-auth",
-                    appName: "aura-auth",
                     msgId: "INVALID_OAUTH_ACCESS_TOKEN_RESPONSE",
-                    message: "Invalid access token response format.",
+                    message: "Invalid access token response format",
+                    structuredData: {
+                        response_type: typeof json,
+                    },
                 })
-                throw new OAuthProtocolError("INVALID_REQUEST", "Invalid access token response format")
+                throw new OAuthProtocolError("invalid_request", "Invalid access token response format")
             }
             logger?.log({
                 facility: 10,
                 severity: "error",
-                timestamp: new Date().toISOString(),
-                hostname: "aura-auth",
-                appName: "aura-auth",
                 msgId: "OAUTH_ACCESS_TOKEN_ERROR",
-                message: `OAuth access token error: ${data.error} - ${data?.error_description ?? "No description"}`,
+                message: `OAuth access token error: ${data.error}`,
+                structuredData: {
+                    oauth_error: data.error,
+                },
             })
-            throw new OAuthProtocolError("OAUTH_TOKEN_ERROR", "OAuth access token error")
+            throw new OAuthProtocolError(data.error, data?.error_description ?? "Failed to retrieve access token")
         }
+
+        logger?.log({
+            facility: 10,
+            severity: "info",
+            msgId: "OAUTH_ACCESS_TOKEN_SUCCESS",
+            message: "OAuth access token retrieved successfully",
+        })
         return token.data
     } catch (error) {
         logger?.log({
             facility: 10,
             severity: "error",
             msgId: "OAUTH_ACCESS_TOKEN_REQUEST_FAILED",
-            message: `OAuth access token request failed: ${(error as Error).message}`,
+            message: "OAuth access token request failed",
+            structuredData: {
+                error_type: error instanceof Error ? error.name : "Unknown",
+            },
         })
+        if (error instanceof Error) {
+            throw new OAuthProtocolError("server_error", "Failed to communicate with OAuth provider", "", { cause: error })
+        }
         throw error
     }
 }
