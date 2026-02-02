@@ -165,7 +165,7 @@ describe("signOut action", async () => {
         )
         expect(request.status).toBe(202)
         expect(await request.json()).toEqual({
-            message: "Signed out successfully"
+            message: "Signed out successfully",
         })
     })
 })

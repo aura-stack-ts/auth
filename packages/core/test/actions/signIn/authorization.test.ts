@@ -494,19 +494,19 @@ describe("getOriginURL", () => {
             description: "with standard URL",
             request: new Request("https://example.com/auth/signIn/github"),
             trustedProxyHeaders: false,
-            expected: "https://example.com/auth/signIn/github",
+            expected: "https://example.com",
         },
         {
             description: "with localhost URL",
             request: new Request("http://localhost:3000/auth/signIn/github"),
             trustedProxyHeaders: false,
-            expected: "http://localhost:3000/auth/signIn/github",
+            expected: "http://localhost:3000",
         },
         {
             description: "with IP address URL",
             request: new Request("http://192.168.0.1/auth/signIn/github"),
             trustedProxyHeaders: false,
-            expected: "http://192.168.0.1/auth/signIn/github",
+            expected: "http://192.168.0.1",
         },
         {
             description: "without trusted proxy headers",
@@ -517,7 +517,7 @@ describe("getOriginURL", () => {
                 },
             }),
             trustedProxyHeaders: false,
-            expected: "http://localhost:3000/auth/signIn/github",
+            expected: "http://localhost:3000",
         },
         {
             description: "with trusted proxy headers",
@@ -528,7 +528,7 @@ describe("getOriginURL", () => {
                 },
             }),
             trustedProxyHeaders: true,
-            expected: "https://example.com/auth/signIn/github",
+            expected: "https://example.com",
         },
         {
             description: "with localhost and trusted proxy headers",
@@ -539,14 +539,14 @@ describe("getOriginURL", () => {
                 },
             }),
             trustedProxyHeaders: true,
-            expected: "http://192.168.0.1/auth/signIn/github",
+            expected: "http://192.168.0.1",
         },
     ]
 
     for (const { description, request, trustedProxyHeaders, expected } of testCases) {
         test(description, () => {
             const originURL = getOriginURL(request, trustedProxyHeaders)
-            expect(originURL.href).toBe(expected)
+            expect(originURL).toBe(expected)
         })
     }
 })

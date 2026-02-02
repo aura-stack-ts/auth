@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { toCastCase, toSnakeCase, sanitizeURL } from "@/utils.js"
+import { toCastCase, toSnakeCase } from "@/utils.js"
 import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 
 describe("toSnakeCase", () => {
@@ -61,45 +61,4 @@ describe("toUpperCase", () => {
             TEMPORARILY_UNAVAILABLE: "temporarily_unavailable",
         })
     })
-})
-
-describe("sanitizeURL", () => {
-    const testCases = [
-        {
-            description: "removes multiple consecutive slashes",
-            url: "https://example.com//path///to/resource",
-            expected: "https://example.com/path/to/resource",
-        },
-        {
-            description: "removes multiple consecutive dots",
-            url: "https://example.com/..//path/../to/..//resource",
-            expected: "https://example.com/path/to/resource",
-        },
-        {
-            description: "trims leading and trailing whitespace",
-            url: "   https://example.com/path/to/resource   ",
-            expected: "https://example.com/path/to/resource",
-        },
-        {
-            description: "combines all sanitizations",
-            url: "   https://example.com//..//path///to/..//resource   ",
-            expected: "https://example.com/path/to/resource",
-        },
-        {
-            description: "handles encoded dots in path",
-            url: "https://example.com/path/%2e%2e/%2e%2e/admin",
-            expected: "https://example.com/path/admin",
-        },
-        {
-            description: "handles encoded dots in path",
-            url: "http://localhost:3000/path/%2e%2e/%2e%2e/admin",
-            expected: "http://localhost:3000/path/admin",
-        },
-    ]
-
-    for (const { description, url, expected } of testCases) {
-        test(description, () => {
-            expect(sanitizeURL(url)).toBe(expected)
-        })
-    }
 })

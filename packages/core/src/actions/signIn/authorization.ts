@@ -1,7 +1,7 @@
 import { isRelativeURL, isSameOrigin, isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
 import { AuthInternalError } from "@/errors.js"
-import { extractPath, formatZodError, getNormalizedOriginPath, toCastCase } from "@/utils.js"
+import { extractPath, formatZodError, toCastCase } from "@/utils.js"
 import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
@@ -35,6 +35,7 @@ export const createAuthorizationURL = (
 }
 
 export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) => {
+    let origin = new URL(request.url).origin
     const headers = request.headers
     if (trustedProxyHeaders) {
         const protocol = headers.get("X-Forwarded-Proto") ?? headers.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? "http"
@@ -43,10 +44,12 @@ export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) =>
             headers.get("Host") ??
             headers.get("Forwarded")?.match(/host=([^;]+)/i)?.[1] ??
             null
-        return new URL(`${protocol}://${host}${getNormalizedOriginPath(new URL(request.url).pathname)}`)
-    } else {
-        return new URL(getNormalizedOriginPath(request.url))
+        origin = `${protocol}://${host}`
     }
+    if (!isValidURL(origin)) {
+        throw new AuthInternalError("INVALID_URL", "The constructed origin URL is invalid.")
+    }
+    return origin
 }
 
 /**
@@ -57,18 +60,19 @@ export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) =>
  * @returns The redirect URI for the OAuth callback.
  */
 export const createRedirectURI = (request: Request, oauth: string, basePath: string, trustedProxyHeaders?: boolean) => {
-    const url = getOriginURL(request, trustedProxyHeaders)
-    return `${url.origin}${basePath}/callback/${oauth}`
+    const origin = getOriginURL(request, trustedProxyHeaders)
+    return `${origin}${basePath}/callback/${oauth}`
 }
 
 /**
  * Verifies if the request's origin matches the expected origin. It accepts the redirectTo search
  * parameter for redirection. It checks the 'Referer' header of the request with the origin where
- * the authentication flow is hosted. If they do not match, it throws an AuthError to avoid
+ * the authentication flow is hosted. If they do not match, it returns "/" to avoid
  * potential `Open URL Redirection` attacks.
  *
  * @param request The incoming request object
  * @param redirectTo Optional redirectTo parameter to override the referer
+ * @param trustedProxyHeaders Whether to trust proxy headers for origin determination
  * @returns The pathname of the referer URL if origins match
  */
 export const createRedirectTo = (request: Request, redirectTo?: string, trustedProxyHeaders?: boolean) => {
@@ -76,12 +80,12 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
         const headers = request.headers
         const origin = headers.get("Origin")
         const referer = headers.get("Referer")
-        const hostedOrigin = getOriginURL(request, trustedProxyHeaders).origin
+        const trustedOrigin = getOriginURL(request, trustedProxyHeaders)
         if (redirectTo) {
             if (isRelativeURL(redirectTo)) {
                 return redirectTo
             }
-            if (isValidURL(redirectTo) && isSameOrigin(redirectTo, hostedOrigin)) {
+            if (isValidURL(redirectTo) && isSameOrigin(redirectTo, trustedOrigin)) {
                 return extractPath(redirectTo)
             }
             console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: The redirectTo parameter does not match the hosted origin.")
@@ -91,14 +95,14 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
             if (isRelativeURL(referer)) {
                 return referer
             }
-            if (isValidURL(referer) && isSameOrigin(referer, hostedOrigin)) {
+            if (isValidURL(referer) && isSameOrigin(referer, trustedOrigin)) {
                 return extractPath(referer)
             }
             console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: The referer of the request does not match the hosted origin.")
             return "/"
         }
         if (origin) {
-            if (isValidURL(origin) && isSameOrigin(origin, hostedOrigin)) {
+            if (isValidURL(origin) && isSameOrigin(origin, trustedOrigin)) {
                 return extractPath(origin)
             }
             console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: Invalid origin (potential CSRF).")

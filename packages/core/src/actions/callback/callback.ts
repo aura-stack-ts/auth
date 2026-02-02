@@ -2,10 +2,11 @@ import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
+import { isRelativeURL } from "@/assert.js"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
 import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import { AuthSecurityError, OAuthProtocolError } from "@/errors.js"
-import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
+import { equals } from "@/utils.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
@@ -64,8 +65,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             }
 
             const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier)
-            const sanitized = sanitizeURL(cookieRedirectTo)
-            if (!isValidRelativePath(sanitized)) {
+            if (!isRelativeURL(cookieRedirectTo)) {
                 throw new AuthSecurityError(
                     "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
                     "Invalid redirect path. Potential open redirect attack detected."
@@ -77,7 +77,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             const csrfToken = await createCSRF(jose)
 
             const headers = new HeadersBuilder(cacheControl)
-                .setHeader("Location", sanitized)
+                .setHeader("Location", cookieRedirectTo)
                 .setCookie(cookies.sessionToken.name, sessionCookie, cookies.sessionToken.attributes)
                 .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
                 .setCookie(cookies.state.name, "", expiredCookieAttributes)
