@@ -16,7 +16,7 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
             facility: 4,
             severity: "info",
             msgId: "AUTH_SESSION_VALID",
-            message: `Get session by: ${(decoded as User).sub}`,
+            message: `Get session`,
         })
         const { exp, iat, jti, nbf, ...user } = decoded as User & JWTStandardClaims
         const headers = new Headers(cacheControl)
@@ -26,7 +26,10 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
             facility: 4,
             severity: "notice",
             msgId: "AUTH_SESSION_INVALID",
-            message: `Invalid session: ${(error as Error).message}`,
+            message: `Session validation failed`,
+            structuredData: {
+                error_type: (error as Error).name,
+            },
         })
         const headers = new HeadersBuilder(cacheControl)
             .setCookie(cookies.sessionToken.name, "", expiredCookieAttributes)

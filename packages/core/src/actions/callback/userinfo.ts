@@ -56,16 +56,12 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
                 severity: "error",
                 msgId: "OAUTH_USERINFO_INVALID_RESPONSE",
                 message: `Invalid userinfo response format. HTTP ${response.status}`,
-                structuredData: {
-                    status: response.status.toString(),
-                    bearer_token: accessToken,
-                },
             })
-            throw new OAuthProtocolError("invalid_request", "Invalid userinfo response format")
+            throw new OAuthProtocolError("INVALID_REQUEST", "Invalid userinfo response format")
         }
 
         const json = await response.json()
-        const { success } = OAuthErrorResponse.safeParse(json)
+        const { success, data } = OAuthErrorResponse.safeParse(json)
         if (success) {
             logger?.log({
                 facility: 10,
@@ -73,15 +69,12 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
                 msgId: "OAUTH_USERINFO_ERROR",
                 message: "Error response received from OAuth userinfo endpoint",
                 structuredData: {
-                    oauth_error: json.error || "unknown",
+                    error: data.error,
+                    error_description: data.error_description ?? "",
                 },
             })
-            throw new OAuthProtocolError(
-                json.error || "invalid_request",
-                json?.error_description ?? "An error was received from the OAuth userinfo endpoint."
-            )
+            throw new OAuthProtocolError("INVALID_REQUEST", "An error was received from the OAuth userinfo endpoint.")
         }
-
         logger?.log({
             facility: 10,
             severity: "info",
@@ -103,10 +96,10 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
             },
         })
         if (isNativeError(error)) {
-            throw new OAuthProtocolError("server_error", "Failed to fetch user information from OAuth provider", "", {
+            throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information from OAuth provider", "", {
                 cause: error,
             })
         }
-        throw new OAuthProtocolError("server_error", "Failed to fetch user information", "", { cause: error })
+        throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information", "", { cause: error })
     }
 }

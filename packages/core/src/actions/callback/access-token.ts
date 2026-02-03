@@ -23,7 +23,6 @@ export const createAccessToken = async (
 ) => {
     const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code, codeVerifier })
     if (!parsed.success) {
-        //const msg = JSON.stringify(formatZodError(parsed.error), null, 2)
         logger?.log({
             facility: 10,
             severity: "error",
@@ -67,9 +66,6 @@ export const createAccessToken = async (
                 severity: "error",
                 msgId: "INVALID_OAUTH_ACCESS_TOKEN_RESPONSE",
                 message: `Invalid access token response format. HTTP ${response.status}`,
-                structuredData: {
-                    status: response.status.toString(),
-                },
             })
             throw new OAuthProtocolError("invalid_request", "Invalid access token response")
         }
@@ -84,9 +80,6 @@ export const createAccessToken = async (
                     severity: "error",
                     msgId: "INVALID_OAUTH_ACCESS_TOKEN_RESPONSE",
                     message: "Invalid access token response format",
-                    structuredData: {
-                        response_type: typeof json,
-                    },
                 })
                 throw new OAuthProtocolError("invalid_request", "Invalid access token response format")
             }
@@ -96,10 +89,11 @@ export const createAccessToken = async (
                 msgId: "OAUTH_ACCESS_TOKEN_ERROR",
                 message: `OAuth access token error: ${data.error}`,
                 structuredData: {
-                    oauth_error: data.error,
+                    error: data.error,
+                    error_description: data.error_description ?? "",
                 },
             })
-            throw new OAuthProtocolError(data.error, data?.error_description ?? "Failed to retrieve access token")
+            throw new OAuthProtocolError("INVALID_ACCESS_TOKEN", "Failed to retrieve access token")
         }
 
         logger?.log({

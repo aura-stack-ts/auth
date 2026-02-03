@@ -68,10 +68,10 @@ export const signOutAction = createEndpoint(
             logger?.log({
                 facility: 4,
                 severity: "warning",
-                msgId: "CSRF_TOKEN_MISSING",
+                msgId: "CSRF_HEADER_MISSING",
                 message: "The CSRF header is missing",
             })
-            throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF header is missing.")
+            throw new AuthSecurityError("CSRF_HEADER_MISSING", "The CSRF header is missing.")
         }
         try {
             await verifyCSRF(jose, csrfToken, header)
@@ -94,15 +94,12 @@ export const signOutAction = createEndpoint(
             message: "CSRF token verified successfully.",
         })
         try {
-            const decoded = await jose.decodeJWT(session)
+            await jose.decodeJWT(session)
             logger?.log({
                 facility: 4,
                 severity: "info",
                 msgId: "SIGN_OUT_SUCCESS",
                 message: "Sign out completed successfully",
-                structuredData: {
-                    user_sub: (decoded as { sub?: string })?.sub || "unknown",
-                },
             })
         } catch (error) {
             logger?.log({

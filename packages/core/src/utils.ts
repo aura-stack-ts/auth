@@ -144,43 +144,6 @@ export const createErrorHandler = (logger?: Logger): RouterConfig["onError"] => 
     }
 }
 
-/**
- * @deprecated Use createErrorHandler instead. This function is kept for backward compatibility.
- */
-export const onErrorHandler: RouterConfig["onError"] = (error) => {
-    if (isRouterError(error)) {
-        const { message, status, statusText } = error
-        return Response.json({ type: "ROUTER_ERROR", code: "ROUTER_INTERNAL_ERROR", message }, { status, statusText })
-    }
-    if (isInvalidZodSchemaError(error)) {
-        return Response.json({ type: "ROUTER_ERROR", code: "INVALID_REQUEST", message: error.errors }, { status: 422 })
-    }
-    if (isOAuthProtocolError(error)) {
-        const { error: errorCode, message, type, errorURI } = error
-        return Response.json(
-            {
-                type,
-                error: errorCode,
-                error_description: message,
-                error_uri: errorURI,
-            },
-            { status: 400 }
-        )
-    }
-    if (isAuthInternalError(error) || isAuthSecurityError(error)) {
-        const { type, code, message } = error
-        return Response.json(
-            {
-                type,
-                code,
-                message,
-            },
-            { status: 400 }
-        )
-    }
-    return Response.json({ type: "SERVER_ERROR", code: "server_error", message: "An unexpected error occurred" }, { status: 500 })
-}
-
 export const getBaseURL = (request: Request) => {
     const url = new URL(request.url)
     return `${url.origin}${url.pathname}`
@@ -220,21 +183,7 @@ export const extractPath = (url: string): string => {
     return match && match[2] ? match[2] : "/"
 }
 
-export const severityToSyslogSeverity = (severity: string): number => {
-    const obj: Record<string, number> = {
-        emergency: 0,
-        alert: 1,
-        critical: 2,
-        error: 3,
-        warning: 4,
-        notice: 5,
-        info: 6,
-        debug: 7,
-    }
-    return obj[severity]
-}
-
-export const createStructuredData = (data: Record<string, string>, sdID = "meta"): string => {
+export const createStructuredData = (data: Record<string, string>, sdID = "metadata"): string => {
     const values = Object.entries(data)
         .map(([key, value]) => `${key}="${value.replace(/(["\\\]])/g, "\\$1")}"`)
         .join(" ")

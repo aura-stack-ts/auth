@@ -36,8 +36,8 @@ export const createAuthorizationURL = (
             structuredData: {
                 scope: oauthConfig.scope,
                 redirect_uri: redirectURI,
-                state: state,
-                code_challenge: codeChallenge,
+                has_state: Boolean(state),
+                has_code_challenge: Boolean(codeChallenge),
                 code_challenge_method: codeChallengeMethod,
             },
         })

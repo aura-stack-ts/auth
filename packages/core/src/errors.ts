@@ -49,7 +49,7 @@ export class AuthSecurityError extends Error {
     readonly type = "AUTH_SECURITY_ERROR"
     readonly code: string
 
-    constructor(code: AuthSecurityErrorCode, message?: string, options?: ErrorOptions) {
+    constructor(code: LiteralUnion<AuthSecurityErrorCode>, message?: string, options?: ErrorOptions) {
         super(message, options)
         this.code = code
         this.name = new.target.name

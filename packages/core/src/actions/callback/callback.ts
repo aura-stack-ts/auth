@@ -97,7 +97,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                     message: "Invalid redirect path. Potential open redirect attack detected",
                     structuredData: {
                         redirect_path: cookieRedirectTo,
-                        oauth_provider: oauth,
+                        provider: oauth,
                     },
                 })
                 throw new AuthSecurityError(
@@ -116,8 +116,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 msgId: "OAUTH_CALLBACK_SUCCESS",
                 message: "OAuth callback completed successfully",
                 structuredData: {
-                    oauth_provider: oauth,
-                    user_sub: (userInfo as User).sub,
+                    provider: oauth,
                 },
             })
 

@@ -203,10 +203,6 @@ export interface JoseInstance {
 
 export type OAuthProviderRecord = Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
 
-export type InternalLogger = {
-    level: LogLevel
-}
-
 export interface RouterGlobalContext {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
@@ -287,17 +283,12 @@ export type APIErrorMap = Record<string, { code: string; message: string }>
  */
 export type LogLevel = "warn" | "error" | "debug" | "info"
 
-export type SyslogSeverity = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
-
 /** Defines the Severity between 0 to 7 */
 export type Severity = "emergency" | "alert" | "critical" | "error" | "warning" | "notice" | "info" | "debug"
 
-export interface LogEvent {
-    level: LogLevel
-    code: string
-    message: string
-}
-
+/**
+ * @see https://datatracker.ietf.org/doc/html/rfc5424
+ */
 export type SyslogOptions = {
     facility: 4 | 10
     severity: Severity
@@ -307,7 +298,7 @@ export type SyslogOptions = {
     procId?: string
     msgId: string
     message: string
-    structuredData?: Record<string, string>
+    structuredData?: Record<string, string | number | boolean>
 }
 
 /**

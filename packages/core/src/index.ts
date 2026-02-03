@@ -23,16 +23,17 @@ export type {
 } from "@/@types/index.js"
 
 /**
- * Maps LogLevel to Severity for filtering
+ * Maps LogLevel to Severity hierarchically per RFC 5424.
+ * Each level includes itself and all more-severe levels.
  */
 const logLevelToSeverity: Record<LogLevel, string[]> = {
-    debug: ["debug"],
-    info: ["info", "notice"],
-    warn: ["warning"],
+    debug: ["debug", "info", "notice", "warning", "error", "critical", "alert", "emergency"],
+    info: ["info", "notice", "warning", "error", "critical", "alert", "emergency"],
+    warn: ["warning", "error", "critical", "alert", "emergency"],
     error: ["error", "critical", "alert", "emergency"],
 }
 
-const createLoggerProxy = (logger?: Logger, authConfig?: AuthConfig) => {
+const createLoggerProxy = (logger?: Logger) => {
     if (!logger) return undefined
     const level = logger.level
     const allowedSeverities = logLevelToSeverity[level] || []
@@ -41,7 +42,7 @@ const createLoggerProxy = (logger?: Logger, authConfig?: AuthConfig) => {
         level,
         log(args) {
             if (allowedSeverities.includes(args.severity)) {
-                authConfig?.logger?.log({
+                logger.log({
                     timestamp: new Date().toISOString(),
                     appName: "aura-auth",
                     hostname: "aura-auth",
@@ -66,12 +67,17 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
             trustedProxyHeaders: useSecure,
-            logger: createLoggerProxy(logger, authConfig),
+            logger: createLoggerProxy(logger),
         },
         middlewares: [
             (ctx) => {
                 const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
-                const cookies = createCookieStore(useSecure, authConfig?.cookies?.prefix, authConfig?.cookies?.overrides ?? {})
+                const cookies = createCookieStore(
+                    useSecure,
+                    authConfig?.cookies?.prefix,
+                    authConfig?.cookies?.overrides ?? {},
+                    logger
+                )
                 ctx.context.cookies = cookies
                 return ctx
             },
