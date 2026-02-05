@@ -58,7 +58,6 @@ export const {
 } = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile],
     cookies: {},
-    secret: process.env.AURA_AUTH_SECRET,
     logger: {
         level: "debug",
         log({ facility, severity, timestamp, message, structuredData, msgId }) {

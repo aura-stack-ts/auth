@@ -3,6 +3,7 @@ import path from "path"
 import { defineConfig } from "vitest/config"
 
 const SECRET_KEY = crypto.randomBytes(32).toString("base64url")
+const SALT_KEY = crypto.randomBytes(32).toString("base64url")
 
 export default defineConfig({
     test: {
@@ -16,6 +17,7 @@ export default defineConfig({
             AURA_AUTH_SECRET: SECRET_KEY,
             AURA_AUTH_GITHUB_CLIENT_ID: "github-client-id",
             AURA_AUTH_GITHUB_CLIENT_SECRET: "github-client-secret",
+            AURA_AUTH_SALT: SALT_KEY,
         },
     },
     resolve: {

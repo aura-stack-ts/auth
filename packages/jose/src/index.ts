@@ -12,6 +12,7 @@ import type { KeyObject } from "crypto"
 export * from "@/sign.js"
 export * from "@/encrypt.js"
 export * from "@/deriveKey.js"
+export * from "@/secret.js"
 
 export type SecretInput = KeyObject | Uint8Array | string
 export type DerivedKeyInput = { jws: SecretInput; jwe: SecretInput }

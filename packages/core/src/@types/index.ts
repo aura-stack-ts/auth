@@ -271,6 +271,7 @@ export type AuthInternalErrorCode =
     | "COOKIE_NOT_FOUND"
     | "INVALID_ENVIRONMENT_CONFIGURATION"
     | "INVALID_URL"
+    | "INVALID_SALT_SECRET_VALUE"
 
 export type AuthSecurityErrorCode =
     | "INVALID_STATE"
