@@ -22,7 +22,12 @@ export const createHash = (data: string, base: "hex" | "base64" | "base64url" = 
  * @see https://datatracker.ietf.org/doc/html/rfc7636#section-4.1
  */
 export const createPKCE = async (verifier?: string) => {
-    const codeVerifier = verifier ?? generateSecure(86)
+    // Base64url: n bytes → ceil(n * 4/3) chars. For 43-128 chars, need 32-96 bytes.
+    const byteLength = verifier ? undefined : Math.floor(Math.random() * (96 - 32 + 1) + 32)
+    const codeVerifier = verifier ?? generateSecure(byteLength ?? 64)
+    if (codeVerifier.length < 43 || codeVerifier.length > 128) {
+        throw new AuthSecurityError("PKCE_VERIFIER_INVALID", "The code verifier must be between 43 and 128 characters in length.")
+    }
     const codeChallenge = createHash(codeVerifier, "base64url")
     return { codeVerifier, codeChallenge, method: "S256" }
 }
