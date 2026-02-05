@@ -37,7 +37,7 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
                     const { error, error_description } = response.data
                     const criticalAuthErrors = ["access_denied", "server_error"]
                     const severity = criticalAuthErrors.includes(error.toLowerCase()) ? "critical" : "warning"
-                    logger?.log("INVALID_OAUTH_CONFIGURATION", {
+                    logger?.log("OAUTH_AUTHORIZATION_ERROR", {
                         severity,
                         structuredData: {
                             error,

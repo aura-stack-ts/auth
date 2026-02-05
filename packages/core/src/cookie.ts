@@ -149,7 +149,6 @@ export const defineSecureCookieOptions = (
     }
     if (attributes.domain === "*") {
         attributes.domain = undefined
-        logger?.level
         logger?.log("COOKIE_WILDCARD_DOMAIN")
     }
     if (!useSecure) {

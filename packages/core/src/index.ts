@@ -5,8 +5,8 @@ import { createCookieStore } from "@/cookie.js"
 import { createErrorHandler, useSecureCookies } from "@/utils.js"
 import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import { createLogEntry } from "@/logger.js"
-import type { AuthConfig, AuthInstance, InternalLogger, Logger, LogLevel } from "@/@types/index.js"
+import { createLogEntry, logMessages } from "@/logger.js"
+import type { AuthConfig, AuthInstance, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.js"
 
 export type {
     AuthConfig,
@@ -41,8 +41,8 @@ const createLoggerProxy = (logger?: Logger): InternalLogger | undefined => {
 
     const internalLogger: InternalLogger = {
         level,
-        log(key, overrides) {
-            const entry = createLogEntry(key as any, overrides)
+        log<T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>) {
+            const entry = createLogEntry(key, overrides)
             if (!allowedSeverities.includes(entry.severity)) return entry
 
             logger.log({
@@ -55,7 +55,6 @@ const createLoggerProxy = (logger?: Logger): InternalLogger | undefined => {
             return entry
         },
     }
-
     return internalLogger
 }
 

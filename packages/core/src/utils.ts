@@ -45,25 +45,32 @@ export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onErr
         }
         if (isOAuthProtocolError(error)) {
             const { error: errorCode, message, type, errorURI } = error
-
-            logger?.log("OAUTH_PROTOCOL_ERROR")
+            logger?.log("OAUTH_PROTOCOL_ERROR", {
+                structuredData: {
+                    error: errorCode,
+                    error_description: message,
+                    error_uri: errorURI ?? "",
+                },
+            })
             return Response.json(
                 {
                     type,
-                    error: errorCode,
-                    error_description: message,
-                    error_uri: errorURI,
+                    message: message,
                 },
                 { status: 400 }
             )
         }
         if (isAuthInternalError(error)) {
             const { type, code, message } = error
-            logger?.log("INVALID_OAUTH_CONFIGURATION")
+            logger?.log("INVALID_OAUTH_CONFIGURATION", {
+                structuredData: {
+                    error: code,
+                    error_description: message,
+                },
+            })
             return Response.json(
                 {
                     type,
-                    code,
                     message,
                 },
                 { status: 400 }
@@ -71,12 +78,15 @@ export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onErr
         }
         if (isAuthSecurityError(error)) {
             const { type, code, message } = error
-            logger?.log("INVALID_OAUTH_CONFIGURATION")
-
+            logger?.log("INVALID_OAUTH_CONFIGURATION", {
+                structuredData: {
+                    error: code,
+                    error_description: message,
+                },
+            })
             return Response.json(
                 {
                     type,
-                    code,
                     message,
                 },
                 { status: 400 }
@@ -84,7 +94,7 @@ export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onErr
         }
         logger?.log("SERVER_ERROR")
         return Response.json(
-            { type: "SERVER_ERROR", code: "server_error", message: "An unexpected error occurred" },
+            { type: "SERVER_ERROR", code: "SERVER_ERROR", message: "An unexpected error occurred" },
             { status: 500 }
         )
     }
@@ -130,9 +140,9 @@ export const extractPath = (url: string): string => {
 }
 
 export const createStructuredData = (data: Record<string, string | number | boolean>, sdID = "metadata"): string => {
-    const values = Object.entries(data)
-        .map(([key, value]) => `${key}="${String(value).replace(/(["\\\]])/g, "\\$1")}"`)
-        .join(" ")
+    const entries = Object.entries(data)
+    if (entries.length === 0) return `[${sdID}]`
+    const values = entries.map(([key, value]) => `${key}="${String(value).replace(/(["\\\]])/g, "\\$1")}"`).join(" ")
     return `[${sdID} ${values}]`
 }
 
