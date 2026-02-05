@@ -44,7 +44,7 @@ describe("JWSs", () => {
 
     test("fail JWT to try to verify an invalid JWS", async () => {
         const { verifyJWS } = createJWS("my-secret-key")
-        await expect(verifyJWS("invalid.jwt.token")).rejects.toThrow("Secret string must be at least 32 characters long")
+        await expect(verifyJWS("invalid.jwt.token")).rejects.toThrow("Secret string must be at least 32 bytes long")
     })
 
     test("fail JWT to try to verify a JWS with invalid secret", async () => {
@@ -55,7 +55,7 @@ describe("JWSs", () => {
         expect(jws).toBeDefined()
 
         const { verifyJWS } = createJWS("wrong-secret-key")
-        await expect(verifyJWS(jws)).rejects.toThrow("Secret string must be at least 32 characters long")
+        await expect(verifyJWS(jws)).rejects.toThrow("Secret string must be at least 32 bytes long")
     })
 
     test("fail JWT with invalid format JWS", async () => {
@@ -185,7 +185,7 @@ describe("JWTs", () => {
 
     test("createJWT with invalid secret", async () => {
         const { encodeJWT } = createJWT("short")
-        await expect(encodeJWT(payload)).rejects.toThrow("Secret string must be at least 32 characters long")
+        await expect(encodeJWT(payload)).rejects.toThrow("Secret string must be at least 32 bytes long")
     })
 
     test("create a signed and encrypted JWT using createJWT with separate JWS and JWE secrets", async () => {
@@ -217,7 +217,7 @@ describe("createSecret", () => {
 
     test("createSecret with string secret with less than 32 bytes", () => {
         const secretString = "short-secret"
-        expect(() => createSecret(secretString)).toThrow("Secret string must be at least 32 characters long")
+        expect(() => createSecret(secretString)).toThrow("Secret string must be at least 32 bytes long")
     })
 
     test("createSecret returns the passed Uint8Array secret", () => {
@@ -239,7 +239,7 @@ describe("createSecret", () => {
 
 describe("createDeriveKey", () => {
     test("createDeriveKey", () => {
-        expect(() => createDeriveKey("adfasdf")).toThrow(/Secret string must be at least 32 characters long/)
+        expect(() => createDeriveKey("adfasdf")).toThrow(/Secret string must be at least 32 bytes long/)
     })
 
     test("createDeriveKey with 32 bytes", () => {
