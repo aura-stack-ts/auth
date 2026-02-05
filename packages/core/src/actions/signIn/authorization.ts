@@ -2,7 +2,7 @@ import { isRelativeURL, isSameOrigin, isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
 import { AuthInternalError } from "@/errors.js"
 import { extractPath, toCastCase } from "@/utils.js"
-import type { Logger, OAuthProviderCredentials } from "@/@types/index.js"
+import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * Constructs the request URI for the Authorization Request to the third-party OAuth service. It includes
@@ -22,17 +22,11 @@ export const createAuthorizationURL = (
     state: string,
     codeChallenge: string,
     codeChallengeMethod: string,
-    logger?: Logger
+    logger?: InternalLogger
 ) => {
     const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state, codeChallenge, codeChallengeMethod })
     if (!parsed.success) {
-        logger?.log({
-            facility: 10,
-            severity: "error",
-            hostname: "aura-auth",
-            appName: "aura-auth",
-            msgId: "INVALID_OAUTH_CONFIGURATION",
-            message: "The OAuth provider configuration is invalid.",
+        logger?.log("INVALID_OAUTH_CONFIGURATION", {
             structuredData: {
                 scope: oauthConfig.scope,
                 redirect_uri: redirectURI,
@@ -49,7 +43,7 @@ export const createAuthorizationURL = (
     return `${authorizeURL}?${searchParams}`
 }
 
-export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean, logger?: Logger) => {
+export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean, logger?: InternalLogger) => {
     let origin = new URL(request.url).origin
     const headers = request.headers
     if (trustedProxyHeaders) {
@@ -62,15 +56,7 @@ export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean, lo
         origin = `${protocol}://${host}`
     }
     if (!isValidURL(origin)) {
-        logger?.log({
-            facility: 10,
-            severity: "error",
-            msgId: "INVALID_URL",
-            message: "The constructed origin URL is invalid",
-            structuredData: {
-                origin: origin,
-            },
-        })
+        logger?.log("INVALID_URL", { structuredData: { origin: origin } })
         throw new AuthInternalError("INVALID_URL", "The constructed origin URL is invalid.")
     }
     return origin
@@ -88,7 +74,7 @@ export const createRedirectURI = (
     oauth: string,
     basePath: string,
     trustedProxyHeaders?: boolean,
-    logger?: Logger
+    logger?: InternalLogger
 ) => {
     const origin = getOriginURL(request, trustedProxyHeaders, logger)
     return `${origin}${basePath}/callback/${oauth}`
@@ -105,7 +91,12 @@ export const createRedirectURI = (
  * @param trustedProxyHeaders Whether to trust proxy headers for origin determination
  * @returns The pathname of the referer URL if origins match
  */
-export const createRedirectTo = (request: Request, redirectTo?: string, trustedProxyHeaders?: boolean, logger?: Logger) => {
+export const createRedirectTo = (
+    request: Request,
+    redirectTo?: string,
+    trustedProxyHeaders?: boolean,
+    logger?: InternalLogger
+) => {
     try {
         const headers = request.headers
         const origin = headers.get("Origin")
@@ -118,12 +109,7 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
             if (isValidURL(redirectTo) && isSameOrigin(redirectTo, trustedOrigin)) {
                 return extractPath(redirectTo)
             }
-            logger?.log({
-                facility: 4,
-                severity: "warning",
-                msgId: "OPEN_REDIRECT_ATTACK",
-                message: "The redirectTo parameter does not match the hosted origin.",
-            })
+            logger?.log("OPEN_REDIRECT_ATTACK")
             return "/"
         }
         if (referer) {
@@ -133,34 +119,19 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
             if (isValidURL(referer) && isSameOrigin(referer, trustedOrigin)) {
                 return extractPath(referer)
             }
-            logger?.log({
-                facility: 4,
-                severity: "warning",
-                msgId: "OPEN_REDIRECT_ATTACK",
-                message: "The referer of the request does not match the hosted origin.",
-            })
+            logger?.log("OPEN_REDIRECT_ATTACK")
             return "/"
         }
         if (origin) {
             if (isValidURL(origin) && isSameOrigin(origin, trustedOrigin)) {
                 return extractPath(origin)
             }
-            logger?.log({
-                facility: 4,
-                severity: "warning",
-                msgId: "OPEN_REDIRECT_ATTACK",
-                message: "The origin of the request does not match the hosted origin.",
-            })
+            logger?.log("OPEN_REDIRECT_ATTACK")
             return "/"
         }
         return "/"
     } catch (error) {
-        logger?.log({
-            facility: 4,
-            severity: "critical",
-            msgId: "OPEN_REDIRECT_ATTACK",
-            message: "Invalid origin (potential CSRF).",
-        })
+        logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED")
         return "/"
     }
 }

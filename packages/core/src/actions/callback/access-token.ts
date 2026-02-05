@@ -1,7 +1,7 @@
 import { fetchAsync } from "@/request.js"
 import { AuthInternalError, OAuthProtocolError } from "@/errors.js"
 import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
-import type { Logger, OAuthProviderCredentials } from "@/@types/index.js"
+import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * Make a request to the OAuth provider to the token endpoint to exchange the authorization code provided
@@ -19,27 +19,18 @@ export const createAccessToken = async (
     redirectURI: string,
     code: string,
     codeVerifier: string,
-    logger?: Logger
+    logger?: InternalLogger
 ) => {
     const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code, codeVerifier })
     if (!parsed.success) {
-        logger?.log({
-            facility: 10,
-            severity: "error",
-            msgId: "INVALID_OAUTH_CONFIGURATION",
-            message: "The OAuth provider configuration is invalid.",
-        })
+        logger?.log("INVALID_OAUTH_CONFIGURATION")
         throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "The OAuth provider configuration is invalid.")
     }
     const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data
     try {
-        logger?.log({
-            facility: 10,
-            severity: "debug",
-            msgId: "OAUTH_ACCESS_TOKEN_REQUEST_INITIATED",
-            message: "Initiating OAuth access token request",
+        logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
-                client_id: clientId,
+                has_client_id: Boolean(clientId),
                 redirect_uri: redirectParsed,
                 grant_type: "authorization_code",
             },
@@ -61,12 +52,7 @@ export const createAccessToken = async (
         })
 
         if (!response.ok) {
-            logger?.log({
-                facility: 10,
-                severity: "error",
-                msgId: "INVALID_OAUTH_ACCESS_TOKEN_RESPONSE",
-                message: `Invalid access token response format. HTTP ${response.status}`,
-            })
+            logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
             throw new OAuthProtocolError("invalid_request", "Invalid access token response")
         }
 
@@ -75,19 +61,10 @@ export const createAccessToken = async (
         if (!token.success) {
             const { success, data } = OAuthAccessTokenErrorResponse.safeParse(json)
             if (!success) {
-                logger?.log({
-                    facility: 10,
-                    severity: "error",
-                    msgId: "INVALID_OAUTH_ACCESS_TOKEN_RESPONSE",
-                    message: "Invalid access token response format",
-                })
+                logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
                 throw new OAuthProtocolError("invalid_request", "Invalid access token response format")
             }
-            logger?.log({
-                facility: 10,
-                severity: "error",
-                msgId: "OAUTH_ACCESS_TOKEN_ERROR",
-                message: `OAuth access token error: ${data.error}`,
+            logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
                 structuredData: {
                     error: data.error,
                     error_description: data.error_description ?? "",
@@ -96,23 +73,10 @@ export const createAccessToken = async (
             throw new OAuthProtocolError("INVALID_ACCESS_TOKEN", "Failed to retrieve access token")
         }
 
-        logger?.log({
-            facility: 10,
-            severity: "info",
-            msgId: "OAUTH_ACCESS_TOKEN_SUCCESS",
-            message: "OAuth access token retrieved successfully",
-        })
+        logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS")
         return token.data
     } catch (error) {
-        logger?.log({
-            facility: 10,
-            severity: "error",
-            msgId: "OAUTH_ACCESS_TOKEN_REQUEST_FAILED",
-            message: "OAuth access token request failed",
-            structuredData: {
-                error_type: error instanceof Error ? error.name : "Unknown",
-            },
-        })
+        logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_FAILED")
         if (error instanceof Error) {
             throw new OAuthProtocolError("server_error", "Failed to communicate with OAuth provider", "", { cause: error })
         }

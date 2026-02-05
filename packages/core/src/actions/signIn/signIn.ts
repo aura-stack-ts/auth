@@ -39,15 +39,8 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
             const { codeVerifier, codeChallenge, method } = await createPKCE()
             const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method, logger)
 
-            logger?.log({
-                facility: 4,
-                severity: "info",
-                msgId: "SIGN_IN_INITIATED",
-                message: "Sign-in initiated",
-                structuredData: {
-                    oauth_provider: oauth,
-                    code_challenge_method: method,
-                },
+            logger?.log("SIGN_IN_INITIATED", {
+                structuredData: { oauth_provider: oauth, code_challenge_method: method },
             })
 
             const headers = new HeadersBuilder(cacheControl)

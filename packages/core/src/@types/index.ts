@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { createLogEntry } from "@/logger.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.js"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { JWTVerifyOptions, EncryptOptions, JWTDecryptOptions } from "@aura-stack/jose"
@@ -203,6 +204,11 @@ export interface JoseInstance {
 
 export type OAuthProviderRecord = Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
 
+export type InternalLogger = {
+    level: LogLevel
+    log: typeof createLogEntry
+}
+
 export interface RouterGlobalContext {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
@@ -210,7 +216,7 @@ export interface RouterGlobalContext {
     secret?: string
     basePath: string
     trustedProxyHeaders: boolean
-    logger?: Logger
+    logger?: InternalLogger
 }
 
 /**
@@ -304,10 +310,6 @@ export type SyslogOptions = {
 /**
  * Logger function interface for structured logging.
  * Called when errors or warnings occur during authentication flows.
- *
- * @param level - The severity level of the log message
- * @param code - Error code/type identifier (e.g., "INVALID_OAUTH_CONFIGURATION", "INVALID_JWT_TOKEN")
- * @param message - Short human-readable description of the error
  */
 export type Logger = {
     level: LogLevel

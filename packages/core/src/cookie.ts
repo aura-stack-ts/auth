@@ -1,7 +1,7 @@
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
 import { AuthInternalError } from "@/errors.js"
 import type { JWTPayload } from "@/jose.js"
-import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig, Logger } from "@/@types/index.js"
+import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig, InternalLogger } from "@/@types/index.js"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -142,60 +142,29 @@ export const defineSecureCookieOptions = (
     useSecure: boolean,
     attributes: SerializeOptions,
     strategy: "host" | "secure" | "standard",
-    logger?: Logger
+    logger?: InternalLogger
 ): SerializeOptions => {
     if (!attributes.httpOnly) {
-        logger?.log({
-            facility: 10,
-            severity: "critical",
-            msgId: "COOKIE_HTTPONLY_DISABLED",
-            message:
-                "Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk.",
-        })
+        logger?.log("COOKIE_HTTPONLY_DISABLED")
     }
     if (attributes.domain === "*") {
         attributes.domain = undefined
-        logger?.log({
-            facility: 10,
-            severity: "critical",
-            msgId: "COOKIE_WILDCARD_DOMAIN",
-            message: "Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.",
-        })
+        logger?.level
+        logger?.log("COOKIE_WILDCARD_DOMAIN")
     }
     if (!useSecure) {
         if (attributes.secure) {
-            logger?.log({
-                facility: 10,
-                severity: "warning",
-                msgId: "COOKIE_SECURE_DISABLED",
-                message:
-                    "Cookie is configured with 'Secure' attribute, but the request is not secure (HTTPS). 'Secure' will be disabled.",
-            })
+            logger?.log("COOKIE_SECURE_DISABLED")
         }
         if (attributes.sameSite == "none") {
             attributes.sameSite = "lax"
-            logger?.log({
-                facility: 10,
-                severity: "warning",
-                msgId: "COOKIE_SAMESITE_NONE_WITHOUT_SECURE",
-                message: "Cookie is configured with SameSite=None but without Secure attribute. Changing SameSite to 'Lax'.",
-            })
+            logger?.log("COOKIE_SAMESITE_NONE_WITHOUT_SECURE")
         }
         if (process.env.NODE_ENV === "production") {
-            logger?.log({
-                facility: 10,
-                severity: "critical",
-                msgId: "COOKIE_INSECURE_IN_PRODUCTION",
-                message: "Cookies are being served over an insecure connection in production. This poses security risks.",
-            })
+            logger?.log("COOKIE_INSECURE_IN_PRODUCTION")
         }
         if (strategy === "host") {
-            logger?.log({
-                facility: 10,
-                severity: "critical",
-                msgId: "COOKIE_HOST_STRATEGY_INSECURE",
-                message: "__Host- cookies require a secure context. Falling back to standard cookie settings.",
-            })
+            logger?.log("COOKIE_HOST_STRATEGY_INSECURE")
         }
         return {
             ...defaultCookieOptions,
@@ -222,7 +191,7 @@ export const createCookieStore = (
     useSecure: boolean,
     prefix?: string,
     overrides?: CookieConfig["overrides"],
-    logger?: Logger
+    logger?: InternalLogger
 ): CookieStoreConfig => {
     prefix ??= COOKIE_NAME
     const securePrefix = useSecure ? "__Secure-" : ""

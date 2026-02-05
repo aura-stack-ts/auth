@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder, statusCode } from "@aura-stack/router"
-import { getBaseURL } from "@/utils.js"
+import { getBaseURL, getErrorName } from "@/utils.js"
 import { verifyCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
 import { AuthSecurityError } from "@/errors.js"
@@ -34,83 +34,38 @@ export const signOutAction = createEndpoint(
         const csrfToken = headers.getCookie(cookies.csrfToken.name)
         const header = headers.getHeader("X-CSRF-Token")
 
-        logger?.log({
-            facility: 4,
-            severity: "debug",
-            msgId: "SIGN_OUT_ATTEMPT",
-            message: "Sign out attempt received",
+        logger?.log("SIGN_OUT_ATTEMPT", {
             structuredData: {
-                has_session: session ? "true" : "false",
-                has_csrf_token: csrfToken ? "true" : "false",
-                has_csrf_header: header ? "true" : "false",
+                has_session: Boolean(session),
+                has_csrf_token: Boolean(csrfToken),
+                has_csrf_header: Boolean(header),
             },
         })
 
         if (!session) {
-            logger?.log({
-                facility: 4,
-                severity: "warning",
-                msgId: "SESSION_TOKEN_MISSING",
-                message: "The sessionToken is missing",
-            })
+            logger?.log("SESSION_TOKEN_MISSING")
             throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
         }
         if (!csrfToken) {
-            logger?.log({
-                facility: 4,
-                severity: "warning",
-                msgId: "CSRF_TOKEN_MISSING",
-                message: "The CSRF token is missing from cookies",
-            })
+            logger?.log("CSRF_TOKEN_MISSING")
             throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
         }
         if (!header) {
-            logger?.log({
-                facility: 4,
-                severity: "warning",
-                msgId: "CSRF_HEADER_MISSING",
-                message: "The CSRF header is missing",
-            })
+            logger?.log("CSRF_HEADER_MISSING")
             throw new AuthSecurityError("CSRF_HEADER_MISSING", "The CSRF header is missing.")
         }
         try {
             await verifyCSRF(jose, csrfToken, header)
         } catch (error) {
-            logger?.log({
-                facility: 4,
-                severity: "error",
-                msgId: "CSRF_TOKEN_INVALID",
-                message: "CSRF token verification failed",
-                structuredData: {
-                    error_type: error instanceof Error ? error.name : "Unknown",
-                },
-            })
+            logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
             throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
         }
-        logger?.log({
-            facility: 4,
-            severity: "info",
-            msgId: "SIGN_OUT_CSRF_VERIFIED",
-            message: "CSRF token verified successfully.",
-        })
+        logger?.log("SIGN_OUT_CSRF_VERIFIED")
         try {
             await jose.decodeJWT(session)
-            logger?.log({
-                facility: 4,
-                severity: "info",
-                msgId: "SIGN_OUT_SUCCESS",
-                message: "Sign out completed successfully",
-            })
+            logger?.log("SIGN_OUT_SUCCESS")
         } catch (error) {
-            logger?.log({
-                facility: 4,
-                severity: "warning",
-                msgId: "INVALID_JWT_TOKEN",
-                message: "Invalid session token during sign out",
-                structuredData: {
-                    error_type: error instanceof Error ? error.name : "Unknown",
-                },
-            })
+            logger?.log("INVALID_JWT_TOKEN", { structuredData: { error_type: getErrorName(error) } })
         }
         const baseURL = getBaseURL(request)
         const location = createRedirectTo(
@@ -120,12 +75,7 @@ export const signOutAction = createEndpoint(
             redirectTo,
             trustedProxyHeaders
         )
-        logger?.log({
-            facility: 4,
-            severity: "debug",
-            msgId: "SIGN_OUT_REDIRECT",
-            message: `Redirecting to ${location}.`,
-        })
+        logger?.log("SIGN_OUT_REDIRECT", { structuredData: { location } })
         const headersList = new HeadersBuilder(cacheControl)
             .setHeader("Location", location)
             .setCookie(cookies.csrfToken.name, "", expiredCookieAttributes)

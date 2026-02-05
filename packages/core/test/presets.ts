@@ -60,7 +60,7 @@ export const {
     cookies: {},
     secret: process.env.AURA_AUTH_SECRET,
     logger: {
-        level: "info",
+        level: "debug",
         log({ facility, severity, timestamp, message, structuredData, msgId }) {
             const pri = facility * 8 + severityToSyslogSeverity(severity)
             /**

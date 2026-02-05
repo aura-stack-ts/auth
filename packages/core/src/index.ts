@@ -5,7 +5,8 @@ import { createCookieStore } from "@/cookie.js"
 import { createErrorHandler, useSecureCookies } from "@/utils.js"
 import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import type { AuthConfig, AuthInstance, Logger, LogLevel } from "@/@types/index.js"
+import { createLogEntry } from "@/logger.js"
+import type { AuthConfig, AuthInstance, InternalLogger, Logger, LogLevel } from "@/@types/index.js"
 
 export type {
     AuthConfig,
@@ -33,41 +34,52 @@ const logLevelToSeverity: Record<LogLevel, string[]> = {
     error: ["error", "critical", "alert", "emergency"],
 }
 
-const createLoggerProxy = (logger?: Logger) => {
+const createLoggerProxy = (logger?: Logger): InternalLogger | undefined => {
     if (!logger) return undefined
     const level = logger.level
-    const allowedSeverities = logLevelToSeverity[level] || []
+    const allowedSeverities = logLevelToSeverity[level] ?? []
 
-    return {
+    const internalLogger: InternalLogger = {
         level,
-        log(args) {
-            if (allowedSeverities.includes(args.severity)) {
-                logger.log({
-                    timestamp: new Date().toISOString(),
-                    appName: "aura-auth",
-                    hostname: "aura-auth",
-                    ...args,
-                })
-            }
+        log(key, overrides) {
+            const entry = createLogEntry(key as any, overrides)
+            if (!allowedSeverities.includes(entry.severity)) return entry
+
+            logger.log({
+                timestamp: entry.timestamp ?? new Date().toISOString(),
+                appName: entry.appName ?? "aura-auth",
+                hostname: entry.hostname ?? "aura-auth",
+                ...entry,
+            })
+
+            return entry
         },
-    } as Logger
+    }
+
+    return internalLogger
 }
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     const useSecure = authConfig?.trustedProxyHeaders ?? false
-    const logger = authConfig?.logger ?? undefined
+    const logger = authConfig?.logger
+    const internalLogger = createLoggerProxy(logger)
 
     return {
         basePath: authConfig?.basePath ?? "/auth",
-        onError: createErrorHandler(logger),
+        onError: createErrorHandler(internalLogger),
         context: {
             oauth: createBuiltInOAuthProviders(authConfig?.oauth),
-            cookies: createCookieStore(useSecure, authConfig?.cookies?.prefix, authConfig?.cookies?.overrides ?? {}),
+            cookies: createCookieStore(
+                useSecure,
+                authConfig?.cookies?.prefix,
+                authConfig?.cookies?.overrides ?? {},
+                internalLogger
+            ),
             jose: createJoseInstance(authConfig?.secret),
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
             trustedProxyHeaders: useSecure,
-            logger: createLoggerProxy(logger),
+            logger: internalLogger,
         },
         middlewares: [
             (ctx) => {
@@ -76,7 +88,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
                     useSecure,
                     authConfig?.cookies?.prefix,
                     authConfig?.cookies?.overrides ?? {},
-                    logger
+                    internalLogger
                 )
                 ctx.context.cookies = cookies
                 return ctx

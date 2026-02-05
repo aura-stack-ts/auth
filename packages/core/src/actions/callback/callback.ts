@@ -10,7 +10,7 @@ import { AuthSecurityError, OAuthProtocolError } from "@/errors.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
-import type { OAuthProviderRecord, User } from "@/@types/index.js"
+import type { OAuthProviderRecord } from "@/@types/index.js"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/callback/:oauth", {
@@ -37,13 +37,11 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
                     const { error, error_description } = response.data
                     const criticalAuthErrors = ["access_denied", "server_error"]
                     const severity = criticalAuthErrors.includes(error.toLowerCase()) ? "critical" : "warning"
-                    logger?.log({
-                        facility: 10,
+                    logger?.log("INVALID_OAUTH_CONFIGURATION", {
                         severity,
-                        msgId: `OAUTH_AUTHORIZATION_${error.toUpperCase()}`,
-                        message: error_description || "OAuth authorization error received",
                         structuredData: {
-                            oauth_error: error,
+                            error,
+                            error_description: error_description ?? "",
                         },
                     })
                     throw new OAuthProtocolError(error, error_description || "OAuth Authorization Error")
@@ -73,11 +71,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             const codeVerifier = getCookie(request, cookies.codeVerifier.name)
 
             if (!equals(cookieState, state)) {
-                logger?.log({
-                    facility: 4,
-                    severity: "critical",
-                    msgId: "MISMATCHING_STATE",
-                    message: "The provided state passed in the OAuth response does not match the stored state",
+                logger?.log("MISMATCHING_STATE", {
                     structuredData: {
                         oauth_provider: oauth,
                     },
@@ -90,11 +84,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
 
             const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier, logger)
             if (!isRelativeURL(cookieRedirectTo)) {
-                logger?.log({
-                    facility: 4,
-                    severity: "critical",
-                    msgId: "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
-                    message: "Invalid redirect path. Potential open redirect attack detected",
+                logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
                     structuredData: {
                         redirect_path: cookieRedirectTo,
                         provider: oauth,
@@ -110,11 +100,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             const sessionCookie = await createSessionCookie(jose, userInfo as JWTPayload)
             const csrfToken = await createCSRF(jose)
 
-            logger?.log({
-                facility: 4,
-                severity: "info",
-                msgId: "OAUTH_CALLBACK_SUCCESS",
-                message: "OAuth callback completed successfully",
+            logger?.log("OAUTH_CALLBACK_SUCCESS", {
                 structuredData: {
                     provider: oauth,
                 },

@@ -1,7 +1,7 @@
 import { isInvalidZodSchemaError, isRouterError, RouterConfig } from "@aura-stack/router"
-import { APIErrorMap, type Logger } from "@/@types/index.js"
 import { isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "@/errors.js"
 import type { ZodError } from "zod"
+import type { APIErrorMap, InternalLogger } from "@/@types/index.js"
 
 export const toSnakeCase = (str: string) => {
     return str
@@ -32,49 +32,21 @@ export const equals = (a: string | number | undefined | null, b: string | number
     return a === b
 }
 
-export const createErrorHandler = (logger?: Logger): RouterConfig["onError"] => {
+export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onError"] => {
     return (error) => {
         if (isRouterError(error)) {
             const { message, status, statusText } = error
-            logger?.log({
-                facility: 10,
-                severity: "error",
-                msgId: "ROUTER_INTERNAL_ERROR",
-                message: message || "Router error occurred",
-                structuredData: {
-                    status: status?.toString() || "unknown",
-                    statusText: statusText || "unknown",
-                },
-            })
+            logger?.log("ROUTER_INTERNAL_ERROR")
             return Response.json({ type: "ROUTER_ERROR", code: "ROUTER_INTERNAL_ERROR", message }, { status, statusText })
         }
         if (isInvalidZodSchemaError(error)) {
-            logger?.log({
-                facility: 10,
-                severity: "warning",
-                msgId: "INVALID_REQUEST",
-                message: "Invalid request schema validation failed",
-                structuredData: {
-                    error_count: error.errors?.length?.toString() || "0",
-                },
-            })
+            logger?.log("INVALID_REQUEST")
             return Response.json({ type: "ROUTER_ERROR", code: "INVALID_REQUEST", message: error.errors }, { status: 422 })
         }
         if (isOAuthProtocolError(error)) {
             const { error: errorCode, message, type, errorURI } = error
-            const criticalOAuthErrors = ["access_denied", "invalid_client", "unauthorized_client"]
-            const severity = criticalOAuthErrors.includes(errorCode.toLowerCase()) ? "error" : "warning"
 
-            logger?.log({
-                facility: 10,
-                severity,
-                msgId: `OAUTH_${errorCode.toUpperCase()}`,
-                message: message || "OAuth protocol error occurred",
-                structuredData: {
-                    oauth_error: errorCode,
-                    error_uri: errorURI || "",
-                },
-            })
+            logger?.log("OAUTH_PROTOCOL_ERROR")
             return Response.json(
                 {
                     type,
@@ -87,15 +59,7 @@ export const createErrorHandler = (logger?: Logger): RouterConfig["onError"] => 
         }
         if (isAuthInternalError(error)) {
             const { type, code, message } = error
-            logger?.log({
-                facility: 10,
-                severity: "error",
-                msgId: code,
-                message: message || "Internal authentication error occurred",
-                structuredData: {
-                    error_type: type,
-                },
-            })
+            logger?.log("INVALID_OAUTH_CONFIGURATION")
             return Response.json(
                 {
                     type,
@@ -107,18 +71,8 @@ export const createErrorHandler = (logger?: Logger): RouterConfig["onError"] => 
         }
         if (isAuthSecurityError(error)) {
             const { type, code, message } = error
-            const criticalSecurityErrors = ["POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", "MISMATCHING_STATE"]
-            const severity = criticalSecurityErrors.includes(code) ? "critical" : "warning"
+            logger?.log("INVALID_OAUTH_CONFIGURATION")
 
-            logger?.log({
-                facility: 4,
-                severity,
-                msgId: code,
-                message: message || "Security error occurred",
-                structuredData: {
-                    error_type: type,
-                },
-            })
             return Response.json(
                 {
                     type,
@@ -128,15 +82,7 @@ export const createErrorHandler = (logger?: Logger): RouterConfig["onError"] => 
                 { status: 400 }
             )
         }
-        logger?.log({
-            facility: 10,
-            severity: "error",
-            msgId: "SERVER_ERROR",
-            message: "An unexpected error occurred",
-            structuredData: {
-                error_name: error instanceof Error ? error.name : "Unknown",
-            },
-        })
+        logger?.log("SERVER_ERROR")
         return Response.json(
             { type: "SERVER_ERROR", code: "server_error", message: "An unexpected error occurred" },
             { status: 500 }
@@ -183,9 +129,16 @@ export const extractPath = (url: string): string => {
     return match && match[2] ? match[2] : "/"
 }
 
-export const createStructuredData = (data: Record<string, string>, sdID = "metadata"): string => {
+export const createStructuredData = (data: Record<string, string | number | boolean>, sdID = "metadata"): string => {
     const values = Object.entries(data)
-        .map(([key, value]) => `${key}="${value.replace(/(["\\\]])/g, "\\$1")}"`)
+        .map(([key, value]) => `${key}="${String(value).replace(/(["\\\]])/g, "\\$1")}"`)
         .join(" ")
     return `[${sdID} ${values}]`
+}
+
+export const getErrorName = (error: unknown): string => {
+    if (error instanceof Error) {
+        return error.name
+    }
+    return typeof error === "string" ? error : "UnknownError"
 }
