@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Added entropy verification for secrets passed to functions for signin, encrypting and derivation keys. The `createSecret` function ensures that the passed secret is secure with at least 32 characters and 6 bits of entropy per character. [#79](https://github.com/aura-stack-ts/auth/pull/79)
+- Added entropy verification for secrets passed to functions for signing, encrypting and derivation keys. The `createSecret` function ensures that the passed secret is secure with at least 32 bytes and 4 bits of entropy per character.
 
 - Added configuration options for signature verification and decryption via `verifyJWS` and `decryptJWE` functions. [#48](https://github.com/aura-stack-ts/auth/pull/48)
 

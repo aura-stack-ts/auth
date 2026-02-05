@@ -2,6 +2,8 @@ import { InvalidSecretError } from "@/errors.js"
 import { isObject } from "@/assert.js"
 import type { DerivedKeyInput, SecretInput } from "@/index.js"
 
+const MIN_SECRET_ENTROPY_BITS = 4
+
 export const getEntropy = (secret: string): number => {
     const charFreq = new Map<string, number>()
     for (const char of secret) {
@@ -25,15 +27,15 @@ export const getEntropy = (secret: string): number => {
  * @param secret - The secret as a string or Uint8Array
  * @returns The secret in Uint8Array format
  */
-export const createSecret = (secret: SecretInput) => {
+export const createSecret = (secret: SecretInput, length: number = 32) => {
     if (!Boolean(secret)) throw new InvalidSecretError("Secret is required")
     if (typeof secret === "string") {
         const byteLength = new TextEncoder().encode(secret).byteLength
-        if (byteLength < 32) {
-            throw new InvalidSecretError("Secret string must be at least 32 characters long")
+        if (byteLength < length) {
+            throw new InvalidSecretError(`Secret string must be at least ${length} bytes long`)
         }
         const entropy = getEntropy(secret)
-        if (entropy < 4) {
+        if (entropy < MIN_SECRET_ENTROPY_BITS) {
             throw new InvalidSecretError("Secret string must have an entropy of at least 6 bits per character")
         }
         return new Uint8Array(Buffer.from(secret, "utf-8"))

@@ -24,8 +24,15 @@ export const createJoseInstance = (secret?: string) => {
     }
 
     const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT ?? createDerivedSalt(secret) ?? "Not found"
-    // Used only to validate the salt length and entropy
-    createSecret(salt)
+    try {
+        createSecret(salt)
+    } catch (error) {
+        throw new AuthInternalError(
+            "INVALID_SALT_SECRET_VALUE",
+            "AURA_AUTH_SALT environment variable is invalid. It must be at least 32 bits long.",
+            { cause: error }
+        )
+    }
     const { derivedKey: derivedSigningKey } = createDeriveKey(secret, salt, "signing")
     const { derivedKey: derivedEncryptionKey } = createDeriveKey(secret, salt, "encryption")
     const { derivedKey: derivedCsrfTokenKey } = createDeriveKey(secret, salt, "csrfToken")
