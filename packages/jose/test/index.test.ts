@@ -212,7 +212,7 @@ describe("createSecret", () => {
 
     test("createSecret with string secret with at least 32 bytes", () => {
         const secretString = "this-is-a-very-secure-and-long-secret"
-        expect(() => createSecret(secretString)).toThrow("Secret string must have an entropy of at least 6 bits per character")
+        expect(() => createSecret(secretString)).toThrow("Secret string must have an entropy of at least 4 bits per character")
     })
 
     test("createSecret with string secret with less than 32 bytes", () => {
