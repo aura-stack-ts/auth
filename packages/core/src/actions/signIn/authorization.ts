@@ -1,8 +1,8 @@
 import { isRelativeURL, isSameOrigin, isValidURL } from "@/assert.js"
 import { OAuthAuthorization } from "@/schemas.js"
 import { AuthInternalError } from "@/errors.js"
-import { extractPath, formatZodError, toCastCase } from "@/utils.js"
-import type { OAuthProviderCredentials } from "@/@types/index.js"
+import { extractPath, toCastCase } from "@/utils.js"
+import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * Constructs the request URI for the Authorization Request to the third-party OAuth service. It includes
@@ -21,12 +21,21 @@ export const createAuthorizationURL = (
     redirectURI: string,
     state: string,
     codeChallenge: string,
-    codeChallengeMethod: string
+    codeChallengeMethod: string,
+    logger?: InternalLogger
 ) => {
     const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state, codeChallenge, codeChallengeMethod })
     if (!parsed.success) {
-        const msg = JSON.stringify(formatZodError(parsed.error), null, 2)
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", msg)
+        logger?.log("INVALID_OAUTH_CONFIGURATION", {
+            structuredData: {
+                scope: oauthConfig.scope,
+                redirect_uri: redirectURI,
+                has_state: Boolean(state),
+                has_code_challenge: Boolean(codeChallenge),
+                code_challenge_method: codeChallengeMethod,
+            },
+        })
+        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "The OAuth provider configuration is invalid.")
     }
     const { authorizeURL, ...options } = parsed.data
     const { userInfo, accessToken, clientSecret, ...required } = options
@@ -34,7 +43,7 @@ export const createAuthorizationURL = (
     return `${authorizeURL}?${searchParams}`
 }
 
-export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) => {
+export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean, logger?: InternalLogger) => {
     let origin = new URL(request.url).origin
     const headers = request.headers
     if (trustedProxyHeaders) {
@@ -47,6 +56,7 @@ export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) =>
         origin = `${protocol}://${host}`
     }
     if (!isValidURL(origin)) {
+        logger?.log("INVALID_URL", { structuredData: { origin: origin } })
         throw new AuthInternalError("INVALID_URL", "The constructed origin URL is invalid.")
     }
     return origin
@@ -59,8 +69,14 @@ export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) =>
  * @param oauth - OAuth provider name
  * @returns The redirect URI for the OAuth callback.
  */
-export const createRedirectURI = (request: Request, oauth: string, basePath: string, trustedProxyHeaders?: boolean) => {
-    const origin = getOriginURL(request, trustedProxyHeaders)
+export const createRedirectURI = (
+    request: Request,
+    oauth: string,
+    basePath: string,
+    trustedProxyHeaders?: boolean,
+    logger?: InternalLogger
+) => {
+    const origin = getOriginURL(request, trustedProxyHeaders, logger)
     return `${origin}${basePath}/callback/${oauth}`
 }
 
@@ -75,12 +91,17 @@ export const createRedirectURI = (request: Request, oauth: string, basePath: str
  * @param trustedProxyHeaders Whether to trust proxy headers for origin determination
  * @returns The pathname of the referer URL if origins match
  */
-export const createRedirectTo = (request: Request, redirectTo?: string, trustedProxyHeaders?: boolean) => {
+export const createRedirectTo = (
+    request: Request,
+    redirectTo?: string,
+    trustedProxyHeaders?: boolean,
+    logger?: InternalLogger
+) => {
     try {
         const headers = request.headers
         const origin = headers.get("Origin")
         const referer = headers.get("Referer")
-        const trustedOrigin = getOriginURL(request, trustedProxyHeaders)
+        const trustedOrigin = getOriginURL(request, trustedProxyHeaders, logger)
         if (redirectTo) {
             if (isRelativeURL(redirectTo)) {
                 return redirectTo
@@ -88,7 +109,7 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
             if (isValidURL(redirectTo) && isSameOrigin(redirectTo, trustedOrigin)) {
                 return extractPath(redirectTo)
             }
-            console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: The redirectTo parameter does not match the hosted origin.")
+            logger?.log("OPEN_REDIRECT_ATTACK")
             return "/"
         }
         if (referer) {
@@ -98,19 +119,19 @@ export const createRedirectTo = (request: Request, redirectTo?: string, trustedP
             if (isValidURL(referer) && isSameOrigin(referer, trustedOrigin)) {
                 return extractPath(referer)
             }
-            console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: The referer of the request does not match the hosted origin.")
+            logger?.log("OPEN_REDIRECT_ATTACK")
             return "/"
         }
         if (origin) {
             if (isValidURL(origin) && isSameOrigin(origin, trustedOrigin)) {
                 return extractPath(origin)
             }
-            console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: Invalid origin (potential CSRF).")
+            logger?.log("OPEN_REDIRECT_ATTACK")
             return "/"
         }
         return "/"
     } catch (error) {
-        console.warn("[WARNING][OPEN_REDIRECT_ATTACK]: Invalid origin (potential CSRF).")
+        logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED")
         return "/"
     }
 }

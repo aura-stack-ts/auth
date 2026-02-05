@@ -2,10 +2,11 @@ import "dotenv/config"
 import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { createJoseInstance } from "@/jose.js"
 import { createCookieStore } from "@/cookie.js"
-import { onErrorHandler, useSecureCookies } from "@/utils.js"
+import { createErrorHandler, useSecureCookies } from "@/utils.js"
 import { createBuiltInOAuthProviders } from "@/oauth/index.js"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import type { AuthConfig, AuthInstance } from "@/@types/index.js"
+import { createLogEntry, logMessages } from "@/logger.js"
+import type { AuthConfig, AuthInstance, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.js"
 
 export type {
     AuthConfig,
@@ -18,26 +19,76 @@ export type {
     OAuthProviderConfig,
     OAuthProviderCredentials,
     ErrorType,
+    Logger,
+    LogLevel,
 } from "@/@types/index.js"
+
+/**
+ * Maps LogLevel to Severity hierarchically per RFC 5424.
+ * Each level includes itself and all more-severe levels.
+ */
+const logLevelToSeverity: Record<LogLevel, string[]> = {
+    debug: ["debug", "info", "notice", "warning", "error", "critical", "alert", "emergency"],
+    info: ["info", "notice", "warning", "error", "critical", "alert", "emergency"],
+    warn: ["warning", "error", "critical", "alert", "emergency"],
+    error: ["error", "critical", "alert", "emergency"],
+}
+
+const createLoggerProxy = (logger?: Logger): InternalLogger | undefined => {
+    if (!logger) return undefined
+    const level = logger.level
+    const allowedSeverities = logLevelToSeverity[level] ?? []
+
+    const internalLogger: InternalLogger = {
+        level,
+        log<T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>) {
+            const entry = createLogEntry(key, overrides)
+            if (!allowedSeverities.includes(entry.severity)) return entry
+
+            logger.log({
+                timestamp: entry.timestamp ?? new Date().toISOString(),
+                appName: entry.appName ?? "aura-auth",
+                hostname: entry.hostname ?? "aura-auth",
+                ...entry,
+            })
+
+            return entry
+        },
+    }
+    return internalLogger
+}
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     const useSecure = authConfig?.trustedProxyHeaders ?? false
+    const logger = authConfig?.logger
+    const internalLogger = createLoggerProxy(logger)
 
     return {
         basePath: authConfig?.basePath ?? "/auth",
-        onError: onErrorHandler,
+        onError: createErrorHandler(internalLogger),
         context: {
             oauth: createBuiltInOAuthProviders(authConfig?.oauth),
-            cookies: createCookieStore(useSecure, authConfig?.cookies?.prefix, authConfig?.cookies?.overrides ?? {}),
+            cookies: createCookieStore(
+                useSecure,
+                authConfig?.cookies?.prefix,
+                authConfig?.cookies?.overrides ?? {},
+                internalLogger
+            ),
             jose: createJoseInstance(authConfig?.secret),
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
             trustedProxyHeaders: useSecure,
+            logger: internalLogger,
         },
         middlewares: [
             (ctx) => {
                 const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
-                const cookies = createCookieStore(useSecure, authConfig?.cookies?.prefix, authConfig?.cookies?.overrides ?? {})
+                const cookies = createCookieStore(
+                    useSecure,
+                    authConfig?.cookies?.prefix,
+                    authConfig?.cookies?.overrides ?? {},
+                    internalLogger
+                )
                 ctx.context.cookies = cookies
                 return ctx
             },

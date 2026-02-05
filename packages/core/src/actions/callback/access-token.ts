@@ -1,8 +1,7 @@
 import { fetchAsync } from "@/request.js"
-import { formatZodError } from "@/utils.js"
 import { AuthInternalError, OAuthProtocolError } from "@/errors.js"
 import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
-import type { OAuthProviderCredentials } from "@/@types/index.js"
+import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * Make a request to the OAuth provider to the token endpoint to exchange the authorization code provided
@@ -19,15 +18,23 @@ export const createAccessToken = async (
     oauthConfig: OAuthProviderCredentials,
     redirectURI: string,
     code: string,
-    codeVerifier: string
+    codeVerifier: string,
+    logger?: InternalLogger
 ) => {
     const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code, codeVerifier })
     if (!parsed.success) {
-        const msg = JSON.stringify(formatZodError(parsed.error), null, 2)
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", msg)
+        logger?.log("INVALID_OAUTH_CONFIGURATION")
+        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "The OAuth provider configuration is invalid.")
     }
     const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data
     try {
+        logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
+            structuredData: {
+                has_client_id: Boolean(clientId),
+                redirect_uri: redirectParsed,
+                grant_type: "authorization_code",
+            },
+        })
         const response = await fetchAsync(accessToken, {
             method: "POST",
             headers: {
@@ -43,21 +50,36 @@ export const createAccessToken = async (
                 code_verifier: codeVerifier,
             }).toString(),
         })
+
+        if (!response.ok) {
+            logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
+            throw new OAuthProtocolError("invalid_request", "Invalid access token response")
+        }
+
         const json = await response.json()
         const token = OAuthAccessTokenResponse.safeParse(json)
         if (!token.success) {
             const { success, data } = OAuthAccessTokenErrorResponse.safeParse(json)
             if (!success) {
-                throw new OAuthProtocolError("INVALID_REQUEST", "Invalid access token response format")
+                logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
+                throw new OAuthProtocolError("invalid_request", "Invalid access token response format")
             }
-            throw new OAuthProtocolError(data.error, data?.error_description ?? "Failed to retrieve access token")
+            logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
+                structuredData: {
+                    error: data.error,
+                    error_description: data.error_description ?? "",
+                },
+            })
+            throw new OAuthProtocolError("INVALID_ACCESS_TOKEN", "Failed to retrieve access token")
         }
+
+        logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS")
         return token.data
     } catch (error) {
-        /**
-         * @todo: review error handling here
-         */
-        //throw throwAuthError(error, "Failed to create access token")
+        logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_FAILED")
+        if (error instanceof Error) {
+            throw new OAuthProtocolError("server_error", "Failed to communicate with OAuth provider", "", { cause: error })
+        }
         throw error
     }
 }

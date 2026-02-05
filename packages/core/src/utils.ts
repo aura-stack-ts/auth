@@ -1,7 +1,7 @@
 import { isInvalidZodSchemaError, isRouterError, RouterConfig } from "@aura-stack/router"
-import { APIErrorMap } from "@/@types/index.js"
 import { isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "@/errors.js"
 import type { ZodError } from "zod"
+import type { APIErrorMap, InternalLogger } from "@/@types/index.js"
 
 export const toSnakeCase = (str: string) => {
     return str
@@ -32,38 +32,73 @@ export const equals = (a: string | number | undefined | null, b: string | number
     return a === b
 }
 
-export const onErrorHandler: RouterConfig["onError"] = (error) => {
-    if (isRouterError(error)) {
-        const { message, status, statusText } = error
-        return Response.json({ type: "ROUTER_ERROR", code: "ROUTER_INTERNAL_ERROR", message }, { status, statusText })
-    }
-    if (isInvalidZodSchemaError(error)) {
-        return Response.json({ type: "ROUTER_ERROR", code: "INVALID_REQUEST", message: error.errors }, { status: 422 })
-    }
-    if (isOAuthProtocolError(error)) {
-        const { error: errorCode, message, type, errorURI } = error
+export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onError"] => {
+    return (error) => {
+        if (isRouterError(error)) {
+            const { message, status, statusText } = error
+            logger?.log("ROUTER_INTERNAL_ERROR")
+            return Response.json({ type: "ROUTER_ERROR", code: "ROUTER_INTERNAL_ERROR", message }, { status, statusText })
+        }
+        if (isInvalidZodSchemaError(error)) {
+            logger?.log("INVALID_REQUEST")
+            return Response.json({ type: "ROUTER_ERROR", code: "INVALID_REQUEST", message: error.errors }, { status: 422 })
+        }
+        if (isOAuthProtocolError(error)) {
+            const { error: errorCode, message, type, errorURI } = error
+            logger?.log("OAUTH_PROTOCOL_ERROR", {
+                structuredData: {
+                    error: errorCode,
+                    error_description: message,
+                    error_uri: errorURI ?? "",
+                },
+            })
+            return Response.json(
+                {
+                    type,
+                    message: message,
+                },
+                { status: 400 }
+            )
+        }
+        if (isAuthInternalError(error)) {
+            const { type, code, message } = error
+            logger?.log("INVALID_OAUTH_CONFIGURATION", {
+                structuredData: {
+                    error: code,
+                    error_description: message,
+                },
+            })
+            return Response.json(
+                {
+                    type,
+                    message,
+                },
+                { status: 400 }
+            )
+        }
+        if (isAuthSecurityError(error)) {
+            const { type, code, message } = error
+            logger?.log("INVALID_OAUTH_CONFIGURATION", {
+                structuredData: {
+                    error: code,
+                    error_description: message,
+                },
+            })
+            return Response.json(
+                {
+                    type,
+                    code,
+                    message,
+                },
+                { status: 400 }
+            )
+        }
+        logger?.log("SERVER_ERROR")
         return Response.json(
-            {
-                type,
-                error: errorCode,
-                error_description: message,
-                error_uri: errorURI,
-            },
-            { status: 400 }
+            { type: "SERVER_ERROR", code: "SERVER_ERROR", message: "An unexpected error occurred" },
+            { status: 500 }
         )
     }
-    if (isAuthInternalError(error) || isAuthSecurityError(error)) {
-        const { type, code, message } = error
-        return Response.json(
-            {
-                type,
-                code,
-                message,
-            },
-            { status: 400 }
-        )
-    }
-    return Response.json({ type: "SERVER_ERROR", code: "server_error", message: "An unexpected error occurred" }, { status: 500 })
 }
 
 export const getBaseURL = (request: Request) => {
@@ -103,4 +138,18 @@ export const extractPath = (url: string): string => {
     const pathRegex = /^https?:\/\/[a-zA-Z0-9_\-\.]+(:\d+)?(\/.*)$/
     const match = url.match(pathRegex)
     return match && match[2] ? match[2] : "/"
+}
+
+export const createStructuredData = (data: Record<string, string | number | boolean>, sdID = "metadata"): string => {
+    const entries = Object.entries(data)
+    if (entries.length === 0) return `[${sdID}]`
+    const values = entries.map(([key, value]) => `${key}="${String(value).replace(/(["\\\]])/g, "\\$1")}"`).join(" ")
+    return `[${sdID} ${values}]`
+}
+
+export const getErrorName = (error: unknown): string => {
+    if (error instanceof Error) {
+        return error.name
+    }
+    return typeof error === "string" ? error : "UnknownError"
 }

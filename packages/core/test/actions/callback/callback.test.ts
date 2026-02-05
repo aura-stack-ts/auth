@@ -68,7 +68,6 @@ describe("callbackAction", () => {
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
             type: "AUTH_INTERNAL_ERROR",
-            code: "COOKIE_NOT_FOUND",
             message: "No cookies found. There is no active session",
         })
     })

@@ -2,7 +2,7 @@ import { fetchAsync } from "@/request.js"
 import { generateSecure } from "@/secure.js"
 import { OAuthErrorResponse } from "@/schemas.js"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/errors.js"
-import type { OAuthProviderCredentials, User } from "@/@types/index.js"
+import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.js"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response
@@ -30,9 +30,14 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
  * @param accessToken - Access Token to access the userinfo endpoint
  * @returns The user information retrieved from the userinfo endpoint
  */
-export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string) => {
+export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string, logger?: InternalLogger) => {
     const userinfoEndpoint = oauthConfig.userInfo
     try {
+        logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
+            structuredData: {
+                endpoint: userinfoEndpoint,
+            },
+        })
         const response = await fetchAsync(userinfoEndpoint, {
             method: "GET",
             headers: {
@@ -40,22 +45,36 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
                 Authorization: `Bearer ${accessToken}`,
             },
         })
+
+        if (!response.ok) {
+            logger?.log("OAUTH_USERINFO_INVALID_RESPONSE")
+            throw new OAuthProtocolError("INVALID_REQUEST", "Invalid userinfo response format")
+        }
+
         const json = await response.json()
         const { success, data } = OAuthErrorResponse.safeParse(json)
         if (success) {
-            throw new OAuthProtocolError(
-                data.error,
-                data?.error_description ?? "An error occurred while fetching user information."
-            )
+            logger?.log("OAUTH_USERINFO_ERROR", {
+                message: "Error response received from OAuth userinfo endpoint",
+                structuredData: {
+                    error: data.error,
+                    error_description: data.error_description ?? "",
+                },
+            })
+            throw new OAuthProtocolError("INVALID_REQUEST", "An error was received from the OAuth userinfo endpoint.")
         }
+        logger?.log("OAUTH_USERINFO_SUCCESS")
         return oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
     } catch (error) {
         if (isOAuthProtocolError(error)) {
             throw error
         }
+        logger?.log("OAUTH_USERINFO_REQUEST_FAILED")
         if (isNativeError(error)) {
-            throw new OAuthProtocolError("invalid_request", error.message, "", { cause: error })
+            throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information from OAuth provider", "", {
+                cause: error,
+            })
         }
-        throw new OAuthProtocolError("invalid_request", "Failed to fetch user information.", "", { cause: error })
+        throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information", "", { cause: error })
     }
 }

@@ -35,7 +35,7 @@ describe("signOut action", async () => {
         expect(request.status).toBe(400)
         expect(await request.json()).toEqual({
             type: "AUTH_SECURITY_ERROR",
-            code: "CSRF_TOKEN_MISSING",
+            code: "CSRF_HEADER_MISSING",
             message: "The CSRF header is missing.",
         })
     })
