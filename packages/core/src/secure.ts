@@ -26,7 +26,6 @@ export const createPKCE = async (verifier?: string) => {
     const byteLength = verifier ? undefined : Math.floor(Math.random() * (96 - 32 + 1) + 32)
     const codeVerifier = verifier ?? generateSecure(byteLength ?? 64)
     if (codeVerifier.length < 43 || codeVerifier.length > 128) {
-        console.log(codeVerifier.length)
         throw new AuthSecurityError("PKCE_VERIFIER_INVALID", "The code verifier must be between 43 and 128 characters in length.")
     }
     const codeChallenge = createHash(codeVerifier, "base64url")
