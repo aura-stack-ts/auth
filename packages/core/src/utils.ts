@@ -87,6 +87,7 @@ export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onErr
             return Response.json(
                 {
                     type,
+                    code,
                     message,
                 },
                 { status: 400 }
