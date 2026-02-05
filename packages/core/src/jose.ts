@@ -1,5 +1,5 @@
 import "dotenv/config"
-import { createJWT, createJWS, createJWE, createDeriveKey } from "@aura-stack/jose"
+import { createJWT, createJWS, createJWE, createDeriveKey, createSecret } from "@aura-stack/jose"
 import { createDerivedSalt } from "@/secure.js"
 import { AuthInternalError } from "@/errors.js"
 export type { JWTPayload } from "@aura-stack/jose/jose"
@@ -23,7 +23,9 @@ export const createJoseInstance = (secret?: string) => {
         )
     }
 
-    const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT ?? createDerivedSalt(secret)
+    const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT ?? createDerivedSalt(secret) ?? "Not found"
+    // Used only to validate the salt length and entropy
+    createSecret(salt)
     const { derivedKey: derivedSigningKey } = createDeriveKey(secret, salt, "signing")
     const { derivedKey: derivedEncryptionKey } = createDeriveKey(secret, salt, "encryption")
     const { derivedKey: derivedCsrfTokenKey } = createDeriveKey(secret, salt, "csrfToken")

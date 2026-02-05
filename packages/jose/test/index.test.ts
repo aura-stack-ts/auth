@@ -212,9 +212,7 @@ describe("createSecret", () => {
 
     test("createSecret with string secret with at least 32 bytes", () => {
         const secretString = "this-is-a-very-secure-and-long-secret"
-        const secret = createSecret(secretString)
-        expect(secret).toBeInstanceOf(Uint8Array)
-        expect(secretString).not.toBe(secret)
+        expect(() => createSecret(secretString)).toThrow("Secret string must have an entropy of at least 6 bits per character")
     })
 
     test("createSecret with string secret with less than 32 bytes", () => {
@@ -226,6 +224,16 @@ describe("createSecret", () => {
         const secretArray = new Uint8Array(32)
         const secret = createSecret(secretArray)
         expect(secret).toBe(secretArray)
+    })
+
+    test("createSecret with null secret", () => {
+        const secret = null
+        expect(() => createSecret(secret as unknown as string)).toThrow("Secret is required")
+    })
+
+    test("createSecret with undefined secret", () => {
+        const secret = undefined
+        expect(() => createSecret(secret as unknown as string)).toThrow("Secret is required")
     })
 })
 
