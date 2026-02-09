@@ -1,26 +1,31 @@
+import { Header } from "@/components/header"
+import { Hero } from "@/components/hero"
+import { Lines } from "@/components/lines"
+import { FinalCTA } from "@/ui/home/contribute-oss"
+import { ExploreUseCases } from "@/ui/home/explore-use-cases"
+import { FAQ } from "@/ui/home/faq"
 import { Footer } from "@/ui/home/footer"
-import { Header } from "@/ui/home/header"
-import { Hero } from "@/ui/home/hero"
-import { Configuration } from "@/ui/home/configuration"
-import { WhyAuraAuth } from "@/ui/home/why-aura-auth"
-import { Features } from "@/ui/home/features"
-import { ContributeOpenSource } from "@/ui/home/contribute-oss"
-import { Statistics } from "@/ui/home/statistics"
+import { Integrations } from "@/ui/home/integrations"
+import { RuntimeSupport } from "@/ui/home/runtime-support"
+import { WhatYouGet } from "@/ui/home/what-you-get"
 
 export default function HomePage() {
     return (
-        <div className="min-h-screen bg-black text-primary antialiased">
+        <div className="min-h-screen bg-black text-primary antialiased relative overflow-hidden">
+            <Lines />
             <Header />
-            <main className="max-w-6xl mx-auto px-3 my-4 divide-x divide-border sm:my-6 sm:px-5 md:my-10 md:px-8 base:my-10 base:px-12">
-                <div className="border border-border divide-y divide-border">
-                    <Hero />
-                    <Configuration />
-                    <WhyAuraAuth />
-                    <Features />
-                    <Statistics />
-                    <ContributeOpenSource />
-                </div>
-            </main>
+            <Hero />
+            <WhatYouGet />
+            <div className="py-10 border-t border-white/20"></div>
+            <ExploreUseCases />
+            <div className="py-10 border-t border-white/20"></div>
+            <RuntimeSupport />
+            <div className="py-10 border-t border-white/20"></div>
+            <Integrations />
+            <div className="py-10 border-t border-white/20"></div>
+            <FAQ />
+            <div className="py-10 border-t border-white/20"></div>
+            <FinalCTA />
             <Footer />
         </div>
     )

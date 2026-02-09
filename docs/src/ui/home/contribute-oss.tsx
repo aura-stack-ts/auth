@@ -1,24 +1,34 @@
 import Link from "next/link"
-import { Github } from "lucide-react"
+import { Github, ArrowRight } from "lucide-react"
 import { Ripple } from "@/ui/ripple"
 
-export const ContributeOpenSource = () => {
+export const FinalCTA = () => {
     return (
-        <section className="h-[500px] w-full relative flex flex-col items-center justify-center overflow-hidden">
+        <section className="w-full relative flex flex-col items-center justify-center overflow-hidden border-t border-white/10">
             <Ripple />
-            <div className="px-6 text-center text-5xl font-medium tracking-tighter whitespace-pre-wrap text-primary relative z-10">
-                <h3 className="font-medium uppercase tracking-wider ">Join Our Community</h3>
-                <p className="mt-2 text-xs font-medium uppercase tracking-wider text-primary-foreground">
-                    Help us build the future of authentication. Contribute code, report issues, or share your ideas with our
-                    growing community of developers.
+            <div className="max-w-6xl mx-auto py-30 px-6 text-center relative z-10 border-x border-white/20">
+                <h2 className="text-5xl font-bold mb-6 text-white md:text-6xl lg:text-7xl">
+                    Ready to Ship Authentication 10x Faster?
+                </h2>
+                <p className="text-lg text-white/70 mb-8 max-w-2xl mx-auto">
+                    Join developers building secure, production-ready auth with Aura Auth. Get started in minutes, not days.
                 </p>
-                <Link
-                    href="https://github.com/aura-stack-ts/auth"
-                    className="mt-5  px-5 py-2.5 inline-flex items-center gap-2 text-sm font-medium text-white tracking-normal bg-neutral-900 hover:bg-neutral-800 rounded-lg border border-border transition-all duration-200"
-                >
-                    <Github className="h-4 w-4" />
-                    Become a Contributor
-                </Link>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <Link
+                        href="/docs"
+                        className="px-8 py-4 inline-flex items-center gap-2 text-base font-medium text-black rounded-lg transition-all duration-200 bg-white hover:bg-neutral-100"
+                    >
+                        Get Started
+                        <ArrowRight className="size-5" />
+                    </Link>
+                    <Link
+                        href="https://github.com/aura-stack-ts/auth"
+                        className="px-8 py-4 inline-flex items-center gap-2 text-base font-medium text-white rounded-lg border border-white/20 transition-all duration-200 hover:bg-white/10"
+                    >
+                        <Github className="size-5" />
+                        View on GitHub
+                    </Link>
+                </div>
             </div>
         </section>
     )

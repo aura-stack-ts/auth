@@ -27,11 +27,11 @@ export const Hero = () => {
             </div>
             <div className="mt-8 mb-16 text-center">
                 <h1 className="w-fit mx-auto mb-6 text-5xl font-semibold leading-[1.1] tracking-tight text-transparent bg-clip-text bg-linear-to-r from-purple-600 via-emerald-500 to-blue-400 md:text-6xl lg:text-7xl xl:text-8xl">
-                    Aura Auth
+                    Ship OAuth 2.0. Secure by Default.
                 </h1>
                 <p className="max-w-2xl mb-10 mx-auto text-base text-primary-foreground leading-relaxed md:text-lg lg:text-xl">
-                    Create powerful authentication workflows with just a few lines of code. Ship OAuth 2.0, encrypted sessions,
-                    and CSRF protection without rebuilding the plumbing.
+                    Authentication workflows made easy. Create powerful auth flows with just a few lines of code. Ship OAuth 2.0,
+                    encrypted sessions, and CSRF protection without rebuilding the plumbing.
                 </p>
                 <div className="flex flex-col items-center gap-4">
                     <div className="flex flex-col sm:flex-row items-center gap-3">
