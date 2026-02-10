@@ -1,0 +1,31 @@
+---
+import { AuthProvider } from "@/contexts/auth";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import "@/globals.css";
+
+interface Props {
+	title: string;
+    session?: any;
+}
+
+const { title, session } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class="antialiased bg-black min-h-screen flex flex-col">
+		<AuthProvider>
+			<!-- <Header > -->
+			<slot />
+			<Footer />
+		</AuthProvider>
+	</body>
+</html>

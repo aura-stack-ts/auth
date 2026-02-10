@@ -1,0 +1,29 @@
+{
+  "name": "astro",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
+    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.2",
+    "@astrojs/react": "^4.4.2",
+    "@aura-stack/auth": "workspace:*",
+    "@radix-ui/react-slot": "^1.2.4",
+    "astro": "^5.16.16",
+    "lucide-react": "catalog:lucide-react",
+    "react": "catalog:react",
+    "react-dom": "catalog:react"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:@tailwindcss/vite",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "tailwindcss": "catalog:tailwindcss"
+  }
+}
