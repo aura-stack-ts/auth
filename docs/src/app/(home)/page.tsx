@@ -1,27 +1,34 @@
-import { Footer } from "@/ui/home/footer"
-import { Header } from "@/ui/home/header"
-import { Hero } from "@/ui/home/hero"
-import { Configuration } from "@/ui/home/configuration"
-import { WhyAuraAuth } from "@/ui/home/why-aura-auth"
-import { Features } from "@/ui/home/features"
-import { ContributeOpenSource } from "@/ui/home/contribute-oss"
-import { Statistics } from "@/ui/home/statistics"
+import { Header } from "@/components/home/header"
+import { Hero } from "@/components/home/hero"
+import { Lines } from "@/components/ui/lines"
+import { PoweredBy } from "@/components/home/powered-by"
+import { CallToAction } from "@/components/home/call-to-action"
+import { WhatYouGet } from "@/components/home/what-you-get"
+import { FAQ } from "@/components/home/faq"
+import { Footer } from "@/components/home/footer"
+import { Integrations } from "@/components/home/integrations"
+import { Testimonials } from "@/components/home/testimonials"
 
 export default function HomePage() {
     return (
-        <div className="min-h-screen bg-black text-primary antialiased">
+        <>
             <Header />
-            <main className="max-w-6xl mx-auto px-3 my-4 divide-x divide-border sm:my-6 sm:px-5 md:my-10 md:px-8 base:my-10 base:px-12">
-                <div className="border border-border divide-y divide-border">
-                    <Hero />
-                    <Configuration />
-                    <WhyAuraAuth />
-                    <Features />
-                    <Statistics />
-                    <ContributeOpenSource />
-                </div>
+            <main className="min-h-screen text-primary antialiased relative overflow-hidden">
+                <Hero />
+                <PoweredBy />
+                <div className="py-10 border-t border-border" />
+                <WhatYouGet />
+                <div className="py-10 border-t border-border" />
+                <Integrations />
+                <div className="py-10 border-t border-border" />
+                <Testimonials />
+                <div className="py-10 border-t border-border" />
+                <FAQ />
+                <div className="py-10 border-t border-border" />
+                <CallToAction />
+                <Lines />
             </main>
             <Footer />
-        </div>
+        </>
     )
 }
