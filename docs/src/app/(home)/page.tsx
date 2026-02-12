@@ -1,32 +1,32 @@
 import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
 import { Lines } from "@/components/lines"
-import { FinalCTA } from "@/ui/home/contribute-oss"
-import { ExploreUseCases } from "@/ui/home/explore-use-cases"
-import { FAQ } from "@/ui/home/faq"
-import { Footer } from "@/ui/home/footer"
-import { Integrations } from "@/ui/home/integrations"
-import { RuntimeSupport } from "@/ui/home/runtime-support"
-import { WhatYouGet } from "@/ui/home/what-you-get"
+import { PoweredBy } from "@/components/powered-by"
+import { FinalCTA } from "@/components/home/contribute-oss"
+import { ExploreUseCases } from "@/components/home/explore-use-cases"
+import { FAQ } from "@/components/home/faq"
+import { Footer } from "@/components/home/footer"
+import { Integrations } from "@/components/home/integrations"
+import { Testimonials } from "@/components/home/testimonials"
 
 export default function HomePage() {
     return (
         <div className="min-h-screen bg-black text-primary antialiased relative overflow-hidden">
-            <Lines />
             <Header />
             <Hero />
-            <WhatYouGet />
-            <div className="py-10 border-t border-white/20"></div>
+            <PoweredBy />
+            <div className="py-10 border-t border-border" />
             <ExploreUseCases />
-            <div className="py-10 border-t border-white/20"></div>
-            <RuntimeSupport />
-            <div className="py-10 border-t border-white/20"></div>
+            <div className="py-10 border-t border-border" />
             <Integrations />
-            <div className="py-10 border-t border-white/20"></div>
+            <div className="py-10 border-t border-border" />
+            <Testimonials />
+            <div className="py-10 border-t border-border" />
             <FAQ />
-            <div className="py-10 border-t border-white/20"></div>
+            <div className="py-10 border-t border-border" />
             <FinalCTA />
             <Footer />
+            <Lines />
         </div>
     )
 }

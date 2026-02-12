@@ -1,12 +1,6 @@
 import { RootProvider } from "fumadocs-ui/provider/next"
-import "@/ui/global.css"
 import { Geist, Inter } from "next/font/google"
-
-const geist = Geist({
-    weight: ["400", "500", "700"],
-    subsets: ["latin"],
-    variable: "--font-geist",
-})
+import "@/app/global.css"
 
 const inter = Inter({
     weight: ["400", "500", "700"],

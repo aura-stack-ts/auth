@@ -1,5 +1,7 @@
 import Link from "next/link"
-import { ArrowRight, Lock, Code2, Shield, Cookie, Layers, Globe } from "lucide-react"
+import { Lock, Code2, Shield, Cookie, Layers, Globe } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 const useCases = [
     {
@@ -7,7 +9,7 @@ const useCases = [
         description:
             "Native support for multiple OAuth providers. Easily integrate GitHub, Discord, Google, and more with built-in provider configurations.",
         icon: Lock,
-        link: "/docs",
+        link: "/docs/oauth",
     },
     {
         title: "Type-Safe Development",
@@ -21,39 +23,39 @@ const useCases = [
         description:
             "Built-in JWT-based session management with encryption and signing. Sessions are encrypted by default with configurable expiration policies.",
         icon: Shield,
-        link: "/docs",
+        link: "/docs/concepts/security-model#token-management",
     },
     {
         title: "Cookie Security",
         description:
             "Secure, configurable cookies for session persistence. Proper security flags, domain settings, and SameSite attributes out of the box.",
         icon: Cookie,
-        link: "/docs",
+        link: "/docs/guides/cookie-management",
     },
     {
         title: "Extensible Architecture",
         description:
             "Easily integrate with @aura-stack/router or custom routing layers. Build on top of a flexible, composable authentication foundation.",
         icon: Layers,
-        link: "/docs",
+        link: "/docs/concepts/architecture",
     },
     {
         title: "Framework-Agnostic Design",
         description:
             "Works seamlessly in any environment that supports the Web Request/Response APIs. Deploy anywhere, from traditional servers to edge runtimes.",
         icon: Globe,
-        link: "/docs",
+        link: "/docs/concepts/architecture",
     },
 ]
 
 export const ExploreUseCases = () => {
     return (
-        <section className="px-6 border-t border-white/10">
-            <div className="max-w-6xl py-20 mx-auto border-x border-white/20">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl font-bold mb-4 text-white md:text-5xl">Explore Use Cases</h2>
-                    <p className="text-lg text-white/70 max-w-2xl mx-auto">
-                        Core features and capabilities that power secure authentication workflows
+        <section className="px-6 border-t border-border">
+            <div className="max-w-6xl py-20 mx-auto border-x border-border">
+                <div className="mb-16 text-center">
+                    <h2 className="mb-4 text-4xl font-bold text-white md:text-5xl">What You Get</h2>
+                    <p className="max-w-2xl mx-auto text-lg text-white/70">
+                        Everything you need to build secure, production-ready authentication workflows
                     </p>
                 </div>
                 <div className="p-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -61,18 +63,25 @@ export const ExploreUseCases = () => {
                         <Link
                             key={useCase.title}
                             href={useCase.link}
-                            className="group p-6 border border-white/20 bg-black transition-all duration-300"
+                            className="group p-6 size-full flex flex-col justify-start relative border border-border transition-all duration-300 bg-background hover:border-white/40"
                         >
                             <div className="mb-4">
                                 <div className="size-12 flex items-center justify-center">
                                     <useCase.icon className="size-8 text-white" />
                                 </div>
                             </div>
-                            <h3 className="text-xl font-semibold text-white mb-2 transition-colors">{useCase.title}</h3>
-                            <p className="text-white/70 leading-relaxed mb-3">{useCase.description}</p>
-                            <div className="inline-flex items-center gap-1 text-sm group-hover:gap-2 transition-all">
-                                Learn more <ArrowRight className="size-4" />
-                            </div>
+                            <h3 className="mb-2 text-xl font-semibold text-white transition-colors">{useCase.title}</h3>
+                            <p className="mb-3 text-white/70 leading-relaxed">{useCase.description}</p>
+                            <Button className="w-fit mt-auto bg-white/5" variant="outline" size="lg">
+                                Try now
+                            </Button>
+                            <Image
+                                className="w-full absolute bottom-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                width={400}
+                                height={400}
+                                src="/shape.png"
+                                alt="Shape"
+                            />
                         </Link>
                     ))}
                 </div>
