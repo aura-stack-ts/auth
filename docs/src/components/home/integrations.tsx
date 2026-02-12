@@ -42,6 +42,7 @@ export const Integrations = () => {
                             href={integration.link}
                             className="group p-6 flex items-start justify-between flex-col relative border border-border transition-all duration-300 bg-background hover:border-white/40"
                             target="_blank"
+                            rel="noopener noreferrer"
                         >
                             <div className="mb-4 flex flex-col items-start text-start relative z-10">
                                 <h3 className="mb-2 text-xl font-semibold text-white transition-colors">{integration.name}</h3>
@@ -55,7 +56,7 @@ export const Integrations = () => {
                                 width={100}
                                 height={100}
                                 src="/shape-top.png"
-                                alt="Shape"
+                                alt=""
                             />
                         </Link>
                     ))}

@@ -80,7 +80,7 @@ export const WhatYouGet = () => {
                                 width={400}
                                 height={400}
                                 src="/shape.png"
-                                alt="Shape"
+                                alt=""
                             />
                         </Link>
                     ))}

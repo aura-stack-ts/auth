@@ -1,4 +1,4 @@
-const LIMIT_LINES = 30
+const LIMIT_LINES = 40
 
 export const Lines = () => {
     return Array.from({ length: LIMIT_LINES }).map((_, i) => (

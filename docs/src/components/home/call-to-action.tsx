@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Github, ArrowRight } from "lucide-react"
+import { Github } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export const CallToAction = () => {
@@ -16,14 +16,11 @@ export const CallToAction = () => {
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <Button variant="secondary" size="lg" asChild>
-                        <Link href="/docs">
-                            Get Started
-                            <ArrowRight className="size-5" />
-                        </Link>
+                    <Button className="w-full sm:w-fit" variant="secondary" size="lg" asChild>
+                        <Link href="/docs">Get Started</Link>
                     </Button>
-                    <Button variant="secondary" size="lg" asChild>
-                        <Link href="https://github.com/aura-stack-ts/auth" target="_blank">
+                    <Button className="w-full bg-transparent sm:w-fit" variant="outline" size="lg" asChild>
+                        <Link href="https://github.com/aura-stack-ts/auth" target="_blank" rel="noopener noreferrer">
                             <Github className="size-5" />
                             View on GitHub
                         </Link>
@@ -31,7 +28,14 @@ export const CallToAction = () => {
                 </div>
             </div>
             <div className="size-full absolute left-0 top-0 pointer-events-none">
-                <Image className="size-full" src="/hero-gradient.png" alt="Hero Gradient Background" width={1200} height={800} />
+                <Image
+                    className="size-full"
+                    src="/hero-gradient.png"
+                    alt="Hero Gradient Background"
+                    width={1200}
+                    height={800}
+                    loading="lazy"
+                />
             </div>
         </section>
     )

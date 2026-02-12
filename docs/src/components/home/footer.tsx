@@ -71,6 +71,7 @@ export const Footer = () => {
                             className="hover:text-neutral-300 transition"
                             href="https://github.com/aura-stack-ts/auth"
                             target="_blank"
+                            rel="noopener noreferrer"
                         >
                             GitHub
                         </Link>
@@ -78,6 +79,7 @@ export const Footer = () => {
                             className="hover:text-neutral-300 transition"
                             href="https://www.npmjs.com/package/@aura-stack/auth"
                             target="_blank"
+                            rel="noopener noreferrer"
                         >
                             npm
                         </Link>

@@ -49,8 +49,12 @@ export const FAQ = () => {
                                 className="border-b border-border bg-background overflow-hidden transition-all duration-300"
                             >
                                 <button
-                                    onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                                    type="button"
                                     className="w-full py-5 flex items-center justify-between text-left"
+                                    onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                                    aria-controls={`faq-panel-${index}`}
+                                    id={`faq-button-${index}`}
+                                    aria-expanded={openIndex === index}
                                 >
                                     <h3 className="text-lg font-semibold text-white pr-8">{faq.question}</h3>
                                     <ChevronDown
@@ -64,6 +68,9 @@ export const FAQ = () => {
                                         "max-h-96": openIndex === index,
                                         "max-h-0": openIndex !== index,
                                     })}
+                                    id={`faq-panel-${index}`}
+                                    role="region"
+                                    aria-labelledby={`faq-button-${index}`}
                                 >
                                     <div className="pb-5">
                                         <p className="text-white/70 leading-relaxed">{faq.answer}</p>

@@ -1,9 +1,9 @@
 "use client"
 
 import Link from "next/link"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
-import { useState } from "react"
 
 const menuItems = [
     { name: "Home", href: "/" },
@@ -61,10 +61,14 @@ export const Header = () => {
                                     size="lg"
                                     asChild
                                 >
-                                    <Link href="#">GitHub</Link>
+                                    <Link href="https://github.com/aura-stack-ts/auth" target="_blank" rel="noopener noreferrer">
+                                        GitHub
+                                    </Link>
                                 </Button>
                                 <Button className="hidden lg:flex" variant="ghost" asChild>
-                                    <Link href="https://github.com/aura-stack-ts/auth">GitHub</Link>
+                                    <Link href="https://github.com/aura-stack-ts/auth" target="_blank" rel="noopener noreferrer">
+                                        GitHub
+                                    </Link>
                                 </Button>
                                 <Button className="w-full rounded-none lg:w-fit" variant="outline" size="lg" asChild>
                                     <Link href="/docs">Get Started</Link>

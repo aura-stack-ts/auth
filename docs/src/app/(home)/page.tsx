@@ -11,22 +11,24 @@ import { Testimonials } from "@/components/home/testimonials"
 
 export default function HomePage() {
     return (
-        <div className="min-h-screen bg-black text-primary antialiased relative overflow-hidden">
+        <>
             <Header />
-            <Hero />
-            <PoweredBy />
-            <div className="py-10 border-t border-border" />
-            <WhatYouGet />
-            <div className="py-10 border-t border-border" />
-            <Integrations />
-            <div className="py-10 border-t border-border" />
-            <Testimonials />
-            <div className="py-10 border-t border-border" />
-            <FAQ />
-            <div className="py-10 border-t border-border" />
-            <CallToAction />
+            <main className="min-h-screen text-primary antialiased relative overflow-hidden">
+                <Hero />
+                <PoweredBy />
+                <div className="py-10 border-t border-border" />
+                <WhatYouGet />
+                <div className="py-10 border-t border-border" />
+                <Integrations />
+                <div className="py-10 border-t border-border" />
+                <Testimonials />
+                <div className="py-10 border-t border-border" />
+                <FAQ />
+                <div className="py-10 border-t border-border" />
+                <CallToAction />
+                <Lines />
+            </main>
             <Footer />
-            <Lines />
-        </div>
+        </>
     )
 }

@@ -1,8 +1,24 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { Check, Copy } from "lucide-react"
 
 export const Hero = () => {
+    const [copied, setCopied] = useState(false)
+
+    const copyToClipboard = async () => {
+        try {
+            await navigator.clipboard.writeText("pnpm add @aura-stack/auth")
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+        } catch (err) {
+            console.error("Failed to copy:", err)
+        }
+    }
+
     return (
         <section className="mt-15 px-6 relative">
             <div className="min-h-[45dvw] max-w-6xl mx-auto py-18 px-6 flex items-center justify-center flex-col text-center border-x border-border">
@@ -18,8 +34,15 @@ export const Hero = () => {
                         <Button className="w-full xs:w-fit" variant="secondary" size="lg" asChild>
                             <Link href="/docs">Get Started</Link>
                         </Button>
-                        <Button className="w-full xs:w-fit" variant="secondary" size="lg" asChild>
-                            <span>npm install @aura-stack/auth</span>
+                        <Button className="w-full xs:w-fit" variant="secondary" size="lg" asChild onClick={copyToClipboard}>
+                            <p>
+                                <span>pnpm add @aura-stack/auth</span>
+                                {copied ? (
+                                    <Check className="size-4 text-green-400" />
+                                ) : (
+                                    <Copy className="size-4 text-neutral-500 hover:cursor-pointer" />
+                                )}
+                            </p>
                         </Button>
                     </div>
                 </div>
@@ -30,6 +53,7 @@ export const Hero = () => {
                         alt="Hero Gradient Background"
                         width={1200}
                         height={800}
+                        priority
                     />
                 </div>
             </div>
