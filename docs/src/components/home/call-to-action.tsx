@@ -3,7 +3,7 @@ import Image from "next/image"
 import { Github, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-export const FinalCTA = () => {
+export const CallToAction = () => {
     return (
         <section className="px-6 relative border-t border-border">
             <div className="max-w-6xl mx-auto py-30 px-6 text-center relative z-10 border-x border-border">

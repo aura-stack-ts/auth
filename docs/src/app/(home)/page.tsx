@@ -1,9 +1,9 @@
-import { Header } from "@/components/header"
-import { Hero } from "@/components/hero"
-import { Lines } from "@/components/lines"
-import { PoweredBy } from "@/components/powered-by"
-import { FinalCTA } from "@/components/home/contribute-oss"
-import { ExploreUseCases } from "@/components/home/explore-use-cases"
+import { Header } from "@/components/home/header"
+import { Hero } from "@/components/home/hero"
+import { Lines } from "@/components/ui/lines"
+import { PoweredBy } from "@/components/home/powered-by"
+import { CallToAction } from "@/components/home/call-to-action"
+import { WhatYouGet } from "@/components/home/what-you-get"
 import { FAQ } from "@/components/home/faq"
 import { Footer } from "@/components/home/footer"
 import { Integrations } from "@/components/home/integrations"
@@ -16,7 +16,7 @@ export default function HomePage() {
             <Hero />
             <PoweredBy />
             <div className="py-10 border-t border-border" />
-            <ExploreUseCases />
+            <WhatYouGet />
             <div className="py-10 border-t border-border" />
             <Integrations />
             <div className="py-10 border-t border-border" />
@@ -24,7 +24,7 @@ export default function HomePage() {
             <div className="py-10 border-t border-border" />
             <FAQ />
             <div className="py-10 border-t border-border" />
-            <FinalCTA />
+            <CallToAction />
             <Footer />
             <Lines />
         </div>
