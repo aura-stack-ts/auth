@@ -11,7 +11,6 @@
     --breakpoint-base: 56.25rem;
     --color-background: #000000;
     --color-muted-foreground: color-mix(in oklab, var(--color-white) 60%, transparent);
-
     --breakpoint-xs: 540px;
 }
 
