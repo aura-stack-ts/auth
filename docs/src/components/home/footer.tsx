@@ -19,6 +19,8 @@ const resources = [
 ]
 
 export const Footer = () => {
+    const year = new Date().getFullYear()
+
     return (
         <footer className="px-6 border-t border-border">
             <div className="max-w-6xl mx-auto">
@@ -44,7 +46,12 @@ export const Footer = () => {
                         <ul className="space-y-2 text-sm text-primary-foreground">
                             {community.map(({ title, href }) => (
                                 <li key={href}>
-                                    <Link href={href} className="hover:text-primary transition">
+                                    <Link
+                                        href={href}
+                                        className="hover:text-primary transition"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
                                         {title}
                                     </Link>
                                 </li>
@@ -65,7 +72,7 @@ export const Footer = () => {
                     </div>
                 </div>
                 <div className="py-4 flex flex-col md:flex-row items-center justify-between">
-                    <p className="text-sm text-neutral-500">© 2025 Aura Stack. All rights reserved.</p>
+                    <p className="text-sm text-neutral-500">© {year} Aura Stack. All rights reserved.</p>
                     <div className="flex items-center gap-6 text-sm text-neutral-500 mt-6 md:mt-0">
                         <Link
                             className="hover:text-neutral-300 transition"

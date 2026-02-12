@@ -52,7 +52,7 @@ export const Testimonials = () => {
                     </p>
                 </div>
                 <div className="pb-4 overflow-x-auto relative">
-                    <div className="grid grid-cols gap-6 sm:grid-cols-2 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
                         {testimonials.map((testimonial) => (
                             <div
                                 key={testimonial.name}

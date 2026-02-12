@@ -35,14 +35,14 @@ export const Hero = () => {
                             <Link href="/docs">Get Started</Link>
                         </Button>
                         <Button className="w-full xs:w-fit" variant="secondary" size="lg" asChild onClick={copyToClipboard}>
-                            <p>
-                                <span>pnpm add @aura-stack/auth</span>
+                            <span>
+                                pnpm add @aura-stack/auth
                                 {copied ? (
-                                    <Check className="size-4 text-green-400" />
+                                    <Check className="ml-1 size-4 text-green-400" />
                                 ) : (
-                                    <Copy className="size-4 text-neutral-500 hover:cursor-pointer" />
+                                    <Copy className="ml-1 size-4 text-neutral-500 hover:cursor-pointer" />
                                 )}
-                            </p>
+                            </span>
                         </Button>
                     </div>
                 </div>
