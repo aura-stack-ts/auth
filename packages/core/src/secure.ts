@@ -75,13 +75,3 @@ export const verifyCSRF = async (jose: AuthRuntimeConfig["jose"], cookie: string
         throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
     }
 }
-
-/**
- * Creates a deterministic derived salt from the provided secret.
- *
- * @param secret the base secret to derive the salt from
- * @returns the derived salt as a hexadecimal string
- */
-export const createDerivedSalt = (secret: string) => {
-    return crypto.createHash("sha256").update(secret).update("aura-auth-salt").digest("hex")
-}

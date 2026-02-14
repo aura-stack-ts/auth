@@ -1,14 +1,12 @@
 import "dotenv/config"
 import { createJWT, createJWS, createJWE, createDeriveKey, createSecret } from "@aura-stack/jose"
-import { createDerivedSalt } from "@/secure.js"
 import { AuthInternalError } from "@/errors.js"
 export type { JWTPayload } from "@aura-stack/jose/jose"
 
 /**
  * Creates the JOSE instance used for signing and verifying tokens. It derives keys
- * for session tokens and CSRF tokens. For security and determinism, it uses the
- * `AURA_AUTH_SALT` environment variable if available; otherwise,it uses a derived
- * salt based on the provided secret.
+ * for session tokens and CSRF tokens. For security and determinism, it's required
+ * to set a salt value in `AURA_AUTH_SALT` or `AUTH_SALT` env.
  *
  * @param secret the base secret for key derivation
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
@@ -23,9 +21,9 @@ export const createJoseInstance = (secret?: string) => {
         )
     }
 
-    const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT ?? createDerivedSalt(secret) ?? "Not found"
+    const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT
     try {
-        createSecret(salt)
+        createSecret(salt!)
     } catch (error) {
         throw new AuthInternalError(
             "INVALID_SALT_SECRET_VALUE",
