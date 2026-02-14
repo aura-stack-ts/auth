@@ -1,9 +1,8 @@
 import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
-import { equals } from "@/utils.js"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
-import { isRelativeURL, isTrustedOrigin } from "@/assert.js"
+import { isRelativeURL, isTrustedOrigin, safeEquals } from "@/assert.js"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
 import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import { AuthSecurityError, OAuthProtocolError } from "@/errors.js"
@@ -71,7 +70,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
             const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
 
-            if (!equals(cookieState, state)) {
+            if (!safeEquals(cookieState, state)) {
                 logger?.log("MISMATCHING_STATE", {
                     structuredData: {
                         oauth_provider: oauth,

@@ -79,6 +79,7 @@ export const isSameOrigin = (origin: string, expected: string): boolean => {
  */
 export const patternToRegex = (pattern: string): RegExp | null => {
     try {
+        pattern = pattern.replace(/\\/g, "")
         const match = pattern.match(/^(https?):\/\/([^\/\s:]+)(?::(\d+|\*))?(\/.*)?$/)
         if (!match) return null
 

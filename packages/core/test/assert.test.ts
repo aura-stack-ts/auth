@@ -386,6 +386,24 @@ describe("isTrustedOrigin", () => {
             trustedOrigins: ["myapp://*"],
             expected: false,
         },
+        {
+            description: "escaped dot in trusted origin",
+            url: "https://example.com",
+            trustedOrigins: ["https://example\\.com"],
+            expected: true
+        },
+        {
+            description: "escaped dot in trusted origin does not match different domain",
+            url: "https://example.com",
+            trustedOrigins: ["https://example\\.org"],
+            expected: false
+        },
+        {
+            description: "escaped dot in trusted origin with subdomain wildcard",
+            url: "https://api.example.com",
+            trustedOrigins: ["https://*\\.example\\.com"],
+            expected: true
+        }
     ]
 
     for (const { description, url, trustedOrigins, expected } of testCases) {
