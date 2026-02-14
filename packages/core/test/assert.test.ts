@@ -390,20 +390,38 @@ describe("isTrustedOrigin", () => {
             description: "escaped dot in trusted origin",
             url: "https://example.com",
             trustedOrigins: ["https://example\\.com"],
-            expected: true
+            expected: true,
         },
         {
             description: "escaped dot in trusted origin does not match different domain",
             url: "https://example.com",
             trustedOrigins: ["https://example\\.org"],
-            expected: false
+            expected: false,
         },
         {
             description: "escaped dot in trusted origin with subdomain wildcard",
             url: "https://api.example.com",
             trustedOrigins: ["https://*\\.example\\.com"],
-            expected: true
-        }
+            expected: true,
+        },
+        {
+            description: "invalid wildcard pattern",
+            url: "https://invalidexample.com",
+            trustedOrigins: ["https://*example.com"],
+            expected: false,
+        },
+        {
+            description: "invalid port wildcard",
+            url: "https://example.com:3000",
+            trustedOrigins: ["https://example.com*"],
+            expected: false,
+        },
+        {
+            description: "invalid pattern with wildcard in the middle of the domain",
+            url: "https://example.com",
+            trustedOrigins: ["https://exa*mple.com"],
+            expected: false,
+        },
     ]
 
     for (const { description, url, trustedOrigins, expected } of testCases) {

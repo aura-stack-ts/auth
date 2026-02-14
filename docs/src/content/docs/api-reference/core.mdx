@@ -74,13 +74,14 @@ Creates an authentication instance with handlers for OAuth flows, session manage
 
 Configuration object for authentication settings.
 
-| Parameter             | Type                                                    | Description                                                                                                                          |
-| --------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `oauth`               | `(BuiltInOAuthProvider  \| OAuthProviderCredentials)[]` | Array of OAuth provider configurations                                                                                               |
-| `cookies`             | `CookieConfig`                                          | Cookie configuration for session management                                                                                          |
-| `secret`              | `string`                                                | Secret value used for signing and encrypting JWTs and CSRF tokens. This option overrides the `AURA_AUTH_SECRET` environment variable |
-| `basePath`            | `/${string}`                                            | Base path for the authentication routes; defaults to `/auth`                                                                         |
-| `trustedProxyHeaders` | `boolean`                                               | Enables proxy headers when the app is behind a proxy                                                                                 |
+| Parameter             | Type                                                              | Description                                                                                                                          |
+| --------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `oauth`               | `(BuiltInOAuthProvider  \| OAuthProviderCredentials)[]`           | Array of OAuth provider configurations                                                                                               |
+| `cookies`             | `CookieConfig`                                                    | Cookie configuration for session management                                                                                          |
+| `secret`              | `string`                                                          | Secret value used for signing and encrypting JWTs and CSRF tokens. This option overrides the `AURA_AUTH_SECRET` environment variable |
+| `basePath`            | `/${string}`                                                      | Base path for the authentication routes; defaults to `/auth`                                                                         |
+| `trustedProxyHeaders` | `boolean`                                                         | Enables proxy headers when the app is behind a proxy                                                                                 |
+| `trustedOrigins`      | `string[] \| (request: Request) => string[] \| Promise<string[]>` | List of allowed origins for CORS and redirect URI validation. Supports wildcards (e.g., `https://*.example.com`)                     |
 
 ##### `oauth`
 
@@ -343,6 +344,42 @@ Aura Auth reads proxy headers to determine if connection is secure:
 | `X-Forwarded-For`   | Client IP             | `203.0.113.45`                 |
 | `X-Forwarded-Host`  | Original host         | `example.com`                  |
 | `Forwarded`         | RFC 7239 standard     | `for=203.0.113.45;proto=https` |
+
+##### `trustedOrigins`
+
+List of allowed origins for CORS and redirect URI validation. This option can be a static array of strings or a function that returns an array of strings based on the incoming request. Wildcards are supported for subdomains (e.g., `https://*.example.com`) and port numbers (e.g., `http://localhost:*`).
+
+```ts lineNumbers
+type TrustedOrigins = string[] | ((request: Request) => string[] | Promise<string[]>)
+```
+
+###### Static Array [!toc]
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: ["http://example.com", "https://app.example.com:3000"],
+})
+```
+
+###### Dynamic Function [!toc]
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: (request) => {
+    const origin = request.headers.get("origin")
+    if (origin && origin.endsWith(".example.com")) {
+      return [origin]
+    }
+    return []
+  },
+})
+```
 
 #### Returns
 

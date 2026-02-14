@@ -153,7 +153,6 @@ describe("callbackAction", () => {
             })
         )
 
-
         expect(fetch).toHaveBeenCalledWith(
             "https://example.com/oauth/userinfo",
             expect.objectContaining({

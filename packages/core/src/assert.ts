@@ -84,8 +84,16 @@ export const patternToRegex = (pattern: string): RegExp | null => {
         if (!match) return null
 
         const [, protocol, host, port] = match
-        const escapedPort = port ? `:${port}` : ""
-        return new RegExp(`^${protocol}:\\/\\/${host}${escapedPort}$`.replace(/\./g, "\\.").replace(/\*/g, "[^.]+"))
+        const hasWildcard = host.includes("*")
+        if (hasWildcard && !host.startsWith("*.")) return null
+        if (hasWildcard && host.slice(2).includes("*")) return null
+
+        const domain = hasWildcard ? host.slice(2) : host
+        const escapedDomain = domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        const hostRegex = hasWildcard ? `[^.]+\\.${escapedDomain}` : escapedDomain
+        const portRegex = port === "*" ? ":\\d{1,5}" : port ? `:${port}` : ""
+
+        return new RegExp(`^${protocol}:\\/\\/${hostRegex}${portRegex}$`)
     } catch {
         return null
     }

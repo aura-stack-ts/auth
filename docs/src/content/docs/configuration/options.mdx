@@ -161,3 +161,57 @@ export const auth = createAuth({
 **When to Enable**: reverse proxy (Nginx, Apache); platforms with automatic proxying (Vercel, Netlify, Heroku); load balancer (AWS ALB, Google Cloud LB); CDN (Cloudflare)
 
 **When NOT to Enable**: localhost or direct internet connection; untrusted or misconfigured proxy; unclear infrastructure setup
+
+### `trustedOrigins`
+
+Defines the allowed origins for CORS and redirect URI validation. It supports static matches and wildcards in subdomains and ports.
+
+<Callout type="warning">
+  This option is security-sensitive. Misconfigured `trustedOrigins` can lead to CORS vulnerabilities or open redirect flaws.
+  Always ensure that origins are specific and do not unintentionally allow malicious sites.
+</Callout>
+
+#### Static Matches
+
+Set the static origins accepted by Aura Auth.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: ["http://example.com", "https://app.example.com:3000"],
+})
+```
+
+#### Dynamic Matches
+
+Set the origin dynamically based on the original request.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: (request) => {
+    const origin = request.headers.get("origin")
+    if (origin && origin.endsWith(".example.com")) {
+      return [origin]
+    }
+    return []
+  },
+})
+```
+
+#### Wildcard Patterns
+
+The `*` wildcard is supported for flexible matching of subdomains and ports. The wildcard can only be used at the start of a subdomain (e.g., `*.example.com`) or as an entire port (e.g., `:3000`).
+
+| Pattern                      | Matches                                                        | Does Not Match                                                               |
+| ---------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `https://example.com`        | `https://example.com`                                          | `http://example.com`, `https://app.example.com`, `https://example.com:3000`  |
+| `https://example.com:3000`   | `https://example.com:3000`                                     | `https://example.com`, `https://example.com:4000`, `http://example.com:3000` |
+| `https://*.example.com`      | `https://app.example.com`, `https://www.example.com`           | `https://example.com`, `http://app.example.com`                              |
+| `https://*.example.com:3000` | `https://app.example.com:3000`, `https://www.example.com:3000` | `https://example.com:3000`, `https://app.example.com:4000`                   |
+| `https://example.com:*`      | `https://example.com:3000`, `https://example.com:4000`         | `https://example.com`, `http://example.com:3000`                             |
+| `https://*.example.com:*`    | `https://app.example.com:3001`, `https://www.example.com:4567` | `https://example.com:3000`, `http://app.example.com:3000`                    |
