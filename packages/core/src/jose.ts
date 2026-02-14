@@ -36,9 +36,8 @@ export const createJoseInstance = (secret?: string) => {
             "AURA_AUTH_SALT or AUTH_SALT environment variable is not set. A salt value is required for key derivation."
         )
     }
-
     try {
-        createSecret(salt!)
+        createSecret(salt)
     } catch (error) {
         throw new AuthInternalError(
             "INVALID_SALT_SECRET_VALUE",
