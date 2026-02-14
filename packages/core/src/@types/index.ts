@@ -191,7 +191,31 @@ export interface AuthConfig {
     trustedProxyHeaders?: boolean
 
     logger?: Logger
+    /**
+     * Defines trusted origins for your application to prevent open redirect attacks.
+     * URLs from the Referer header, Origin header, request URL, and redirectTo option
+     * are validated against this list before redirecting.
+     *
+     * - **Exact URL**: `https://example.com` matches only that origin.
+     * - **Subdomain wildcard**: `https://*.example.com` matches `https://app.example.com`, `https://api.example.com`, etc.
+     * @example
+     * trustedOrigins: ["https://example.com", "https://*.example.com", "http://localhost:3000"]
+     *
+     *
+     * trustedOrigins: async (request) => {
+     *   const origin = new URL(request.url).origin
+     *   return [origin, "https://admin.example.com"]
+     * }
+     */
+    trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
 }
+
+/**
+ * A trusted origin URL or pattern. Supports:
+ * - Exact: `https://example.com`
+ * - Subdomain wildcard: `https://*.example.com`
+ */
+export type TrustedOrigin = string
 
 export interface JoseInstance {
     decodeJWT: (token: string) => Promise<JWTPayload>
@@ -216,6 +240,7 @@ export interface RouterGlobalContext {
     secret?: string
     basePath: string
     trustedProxyHeaders: boolean
+    trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
 }
 

@@ -3,10 +3,11 @@ import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stac
 import { equals } from "@/utils.js"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
-import { isRelativeURL } from "@/assert.js"
+import { isRelativeURL, matchesTrustedOrigin } from "@/assert.js"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
 import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import { AuthSecurityError, OAuthProtocolError } from "@/errors.js"
+import { getTrustedOrigins } from "@/actions/signIn/authorization.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
@@ -61,14 +62,14 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 request,
                 params: { oauth },
                 searchParams: { code, state },
-                context: { oauth: providers, cookies, jose, logger },
+                context: { oauth: providers, cookies, jose, logger, trustedOrigins },
             } = ctx
 
             const oauthConfig = providers[oauth]
             const cookieState = getCookie(request, cookies.state.name)
+            const codeVerifier = getCookie(request, cookies.codeVerifier.name)
             const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
             const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
-            const codeVerifier = getCookie(request, cookies.codeVerifier.name)
 
             if (!equals(cookieState, state)) {
                 logger?.log("MISMATCHING_STATE", {
@@ -83,7 +84,8 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             }
 
             const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier, logger)
-            if (!isRelativeURL(cookieRedirectTo)) {
+            const origins = await getTrustedOrigins(request, trustedOrigins)
+            if (!isRelativeURL(cookieRedirectTo) && !matchesTrustedOrigin(cookieRedirectTo, origins)) {
                 logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
                     structuredData: {
                         redirect_path: cookieRedirectTo,

@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest"
 import { oauthCustomService } from "@test/presets.js"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI, getOriginURL } from "@/actions/signIn/authorization.js"
 import type { OAuthProviderCredentials } from "@/index.js"
+import type { GlobalContext } from "@aura-stack/router/types"
 
 describe("createRedirectURI", () => {
     const testCases = [
@@ -56,8 +57,8 @@ describe("createRedirectURI", () => {
     ]
 
     for (const { description, requestURL, oauth, expected } of testCases) {
-        test(description, () => {
-            const redirectURI = createRedirectURI(new Request(requestURL), oauth, "/auth")
+        test(description, async () => {
+            const redirectURI = await createRedirectURI(new Request(requestURL), oauth, { basePath: "/auth" } as GlobalContext)
             expect(redirectURI).toBe(expected)
         })
     }
@@ -231,9 +232,9 @@ describe("createRedirectTo", () => {
             {
                 description: "with path in origin header",
                 request: new Request(signInURL, {
-                    headers: { Origin: "https://example.com/auth/signIn" },
+                    headers: { Origin: "https://example.com/dashboard" },
                 }),
-                expected: "/auth/signIn",
+                expected: "/dashboard",
             },
             {
                 description: "with redirectTo parameter provided",
@@ -325,8 +326,8 @@ describe("createRedirectTo", () => {
         ]
 
         for (const { description, request, expected, redirectTo: redirectToParam, trustedProxyHeaders } of testCases) {
-            test(description, () => {
-                const redirectTo = createRedirectTo(request, redirectToParam, trustedProxyHeaders)
+            test(description, async () => {
+                const redirectTo = await createRedirectTo(request, redirectToParam, { trustedProxyHeaders } as GlobalContext)
                 expect(redirectTo).toBe(expected)
             })
         }
@@ -481,10 +482,56 @@ describe("createRedirectTo", () => {
         ]
 
         for (const { description, request, redirectTo } of testCases) {
-            test(description, () => {
-                expect(createRedirectTo(request, redirectTo)).toEqual("/")
+            test(description, async () => {
+                expect(await createRedirectTo(request, redirectTo)).toEqual("/")
             })
         }
+    })
+
+    describe("with trustedOrigins config", () => {
+        test("accepts referer from trusted origin", async () => {
+            const request = new Request("https://example.com/auth/signIn/github", {
+                headers: { Referer: "https://example.com/dashboard" },
+            })
+            const result = await createRedirectTo(request, undefined, {
+                trustedOrigins: ["https://example.com", "https://admin.example.com"],
+            } as GlobalContext)
+            expect(result).toBe("/dashboard")
+        })
+
+        test("accepts referer matching wildcard pattern", async () => {
+            const request = new Request("https://app.example.com/auth/signIn/github", {
+                headers: { Referer: "https://app.example.com/dashboard" },
+            })
+            const result = await createRedirectTo(request, undefined, {
+                trustedOrigins: ["https://*.example.com"],
+            } as GlobalContext)
+            expect(result).toBe("/dashboard")
+        })
+
+        test("rejects referer not in trusted origins", async () => {
+            const request = new Request("https://example.com/auth/signIn/github", {
+                headers: { Referer: "https://malicious.com/phishing" },
+            })
+            const result = await createRedirectTo(request, undefined, {
+                trustedOrigins: ["https://example.com"],
+            } as GlobalContext)
+            expect(result).toBe("/")
+        })
+
+        test("accepts redirectTo from trusted origin", async () => {
+            const request = new Request("https://example.com/auth/signIn/github")
+            const result = await createRedirectTo(request, "https://example.com/dashboard", {} as GlobalContext)
+            expect(result).toBe("/dashboard")
+        })
+
+        test("with trusted origins that are not same origin", async () => {
+            const request = new Request("https://example.com/auth/signIn/github")
+            const result = await createRedirectTo(request, "https://api.example.com/data", {
+                trustedOrigins: ["https://api.example.com"],
+            } as GlobalContext)
+            expect(result).toBe("https://api.example.com/data")
+        })
     })
 })
 

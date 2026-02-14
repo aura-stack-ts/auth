@@ -21,6 +21,7 @@ export type {
     ErrorType,
     Logger,
     LogLevel,
+    TrustedOrigin,
 } from "@/@types/index.js"
 
 /**
@@ -78,6 +79,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
             trustedProxyHeaders: useSecure,
+            trustedOrigins: authConfig?.trustedOrigins,
             logger: internalLogger,
         },
         middlewares: [

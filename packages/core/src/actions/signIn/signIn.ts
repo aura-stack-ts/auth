@@ -30,11 +30,12 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
                 request,
                 params: { oauth },
                 searchParams: { redirectTo },
-                context: { oauth: providers, cookies, trustedProxyHeaders, basePath, logger },
+                context,
             } = ctx
+            const { oauth: providers, cookies, logger } = context
             const state = generateSecure()
-            const redirectURI = createRedirectURI(request, oauth, basePath, trustedProxyHeaders, logger)
-            const redirectToValue = createRedirectTo(request, redirectTo, trustedProxyHeaders, logger)
+            const redirectURI = await createRedirectURI(request, oauth, context)
+            const redirectToValue = await createRedirectTo(request, redirectTo, context)
 
             const { codeVerifier, codeChallenge, method } = await createPKCE()
             const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method, logger)
