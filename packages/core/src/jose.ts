@@ -30,12 +30,19 @@ export const createJoseInstance = (secret?: string) => {
     }
 
     const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT
+    if (!salt) {
+        throw new AuthInternalError(
+            "JOSE_INITIALIZATION_FAILED",
+            "AURA_AUTH_SALT or AUTH_SALT environment variable is not set. A salt value is required for key derivation."
+        )
+    }
+
     try {
         createSecret(salt!)
     } catch (error) {
         throw new AuthInternalError(
             "INVALID_SALT_SECRET_VALUE",
-            "AURA_AUTH_SALT environment variable is invalid. It must be at least 32 bits long.",
+            "AURA_AUTH_SALT/AUTH_SALT is invalid. It must be at least 32 bytes long and meet entropy requirements.",
             { cause: error }
         )
     }

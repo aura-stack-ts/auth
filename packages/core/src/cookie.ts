@@ -227,7 +227,7 @@ export const createCookieStore = (
                 {
                     ...overrides?.csrfToken?.attributes,
                     ...defaultHostCookieConfig,
-                    sameSite: "strict"
+                    sameSite: "strict",
                 },
                 overrides?.csrfToken?.attributes?.strategy ?? "host",
                 logger
