@@ -1,8 +1,8 @@
 import { z } from "zod"
 import { createLogEntry } from "@/logger.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.js"
-import type { SerializeOptions } from "@aura-stack/router/cookie"
 import { createJoseInstance, type JWTPayload } from "@/jose.js"
+import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { BuiltInOAuthProvider } from "@/oauth/index.js"
 import type { LiteralUnion, Prettify } from "@/@types/utility.js"
 

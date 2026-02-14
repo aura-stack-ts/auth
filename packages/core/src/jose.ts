@@ -1,5 +1,13 @@
 import "dotenv/config"
-import { createJWT, createJWS, createJWE, createDeriveKey, createSecret, JWTVerifyOptions, DecodeJWTOptions } from "@aura-stack/jose"
+import {
+    createJWT,
+    createJWS,
+    createJWE,
+    createDeriveKey,
+    createSecret,
+    JWTVerifyOptions,
+    DecodeJWTOptions,
+} from "@aura-stack/jose"
 import { AuthInternalError } from "@/errors.js"
 export type { JWTPayload } from "@aura-stack/jose/jose"
 
@@ -51,12 +59,12 @@ export const createJoseInstance = (secret?: string) => {
 
 export const jwtVerificationOptions: JWTVerifyOptions = {
     algorithms: ["HS256"],
-    typ: "JWT"
+    typ: "JWT",
 }
 
 export const decodeJWTOptions: DecodeJWTOptions = {
     jws: jwtVerificationOptions,
     jwt: {
-        typ: "JWT"
-    }
+        typ: "JWT",
+    },
 }
