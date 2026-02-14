@@ -1,7 +1,7 @@
 import crypto from "crypto"
 import { equals } from "@/utils.js"
 import { AuthSecurityError } from "@/errors.js"
-import { isJWTPayloadWithToken } from "@/assert.js"
+import { isJWTPayloadWithToken, safeEquals } from "@/assert.js"
 import { AuthRuntimeConfig } from "@/@types/index.js"
 
 export const generateSecure = (length: number = 32) => {
@@ -64,12 +64,10 @@ export const verifyCSRF = async (jose: AuthRuntimeConfig["jose"], cookie: string
             throw new AuthSecurityError("CSRF_TOKEN_INVALID", "Header payload missing token field.")
         }
 
-        const cookieBuffer = Buffer.from(cookiePayload.token)
-        const headerBuffer = Buffer.from(headerPayload.token)
-        if (!equals(headerBuffer.length, cookieBuffer.length)) {
+        if (!equals(cookiePayload.token.length, headerPayload.token.length)) {
             throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
         }
-        if (!crypto.timingSafeEqual(cookieBuffer, headerBuffer)) {
+        if (!safeEquals(cookiePayload.token, headerPayload.token)) {
             throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
         }
         return true

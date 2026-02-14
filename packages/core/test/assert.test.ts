@@ -1,4 +1,4 @@
-import { isRelativeURL, isValidURL } from "@/assert.js"
+import { isRelativeURL, isValidURL, isTrustedOrigin } from "@/assert.js"
 import { describe, test, expect } from "vitest"
 
 describe("isRelativeURL", () => {
@@ -254,6 +254,179 @@ describe("isValidURL", () => {
     for (const { description, input, expected } of testCases) {
         test(description, () => {
             expect(isValidURL(input)).toBe(expected)
+        })
+    }
+})
+
+describe("isTrustedOrigin", () => {
+    const testCases = [
+        {
+            description: "without subdomain - empty trusted origins returns false",
+            url: "https://example.com",
+            trustedOrigins: [],
+            expected: false,
+        },
+        {
+            description: "without subdomain - invalid URL returns false",
+            url: "not-a-valid-url",
+            trustedOrigins: ["https://example.com"],
+            expected: false,
+        },
+        {
+            description: "without subdomain - exact URL match",
+            url: "https://example.com/auth",
+            trustedOrigins: ["https://example.com"],
+            expected: true,
+        },
+        {
+            description: "without subdomain - exact URL without same scheme does not match",
+            url: "http://example.com",
+            trustedOrigins: ["https://example.com"],
+            expected: false,
+        },
+        {
+            description: "without subdomain - different domain does not match exact URL",
+            url: "https://demo.com",
+            trustedOrigins: ["https://example.com"],
+            expected: false,
+        },
+        {
+            description: "without subdomain - exact URL with port match",
+            url: "https://example.com:3000",
+            trustedOrigins: ["https://example.com:3000"],
+            expected: true,
+        },
+        {
+            description: "without subdomain - exact URL with port not match",
+            url: "https://example.com:3000",
+            trustedOrigins: ["https://example.com:8080"],
+            expected: false,
+        },
+        {
+            description: "without subdomain - exact URL with port does not match same URL without port",
+            url: "https://example.com:3000",
+            trustedOrigins: ["https://example.com"],
+            expected: false,
+        },
+        {
+            description: "without subdomain - exact URL without port does not match same URL with port",
+            url: "https://example.com",
+            trustedOrigins: ["https://example.com:3000"],
+            expected: false,
+        },
+        {
+            description: "without subdomain - URL with path matches with wildcard port",
+            url: "https://example.com:3000",
+            trustedOrigins: ["https://example.com:*"],
+            expected: true,
+        },
+        {
+            description: "with subdomain - subdomain wildcard matches app subdomain",
+            url: "https://app.example.com",
+            trustedOrigins: ["https://*.example.com"],
+            expected: true,
+        },
+        {
+            description: "with subdomain - subdomain wildcard doesn't match app subdomain",
+            url: "https://example.com",
+            trustedOrigins: ["https://*.example.com"],
+            expected: false,
+        },
+        {
+            description: "with subdomain - subdomain wildcard does not match different domain",
+            url: "https://app.com",
+            trustedOrigins: ["https://*.example.com"],
+            expected: false,
+        },
+        {
+            description: "with subdomain - multiple trusted origins - matches second",
+            url: "https://admin.example.com",
+            trustedOrigins: ["https://example.com", "https://*.example.com"],
+            expected: true,
+        },
+        {
+            description: "with subdomain - URL with subdomain wildcard and without port",
+            url: "http://sub.example.com:8080",
+            trustedOrigins: ["http://*.example.com"],
+            expected: false,
+        },
+        {
+            description: "with subdomain - URL with subdomain wildcard and port",
+            url: "http://sub.example.com:8080",
+            trustedOrigins: ["http://*.example.com:8080"],
+            expected: true,
+        },
+        {
+            description: "with subdomain - URL with subdomain wildcard and different port",
+            url: "http://sub.example.com:8080",
+            trustedOrigins: ["http://*.example.com:3000"],
+            expected: false,
+        },
+        {
+            description: "with subdomain - URL with subdomain wildcard and different port does not match",
+            url: "http://sub.example.com",
+            trustedOrigins: ["http://*.example.com:8080"],
+            expected: false,
+        },
+        {
+            description: "with subdomain - URL with subdomain wildcard and port wildcard - matches any port",
+            url: "https://sub.example.com:8000",
+            trustedOrigins: ["https://*.example.com:*"],
+            expected: true,
+        },
+        {
+            description: "custom schema - Custom URL schema",
+            url: "myapp://callback.com",
+            trustedOrigins: ["myapp://callback.com"],
+            expected: false,
+        },
+        {
+            description: "custom schema - Custom URL schema with wildcard",
+            url: "myapp://callback",
+            trustedOrigins: ["myapp://*"],
+            expected: false,
+        },
+        {
+            description: "escaped dot in trusted origin",
+            url: "https://example.com",
+            trustedOrigins: ["https://example\\.com"],
+            expected: true,
+        },
+        {
+            description: "escaped dot in trusted origin does not match different domain",
+            url: "https://example.com",
+            trustedOrigins: ["https://example\\.org"],
+            expected: false,
+        },
+        {
+            description: "escaped dot in trusted origin with subdomain wildcard",
+            url: "https://api.example.com",
+            trustedOrigins: ["https://*\\.example\\.com"],
+            expected: true,
+        },
+        {
+            description: "invalid wildcard pattern",
+            url: "https://invalidexample.com",
+            trustedOrigins: ["https://*example.com"],
+            expected: false,
+        },
+        {
+            description: "invalid port wildcard",
+            url: "https://example.com:3000",
+            trustedOrigins: ["https://example.com*"],
+            expected: false,
+        },
+        {
+            description: "invalid pattern with wildcard in the middle of the domain",
+            url: "https://example.com",
+            trustedOrigins: ["https://exa*mple.com"],
+            expected: false,
+        },
+    ]
+
+    for (const { description, url, trustedOrigins, expected } of testCases) {
+        test(description, () => {
+            expect(isTrustedOrigin(url, trustedOrigins)).toBe(expected)
         })
     }
 })

@@ -27,9 +27,10 @@ export const signOutAction = createEndpoint(
             request,
             headers,
             searchParams: { redirectTo },
-            context: { jose, cookies, trustedProxyHeaders, logger },
+            context,
         } = ctx
 
+        const { jose, cookies, logger } = context
         const session = headers.getCookie(cookies.sessionToken.name)
         const csrfToken = headers.getCookie(cookies.csrfToken.name)
         const header = headers.getHeader("X-CSRF-Token")
@@ -68,12 +69,12 @@ export const signOutAction = createEndpoint(
             logger?.log("INVALID_JWT_TOKEN", { structuredData: { error_type: getErrorName(error) } })
         }
         const baseURL = getBaseURL(request)
-        const location = createRedirectTo(
+        const location = await createRedirectTo(
             new Request(baseURL, {
                 headers: headers.toHeaders(),
             }),
             redirectTo,
-            trustedProxyHeaders
+            context
         )
         logger?.log("SIGN_OUT_REDIRECT", { structuredData: { location } })
         const headersList = new HeadersBuilder(cacheControl)
