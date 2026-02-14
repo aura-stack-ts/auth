@@ -3,6 +3,7 @@ import { equals } from "@/utils.js"
 import { AuthSecurityError } from "@/errors.js"
 import { isJWTPayloadWithToken, safeEquals } from "@/assert.js"
 import { AuthRuntimeConfig } from "@/@types/index.js"
+import { jwtVerificationOptions } from "./jose.js"
 
 export const generateSecure = (length: number = 32) => {
     return crypto.randomBytes(length).toString("base64url")
@@ -42,7 +43,7 @@ export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: s
     try {
         const token = generateSecure(32)
         if (csrfCookie) {
-            await jose.verifyJWS(csrfCookie)
+            await jose.verifyJWS(csrfCookie, jwtVerificationOptions)
             return csrfCookie
         }
         return jose.signJWS({ token })
@@ -54,8 +55,8 @@ export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: s
 
 export const verifyCSRF = async (jose: AuthRuntimeConfig["jose"], cookie: string, header: string): Promise<boolean> => {
     try {
-        const cookiePayload = await jose.verifyJWS(cookie)
-        const headerPayload = await jose.verifyJWS(header)
+        const cookiePayload = await jose.verifyJWS(cookie, jwtVerificationOptions)
+        const headerPayload = await jose.verifyJWS(header, jwtVerificationOptions)
 
         if (!isJWTPayloadWithToken(cookiePayload)) {
             throw new AuthSecurityError("CSRF_TOKEN_INVALID", "Cookie payload missing token field.")
