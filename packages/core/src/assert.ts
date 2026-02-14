@@ -76,21 +76,15 @@ export const isSameOrigin = (origin: string, expected: string): boolean => {
  * Converts a trusted origin pattern to a regex for matching.
  * Supports `*` as subdomain wildcard: `https://*.example.com` matches `https://app.example.com`
  * @todo: add support to Custom URI Schemes (e.g. `myapp://*`).
- * @todo: add support to subdomain wildcards
  */
 export const patternToRegex = (pattern: string): RegExp | null => {
     try {
-        const match = pattern.match(/^(https?):\/\/(.+)$/)
+        const match = pattern.match(/^(https?):\/\/([^\/\s:]+)(?::(\d+|\*))?(\/.*)?$/)
         if (!match) return null
-        const [_, protocol, hostSegment] = match
-        const host = hostSegment.split("/")[0].split(":")[0]
-        if (host.startsWith("*.")) {
-            const domain = host.slice(2)
-            const escaped = domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-            return new RegExp(`^${protocol}:\\/\\/[^.]+\.${escaped}(?::\\d{1,5})?$`)
-        }
-        const escaped = host.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-        return new RegExp(`^${protocol}:\\/\\/${escaped}(?::\\d{1,5})?$`)
+
+        const [, protocol, host, port] = match
+        const escapedPort = port ? `:${port}` : ""
+        return new RegExp(`^${protocol}:\\/\\/${host}${escapedPort}$`.replace(/\./g, "\\.").replace(/\*/g, "[^.]+"))
     } catch {
         return null
     }
@@ -103,7 +97,7 @@ export const patternToRegex = (pattern: string): RegExp | null => {
  * @param url - The URL to validate (e.g. from Referer, Origin, redirectTo)
  * @param trustedOrigins - Array of exact URLs or patterns (e.g. `https://*.example.com`)
  */
-export const matchesTrustedOrigin = (url: string, trustedOrigins: string[]): boolean => {
+export const isTrustedOrigin = (url: string, trustedOrigins: string[]): boolean => {
     if (!isValidURL(url) || trustedOrigins.length === 0) return false
     try {
         const urlOrigin = new URL(url).origin

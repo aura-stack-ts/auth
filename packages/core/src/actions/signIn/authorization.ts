@@ -1,7 +1,7 @@
 import { AuthInternalError } from "@/errors.js"
 import { OAuthAuthorization } from "@/schemas.js"
 import { equals, extractPath, toCastCase } from "@/utils.js"
-import { isRelativeURL, isSameOrigin, isValidURL, matchesTrustedOrigin, patternToRegex } from "@/assert.js"
+import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin, patternToRegex } from "@/assert.js"
 import type { GlobalContext } from "@aura-stack/router"
 import type { AuthConfig, InternalLogger, OAuthProviderCredentials } from "@/@types/index.js"
 
@@ -108,7 +108,7 @@ export const createRedirectTo = async (request: Request, redirectTo?: string, co
             if (!isRelativeURL(url) && !isValidURL(url)) return "/"
             if (isRelativeURL(url)) return url
 
-            if (origins.length > 0 && matchesTrustedOrigin(url, origins)) {
+            if (origins.length > 0 && isTrustedOrigin(url, origins)) {
                 const urlOrigin = new URL(url).origin
                 for (const pattern of origins) {
                     const regex = patternToRegex(pattern)

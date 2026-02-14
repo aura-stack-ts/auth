@@ -133,9 +133,6 @@ describe("callbackAction", () => {
             })
         )
 
-        console.log("response: ", await response.json())
-
-        /*
         expect(fetch).toHaveBeenCalledWith(
             "https://example.com/oauth/access_token",
             expect.objectContaining({
@@ -168,7 +165,6 @@ describe("callbackAction", () => {
                 signal: expect.any(AbortSignal),
             })
         )
-        */
 
         expect(fetch).toHaveBeenCalledTimes(2)
         expect(response.status).toBe(302)

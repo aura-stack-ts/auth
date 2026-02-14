@@ -3,7 +3,7 @@ import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stac
 import { equals } from "@/utils.js"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
-import { isRelativeURL, matchesTrustedOrigin } from "@/assert.js"
+import { isRelativeURL, isTrustedOrigin } from "@/assert.js"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
 import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import { AuthSecurityError, OAuthProtocolError } from "@/errors.js"
@@ -85,7 +85,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
 
             const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier, logger)
             const origins = await getTrustedOrigins(request, trustedOrigins)
-            if (!isRelativeURL(cookieRedirectTo) && !matchesTrustedOrigin(cookieRedirectTo, origins)) {
+            if (!isRelativeURL(cookieRedirectTo) && !isTrustedOrigin(cookieRedirectTo, origins)) {
                 logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
                     structuredData: {
                         redirect_path: cookieRedirectTo,
