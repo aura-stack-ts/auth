@@ -422,6 +422,24 @@ describe("isTrustedOrigin", () => {
             trustedOrigins: ["https://exa*mple.com"],
             expected: false,
         },
+        {
+            description: "invalid subdomain depth with wildcard",
+            url: "https://sub.sub.example.com",
+            trustedOrigins: ["https://*.example.com"],
+            expected: false,
+        },
+        {
+            description: "invalid pattern with wildcard in the middle of the domain",
+            url: "https://example.com",
+            trustedOrigins: ["https://example.*.com"],
+            expected: false,
+        },
+        {
+            description: "invalid pattern with wildcard in the middle of the domain",
+            url: "https://api.example.com",
+            trustedOrigins: ["https://api.*.com"],
+            expected: false,
+        },
     ]
 
     for (const { description, url, trustedOrigins, expected } of testCases) {
