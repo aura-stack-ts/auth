@@ -30,10 +30,23 @@ export const contentSecurityPolicy: HeadersInit = {
 }
 
 /**
+ * X-Frame-Options is overridden by the frame-ancestors directive in CSP.
+ * However, it's included here for compatibility with older browsers that do not support CSP.
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options
+ * @see https://developer.mozilla.org/es/docs/Web/HTTP/Reference/Headers/Referrer-Policy
+ */
+export const secureHeaders = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+}
+
+/**
  * Combined security headers for JSON API responses.
  * Includes cache control, CSP, and other security headers.
  */
 export const secureApiHeaders: HeadersInit = {
     ...cacheControl,
     ...contentSecurityPolicy,
+    ...secureHeaders,
 }

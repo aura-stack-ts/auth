@@ -2,7 +2,7 @@ import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder, statusCode } from "@aura-stack/router"
 import { getBaseURL, getErrorName } from "@/utils.js"
 import { verifyCSRF } from "@/secure.js"
-import { cacheControl } from "@/headers.js"
+import { secureApiHeaders } from "@/headers.js"
 import { AuthSecurityError } from "@/errors.js"
 import { expiredCookieAttributes } from "@/cookie.js"
 import { createRedirectTo } from "@/actions/signIn/authorization.js"
@@ -77,7 +77,7 @@ export const signOutAction = createEndpoint(
             context
         )
         logger?.log("SIGN_OUT_REDIRECT", { structuredData: { location } })
-        const headersList = new HeadersBuilder(cacheControl)
+        const headersList = new HeadersBuilder(secureApiHeaders)
             .setHeader("Location", location)
             .setCookie(cookies.csrfToken.name, "", expiredCookieAttributes)
             .setCookie(cookies.sessionToken.name, "", expiredCookieAttributes)
