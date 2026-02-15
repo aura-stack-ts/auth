@@ -1,6 +1,6 @@
 import crypto from "crypto"
 import { describe, test, expect } from "vitest"
-import { createJWT } from "@/index.js"
+import { createJWT, MIN_SECRET_ENTROPY_BITS } from "@/index.js"
 import { createSecret } from "@/secret.js"
 import { createJWS, signJWS, verifyJWS } from "@/sign.js"
 import { deriveKey, createDeriveKey } from "@/deriveKey.js"
@@ -212,7 +212,9 @@ describe("createSecret", () => {
 
     test("createSecret with string secret with at least 32 bytes", () => {
         const secretString = "this-is-a-very-secure-and-long-secret"
-        expect(() => createSecret(secretString)).toThrow("Secret string must have an entropy of at least 4 bits per character")
+        expect(() => createSecret(secretString)).toThrow(
+            `Secret string must have an entropy of at least ${MIN_SECRET_ENTROPY_BITS} bits per character`
+        )
     })
 
     test("createSecret with string secret with less than 32 bytes", () => {
@@ -234,6 +236,20 @@ describe("createSecret", () => {
     test("createSecret with undefined secret", () => {
         const secret = undefined
         expect(() => createSecret(secret as unknown as string)).toThrow("Secret is required")
+    })
+
+    test("createSecret with repeated words", () => {
+        const secret = "aaaabbbbccccddddeeeeffffgggghhhh"
+        expect(() => createSecret(secret)).toThrow(
+            `Secret string must have an entropy of at least ${MIN_SECRET_ENTROPY_BITS} bits per character`
+        )
+    })
+
+    test("createSecret with high entropy string", () => {
+        const secret = "mysecretmysecretmysecretmysecret"
+        expect(() => createSecret(secret)).toThrow(
+            `Secret string must have an entropy of at least ${MIN_SECRET_ENTROPY_BITS} bits per character`
+        )
     })
 })
 

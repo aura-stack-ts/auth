@@ -1,7 +1,7 @@
 /**
  * @module @aura-stack/jose
  */
-import { JWTPayload } from "jose"
+import { JWTDecryptOptions, JWTPayload, JWTVerifyOptions } from "jose"
 import { createJWS } from "@/sign.js"
 import { getSecrets } from "@/secret.js"
 import { createJWE } from "@/encrypt.js"
@@ -16,6 +16,7 @@ export * from "@/secret.js"
 
 export type SecretInput = KeyObject | Uint8Array | string
 export type DerivedKeyInput = { jws: SecretInput; jwe: SecretInput }
+export type DecodeJWTOptions = { jws: JWTVerifyOptions; jwt: JWTDecryptOptions }
 
 /**
  * Encode a JWT signed and encrypted token. The token first signed using JWS
@@ -58,13 +59,13 @@ export const encodeJWT = async (token: JWTPayload, secret: SecretInput | Derived
  * @param secret
  * @returns
  */
-export const decodeJWT = async (token: string, secret: SecretInput | DerivedKeyInput) => {
+export const decodeJWT = async (token: string, secret: SecretInput | DerivedKeyInput, options?: DecodeJWTOptions) => {
     try {
         const { jweSecret, jwsSecret } = getSecrets(secret)
         const { verifyJWS } = createJWS(jwsSecret)
         const { decryptJWE } = createJWE(jweSecret)
-        const decrypted = await decryptJWE(token)
-        return await verifyJWS(decrypted)
+        const decrypted = await decryptJWE(token, options?.jwt)
+        return await verifyJWS(decrypted, options?.jws)
     } catch (error) {
         if (isAuraJoseError(error)) {
             throw error

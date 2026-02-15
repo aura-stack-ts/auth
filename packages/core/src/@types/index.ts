@@ -1,9 +1,8 @@
 import { z } from "zod"
 import { createLogEntry } from "@/logger.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.js"
+import { createJoseInstance, type JWTPayload } from "@/jose.js"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { JWTVerifyOptions, EncryptOptions, JWTDecryptOptions } from "@aura-stack/jose"
-import type { JWTPayload } from "@/jose.js"
 import type { BuiltInOAuthProvider } from "@/oauth/index.js"
 import type { LiteralUnion, Prettify } from "@/@types/utility.js"
 
@@ -217,14 +216,7 @@ export interface AuthConfig {
  */
 export type TrustedOrigin = string
 
-export interface JoseInstance {
-    decodeJWT: (token: string) => Promise<JWTPayload>
-    encodeJWT: (payload: JWTPayload) => Promise<string>
-    signJWS: (payload: JWTPayload) => Promise<string>
-    verifyJWS: (payload: string, options?: JWTVerifyOptions) => Promise<JWTPayload>
-    encryptJWE: (payload: string, options?: EncryptOptions) => Promise<string>
-    decryptJWE: (payload: string, options?: JWTDecryptOptions) => Promise<string>
-}
+export type JoseInstance = ReturnType<typeof createJoseInstance>
 
 export type OAuthProviderRecord = Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
 
