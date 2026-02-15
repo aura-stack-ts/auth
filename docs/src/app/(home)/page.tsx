@@ -13,7 +13,7 @@ export default function HomePage() {
     return (
         <>
             <Header />
-            <main className="min-h-screen text-primary antialiased relative overflow-hidden">
+            <main className="min-h-screen text-primary antialiased relative overflow-hidden bg-background">
                 <Hero />
                 <PoweredBy />
                 <div className="py-10 border-t border-border" />
