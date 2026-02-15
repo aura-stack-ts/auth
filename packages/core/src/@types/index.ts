@@ -289,6 +289,7 @@ export type AuthInternalErrorCode =
     | "INVALID_ENVIRONMENT_CONFIGURATION"
     | "INVALID_URL"
     | "INVALID_SALT_SECRET_VALUE"
+    | "UNTRUSTED_ORIGIN"
 
 export type AuthSecurityErrorCode =
     | "INVALID_STATE"

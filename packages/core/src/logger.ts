@@ -253,6 +253,12 @@ export const logMessages = {
         msgId: "COOKIE_HOST_STRATEGY_INSECURE",
         message: "__Host- cookies require a secure HTTPS context. Falling back to standard cookie settings.",
     },
+    UNTRUSTED_ORIGIN: {
+        facility: 10,
+        severity: "error",
+        msgId: "UNTRUSTED_ORIGIN",
+        message: "The constructed origin URL is not trusted.",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {
