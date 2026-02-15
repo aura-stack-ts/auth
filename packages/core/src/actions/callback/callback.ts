@@ -89,7 +89,9 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
 
             if (!isRelativeURL(cookieRedirectTo)) {
                 let isValid =
-                    origin.length > 0 ? isTrustedOrigin(cookieRedirectTo, origins) : isSameOrigin(cookieRedirectTo, requestOrigin)
+                    origins.length > 0
+                        ? isTrustedOrigin(cookieRedirectTo, origins)
+                        : isSameOrigin(cookieRedirectTo, requestOrigin)
                 if (!isValid) {
                     logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
                         structuredData: {

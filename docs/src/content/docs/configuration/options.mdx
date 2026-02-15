@@ -205,7 +205,43 @@ export const auth = createAuth({
 
 #### Wildcard Patterns
 
-The `*` wildcard is supported for flexible matching of subdomains and ports. The wildcard can only be used at the start of a subdomain (e.g., `*.example.com`) or as an entire port (e.g., `:3000`).
+The `*` wildcard is supported for flexible matching of subdomains and ports. The wildcard can only be used at the start of a subdomain or as an entire port.
+
+<Callout type="warning">
+  Use wildcards with caution. Overly permissive patterns can introduce security risks. Always prefer specific origins when
+  possible. It's recommended to be as restrictive as possible with allowed origins to minimize attacks and risks. Use
+  `trustedOrigins` carefully and only allow known origins.
+</Callout>
+
+##### Subdomain Wildcards [!toc]
+
+Trust one level of subdomains under a specific domain.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: ["https://*.example.com"],
+})
+```
+
+It matches any origin that starts with `https://` and ends with `.example.com`, allowing for any single subdomain level (e.g., `https://app.example.com`, `https://www.example.com`), but not the root domain itself (`https://example.com`) or multiple subdomain levels (`https://sub.app.example.com`).
+
+##### Port Wildcards [!toc]
+
+Trust any port on a specific domain.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: ["https://example.com:*"],
+})
+```
+
+It matches any port on `https://example.com` (e.g., `https://example.com:3000`, `https://example.com:3001`, `https://example.com:8080`), but not the domain without a port (`https://example.com`) or with a different protocol (`http://example.com:3000`).
 
 | Pattern                      | Matches                                                        | Does Not Match                                                               |
 | ---------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------- |
