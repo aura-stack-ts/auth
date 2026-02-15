@@ -88,7 +88,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             const requestOrigin = await getOriginURL(request, context)
 
             if (!isRelativeURL(cookieRedirectTo)) {
-                let isValid =
+                const isValid =
                     origins.length > 0
                         ? isTrustedOrigin(cookieRedirectTo, origins)
                         : isSameOrigin(cookieRedirectTo, requestOrigin)
