@@ -68,6 +68,7 @@ export const expiredCookieAttributes: SerializeOptions = {
     ...defaultCookieOptions,
     expires: new Date(0),
     maxAge: 0,
+    secure: true,
 }
 
 /**

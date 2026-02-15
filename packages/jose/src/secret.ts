@@ -35,7 +35,7 @@ export const createSecret = (secret: SecretInput, length: number = 32) => {
             throw new InvalidSecretError(`Secret string must be at least ${length} bytes long`)
         }
         const entropy = getEntropy(secret)
-        if (entropy <= MIN_SECRET_ENTROPY_BITS) {
+        if (entropy < MIN_SECRET_ENTROPY_BITS) {
             throw new InvalidSecretError(
                 `Secret string must have an entropy of at least ${MIN_SECRET_ENTROPY_BITS} bits per character`
             )
