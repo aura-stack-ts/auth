@@ -20,11 +20,10 @@ export const cacheControl: HeadersInit = {
 export const contentSecurityPolicy: HeadersInit = {
     "Content-Security-Policy": [
         "default-src 'none'",
-        "scrypt-src 'self'",
+        "script-src 'self'",
         "frame-src 'none'",
         "object-src 'none'",
         "frame-ancestors 'none'",
-        "wasm-unsafe-eval 'none'",
         "base-uri 'none'",
     ].join("; "),
 }
@@ -39,6 +38,7 @@ export const contentSecurityPolicy: HeadersInit = {
 export const secureHeaders = {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
 }
 
 /**
