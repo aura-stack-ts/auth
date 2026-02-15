@@ -468,7 +468,6 @@ describe("createRedirectTo", () => {
                     headers: { Referer: "https://example.dev/auth" },
                 }),
             },
-
             {
                 description: "with redirectTo parameter containing full URL with different origin",
                 request: new Request(signInURL),
@@ -493,44 +492,54 @@ describe("createRedirectTo", () => {
             const request = new Request("https://example.com/auth/signIn/github", {
                 headers: { Referer: "https://example.com/dashboard" },
             })
-            const result = await createRedirectTo(request, undefined, {
+            const redirectTo = await createRedirectTo(request, undefined, {
                 trustedOrigins: ["https://example.com", "https://admin.example.com"],
             } as GlobalContext)
-            expect(result).toBe("/dashboard")
+            expect(redirectTo).toBe("/dashboard")
         })
 
         test("accepts referer matching wildcard pattern", async () => {
             const request = new Request("https://app.example.com/auth/signIn/github", {
                 headers: { Referer: "https://app.example.com/dashboard" },
             })
-            const result = await createRedirectTo(request, undefined, {
+            const redirectTo = await createRedirectTo(request, undefined, {
                 trustedOrigins: ["https://*.example.com"],
             } as GlobalContext)
-            expect(result).toBe("/dashboard")
+            expect(redirectTo).toBe("/dashboard")
         })
 
         test("rejects referer not in trusted origins", async () => {
             const request = new Request("https://example.com/auth/signIn/github", {
                 headers: { Referer: "https://malicious.com/phishing" },
             })
-            const result = await createRedirectTo(request, undefined, {
+            const redirectTo = await createRedirectTo(request, undefined, {
                 trustedOrigins: ["https://example.com"],
             } as GlobalContext)
-            expect(result).toBe("/")
+            expect(redirectTo).toBe("/")
         })
 
         test("accepts redirectTo from trusted origin", async () => {
             const request = new Request("https://example.com/auth/signIn/github")
-            const result = await createRedirectTo(request, "https://example.com/dashboard", {} as GlobalContext)
-            expect(result).toBe("/dashboard")
+            const redirectTo = await createRedirectTo(request, "https://example.com/dashboard", {} as GlobalContext)
+            expect(redirectTo).toBe("/dashboard")
         })
 
         test("with trusted origins that are not same origin", async () => {
             const request = new Request("https://example.com/auth/signIn/github")
-            const result = await createRedirectTo(request, "https://api.example.com/data", {
+            const redirectTo = await createRedirectTo(request, "https://api.example.com/redirect", {
                 trustedOrigins: ["https://api.example.com"],
+                trustedProxyHeaders: false,
             } as GlobalContext)
-            expect(result).toBe("https://api.example.com/data")
+            expect(redirectTo).toBe("https://api.example.com/redirect")
+        })
+
+        test("misconfigurated", async () => {
+            const request = new Request("https://example.com/signIn/github")
+            const redirectTo = await createRedirectTo(request, "https://api.example.com/redirect", {
+                trustedOrigins: ["https://example.com"],
+                trustedProxyHeaders: false,
+            } as GlobalContext)
+            expect(redirectTo).toBe("/")
         })
     })
 })
@@ -541,18 +550,21 @@ describe("getOriginURL", () => {
             description: "with standard URL",
             request: new Request("https://example.com/auth/signIn/github"),
             trustedProxyHeaders: false,
+            trustedOrigins: [],
             expected: "https://example.com",
         },
         {
             description: "with localhost URL",
             request: new Request("http://localhost:3000/auth/signIn/github"),
             trustedProxyHeaders: false,
+            trustedOrigins: [],
             expected: "http://localhost:3000",
         },
         {
             description: "with IP address URL",
             request: new Request("http://192.168.0.1/auth/signIn/github"),
             trustedProxyHeaders: false,
+            trustedOrigins: [],
             expected: "http://192.168.0.1",
         },
         {
@@ -564,6 +576,7 @@ describe("getOriginURL", () => {
                 },
             }),
             trustedProxyHeaders: false,
+            trustedOrigins: [],
             expected: "http://localhost:3000",
         },
         {
@@ -575,6 +588,7 @@ describe("getOriginURL", () => {
                 },
             }),
             trustedProxyHeaders: true,
+            trustedOrigins: ["https://example.com"],
             expected: "https://example.com",
         },
         {
@@ -586,14 +600,61 @@ describe("getOriginURL", () => {
                 },
             }),
             trustedProxyHeaders: true,
+            trustedOrigins: ["http://192.168.0.1"],
             expected: "http://192.168.0.1",
+        },
+        {
+            description: "priority of Forwarded header over X-Forwarded headers",
+            request: new Request("http://localhost:3000/auth/signIn/github", {
+                headers: {
+                    Forwarded: "proto=https;host=app.com",
+                    "X-Forwarded-Proto": "http",
+                    "X-Forwarded-Host": "malicious.com",
+                },
+            }),
+            trustedProxyHeaders: true,
+            trustedOrigins: ["https://app.com"],
+            expected: "https://app.com",
         },
     ]
 
-    for (const { description, request, trustedProxyHeaders, expected } of testCases) {
-        test(description, () => {
-            const originURL = getOriginURL(request, trustedProxyHeaders)
+    for (const { description, request, trustedProxyHeaders, trustedOrigins, expected } of testCases) {
+        test(description, async () => {
+            const originURL = await getOriginURL(request, { trustedProxyHeaders, trustedOrigins } as GlobalContext)
             expect(originURL).toBe(expected)
         })
     }
+
+    describe("Invalid origins", () => {
+        const testCases = [
+            {
+                description: "origin not set in trustedOrigins",
+                request: new Request("https://example.com/signIn/github", {
+                    headers: {
+                        "X-Forwarded-Proto": "http",
+                        "X-Forwarded-Host": "localhost:3000",
+                    },
+                }),
+                trustedOrigins: ["https://example.com"],
+                trustedProxyHeaders: true,
+            },
+            {
+                description: "trustedOrigins empty",
+                request: new Request("https://example.com/signIn/github", {
+                    headers: {
+                        "X-Forwarded-Proto": "http",
+                        "X-Forwarded-Host": "localhost:3000",
+                    },
+                }),
+                trustedOrigins: [],
+                trustedProxyHeaders: true,
+            },
+        ]
+
+        for (const { description, request, trustedOrigins, trustedProxyHeaders } of testCases) {
+            test(description, async () => {
+                await expect(getOriginURL(request, { trustedOrigins, trustedProxyHeaders } as GlobalContext)).rejects.toThrow()
+            })
+        }
+    })
 })

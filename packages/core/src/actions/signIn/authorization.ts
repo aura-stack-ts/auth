@@ -44,21 +44,32 @@ export const createAuthorizationURL = (
     return `${authorizeURL}?${searchParams}`
 }
 
-export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean, logger?: InternalLogger) => {
-    let origin = new URL(request.url).origin
+/**
+ * Resolves trusted origins from config (array or function).
+ */
+export const getTrustedOrigins = async (request: Request, trustedOrigins: AuthConfig["trustedOrigins"]): Promise<string[]> => {
+    if (!trustedOrigins) return []
+    const raw = typeof trustedOrigins === "function" ? await trustedOrigins(request) : trustedOrigins
+    return Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : []
+}
+
+export const getOriginURL = async (request: Request, context?: GlobalContext) => {
     const headers = request.headers
-    if (trustedProxyHeaders) {
-        const protocol = headers.get("X-Forwarded-Proto") ?? headers.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? "http"
+    let origin = new URL(request.url).origin
+    const trustedOrigins = await getTrustedOrigins(request, context?.trustedOrigins)
+    trustedOrigins.push(origin)
+    if (context?.trustedProxyHeaders) {
+        const protocol = headers.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? headers.get("X-Forwarded-Proto") ?? "http"
         const host =
-            headers.get("X-Forwarded-Host") ??
             headers.get("Host") ??
             headers.get("Forwarded")?.match(/host=([^;]+)/i)?.[1] ??
+            headers.get("X-Forwarded-Host") ??
             null
         origin = `${protocol}://${host}`
     }
-    if (!isValidURL(origin)) {
-        logger?.log("INVALID_URL", { structuredData: { origin: origin } })
-        throw new AuthInternalError("INVALID_URL", "The constructed origin URL is invalid.")
+    if (!isTrustedOrigin(origin, trustedOrigins)) {
+        context?.logger?.log("UNTRUSTED_ORIGIN", { structuredData: { origin: origin } })
+        throw new AuthInternalError("UNTRUSTED_ORIGIN", "The constructed origin URL is not trusted.")
     }
     return origin
 }
@@ -72,17 +83,8 @@ export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean, lo
  * @returns The redirect URI for the OAuth callback.
  */
 export const createRedirectURI = async (request: Request, oauth: string, context: GlobalContext) => {
-    const origin = getOriginURL(request, context.trustedProxyHeaders, context.logger)
+    const origin = await getOriginURL(request, context)
     return `${origin}${context.basePath}/callback/${oauth}`
-}
-
-/**
- * Resolves trusted origins from config (array or function).
- */
-export const getTrustedOrigins = async (request: Request, trustedOrigins: AuthConfig["trustedOrigins"]): Promise<string[]> => {
-    if (!trustedOrigins) return []
-    const raw = typeof trustedOrigins === "function" ? await trustedOrigins(request) : trustedOrigins
-    return Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : []
 }
 
 /**
@@ -101,22 +103,26 @@ export const getTrustedOrigins = async (request: Request, trustedOrigins: AuthCo
 export const createRedirectTo = async (request: Request, redirectTo?: string, context?: GlobalContext) => {
     try {
         const headers = request.headers
+        const requestOrigin = await getOriginURL(request, context)
         const origins = await getTrustedOrigins(request, context?.trustedOrigins)
-        const requestOrigin = getOriginURL(request, context?.trustedProxyHeaders, context?.logger)
 
         const validateURL = (url: string): string => {
             if (!isRelativeURL(url) && !isValidURL(url)) return "/"
             if (isRelativeURL(url)) return url
 
-            if (origins.length > 0 && isTrustedOrigin(url, origins)) {
-                const urlOrigin = new URL(url).origin
-                for (const pattern of origins) {
-                    const regex = patternToRegex(pattern)
-                    if (regex?.test(urlOrigin)) {
-                        return isSameOrigin(url, requestOrigin) ? extractPath(url) : url
+            if (origins.length > 0) {
+                if (isTrustedOrigin(url, origins)) {
+                    const urlOrigin = new URL(url).origin
+                    for (const pattern of origins) {
+                        const regex = patternToRegex(pattern)
+                        if (regex?.test(urlOrigin)) {
+                            return isSameOrigin(url, request.url) ? extractPath(url) : url
+                        }
+                        if (isValidURL(pattern) && equals(new URL(pattern).origin, urlOrigin)) return url
                     }
-                    if (isValidURL(pattern) && equals(new URL(pattern).origin, urlOrigin)) return url
                 }
+                context?.logger?.log("OPEN_REDIRECT_ATTACK")
+                return "/"
             }
             if (isSameOrigin(url, requestOrigin)) {
                 return extractPath(url)
