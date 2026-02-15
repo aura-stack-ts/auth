@@ -6,4 +6,5 @@ export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[
 export const auth = createAuth({
     oauth,
     trustedProxyHeaders: true,
+    trustedOrigins: ["http://localhost:3000", "https://*.vercel.app"]
 })
