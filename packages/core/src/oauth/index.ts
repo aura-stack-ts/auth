@@ -4,6 +4,7 @@
  * This modules re-exports OAuth providers available in Aura Auth to be used in the Auth instance configuration.
  */
 import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.js"
+import { env } from "@/env.js"
 import { github } from "./github.js"
 import { bitbucket } from "./bitbucket.js"
 import { figma } from "./figma.js"
@@ -53,7 +54,6 @@ export const builtInOAuthProviders = {
  * @returns The credentials for the specified OAuth provider
  */
 const defineOAuthEnvironment = (oauth: string) => {
-    const env = process.env
     const clientIdSuffix = `${oauth.toUpperCase()}_CLIENT_ID`
     const clientSecretSuffix = `${oauth.toUpperCase()}_CLIENT_SECRET`
     const loadEnvs = OAuthEnvSchema.safeParse({
