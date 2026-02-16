@@ -63,11 +63,6 @@ export interface OAuthProviderCredentials<Profile extends object = Record<string
 }
 
 /**
- * A partial OAuth provider configuration used for factory overrides.
- */
-export type PartialOAuthProvider<Profile extends object = Record<string, any>> = Partial<OAuthProviderCredentials<Profile>>
-
-/**
  * Complete OAuth provider type combining configuration and credentials.
  */
 export type OAuthProvider<Profile extends object = Record<string, any>> = OAuthProviderCredentials<Profile>

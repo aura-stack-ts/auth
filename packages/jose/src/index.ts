@@ -18,7 +18,6 @@ export type SecretInput = KeyObject | Uint8Array | string
 export type DerivedKeyInput = { jws: SecretInput; jwe: SecretInput }
 export type DecodedJWTPayloadOptions = { jws: JWTVerifyOptions; jwt: JWTDecryptOptions }
 
-
 /**
  * Encode a JWT signed and encrypted token. The token first signed using JWS
  * and then encrypted using JWE to ensure both integrity and confidentiality.

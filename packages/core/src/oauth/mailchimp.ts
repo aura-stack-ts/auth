@@ -42,7 +42,7 @@ export const mailchimp = (
         responseType: "code",
         profile(profile) {
             return {
-                sub: profile.user_id.toString(),
+                sub: profile.user_id,
                 name: profile.accountname,
                 email: profile.login.email,
                 image: profile.login.avatar,

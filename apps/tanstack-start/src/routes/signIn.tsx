@@ -11,7 +11,9 @@ export const Route = createFileRoute("/signIn")({
 })
 
 function RouteComponent() {
-    const identities = Object.keys(builtInOAuthProviders).map(key => builtInOAuthProviders[key as keyof typeof builtInOAuthProviders]())
+    const identities = Object.keys(builtInOAuthProviders).map((key) =>
+        builtInOAuthProviders[key as keyof typeof builtInOAuthProviders]()
+    )
 
     return (
         <section className="w-full min-h-screen pt-36 pb-6 flex flex-col items-center justify-center relative bg-black base:pt-22">

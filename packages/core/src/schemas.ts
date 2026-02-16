@@ -5,7 +5,7 @@ export const OAuthProviderCredentialsSchema = object({
     name: string(),
     authorizeURL: string().url(),
     accessToken: string().url(),
-    scope: string().optional(),
+    scope: string(),
     userInfo: string().url(),
     responseType: options(["code", "token", "id_token"]),
     clientId: string(),
