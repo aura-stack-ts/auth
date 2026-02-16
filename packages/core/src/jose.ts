@@ -1,4 +1,4 @@
-import "dotenv/config"
+import { env } from "@/env.js"
 import {
     createJWT,
     createJWS,
@@ -20,7 +20,6 @@ export type { JWTPayload } from "@aura-stack/jose/jose"
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
  */
 export const createJoseInstance = (secret?: string) => {
-    const env = process.env
     secret ??= env.AURA_AUTH_SECRET! ?? env.AUTH_SECRET!
     if (!secret) {
         throw new AuthInternalError(

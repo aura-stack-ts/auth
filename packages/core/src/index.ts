@@ -1,4 +1,3 @@
-import "dotenv/config"
 import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { createJoseInstance } from "@/jose.js"
 import { createCookieStore } from "@/cookie.js"
