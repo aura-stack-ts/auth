@@ -1,4 +1,4 @@
-import { LiteralUnion, OAuthProviderConfig } from "@/@types/index.js"
+import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * @see [Pinterest - Get User Account](https://developers.pinterest.com/docs/api/v5/user_account-get)
@@ -23,20 +23,24 @@ export interface PinterestProfile {
  * @see [Pinterest - My Apps](https://developers.pinterest.com/apps/)
  * @see [Pinterest - Get User Account](https://developers.pinterest.com/docs/api/v5/user_account-get)
  */
-export const pinterest: OAuthProviderConfig<PinterestProfile> = {
-    id: "pinterest",
-    name: "Pinterest",
-    authorizeURL: "https://api.pinterest.com/oauth/",
-    accessToken: "https://api.pinterest.com/v5/oauth/token",
-    userInfo: "https://api.pinterest.com/v5/user_account",
-    scope: "user_accounts:read",
-    responseType: "code",
-    profile(profile) {
-        return {
-            sub: profile.id,
-            name: profile.username,
-            email: null,
-            image: profile.profile_image,
-        }
-    },
+export const pinterest = (
+    options?: Partial<OAuthProviderCredentials<PinterestProfile>>
+): OAuthProviderCredentials<PinterestProfile> => {
+    return {
+        id: "pinterest",
+        name: "Pinterest",
+        authorizeURL: "https://www.pinterest.com/oauth",
+        accessToken: "https://api.pinterest.com/v5/oauth/token",
+        userInfo: "https://api.pinterest.com/v5/user_account",
+        scope: "user_accounts:read",
+        responseType: "code",
+        profile(profile) {
+            return {
+                sub: profile.username,
+                name: profile.username,
+                image: profile.profile_image,
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<PinterestProfile>
 }

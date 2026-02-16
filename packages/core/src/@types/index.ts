@@ -42,7 +42,7 @@ export interface Session {
  * Configuration for an OAuth provider without credentials.
  * Use this type when defining provider metadata and endpoints.
  */
-export interface OAuthProviderConfig<Profile extends object = {}> {
+export interface OAuthProviderConfig<Profile extends object = Record<string, any>> {
     id: string
     name: string
     authorizeURL: string
@@ -57,15 +57,20 @@ export interface OAuthProviderConfig<Profile extends object = {}> {
  * OAuth provider configuration with client credentials.
  * Extends OAuthProviderConfig with clientId and clientSecret.
  */
-export interface OAuthProviderCredentials<Profile extends object = {}> extends OAuthProviderConfig<Profile> {
-    clientId: string
-    clientSecret: string
+export interface OAuthProviderCredentials<Profile extends object = Record<string, any>> extends OAuthProviderConfig<Profile> {
+    clientId?: string
+    clientSecret?: string
 }
+
+/**
+ * A partial OAuth provider configuration used for factory overrides.
+ */
+export type PartialOAuthProvider<Profile extends object = Record<string, any>> = Partial<OAuthProviderCredentials<Profile>>
 
 /**
  * Complete OAuth provider type combining configuration and credentials.
  */
-export type OAuthProvider<Profile extends object = {}> = OAuthProviderCredentials<Profile>
+export type OAuthProvider<Profile extends object = Record<string, any>> = OAuthProviderCredentials<Profile>
 
 /**
  * Cookie type with __Secure- prefix, must be Secure.
@@ -128,6 +133,9 @@ export interface AuthConfig {
      * Built-in OAuth providers:
      * oauth: ["github", "google"]
      *
+     * Custom credentials via factory:
+     * oauth: [github({ clientId: "...", clientSecret: "..." })]
+     *
      * Custom OAuth providers:
      * oauth: [
      *   {
@@ -138,12 +146,12 @@ export interface AuthConfig {
      *     scope: "profile email",
      *     responseType: "code",
      *     userInfo: "https://example.com/oauth/userinfo",
-     *     clientId: process.env.AURA_AUTH_OAUTH_PROVIDER_CLIENT_ID!,
-     *     clientSecret: process.env.AURA_AUTH_OAUTH_PROVIDER_CLIENT_SECRET!,
+     *     clientId: process.env.AURA_AUTH_PROVIDER_CLIENT_ID,
+     *     clientSecret: process.env.AURA_AUTH_PROVIDER_CLIENT_SECRET,
      *   }
      * ]
      */
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -290,6 +298,8 @@ export type AuthInternalErrorCode =
     | "INVALID_URL"
     | "INVALID_SALT_SECRET_VALUE"
     | "UNTRUSTED_ORIGIN"
+    | "INVALID_OAUTH_PROVIDER_CONFIGURATION"
+    | "DUPLICATED_OAUTH_PROVIDER_ID"
 
 export type AuthSecurityErrorCode =
     | "INVALID_STATE"

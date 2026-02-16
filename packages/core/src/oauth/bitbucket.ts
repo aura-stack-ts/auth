@@ -1,4 +1,4 @@
-import type { LiteralUnion, OAuthProviderConfig } from "@/@types/index.js"
+import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * @see [Get current user](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get)
@@ -29,19 +29,24 @@ export interface BitbucketProfile {
  * @see [Bitbucket - Cloud REST API](https://developer.atlassian.com/cloud/bitbucket/rest/intro/)
  * @see [Bitbucket - User Endpoint](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-users-endpoint)
  */
-export const bitbucket: OAuthProviderConfig<BitbucketProfile> = {
-    id: "bitbucket",
-    name: "Bitbucket",
-    authorizeURL: "https://bitbucket.org/site/oauth2/authorize",
-    accessToken: "https://bitbucket.org/site/oauth2/access_token",
-    userInfo: "https://api.bitbucket.org/2.0/user",
-    scope: "account email",
-    responseType: "code",
-    profile(profile) {
-        return {
-            sub: profile.uuid ?? profile.account_id,
-            name: profile.display_name ?? profile.nickname,
-            image: profile.links.avatar.href,
-        }
-    },
+export const bitbucket = (
+    options?: Partial<OAuthProviderCredentials<BitbucketProfile>>
+): OAuthProviderCredentials<BitbucketProfile> => {
+    return {
+        id: "bitbucket",
+        name: "Bitbucket",
+        authorizeURL: "https://bitbucket.org/site/oauth2/authorize",
+        accessToken: "https://bitbucket.org/site/oauth2/access_token",
+        userInfo: "https://api.bitbucket.org/2.0/user",
+        scope: "account email",
+        responseType: "code",
+        profile(profile) {
+            return {
+                sub: profile.uuid ?? profile.account_id,
+                name: profile.display_name ?? profile.nickname,
+                image: profile.links.avatar.href,
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<BitbucketProfile>
 }

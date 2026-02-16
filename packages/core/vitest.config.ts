@@ -18,6 +18,12 @@ export default defineConfig({
             AURA_AUTH_GITHUB_CLIENT_ID: "github-client-id",
             AURA_AUTH_GITHUB_CLIENT_SECRET: "github-client-secret",
             AURA_AUTH_SALT: SALT_KEY,
+            AURA_AUTH_OAUTH_PROVIDER_CLIENT_ID: "oauth_client_id",
+            AURA_AUTH_OAUTH_PROVIDER_CLIENT_SECRET: "oauth_client_secret",
+            "AURA_AUTH_OAUTH-PROVIDER_CLIENT_ID": "oauth_client_id",
+            "AURA_AUTH_OAUTH-PROVIDER_CLIENT_SECRET": "oauth_client_secret",
+            "AURA_AUTH_OAUTH-PROFILE_CLIENT_ID": "oauth_profile_client_id",
+            "AURA_AUTH_OAUTH-PROFILE_CLIENT_SECRET": "oauth_profile_client_secret",
         },
     },
     resolve: {

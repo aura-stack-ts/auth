@@ -5,8 +5,8 @@ import {
     createJWE,
     createDeriveKey,
     createSecret,
-    JWTVerifyOptions,
-    DecodeJWTOptions,
+    type JWTVerifyOptions,
+    type DecodeJWTOptions,
 } from "@aura-stack/jose"
 import { AuthInternalError } from "@/errors.js"
 export type { JWTPayload } from "@aura-stack/jose/jose"

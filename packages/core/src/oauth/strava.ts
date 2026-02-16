@@ -1,4 +1,4 @@
-import type { OAuthProviderConfig } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * @see [Strava - SummaryClub](https://developers.strava.com/docs/reference/#api-models-SummaryClub)
@@ -73,20 +73,22 @@ export interface StravaProfile {
  * @see [Strava - API Application](https://www.strava.com/settings/api)
  * @see [Strava - API Reference](https://developers.strava.com/docs/reference/)
  */
-export const strava: OAuthProviderConfig<StravaProfile> = {
-    id: "strava",
-    name: "Strava",
-    authorizeURL: "https://www.strava.com/oauth/authorize",
-    accessToken: "https://www.strava.com/oauth/token",
-    userInfo: "https://www.strava.com/api/v3/athlete",
-    scope: "read",
-    responseType: "code",
-    profile(profile) {
-        return {
-            sub: profile.id.toString(),
-            name: `${profile.firstname} ${profile.lastname}`,
-            image: profile.profile,
-            email: "",
-        }
-    },
+export const strava = (options?: Partial<OAuthProviderCredentials<StravaProfile>>): OAuthProviderCredentials<StravaProfile> => {
+    return {
+        id: "strava",
+        name: "Strava",
+        authorizeURL: "https://www.strava.com/oauth/authorize",
+        accessToken: "https://www.strava.com/oauth/token",
+        userInfo: "https://www.strava.com/api/v3/athlete",
+        scope: "read",
+        responseType: "code",
+        profile(profile) {
+            return {
+                sub: profile.id.toString(),
+                name: `${profile.firstname} ${profile.lastname}`,
+                image: profile.profile,
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<StravaProfile>
 }

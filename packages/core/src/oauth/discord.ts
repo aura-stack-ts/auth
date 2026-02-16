@@ -1,4 +1,4 @@
-import type { OAuthProviderConfig } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * @see [Discord - Nameplate Object](https://discord.com/developers/docs/resources/user#nameplate-nameplate-structure)
@@ -59,28 +59,33 @@ export interface DiscordProfile {
  * @see [Discord - Image Formatting](https://discord.com/developers/docs/reference#image-formatting)
  * @see [Discord - Display Names](https://discord.com/developers/docs/change-log#display-names)
  */
-export const discord: OAuthProviderConfig<DiscordProfile> = {
-    id: "discord",
-    name: "Discord",
-    authorizeURL: "https://discord.com/oauth2/authorize",
-    accessToken: "https://discord.com/api/oauth2/token",
-    userInfo: "https://discord.com/api/users/@me",
-    scope: "identify email",
-    responseType: "code",
-    profile(profile) {
-        let image = ""
-        if (profile.avatar === null) {
-            const index = profile.discriminator === "0" ? (BigInt(profile.id) >> 22n) % 6n : Number(profile.discriminator) % 5
-            image = `https://cdn.discordapp.com/embed/avatars/${index}.png`
-        } else {
-            const format = profile.avatar.startsWith("a_") ? "gif" : "png"
-            image = `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.${format}`
-        }
-        return {
-            sub: profile.id,
-            name: profile.global_name ?? profile.username,
-            email: profile.email ?? "",
-            image,
-        }
-    },
+export const discord = (
+    options?: Partial<OAuthProviderCredentials<DiscordProfile>>
+): OAuthProviderCredentials<DiscordProfile> => {
+    return {
+        id: "discord",
+        name: "Discord",
+        authorizeURL: "https://discord.com/oauth2/authorize",
+        accessToken: "https://discord.com/api/oauth2/token",
+        userInfo: "https://discord.com/api/users/@me",
+        scope: "identify email",
+        responseType: "code",
+        profile(profile) {
+            let image = ""
+            if (profile.avatar === null) {
+                const index = profile.discriminator === "0" ? (BigInt(profile.id) >> 22n) % 6n : Number(profile.discriminator) % 5
+                image = `https://cdn.discordapp.com/embed/avatars/${index}.png`
+            } else {
+                const format = profile.avatar.startsWith("a_") ? "gif" : "png"
+                image = `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.${format}`
+            }
+            return {
+                sub: profile.id,
+                name: profile.global_name ?? profile.username,
+                email: profile.email ?? "",
+                image,
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<DiscordProfile>
 }

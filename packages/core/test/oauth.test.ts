@@ -1,59 +1,54 @@
 import { describe, test, expect } from "vitest"
-import { createBuiltInOAuthProviders } from "@/oauth/index.js"
-import { OAuthProviderConfigSchema } from "@/schemas.js"
-import { OAuthProviderCredentials } from "@/@types/index.js"
-import { oauthCustomService } from "./presets.js"
+import { createBuiltInOAuthProviders, builtInOAuthProviders, GitHubProfile } from "@/oauth/index.js"
+import { OAuthProviderCredentials, User } from "@/@types/index.js"
 
 describe("createBuiltInOAuthProviders", () => {
     test("create oauth config for github", () => {
         const oauth = createBuiltInOAuthProviders(["github"])
-        const githubConfig = Object.values(oauth)[0]
-        const isValid = OAuthProviderConfigSchema.safeParse(githubConfig)
-        expect(isValid.success).toBe(true)
+        expect(oauth.github.clientId).toBe("github-client-id")
+        expect(oauth.github.clientSecret).toBe("github-client-secret")
     })
 
-    test("create custom oauth config", () => {
-        const oauth = createBuiltInOAuthProviders([oauthCustomService])
-        const customConfig = Object.values(oauth)[0]
-        const isValid = OAuthProviderConfigSchema.safeParse(customConfig)
-        expect(isValid.success).toBe(true)
-    })
-
-    test("create oauth config with empty array", () => {
-        const oauth = createBuiltInOAuthProviders([])
-        expect(Object.keys(oauth).length).toBe(0)
-    })
-
-    test("create oauth config for github and custom", () => {
-        const oauth = createBuiltInOAuthProviders(["github", oauthCustomService])
-        for (const config of Object.values(oauth)) {
-            const isValid = OAuthProviderConfigSchema.safeParse(config)
-            expect(isValid.success).toBe(true)
-        }
+    test("create oauth config for github object syntax", () => {
+        const oauth = createBuiltInOAuthProviders([builtInOAuthProviders.github()])
+        expect(oauth.github.clientId).toBe("github-client-id")
+        expect(oauth.github.clientSecret).toBe("github-client-secret")
     })
 
     test("create oauth config with missing fields", () => {
-        const oauth = createBuiltInOAuthProviders([
-            {
-                id: "oauth",
-                name: "OAuth",
-                authorizeURL: "https://example.com/authorize",
-            } as OAuthProviderCredentials,
-        ])
-        const invalidConfig = Object.values(oauth)[0]
-        const isValid = OAuthProviderConfigSchema.safeParse(invalidConfig)
-        expect(isValid.success).toBe(false)
+        expect(() =>
+            createBuiltInOAuthProviders([
+                {
+                    id: "oauth_provider",
+                    name: "OAuth",
+                    authorizeURL: "https://example.com/authorize",
+                } as OAuthProviderCredentials,
+            ])
+        ).toThrow('Invalid configuration for OAuth provider "oauth_provider"')
     })
 
-    test("create oauth config with invalid userinfo URL", () => {
-        const oauth = createBuiltInOAuthProviders([
-            {
-                ...oauthCustomService,
-                userInfo: "not-a-valid-url",
-            },
-        ])
-        const invalidConfig = Object.values(oauth)[0]
-        const isValid = OAuthProviderConfigSchema.safeParse(invalidConfig)
-        expect(isValid.success).toBe(false)
+    test("create oauth config override", async () => {
+        const { github } = builtInOAuthProviders
+        const oauth = createBuiltInOAuthProviders([github({ clientId: "id", scope: "scope:override" })])
+        const githubConfig = oauth.github
+        expect(githubConfig.id).toBe("github")
+        expect(githubConfig.scope).toBe("scope:override")
+        expect(githubConfig.clientId).toBe("id")
+        expect(githubConfig.clientSecret).toBe("github-client-secret")
+    })
+
+    test("create oauth config with custom profile function", () => {
+        const profile = (): User => {
+            return { sub: "override" } as User
+        }
+        const { github } = builtInOAuthProviders
+        const oauth = createBuiltInOAuthProviders([github({ profile })])
+        expect(oauth.github.clientId).toBe("github-client-id")
+        expect(oauth.github.profile?.({ id: 123 } as GitHubProfile)).toEqual({ sub: "override" })
+        expect(oauth.github.profile?.({ id: 123 } as GitHubProfile)).not.toEqual({ sub: "123" })
+    })
+
+    test("create oauth config with duplicated id", () => {
+        expect(() => createBuiltInOAuthProviders(["github", "github"])).toThrow('Duplicate OAuth provider id "github"')
     })
 })
