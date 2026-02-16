@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { SessionClient } from "@/components/get-session-client"
 import { useAuthClient } from "@/contexts/auth"
 
-const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, builtInOAuthProviders.bitbucket]
+const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
 
 export const getServerSideProps: GetServerSideProps<{ session: Session | null }> = async ({ req }) => {
     const session = await authServer.getSession(req)

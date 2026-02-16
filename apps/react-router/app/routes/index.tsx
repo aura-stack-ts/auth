@@ -14,7 +14,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 const IndexPage = ({ loaderData }: Route.ComponentProps) => {
     const { session } = loaderData
     const isAuthenticated = Boolean(session && session?.user)
-    const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, builtInOAuthProviders.bitbucket]
+    const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
 
     return (
         <main className="flex-1 bg-black">
