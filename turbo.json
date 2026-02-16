@@ -9,7 +9,8 @@
       "dependsOn": ["^build"],
       "inputs": [".env"],
       "env": ["AURA_AUTH_*"],
-      "outputs": ["dist/**", "!.turbo/**", ".next/**", ".tanstack/**", ".output/**", ".react-router/**"]
+      "outputs": ["dist/**", "!.turbo/**", ".next/**", ".tanstack/**", ".output/**", ".react-router/**"],
+      "cache": false
     },
     "test": {
       "dependsOn": ["^test"],

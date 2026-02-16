@@ -45,6 +45,7 @@ export const bitbucket = (
                 sub: profile.uuid ?? profile.account_id,
                 name: profile.display_name ?? profile.nickname,
                 image: profile.links.avatar.href,
+                email: undefined,
             }
         },
         ...options,

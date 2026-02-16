@@ -16,7 +16,8 @@ export * from "@/secret.js"
 
 export type SecretInput = KeyObject | Uint8Array | string
 export type DerivedKeyInput = { jws: SecretInput; jwe: SecretInput }
-export type DecodeJWTOptions = { jws: JWTVerifyOptions; jwt: JWTDecryptOptions }
+export type DecodedJWTPayloadOptions = { jws: JWTVerifyOptions; jwt: JWTDecryptOptions }
+
 
 /**
  * Encode a JWT signed and encrypted token. The token first signed using JWS
@@ -59,7 +60,7 @@ export const encodeJWT = async (token: JWTPayload, secret: SecretInput | Derived
  * @param secret
  * @returns
  */
-export const decodeJWT = async (token: string, secret: SecretInput | DerivedKeyInput, options?: DecodeJWTOptions) => {
+export const decodeJWT = async (token: string, secret: SecretInput | DerivedKeyInput, options?: DecodedJWTPayloadOptions) => {
     try {
         const { jweSecret, jwsSecret } = getSecrets(secret)
         const { verifyJWS } = createJWS(jwsSecret)

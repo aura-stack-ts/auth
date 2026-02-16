@@ -87,6 +87,7 @@ export const strava = (options?: Partial<OAuthProviderCredentials<StravaProfile>
                 sub: profile.id.toString(),
                 name: `${profile.firstname} ${profile.lastname}`,
                 image: profile.profile,
+                email: undefined,
             }
         },
         ...options,

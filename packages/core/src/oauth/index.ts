@@ -73,9 +73,10 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
         const oauthConfig = builtInOAuthProviders[config]()
         const parsed = OAuthProviderCredentialsSchema.safeParse({ ...oauthConfig, ...definition })
         if (!parsed.success) {
+            const details = JSON.stringify(formatZodError(parsed.error), null, 2)
             throw new AuthInternalError(
                 "INVALID_OAUTH_PROVIDER_CONFIGURATION",
-                `Invalid configuration for OAuth provider "${config}"`
+                `Invalid configuration for OAuth provider "${config}": ${details}`
             )
         }
         return parsed.data
@@ -83,9 +84,10 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
     const envConfig = defineOAuthEnvironment(config.id)
     const parsed = OAuthProviderCredentialsSchema.safeParse({ ...envConfig, ...config })
     if (!parsed.success) {
+        const details = JSON.stringify(formatZodError(parsed.error), null, 2)
         throw new AuthInternalError(
             "INVALID_OAUTH_PROVIDER_CONFIGURATION",
-            `Invalid configuration for OAuth provider "${config.id}"`
+            `Invalid configuration for OAuth provider "${config.id}": ${details}`
         )
     }
     return parsed.data

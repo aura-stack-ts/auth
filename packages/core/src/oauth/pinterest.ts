@@ -36,9 +36,10 @@ export const pinterest = (
         responseType: "code",
         profile(profile) {
             return {
-                sub: profile.username,
+                sub: profile.id,
                 name: profile.username,
                 image: profile.profile_image,
+                email: undefined,
             }
         },
         ...options,

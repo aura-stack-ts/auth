@@ -6,7 +6,7 @@ import {
     createDeriveKey,
     createSecret,
     type JWTVerifyOptions,
-    type DecodeJWTOptions,
+    type DecodedJWTPayloadOptions,
 } from "@aura-stack/jose"
 import { AuthInternalError } from "@/errors.js"
 export type { JWTPayload } from "@aura-stack/jose/jose"
@@ -67,7 +67,7 @@ export const jwtVerificationOptions: JWTVerifyOptions = {
     typ: "JWT",
 }
 
-export const decodeJWTOptions: DecodeJWTOptions = {
+export const decodeJWTOptions: DecodedJWTPayloadOptions = {
     jws: jwtVerificationOptions,
     jwt: {
         typ: "JWT",

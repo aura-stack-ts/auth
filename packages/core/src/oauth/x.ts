@@ -34,6 +34,7 @@ export const x = (options?: Partial<OAuthProviderCredentials<XProfile>>): OAuthP
                 sub: profile.data.id,
                 name: profile.data.name,
                 image: profile.data.profile_image_url,
+                email: undefined,
             }
         },
         ...options,
