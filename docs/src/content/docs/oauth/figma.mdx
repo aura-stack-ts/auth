@@ -90,13 +90,32 @@ AURA_AUTH_SECRET="32-bytes-secret"
 
 ### Configure the provider
 
-Set the `oauth` option of the `createAuth` instance and writing `"figma"` name.
+Set the `oauth` option of the `createAuth` instance. You can use the provider name as a string to use default settings, or use the `figma` factory function to customize the configuration.
+
+#### Default configuration
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["figma"],
+})
+
+export const { handlers } = auth
+```
+
+#### Custom configuration
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { figma } from "@aura-stack/auth/oauth/figma"
+
+export const auth = createAuth({
+  oauth: [
+    figma({
+      scope: "current_user:read file_read", // Custom scopes
+    }),
+  ],
 })
 
 export const { handlers } = auth

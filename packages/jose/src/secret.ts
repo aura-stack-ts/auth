@@ -1,5 +1,5 @@
-import { InvalidSecretError } from "@/errors.js"
 import { isObject } from "@/assert.js"
+import { InvalidSecretError } from "@/errors.js"
 import type { DerivedKeyInput, SecretInput } from "@/index.js"
 
 export const MIN_SECRET_ENTROPY_BITS = 4.5
