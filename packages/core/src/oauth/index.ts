@@ -81,7 +81,8 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
         }
         return parsed.data
     }
-    const envConfig = defineOAuthEnvironment(config.id)
+    const hasCredentials = config.clientId && config.clientSecret
+    const envConfig = hasCredentials ? {} : defineOAuthEnvironment(config.id)
     const parsed = OAuthProviderCredentialsSchema.safeParse({ ...envConfig, ...config })
     if (!parsed.success) {
         const details = JSON.stringify(formatZodError(parsed.error), null, 2)

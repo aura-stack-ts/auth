@@ -33,7 +33,7 @@ Providers can be defined using three distinct patterns within the `createAuth` i
 
 ```ts lineNumbers
 import { createAuth } from "@aura-stack/auth"
-import { github } from "@aura-stack/auth/oauth/github"
+import { bitbucket } from "@aura-stack/auth/oauth/bitbucket"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 
 export const auth = createAuth({
@@ -42,10 +42,10 @@ export const auth = createAuth({
     "github",
 
     // 2. Object Pattern: Access via a single built-in collection
-    builtInOAuthProviders.github(),
+    builtInOAuthProviders.gitlab(),
 
     // 3. Factory Pattern: Direct import for optimal tree-shaking
-    github(),
+    bitbucket(),
   ],
 })
 ```
@@ -101,7 +101,7 @@ The `builtInOAuthProviders` object provides a centralized collection for all sup
 
 ```ts title="auth.ts"
 import { createAuth } from "@aura-stack/auth"
-import { builtInOAuthProviders } from "@aura-stack/auth/oauth"
+import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 
 export const auth = createAuth({
   oauth: [
