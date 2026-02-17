@@ -10,6 +10,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.4.0] - 2026-2-16
+
+### Added
+
+- Introduced a new OAuth provider API. The new API exposes provider factories as configurable objects, allowing consumers to override default behavior while preserving a consistent interface. [#93](https://github.com/aura-stack-ts/auth/pull/93)
+
+- Introduced native environment variable access to improve cross-runtime compatibility. It relies on the host runtime to provide environment variables, supporting Node.js, Deno, Bun, and Edge environments without additional packages and removing the `dotenv` dependency. [#92](https://github.com/aura-stack-ts/auth/pull/92)
+
+- Added strict security headers (Content-Security-Policy, X-Content-Type-Options, X-Frame-Options, Referrer-Policy) across critical authentication endpoints: `/signIn/:provider`, `/callback/:provider`, `/session`, `/signOut`, and `/csrfToken`. This helps prevent XSS, MIME-type sniffing, clickjacking, and unsafe referrer leakage. [#90](https://github.com/aura-stack-ts/auth/pull/90)
+
+- Introduced the `trustedOrigins` configuration option for `createAuth`. This option explicitly trusts requests from specific domains, acting as an origin allowlist for sensitive or security-critical operations. [#88](https://github.com/aura-stack-ts/auth/pull/88)
+
+- Introduced the `logger` configuration option for `createAuth`. It enables detailed, structured logging across Aura Auth internal flows. All data passed to `logger.log` follows RFC 5424 (Syslog Protocol) for standardized, interoperable logging. [#84](https://github.com/aura-stack-ts/auth/pull/84)
+
+### Changed
+
+- Hardened CSRF protection by setting the `csrfToken` cookie to `SameSite=Strict`, ensuring it is only sent to the same origin. [#89](https://github.com/aura-stack-ts/auth/pull/89)
+
+- Removed automatic salt derivation; authentication salt must now be explicitly configured. The salt value is now required and must be explicitly provided via environment variables. Previously, the salt was derived from the secret value. [#89](https://github.com/aura-stack-ts/auth/pull/89)
+
+- Implemented `createSecret` from `@aura-auth/jose` to add strong entropy verification for salt and secret values. The validation ensures secrets meet minimum requirements: **at least 32 bits of length** and **a minimum of 4 bits of entropy per character**, helping prevent weak or guessable secrets. [#85](https://github.com/aura-stack-ts/auth/pull/85)
+
+- Improved strict validation for redirect values in `/signIn/:provider`, `/callback/:provider`, and `/signOut` using the `redirectTo` search parameter or `Referer` and `Origin` headers. This ensures only legitimate, safe URLs are allowed, preventing open redirect vulnerabilities. [#83](https://github.com/aura-stack-ts/auth/pull/83)
+
+---
+
 ## [0.3.0] - 2026-1-29
 
 ### Added
