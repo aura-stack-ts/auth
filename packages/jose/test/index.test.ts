@@ -1,11 +1,11 @@
 import crypto from "crypto"
 import { describe, test, expect } from "vitest"
-import { createJWT, MIN_SECRET_ENTROPY_BITS } from "@/index.js"
+import { type JWTPayload } from "jose"
 import { createSecret } from "@/secret.js"
 import { createJWS, signJWS, verifyJWS } from "@/sign.js"
 import { deriveKey, createDeriveKey } from "@/deriveKey.js"
+import { createJWT, MIN_SECRET_ENTROPY_BITS } from "@/index.js"
 import { createJWE, encryptJWE, decryptJWE } from "@/encrypt.js"
-import { base64url, type JWTPayload } from "jose"
 
 const payload: JWTPayload = {
     sub: "user-123",
@@ -16,7 +16,7 @@ const payload: JWTPayload = {
 describe("JWSs", () => {
     test("sign and verify a JWS using signJWS and verifyJWS", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = await createDeriveKey(secretKey)
+        const derivedKey = await createDeriveKey(secretKey)
 
         const jws = await signJWS(payload, derivedKey)
         expect(jws).toBeDefined()
@@ -29,7 +29,7 @@ describe("JWSs", () => {
 
     test("sign and verify a JWS using createJWS", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = await createDeriveKey(secretKey)
+        const derivedKey = await createDeriveKey(secretKey)
 
         const { signJWS, verifyJWS } = createJWS(derivedKey)
 
@@ -49,7 +49,7 @@ describe("JWSs", () => {
 
     test("fail JWT to try to verify a JWS with invalid secret", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = await createDeriveKey(secretKey)
+        const derivedKey = await createDeriveKey(secretKey)
 
         const jws = await signJWS(payload, derivedKey)
         expect(jws).toBeDefined()
@@ -90,7 +90,7 @@ describe("JWSs", () => {
 describe("JWEs", () => {
     test("encrypt and decrypt a JWE using encryptJWE and decryptJWE", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = await createDeriveKey(secretKey)
+        const derivedKey = await createDeriveKey(secretKey)
 
         const jwe = await encryptJWE(JSON.stringify(payload), derivedKey)
         expect(jwe).toBeDefined()
@@ -105,7 +105,7 @@ describe("JWEs", () => {
 
     test("encrypt and decrypt a JWE using createJWE", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = await createDeriveKey(secretKey)
+        const derivedKey = await createDeriveKey(secretKey)
 
         const { signJWS } = createJWS(derivedKey)
         const { encryptJWE, decryptJWE } = createJWE(derivedKey)
@@ -120,7 +120,7 @@ describe("JWEs", () => {
 
     test("fail JWT to try to decrypt an invalid JWE", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = await createDeriveKey(secretKey)
+        const derivedKey = await createDeriveKey(secretKey)
 
         const { decryptJWE } = createJWE(derivedKey)
         await expect(decryptJWE("header.payload.signature")).rejects.toThrow()
@@ -147,7 +147,7 @@ describe("JWEs", () => {
 describe("JWTs", () => {
     test("create a signed and encrypted JWT using createJWS and createJWE functions", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = await createDeriveKey(secretKey)
+        const derivedKey = await createDeriveKey(secretKey)
 
         const { signJWS, verifyJWS } = createJWS(derivedKey)
         const { encryptJWE, decryptJWE } = createJWE(derivedKey)
@@ -190,8 +190,8 @@ describe("JWTs", () => {
 
     test("create a signed and encrypted JWT using createJWT with separate JWS and JWE secrets", async () => {
         const secret = crypto.randomBytes(32)
-        const { derivedKey: derivedSigningKey } = await createDeriveKey(secret, "salt", "signing")
-        const { derivedKey: derivedEncryptionKey } = await createDeriveKey(secret, "salt", "encryption")
+        const derivedSigningKey = await createDeriveKey(secret, "salt", "signing")
+        const derivedEncryptionKey = await createDeriveKey(secret, "salt", "encryption")
 
         const { encodeJWT, decodeJWT } = createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey })
 
@@ -260,9 +260,9 @@ describe("createDeriveKey", () => {
 
     test("createDeriveKey with 32 bytes", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { key, derivedKey } = await createDeriveKey(secretKey)
+        const derivedKey = await createDeriveKey(secretKey)
         expect(derivedKey).toBeDefined()
-        expect(key.byteLength).toBe(32)
+        expect(derivedKey.byteLength).toBe(32)
     })
 })
 
