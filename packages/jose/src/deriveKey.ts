@@ -22,7 +22,7 @@ export const deriveKey = async (
     try {
         const subtle = getSubtleCrypto()
         const secretBuffer = secret.buffer.slice(secret.byteOffset, secret.byteOffset + secret.byteLength)
-        const baseKey = await subtle.importKey("raw", secretBuffer as BufferSource, "HKDF", false, ["deriveBits", "deriveKey"])
+        const baseKey = await subtle.importKey("raw", secretBuffer as BufferSource, "HKDF", false, ["deriveBits"])
 
         const saltBuffer = typeof salt === "string" ? encodeString(salt) : salt
         const infoBuffer = typeof info === "string" ? encodeString(info) : info
@@ -53,7 +53,7 @@ export const deriveKey = async (
  * @param salt - Optional cryptographic salt (defaults to "Aura Jose secret salt")
  * @param info - Optional context information (defaults to "Aura Jose secret derivation")
  * @param length - Size of the derived key in bytes (default is 32 bytes)
- * @returns Promise resolving to an object with the derived key as Uint8Array
+ * @returns Promise resolving to the derived key as a Uint8Array
  */
 export const createDeriveKey = async (
     secret: SecretInput,

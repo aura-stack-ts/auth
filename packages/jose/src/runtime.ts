@@ -1,3 +1,6 @@
+const encoder = new TextEncoder()
+const decoder = new TextDecoder()
+
 /**
  * Generate random bytes using the Web Crypto API
  * Works in Node.js 15+, Deno, Bun, and browsers
@@ -17,7 +20,7 @@ export const getRandomBytes = (size: number): Uint8Array => {
  * @returns Uint8Array containing UTF-8 encoded bytes
  */
 export const encodeString = (input: string): Uint8Array => {
-    return new TextEncoder().encode(input)
+    return encoder.encode(input)
 }
 
 /**
@@ -28,7 +31,7 @@ export const encodeString = (input: string): Uint8Array => {
  * @returns Decoded string
  */
 export const decodeString = (bytes: Uint8Array): string => {
-    return new TextDecoder().decode(bytes)
+    return decoder.decode(bytes)
 }
 
 /**
