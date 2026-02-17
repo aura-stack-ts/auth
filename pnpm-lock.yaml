@@ -5,50 +5,10 @@ settings:
   excludeLinksFromLockfile: false
 
 catalogs:
-  '@tailwindcss/vite':
-    '@tailwindcss/vite':
-      specifier: ^4.0.6
-      version: 4.1.18
-  lucide-react:
-    lucide-react:
-      specifier: ^0.561.0
-      version: 0.561.0
-  next:
-    next:
-      specifier: ^16.1.6
-      version: 16.1.6
-  node:
-    '@types/node':
-      specifier: ^24.9.2
-      version: 24.10.9
-  react:
-    '@types/react':
-      specifier: ^19.2.7
-      version: 19.2.9
-    '@types/react-dom':
-      specifier: ^19.2.3
-      version: 19.2.3
-    react:
-      specifier: ^19.2.3
-      version: 19.2.3
-    react-dom:
-      specifier: ^19.2.3
-      version: 19.2.3
-  tailwindcss:
-    '@tailwindcss/postcss':
-      specifier: ^4.1.16
-      version: 4.1.18
-    tailwindcss:
-      specifier: 4.1.18
-      version: 4.1.18
   typescript:
     typescript:
       specifier: ^5.9.2
       version: 5.9.3
-  vite:
-    vite:
-      specifier: ^7.1.7
-      version: 7.3.1
 
 overrides:
   seroval: ^1.4.1
@@ -495,9 +455,6 @@ importers:
       '@aura-stack/tsup-config':
         specifier: workspace:*
         version: link:../../configs/tsup-config
-      '@types/node':
-        specifier: catalog:node
-        version: 24.10.9
       typescript:
         specifier: catalog:typescript
         version: 5.9.3

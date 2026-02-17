@@ -5,7 +5,7 @@ import { createSecret } from "@/secret.js"
 import { createJWS, signJWS, verifyJWS } from "@/sign.js"
 import { deriveKey, createDeriveKey } from "@/deriveKey.js"
 import { createJWE, encryptJWE, decryptJWE } from "@/encrypt.js"
-import type { JWTPayload } from "jose"
+import { base64url, type JWTPayload } from "jose"
 
 const payload: JWTPayload = {
     sub: "user-123",
@@ -16,7 +16,7 @@ const payload: JWTPayload = {
 describe("JWSs", () => {
     test("sign and verify a JWS using signJWS and verifyJWS", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = createDeriveKey(secretKey)
+        const { derivedKey } = await createDeriveKey(secretKey)
 
         const jws = await signJWS(payload, derivedKey)
         expect(jws).toBeDefined()
@@ -29,7 +29,7 @@ describe("JWSs", () => {
 
     test("sign and verify a JWS using createJWS", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = createDeriveKey(secretKey)
+        const { derivedKey } = await createDeriveKey(secretKey)
 
         const { signJWS, verifyJWS } = createJWS(derivedKey)
 
@@ -49,7 +49,7 @@ describe("JWSs", () => {
 
     test("fail JWT to try to verify a JWS with invalid secret", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = createDeriveKey(secretKey)
+        const { derivedKey } = await createDeriveKey(secretKey)
 
         const jws = await signJWS(payload, derivedKey)
         expect(jws).toBeDefined()
@@ -90,7 +90,7 @@ describe("JWSs", () => {
 describe("JWEs", () => {
     test("encrypt and decrypt a JWE using encryptJWE and decryptJWE", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = createDeriveKey(secretKey)
+        const { derivedKey } = await createDeriveKey(secretKey)
 
         const jwe = await encryptJWE(JSON.stringify(payload), derivedKey)
         expect(jwe).toBeDefined()
@@ -105,7 +105,7 @@ describe("JWEs", () => {
 
     test("encrypt and decrypt a JWE using createJWE", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = createDeriveKey(secretKey)
+        const { derivedKey } = await createDeriveKey(secretKey)
 
         const { signJWS } = createJWS(derivedKey)
         const { encryptJWE, decryptJWE } = createJWE(derivedKey)
@@ -120,7 +120,7 @@ describe("JWEs", () => {
 
     test("fail JWT to try to decrypt an invalid JWE", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = createDeriveKey(secretKey)
+        const { derivedKey } = await createDeriveKey(secretKey)
 
         const { decryptJWE } = createJWE(derivedKey)
         await expect(decryptJWE("header.payload.signature")).rejects.toThrow()
@@ -147,7 +147,7 @@ describe("JWEs", () => {
 describe("JWTs", () => {
     test("create a signed and encrypted JWT using createJWS and createJWE functions", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey } = createDeriveKey(secretKey)
+        const { derivedKey } = await createDeriveKey(secretKey)
 
         const { signJWS, verifyJWS } = createJWS(derivedKey)
         const { encryptJWE, decryptJWE } = createJWE(derivedKey)
@@ -190,8 +190,8 @@ describe("JWTs", () => {
 
     test("create a signed and encrypted JWT using createJWT with separate JWS and JWE secrets", async () => {
         const secret = crypto.randomBytes(32)
-        const { derivedKey: derivedSigningKey } = createDeriveKey(secret, "salt", "signing")
-        const { derivedKey: derivedEncryptionKey } = createDeriveKey(secret, "salt", "encryption")
+        const { derivedKey: derivedSigningKey } = await createDeriveKey(secret, "salt", "signing")
+        const { derivedKey: derivedEncryptionKey } = await createDeriveKey(secret, "salt", "encryption")
 
         const { encodeJWT, decodeJWT } = createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey })
 
@@ -254,35 +254,35 @@ describe("createSecret", () => {
 })
 
 describe("createDeriveKey", () => {
-    test("createDeriveKey", () => {
-        expect(() => createDeriveKey("adfasdf")).toThrow(/Secret string must be at least 32 bytes long/)
+    test("createDeriveKey", async () => {
+        await expect(createDeriveKey("asfts")).rejects.toThrow(/Secret string must be at least 32 bytes long/)
     })
 
-    test("createDeriveKey with 32 bytes", () => {
+    test("createDeriveKey with 32 bytes", async () => {
         const secretKey = crypto.randomBytes(32)
-        const { key, derivedKey } = createDeriveKey(secretKey)
+        const { key, derivedKey } = await createDeriveKey(secretKey)
         expect(derivedKey).toBeDefined()
         expect(key.byteLength).toBe(32)
     })
 })
 
 describe("deriveKey", () => {
-    test("deriveKey", () => {
+    test("deriveKey", async () => {
         const secret = "my-secret-password-123"
-        const derivedKey1 = deriveKey(secret, "salt-1", "info-1")
-        const derivedKey2 = deriveKey(secret, "salt-2", "info-2")
+        const derivedKey1 = await deriveKey(Buffer.from(secret), "salt-1", "info-1")
+        const derivedKey2 = await deriveKey(Buffer.from(secret), "salt-2", "info-2")
         expect(derivedKey1).toBeDefined()
         expect(derivedKey2).toBeDefined()
         expect(derivedKey1).not.toBe(derivedKey2)
     })
 
-    test("create deterministic derived keys", () => {
+    test("create deterministic derived keys", async () => {
         const salt = "deterministic-salt"
         const info = "deterministic-info"
         const secretKey = crypto.randomBytes(32)
-        const { derivedKey: derivedKey1 } = deriveKey(secretKey, salt, info)
-        const { derivedKey: derivedKey2 } = deriveKey(secretKey, salt, info)
-        const { derivedKey: derivedKey3 } = deriveKey(secretKey, salt, info)
+        const derivedKey1 = await deriveKey(secretKey, salt, info)
+        const derivedKey2 = await deriveKey(secretKey, salt, info)
+        const derivedKey3 = await deriveKey(secretKey, salt, info)
         expect(derivedKey1).toEqual(derivedKey2)
         expect(derivedKey2).toEqual(derivedKey3)
     })
