@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [0.4.0] - 2026-2-16
+## [0.4.0] - 2026-02-16
 
 ### Added
 
@@ -36,7 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [0.3.0] - 2026-1-29
+## [0.3.0] - 2026-01-29
 
 ### Added
 
@@ -58,7 +58,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [0.2.0] - 2026-1-09
+## [0.2.0] - 2026-01-09
 
 ### Added
 
