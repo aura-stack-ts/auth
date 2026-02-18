@@ -1,46 +1,49 @@
-# Astro Starter Kit: Basics
+<div align="center">
 
-```sh
-pnpm create astro@latest -- --template basics
+<h1>Aura Auth + Astro App Router</h1>
+
+**Integration Example App**
+
+[Official Docs](https://aura-stack-auth.vercel.app/docs/oauth) · [Astro](https://astro.build/)
+
+</div>
+
+---
+
+## Overview
+
+This project contains a demonstration of Aura Auth authentication with [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) with [Astro](https://astro.build/) app
+
+## Getting Started
+
+You can run the documentation locally for development or contribution.
+
+### From the repository root
+
+```bash
+pnpm dev --filter=astro
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+### Or manually from the root directory
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+```bash
+cd apps/astro
+pnpm install
+pnpm dev
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+Once started, open your browser at `http://localhost:4321` to view the app.
 
-## 🧞 Commands
+## Documentation
 
-All commands are run from the root of the project, from a terminal:
+Visit the [**official documentation website**](https://aura-stack-auth.vercel.app).
 
-| Command                | Action                                           |
-| :--------------------- | :----------------------------------------------- |
-| `pnpm install`         | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+## License
 
-## 👀 Want to learn more?
+Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/aura-stack-ts">Aura Stack team</a>
+</p>
