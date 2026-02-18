@@ -3,8 +3,8 @@ import { createSecret } from "@/secret.js"
 import { encoder, getRandomBytes } from "@/crypto.js"
 import { createJWS, signJWS, verifyJWS } from "@/sign.js"
 import { deriveKey, createDeriveKey } from "@/deriveKey.js"
-import { createJWT, MIN_SECRET_ENTROPY_BITS } from "@/index.js"
 import { createJWE, encryptJWE, decryptJWE } from "@/encrypt.js"
+import { createJWT, MIN_SECRET_ENTROPY_BITS, SecretInput } from "@/index.js"
 import type { JWTPayload } from "jose"
 
 const payload: JWTPayload = {
@@ -263,6 +263,11 @@ describe("createDeriveKey", () => {
         const derivedKey = await createDeriveKey(secretKey)
         expect(derivedKey).toBeDefined()
         expect(derivedKey.byteLength).toBe(32)
+    })
+
+    test("createDeriveKey throws when given a CryptoKey", async () => {
+        const cryptoKey = await globalThis.crypto.subtle.generateKey({ name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+        await expect(createDeriveKey(cryptoKey as unknown as SecretInput)).rejects.toThrow("Cannot derive key from CryptoKey")
     })
 })
 

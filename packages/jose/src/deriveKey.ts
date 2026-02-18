@@ -38,7 +38,7 @@ export const deriveKey = async (
         )
         return new Uint8Array(derivedBits)
     } catch (error) {
-        throw new Error("Failed to create a derived key (HKDF)", { cause: error })
+        throw new KeyDerivationError("Failed to create a derived key (HKDF)", { cause: error })
     }
 }
 
