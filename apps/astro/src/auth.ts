@@ -6,5 +6,5 @@ export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[
 export const { handlers, jose } = createAuth({
     oauth,
     basePath: "/api/auth",
-    trustedProxyHeaders: true,
+    trustedOrigins: ["https://*.vercel.app"],
 })

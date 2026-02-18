@@ -12,9 +12,7 @@ export default defineConfig({
         plugins: [tailwindcss()],
     },
     output: "server",
-    adapters: [
-        node({
-            mode: "standalone",
-        }),
-    ],
+    adapter: node({
+        mode: "standalone",
+    }),
 })

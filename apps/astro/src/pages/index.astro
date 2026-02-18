@@ -4,27 +4,20 @@ import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 import { Button } from "@/components/ui/button"
 import { SessionClient } from "@/components/get-session-client"
+import { createAuthServer } from "@/lib/server"
 
-/*
-const { getSession, signIn } = await createAuthServer({ request: Astro.request, cookies: {}, redirect: () => {} })
-const session = await getSession()
-const isAuthenticated = Boolean(session && session?.user)
-*/
+const auth = await createAuthServer({
+    request: Astro.request,
+    redirect: Astro.redirect
+})
 
-const isAuthenticated = false
-const session = {
-    user: {
-        sub: "1234567890",
-        name: "John Doe",
-        email: "doe",
-        image: ""
-    }
-}
+const session = await auth.getSession()
+const isAuthenticated = Boolean(session?.user)
 
-const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, builtInOAuthProviders.bitbucket]
+const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
 ---
 
-<Layout title="Aura Auth | Astro Integration Example">
+<Layout title="Aura Auth | Astro Integration Example" session={session}>
 	<main class="flex-1 bg-black">
         <section class="border-b border-muted">
             <div class="w-11/12 max-w-5xl mx-auto py-24 px-6 border-x border-muted space-y-8">
@@ -94,7 +87,7 @@ const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, b
                                         </div>
                                     </div>
                                 </div>
-                                <SessionClient client:load />
+                                <SessionClient client:load session={session} />
                             </>
                         ) : (
                             <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

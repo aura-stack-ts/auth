@@ -1,7 +1,8 @@
-import { useAuthClient } from "@/contexts/auth"
 import { LayoutDashboard } from "lucide-react"
+import type { Session } from "@aura-stack/auth"
+import { AuthProvider, useAuthClient } from "@/contexts/auth"
 
-export const SessionClient = () => {
+const SessionClientContent = () => {
     const { session } = useAuthClient()
 
     if (!session) return null
@@ -32,5 +33,13 @@ export const SessionClient = () => {
                 </div>
             </div>
         </div>
+    )
+}
+
+export const SessionClient = (props: { session?: Session | null }) => {
+    return (
+        <AuthProvider session={props.session}>
+            <SessionClientContent />
+        </AuthProvider>
     )
 }

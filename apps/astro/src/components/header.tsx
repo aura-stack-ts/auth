@@ -1,9 +1,10 @@
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
-import { useAuthClient } from "@/contexts/auth"
 import { Button } from "@/components/ui/button"
+import { useAuthClient, AuthProvider } from "@/contexts/auth"
+import type { Session } from "@aura-stack/auth"
 
-export const Header = () => {
+const HeaderContent = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const { isAuthenticated, isLoading, signOut, signIn } = useAuthClient()
 
@@ -113,6 +114,14 @@ export const Header = () => {
                 </div>
             )}
         </header>
+    )
+}
+
+export const Header = (props: { session?: Session }) => {
+    return (
+        <AuthProvider session={props.session}>
+            <HeaderContent />
+        </AuthProvider>
     )
 }
 

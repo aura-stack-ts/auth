@@ -22,10 +22,8 @@ const { title, session } = Astro.props;
 		<title>{title}</title>
 	</head>
 	<body class="antialiased bg-black min-h-screen flex flex-col">
-		<AuthProvider>
-			<!-- <Header > -->
-			<slot />
-			<Footer />
-		</AuthProvider>
+		<Header client:load session={session} />
+		<slot />
+		<Footer />
 	</body>
 </html>

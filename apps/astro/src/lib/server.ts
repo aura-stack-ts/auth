@@ -5,8 +5,7 @@ import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
 
 export const createAuthServer = async (context: {
     request: Request
-    cookies: any
-    redirect: (path: string, status?: number) => any
+    redirect: (path: string, status?: 301 | 302 | 303 | 307 | 308 | 300 | 304) => Response
 }) => {
     const { request, redirect } = context
 
@@ -22,10 +21,11 @@ export const createAuthServer = async (context: {
         const response = await createRequest(`/api/auth/session`, {
             headers: {
                 ...Object.fromEntries(request.headers.entries()),
-                Cookie: request.headers.get("cookie") || "",
+                Cookie: request.headers.get("cookie") ?? "",
             },
         })
         const session = (await response.json()) as Session
+        if (!session || !session.user) return null
         return session
     }
 
@@ -47,7 +47,7 @@ export const createAuthServer = async (context: {
             }
         )
         if (response.status === 202) {
-            redirect(redirectTo)
+            return redirect(redirectTo)
         }
         return response.json()
     }
