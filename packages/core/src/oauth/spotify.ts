@@ -1,6 +1,6 @@
-import type { OAuthProviderConfig } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.js"
 
-export interface Image {
+export interface SpotifyImage {
     url: string
     height: number
     width: number
@@ -17,7 +17,7 @@ export interface SpotifyProfile {
     uri: string
     country: string
     href: string
-    images: Image[]
+    images: SpotifyImage[]
     product: string
     explicit_content: {
         filter_enabled: boolean
@@ -36,20 +36,25 @@ export interface SpotifyProfile {
  * @see [Spotify - Scopes](https://developer.spotify.com/documentation/web-api/concepts/scopes)
  * @see [Spotify - Redirect URIs](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
  */
-export const spotify: OAuthProviderConfig<SpotifyProfile> = {
-    id: "spotify",
-    name: "Spotify",
-    authorizeURL: "https://accounts.spotify.com/authorize",
-    accessToken: "https://accounts.spotify.com/api/token",
-    userInfo: "https://api.spotify.com/v1/me",
-    scope: "user-read-email user-read-private",
-    responseType: "token",
-    profile(profile) {
-        return {
-            sub: profile.id,
-            name: profile.display_name,
-            email: profile.email,
-            image: profile.images?.[0]?.url,
-        }
-    },
+export const spotify = (
+    options?: Partial<OAuthProviderCredentials<SpotifyProfile>>
+): OAuthProviderCredentials<SpotifyProfile> => {
+    return {
+        id: "spotify",
+        name: "Spotify",
+        authorizeURL: "https://accounts.spotify.com/authorize",
+        accessToken: "https://accounts.spotify.com/api/token",
+        userInfo: "https://api.spotify.com/v1/me",
+        scope: "user-read-private user-read-email",
+        responseType: "code",
+        profile(profile) {
+            return {
+                sub: profile.id,
+                name: profile.display_name,
+                email: profile.email,
+                image: profile.images[0]?.url ?? undefined,
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<SpotifyProfile>
 }

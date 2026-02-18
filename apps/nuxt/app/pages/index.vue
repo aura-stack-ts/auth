@@ -7,9 +7,9 @@ import Button from "~/components/ui/button/Button.vue"
 const { session, isAuthenticated, isLoading, signIn, signOut } = useAuthClient()
 
 const providers = {
-    github: builtInOAuthProviders.github,
-    gitlab: builtInOAuthProviders.gitlab,
-    x: builtInOAuthProviders.x,
+    github: builtInOAuthProviders.github(),
+    gitlab: builtInOAuthProviders.gitlab(),
+    bitbucket: builtInOAuthProviders.bitbucket(),
 }
 </script>
 

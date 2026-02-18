@@ -96,13 +96,32 @@ AURA_AUTH_SECRET="32-bytes-secret"
 
 ### Configure the provider
 
-Set the `oauth` option of the `createAuth` instance by writing the `"spotify"` provider name.
+Set the `oauth` option of the `createAuth` instance. You can use the provider name as a string to use default settings, or use the `spotify` factory function to customize the configuration.
+
+#### Default configuration
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["spotify"],
+})
+
+export const { handlers } = auth
+```
+
+#### Custom configuration
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { spotify } from "@aura-stack/auth/oauth/spotify"
+
+export const auth = createAuth({
+  oauth: [
+    spotify({
+      scope: "user-read-private user-read-email playlist-read-private", // Custom scopes
+    }),
+  ],
 })
 
 export const { handlers } = auth

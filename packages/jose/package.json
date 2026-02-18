@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/jose",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": false,
   "type": "module",
   "description": "JOSE utilities for @aura-stack/auth",
@@ -53,6 +53,11 @@
       "types": "./dist/deriveKey.d.ts",
       "require": "./dist/deriveKey.cjs",
       "import": "./dist/deriveKey.js"
+    },
+    "./crypto": {
+      "types": "./dist/crypto.d.ts",
+      "require": "./dist/crypto.cjs",
+      "import": "./dist/crypto.js"
     }
   },
   "keywords": [
@@ -72,7 +77,6 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsup-config": "workspace:*",
-    "@types/node": "catalog:node",
     "typescript": "catalog:typescript"
   }
 }

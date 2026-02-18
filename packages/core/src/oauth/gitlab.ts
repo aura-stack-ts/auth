@@ -1,7 +1,7 @@
-import type { OAuthProviderConfig } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
- * @see [GitLab - Get the current user](https://docs.gitlab.com/api/users/#get-the-current-user)
+ * @see [GitLab - User Structure](https://docs.gitlab.com/ee/api/users.html#external-user-structure)
  */
 export interface GitLabProfile {
     id: number
@@ -61,20 +61,23 @@ export interface GitLabProfile {
  * @see [GitLab - Scopes](https://docs.gitlab.com/integration/oauth_provider/#view-all-authorized-applications)
  * @see [GitLab - Get current user](https://docs.gitlab.com/api/users/#get-the-current-user)
  */
-export const gitlab: OAuthProviderConfig<GitLabProfile> = {
-    id: "gitlab",
-    name: "GitLab",
-    authorizeURL: "https://gitlab.com/oauth/authorize",
-    accessToken: "https://gitlab.com/oauth/token",
-    userInfo: "https://gitlab.com/api/v4/user",
-    scope: "read_user",
-    responseType: "code",
-    profile(profile) {
-        return {
-            sub: profile.id.toString(),
-            name: profile.name ?? profile.username,
-            email: profile.email,
-            avatar: profile.avatar_url,
-        }
-    },
+export const gitlab = (options?: Partial<OAuthProviderCredentials<GitLabProfile>>): OAuthProviderCredentials<GitLabProfile> => {
+    return {
+        id: "gitlab",
+        name: "GitLab",
+        authorizeURL: "https://gitlab.com/oauth/authorize",
+        accessToken: "https://gitlab.com/oauth/token",
+        userInfo: "https://gitlab.com/api/v4/user",
+        scope: "read_user",
+        responseType: "code",
+        profile(profile) {
+            return {
+                sub: profile.id.toString(),
+                name: profile.name ?? profile.username,
+                email: profile.email,
+                image: profile.avatar_url,
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<GitLabProfile>
 }

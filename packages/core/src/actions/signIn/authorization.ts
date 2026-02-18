@@ -1,8 +1,9 @@
-import { isValidURL } from "@/assert.js"
+import { AuthInternalError } from "@/errors.js"
 import { OAuthAuthorization } from "@/schemas.js"
-import { AuthInternalError, AuthSecurityError, isAuthSecurityError } from "@/errors.js"
-import { equals, formatZodError, getNormalizedOriginPath, sanitizeURL, toCastCase } from "@/utils.js"
-import type { OAuthProviderCredentials } from "@/@types/index.js"
+import { equals, extractPath, toCastCase } from "@/utils.js"
+import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin, patternToRegex } from "@/assert.js"
+import type { GlobalContext } from "@aura-stack/router"
+import type { AuthConfig, InternalLogger, OAuthProviderCredentials } from "@/@types/index.js"
 
 /**
  * Constructs the request URI for the Authorization Request to the third-party OAuth service. It includes
@@ -21,12 +22,21 @@ export const createAuthorizationURL = (
     redirectURI: string,
     state: string,
     codeChallenge: string,
-    codeChallengeMethod: string
+    codeChallengeMethod: string,
+    logger?: InternalLogger
 ) => {
     const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state, codeChallenge, codeChallengeMethod })
     if (!parsed.success) {
-        const msg = JSON.stringify(formatZodError(parsed.error), null, 2)
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", msg)
+        logger?.log("INVALID_OAUTH_CONFIGURATION", {
+            structuredData: {
+                scope: oauthConfig.scope,
+                redirect_uri: redirectURI,
+                has_state: Boolean(state),
+                has_code_challenge: Boolean(codeChallenge),
+                code_challenge_method: codeChallengeMethod,
+            },
+        })
+        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "The OAuth provider configuration is invalid.")
     }
     const { authorizeURL, ...options } = parsed.data
     const { userInfo, accessToken, clientSecret, ...required } = options
@@ -34,19 +44,34 @@ export const createAuthorizationURL = (
     return `${authorizeURL}?${searchParams}`
 }
 
-export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) => {
+/**
+ * Resolves trusted origins from config (array or function).
+ */
+export const getTrustedOrigins = async (request: Request, trustedOrigins: AuthConfig["trustedOrigins"]): Promise<string[]> => {
+    if (!trustedOrigins) return []
+    const raw = typeof trustedOrigins === "function" ? await trustedOrigins(request) : trustedOrigins
+    return Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : []
+}
+
+export const getOriginURL = async (request: Request, context?: GlobalContext) => {
     const headers = request.headers
-    if (trustedProxyHeaders) {
-        const protocol = headers.get("X-Forwarded-Proto") ?? headers.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? "http"
+    let origin = new URL(request.url).origin
+    const trustedOrigins = await getTrustedOrigins(request, context?.trustedOrigins)
+    trustedOrigins.push(origin)
+    if (context?.trustedProxyHeaders) {
+        const protocol = headers.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? headers.get("X-Forwarded-Proto") ?? "http"
         const host =
-            headers.get("X-Forwarded-Host") ??
             headers.get("Host") ??
             headers.get("Forwarded")?.match(/host=([^;]+)/i)?.[1] ??
+            headers.get("X-Forwarded-Host") ??
             null
-        return new URL(`${protocol}://${host}${getNormalizedOriginPath(new URL(request.url).pathname)}`)
-    } else {
-        return new URL(getNormalizedOriginPath(request.url))
+        origin = `${protocol}://${host}`
     }
+    if (!isTrustedOrigin(origin, trustedOrigins)) {
+        context?.logger?.log("UNTRUSTED_ORIGIN", { structuredData: { origin: origin } })
+        throw new AuthInternalError("UNTRUSTED_ORIGIN", "The constructed origin URL is not trusted.")
+    }
+    return origin
 }
 
 /**
@@ -54,64 +79,60 @@ export const getOriginURL = (request: Request, trustedProxyHeaders?: boolean) =>
  *
  * @param requestURL - the original request URL
  * @param oauth - OAuth provider name
+ * @param context - Global context containing configuration and utilities
  * @returns The redirect URI for the OAuth callback.
  */
-export const createRedirectURI = (request: Request, oauth: string, basePath: string, trustedProxyHeaders?: boolean) => {
-    const url = getOriginURL(request, trustedProxyHeaders)
-    return `${url.origin}${basePath}/callback/${oauth}`
+export const createRedirectURI = async (request: Request, oauth: string, context: GlobalContext) => {
+    const origin = await getOriginURL(request, context)
+    return `${origin}${context.basePath}/callback/${oauth}`
 }
 
 /**
  * Verifies if the request's origin matches the expected origin. It accepts the redirectTo search
- * parameter for redirection. It checks the 'Referer' header of the request with the origin where
- * the authentication flow is hosted. If they do not match, it throws an AuthError to avoid
- * potential `Open URL Redirection` attacks.
+ * parameter for redirection. It checks the Referer and Origin headers and the request URL against
+ * the trusted origins list. If they do not match, it returns "/" to avoid potential open redirect attacks.
+ *
+ * When `trustedOrigins` is provided, URLs are validated against that list. When not provided,
+ * the request's derived origin (from request.url or proxy headers) is used as the only trusted origin.
  *
  * @param request The incoming request object
  * @param redirectTo Optional redirectTo parameter to override the referer
- * @returns The pathname of the referer URL if origins match
+ * @param context Global context containing configuration and utilities
+ * @returns A safe URL to redirect to after authentication, or "/" if the URL is not considered safe.
  */
-export const createRedirectTo = (request: Request, redirectTo?: string, trustedProxyHeaders?: boolean) => {
+export const createRedirectTo = async (request: Request, redirectTo?: string, context?: GlobalContext) => {
     try {
         const headers = request.headers
-        const origin = headers.get("Origin")
-        const referer = headers.get("Referer")
-        let hostedURL = getOriginURL(request, trustedProxyHeaders)
-        if (redirectTo) {
-            if (redirectTo.startsWith("/")) {
-                return sanitizeURL(redirectTo)
+        const requestOrigin = await getOriginURL(request, context)
+        const origins = await getTrustedOrigins(request, context?.trustedOrigins)
+
+        const validateURL = (url: string): string => {
+            if (!isRelativeURL(url) && !isValidURL(url)) return "/"
+            if (isRelativeURL(url)) return url
+
+            if (origins.length > 0) {
+                if (isTrustedOrigin(url, origins)) {
+                    const urlOrigin = new URL(url).origin
+                    for (const pattern of origins) {
+                        const regex = patternToRegex(pattern)
+                        if (regex?.test(urlOrigin)) {
+                            return isSameOrigin(url, request.url) ? extractPath(url) : url
+                        }
+                        if (isValidURL(pattern) && equals(new URL(pattern).origin, urlOrigin)) return url
+                    }
+                }
+                context?.logger?.log("OPEN_REDIRECT_ATTACK")
+                return "/"
             }
-            const redirectToURL = new URL(sanitizeURL(getNormalizedOriginPath(redirectTo)))
-            if (!isValidURL(redirectTo) || !equals(redirectToURL.origin, hostedURL.origin)) {
-                throw new AuthSecurityError(
-                    "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
-                    "The redirectTo parameter does not match the hosted origin."
-                )
+            if (isSameOrigin(url, requestOrigin)) {
+                return extractPath(url)
             }
-            return sanitizeURL(redirectToURL.pathname)
+            context?.logger?.log("OPEN_REDIRECT_ATTACK")
+            return "/"
         }
-        if (referer) {
-            const refererURL = new URL(sanitizeURL(referer))
-            if (!isValidURL(referer) || !equals(refererURL.origin, hostedURL.origin)) {
-                throw new AuthSecurityError(
-                    "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
-                    "The referer of the request does not match the hosted origin."
-                )
-            }
-            return sanitizeURL(refererURL.pathname)
-        }
-        if (origin) {
-            const originURL = new URL(sanitizeURL(getNormalizedOriginPath(origin)))
-            if (!isValidURL(origin) || !equals(originURL.origin, hostedURL.origin)) {
-                throw new AuthSecurityError("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", "Invalid origin (potential CSRF).")
-            }
-            return sanitizeURL(originURL.pathname)
-        }
-        return "/"
+        return validateURL(redirectTo ?? headers.get("Referer") ?? headers.get("Origin") ?? "/")
     } catch (error) {
-        if (isAuthSecurityError(error)) {
-            throw error
-        }
-        throw new AuthSecurityError("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", "Invalid origin (potential CSRF).")
+        context?.logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED")
+        return "/"
     }
 }

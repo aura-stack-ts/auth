@@ -1,20 +1,26 @@
-import "dotenv/config"
-import { createJWT, createJWS, createJWE, createDeriveKey } from "@aura-stack/jose"
-import { createDerivedSalt } from "@/secure.js"
+import { env } from "@/env.js"
+import {
+    createJWT,
+    createJWS,
+    createJWE,
+    createDeriveKey,
+    createSecret,
+    type JWTVerifyOptions,
+    type DecodedJWTPayloadOptions,
+} from "@aura-stack/jose"
 import { AuthInternalError } from "@/errors.js"
-export type { JWTPayload } from "@aura-stack/jose/jose"
+export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
+export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 
 /**
  * Creates the JOSE instance used for signing and verifying tokens. It derives keys
- * for session tokens and CSRF tokens. For security and determinism, it uses the
- * `AURA_AUTH_SALT` environment variable if available; otherwise,it uses a derived
- * salt based on the provided secret.
+ * for session tokens and CSRF tokens. For security and determinism, it's required
+ * to set a salt value in `AURA_AUTH_SALT` or `AUTH_SALT` env.
  *
  * @param secret the base secret for key derivation
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
  */
 export const createJoseInstance = (secret?: string) => {
-    const env = process.env
     secret ??= env.AURA_AUTH_SECRET! ?? env.AUTH_SECRET!
     if (!secret) {
         throw new AuthInternalError(
@@ -23,21 +29,72 @@ export const createJoseInstance = (secret?: string) => {
         )
     }
 
-    const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT ?? createDerivedSalt(secret)
-    const { derivedKey: derivedSigningKey } = createDeriveKey(secret, salt, "signing")
-    const { derivedKey: derivedEncryptionKey } = createDeriveKey(secret, salt, "encryption")
-    const { derivedKey: derivedCsrfTokenKey } = createDeriveKey(secret, salt, "csrfToken")
+    const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT
+    if (!salt) {
+        throw new AuthInternalError(
+            "JOSE_INITIALIZATION_FAILED",
+            "AURA_AUTH_SALT or AUTH_SALT environment variable is not set. A salt value is required for key derivation."
+        )
+    }
+    try {
+        createSecret(salt)
+    } catch (error) {
+        throw new AuthInternalError(
+            "INVALID_SALT_SECRET_VALUE",
+            "AURA_AUTH_SALT/AUTH_SALT is invalid. It must be at least 32 bytes long and meet entropy requirements.",
+            { cause: error }
+        )
+    }
 
-    const { decodeJWT, encodeJWT } = createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey })
-    const { signJWS, verifyJWS } = createJWS(derivedCsrfTokenKey)
-    const { encryptJWE, decryptJWE } = createJWE(derivedEncryptionKey)
+    const jose = (async () => {
+        const derivedSigningKey = await createDeriveKey(secret, salt, "signing")
+        const derivedEncryptionKey = await createDeriveKey(secret, salt, "encryption")
+        const derivedCsrfTokenKey = await createDeriveKey(secret, salt, "csrfToken")
+
+        return {
+            jwt: createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey }),
+            jws: createJWS(derivedCsrfTokenKey),
+            jwe: createJWE(derivedEncryptionKey),
+        }
+    })()
+    jose.catch(() => {})
 
     return {
-        decodeJWT,
-        encodeJWT,
-        signJWS,
-        verifyJWS,
-        encryptJWE,
-        decryptJWE,
+        decodeJWT: async (...args: Parameters<ReturnType<typeof createJWT>["decodeJWT"]>) => {
+            const { jwt } = await jose
+            return jwt.decodeJWT(...args)
+        },
+        encodeJWT: async (...args: Parameters<ReturnType<typeof createJWT>["encodeJWT"]>) => {
+            const { jwt } = await jose
+            return jwt.encodeJWT(...args)
+        },
+        signJWS: async (...args: Parameters<ReturnType<typeof createJWS>["signJWS"]>) => {
+            const { jws } = await jose
+            return jws.signJWS(...args)
+        },
+        verifyJWS: async (...args: Parameters<ReturnType<typeof createJWS>["verifyJWS"]>) => {
+            const { jws } = await jose
+            return jws.verifyJWS(...args)
+        },
+        encryptJWE: async (...args: Parameters<ReturnType<typeof createJWE>["encryptJWE"]>) => {
+            const { jwe } = await jose
+            return jwe.encryptJWE(...args)
+        },
+        decryptJWE: async (...args: Parameters<ReturnType<typeof createJWE>["decryptJWE"]>) => {
+            const { jwe } = await jose
+            return jwe.decryptJWE(...args)
+        },
     }
+}
+
+export const jwtVerificationOptions: JWTVerifyOptions = {
+    algorithms: ["HS256"],
+    typ: "JWT",
+}
+
+export const decodeJWTOptions: DecodedJWTPayloadOptions = {
+    jws: jwtVerificationOptions,
+    jwt: {
+        typ: "JWT",
+    },
 }

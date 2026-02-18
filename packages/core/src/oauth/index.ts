@@ -4,6 +4,7 @@
  * This modules re-exports OAuth providers available in Aura Auth to be used in the Auth instance configuration.
  */
 import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.js"
+import { env } from "@/env.js"
 import { github } from "./github.js"
 import { bitbucket } from "./bitbucket.js"
 import { figma } from "./figma.js"
@@ -14,7 +15,7 @@ import { x } from "./x.js"
 import { strava } from "./strava.js"
 import { mailchimp } from "./mailchimp.js"
 import { pinterest } from "./pinterest.js"
-import { OAuthEnvSchema } from "@/schemas.js"
+import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.js"
 import { AuthInternalError } from "@/errors.js"
 import { formatZodError } from "@/utils.js"
 
@@ -53,7 +54,6 @@ export const builtInOAuthProviders = {
  * @returns The credentials for the specified OAuth provider
  */
 const defineOAuthEnvironment = (oauth: string) => {
-    const env = process.env
     const clientIdSuffix = `${oauth.toUpperCase()}_CLIENT_ID`
     const clientSecretSuffix = `${oauth.toUpperCase()}_CLIENT_SECRET`
     const loadEnvs = OAuthEnvSchema.safeParse({
@@ -70,13 +70,28 @@ const defineOAuthEnvironment = (oauth: string) => {
 const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderCredentials) => {
     if (typeof config === "string") {
         const definition = defineOAuthEnvironment(config)
-        const oauthConfig = builtInOAuthProviders[config]
-        return {
-            ...oauthConfig,
-            ...definition,
+        const oauthConfig = builtInOAuthProviders[config]()
+        const parsed = OAuthProviderCredentialsSchema.safeParse({ ...oauthConfig, ...definition })
+        if (!parsed.success) {
+            const details = JSON.stringify(formatZodError(parsed.error), null, 2)
+            throw new AuthInternalError(
+                "INVALID_OAUTH_PROVIDER_CONFIGURATION",
+                `Invalid configuration for OAuth provider "${config}": ${details}`
+            )
         }
+        return parsed.data
     }
-    return config
+    const hasCredentials = config.clientId && config.clientSecret
+    const envConfig = hasCredentials ? {} : defineOAuthEnvironment(config.id)
+    const parsed = OAuthProviderCredentialsSchema.safeParse({ ...envConfig, ...config })
+    if (!parsed.success) {
+        const details = JSON.stringify(formatZodError(parsed.error), null, 2)
+        throw new AuthInternalError(
+            "INVALID_OAUTH_PROVIDER_CONFIGURATION",
+            `Invalid configuration for OAuth provider "${config.id}": ${details}`
+        )
+    }
+    return parsed.data
 }
 
 /**
@@ -85,12 +100,25 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
  *
  * @param oauth - Array of OAuth provider configurations or provider names to be defined from environment variables
  * @returns A record of OAuth provider configurations
+ * @example
+ * // Using built-in provider with env variables
+ * createBuiltInOAuthProviders(["github"])
+ *
+ * // Using built-in provider with explicit credentials via factory
+ * createBuiltInOAuthProviders([github({ clientId: "...", clientSecret: "..." })])
  */
-export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuthProviderCredentials)[] = []) => {
+export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any>)[] = []) => {
     return oauth.reduce((previous, config) => {
         const oauthConfig = defineOAuthProviderConfig(config)
+        if (oauthConfig.id in previous) {
+            throw new AuthInternalError(
+                "DUPLICATED_OAUTH_PROVIDER_ID",
+                `Duplicate OAuth provider id "${oauthConfig.id}" found. Each provider must have a unique id.`
+            )
+        }
+
         return { ...previous, [oauthConfig.id]: oauthConfig }
-    }, {}) as Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+    }, {}) as Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials<any>>
 }
 
 export type BuiltInOAuthProvider = keyof typeof builtInOAuthProviders

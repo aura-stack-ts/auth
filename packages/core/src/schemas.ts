@@ -1,5 +1,18 @@
 import { object, string, enum as options, number, z, null as nullable } from "zod"
 
+export const OAuthProviderCredentialsSchema = object({
+    id: string(),
+    name: string(),
+    authorizeURL: string().url(),
+    accessToken: string().url(),
+    scope: string(),
+    userInfo: string().url(),
+    responseType: options(["code", "token", "id_token"]),
+    clientId: string(),
+    clientSecret: string(),
+    profile: z.function().optional(),
+})
+
 /**
  * Schema for OAuth Provider Configuration
  */

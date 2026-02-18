@@ -1,8 +1,8 @@
 import { z } from "zod"
+import { createLogEntry } from "@/logger.js"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.js"
+import { createJoseInstance, type JWTPayload } from "@/jose.js"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { JWTVerifyOptions, EncryptOptions, JWTDecryptOptions } from "@aura-stack/jose"
-import type { JWTPayload } from "@/jose.js"
 import type { BuiltInOAuthProvider } from "@/oauth/index.js"
 import type { LiteralUnion, Prettify } from "@/@types/utility.js"
 
@@ -42,7 +42,7 @@ export interface Session {
  * Configuration for an OAuth provider without credentials.
  * Use this type when defining provider metadata and endpoints.
  */
-export interface OAuthProviderConfig<Profile extends object = {}> {
+export interface OAuthProviderConfig<Profile extends object = Record<string, any>> {
     id: string
     name: string
     authorizeURL: string
@@ -57,15 +57,15 @@ export interface OAuthProviderConfig<Profile extends object = {}> {
  * OAuth provider configuration with client credentials.
  * Extends OAuthProviderConfig with clientId and clientSecret.
  */
-export interface OAuthProviderCredentials<Profile extends object = {}> extends OAuthProviderConfig<Profile> {
-    clientId: string
-    clientSecret: string
+export interface OAuthProviderCredentials<Profile extends object = Record<string, any>> extends OAuthProviderConfig<Profile> {
+    clientId?: string
+    clientSecret?: string
 }
 
 /**
  * Complete OAuth provider type combining configuration and credentials.
  */
-export type OAuthProvider<Profile extends object = {}> = OAuthProviderCredentials<Profile>
+export type OAuthProvider<Profile extends object = Record<string, any>> = OAuthProviderCredentials<Profile>
 
 /**
  * Cookie type with __Secure- prefix, must be Secure.
@@ -128,6 +128,9 @@ export interface AuthConfig {
      * Built-in OAuth providers:
      * oauth: ["github", "google"]
      *
+     * Custom credentials via factory:
+     * oauth: [github({ clientId: "...", clientSecret: "..." })]
+     *
      * Custom OAuth providers:
      * oauth: [
      *   {
@@ -138,12 +141,12 @@ export interface AuthConfig {
      *     scope: "profile email",
      *     responseType: "code",
      *     userInfo: "https://example.com/oauth/userinfo",
-     *     clientId: process.env.AURA_AUTH_OAUTH_PROVIDER_CLIENT_ID!,
-     *     clientSecret: process.env.AURA_AUTH_OAUTH_PROVIDER_CLIENT_SECRET!,
+     *     clientId: process.env.AURA_AUTH_PROVIDER_CLIENT_ID,
+     *     clientSecret: process.env.AURA_AUTH_PROVIDER_CLIENT_SECRET,
      *   }
      * ]
      */
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -188,18 +191,42 @@ export interface AuthConfig {
      * @experimental
      */
     trustedProxyHeaders?: boolean
+
+    logger?: Logger
+    /**
+     * Defines trusted origins for your application to prevent open redirect attacks.
+     * URLs from the Referer header, Origin header, request URL, and redirectTo option
+     * are validated against this list before redirecting.
+     *
+     * - **Exact URL**: `https://example.com` matches only that origin.
+     * - **Subdomain wildcard**: `https://*.example.com` matches `https://app.example.com`, `https://api.example.com`, etc.
+     * @example
+     * trustedOrigins: ["https://example.com", "https://*.example.com", "http://localhost:3000"]
+     *
+     *
+     * trustedOrigins: async (request) => {
+     *   const origin = new URL(request.url).origin
+     *   return [origin, "https://admin.example.com"]
+     * }
+     */
+    trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
 }
 
-export interface JoseInstance {
-    decodeJWT: (token: string) => Promise<JWTPayload>
-    encodeJWT: (payload: JWTPayload) => Promise<string>
-    signJWS: (payload: JWTPayload) => Promise<string>
-    verifyJWS: (payload: string, options?: JWTVerifyOptions) => Promise<JWTPayload>
-    encryptJWE: (payload: string, options?: EncryptOptions) => Promise<string>
-    decryptJWE: (payload: string, options?: JWTDecryptOptions) => Promise<string>
-}
+/**
+ * A trusted origin URL or pattern. Supports:
+ * - Exact: `https://example.com`
+ * - Subdomain wildcard: `https://*.example.com`
+ */
+export type TrustedOrigin = string
+
+export type JoseInstance = ReturnType<typeof createJoseInstance>
 
 export type OAuthProviderRecord = Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+
+export type InternalLogger = {
+    level: LogLevel
+    log: typeof createLogEntry
+}
 
 export interface RouterGlobalContext {
     oauth: OAuthProviderRecord
@@ -208,6 +235,8 @@ export interface RouterGlobalContext {
     secret?: string
     basePath: string
     trustedProxyHeaders: boolean
+    trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
+    logger?: InternalLogger
 }
 
 /**
@@ -261,6 +290,11 @@ export type AuthInternalErrorCode =
     | "COOKIE_PARSING_FAILED"
     | "COOKIE_NOT_FOUND"
     | "INVALID_ENVIRONMENT_CONFIGURATION"
+    | "INVALID_URL"
+    | "INVALID_SALT_SECRET_VALUE"
+    | "UNTRUSTED_ORIGIN"
+    | "INVALID_OAUTH_PROVIDER_CONFIGURATION"
+    | "DUPLICATED_OAUTH_PROVIDER_ID"
 
 export type AuthSecurityErrorCode =
     | "INVALID_STATE"
@@ -273,3 +307,35 @@ export type AuthSecurityErrorCode =
 export type OAuthEnv = z.infer<typeof OAuthEnvSchema>
 
 export type APIErrorMap = Record<string, { code: string; message: string }>
+
+/**
+ * Log level for logger messages.
+ */
+export type LogLevel = "warn" | "error" | "debug" | "info"
+
+/** Defines the Severity between 0 to 7 */
+export type Severity = "emergency" | "alert" | "critical" | "error" | "warning" | "notice" | "info" | "debug"
+
+/**
+ * @see https://datatracker.ietf.org/doc/html/rfc5424
+ */
+export type SyslogOptions = {
+    facility: 4 | 10
+    severity: Severity
+    timestamp?: string
+    hostname?: string
+    appName?: string
+    procId?: string
+    msgId: string
+    message: string
+    structuredData?: Record<string, string | number | boolean>
+}
+
+/**
+ * Logger function interface for structured logging.
+ * Called when errors or warnings occur during authentication flows.
+ */
+export type Logger = {
+    level: LogLevel
+    log: (args: SyslogOptions) => void
+}

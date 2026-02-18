@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { createAuthServer } from "@/lib/server"
 import { SessionClient } from "@/components/get-session-client"
 
-const providers = [builtInOAuthProviders.github, builtInOAuthProviders.gitlab, builtInOAuthProviders.bitbucket]
+const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
 
 export default async function Home() {
     const { getSession, signIn } = await createAuthServer()

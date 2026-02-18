@@ -2,10 +2,11 @@ import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/secure.js"
 import { cacheControl } from "@/headers.js"
+import { isRelativeURL, isSameOrigin, isTrustedOrigin, safeEquals } from "@/assert.js"
 import { getUserInfo } from "@/actions/callback/userinfo.js"
 import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
 import { AuthSecurityError, OAuthProtocolError } from "@/errors.js"
-import { equals, isValidRelativePath, sanitizeURL } from "@/utils.js"
+import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.js"
 import { createAccessToken } from "@/actions/callback/access-token.js"
 import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.js"
 import type { JWTPayload } from "@/jose.js"
@@ -27,10 +28,23 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
         },
         middlewares: [
             (ctx) => {
-                const response = OAuthAuthorizationErrorResponse.safeParse(ctx.searchParams)
+                const {
+                    searchParams,
+                    context: { logger },
+                } = ctx
+                const response = OAuthAuthorizationErrorResponse.safeParse(searchParams)
                 if (response.success) {
                     const { error, error_description } = response.data
-                    throw new OAuthProtocolError(error, error_description ?? "OAuth Authorization Error")
+                    const criticalAuthErrors = ["access_denied", "server_error"]
+                    const severity = criticalAuthErrors.includes(error.toLowerCase()) ? "critical" : "warning"
+                    logger?.log("OAUTH_AUTHORIZATION_ERROR", {
+                        severity,
+                        structuredData: {
+                            error,
+                            error_description: error_description ?? "",
+                        },
+                    })
+                    throw new OAuthProtocolError(error, error_description || "OAuth Authorization Error")
                 }
                 return ctx
             },
@@ -47,37 +61,65 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 request,
                 params: { oauth },
                 searchParams: { code, state },
-                context: { oauth: providers, cookies, jose },
+                context,
             } = ctx
+            const { oauth: providers, cookies, jose, logger, trustedOrigins } = context
 
             const oauthConfig = providers[oauth]
             const cookieState = getCookie(request, cookies.state.name)
+            const codeVerifier = getCookie(request, cookies.codeVerifier.name)
             const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
             const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
-            const codeVerifier = getCookie(request, cookies.codeVerifier.name)
 
-            if (!equals(cookieState, state)) {
+            if (!safeEquals(cookieState, state)) {
+                logger?.log("MISMATCHING_STATE", {
+                    structuredData: {
+                        oauth_provider: oauth,
+                    },
+                })
                 throw new AuthSecurityError(
                     "MISMATCHING_STATE",
                     "The provided state passed in the OAuth response does not match the stored state."
                 )
             }
 
-            const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier)
-            const sanitized = sanitizeURL(cookieRedirectTo)
-            if (!isValidRelativePath(sanitized)) {
-                throw new AuthSecurityError(
-                    "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
-                    "Invalid redirect path. Potential open redirect attack detected."
-                )
+            const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier, logger)
+            const origins = await getTrustedOrigins(request, trustedOrigins)
+            const requestOrigin = await getOriginURL(request, context)
+
+            if (!isRelativeURL(cookieRedirectTo)) {
+                const isValid =
+                    origins.length > 0
+                        ? isTrustedOrigin(cookieRedirectTo, origins)
+                        : isSameOrigin(cookieRedirectTo, requestOrigin)
+                if (!isValid) {
+                    logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
+                        structuredData: {
+                            redirect_path: cookieRedirectTo,
+                            provider: oauth,
+                            has_trusted_origins: origins.length > 0,
+                            request_origin: requestOrigin,
+                        },
+                    })
+                    throw new AuthSecurityError(
+                        "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
+                        "Invalid redirect path. Potential open redirect attack detected."
+                    )
+                }
             }
 
-            const userInfo = await getUserInfo(oauthConfig, accessToken.access_token)
+            const userInfo = await getUserInfo(oauthConfig, accessToken.access_token, logger)
             const sessionCookie = await createSessionCookie(jose, userInfo as JWTPayload)
             const csrfToken = await createCSRF(jose)
 
+            logger?.log("OAUTH_CALLBACK_SUCCESS", {
+                structuredData: {
+                    provider: oauth,
+                },
+            })
+
             const headers = new HeadersBuilder(cacheControl)
-                .setHeader("Location", sanitized)
+                .setHeader("Location", cookieRedirectTo)
                 .setCookie(cookies.sessionToken.name, sessionCookie, cookies.sessionToken.attributes)
                 .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
                 .setCookie(cookies.state.name, "", expiredCookieAttributes)

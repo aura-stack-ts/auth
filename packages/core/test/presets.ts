@@ -1,4 +1,5 @@
 import { createAuth } from "@/index.js"
+import { createStructuredData } from "@/utils.js"
 import { OAuthProviderCredentials } from "@/@types/index.js"
 import type { JWTPayload } from "@/jose.js"
 
@@ -37,11 +38,36 @@ export const sessionPayload: JWTPayload = {
     image: "https://example.com/image.jpg",
 }
 
+const severityToSyslogSeverity = (severity: string): number => {
+    const obj: Record<string, number> = {
+        emergency: 0,
+        alert: 1,
+        critical: 2,
+        error: 3,
+        warning: 4,
+        notice: 5,
+        info: 6,
+        debug: 7,
+    }
+    return obj[severity] ?? 6
+}
+
 export const {
     handlers: { GET, POST },
     jose,
 } = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile],
     cookies: {},
-    secret: process.env.AURA_AUTH_SECRET,
+    logger: {
+        level: "debug",
+        log({ facility, severity, timestamp, message, structuredData, msgId }) {
+            const pri = facility * 8 + severityToSyslogSeverity(severity)
+            /**
+             * This is not a real logger implementation.
+             * Replace this with your own logger implementation.
+             */
+            const msg = createStructuredData(structuredData ?? {})
+            console.log(`<${pri}>1 ${timestamp} aura-auth - - ${msgId} ${msg} ${message}`)
+        },
+    },
 })

@@ -86,13 +86,32 @@ AURA_AUTH_SECRET="32-bytes-secret"
 
 ### Configure the provider
 
-Set the `oauth` option of the `createAuth` instance and writing `"github"` name.
+Set the `oauth` option of the `createAuth` instance. You can use the provider name as a string to use default settings, or use the `github` factory function to customize the configuration.
+
+#### Default configuration
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["github"],
+})
+
+export const { handlers } = auth
+```
+
+#### Custom configuration
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { github } from "@aura-stack/auth/oauth/github"
+
+export const auth = createAuth({
+  oauth: [
+    github({
+      scope: "read:user user:email repo", // Custom scopes
+    }),
+  ],
 })
 
 export const { handlers } = auth

@@ -30,14 +30,19 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
                 request,
                 params: { oauth },
                 searchParams: { redirectTo },
-                context: { oauth: providers, cookies, trustedProxyHeaders, basePath },
+                context,
             } = ctx
+            const { oauth: providers, cookies, logger } = context
             const state = generateSecure()
-            const redirectURI = createRedirectURI(request, oauth, basePath, trustedProxyHeaders)
-            const redirectToValue = createRedirectTo(request, redirectTo, trustedProxyHeaders)
+            const redirectURI = await createRedirectURI(request, oauth, context)
+            const redirectToValue = await createRedirectTo(request, redirectTo, context)
 
             const { codeVerifier, codeChallenge, method } = await createPKCE()
-            const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method)
+            const authorization = createAuthorizationURL(providers[oauth], redirectURI, state, codeChallenge, method, logger)
+
+            logger?.log("SIGN_IN_INITIATED", {
+                structuredData: { oauth_provider: oauth, code_challenge_method: method },
+            })
 
             const headers = new HeadersBuilder(cacheControl)
                 .setHeader("Location", authorization)

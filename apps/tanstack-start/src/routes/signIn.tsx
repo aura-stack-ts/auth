@@ -5,14 +5,15 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, BookOpen } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import type { OAuthProviderConfig } from "@aura-stack/auth"
 
 export const Route = createFileRoute("/signIn")({
     component: RouteComponent,
 })
 
 function RouteComponent() {
-    const identities = Object.values(builtInOAuthProviders) as OAuthProviderConfig[]
+    const identities = Object.keys(builtInOAuthProviders).map((key) =>
+        builtInOAuthProviders[key as keyof typeof builtInOAuthProviders]()
+    )
 
     return (
         <section className="w-full min-h-screen pt-36 pb-6 flex flex-col items-center justify-center relative bg-black base:pt-22">

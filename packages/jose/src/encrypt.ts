@@ -1,6 +1,6 @@
-import crypto from "node:crypto"
-import { EncryptJWT, jwtDecrypt, type JWTDecryptOptions } from "jose"
+import { base64url, EncryptJWT, jwtDecrypt, type JWTDecryptOptions } from "jose"
 import { createSecret } from "@/secret.js"
+import { getRandomBytes } from "@/crypto.js"
 import { isAuraJoseError, isFalsy } from "@/assert.js"
 import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.js"
 import type { SecretInput } from "@/index.js"
@@ -33,7 +33,7 @@ export const encryptJWE = async (payload: string, secret: SecretInput, options?:
             throw new InvalidPayloadError("The payload must be a non-empty string")
         }
         const secretKey = createSecret(secret)
-        const jti = crypto.randomBytes(32).toString("base64url")
+        const jti = base64url.encode(getRandomBytes(32))
 
         return new EncryptJWT({ payload })
             .setProtectedHeader({ alg: "dir", enc: "A256GCM", typ: "JWT", cty: "JWT" })
