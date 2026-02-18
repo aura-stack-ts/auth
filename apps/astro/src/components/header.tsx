@@ -25,6 +25,7 @@ const HeaderContent = () => {
                             href="https://aura-stack-auth.vercel.app/docs"
                             className="text-sm hover:text-white transition-colors"
                             target="_blank"
+                            rel="noopener noreferrer"
                         >
                             Documentation
                         </a>
@@ -32,6 +33,7 @@ const HeaderContent = () => {
                             href="https://github.com/aura-stack-ts/auth"
                             className="text-sm hover:text-white transition-colors"
                             target="_blank"
+                            rel="noopener noreferrer"
                         >
                             Repository
                         </a>
@@ -39,6 +41,7 @@ const HeaderContent = () => {
                             href="https://discord.com/invite/anXExMR5"
                             className="text-sm hover:text-white transition-colors"
                             target="_blank"
+                            rel="noopener noreferrer"
                         >
                             Discord
                         </a>
@@ -47,6 +50,7 @@ const HeaderContent = () => {
                         <a
                             href="https://astro.build/"
                             target="_blank"
+                            rel="noopener noreferrer"
                             className="hidden text-xl font-semibold text-white md:flex"
                         >
                             Astro
@@ -84,6 +88,7 @@ const HeaderContent = () => {
                             href="https://github.com/aura-stack-ts/auth"
                             className="text-sm text-muted-foreground hover:text-white transition-colors py-2"
                             target="_blank"
+                            rel="noopener noreferrer"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Repository
@@ -92,6 +97,7 @@ const HeaderContent = () => {
                             href="https://discord.com/invite/anXExMR5"
                             className="text-sm text-muted-foreground hover:text-white transition-colors py-2"
                             target="_blank"
+                            rel="noopener noreferrer"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Discord

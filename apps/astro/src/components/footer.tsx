@@ -49,6 +49,7 @@ export const Footer = () => {
                                     className="h-min p-1.5 border rounded-md hover:bg-accent"
                                     key={i}
                                     target="_blank"
+                                    rel="noopener noreferrer"
                                     href={item.link}
                                 >
                                     {item.icon}

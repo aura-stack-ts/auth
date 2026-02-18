@@ -16,18 +16,18 @@ This project contains a demonstration of Aura Auth authentication with [OAuth 2.
 
 ## Getting Started
 
-You can run the example app locally for development or contribution.
+You can run the documentation site locally for development or contribution.
 
 ### From the repository root
 
 ```bash
-pnpm dev --filter=astro-app
+pnpm dev --filter=astro
 ```
 
 ### Or manually from the app directory
 
 ```bash
-cd apps/astro-app
+cd apps/astro
 pnpm install
 pnpm dev
 ```
