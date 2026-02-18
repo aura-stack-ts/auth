@@ -1,10 +1,10 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import { Fingerprint, LayoutDashboard } from "lucide-react"
-import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
+import { createAuthServer } from "@/lib/server"
 import { Button } from "@/components/ui/button"
 import { SessionClient } from "@/components/get-session-client"
-import { createAuthServer } from "@/lib/server"
+import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 
 const auth = await createAuthServer({
     request: Astro.request,

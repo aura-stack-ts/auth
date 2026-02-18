@@ -1,7 +1,8 @@
 import { createContext, use, useState, useEffect } from "react"
 import { createAuthClient } from "@/lib/client"
 import type { Session } from "@aura-stack/auth"
-import type { AuthContextValue, AuthProviderProps } from "@/lib/auth-types"
+import type { AuthProviderProps } from "@/@types/props"
+import type { AuthContextValue } from "@/@types/types"
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
