@@ -57,6 +57,7 @@ export const createJoseInstance = (secret?: string) => {
             jwe: createJWE(derivedEncryptionKey),
         }
     })()
+    jose.catch(() => {})
 
     return {
         decodeJWT: async (...args: Parameters<ReturnType<typeof createJWT>["decodeJWT"]>) => {
