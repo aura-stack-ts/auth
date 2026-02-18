@@ -9,7 +9,8 @@ import {
     type DecodedJWTPayloadOptions,
 } from "@aura-stack/jose"
 import { AuthInternalError } from "@/errors.js"
-export type { JWTPayload } from "@aura-stack/jose/jose"
+export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
+export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 
 /**
  * Creates the JOSE instance used for signing and verifying tokens. It derives keys
@@ -44,21 +45,45 @@ export const createJoseInstance = (secret?: string) => {
             { cause: error }
         )
     }
-    const { derivedKey: derivedSigningKey } = createDeriveKey(secret, salt, "signing")
-    const { derivedKey: derivedEncryptionKey } = createDeriveKey(secret, salt, "encryption")
-    const { derivedKey: derivedCsrfTokenKey } = createDeriveKey(secret, salt, "csrfToken")
 
-    const { decodeJWT, encodeJWT } = createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey })
-    const { signJWS, verifyJWS } = createJWS(derivedCsrfTokenKey)
-    const { encryptJWE, decryptJWE } = createJWE(derivedEncryptionKey)
+    const jose = (async () => {
+        const derivedSigningKey = await createDeriveKey(secret, salt, "signing")
+        const derivedEncryptionKey = await createDeriveKey(secret, salt, "encryption")
+        const derivedCsrfTokenKey = await createDeriveKey(secret, salt, "csrfToken")
+
+        return {
+            jwt: createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey }),
+            jws: createJWS(derivedCsrfTokenKey),
+            jwe: createJWE(derivedEncryptionKey),
+        }
+    })()
+    jose.catch(() => {})
 
     return {
-        decodeJWT,
-        encodeJWT,
-        signJWS,
-        verifyJWS,
-        encryptJWE,
-        decryptJWE,
+        decodeJWT: async (...args: Parameters<ReturnType<typeof createJWT>["decodeJWT"]>) => {
+            const { jwt } = await jose
+            return jwt.decodeJWT(...args)
+        },
+        encodeJWT: async (...args: Parameters<ReturnType<typeof createJWT>["encodeJWT"]>) => {
+            const { jwt } = await jose
+            return jwt.encodeJWT(...args)
+        },
+        signJWS: async (...args: Parameters<ReturnType<typeof createJWS>["signJWS"]>) => {
+            const { jws } = await jose
+            return jws.signJWS(...args)
+        },
+        verifyJWS: async (...args: Parameters<ReturnType<typeof createJWS>["verifyJWS"]>) => {
+            const { jws } = await jose
+            return jws.verifyJWS(...args)
+        },
+        encryptJWE: async (...args: Parameters<ReturnType<typeof createJWE>["encryptJWE"]>) => {
+            const { jwe } = await jose
+            return jwe.encryptJWE(...args)
+        },
+        decryptJWE: async (...args: Parameters<ReturnType<typeof createJWE>["decryptJWE"]>) => {
+            const { jwe } = await jose
+            return jwe.decryptJWE(...args)
+        },
     }
 }
 

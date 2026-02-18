@@ -1,5 +1,6 @@
 import { isObject } from "@/assert.js"
 import { InvalidSecretError } from "@/errors.js"
+import { encoder } from "@/crypto.js"
 import type { DerivedKeyInput, SecretInput } from "@/index.js"
 
 export const MIN_SECRET_ENTROPY_BITS = 4.5
@@ -23,6 +24,7 @@ export const getEntropy = (secret: string): number => {
 
 /**
  * Create a secret in Uint8Array format
+ * Uses the standard TextEncoder API for cross-runtime compatibility
  *
  * @param secret - The secret as a string or Uint8Array
  * @returns The secret in Uint8Array format
@@ -30,7 +32,8 @@ export const getEntropy = (secret: string): number => {
 export const createSecret = (secret: SecretInput, length: number = 32) => {
     if (!Boolean(secret)) throw new InvalidSecretError("Secret is required")
     if (typeof secret === "string") {
-        const byteLength = new TextEncoder().encode(secret).byteLength
+        const encoded = encoder.encode(secret)
+        const byteLength = encoded.byteLength
         if (byteLength < length) {
             throw new InvalidSecretError(`Secret string must be at least ${length} bytes long`)
         }
@@ -40,9 +43,15 @@ export const createSecret = (secret: SecretInput, length: number = 32) => {
                 `Secret string must have an entropy of at least ${MIN_SECRET_ENTROPY_BITS} bits per character`
             )
         }
-        return new Uint8Array(Buffer.from(secret, "utf-8"))
+        return encoded
     }
-    return secret
+    if (secret instanceof CryptoKey || secret instanceof Uint8Array) {
+        if (secret instanceof Uint8Array && secret.byteLength < length) {
+            throw new InvalidSecretError(`Secret must be at least ${length} bytes long`)
+        }
+        return secret
+    }
+    throw new InvalidSecretError("Secret must be a string, Uint8Array, or CryptoKey")
 }
 
 export const getSecrets = (secret: SecretInput | DerivedKeyInput) => {

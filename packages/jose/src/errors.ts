@@ -44,3 +44,7 @@ export class JWEEncryptionError extends AuraJoseError {
 export class InvalidSecretError extends AuraJoseError {
     static code = "ERR_INVALID_SECRET"
 }
+
+export class KeyDerivationError extends AuraJoseError {
+    static code = "ERR_KEY_DERIVATION"
+}

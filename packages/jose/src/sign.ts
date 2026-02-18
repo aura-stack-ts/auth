@@ -1,6 +1,6 @@
-import crypto from "crypto"
-import { jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
+import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
 import { createSecret } from "@/secret.js"
+import { getRandomBytes } from "@/crypto.js"
 import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.js"
 import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.js"
 import type { SecretInput } from "@/index.js"
@@ -26,7 +26,7 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
             throw new InvalidPayloadError("The payload must be a non-empty object")
         }
         const secretKey = createSecret(secret)
-        const jti = crypto.randomBytes(32).toString("base64url")
+        const jti = base64url.encode(getRandomBytes(32))
 
         return new SignJWT(payload)
             .setProtectedHeader({ alg: "HS256", typ: "JWT" })
