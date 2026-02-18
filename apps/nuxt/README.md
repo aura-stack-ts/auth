@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project contains a demonstration of Aura Auth authentication with [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/oauth) with [Nuxt](https://nuxt.com/) app.
+This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in an [Nuxt](https://nuxt.com/) application.
 
 ## Getting Started
 

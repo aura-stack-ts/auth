@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project contains a demonstration of Aura Auth authentication with [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) with [Next.js](https://nextjs.org/) app
+This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in an [Next.js](https://nextjs.org/) application.
 
 ## Getting Started
 
