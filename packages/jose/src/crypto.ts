@@ -1,5 +1,5 @@
-const encoder = new TextEncoder()
-const decoder = new TextDecoder()
+export const encoder = new TextEncoder()
+export const decoder = new TextDecoder()
 
 /**
  * Generate random bytes using the Web Crypto API
@@ -10,28 +10,6 @@ const decoder = new TextDecoder()
  */
 export const getRandomBytes = (size: number): Uint8Array => {
     return globalThis.crypto.getRandomValues(new Uint8Array(size))
-}
-
-/**
- * Encode a string to UTF-8 bytes
- * Uses the standard TextEncoder API
- *
- * @param input - String to encode
- * @returns Uint8Array containing UTF-8 encoded bytes
- */
-export const encodeString = (input: string): Uint8Array => {
-    return encoder.encode(input)
-}
-
-/**
- * Decode UTF-8 bytes to a string
- * Uses the standard TextDecoder API
- *
- * @param bytes - Uint8Array containing UTF-8 encoded bytes
- * @returns Decoded string
- */
-export const decodeString = (bytes: Uint8Array): string => {
-    return decoder.decode(bytes)
 }
 
 /**

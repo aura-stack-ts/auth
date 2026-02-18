@@ -12,6 +12,7 @@ export * from "@/sign.js"
 export * from "@/encrypt.js"
 export * from "@/deriveKey.js"
 export * from "@/secret.js"
+export * from "@/crypto.js"
 
 /**
  * Secret input can be:

@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { createSecret } from "@/secret.js"
-import { getRandomBytes } from "@/runtime.js"
+import { encoder, getRandomBytes } from "@/crypto.js"
 import { createJWS, signJWS, verifyJWS } from "@/sign.js"
 import { deriveKey, createDeriveKey } from "@/deriveKey.js"
 import { createJWT, MIN_SECRET_ENTROPY_BITS } from "@/index.js"
@@ -269,8 +269,8 @@ describe("createDeriveKey", () => {
 describe("deriveKey", () => {
     test("deriveKey", async () => {
         const secret = "my-secret-password-123"
-        const derivedKey1 = await deriveKey(Buffer.from(secret), "salt-1", "info-1")
-        const derivedKey2 = await deriveKey(Buffer.from(secret), "salt-2", "info-2")
+        const derivedKey1 = await deriveKey(encoder.encode(secret), "salt-1", "info-1")
+        const derivedKey2 = await deriveKey(encoder.encode(secret), "salt-2", "info-2")
         expect(derivedKey1).toBeDefined()
         expect(derivedKey2).toBeDefined()
         expect(derivedKey1).not.toEqual(derivedKey2)

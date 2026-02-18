@@ -1,6 +1,6 @@
 import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
 import { createSecret } from "@/secret.js"
-import { getRandomBytes } from "@/runtime.js"
+import { getRandomBytes } from "@/crypto.js"
 import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.js"
 import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.js"
 import type { SecretInput } from "@/index.js"

@@ -1,6 +1,6 @@
-import { encodeString, getSubtleCrypto } from "@/runtime.js"
 import { createSecret } from "@/secret.js"
 import { KeyDerivationError } from "@/errors.js"
+import { encoder, getSubtleCrypto } from "@/crypto.js"
 import type { SecretInput } from "@/index.js"
 
 /**
@@ -24,8 +24,8 @@ export const deriveKey = async (
         const secretBuffer = secret.buffer.slice(secret.byteOffset, secret.byteOffset + secret.byteLength)
         const baseKey = await subtle.importKey("raw", secretBuffer as BufferSource, "HKDF", false, ["deriveBits"])
 
-        const saltBuffer = typeof salt === "string" ? encodeString(salt) : salt
-        const infoBuffer = typeof info === "string" ? encodeString(info) : info
+        const saltBuffer = typeof salt === "string" ? encoder.encode(salt) : salt
+        const infoBuffer = typeof info === "string" ? encoder.encode(info) : info
         const derivedBits = await subtle.deriveBits(
             {
                 name: "HKDF",
@@ -62,11 +62,9 @@ export const createDeriveKey = async (
     length: number = 32
 ) => {
     const secretKey = createSecret(secret)
-
     if (secretKey instanceof CryptoKey) {
         throw new KeyDerivationError("Cannot derive key from CryptoKey. Use Uint8Array or string secret instead.")
     }
-
     const key = await deriveKey(secretKey, salt ?? "Aura Jose secret salt", info ?? "Aura Jose secret derivation", length)
     return key
 }

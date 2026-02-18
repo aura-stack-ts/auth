@@ -53,6 +53,11 @@
       "types": "./dist/deriveKey.d.ts",
       "require": "./dist/deriveKey.cjs",
       "import": "./dist/deriveKey.js"
+    },
+    "./crypto": {
+      "types": "./dist/crypto.d.ts",
+      "require": "./dist/crypto.cjs",
+      "import": "./dist/crypto.js"
     }
   },
   "keywords": [
