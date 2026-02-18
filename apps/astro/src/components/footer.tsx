@@ -36,16 +36,21 @@ export const Footer = () => {
             <div className="w-11/12 mx-auto max-w-5xl border-x border-muted">
                 <div className="py-10 px-6 max-w-5xl grid grid-cols-6 gap-6">
                     <div className="col-span-6 flex flex-col gap-5 md:col-span-4">
-                        <a href="" className="w-max opacity-25">
+                        <a href="https://aura-stack-auth.vercel.app" className="w-max opacity-25">
                             Aura Auth
                         </a>
                         <p className="max-w-sm text-muted-foreground font-mono text-sm text-balance">
                             Built for speed, security, and developer experience. The complete authentication library for
                             TypeScript applications.
                         </p>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 list-none">
                             {socialLinks.map((item, i) => (
-                                <a key={i} className="p-1.5 border rounded-md hover:bg-accent" target="_blank" href={item.link}>
+                                <a
+                                    className="h-min p-1.5 border rounded-md hover:bg-accent"
+                                    key={i}
+                                    target="_blank"
+                                    href={item.link}
+                                >
                                     {item.icon}
                                 </a>
                             ))}
@@ -55,13 +60,14 @@ export const Footer = () => {
                         <span className="mb-1 text-sm text-white">Resources</span>
                         <ul className="flex flex-col gap-1">
                             {resources.map(({ href, title }, i) => (
-                                <a
-                                    key={i}
-                                    className={`w-max py-1 text-xs text-muted-foreground duration-200 hover:underline`}
-                                    href={href}
-                                >
-                                    {title}
-                                </a>
+                                <li key={i}>
+                                    <a
+                                        className={`w-max py-1 text-xs text-muted-foreground duration-200 hover:underline`}
+                                        href={href}
+                                    >
+                                        {title}
+                                    </a>
+                                </li>
                             ))}
                         </ul>
                     </div>

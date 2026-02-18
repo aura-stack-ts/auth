@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1>Aura Auth + Astro App Router</h1>
+<h1>Aura Auth + Astro</h1>
 
 **Integration Example App**
 
@@ -16,18 +16,18 @@ This project contains a demonstration of Aura Auth authentication with [OAuth 2.
 
 ## Getting Started
 
-You can run the documentation locally for development or contribution.
+You can run the example app locally for development or contribution.
 
 ### From the repository root
 
 ```bash
-pnpm dev --filter=astro
+pnpm dev --filter=astro-app
 ```
 
-### Or manually from the root directory
+### Or manually from the app directory
 
 ```bash
-cd apps/astro
+cd apps/astro-app
 pnpm install
 pnpm dev
 ```

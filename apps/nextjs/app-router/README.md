@@ -16,7 +16,7 @@ This project contains a demonstration of Aura Auth authentication with [OAuth 2.
 
 ## Getting Started
 
-You can run the documentation locally for development or contribution.
+You can run the example app locally for development or contribution.
 
 ### From the repository root
 

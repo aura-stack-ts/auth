@@ -20,7 +20,7 @@ It is built with **MDX** and served through **[FumaDocs](https://fumadocs.dev)**
 
 ## Getting Started
 
-You can run the documentation locally for development or contribution.
+You can run the example app locally for development or contribution.
 
 ### From the repository root
 

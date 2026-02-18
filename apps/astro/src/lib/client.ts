@@ -9,12 +9,18 @@ const getBaseURL = () => {
 
 const getCSRFToken = async (): Promise<string> => {
     const response = await createRequest("/api/auth/csrfToken")
+    if (!response.ok) {
+        throw new Error(`Failed to fetch CSRF token: ${response.status}`)
+    }
     const data = await response.json()
     return data.csrfToken
 }
 
 const getSession = async (): Promise<Session | null> => {
     const response = await createRequest("/api/auth/session")
+    if (!response.ok) {
+        throw new Error(`Failed to fetch session: ${response.status}`)
+    }
     const session = await response.json()
     return session
 }

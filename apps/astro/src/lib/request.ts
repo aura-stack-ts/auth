@@ -14,6 +14,7 @@ export const createRequest = async (endpoint: string, init?: RequestInit, timeou
     const response = await fetch(`${baseURL}${endpoint}`, {
         ...options,
         method,
+        signal: controller.signal,
         headers: {
             ...(body ? { "Content-Type": "application/json" } : {}),
             ...headers,

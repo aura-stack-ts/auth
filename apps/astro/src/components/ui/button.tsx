@@ -1,7 +1,8 @@
-import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
+import { Slot } from "@radix-ui/react-slot"
+import type { ButtonHTMLAttributes } from "react"
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: "default" | "secondary" | "outline"
     size?: "default" | "sm" | "lg" | "icon" | "icon-sm" | "icon-lg"
     asChild?: boolean
