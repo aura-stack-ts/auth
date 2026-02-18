@@ -1,16 +1,17 @@
-import crypto from "crypto"
 import { equals } from "@/utils.js"
 import { AuthSecurityError } from "@/errors.js"
 import { isJWTPayloadWithToken, safeEquals } from "@/assert.js"
-import { AuthRuntimeConfig } from "@/@types/index.js"
-import { jwtVerificationOptions } from "./jose.js"
+import { jwtVerificationOptions, base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.js"
+import type { AuthRuntimeConfig } from "@/@types/index.js"
 
 export const generateSecure = (length: number = 32) => {
-    return crypto.randomBytes(length).toString("base64url")
+    return base64url.encode(getRandomBytes(length))
 }
 
-export const createHash = (data: string, base: "hex" | "base64" | "base64url" = "hex") => {
-    return crypto.createHash("sha256").update(data).digest().toString(base)
+export const createHash = async (data: string) => {
+    const subtle = getSubtleCrypto()
+    const digest = await subtle.digest("SHA-256", encoder.encode(data))
+    return base64url.encode(new Uint8Array(digest))
 }
 
 /**
@@ -29,7 +30,7 @@ export const createPKCE = async (verifier?: string) => {
     if (codeVerifier.length < 43 || codeVerifier.length > 128) {
         throw new AuthSecurityError("PKCE_VERIFIER_INVALID", "The code verifier must be between 43 and 128 characters in length.")
     }
-    const codeChallenge = createHash(codeVerifier, "base64url")
+    const codeChallenge = await createHash(codeVerifier)
     return { codeVerifier, codeChallenge, method: "S256" }
 }
 

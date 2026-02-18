@@ -9,7 +9,8 @@ import {
     type DecodedJWTPayloadOptions,
 } from "@aura-stack/jose"
 import { AuthInternalError } from "@/errors.js"
-export type { JWTPayload } from "@aura-stack/jose/jose"
+export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
+export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 
 /**
  * Creates the JOSE instance used for signing and verifying tokens. It derives keys
