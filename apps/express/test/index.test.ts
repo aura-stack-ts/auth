@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import supertest from "supertest"
-import { app } from "../src/server"
-import { jose } from "../src/auth"
+import { app } from "@/server.js"
+import { jose } from "@/auth.js"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
@@ -68,9 +68,7 @@ describe("GET /api/protected", () => {
             name: "John Doe",
             email: "johndoe@example.com",
         })
-        const response = await supertest(app)
-            .get("/api/protected")
-            .set("Cookie", [`aura-auth.session_token=${sessionToken}`, `aura-auth.csrf_token=valid_csrf_token`])
+        const response = await supertest(app).get("/api/protected").set("Cookie", `aura-auth.session_token=${sessionToken}`)
         expect(response.status).toBe(200)
         expect(response.body).toMatchObject({
             message: "You have access to this protected resource.",

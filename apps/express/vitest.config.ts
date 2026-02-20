@@ -1,3 +1,4 @@
+import path from "path"
 import crypto from "crypto"
 import { defineConfig } from "vitest/config"
 
@@ -17,6 +18,12 @@ export default defineConfig({
             AURA_AUTH_SALT: SALT_KEY,
             AURA_AUTH_GITHUB_CLIENT_ID: "test-github-client-id",
             AURA_AUTH_GITHUB_CLIENT_SECRET: "test-github-client-secret",
+        },
+    },
+    resolve: {
+        alias: {
+            "@": path.resolve(__dirname, "./src"),
+            "@test": path.resolve(__dirname, "./test"),
         },
     },
 })
