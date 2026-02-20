@@ -7,10 +7,4 @@ export const { handlers, jose } = createAuth({
     oauth: ["github"],
     basePath: "/api/auth",
     trustedOrigins: ["http://localhost:3000", "http://localhost:3001", "https://*.vercel.app"],
-    logger: {
-        level: "debug",
-        log({ message, structuredData, msgId }) {
-            console.log(`[${msgId}] ${message}`, structuredData || "")
-        },
-    },
 })

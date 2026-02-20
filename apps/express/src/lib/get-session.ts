@@ -1,14 +1,10 @@
 import type { Request } from "express"
 import type { Session } from "@aura-stack/auth"
-import { jose } from "../auth.js"
+import { jose } from "@/auth.js"
 
 /**
  * Decodes and validates the session JWT from the incoming Express request's cookies.
  * Uses the Aura Auth jose instance to verify the token.
- *
- * @returns The decoded session object, or null if no valid session exists.
- * @unstable
- * @experimental
  */
 export const getSession = async (request: Request): Promise<Session | null> => {
     const cookieHeader = request.headers.cookie
@@ -17,11 +13,14 @@ export const getSession = async (request: Request): Promise<Session | null> => {
         const cookies = Object.fromEntries(
             cookieHeader
                 .split(";")
-                .map((c) => c.trim().split("="))
-                .map(([key, ...val]) => [decodeURIComponent(key), decodeURIComponent(val.join("="))])
+                .map((cookiePair) => cookiePair.trim().split("="))
+                .map(([cookieName, ...cookieValueParts]) => [
+                    decodeURIComponent(cookieName),
+                    decodeURIComponent(cookieValueParts.join("=")),
+                ])
         )
 
-        const sessionCookieKey = Object.keys(cookies).find((k) => k.includes("session_token"))
+        const sessionCookieKey = Object.keys(cookies).find((cookieName) => cookieName.includes("session_token"))
         if (!sessionCookieKey) return null
 
         const token = cookies[sessionCookieKey]
@@ -29,6 +28,7 @@ export const getSession = async (request: Request): Promise<Session | null> => {
 
         const decoded = await jose.decodeJWT(token)
         const { exp, iat, jti, nbf, sub, aud, iss, ...user } = decoded as Record<string, any>
+        if (!exp) return null
 
         return {
             user,

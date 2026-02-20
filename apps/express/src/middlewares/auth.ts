@@ -1,5 +1,12 @@
 import type { Request, Response, NextFunction } from "express"
-import { handlers } from "../auth.js"
+import { handlers } from "@/auth.js"
+
+const splitSetCookieHeaderValue = (value: string): string[] => {
+    return value
+        .split(/,(?=\s*[^;,\s]+=)/g)
+        .map((cookie) => cookie.trim())
+        .filter(Boolean)
+}
 
 /**
  * Convert an Express Request to a Web API Request so it can be handled
@@ -22,10 +29,15 @@ export const toWebRequest = (req: Request): globalThis.Request => {
         }
     }
 
+    const body = method !== "GET" && method !== "HEAD" ? JSON.stringify(req.body) : undefined
+    if (body !== undefined) {
+        headers.set("content-type", "application/json")
+    }
+
     return new globalThis.Request(url, {
         method,
         headers,
-        body: method !== "GET" && method !== "HEAD" ? JSON.stringify(req.body) : undefined,
+        body,
     })
 }
 
@@ -36,7 +48,9 @@ export const toWebRequest = (req: Request): globalThis.Request => {
 export const toExpressResponse = async (webResponse: globalThis.Response, res: Response) => {
     for (const [key, value] of webResponse.headers.entries()) {
         if (key.toLowerCase() === "set-cookie") {
-            for (const cookie of webResponse.headers.getSetCookie?.() ?? [value]) {
+            const cookies = webResponse.headers.getSetCookie?.() ?? splitSetCookieHeaderValue(value)
+
+            for (const cookie of cookies) {
                 res.append("Set-Cookie", cookie)
             }
         } else {
@@ -62,7 +76,7 @@ export const toExpressResponse = async (webResponse: globalThis.Response, res: R
  * Express middleware that bridges Aura Auth Web-API handlers to Express.
  * Mount this on the `basePath` configured in `createAuth()` (default: `/api/auth`).
  */
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const toExpressHandler = async (req: Request, res: Response, next: NextFunction) => {
     const handler = handlers[req.method as keyof typeof handlers]
     if (!handler) {
         return next()

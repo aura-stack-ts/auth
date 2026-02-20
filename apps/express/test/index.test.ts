@@ -1,14 +1,14 @@
 import { describe, test, expect } from "vitest"
 import supertest from "supertest"
-import { app } from "../src/index"
+import { app } from "../src/server"
 import { jose } from "../src/auth"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
-        const response = await supertest(app).get("/api/auth/signIn/github")
-        expect(response.status).toBe(302)
-        expect(response.headers).toHaveProperty("location")
-        expect(response.headers.location).toMatch(/^https:\/\/github\.com\/login\/oauth\/authorize\?/)
+        const signIn = await supertest(app).get("/api/auth/signIn/github")
+        expect(signIn.status).toBe(302)
+        expect(signIn.headers).toHaveProperty("location")
+        expect(signIn.headers.location).toMatch(/^https:\/\/github\.com\/login\/oauth\/authorize\?/)
     })
 })
 
@@ -56,10 +56,31 @@ describe("GET /api/auth/csrfToken", () => {
 describe("GET /api/protected", () => {
     test("returns 401 when no session cookie is present", async () => {
         const response = await supertest(app).get("/api/protected")
-
         expect(response.status).toBe(401)
         expect(response.body).toMatchObject({
             error: "Unauthorized",
+        })
+    })
+
+    test("returns protected data when a valid session cookie is present", async () => {
+        const sessionToken = await jose.encodeJWT({
+            sub: "johndoe",
+            name: "John Doe",
+            email: "johndoe@example.com",
+        })
+        const response = await supertest(app)
+            .get("/api/protected")
+            .set("Cookie", [`aura-auth.session_token=${sessionToken}`, `aura-auth.csrf_token=valid_csrf_token`])
+        expect(response.status).toBe(200)
+        expect(response.body).toMatchObject({
+            message: "You have access to this protected resource.",
+            session: expect.objectContaining({
+                user: {
+                    sub: "johndoe",
+                    name: "John Doe",
+                    email: "johndoe@example.com",
+                },
+            }),
         })
     })
 })
