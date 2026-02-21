@@ -3,8 +3,8 @@ import type { Context } from "hono"
 import type { Session } from "@aura-stack/auth"
 
 /**
- * Retrieves and validates the session from the request cookies.
- * Uses Hono's built-in getCookie helper and the Aura Auth jose instance.
+ * Retrieves the current session by forwarding the incoming request headers
+ * to the Aura Auth /api/auth/session handler and parsing the response.
  */
 export const getSession = async (ctx: Context): Promise<Session | null> => {
     try {
