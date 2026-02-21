@@ -1,8 +1,8 @@
 import { Hono } from "hono"
 import { toHonoHandler } from "./lib/handler"
-import { withAuth } from "./middleware/with-auth"
+import { AuthVariables, withAuth } from "./middleware/with-auth"
 
-const app = new Hono()
+const app = new Hono<{ Variables: AuthVariables }>()
 
 app.get("/", (ctx) => {
     return ctx.text("Welcome to the Aura Auth Hono App!")

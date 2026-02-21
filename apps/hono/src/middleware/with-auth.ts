@@ -10,10 +10,14 @@ export type AuthVariables = {
 }
 
 export const withAuth = createMiddleware<{ Variables: AuthVariables }>(async (ctx, next) => {
-    const session = await getSession(ctx)
-    if (!session) {
+    try {
+        const session = await getSession(ctx)
+        if (!session) {
+            return ctx.json({ error: "Unauthorized", message: "Active session required." }, 401)
+        }
+        ctx.set("session", session)
+        return await next()
+    } catch {
         return ctx.json({ error: "Unauthorized", message: "Active session required." }, 401)
     }
-    ctx.set("session", session)
-    return await next()
 })

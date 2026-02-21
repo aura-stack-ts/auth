@@ -10,5 +10,10 @@ export const toHonoHandler = async (ctx: Context): Promise<Response> => {
     if (!handler) {
         return ctx.json({ error: "Method Not Allowed" }, 405)
     }
-    return handler(ctx.req.raw)
+    try {
+        return await handler(ctx.req.raw)
+    } catch (error) {
+        console.error("[toHonoHandler] Unhandled error:", error)
+        return ctx.json({ error: "Internal Server Error" }, 500)
+    }
 }
