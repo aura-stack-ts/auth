@@ -1,13 +1,49 @@
-To install dependencies:
+<div align="center">
 
-```sh
+<h1>Aura Auth + Hono</h1>
+
+**Demonstration app**
+
+[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Hono](https://hono.dev/)
+
+</div>
+
+---
+
+## Overview
+
+This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in an [Hono](https://hono.dev/) application.
+
+## Getting Started
+
+You can run the documentation site locally for development or contribution.
+
+### From the repository root
+
+```bash
+pnpm dev --filter=hono
+```
+
+### Or manually from the root directory
+
+```bash
+cd apps/hono
 bun install
+pnpm dev
 ```
 
-To run:
+Once started, open your browser at `http://localhost:3000` to view the app.
 
-```sh
-bun run dev
-```
+## Documentation
 
-open http://localhost:3000
+Visit the [**official documentation website**](https://aura-stack-auth.vercel.app).
+
+## License
+
+Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/aura-stack-ts">Aura Stack team</a>
+</p>
