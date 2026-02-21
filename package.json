@@ -46,11 +46,48 @@
     "vitest": "^4.0.14"
   },
   "packageManager": "pnpm@10.15.0",
-  "pnpm": {
-    "overrides": {
-      "seroval": "^1.4.1",
-      "lodash-es": "^4.17.23",
-      "tar": ">=7.5.7"
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "configs/*",
+      "apps/**",
+      "docs"
+    ],
+    "catalogs": {
+      "@tailwindcss/vite": {
+        "@tailwindcss/vite": "^4.0.6"
+      },
+      "lucide-react": {
+        "lucide-react": "^0.561.0"
+      },
+      "next": {
+        "next": "^16.1.6"
+      },
+      "node": {
+        "@types/node": "^24.9.2"
+      },
+      "react": {
+        "@types/react": "^19.2.7",
+        "@types/react-dom": "^19.2.3",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3"
+      },
+      "tailwindcss": {
+        "@tailwindcss/postcss": "^4.1.16",
+        "tailwindcss": "4.1.18"
+      },
+      "typescript": {
+        "typescript": "^5.9.2"
+      },
+      "vite": {
+        "vite": "^7.1.7"
+      }
     }
+  },
+  "overrides": {
+    "seroval": "^1.4.1",
+    "lodash-es": "^4.17.23",
+    "tar": ">=7.5.7",
+    "zod": "^4.3.5"
   }
 }
