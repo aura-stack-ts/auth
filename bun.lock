@@ -57,6 +57,7 @@
     },
     "apps/hono": {
       "name": "hono",
+      "version": "0.1.0",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
         "@aura-stack/jose": "workspace:*",

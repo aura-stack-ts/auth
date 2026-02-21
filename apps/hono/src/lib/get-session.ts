@@ -7,13 +7,17 @@ import type { Session } from "@aura-stack/auth"
  * Uses Hono's built-in getCookie helper and the Aura Auth jose instance.
  */
 export const getSession = async (ctx: Context): Promise<Session | null> => {
-    const url = new URL(ctx.req.url)
-    url.pathname = "/api/auth/session"
-    const response = await handlers.GET(
-        new Request(url, {
-            headers: ctx.req.raw.headers,
-        })
-    )
-    const sessionToken = await response.json()
-    return sessionToken
+    try {
+        const url = new URL(ctx.req.url)
+        url.pathname = "/api/auth/session"
+        const response = await handlers.GET(
+            new Request(url, {
+                headers: ctx.req.raw.headers,
+            })
+        )
+        const sessionToken = await response.json()
+        return sessionToken
+    } catch {
+        return null
+    }
 }
