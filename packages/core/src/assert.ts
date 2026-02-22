@@ -1,5 +1,5 @@
 import { equals } from "@/utils.js"
-import { timingSafeEqual } from "crypto"
+import { encoder } from "@aura-stack/jose/crypto"
 import type { JWTPayloadWithToken } from "@/@types/index.js"
 
 export const isFalsy = (value: unknown): boolean => {
@@ -123,11 +123,15 @@ export const isTrustedOrigin = (url: string, trustedOrigins: string[]): boolean 
     return false
 }
 
-export const safeEquals = (a: string, b: string): boolean => {
-    const bufferA = Buffer.from(a)
-    const bufferB = Buffer.from(b)
-    if (bufferA.length !== bufferB.length) {
+export const timingSafeEqual = (a: string, b: string): boolean => {
+    const bufferA = encoder.encode(a)
+    const bufferB = encoder.encode(b)
+    if(bufferA.length !== bufferB.length) {
         return false
     }
-    return timingSafeEqual(bufferA, bufferB)
+    let diff = 0
+    for(let i = 0; i < bufferA.length; i++) {
+        diff |= bufferA[i] ^ bufferB[i]
+    }
+    return diff === 0
 }

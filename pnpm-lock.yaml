@@ -583,9 +583,6 @@ importers:
       '@aura-stack/tsup-config':
         specifier: workspace:*
         version: link:../../configs/tsup-config
-      '@types/node':
-        specifier: catalog:node
-        version: 24.10.13
       typescript:
         specifier: catalog:typescript
         version: 5.9.3
