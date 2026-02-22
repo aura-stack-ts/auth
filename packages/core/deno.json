@@ -7,13 +7,12 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./oauth/*": "./src/oauth/*.ts",
+    "./oauth": "./src/oauth/*.ts",
     "./types": "./src/@types/index.ts"
   },
   "imports": {
     "@/": "./src/",
     "@aura-stack/router": "npm:@aura-stack/router@^0.5.0",
-    "@aura-stack/jose": "jsr:@aura-stack/jose@^0.3.0",
     "zod": "npm:zod@^4.3.5"
   },
   "publish": {
