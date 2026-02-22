@@ -1,10 +1,10 @@
 import { describe, test, expect } from "vitest"
-import { createSecret } from "@/secret.js"
-import { encoder, getRandomBytes } from "@/crypto.js"
-import { createJWS, signJWS, verifyJWS } from "@/sign.js"
-import { deriveKey, createDeriveKey } from "@/deriveKey.js"
-import { createJWE, encryptJWE, decryptJWE } from "@/encrypt.js"
-import { createJWT, MIN_SECRET_ENTROPY_BITS, SecretInput } from "@/index.js"
+import { createSecret } from "@/secret.ts"
+import { encoder, getRandomBytes } from "@/crypto.ts"
+import { createJWS, signJWS, verifyJWS } from "@/sign.ts"
+import { deriveKey, createDeriveKey } from "@/deriveKey.ts"
+import { createJWE, encryptJWE, decryptJWE } from "@/encrypt.ts"
+import { createJWT, MIN_SECRET_ENTROPY_BITS, type SecretInput } from "@/index.ts"
 import type { JWTPayload } from "jose"
 
 const payload: JWTPayload = {
@@ -58,10 +58,10 @@ describe("JWSs", () => {
         await expect(verifyJWS(jws)).rejects.toThrow("Secret string must be at least 32 bytes long")
     })
 
-    test("fail JWT with invalid format JWS", async () => {
+    test("fail JWT with invalid format JWS", () => {
         const secretKey = getRandomBytes(32)
         const { signJWS } = createJWS(secretKey)
-        await expect(signJWS(undefined as unknown as JWTPayload)).rejects.toThrow("The payload must be a non-empty object")
+        expect(() => signJWS(undefined as unknown as JWTPayload)).toThrow("The payload must be a non-empty object")
     })
 
     test("set audience in a JWS and verify it", async () => {

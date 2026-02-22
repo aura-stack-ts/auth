@@ -3,7 +3,9 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "baseUrl": ".",
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "tsup.config.ts", "test"],
   "exclude": ["dist", "node_modules"]

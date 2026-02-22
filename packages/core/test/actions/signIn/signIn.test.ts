@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
-import { createAuth } from "@/index.js"
-import { getSetCookie } from "@/cookie.js"
-import { GET, oauthCustomService } from "@test/presets.js"
+import { createAuth } from "@/index.ts"
+import { getSetCookie } from "@/cookie.ts"
+import { GET, oauthCustomService } from "@test/presets.ts"
 
 describe("signIn action", () => {
     test("rejects unsupported OAuth provider", async () => {

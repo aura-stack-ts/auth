@@ -1,7 +1,8 @@
+import { env } from "@/env.ts"
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
-import { AuthInternalError } from "@/errors.js"
-import type { JWTPayload } from "@/jose.js"
-import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig, InternalLogger } from "@/@types/index.js"
+import { AuthInternalError } from "@/errors.ts"
+import type { JWTPayload } from "@/jose.ts"
+import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig, InternalLogger } from "@/@types/index.ts"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -160,7 +161,7 @@ export const defineSecureCookieOptions = (
             attributes.sameSite = "lax"
             logger?.log("COOKIE_SAMESITE_NONE_WITHOUT_SECURE")
         }
-        if (process.env.NODE_ENV === "production") {
+        if (env.NODE_ENV === "production") {
             logger?.log("COOKIE_INSECURE_IN_PRODUCTION")
         }
         if (strategy === "host") {

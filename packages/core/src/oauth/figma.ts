@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * @see [Figma API - Users](https://developers.figma.com/docs/rest-api/users-types/)

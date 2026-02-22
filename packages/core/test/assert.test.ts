@@ -1,4 +1,4 @@
-import { isRelativeURL, isValidURL, isTrustedOrigin } from "@/assert.js"
+import { isRelativeURL, isValidURL, isTrustedOrigin } from "@/assert.ts"
 import { describe, test, expect } from "vitest"
 
 describe("isRelativeURL", () => {

@@ -1,7 +1,7 @@
-import { createSecret } from "@/secret.js"
-import { KeyDerivationError } from "@/errors.js"
-import { encoder, getSubtleCrypto } from "@/crypto.js"
-import type { SecretInput } from "@/index.js"
+import { createSecret } from "@/secret.ts"
+import { KeyDerivationError } from "@/errors.ts"
+import { encoder, getSubtleCrypto } from "@/crypto.ts"
+import type { SecretInput } from "@/index.ts"
 
 /**
  * Generate a derived key using HKDF (HMAC-based Extract-and-Expand Key Derivation Function)

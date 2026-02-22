@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * @see [GitLab - User Structure](https://docs.gitlab.com/ee/api/users.html#external-user-structure)

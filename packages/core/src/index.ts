@@ -1,11 +1,11 @@
 import { createRouter, type RouterConfig } from "@aura-stack/router"
-import { createJoseInstance } from "@/jose.js"
-import { createCookieStore } from "@/cookie.js"
-import { createErrorHandler, useSecureCookies } from "@/utils.js"
-import { createBuiltInOAuthProviders } from "@/oauth/index.js"
-import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.js"
-import { createLogEntry, logMessages } from "@/logger.js"
-import type { AuthConfig, AuthInstance, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.js"
+import { createJoseInstance } from "@/jose.ts"
+import { createCookieStore } from "@/cookie.ts"
+import { createErrorHandler, useSecureCookies } from "@/utils.ts"
+import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
+import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
+import { createLogEntry, logMessages } from "@/logger.ts"
+import type { AuthConfig, AuthInstance, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
 
 export type {
     AuthConfig,
@@ -21,7 +21,7 @@ export type {
     Logger,
     LogLevel,
     TrustedOrigin,
-} from "@/@types/index.js"
+} from "@/@types/index.ts"
 
 /**
  * Maps LogLevel to Severity hierarchically per RFC 5424.

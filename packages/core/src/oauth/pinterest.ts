@@ -1,4 +1,4 @@
-import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.js"
+import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * @see [Pinterest - Get User Account](https://developers.pinterest.com/docs/api/v5/user_account-get)

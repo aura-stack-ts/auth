@@ -1,4 +1,4 @@
-import { AuraJoseError, InvalidSecretError } from "./errors.js"
+import { AuraJoseError, InvalidSecretError } from "@/errors.ts"
 
 export const isAuraJoseError = (error: unknown): error is AuraJoseError => {
     return error instanceof AuraJoseError

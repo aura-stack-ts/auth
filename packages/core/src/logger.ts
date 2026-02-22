@@ -1,4 +1,4 @@
-import type { SyslogOptions } from "@/@types/index.js"
+import type { SyslogOptions } from "@/@types/index.ts"
 
 /**
  * Log message definitions organized by category.

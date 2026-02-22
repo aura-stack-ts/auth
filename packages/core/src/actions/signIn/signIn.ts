@@ -1,9 +1,9 @@
 import { z } from "zod"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
-import { cacheControl } from "@/headers.js"
-import { createPKCE, generateSecure } from "@/secure.js"
-import { createAuthorizationURL, createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.js"
-import type { OAuthProviderRecord } from "@/@types/index.js"
+import { cacheControl } from "@/headers.ts"
+import { createPKCE, generateSecure } from "@/secure.ts"
+import { createAuthorizationURL, createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.ts"
+import type { OAuthProviderRecord } from "@/@types/index.ts"
 
 const signInConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/signIn/:oauth", {

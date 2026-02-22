@@ -1,7 +1,7 @@
 import { isInvalidZodSchemaError, isRouterError, RouterConfig } from "@aura-stack/router"
-import { isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "@/errors.js"
+import { isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "@/errors.ts"
 import type { ZodError } from "zod"
-import type { APIErrorMap, InternalLogger } from "@/@types/index.js"
+import type { APIErrorMap, InternalLogger } from "@/@types/index.ts"
 
 export const toSnakeCase = (str: string) => {
     return str

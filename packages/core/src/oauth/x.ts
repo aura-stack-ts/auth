@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * @see [X - Get my User](https://docs.x.com/x-api/users/get-my-user)

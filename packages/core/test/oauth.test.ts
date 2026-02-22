@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
-import { createBuiltInOAuthProviders, builtInOAuthProviders, GitHubProfile } from "@/oauth/index.js"
-import { OAuthProviderCredentials, User } from "@/@types/index.js"
+import { createBuiltInOAuthProviders, builtInOAuthProviders, GitHubProfile } from "@/oauth/index.ts"
+import { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 describe("createBuiltInOAuthProviders", () => {
     test("create oauth config for github", () => {

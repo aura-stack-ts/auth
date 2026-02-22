@@ -1,4 +1,4 @@
-import { env } from "@/env.js"
+import { env } from "@/env.ts"
 import {
     createJWT,
     createJWS,
@@ -8,7 +8,7 @@ import {
     type JWTVerifyOptions,
     type DecodedJWTPayloadOptions,
 } from "@aura-stack/jose"
-import { AuthInternalError } from "@/errors.js"
+import { AuthInternalError } from "@/errors.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 

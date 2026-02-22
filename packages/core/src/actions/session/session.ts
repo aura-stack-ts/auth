@@ -1,8 +1,8 @@
 import { createEndpoint, HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders } from "@/headers.js"
-import { getErrorName, toISOString } from "@/utils.js"
-import { expiredCookieAttributes, getCookie } from "@/cookie.js"
-import type { JWTStandardClaims, Session, User } from "@/@types/index.js"
+import { secureApiHeaders } from "@/headers.ts"
+import { getErrorName, toISOString } from "@/utils.ts"
+import { expiredCookieAttributes, getCookie } from "@/cookie.ts"
+import type { JWTStandardClaims, Session, User } from "@/@types/index.ts"
 
 export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
     const {

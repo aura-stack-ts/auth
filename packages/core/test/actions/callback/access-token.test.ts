@@ -1,8 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
-import { AuthInternalError } from "@/errors.js"
-import { createPKCE } from "@/secure.js"
-import { oauthCustomService } from "@test/presets.js"
-import { createAccessToken } from "@/actions/callback/access-token.js"
+import { AuthInternalError } from "@/errors.ts"
+import { createPKCE } from "@/secure.ts"
+import { oauthCustomService } from "@test/presets.ts"
+import { createAccessToken } from "@/actions/callback/access-token.ts"
 
 describe("createAccessToken", async () => {
     const { codeVerifier } = await createPKCE()

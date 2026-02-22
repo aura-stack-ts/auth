@@ -1,7 +1,7 @@
-import { fetchAsync } from "@/request.js"
-import { AuthInternalError, OAuthProtocolError } from "@/errors.js"
-import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.js"
-import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.js"
+import { fetchAsync } from "@/request.ts"
+import { AuthInternalError, OAuthProtocolError } from "@/errors.ts"
+import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.ts"
+import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * Make a request to the OAuth provider to the token endpoint to exchange the authorization code provided

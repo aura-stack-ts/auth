@@ -1,9 +1,9 @@
 import { base64url, EncryptJWT, jwtDecrypt, type JWTDecryptOptions } from "jose"
-import { createSecret } from "@/secret.js"
-import { getRandomBytes } from "@/crypto.js"
-import { isAuraJoseError, isFalsy } from "@/assert.js"
-import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.js"
-import type { SecretInput } from "@/index.js"
+import { createSecret } from "@/secret.ts"
+import { getRandomBytes } from "@/crypto.ts"
+import { isAuraJoseError, isFalsy } from "@/assert.ts"
+import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.ts"
+import type { SecretInput } from "@/index.ts"
 
 export type { JWTDecryptOptions } from "jose"
 
@@ -27,7 +27,7 @@ export interface EncryptOptions {
  * @param secret - Secret key to encrypt the JWT (CryptoKey, KeyObject, string or Uint8Array)
  * @returns Encrypted JWT string
  */
-export const encryptJWE = async (payload: string, secret: SecretInput, options?: EncryptOptions) => {
+export const encryptJWE = (payload: string, secret: SecretInput, options?: EncryptOptions) => {
     try {
         if (isFalsy(payload)) {
             throw new InvalidPayloadError("The payload must be a non-empty string")

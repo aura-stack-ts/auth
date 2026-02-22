@@ -31,17 +31,17 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "import": "./dist/index.ts",
       "require": "./dist/index.cjs"
     },
     "./oauth/*": {
       "types": "./dist/oauth/*.d.ts",
-      "import": "./dist/oauth/*.js",
+      "import": "./dist/oauth/*.ts",
       "require": "./dist/oauth/*.cjs"
     },
     "./types": {
       "types": "./dist/@types/index.d.ts",
-      "import": "./dist/@types/index.js",
+      "import": "./dist/@types/index.ts",
       "require": "./dist/@types/index.cjs"
     }
   },

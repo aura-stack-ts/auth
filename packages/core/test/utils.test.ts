@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { toCastCase, toSnakeCase } from "@/utils.js"
-import { OAuthAuthorizationErrorResponse } from "@/schemas.js"
+import { toCastCase, toSnakeCase } from "@/utils.ts"
+import { OAuthAuthorizationErrorResponse } from "@/schemas.ts"
 
 describe("toSnakeCase", () => {
     const testCases = [

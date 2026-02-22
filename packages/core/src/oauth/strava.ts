@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * @see [Strava - SummaryClub](https://developers.strava.com/docs/reference/#api-models-SummaryClub)

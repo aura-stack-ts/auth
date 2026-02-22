@@ -1,9 +1,9 @@
 import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
-import { createSecret } from "@/secret.js"
-import { getRandomBytes } from "@/crypto.js"
-import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.js"
-import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.js"
-import type { SecretInput } from "@/index.js"
+import { createSecret } from "@/secret.ts"
+import { getRandomBytes } from "@/crypto.ts"
+import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.ts"
+import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.ts"
+import type { SecretInput } from "@/index.ts"
 
 export type { JWTVerifyOptions } from "jose"
 
@@ -20,7 +20,7 @@ export type { JWTVerifyOptions } from "jose"
  * @param secret - Secret key to sign the JWT (CryptoKey, KeyObject, string or Uint8Array)
  * @returns Signed JWT string
  */
-export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise<string> => {
+export const signJWS = (payload: JWTPayload, secret: SecretInput): Promise<string> => {
     try {
         if (isInvalidPayload(payload)) {
             throw new InvalidPayloadError("The payload must be a non-empty object")

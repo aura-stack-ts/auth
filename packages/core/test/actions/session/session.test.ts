@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, afterEach } from "vitest"
-import { createPKCE } from "@/secure.js"
-import { GET, jose, sessionPayload } from "@test/presets.js"
-import { setCookie, getSetCookie, createCookieStore } from "@/cookie.js"
+import { createPKCE } from "@/secure.ts"
+import { GET, jose, sessionPayload } from "@test/presets.ts"
+import { setCookie, getSetCookie, createCookieStore } from "@/cookie.ts"
 
 afterEach(() => {
     vi.restoreAllMocks()

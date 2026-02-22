@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * @see [Discord - Nameplate Object](https://discord.com/developers/docs/resources/user#nameplate-nameplate-structure)

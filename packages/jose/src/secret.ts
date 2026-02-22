@@ -1,7 +1,7 @@
-import { isObject } from "@/assert.js"
-import { InvalidSecretError } from "@/errors.js"
-import { encoder } from "@/crypto.js"
-import type { DerivedKeyInput, SecretInput } from "@/index.js"
+import { isObject } from "@/assert.ts"
+import { InvalidSecretError } from "@/errors.ts"
+import { encoder } from "@/crypto.ts"
+import type { DerivedKeyInput, SecretInput } from "@/index.ts"
 
 export const MIN_SECRET_ENTROPY_BITS = 4.5
 
