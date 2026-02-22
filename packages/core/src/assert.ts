@@ -123,7 +123,7 @@ export const isTrustedOrigin = (url: string, trustedOrigins: string[]): boolean 
     return false
 }
 
-export const safeEquals = (a: string, b: string): boolean => {
+export const timingSafeEqual = (a: string, b: string): boolean => {
     const bufferA = encoder.encode(a)
     const bufferB = encoder.encode(b)
     if (bufferA.length !== bufferB.length) {

@@ -1,6 +1,6 @@
 import { equals } from "@/utils.js"
 import { AuthSecurityError } from "@/errors.js"
-import { isJWTPayloadWithToken, safeEquals } from "@/assert.js"
+import { isJWTPayloadWithToken, timingSafeEqual } from "@/assert.js"
 import { jwtVerificationOptions, base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.js"
 import type { AuthRuntimeConfig } from "@/@types/index.js"
 
@@ -69,7 +69,7 @@ export const verifyCSRF = async (jose: AuthRuntimeConfig["jose"], cookie: string
         if (!equals(cookiePayload.token.length, headerPayload.token.length)) {
             throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
         }
-        if (!safeEquals(cookiePayload.token, headerPayload.token)) {
+        if (!timingSafeEqual(cookiePayload.token, headerPayload.token)) {
             throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
         }
         return true
