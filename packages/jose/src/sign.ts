@@ -2,7 +2,7 @@ import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions }
 import { createSecret } from "@/secret.ts"
 import { getRandomBytes } from "@/crypto.ts"
 import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.ts"
-import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.ts"
+import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "@/errors.ts"
 import type { SecretInput } from "@/index.ts"
 
 export type { JWTVerifyOptions } from "jose"

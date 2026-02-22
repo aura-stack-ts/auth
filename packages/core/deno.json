@@ -7,7 +7,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./oauth": "./src/oauth/*.ts",
+    "./oauth/*": "./src/oauth/*.ts",
     "./types": "./src/@types/index.ts"
   },
   "imports": {
@@ -19,5 +19,5 @@
   "publish": {
     "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
   },
-  "exclude": ["dist", "node_mofules"]
+  "exclude": ["dist", "node_modules"]
 }

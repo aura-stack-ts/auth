@@ -1,6 +1,6 @@
 import { createAuth } from "@/index.ts"
 import { createStructuredData } from "@/utils.ts"
-import { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 import type { JWTPayload } from "@/jose.ts"
 
 export const oauthCustomService: OAuthProviderCredentials = {

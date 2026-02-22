@@ -6,7 +6,7 @@
       "@test/*": ["./test/*"]
     },
     "baseUrl": ".",
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
   },
   "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]
