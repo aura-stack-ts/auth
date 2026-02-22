@@ -8,14 +8,20 @@ app.get("/", () => "Welcome to the Aura Auth Elysia App!")
 
 app.all("/api/auth/*", toElysiaHandler)
 
-app
-.use(withAuthPlugin)
-.get("/api/protected", ({ session }) => {
+app.use(withAuthPlugin).get("/api/protected", (ctx) => {
+    if (!ctx.session) {
+        return Response.json(
+            {
+                error: "Unauthorized",
+                message: "Active session required.",
+            },
+            { status: 401 }
+        )
+    }
     return Response.json({
         message: "You have access to this protected resource.",
-        session,
+        session: ctx?.session,
     })
 })
-
 
 app.listen(3000)

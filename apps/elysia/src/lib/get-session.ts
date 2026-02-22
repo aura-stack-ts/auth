@@ -15,8 +15,9 @@ export const getSession = async (ctx: Context): Promise<Session | null> => {
                 headers: ctx.request.headers,
             })
         )
-        const sessionToken = await response.json()
-        return sessionToken
+        if (!response.ok) return null
+        const session = await response.json()
+        return session as Session
     } catch {
         return null
     }
