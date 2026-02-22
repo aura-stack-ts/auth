@@ -1,0 +1,19 @@
+{
+  "name": "elysia",
+  "version": "1.0.50",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
+    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
+  },
+  "dependencies": {
+    "elysia": "latest",
+    "@aura-stack/auth": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "@aura-stack/tsconfig": "workspace:*"
+  },
+  "module": "src/index.js"
+}
