@@ -126,13 +126,12 @@ export const isTrustedOrigin = (url: string, trustedOrigins: string[]): boolean 
 export const timingSafeEqual = (a: string, b: string): boolean => {
     const bufferA = encoder.encode(a)
     const bufferB = encoder.encode(b)
-    if (bufferA.length !== bufferB.length) {
+    if(bufferA.length !== bufferB.length) {
         return false
     }
-    for (let i = 0; i < bufferA.length; i++) {
-        if (bufferA[i] ^ bufferB[i]) {
-            return false
-        }
+    let diff = 0
+    for(let i = 0; i < bufferA.length; i++) {
+        diff |= bufferA[i] ^ bufferB[i]
     }
-    return true
+    return diff === 0
 }
