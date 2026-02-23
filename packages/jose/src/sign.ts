@@ -20,7 +20,7 @@ export type { JWTVerifyOptions } from "jose"
  * @param secret - Secret key to sign the JWT (CryptoKey, KeyObject, string or Uint8Array)
  * @returns Signed JWT string
  */
-export const signJWS = (payload: JWTPayload, secret: SecretInput): Promise<string> => {
+export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise<string> => {
     try {
         if (isInvalidPayload(payload)) {
             throw new InvalidPayloadError("The payload must be a non-empty object")
@@ -28,7 +28,7 @@ export const signJWS = (payload: JWTPayload, secret: SecretInput): Promise<strin
         const secretKey = createSecret(secret)
         const jti = base64url.encode(getRandomBytes(32))
 
-        return new SignJWT(payload)
+        return await new SignJWT(payload)
             .setProtectedHeader({ alg: "HS256", typ: "JWT" })
             .setIssuedAt()
             .setNotBefore(payload.nbf ?? "0s")
