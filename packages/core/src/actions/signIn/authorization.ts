@@ -1,9 +1,9 @@
-import { AuthInternalError } from "@/errors.js"
-import { OAuthAuthorization } from "@/schemas.js"
-import { equals, extractPath, toCastCase } from "@/utils.js"
-import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin, patternToRegex } from "@/assert.js"
+import { AuthInternalError } from "@/errors.ts"
+import { OAuthAuthorization } from "@/schemas.ts"
+import { equals, extractPath, toCastCase } from "@/utils.ts"
+import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin, patternToRegex } from "@/assert.ts"
 import type { GlobalContext } from "@aura-stack/router"
-import type { AuthConfig, InternalLogger, OAuthProviderCredentials } from "@/@types/index.js"
+import type { AuthConfig, InternalLogger, OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * Constructs the request URI for the Authorization Request to the third-party OAuth service. It includes

@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
-import { GET } from "@test/presets.js"
-import { createPKCE } from "@/secure.js"
-import { setCookie, getSetCookie } from "@/cookie.js"
+import { GET } from "@test/presets.ts"
+import { createPKCE } from "@/secure.ts"
+import { setCookie, getSetCookie } from "@/cookie.ts"
 
 describe("callbackAction", () => {
     test("invalid endpoint", async () => {

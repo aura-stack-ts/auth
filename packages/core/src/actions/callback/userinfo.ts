@@ -1,8 +1,8 @@
-import { fetchAsync } from "@/request.js"
-import { generateSecure } from "@/secure.js"
-import { OAuthErrorResponse } from "@/schemas.js"
-import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/errors.js"
-import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.js"
+import { fetchAsync } from "@/request.ts"
+import { generateSecure } from "@/secure.ts"
+import { OAuthErrorResponse } from "@/schemas.ts"
+import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/errors.ts"
+import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response

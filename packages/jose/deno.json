@@ -1,0 +1,26 @@
+{
+  "name": "@aura-stack/jose",
+  "version": "0.3.0",
+  "license": "MIT",
+  "tasks": {
+    "dev": "deno run --watch src/index.ts",
+    "type-check": "deno check",
+    "lint": "deno lint"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./encrypt": "./src/encrypt.ts",
+    "./sign": "./src/sign.ts",
+    "./jose": "./src/jose.ts",
+    "./hkdf": "./src/deriveKey.ts",
+    "./crypto": "./src/crypto.ts"
+  },
+  "imports": {
+    "jose": "npm:jose@^6.1.2",
+    "@/": "./src/"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
+  },
+  "exclude": ["dist", "node_modules"]
+}

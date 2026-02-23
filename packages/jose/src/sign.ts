@@ -1,9 +1,9 @@
 import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
-import { createSecret } from "@/secret.js"
-import { getRandomBytes } from "@/crypto.js"
-import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.js"
-import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.js"
-import type { SecretInput } from "@/index.js"
+import { createSecret } from "@/secret.ts"
+import { getRandomBytes } from "@/crypto.ts"
+import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.ts"
+import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "@/errors.ts"
+import type { SecretInput } from "@/index.ts"
 
 export type { JWTVerifyOptions } from "jose"
 
@@ -28,7 +28,7 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
         const secretKey = createSecret(secret)
         const jti = base64url.encode(getRandomBytes(32))
 
-        return new SignJWT(payload)
+        return await new SignJWT(payload)
             .setProtectedHeader({ alg: "HS256", typ: "JWT" })
             .setIssuedAt()
             .setNotBefore(payload.nbf ?? "0s")

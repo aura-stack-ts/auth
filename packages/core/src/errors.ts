@@ -1,4 +1,4 @@
-import type { AuthInternalErrorCode, AuthSecurityErrorCode, ErrorType, LiteralUnion } from "@/@types/index.js"
+import type { AuthInternalErrorCode, AuthSecurityErrorCode, ErrorType, LiteralUnion } from "@/@types/index.ts"
 
 /**
  * The object returned by the class to users its:

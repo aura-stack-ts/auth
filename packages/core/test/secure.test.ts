@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { createPKCE } from "@/secure.js"
+import { createPKCE } from "@/secure.ts"
 
 describe("createPKCE", () => {
     test("generates a valid code verifier and code challenge", async () => {

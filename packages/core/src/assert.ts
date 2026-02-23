@@ -1,6 +1,6 @@
-import { equals } from "@/utils.js"
+import { equals } from "@/utils.ts"
 import { encoder } from "@aura-stack/jose/crypto"
-import type { JWTPayloadWithToken } from "@/@types/index.js"
+import type { JWTPayloadWithToken } from "@/@types/index.ts"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -126,12 +126,10 @@ export const isTrustedOrigin = (url: string, trustedOrigins: string[]): boolean 
 export const timingSafeEqual = (a: string, b: string): boolean => {
     const bufferA = encoder.encode(a)
     const bufferB = encoder.encode(b)
-    if(bufferA.length !== bufferB.length) {
-        return false
-    }
+    const len = Math.max(bufferA.length, bufferB.length)
     let diff = 0
-    for(let i = 0; i < bufferA.length; i++) {
-        diff |= bufferA[i] ^ bufferB[i]
+    for (let i = 0; i < len; i++) {
+        diff |= (bufferA[i] ?? 0) ^ (bufferB[i] ?? 0)
     }
-    return diff === 0
+    return diff === 0 && bufferA.length === bufferB.length
 }

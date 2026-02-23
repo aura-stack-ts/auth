@@ -1,12 +1,12 @@
 import { z } from "zod"
-import { createLogEntry } from "@/logger.js"
-import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.js"
-import { createJoseInstance, type JWTPayload } from "@/jose.js"
+import { createLogEntry } from "@/logger.ts"
+import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.ts"
+import { createJoseInstance, type JWTPayload } from "@/jose.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { BuiltInOAuthProvider } from "@/oauth/index.js"
-import type { LiteralUnion, Prettify } from "@/@types/utility.js"
+import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
+import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
 
-export * from "./utility.js"
+export * from "./utility.ts"
 
 /**
  * Standard JWT claims that are managed internally by the token system.
