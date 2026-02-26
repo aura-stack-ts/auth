@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/secure.ts"
 import { cacheControl } from "@/headers.ts"
@@ -26,7 +26,7 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
                 state: z.string("Missing state parameter in the OAuth authorization response."),
             }),
         },
-        middlewares: [
+        use: [
             (ctx) => {
                 const {
                     searchParams,

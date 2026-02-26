@@ -1,24 +1,44 @@
 import { redirect } from "react-router"
-import { createRequest } from "~/lib/request"
-import type { Session } from "@aura-stack/auth"
+import { createClient, type Session } from "@aura-stack/auth"
 
-const getBaseURL = (request: Request) => {
-    return new URL(request.url).origin
+const client = (request: Request) => {
+    const baseURL = new URL(request.url).origin
+    const headers: Record<string, string> = {}
+    const cookie = request.headers.get("cookie")
+    if (cookie) {
+        headers.cookie = cookie
+    }
+
+    return createClient({
+        baseURL,
+        basePath: "/auth",
+        cache: "no-store",
+        credentials: "include",
+        headers,
+    })
 }
 
-export const getCSRFToken = async (request: Request): Promise<string> => {
+export const getCSRFToken = async (request: Request): Promise<string | null> => {
     try {
-        const baseURL = getBaseURL(request)
-        const response = await createRequest(`${baseURL}/auth/csrfToken`, {
-            headers: request.headers,
-        })
-        if (!response.ok) {
-            throw new Error(`Failed to fetch CSRF token: ${response.status}`)
-        }
-        const data = await response.json()
-        return data.csrfToken
+        const response = await client(request).get("/csrfToken")
+        if (!response.ok) return null
+        const json = await response.json()
+        return json && json?.csrfToken ? json.csrfToken : null
     } catch (error) {
-        throw error
+        console.log("[error:server] getCSRFToken", error)
+        return null
+    }
+}
+
+export const getSession = async (request: Request): Promise<Session | null> => {
+    try {
+        const response = await client(request).get("/session")
+        if (!response.ok) return null
+        const session = await response.json()
+        return session && session?.user ? session : null
+    } catch (error) {
+        console.log("[error:server] getSession", error)
+        return null
     }
 }
 
@@ -27,11 +47,17 @@ export const signIn = async (providerId: string) => {
 }
 
 export const signOut = async (request: Request, redirectTo: string = "/") => {
-    const baseURL = getBaseURL(request)
     try {
         const csrfToken = await getCSRFToken(request)
-        const response = await createRequest(`${baseURL}/auth/signOut?token_type_hint=session_token`, {
-            method: "POST",
+        if (!csrfToken) {
+            console.error("[error:server] signOut - No CSRF token")
+            return null
+        }
+        const response = await client(request).post("/signOut", {
+            searchParams: {
+                redirectTo,
+                token_type_hint: "session_token",
+            },
             headers: {
                 "X-CSRF-Token": csrfToken,
             },
@@ -41,25 +67,10 @@ export const signOut = async (request: Request, redirectTo: string = "/") => {
                 headers: response.headers,
             })
         }
-        const data = await response.json()
-        return data
+        const json = await response.json()
+        return json
     } catch (error) {
-        throw error
-    }
-}
-
-export const getSession = async (request: Request): Promise<Session | null> => {
-    const baseURL = getBaseURL(request)
-    try {
-        const response = await createRequest(`${baseURL}/auth/session`, {
-            headers: request.headers,
-        })
-        if (!response.ok) {
-            return null
-        }
-        const session = await response.json()
-        return session
-    } catch (error) {
+        console.log("[error:server] signOut", error)
         return null
     }
 }

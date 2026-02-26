@@ -1,11 +1,29 @@
+import { createClient } from "@aura-stack/auth"
 import { createServerFn } from "@tanstack/react-start"
-import { getCookies, getRequest, getRequestHeaders, setResponseHeader } from "@tanstack/react-start/server"
-import { AUTH_API_ENDPOINTS } from "./constants"
-import type { Session } from "@aura-stack/auth"
+import { getCookies, getRequest, getRequestHeaders, setResponseHeaders } from "@tanstack/react-start/server"
 
 const getBaseURL = (request: Request) => {
     const url = new URL(request.url)
     return `${url.protocol}//${url.host}`
+}
+
+const client = () => {
+    const request = getRequest()
+    return createClient({
+        baseURL: getBaseURL(request),
+        basePath: "/auth",
+        cache: "no-store",
+        credentials: "include",
+        headers: async () => {
+            const cookies = getCookies()
+            const headers = getRequestHeaders()
+            const cookieStr = cookiesToString(cookies)
+            return {
+                ...Object.fromEntries(headers.entries()),
+                cookie: cookieStr,
+            }
+        },
+    })
 }
 
 const cookiesToString = (cookies: Record<string, string | undefined>) => {
@@ -15,62 +33,49 @@ const cookiesToString = (cookies: Record<string, string | undefined>) => {
         .join("; ")
 }
 
-export const getSessionRequest = async (request: Request, cookies: string): Promise<Session | null> => {
-    const baseURL = getBaseURL(request)
-    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SESSION}`, {
-        method: "GET",
-        cache: "no-store",
-        headers: { cookie: cookies },
-    })
-    if (!response.ok) {
+export const getSession = createServerFn({ method: "GET" }).handler(async () => {
+    try {
+        const response = await client().get("/session")
+        if (!response.ok) return null
+        const session = await response.json()
+        return session && session?.user ? session : null
+    } catch (error) {
+        console.log("[error:server] getSession", error)
         return null
     }
-    const session = await response.json()
-    return session
-}
-
-export const getCsrfTokenRequest = async (request: Request, headers: HeadersInit) => {
-    const baseURL = getBaseURL(request)
-    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.CSRF_TOKEN}`, {
-        method: "GET",
-        cache: "no-store",
-        headers,
-    })
-    const json = await response.json()
-    return json.csrfToken
-}
-
-export const getSession = createServerFn({ method: "GET" }).handler(async () => {
-    const request = getRequest()
-    const cookies = getCookies()
-    const cookieStr = cookiesToString(cookies)
-    const session = await getSessionRequest(request, cookieStr)
-    return session
 })
 
 export const getCsrfToken = createServerFn({ method: "GET" }).handler(async () => {
-    const request = getRequest()
-    const headers = getRequestHeaders()
-    const csrfToken = await getCsrfTokenRequest(request, headers)
-    return csrfToken
+    try {
+        const response = await client().get("/csrfToken")
+        if (!response.ok) return null
+        const json = await response.json()
+        return json && json?.csrfToken ? json.csrfToken : null
+    } catch (error) {
+        console.log("[error:server] getCsrfToken", error)
+        return null
+    }
 })
 
 export const signOut = createServerFn({ method: "POST" }).handler(async () => {
-    const request = getRequest()
-    const baseURL = getBaseURL(request)
-    const csrfToken = await getCsrfTokenRequest(request, getRequestHeaders())
-    const cookies = getCookies()
-    const cookieStr = cookiesToString(cookies)
-
-    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SIGN_OUT}?token_type_hint=session_token`, {
-        method: "POST",
-        cache: "no-store",
-        headers: {
-            "X-CSRF-Token": csrfToken,
-            "Content-Type": "application/json",
-            Cookie: cookieStr,
-        },
-        body: JSON.stringify({}),
-    })
-    setResponseHeader("Set-Cookie", response.headers.getSetCookie())
+    try {
+        const csrfToken = await getCsrfToken()
+        if (!csrfToken) {
+            console.error("[error:server] signOut - No CSRF token")
+            return null
+        }
+        const response = await client().post("/signOut", {
+            searchParams: {
+                token_type_hint: "session_token",
+            },
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        })
+        setResponseHeaders(response.headers)
+        const json = await response.json()
+        return json
+    } catch (error) {
+        console.log("[error:server] signOut", error)
+    }
 })

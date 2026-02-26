@@ -1,32 +1,42 @@
-import { createRequest } from "@/lib/request"
-import type { Session } from "@aura-stack/auth"
-import type { LiteralUnion } from "@aura-stack/auth/types"
-import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
+import type { AuthServerContext } from "@/@types/types"
+import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
-export const createAuthServer = async (context: {
-    request: Request
-    redirect: (path: string, status?: 301 | 302 | 303 | 307 | 308 | 300 | 304) => Response
-}) => {
+export const createAuthServer = async (context: AuthServerContext) => {
     const { request, redirect } = context
 
-    const getCSRFToken = async () => {
-        const response = await createRequest("/api/auth/csrfToken", {
-            headers: Object.fromEntries(request.headers.entries()),
-        })
-        const json = await response.json()
-        return json.csrfToken
+    const client = createClient({
+        baseURL: new URL(request.url).origin,
+        basePath: "/api/auth",
+        cache: "no-store",
+        credentials: "include",
+        headers: {
+            ...Object.fromEntries(request.headers.entries()),
+            cookie: request.headers.get("cookie") ?? "",
+        },
+    })
+
+    const getCSRFToken = async (): Promise<string | null> => {
+        try {
+            const response = await client.get("/csrfToken")
+            if (!response.ok) return null
+            const json = await response.json()
+            return json && json?.csrfToken ? json.csrfToken : null
+        } catch (error) {
+            console.log("[error:server] getCSRFToken", error)
+            return null
+        }
     }
 
     const getSession = async (): Promise<Session | null> => {
-        const response = await createRequest(`/api/auth/session`, {
-            headers: {
-                ...Object.fromEntries(request.headers.entries()),
-                Cookie: request.headers.get("cookie") ?? "",
-            },
-        })
-        const session = (await response.json()) as Session
-        if (!session || !session.user) return null
-        return session
+        try {
+            const response = await client.get("/session")
+            if (!response.ok) return null
+            const session = await response.json()
+            return session && session?.user ? session : null
+        } catch (error) {
+            console.log("[error:server] getSession", error)
+            return null
+        }
     }
 
     const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
@@ -34,25 +44,35 @@ export const createAuthServer = async (context: {
     }
 
     const signOut = async (redirectTo: string = "/") => {
-        const csrfToken = await getCSRFToken()
-        const response = await createRequest(
-            `/api/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
-            {
-                method: "POST",
+        try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                console.log("[error:server] signOut - No CSRF token found")
+                return null
+            }
+
+            const response = await client.post("/signOut", {
+                searchParams: {
+                    redirectTo,
+                    token_type_hint: "session_token",
+                },
                 headers: {
-                    ...Object.fromEntries(request.headers.entries()),
-                    Cookie: request.headers.get("cookie") || "",
                     "X-CSRF-Token": csrfToken,
                 },
+            })
+            if (response.status === 202) {
+                return redirect(redirectTo)
             }
-        )
-        if (response.status === 202) {
-            return redirect(redirectTo)
+            const json = await response.json()
+            return json
+        } catch (error) {
+            console.log("[error:server] signOut", error)
+            return null
         }
-        return response.json()
     }
 
     return {
+        getCSRFToken,
         getSession,
         signIn,
         signOut,

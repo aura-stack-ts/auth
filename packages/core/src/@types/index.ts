@@ -7,6 +7,7 @@ import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
 
 export * from "./utility.ts"
+export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 
 /**
  * Standard JWT claims that are managed internally by the token system.

@@ -1,49 +1,66 @@
-import { createRequest } from "~/lib/request"
-import type { Session } from "@aura-stack/auth"
-import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
-import type { LiteralUnion } from "@aura-stack/auth/types"
+import { createClient, type Session, type BuiltInOAuthProvider, type LiteralUnion } from "@aura-stack/auth"
 
-const getBaseURL = () => {
-    return window.location.origin
-}
+const client = createClient({
+    baseURL: window.location.origin,
+    basePath: "/auth",
+    cache: "no-store",
+    credentials: "include",
+})
 
-export const getCSRFToken = async (): Promise<string> => {
-    const baseURL = getBaseURL()
-    const response = await createRequest(`${baseURL}/auth/csrfToken`)
-    const data = await response.json()
-    return data.csrfToken
+export const getCSRFToken = async (): Promise<string | null> => {
+    try {
+        const response = await client.get("/csrfToken")
+        const json = await response.json()
+        return json && json?.csrfToken ? json.csrfToken : null
+    } catch (error) {
+        console.log("[error:client] getCSRFToken", error)
+        return null
+    }
 }
 
 export const getSession = async (): Promise<Session | null> => {
-    const baseURL = getBaseURL()
-    const response = await createRequest(`${baseURL}/auth/session`)
-    const session = await response.json()
-    return session
+    try {
+        const response = await client.get("/session")
+        const session = await response.json()
+        return session && session?.user ? session : null
+    } catch (error) {
+        console.log("[error:client] getSession", error)
+        return null
+    }
 }
 
 export const signIn = async (provide: LiteralUnion<BuiltInOAuthProvider>) => {
-    const baseURL = getBaseURL()
+    console.log("[client] signIn - provider:", provide)
+    const baseURL = window.location.origin
     window.location.href = `${baseURL}/auth/signIn/${provide}`
 }
 
-export const signOut = async () => {
+export const signOut = async (redirectTo: string = "/") => {
     try {
-        const baseURL = getBaseURL()
         const csrfToken = await getCSRFToken()
-        const response = await createRequest(`${baseURL}/auth/signOut?token_type_hint=session_token`, {
-            method: "POST",
+        if (!csrfToken) {
+            console.error("[error:client] signOut - No CSRF token")
+            return null
+        }
+        const response = await client.post("/signOut", {
+            searchParams: {
+                redirectTo,
+                token_type_hint: "session_token",
+            },
             headers: {
                 "X-CSRF-Token": csrfToken,
             },
         })
-        const session = await response.json()
-        return session
+        const json = await response.json()
+        return json
     } catch (error) {
+        console.log("[error:client] signOut", error)
         return null
     }
 }
 
 export const createAuthClient = {
+    getCSRFToken,
     getSession,
     signIn,
     signOut,

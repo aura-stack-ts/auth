@@ -1,13 +1,13 @@
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 import { Button } from "@/components/ui/button"
-import { createAuthServer } from "@/lib/server"
+import { createAuthServer } from "@/lib/index"
 import { SessionClient } from "@/components/get-session-client"
 
 const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
 
 export default async function Home() {
-    const { getSession, signIn } = await createAuthServer()
+    const { getSession, signIn } = createAuthServer
     const session = await getSession()
     const isAuthenticated = Boolean(session && session?.user)
 

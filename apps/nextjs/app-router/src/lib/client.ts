@@ -1,49 +1,60 @@
-import { LiteralUnion } from "@aura-stack/auth/types"
-import { createRequest } from "./request"
-import type { Session } from "@aura-stack/auth"
-import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
+import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
-const getBaseURL = () => {
-    return typeof window !== "undefined" ? window.location.origin : ""
+const client = createClient({
+    baseURL: typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
+    basePath: "/auth",
+    cache: "no-store",
+    credentials: "include",
+})
+
+export const getCSRFToken = async (): Promise<string | null> => {
+    try {
+        const response = await client.get("/csrfToken")
+        if (!response.ok) return null
+        const data = await response.json()
+        return data.csrfToken
+    } catch (error) {
+        console.log("[error:client] getCSRFToken", error)
+        return null
+    }
 }
 
-const getCSRFToken = async (): Promise<string> => {
-    const response = await createRequest("/auth/csrfToken")
-    const data = await response.json()
-    return data.csrfToken
+export const getSession = async (): Promise<Session | null> => {
+    try {
+        const response = await client.get("/session")
+        if (!response.ok) return null
+        const session = await response.json()
+        return session && session?.user ? session : null
+    } catch (error) {
+        console.log("[error:client] getSession", error)
+        return null
+    }
 }
 
-const getSession = async (): Promise<Session | null> => {
-    const response = await createRequest("/auth/session")
-    const session = await response.json()
-    return session
+export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
+    await client.get("/signIn/:oauth", {
+        params: { oauth: provider },
+        searchParams: { redirectTo },
+    })
 }
 
-const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
-    const baseURL = getBaseURL()
-    window.location.href = `${baseURL}/auth/signIn/${provider}?${new URLSearchParams({ redirectTo })}`
-}
-
-const signOut = async (redirectTo: string = "/") => {
-    const csrfToken = await getCSRFToken()
-    const response = await createRequest(
-        `/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
-        {
-            method: "POST",
+export const signOut = async (redirectTo: string = "/") => {
+    try {
+        const csrfToken = await getCSRFToken()
+        if (!csrfToken) {
+            console.log("[error:client] signOut - No CSRF token")
+            return null
+        }
+        await client.post("/signOut", {
+            searchParams: {
+                token_type_hint: "session_token",
+                redirectTo,
+            },
             headers: {
                 "X-CSRF-Token": csrfToken,
             },
-        }
-    )
-    const session = await response.json()
-    return session
-}
-
-export const createAuthClient = () => {
-    return {
-        getCSRFToken,
-        getSession,
-        signIn,
-        signOut,
+        })
+    } catch (error) {
+        console.log("[error:client] signOut", error)
     }
 }

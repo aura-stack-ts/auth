@@ -9,7 +9,8 @@ const getBaseURL = (request: NextApiRequest) => {
 
 export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const method = req.method ?? "GET"
-    const handler = handlers[method as keyof typeof handlers]
+    // @todo: resolve handler types
+    const handler = handlers[method as keyof typeof handlers] as ((request: Request) => Promise<Response>) | undefined
     if (!handler) {
         return res.status(405).json({ error: `Method ${method} Not Allowed` })
     }

@@ -4,8 +4,8 @@ import { createCookieStore } from "@/cookie.ts"
 import { createErrorHandler, useSecureCookies } from "@/utils.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
-import { createLogEntry, logMessages } from "@/logger.ts"
-import type { AuthConfig, AuthInstance, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
+import { createLogEntry, type logMessages } from "@/logger.ts"
+import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
 
 export type {
     AuthConfig,
@@ -21,7 +21,11 @@ export type {
     Logger,
     LogLevel,
     TrustedOrigin,
+    BuiltInOAuthProvider,
+    LiteralUnion,
 } from "@/@types/index.ts"
+
+export { createClient, type AuthClient, type Client, type ClientOptions } from "@/client.ts"
 
 /**
  * Maps LogLevel to Severity hierarchically per RFC 5424.
@@ -81,7 +85,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
             trustedOrigins: authConfig?.trustedOrigins,
             logger: internalLogger,
         },
-        middlewares: [
+        use: [
             (ctx) => {
                 const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
                 const cookies = createCookieStore(
@@ -119,20 +123,15 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
  *   }]
  * })
  */
-export const createAuth = (authConfig: AuthConfig): AuthInstance => {
+export const createAuth = (authConfig: AuthConfig) => {
     const config = createInternalConfig(authConfig)
     const router = createRouter(
         [signInAction(config.context.oauth), callbackAction(config.context.oauth), sessionAction, signOutAction, csrfTokenAction],
         config
     )
 
-    /**
-     * Return the auth instance with handlers and jose instance.
-     * This type is asserted to AuthInstance to ensure correct typing when the package is published on npm.
-     * Trust me.
-     */
     return {
         handlers: router,
         jose: config.context.jose,
-    } as AuthInstance
+    }
 }

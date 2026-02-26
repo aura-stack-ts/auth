@@ -2,10 +2,10 @@ import { type PropsWithChildren } from "react"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
-import appCss from "../styles.css?url"
 import { AuthProvider } from "@/contexts/auth"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import appCss from "../styles.css?url"
 
 export const Route = createRootRoute({
     head: () => ({

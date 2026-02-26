@@ -1,46 +1,54 @@
-import { AUTH_API_ENDPOINTS } from "./constants"
-import type { Session } from "@aura-stack/auth"
+import { createClient, type Session } from "@aura-stack/auth"
 
-export const getBaseURL = () => {
-    return typeof window !== "undefined" ? window.location.origin : ""
-}
+const client = createClient({
+    baseURL: typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
+    basePath: "/auth",
+    cache: "no-store",
+    credentials: "include",
+})
 
-export const getCSRFToken = async (): Promise<string> => {
-    const baseURL = getBaseURL()
-    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.CSRF_TOKEN}`, {
-        method: "GET",
-        cache: "no-store",
-    })
-    const data = await response.json()
-    return data.csrfToken
+export const getCSRFToken = async (): Promise<string | null> => {
+    try {
+        const response = await client.get("/csrfToken")
+        const json = await response.json()
+        return json && json?.csrfToken ? json.csrfToken : null
+    } catch (error) {
+        console.log("[error:client] getCSRFToken", error)
+        return null
+    }
 }
 
 export const getSession = async (): Promise<Session | null> => {
-    const baseURL = getBaseURL()
-    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SESSION}`, {
-        cache: "no-store",
-        credentials: "include",
-    })
-    const session = await response.json()
-    return session
+    try {
+        const response = await client.get("/session")
+        const session = await response.json()
+        return session && session?.user ? session : null
+    } catch (error) {
+        console.log("[error:client] getSession", error)
+        return null
+    }
 }
 
-export const signOut = async () => {
+export const signOut = async (redirectTo: string = "/") => {
     try {
-        const baseURL = getBaseURL()
         const csrfToken = await getCSRFToken()
-        const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SIGN_OUT}?token_type_hint=session_token`, {
-            method: "POST",
-            cache: "no-store",
+        if (!csrfToken) {
+            console.error("[error:client] signOut - No CSRF token")
+            return null
+        }
+        const response = await client.post("/signOut", {
+            searchParams: {
+                redirectTo,
+                token_type_hint: "session_token",
+            },
             headers: {
                 "X-CSRF-Token": csrfToken,
-                "Content-Type": "application/json",
             },
-            body: JSON.stringify({}),
         })
-        const session = await response.json()
-        return session
+        const json = await response.json()
+        return json
     } catch (error) {
+        console.log("[error:client] signOut", error)
         return null
     }
 }

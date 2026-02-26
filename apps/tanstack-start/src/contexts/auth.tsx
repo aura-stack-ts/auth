@@ -6,10 +6,11 @@ import type { AuthProviderProps } from "@/@types/props"
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+// @todo: fix bug
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
     const [isLoading, setIsLoading] = useState(true)
-    const isAuthenticated = !!session?.user
+    const isAuthenticated = Boolean(session?.user)
 
     useEffect(() => {
         if (defaultSession !== undefined) {
