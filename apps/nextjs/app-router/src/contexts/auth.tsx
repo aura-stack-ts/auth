@@ -1,13 +1,13 @@
 "use client"
 import { createContext, use, useState, useEffect } from "react"
-import { createAuthClient } from "@/lib/client"
+import { createAuthClient } from "@/lib/index"
 import type { Session } from "@aura-stack/auth"
 import type { AuthContextValue } from "@/@types/types"
 import type { AuthProviderProps } from "@/@types/props"
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-const { signIn: signInClient, signOut: signOutClient, getSession } = createAuthClient()
+const { signIn: signInClient, signOut: signOutClient, getSession } = createAuthClient
 
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState(defaultSession === undefined)

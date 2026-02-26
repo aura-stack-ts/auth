@@ -1,19 +1,12 @@
 import { createContext, use, useState, useEffect } from "react"
-import { authClient } from "@/lib/client"
+import { createAuthClient } from "@/lib/client"
 import type { Session } from "@aura-stack/auth"
+import type { AuthContextValue } from "@/@types/types"
 import type { AuthProviderProps } from "@/@types/props"
-
-export interface AuthContextValue {
-    session: Session | null
-    isAuthenticated: boolean
-    isLoading: boolean
-    signIn: (typeof authClient)["signIn"]
-    signOut: (typeof authClient)["signOut"]
-}
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-const { getSession, signIn: signInClient, signOut: signOutClient } = authClient
+const { getSession, signIn: signInClient, signOut: signOutClient } = createAuthClient
 
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState(defaultSession === undefined)

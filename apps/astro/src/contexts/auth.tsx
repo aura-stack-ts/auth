@@ -6,7 +6,7 @@ import type { AuthContextValue } from "@/@types/types"
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-const { signIn: signInClient, signOut: signOutClient, getSession } = createAuthClient()
+const { signIn: signInClient, signOut: signOutClient, getSession } = createAuthClient
 
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState(defaultSession === undefined)

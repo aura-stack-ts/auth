@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button"
 import { SessionClient } from "@/components/get-session-client"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 
-const auth = await createAuthServer({
+const { getSession } = await createAuthServer({
     request: Astro.request,
     redirect: Astro.redirect,
 })
 
-const session = await auth.getSession()
+const session = await getSession()
 const isAuthenticated = Boolean(session?.user)
 
 const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]

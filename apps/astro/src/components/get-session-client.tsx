@@ -1,6 +1,6 @@
 import { LayoutDashboard } from "lucide-react"
-import type { Session } from "@aura-stack/auth"
 import { AuthProvider, useAuthClient } from "@/contexts/auth"
+import type { Session } from "@aura-stack/auth"
 
 const SessionClientContent = () => {
     const { session } = useAuthClient()

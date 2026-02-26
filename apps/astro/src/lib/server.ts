@@ -1,7 +1,4 @@
-import { createRequest } from "@/lib/request"
-import type { Session } from "@aura-stack/auth"
-import type { LiteralUnion } from "@aura-stack/auth/types"
-import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
+import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
 export const createAuthServer = async (context: {
     request: Request
@@ -9,22 +6,26 @@ export const createAuthServer = async (context: {
 }) => {
     const { request, redirect } = context
 
+    const client = createClient({
+        baseURL: "http://localhost:3000",
+        basePath: "/api/auth",
+        cache: "no-store",
+        credentials: "include",
+        headers: {
+            ...Object.fromEntries(request.headers.entries()),
+            cookie: request.headers.get("cookie") ?? "",
+        },
+    })
+
     const getCSRFToken = async () => {
-        const response = await createRequest("/api/auth/csrfToken", {
-            headers: Object.fromEntries(request.headers.entries()),
-        })
+        const response = await client.get("/csrfToken")
         const json = await response.json()
         return json.csrfToken
     }
 
     const getSession = async (): Promise<Session | null> => {
-        const response = await createRequest(`/api/auth/session`, {
-            headers: {
-                ...Object.fromEntries(request.headers.entries()),
-                Cookie: request.headers.get("cookie") ?? "",
-            },
-        })
-        const session = (await response.json()) as Session
+        const response = await client.get("/session")
+        const session = await response.json() as Session
         if (!session || !session.user) return null
         return session
     }
@@ -35,17 +36,15 @@ export const createAuthServer = async (context: {
 
     const signOut = async (redirectTo: string = "/") => {
         const csrfToken = await getCSRFToken()
-        const response = await createRequest(
-            `/api/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
-            {
-                method: "POST",
-                headers: {
-                    ...Object.fromEntries(request.headers.entries()),
-                    Cookie: request.headers.get("cookie") || "",
-                    "X-CSRF-Token": csrfToken,
-                },
+        const response = await client.post("/signOut", {
+            searchParams: {
+                redirectTo,
+                token_type_hint: "session_token"
+            },
+            headers: {
+                "X-CSRF-Token": csrfToken
             }
-        )
+        })
         if (response.status === 202) {
             return redirect(redirectTo)
         }
@@ -53,6 +52,7 @@ export const createAuthServer = async (context: {
     }
 
     return {
+        getCSRFToken,
         getSession,
         signIn,
         signOut,

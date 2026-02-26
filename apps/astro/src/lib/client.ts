@@ -1,55 +1,47 @@
-import { createRequest } from "@/lib/request"
-import type { Session } from "@aura-stack/auth"
-import type { LiteralUnion } from "@aura-stack/auth/types"
-import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
+import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
-const getBaseURL = () => {
-    return typeof window !== "undefined" ? window.location.origin : ""
-}
+export const client = createClient({
+    baseURL: "http://localhost:3000",
+    basePath: "/api/auth",
+    cache: "no-store",
+    credentials: "include",
+})
 
 const getCSRFToken = async (): Promise<string> => {
-    const response = await createRequest("/api/auth/csrfToken")
-    if (!response.ok) {
-        throw new Error(`Failed to fetch CSRF token: ${response.status}`)
-    }
+    const response = await client.get("/csrfToken")
     const data = await response.json()
     return data.csrfToken
 }
 
 const getSession = async (): Promise<Session | null> => {
-    const response = await createRequest("/api/auth/session")
-    if (!response.ok) {
-        throw new Error(`Failed to fetch session: ${response.status}`)
-    }
+    const response = await client.get("/session")
     const session = await response.json()
     return session
 }
 
 const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
-    const baseURL = getBaseURL()
+    const baseURL = window.location.origin
     window.location.href = `${baseURL}/api/auth/signIn/${provider}?${new URLSearchParams({ redirectTo })}`
 }
 
 const signOut = async (redirectTo: string = "/") => {
     const csrfToken = await getCSRFToken()
-    const response = await createRequest(
-        `/api/auth/signOut?token_type_hint=session_token&redirectTo=${encodeURIComponent(redirectTo)}`,
-        {
-            method: "POST",
-            headers: {
-                "X-CSRF-Token": csrfToken,
-            },
+    const response = await client.post("/signOut", {
+        searchParams: {
+            redirectTo,
+            token_type_hint: "session_token"
+        },
+        headers: {
+            "X-CSRF-Token": csrfToken
         }
-    )
+    })
     const session = await response.json()
     return session
 }
 
-export const createAuthClient = () => {
-    return {
-        getCSRFToken,
-        getSession,
-        signIn,
-        signOut,
-    }
+export const createAuthClient = {
+    getCSRFToken,
+    getSession,
+    signIn,
+    signOut,
 }

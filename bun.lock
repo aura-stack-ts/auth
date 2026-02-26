@@ -259,7 +259,7 @@
       "version": "0.4.0",
       "dependencies": {
         "@aura-stack/jose": "workspace:*",
-        "@aura-stack/router": "^0.5.0",
+        "@aura-stack/router": "^0.6.0",
         "zod": "^4.3.5",
       },
       "devDependencies": {
@@ -356,7 +356,7 @@
 
     "@aura-stack/prettier-config": ["@aura-stack/prettier-config@workspace:configs/prettier-config"],
 
-    "@aura-stack/router": ["@aura-stack/router@0.5.0", "", { "dependencies": { "cookie": "1.1.1" } }, "sha512-CuiBaoJz8C035rfwHI+V1GYQhVYA6rA0LrMJMJeIBb/il5XfG/Xb0lrMGJQNfneGmwc6KgbNPVLyMiksGvOAYA=="],
+    "@aura-stack/router": ["@aura-stack/router@0.6.0", "", { "dependencies": { "cookie": "^1.1.1" } }, "sha512-mb0iXHGgKeN5myC2PrmXxGydN8Gol3MlVARRoFc7/2+G3OD9/k3LqkQKDDnKnwVvrj6kE7EIwftXDxouEDdAxA=="],
 
     "@aura-stack/tsconfig": ["@aura-stack/tsconfig@workspace:configs/tsconfig"],
 

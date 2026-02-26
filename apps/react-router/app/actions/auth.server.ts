@@ -1,17 +1,20 @@
 import { redirect } from "react-router"
-import { createRequest } from "~/lib/request"
-import type { Session } from "@aura-stack/auth"
+import { createClient, type Session } from "@aura-stack/auth"
 
-const getBaseURL = (request: Request) => {
-    return new URL(request.url).origin
+const client = (request: Request) => {
+    const baseURL = new URL(request.url).origin
+    return createClient({
+        baseURL,
+        basePath: "/api/auth",
+        cache: "no-store",
+        credentials: "include",
+        headers: Object.fromEntries(request.headers.entries()),
+    })
 }
 
 export const getCSRFToken = async (request: Request): Promise<string> => {
     try {
-        const baseURL = getBaseURL(request)
-        const response = await createRequest(`${baseURL}/auth/csrfToken`, {
-            headers: request.headers,
-        })
+        const response = await client(request).get("/csrfToken")
         if (!response.ok) {
             throw new Error(`Failed to fetch CSRF token: ${response.status}`)
         }
@@ -27,11 +30,13 @@ export const signIn = async (providerId: string) => {
 }
 
 export const signOut = async (request: Request, redirectTo: string = "/") => {
-    const baseURL = getBaseURL(request)
     try {
         const csrfToken = await getCSRFToken(request)
-        const response = await createRequest(`${baseURL}/auth/signOut?token_type_hint=session_token`, {
-            method: "POST",
+        const response = await client(request).post("/signOut", {
+            searchParams: {
+                redirectTo,
+                token_type_hint: "session_token"
+            },
             headers: {
                 "X-CSRF-Token": csrfToken,
             },
@@ -44,16 +49,13 @@ export const signOut = async (request: Request, redirectTo: string = "/") => {
         const data = await response.json()
         return data
     } catch (error) {
-        throw error
+        return null
     }
 }
 
 export const getSession = async (request: Request): Promise<Session | null> => {
-    const baseURL = getBaseURL(request)
     try {
-        const response = await createRequest(`${baseURL}/auth/session`, {
-            headers: request.headers,
-        })
+        const response = await client(request).get("/session")
         if (!response.ok) {
             return null
         }

@@ -12,7 +12,7 @@
   },
   "imports": {
     "@/": "./src/",
-    "@aura-stack/router": "npm:@aura-stack/router@^0.5.0",
+    "@aura-stack/router": "npm:@aura-stack/router@^0.6.0",
     "zod": "npm:zod@^4.3.5"
   },
   "publish": {

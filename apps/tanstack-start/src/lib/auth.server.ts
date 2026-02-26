@@ -1,7 +1,14 @@
 import { createServerFn } from "@tanstack/react-start"
-import { getCookies, getRequest, getRequestHeaders, setResponseHeader } from "@tanstack/react-start/server"
+import { getCookies, getRequest, getRequestHeaders, setResponseHeaders } from "@tanstack/react-start/server"
 import { AUTH_API_ENDPOINTS } from "./constants"
-import type { Session } from "@aura-stack/auth"
+import { createClient, type Session } from "@aura-stack/auth"
+
+const client = createClient({
+    baseURL: "http://localhost:3000",
+    basePath: "/api/auth",
+    cache: "no-store",
+    credentials: "include",
+})
 
 const getBaseURL = (request: Request) => {
     const url = new URL(request.url)
@@ -72,5 +79,5 @@ export const signOut = createServerFn({ method: "POST" }).handler(async () => {
         },
         body: JSON.stringify({}),
     })
-    setResponseHeader("Set-Cookie", response.headers.getSetCookie())
+    setResponseHeaders(response.headers)
 })

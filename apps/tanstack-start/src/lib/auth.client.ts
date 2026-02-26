@@ -1,42 +1,35 @@
-import { AUTH_API_ENDPOINTS } from "./constants"
-import type { Session } from "@aura-stack/auth"
+import { createClient, type Session } from "@aura-stack/auth"
 
-export const getBaseURL = () => {
-    return typeof window !== "undefined" ? window.location.origin : ""
-}
+const client = createClient({
+    baseURL: "http://localhost:3000",
+    basePath: "/api/auth",
+    cache: "no-store",
+    credentials: "include",
+})
 
 export const getCSRFToken = async (): Promise<string> => {
-    const baseURL = getBaseURL()
-    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.CSRF_TOKEN}`, {
-        method: "GET",
-        cache: "no-store",
-    })
+    const response = await client.get("/csrfToken")
     const data = await response.json()
     return data.csrfToken
 }
 
 export const getSession = async (): Promise<Session | null> => {
-    const baseURL = getBaseURL()
-    const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SESSION}`, {
-        cache: "no-store",
-        credentials: "include",
-    })
+    const response = await client.get("/session")
     const session = await response.json()
     return session
 }
 
-export const signOut = async () => {
+export const signOut = async (redirectTo: string = "/") => {
     try {
-        const baseURL = getBaseURL()
         const csrfToken = await getCSRFToken()
-        const response = await fetch(`${baseURL}${AUTH_API_ENDPOINTS.SIGN_OUT}?token_type_hint=session_token`, {
-            method: "POST",
-            cache: "no-store",
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                "Content-Type": "application/json",
+        const response = await client.post("/signOut", {
+            searchParams: {
+                redirectTo,
+                token_type_hint: "session_token"
             },
-            body: JSON.stringify({}),
+            headers: {
+                "X-CSRF-Token": csrfToken
+            }
         })
         const session = await response.json()
         return session

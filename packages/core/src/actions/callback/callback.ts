@@ -26,7 +26,7 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
                 state: z.string("Missing state parameter in the OAuth authorization response."),
             }),
         },
-        middlewares: [
+        use: [
             (ctx) => {
                 const {
                     searchParams,
