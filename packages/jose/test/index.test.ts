@@ -58,10 +58,10 @@ describe("JWSs", () => {
         await expect(verifyJWS(jws)).rejects.toThrow("Secret string must be at least 32 bytes long")
     })
 
-    test("fail JWT with invalid format JWS", () => {
+    test("fail JWT with invalid format JWS", async () => {
         const secretKey = getRandomBytes(32)
         const { signJWS } = createJWS(secretKey)
-        expect(() => signJWS(undefined as unknown as JWTPayload)).toThrow("The payload must be a non-empty object")
+        await expect(signJWS(undefined as unknown as JWTPayload)).rejects.toThrow("The payload must be a non-empty object")
     })
 
     test("set audience in a JWS and verify it", async () => {
