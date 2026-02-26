@@ -33,7 +33,7 @@ export const getSession = async (): Promise<Session | null> => {
 }
 
 export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
-    return redirect(`/auth/signIn/${provider}?${new URLSearchParams({ redirectTo }).toString()}`)
+    redirect(`/auth/signIn/${provider}?${new URLSearchParams({ redirectTo }).toString()}`)
 }
 
 export const signOut = async (redirectTo: string = "/") => {
@@ -43,7 +43,6 @@ export const signOut = async (redirectTo: string = "/") => {
             console.log("[error:client] signOut - No CSRF token")
             return
         }
-
         const response = await client.post("/signOut", {
             searchParams: {
                 token_type_hint: "session_token",
@@ -53,7 +52,7 @@ export const signOut = async (redirectTo: string = "/") => {
                 "X-CSRF-Token": csrfToken,
             },
         })
-        return redirect(response.redirected ? response.url : redirectTo)
+        redirect(response.redirected ? response.url : redirectTo)
     } catch (error) {
         console.log("[error:client] signOut", error)
     }

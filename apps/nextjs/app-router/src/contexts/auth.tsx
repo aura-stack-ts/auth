@@ -54,7 +54,9 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
         fetchSession()
     }, [defaultSession])
 
-    return <AuthContext value={{ session, isAuthenticated, isLoading, signIn, signOut }}>{children}</AuthContext>
+    return (
+        <AuthContext value={{ session, isAuthenticated, isLoading, signIn, signOut } as AuthContextValue}>{children}</AuthContext>
+    )
 }
 
 export const useAuthClient = () => {
