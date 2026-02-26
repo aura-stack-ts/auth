@@ -10,8 +10,8 @@ const client = createClient({
 export const getCSRFToken = async (): Promise<string | null> => {
     try {
         const response = await client.get("/csrfToken")
-        const data = await response.json()
-        return data.csrfToken
+        const json = await response.json()
+        return json && json?.csrfToken ? json.csrfToken : null
     } catch (error) {
         console.log("[error:client] getCSRFToken", error)
         return null
@@ -30,6 +30,7 @@ export const getSession = async (): Promise<Session | null> => {
 }
 
 export const signIn = async (provide: LiteralUnion<BuiltInOAuthProvider>) => {
+    console.log("[client] signIn - provider:", provide)
     const baseURL = window.location.origin
     window.location.href = `${baseURL}/auth/signIn/${provide}`
 }
@@ -37,13 +38,17 @@ export const signIn = async (provide: LiteralUnion<BuiltInOAuthProvider>) => {
 export const signOut = async (redirectTo: string = "/") => {
     try {
         const csrfToken = await getCSRFToken()
+        if (!csrfToken) {
+            console.error("[error:client] signOut - No CSRF token")
+            return
+        }
         const response = await client.post("/signOut", {
             searchParams: {
                 redirectTo,
                 token_type_hint: "session_token",
             },
             headers: {
-                "X-CSRF-Token": csrfToken!,
+                "X-CSRF-Token": csrfToken,
             },
         })
         const session = await response.json()

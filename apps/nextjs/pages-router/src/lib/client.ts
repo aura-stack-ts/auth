@@ -4,8 +4,8 @@ import type { LiteralUnion, BuiltInOAuthProvider, Session } from "@aura-stack/au
 export const getCsrfToken = async (): Promise<string | null> => {
     try {
         const response = await client.get("/csrfToken")
-        const data = await response.json()
-        return data.csrfToken
+        const json = await response.json()
+        return json && json?.csrfToken ? json.csrfToken : null
     } catch (error) {
         console.log("[error:client] getCsrfToken", error)
         return null
@@ -30,13 +30,17 @@ export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>): Prom
 export const signOut = async (redirectTo: string = "/"): Promise<void> => {
     try {
         const csrfToken = await getCsrfToken()
+        if (!csrfToken) {
+            console.error("[error:client] signOut - No CSRF token")
+            return
+        }
         const response = await client.post("/signOut", {
             searchParams: {
                 token_type_hint: "session_token",
                 redirectTo: redirectTo,
             },
             headers: {
-                "X-CSRF-Token": csrfToken!,
+                "X-CSRF-Token": csrfToken,
             },
         })
         if (response.redirected) {

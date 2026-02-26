@@ -8,17 +8,27 @@ export const client = createClient({
 })
 
 const getCSRFToken = async (): Promise<string | null> => {
-    const response = await client.get("/csrfToken")
-    if (!response.ok) return null
-    const data = await response.json()
-    return data.csrfToken
+    try {
+        const response = await client.get("/csrfToken")
+        if (!response.ok) return null
+        const data = await response.json()
+        return data.csrfToken
+    } catch (error) {
+        console.log("[error:client] getCSRFToken", error)
+        return null
+    }
 }
 
 const getSession = async (): Promise<Session | null> => {
-    const response = await client.get("/session")
-    if (!response.ok) return null
-    const session = await response.json()
-    return session
+    try {
+        const response = await client.get("/session")
+        if (!response.ok) return null
+        const session = await response.json()
+        return session && session?.user ? session : null
+    } catch (error) {
+        console.log("[error:client] getSession", error)
+        return null
+    }
 }
 
 const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
@@ -27,18 +37,28 @@ const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: 
 }
 
 const signOut = async (redirectTo: string = "/") => {
-    const csrfToken = await getCSRFToken()
-    const response = await client.post("/signOut", {
-        searchParams: {
-            redirectTo,
-            token_type_hint: "session_token",
-        },
-        headers: {
-            "X-CSRF-Token": csrfToken!,
-        },
-    })
-    const session = await response.json()
-    return session
+    try {
+        const csrfToken = await getCSRFToken()
+        if (!csrfToken) {
+            console.log("[error:client] signOut - No CSRF token found")
+            return null
+        }
+
+        const response = await client.post("/signOut", {
+            searchParams: {
+                redirectTo,
+                token_type_hint: "session_token",
+            },
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        })
+        const json = await response.json()
+        return json
+    } catch (error) {
+        console.log("[error:client] signOut", error)
+        return null
+    }
 }
 
 export const createAuthClient = {

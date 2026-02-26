@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers"
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
 const client = createClient({
-    baseURL: "http://localhost:3000",
+    baseURL: typeof window !== "undefined" ? window.location.origin : (process.env.AUTH_URL ?? "http://localhost:3000"),
     basePath: "/auth",
     cache: "no-store",
     credentials: "include",
@@ -15,12 +15,12 @@ const client = createClient({
     },
 })
 
-export const getCSRFToken = async () => {
+export const getCSRFToken = async (): Promise<string | null> => {
     try {
         const response = await client.get("/csrfToken")
         if (!response.ok) return null
         const json = await response.json()
-        return json.csrfToken
+        return json && json?.csrfToken ? json.csrfToken : null
     } catch (error) {
         console.log("[error:server] getCSRFToken", error)
         return null
@@ -48,6 +48,10 @@ export const signOut = async (redirectTo: string = "/") => {
     try {
         const cookiesStore = await cookies()
         const csrfToken = await getCSRFToken()
+        if (!csrfToken) {
+            console.log("[error:server] signOut - No CSRF token")
+            return
+        }
         const response = await client.post("/signOut", {
             searchParams: {
                 redirectTo,
@@ -60,8 +64,8 @@ export const signOut = async (redirectTo: string = "/") => {
         if (response.status === 202) {
             const setCookies = response.headers.getSetCookie()
             for (const cookie of setCookies) {
-                const [nameValue] = cookie.split("; ")
-                cookiesStore.set(nameValue.split("=")[0], "")
+                const nameMatch = cookie.match(/^([^=]+)=/)
+                nameMatch && cookiesStore.delete(nameMatch[1])
             }
             redirect(redirectTo)
         }

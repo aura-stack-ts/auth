@@ -50,7 +50,7 @@ export const getCsrfToken = createServerFn({ method: "GET" }).handler(async () =
         const response = await client().get("/csrfToken")
         if (!response.ok) return null
         const json = await response.json()
-        return json.csrfToken
+        return json && json?.csrfToken ? json.csrfToken : null
     } catch (error) {
         console.log("[error:server] getCsrfToken", error)
         return null
@@ -60,6 +60,10 @@ export const getCsrfToken = createServerFn({ method: "GET" }).handler(async () =
 export const signOut = createServerFn({ method: "POST" }).handler(async () => {
     try {
         const csrfToken = await getCsrfToken()
+        if (!csrfToken) {
+            console.error("[error:server] signOut - No CSRF token")
+            return
+        }
         const response = await client().post("/signOut", {
             searchParams: {
                 token_type_hint: "session_token",
