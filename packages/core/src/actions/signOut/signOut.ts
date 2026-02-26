@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder, statusCode } from "@aura-stack/router"
 import { verifyCSRF } from "@/secure.ts"
 import { secureApiHeaders } from "@/headers.ts"

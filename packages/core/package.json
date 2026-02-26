@@ -43,6 +43,11 @@
       "types": "./dist/@types/index.d.ts",
       "import": "./dist/@types/index.js",
       "require": "./dist/@types/index.cjs"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js",
+      "require": "./dist/client/index.cjs"
     }
   },
   "keywords": [

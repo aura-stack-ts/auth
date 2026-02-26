@@ -77,9 +77,7 @@ export const toExpressResponse = async (webResponse: globalThis.Response, res: R
  * Mount this on the `basePath` configured in `createAuth()` (default: `/api/auth`).
  */
 export const toExpressHandler = async (req: Request, res: Response, next: NextFunction) => {
-    const handler = handlers[req.method as keyof typeof handlers] as
-        | ((req: globalThis.Request) => Promise<globalThis.Response>)
-        | undefined
+    const handler = handlers[req.method as keyof typeof handlers]
     if (!handler) {
         return next()
     }
