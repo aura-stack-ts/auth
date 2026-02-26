@@ -46,7 +46,7 @@ export const Header = () => {
                             Discord
                         </a>
                     </div>
-                    {!isLoading && !isAuthenticated && (
+                    {!isAuthenticated && (
                         <Button className="hidden md:flex" variant="outline" size="sm" asChild>
                             <Link to="/signIn">Sign In</Link>
                         </Button>

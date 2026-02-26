@@ -1,13 +1,11 @@
+import type { AuthServerContext } from "@/@types/types"
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
-export const createAuthServer = async (context: {
-    request: Request
-    redirect: (path: string, status?: 301 | 302 | 303 | 307 | 308 | 300 | 304) => Response
-}) => {
+export const createAuthServer = async (context: AuthServerContext) => {
     const { request, redirect } = context
 
     const client = createClient({
-        baseURL: "http://localhost:3000",
+        baseURL: new URL(request.url).origin,
         basePath: "/api/auth",
         cache: "no-store",
         credentials: "include",
@@ -19,13 +17,15 @@ export const createAuthServer = async (context: {
 
     const getCSRFToken = async () => {
         const response = await client.get("/csrfToken")
+        if (!response.ok) return null
         const json = await response.json()
         return json.csrfToken
     }
 
     const getSession = async (): Promise<Session | null> => {
         const response = await client.get("/session")
-        const session = await response.json() as Session
+        if (!response.ok) return null
+        const session = (await response.json()) as Session
         if (!session || !session.user) return null
         return session
     }
@@ -39,11 +39,11 @@ export const createAuthServer = async (context: {
         const response = await client.post("/signOut", {
             searchParams: {
                 redirectTo,
-                token_type_hint: "session_token"
+                token_type_hint: "session_token",
             },
             headers: {
-                "X-CSRF-Token": csrfToken
-            }
+                "X-CSRF-Token": csrfToken,
+            },
         })
         if (response.status === 202) {
             return redirect(redirectTo)

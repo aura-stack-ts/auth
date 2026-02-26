@@ -9,14 +9,14 @@ import { client } from "./client.api"
  */
 export async function getSession(req: IncomingMessage | NextApiRequest): Promise<Session | null> {
     try {
-        const response =  await client.get("/session", { 
-            headers: req.headers as Record<string, string>
+        const response = await client.get("/session", {
+            headers: req.headers as Record<string, string>,
         })
         if (!response.ok) {
             return null
         }
-        const session = (await response.json()) as Session
-        return session && session.user ? session : null
+        const session = await response.json()
+        return session && session?.user ? session : null
     } catch (error) {
         return null
     }

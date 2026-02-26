@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { cacheControl } from "@/headers.ts"
 import { createPKCE, generateSecure } from "@/secure.ts"

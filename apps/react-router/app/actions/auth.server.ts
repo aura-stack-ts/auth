@@ -12,16 +12,27 @@ const client = (request: Request) => {
     })
 }
 
-export const getCSRFToken = async (request: Request): Promise<string> => {
+export const getCSRFToken = async (request: Request): Promise<string | null> => {
     try {
         const response = await client(request).get("/csrfToken")
-        if (!response.ok) {
-            throw new Error(`Failed to fetch CSRF token: ${response.status}`)
-        }
+        if (!response.ok) return null
         const data = await response.json()
         return data.csrfToken
     } catch (error) {
-        throw error
+        console.log("[error:server] getCSRFToken", error)
+        return null
+    }
+}
+
+export const getSession = async (request: Request): Promise<Session | null> => {
+    try {
+        const response = await client(request).get("/session")
+        if (!response.ok) return null
+        const session = await response.json()
+        return session && session?.user ? session : null
+    } catch (error) {
+        console.log("[error:server] getSession", error)
+        return null
     }
 }
 
@@ -35,10 +46,10 @@ export const signOut = async (request: Request, redirectTo: string = "/") => {
         const response = await client(request).post("/signOut", {
             searchParams: {
                 redirectTo,
-                token_type_hint: "session_token"
+                token_type_hint: "session_token",
             },
             headers: {
-                "X-CSRF-Token": csrfToken,
+                "X-CSRF-Token": csrfToken!,
             },
         })
         if (response.status === 202) {
@@ -49,19 +60,7 @@ export const signOut = async (request: Request, redirectTo: string = "/") => {
         const data = await response.json()
         return data
     } catch (error) {
-        return null
-    }
-}
-
-export const getSession = async (request: Request): Promise<Session | null> => {
-    try {
-        const response = await client(request).get("/session")
-        if (!response.ok) {
-            return null
-        }
-        const session = await response.json()
-        return session
-    } catch (error) {
+        console.log("[error:server] signOut", error)
         return null
     }
 }

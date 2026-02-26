@@ -21,7 +21,6 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         body: method !== "GET" && req.body ? JSON.stringify(req.body) : undefined,
     })
     try {
-        console.log(`Handling ${method} request for ${url.pathname}`)
         const response = await handler(webRequest)
         if (response.status >= 300 && response.status < 400) {
             const location = response.headers.get("location")

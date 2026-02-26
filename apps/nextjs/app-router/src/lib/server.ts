@@ -1,9 +1,7 @@
 "use server"
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
-import { createClient, type Session } from "@aura-stack/auth"
-import type { LiteralUnion } from "@aura-stack/auth/types"
-import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
+import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
 const client = createClient({
     baseURL: "http://localhost:3000",
@@ -14,19 +12,31 @@ const client = createClient({
         "use server"
         const headersStore = await headers()
         return Object.fromEntries(headersStore.entries())
-    }
+    },
 })
 
 export const getCSRFToken = async () => {
-    const response = await client.get("/csrfToken")
-    const json = await response.json()
-    return json.csrfToken
+    try {
+        const response = await client.get("/csrfToken")
+        if (!response.ok) return null
+        const json = await response.json()
+        return json.csrfToken
+    } catch (error) {
+        console.log("[error:server] getCSRFToken", error)
+        return null
+    }
 }
 
 export const getSession = async (): Promise<Session | null> => {
-    const response = await client.get("/session")
-    const session = await response.json()
-    return session
+    try {
+        const response = await client.get("/session")
+        if (!response.ok) return null
+        const session = await response.json()
+        return session && session?.user ? session : null
+    } catch (error) {
+        console.log("[error:server] getSession", error)
+        return null
+    }
 }
 
 export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
@@ -35,24 +45,28 @@ export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redir
 }
 
 export const signOut = async (redirectTo: string = "/") => {
-    const cookiesStore = await cookies()
-    const csrfToken = await getCSRFToken()
-    const response = await client.post("/signOut", {
-        searchParams: {
-            redirectTo,
-            token_type_hint: "session_token",
-        },
-        headers: {
-            "X-CSRF-Token": csrfToken,
+    try {
+        const cookiesStore = await cookies()
+        const csrfToken = await getCSRFToken()
+        const response = await client.post("/signOut", {
+            searchParams: {
+                redirectTo,
+                token_type_hint: "session_token",
+            },
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        })
+        if (response.status === 202) {
+            const setCookies = response.headers.getSetCookie()
+            for (const cookie of setCookies) {
+                const [nameValue] = cookie.split("; ")
+                cookiesStore.set(nameValue.split("=")[0], "")
+            }
+            redirect(redirectTo)
         }
-    })
-    if (response.status === 202) {
-        const setCookies = response.headers.getSetCookie()
-        for (const cookie of setCookies) {
-            const [nameValue] = cookie.split("; ")
-            cookiesStore.set(nameValue.split("=")[0], "")
-        }
-        redirect(redirectTo)
+        return response.json()
+    } catch (error) {
+        console.log("[error:server] signOut", error)
     }
-    return response.json()
 }

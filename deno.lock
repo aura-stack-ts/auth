@@ -9,7 +9,7 @@
     "npm:tsup@^8.5.1": "8.5.1_esbuild@0.27.3",
     "npm:turbo@^2.7.5": "2.8.10",
     "npm:vitest@^4.0.14": "4.0.18_vite@7.3.1__@types+node@20.19.33__picomatch@4.0.3_@types+node@20.19.33",
-    "npm:zod@^4.3.5": "4.3.6"
+    "npm:zod@4.3.5": "4.3.5"
   },
   "npm": {
     "@acemir/cssom@0.9.31": {
@@ -1585,8 +1585,8 @@
     "yocto-queue@0.1.0": {
       "integrity": "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="
     },
-    "zod@4.3.6": {
-      "integrity": "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="
+    "zod@4.3.5": {
+      "integrity": "sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g=="
     }
   },
   "workspace": {
@@ -1603,19 +1603,19 @@
         "seroval": "^1.4.1",
         "lodash-es": "^4.17.23",
         "tar": ">=7.5.7",
-        "zod": "^4.3.5"
+        "zod": "4.3.5"
       }
     },
     "members": {
       "packages/core": {
         "dependencies": [
           "npm:@aura-stack/router@0.6",
-          "npm:zod@^4.3.5"
+          "npm:zod@4.3.5"
         ],
         "packageJson": {
           "dependencies": [
             "npm:@aura-stack/router@0.6",
-            "npm:zod@^4.3.5"
+            "npm:zod@4.3.5"
           ]
         }
       },

@@ -1,20 +1,22 @@
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
 export const client = createClient({
-    baseURL: "http://localhost:3000",
+    baseURL: typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
     basePath: "/api/auth",
     cache: "no-store",
     credentials: "include",
 })
 
-const getCSRFToken = async (): Promise<string> => {
+const getCSRFToken = async (): Promise<string | null> => {
     const response = await client.get("/csrfToken")
+    if (!response.ok) return null
     const data = await response.json()
     return data.csrfToken
 }
 
 const getSession = async (): Promise<Session | null> => {
     const response = await client.get("/session")
+    if (!response.ok) return null
     const session = await response.json()
     return session
 }
@@ -29,11 +31,11 @@ const signOut = async (redirectTo: string = "/") => {
     const response = await client.post("/signOut", {
         searchParams: {
             redirectTo,
-            token_type_hint: "session_token"
+            token_type_hint: "session_token",
         },
         headers: {
-            "X-CSRF-Token": csrfToken
-        }
+            "X-CSRF-Token": csrfToken!,
+        },
     })
     const session = await response.json()
     return session
