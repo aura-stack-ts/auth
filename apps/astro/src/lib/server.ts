@@ -63,7 +63,8 @@ export const createAuthServer = async (context: AuthServerContext) => {
             if (response.status === 202) {
                 return redirect(redirectTo)
             }
-            return response.json()
+            const json = await response.json()
+            return json
         } catch (error) {
             console.log("[error:server] signOut", error)
             return null

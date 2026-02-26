@@ -43,7 +43,6 @@ const signOut = async (redirectTo: string = "/") => {
             console.log("[error:client] signOut - No CSRF token found")
             return null
         }
-
         const response = await client.post("/signOut", {
             searchParams: {
                 redirectTo,

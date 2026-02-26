@@ -50,7 +50,7 @@ export const signOut = async (redirectTo: string = "/") => {
         const csrfToken = await getCSRFToken()
         if (!csrfToken) {
             console.log("[error:server] signOut - No CSRF token")
-            return
+            return null
         }
         const response = await client.post("/signOut", {
             searchParams: {

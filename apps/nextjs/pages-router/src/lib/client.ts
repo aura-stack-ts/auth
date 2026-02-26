@@ -27,12 +27,12 @@ export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>): Prom
     window.location.href = `/api/auth/signIn/${provider}`
 }
 
-export const signOut = async (redirectTo: string = "/"): Promise<void> => {
+export const signOut = async (redirectTo: string = "/") => {
     try {
         const csrfToken = await getCsrfToken()
         if (!csrfToken) {
             console.error("[error:client] signOut - No CSRF token")
-            return
+            return null
         }
         const response = await client.post("/signOut", {
             searchParams: {

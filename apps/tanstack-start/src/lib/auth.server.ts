@@ -62,7 +62,7 @@ export const signOut = createServerFn({ method: "POST" }).handler(async () => {
         const csrfToken = await getCsrfToken()
         if (!csrfToken) {
             console.error("[error:server] signOut - No CSRF token")
-            return
+            return null
         }
         const response = await client().post("/signOut", {
             searchParams: {
@@ -73,6 +73,8 @@ export const signOut = createServerFn({ method: "POST" }).handler(async () => {
             },
         })
         setResponseHeaders(response.headers)
+        const json = await response.json()
+        return json
     } catch (error) {
         console.log("[error:server] signOut", error)
     }

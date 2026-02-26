@@ -49,13 +49,17 @@ export const signIn = async (providerId: string) => {
 export const signOut = async (request: Request, redirectTo: string = "/") => {
     try {
         const csrfToken = await getCSRFToken(request)
+        if (!csrfToken) {
+            console.error("[error:server] signOut - No CSRF token")
+            return null
+        }
         const response = await client(request).post("/signOut", {
             searchParams: {
                 redirectTo,
                 token_type_hint: "session_token",
             },
             headers: {
-                "X-CSRF-Token": csrfToken!,
+                "X-CSRF-Token": csrfToken,
             },
         })
         if (response.status === 202) {
@@ -63,8 +67,8 @@ export const signOut = async (request: Request, redirectTo: string = "/") => {
                 headers: response.headers,
             })
         }
-        const data = await response.json()
-        return data
+        const json = await response.json()
+        return json
     } catch (error) {
         console.log("[error:server] signOut", error)
         return null

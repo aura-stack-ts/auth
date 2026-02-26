@@ -1,5 +1,4 @@
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
-import { redirect } from "next/navigation"
 
 const client = createClient({
     baseURL: typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
@@ -33,7 +32,10 @@ export const getSession = async (): Promise<Session | null> => {
 }
 
 export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
-    redirect(`/auth/signIn/${provider}?${new URLSearchParams({ redirectTo }).toString()}`)
+    await client.get("/signIn/:oauth", {
+        params: { oauth: provider },
+        searchParams: { redirectTo },
+    })
 }
 
 export const signOut = async (redirectTo: string = "/") => {
@@ -41,9 +43,9 @@ export const signOut = async (redirectTo: string = "/") => {
         const csrfToken = await getCSRFToken()
         if (!csrfToken) {
             console.log("[error:client] signOut - No CSRF token")
-            return
+            return null
         }
-        const response = await client.post("/signOut", {
+        await client.post("/signOut", {
             searchParams: {
                 token_type_hint: "session_token",
                 redirectTo,
@@ -52,7 +54,6 @@ export const signOut = async (redirectTo: string = "/") => {
                 "X-CSRF-Token": csrfToken,
             },
         })
-        redirect(response.redirected ? response.url : redirectTo)
     } catch (error) {
         console.log("[error:client] signOut", error)
     }
