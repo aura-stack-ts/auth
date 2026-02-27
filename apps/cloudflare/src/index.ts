@@ -17,7 +17,7 @@ export default {
     async fetch(request): Promise<Response> {
         const pathname = new URL(request.url).pathname
         if (pathname === "/") {
-            return new Response("Hello World from GET / endpoint")
+            return new Response("Welcome to Aura Auth Cloudflare Worker App!")
         }
         if (pathname.startsWith("/api/auth/")) {
             const handler = handlers[request.method as keyof typeof handlers]

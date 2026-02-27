@@ -8,7 +8,6 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "worker-check": "wrangler check",
-    "test": "vitest",
     "typegen": "wrangler types",
     "type-check": "tsc --noEmit",
     "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
