@@ -14,18 +14,17 @@ import { handlers } from "./auth"
  */
 
 export default {
-    async fetch(request, env, ctx): Promise<Response> {
+    async fetch(request): Promise<Response> {
         const pathname = new URL(request.url).pathname
         if (pathname === "/") {
             return new Response("Hello World from GET / endpoint")
         }
-        if(pathname.startsWith("/api/auth/")) {
+        if (pathname.startsWith("/api/auth/")) {
             const handler = handlers[request.method as keyof typeof handlers]
-            if(!handler) {
+            if (!handler) {
                 return Response.json({ error: "Method Not Allowed" }, { status: 405 })
             }
-            const response = await handler(request)
-            return response
+            return await handler(request)
         }
         return new Response("Not Found", { status: 404 })
     },

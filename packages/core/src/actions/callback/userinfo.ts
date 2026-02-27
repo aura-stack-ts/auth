@@ -41,17 +41,17 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
         const response = await fetchAsync(userinfoEndpoint, {
             method: "GET",
             headers: {
+                "User-Agent": "Aura Auth/0.4.0",
                 Accept: "application/json",
                 Authorization: `Bearer ${accessToken}`,
             },
         })
-        const json = await response.json()
-
         if (!response.ok) {
             logger?.log("OAUTH_USERINFO_INVALID_RESPONSE")
             throw new OAuthProtocolError("INVALID_REQUEST", "Invalid userinfo response format")
         }
 
+        const json = await response.json()
         const { success, data } = OAuthErrorResponse.safeParse(json)
         if (success) {
             logger?.log("OAUTH_USERINFO_ERROR", {

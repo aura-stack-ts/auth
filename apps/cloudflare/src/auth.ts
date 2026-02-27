@@ -8,6 +8,6 @@ export const { handlers, jose } = createAuth({
         level: "debug",
         log({ msgId, message, structuredData }) {
             console.log(`[${msgId}] ${message}`, structuredData)
-        }
-    }
+        },
+    },
 }) as AuthInstance
