@@ -2,6 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { GET } from "@test/presets.ts"
 import { createPKCE } from "@/secure.ts"
 import { setCookie, getSetCookie } from "@/cookie.ts"
+import { AURA_AUTH_VERSION } from "@/utils.ts"
 
 describe("callbackAction", () => {
     test("invalid endpoint", async () => {
@@ -158,6 +159,7 @@ describe("callbackAction", () => {
             expect.objectContaining({
                 method: "GET",
                 headers: {
+                    "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                     Accept: "application/json",
                     Authorization: "Bearer access_123",
                 },
