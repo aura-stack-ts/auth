@@ -13,7 +13,7 @@ export const getSession = async <Route extends string>(ctx: RouterContext<Route>
         const response = await handlers.GET(
             new Request(url, {
                 headers: ctx.request.headers,
-            })
+            }),
         )
         const sessionToken = await response.json()
         return sessionToken

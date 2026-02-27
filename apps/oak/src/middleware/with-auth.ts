@@ -1,6 +1,6 @@
-import type { Next, RouteParams, RouterContext } from "@oak/oak"
 import { getSession } from "../lib/get-session.ts"
-import { Session } from "@aura-stack/auth"
+import type { Session } from "@aura-stack/auth"
+import type { Next, RouteParams, RouterContext } from "@oak/oak"
 
 const unauthorizedBody = {
     error: "Unauthorized",

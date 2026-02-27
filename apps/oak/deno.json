@@ -2,7 +2,8 @@
   "name": "oak",
   "version": "0.1.0",
   "tasks": {
-    "dev": "deno run --allow-net --allow-env --env-file --watch src/index.ts"
+    "dev": "deno run --allow-net --allow-env --env-file --watch src/index.ts",
+    "format": "deno fmt"
   },
   "imports": {
     "@oak/oak": "jsr:@oak/oak@^17.2.0"
@@ -11,7 +12,7 @@
     "semiColons": false,
     "indentWidth": 4,
     "lineWidth": 130,
-    "trailingCommas": "always",
+    "trailingCommas": "onlyMultiLine",
     "include": ["src", "README.md"]
   }
 }

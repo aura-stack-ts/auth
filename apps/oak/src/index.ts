@@ -1,6 +1,6 @@
 import { Application, Router } from "@oak/oak"
 import { toOakHandler } from "./lib/handler.ts"
-import { GlobalState, withAuth } from "./middleware/with-auth.ts"
+import { type GlobalState, withAuth } from "./middleware/with-auth.ts"
 
 const router = new Router<GlobalState>()
 const app = new Application()
