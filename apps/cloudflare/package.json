@@ -1,0 +1,26 @@
+{
+  "name": "cloudflare",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "worker-check": "wrangler check",
+    "test": "vitest",
+    "typegen": "wrangler types",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
+    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
+  },
+  "dependencies": {
+    "@aura-stack/auth": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.12.4",
+    "@types/node": "catalog:node",
+    "typescript": "catalog:typescript",
+    "wrangler": "^4.69.0"
+  }
+}
