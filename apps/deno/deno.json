@@ -1,0 +1,16 @@
+{
+  "name": "deno",
+  "version": "0.1.0",
+  "tasks": {
+    "dev": "deno --allow-net --allow-env --env-file --watch src/index.ts",
+    "format": "deno fmt"
+  },
+  "imports": {},
+  "fmt": {
+    "semiColons": false,
+    "indentWidth": 4,
+    "lineWidth": 130,
+    "trailingCommas": "onlyMultiLine",
+    "include": ["src", "README.md"]
+  }
+}
