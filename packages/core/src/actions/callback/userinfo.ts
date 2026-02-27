@@ -1,5 +1,6 @@
 import { fetchAsync } from "@/request.ts"
 import { generateSecure } from "@/secure.ts"
+import { AURA_AUTH_VERSION } from "@/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/errors.ts"
 import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.ts"
@@ -41,11 +42,11 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
         const response = await fetchAsync(userinfoEndpoint, {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: `Bearer ${accessToken}`,
             },
         })
-
         if (!response.ok) {
             logger?.log("OAUTH_USERINFO_INVALID_RESPONSE")
             throw new OAuthProtocolError("INVALID_REQUEST", "Invalid userinfo response format")

@@ -2,6 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { OAuthProviderConfig, OAuthProviderCredentials } from "@/@types/index.ts"
 import { oauthCustomService } from "@test/presets.ts"
+import { AURA_AUTH_VERSION } from "@/utils.ts"
 
 describe("getUserInfo", () => {
     test("get user info", async () => {
@@ -25,6 +26,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
@@ -66,6 +68,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
@@ -109,6 +112,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
@@ -135,6 +139,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer invalid_access_token",
             },
@@ -157,6 +162,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token",
             },

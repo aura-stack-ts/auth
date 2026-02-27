@@ -3,6 +3,8 @@ import { isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "
 import type { ZodError } from "zod"
 import type { APIErrorMap, InternalLogger } from "@/@types/index.ts"
 
+export const AURA_AUTH_VERSION = "0.4.0"
+
 export const toSnakeCase = (str: string) => {
     return str
         .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
