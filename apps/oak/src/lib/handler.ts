@@ -1,5 +1,11 @@
 import { handlers } from "../auth.ts"
+import { toSetHeaders } from "./utils.ts"
 import type { RouterContext } from "@oak/oak"
+
+const isRedirect = (response: Response) => {
+    const location = response.headers.get("Location")
+    return location !== null && response.status >= 300 && response.status < 400
+}
 
 export const toOakHandler = async (ctx: RouterContext<"/api/auth/(.*)">) => {
     const handler = handlers[ctx.request.method as keyof typeof handlers]
@@ -15,11 +21,14 @@ export const toOakHandler = async (ctx: RouterContext<"/api/auth/(.*)">) => {
         return
     }
     const response = await handler(toWebRequest)
-    const body = await response.json()
-    ctx.response.headers = response.headers
-    ctx.response.body = body
-    if (ctx.response.headers.get("Location")) {
+    if (isRedirect(response)) {
+        const location = response.headers.get("Location")!
         ctx.response.status = 302
-        ctx.response.redirect(ctx.response.headers.get("Location")!)
+        toSetHeaders(ctx, response.headers)
+        ctx.response.redirect(location)
+        return
     }
+    const body = await response.json()
+    toSetHeaders(ctx, response.headers)
+    ctx.response.body = body
 }
