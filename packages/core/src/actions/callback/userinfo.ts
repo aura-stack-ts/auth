@@ -45,13 +45,13 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
                 Authorization: `Bearer ${accessToken}`,
             },
         })
+        const json = await response.json()
 
         if (!response.ok) {
             logger?.log("OAUTH_USERINFO_INVALID_RESPONSE")
             throw new OAuthProtocolError("INVALID_REQUEST", "Invalid userinfo response format")
         }
 
-        const json = await response.json()
         const { success, data } = OAuthErrorResponse.safeParse(json)
         if (success) {
             logger?.log("OAUTH_USERINFO_ERROR", {

@@ -19,11 +19,14 @@ export default {
         if (pathname === "/") {
             return new Response("Hello World from GET / endpoint")
         }
-        const handler = handlers[request.method as keyof typeof handlers]
-        if (handler) {
-            return await handler(request)
-        } else {
-            return new Response("Not Found", { status: 404 })
+        if(pathname.startsWith("/api/auth/")) {
+            const handler = handlers[request.method as keyof typeof handlers]
+            if(!handler) {
+                return Response.json({ error: "Method Not Allowed" }, { status: 405 })
+            }
+            const response = await handler(request)
+            return response
         }
+        return new Response("Not Found", { status: 404 })
     },
 } satisfies ExportedHandler<Env>
