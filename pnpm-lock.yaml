@@ -128,6 +128,19 @@ importers:
         specifier: catalog:tailwindcss
         version: 4.1.18
 
+  apps/bun:
+    dependencies:
+      '@aura-stack/auth':
+        specifier: workspace:*
+        version: link:../../packages/core
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+    devDependencies:
+      '@types/bun':
+        specifier: ^1.3.9
+        version: 1.3.9
+
   apps/elysia:
     dependencies:
       '@aura-stack/auth':

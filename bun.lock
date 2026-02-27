@@ -38,6 +38,18 @@
         "tailwindcss": "catalog:tailwindcss",
       },
     },
+    "apps/bun": {
+      "name": "bun",
+      "dependencies": {
+        "@aura-stack/auth": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.9",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
     "apps/elysia": {
       "name": "elysia",
       "version": "0.1.0",
@@ -1571,6 +1583,8 @@
     "buffer-crc32": ["buffer-crc32@1.0.0", "", {}, "sha512-Db1SbgBS/fg/392AblrMJk97KggmvYhr4pB5ZIMTWtaivCPMWLkmb7m21cJvpvgK+J3nsU2CmmixNBZx4vFj/w=="],
 
     "buffer-from": ["buffer-from@1.1.2", "", {}, "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ=="],
+
+    "bun": ["bun@workspace:apps/bun"],
 
     "bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "20.19.33" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
