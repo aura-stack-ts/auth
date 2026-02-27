@@ -1,13 +1,11 @@
 {
-  "name": "oak",
+  "name": "deno",
   "version": "0.1.0",
   "tasks": {
-    "dev": "deno run --allow-net --allow-env --env-file --watch src/index.ts",
+    "dev": "deno --allow-net --allow-env --env-file --watch src/index.ts",
     "format": "deno fmt"
   },
-  "imports": {
-    "@oak/oak": "jsr:@oak/oak@^17.2.0"
-  },
+  "imports": {},
   "exports": "./src/index.ts",
   "fmt": {
     "semiColons": false,
