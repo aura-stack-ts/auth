@@ -1,15 +1,15 @@
 {
-  "name": "vercel-nodejs",
+  "name": "vercel",
   "version": "0.1.0",
-  "description": "",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "echo 'Welcome to Aura Auth Vercel Functions App!'",
     "build": "tsc"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Aura Stack Team",
+  "license": "MIT",
   "packageManager": "pnpm@10.15.0",
   "dependencies": {
     "@aura-stack/auth": "workspace:*"
