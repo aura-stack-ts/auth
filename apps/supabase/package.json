@@ -1,0 +1,18 @@
+{
+  "name": "supabase-root",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "deno run --allow-net --allow-env --env-file functions/auth/index.ts",
+    "server": "pnpx supabase functions serve auth",
+    "start": "pnpx supabase start",
+    "stop": "pnpx supabase stop"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.15.0",
+  "devDependencies": {
+    "supabase": "^2.76.15"
+  }
+}
