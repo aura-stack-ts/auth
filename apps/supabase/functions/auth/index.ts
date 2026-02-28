@@ -6,7 +6,7 @@ import { getSession } from "../_shared/get-session.ts"
 // This enables autocomplete, go to definition, etc.
 import "@supabase/functions-js/edge-runtime.d.ts"
 
-Deno.serve({ port: 3000 }, async (request) => {
+Deno.serve(async (request) => {
     const pathname = new URL(request.url).pathname
     switch (pathname) {
         case "/":

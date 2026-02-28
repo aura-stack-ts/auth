@@ -22,11 +22,17 @@ You can run the demo app locally for development or testing.
 
 ```bash
 cd apps/supabase/
+
+# deno
 deno install
 deno run dev
+
+# pnpm
+pnpm install
+pnpm dev
 ```
 
-Once started, open your browser at `http://localhost:3000` to view the app.
+Once started, open your browser at `http://localhost:8000` to view the app.
 
 ## Documentation
 
