@@ -155,3 +155,5 @@ export const getErrorName = (error: unknown): string => {
     }
     return typeof error === "string" ? error : "UnknownError"
 }
+
+export const getEnvironmentVariables = () => {}

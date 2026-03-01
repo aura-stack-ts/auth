@@ -31,3 +31,29 @@ export const env = new Proxy({} as Record<string, string | undefined>, {
         }
     },
 })
+
+export const getEnv = (key: string): string | undefined => {
+    const keys = [`AURA_AUTH_${key.toUpperCase()}`, `AURA_${key.toUpperCase()}`, `AUTH_${key.toUpperCase()}`, key.toUpperCase()]
+    return env[keys.find((k) => env[k]) ?? ""]
+}
+
+export const getEnvBoolean = (key: string): boolean => {
+    const value = getEnv(key)
+    if (value === undefined) return false
+    const normalized = value.trim().toLowerCase()
+    if (["1", "true", "yes", "on", "debug"].includes(normalized)) return true
+    return false
+}
+
+export const getEnvArray = <T>(key: string, defaultValue: T = []) => {
+    const value = getEnv(key)
+    if (!value) return defaultValue ?? []
+    return (
+        value
+            .split(/[,;\n]+/)
+            .map((v) => v.trim())
+            .filter(Boolean) ??
+        defaultValue ??
+        []
+    )
+}

@@ -186,6 +186,8 @@ export interface AuthConfig {
      * Misconfiguration can lead to security vulnerabilities, such as incorrect handling of secure cookies or
      * inaccurate client IP logging.
      *
+     * This value can also be set via environment variable as `AURA_AUTH_TRUSTED_PROXY_HEADERS`
+     *
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
@@ -193,7 +195,7 @@ export interface AuthConfig {
      */
     trustedProxyHeaders?: boolean
 
-    logger?: Logger
+    logger?: boolean | Logger
     /**
      * Defines trusted origins for your application to prevent open redirect attacks.
      * URLs from the Referer header, Origin header, request URL, and redirectTo option
