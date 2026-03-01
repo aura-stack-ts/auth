@@ -45,15 +45,11 @@ export const getEnvBoolean = (key: string): boolean => {
     return false
 }
 
-export const getEnvArray = <T>(key: string, defaultValue: T = []) => {
+export const getEnvArray = (key: string, defaultValue: string[] = []) => {
     const value = getEnv(key)
-    if (!value) return defaultValue ?? []
-    return (
-        value
-            .split(/[,;\n]+/)
-            .map((v) => v.trim())
-            .filter(Boolean) ??
-        defaultValue ??
-        []
-    )
+    if (!value) return defaultValue
+    return value
+        .split(/[,;\n]+/)
+        .map((v) => v.trim())
+        .filter(Boolean)
 }

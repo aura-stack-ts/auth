@@ -2,7 +2,7 @@ import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { createJoseInstance } from "@/jose.ts"
 import { createCookieStore } from "@/cookie.ts"
 import { createProxyLogger } from "@/logger.ts"
-import { getEnvArray, getEnvBoolean } from "@/env.ts"
+import { getEnv, getEnvArray, getEnvBoolean } from "@/env.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { createErrorHandler, useSecureCookies } from "@/utils.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
@@ -29,7 +29,9 @@ export type {
 export { createClient, type AuthClient, type Client, type ClientOptions } from "@/client.ts"
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
-    const useProxyHeaders = getEnvBoolean("TRUSTED_PROXY_HEADERS") || authConfig?.trustedProxyHeaders || false
+    const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
+    const useProxyHeaders =
+        trustedProxyHeadersEnv === undefined ? (authConfig?.trustedProxyHeaders ?? false) : getEnvBoolean("TRUSTED_PROXY_HEADERS")
     const logger = createProxyLogger(authConfig)
 
     return {
@@ -47,7 +49,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
             trustedProxyHeaders: useProxyHeaders,
-            trustedOrigins: getEnvArray("TRUSTED_ORIGINS", authConfig?.trustedOrigins),
+            trustedOrigins: getEnvArray("TRUSTED_ORIGINS") ?? authConfig?.trustedOrigins,
             logger,
         },
         use: [

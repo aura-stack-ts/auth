@@ -20,7 +20,7 @@ describe("env", () => {
         expect(env.AURA_AUTH_SECRET).toBe(`${secret1},${secret2}`)
     })
 
-    test("nose", () => {
+    test("last stubbed value overwrites previous values", () => {
         const secret1 = generateSecure()
         const secret2 = generateSecure()
         vi.stubEnv("AURA_AUTH_SECRET", secret1)

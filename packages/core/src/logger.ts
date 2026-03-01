@@ -263,14 +263,13 @@ export const logMessages = {
     },
 } as const
 
-// @todo: verify .pid support in Deno and Bun runtime environments
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {
     const message = logMessages[key]
     return {
         ...message,
         timestamp: new Date().toISOString(),
         hostname: "aura-auth",
-        procId: process.pid.toString(),
+        procId: typeof process !== "undefined" && process.pid ? process.pid.toString() : "-",
         ...overrides,
     }
 }
@@ -301,7 +300,7 @@ const getSeverityLevel = (severity: string): number => {
 }
 
 export const createSyslogMessage = (options: SyslogOptions): string => {
-    const { timestamp, hostname, appName, procId, msgId, structuredData, message } = options
+    const { timestamp, hostname, appName = "aura-auth", procId = "-", msgId, structuredData, message } = options
     const pri = (options.facility ?? 16) * 8 + getSeverityLevel(options.severity)
     const structuredDataStr = createStructuredData(structuredData ?? {})
     return `<${pri}>1 ${timestamp} ${hostname} ${appName} ${procId} ${msgId} ${structuredDataStr} ${message}`
@@ -340,5 +339,5 @@ export const createProxyLogger = (config?: AuthConfig) => {
             log: createSyslogMessage,
         })
     }
-    return createLogger(config?.logger as Exclude<AuthConfig["logger"], boolean>)
+    return typeof config?.logger === "object" ? createLogger(config.logger) : undefined
 }
