@@ -4,9 +4,9 @@
   "tasks": {
     "dev": "deno --allow-net --allow-env --env-file --watch index.ts",
     "format": "deno format",
-    "dev:server": "pnpx supabase functions serve auth",
-    "start": "pnpx supabase start",
-    "stop": "pnpx supabase stop"
+    "dev:server": "pnpm exec supabase functions serve auth",
+    "start": "pnpm exec supabase start",
+    "stop": "pnpm exec supabase stop"
   },
   "exports": "./index.ts",
   "imports": {

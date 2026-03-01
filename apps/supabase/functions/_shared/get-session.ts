@@ -10,6 +10,7 @@ export const getSession = async (request: Request): Promise<Session | null> => {
                 headers: request.headers,
             })
         )
+        if(!response.ok) return null
         const session = (await response.json()) as Session
         return session && session?.user ? session : null
     } catch {

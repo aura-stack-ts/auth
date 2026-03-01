@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "deno run --allow-net --allow-env --env-file functions/auth/index.ts",
-    "dev:server": "pnpx supabase functions serve auth",
-    "start": "pnpx supabase start",
-    "stop": "pnpx supabase stop"
+    "dev:server": "pnpm exec supabase functions serve auth",
+    "start": "pnpm exec supabase start",
+    "stop": "pnpm exec supabase stop"
   },
   "keywords": [],
   "author": "",
