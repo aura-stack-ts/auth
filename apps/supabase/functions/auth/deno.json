@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "tasks": {
     "dev": "deno --allow-net --allow-env --env-file --watch index.ts",
-    "format": "deno format"
+    "format": "deno format",
+    "dev:server": "pnpx supabase functions serve auth",
+    "start": "pnpx supabase start",
+    "stop": "pnpx supabase stop"
   },
   "exports": "./index.ts",
   "imports": {

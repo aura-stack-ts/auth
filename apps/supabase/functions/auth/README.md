@@ -34,13 +34,31 @@ pnpm dev
 
 Once started, open your browser at `http://localhost:8000` to view the app.
 
+### Test the function locally
+
+```bash
+cd apps/supabase
+
+# deno
+deno run start
+deno run dev:server
+deno run stop
+
+# pnpm
+pnpm start
+pnpm dev:server
+pnpm stop
+```
+
+Once started, open `http://127.0.0.1:54321/functions/v1/auth` in your browser and send a request to the Edge Function.
+
 ## Documentation
 
 Visit the [**official documentation website**](https://aura-stack-auth.vercel.app).
 
 ## License
 
-Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
+Licensed under the [MIT License](../../../../LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
 ---
 
