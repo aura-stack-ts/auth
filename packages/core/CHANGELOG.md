@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Added the `User-Agent` header to requests sent to the `/userInfo` endpoint, allowing the service to identify the calling client or application. [#105](https://github.com/aura-stack-ts/auth/pull/105)
 
-timingSafeEqual` function for constant-time string comparison across runtimes. [#99](https://github.com/aura-stack-ts/auth/pull/99)
+- Added `timingSafeEqual` function for constant-time string comparison across runtimes. [#99](https://github.com/aura-stack-ts/auth/pull/99)
 
 ---
 

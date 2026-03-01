@@ -333,7 +333,7 @@ export const createLogger = (logger?: Logger): InternalLogger | undefined => {
 export const createProxyLogger = (config?: AuthConfig) => {
     const level = getEnv("LOG_LEVEL")
     const debug = getEnvBoolean("DEBUG")
-    if (debug || Boolean(config?.logger)) {
+    if (debug || config?.logger === true) {
         return createLogger({
             level: (level as LogLevel) ?? "debug",
             log: createSyslogMessage,

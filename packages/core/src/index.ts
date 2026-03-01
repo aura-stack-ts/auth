@@ -49,7 +49,8 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
             trustedProxyHeaders: useProxyHeaders,
-            trustedOrigins: getEnvArray("TRUSTED_ORIGINS") ?? authConfig?.trustedOrigins,
+            trustedOrigins:
+                getEnvArray("TRUSTED_ORIGINS").length > 0 ? getEnvArray("TRUSTED_ORIGINS") : authConfig?.trustedOrigins,
             logger,
         },
         use: [
