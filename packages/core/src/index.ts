@@ -1,11 +1,12 @@
 import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { createJoseInstance } from "@/jose.ts"
 import { createCookieStore } from "@/cookie.ts"
-import { createErrorHandler, useSecureCookies } from "@/utils.ts"
+import { createProxyLogger } from "@/logger.ts"
+import { getEnv, getEnvArray, getEnvBoolean } from "@/env.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
+import { createErrorHandler, useSecureCookies } from "@/utils.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
-import { createLogEntry, type logMessages } from "@/logger.ts"
-import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
+import type { AuthConfig } from "@/@types/index.ts"
 
 export type {
     AuthConfig,
@@ -27,63 +28,30 @@ export type {
 
 export { createClient, type AuthClient, type Client, type ClientOptions } from "@/client.ts"
 
-/**
- * Maps LogLevel to Severity hierarchically per RFC 5424.
- * Each level includes itself and all more-severe levels.
- */
-const logLevelToSeverity: Record<LogLevel, string[]> = {
-    debug: ["debug", "info", "notice", "warning", "error", "critical", "alert", "emergency"],
-    info: ["info", "notice", "warning", "error", "critical", "alert", "emergency"],
-    warn: ["warning", "error", "critical", "alert", "emergency"],
-    error: ["error", "critical", "alert", "emergency"],
-}
-
-const createLoggerProxy = (logger?: Logger): InternalLogger | undefined => {
-    if (!logger) return undefined
-    const level = logger.level
-    const allowedSeverities = logLevelToSeverity[level] ?? []
-
-    const internalLogger: InternalLogger = {
-        level,
-        log<T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>) {
-            const entry = createLogEntry(key, overrides)
-            if (!allowedSeverities.includes(entry.severity)) return entry
-
-            logger.log({
-                timestamp: entry.timestamp ?? new Date().toISOString(),
-                appName: entry.appName ?? "aura-auth",
-                hostname: entry.hostname ?? "aura-auth",
-                ...entry,
-            })
-
-            return entry
-        },
-    }
-    return internalLogger
-}
-
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
-    const useSecure = authConfig?.trustedProxyHeaders ?? false
-    const logger = authConfig?.logger
-    const internalLogger = createLoggerProxy(logger)
+    const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
+    const useProxyHeaders =
+        trustedProxyHeadersEnv === undefined ? (authConfig?.trustedProxyHeaders ?? false) : getEnvBoolean("TRUSTED_PROXY_HEADERS")
+    const logger = createProxyLogger(authConfig)
 
     return {
         basePath: authConfig?.basePath ?? "/auth",
-        onError: createErrorHandler(internalLogger),
+        onError: createErrorHandler(logger),
         context: {
             oauth: createBuiltInOAuthProviders(authConfig?.oauth),
             cookies: createCookieStore(
-                useSecure,
+                useProxyHeaders,
                 authConfig?.cookies?.prefix,
                 authConfig?.cookies?.overrides ?? {},
-                internalLogger
+                logger
             ),
             jose: createJoseInstance(authConfig?.secret),
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
-            trustedProxyHeaders: useSecure,
-            trustedOrigins: authConfig?.trustedOrigins,
-            logger: internalLogger,
+            trustedProxyHeaders: useProxyHeaders,
+            trustedOrigins:
+                getEnvArray("TRUSTED_ORIGINS").length > 0 ? getEnvArray("TRUSTED_ORIGINS") : authConfig?.trustedOrigins,
+            logger,
         },
         use: [
             (ctx) => {
@@ -92,7 +60,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
                     useSecure,
                     authConfig?.cookies?.prefix,
                     authConfig?.cookies?.overrides ?? {},
-                    internalLogger
+                    logger
                 )
                 ctx.context.cookies = cookies
                 return ctx

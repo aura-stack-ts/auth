@@ -4,7 +4,7 @@
  * This modules re-exports OAuth providers available in Aura Auth to be used in the Auth instance configuration.
  */
 import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.ts"
-import { env } from "@/env.ts"
+import { getEnv } from "@/env.ts"
 import { github } from "./github.ts"
 import { bitbucket } from "./bitbucket.ts"
 import { figma } from "./figma.ts"
@@ -47,6 +47,7 @@ export const builtInOAuthProviders = {
  * Loads OAuth provider credentials from environment variables based on the provider name.
  * Supported patterns for environment variables are:
  *   - `AURA_AUTH_{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
+ *   - `AURA_{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
  *   - `AUTH_{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
  *   - `{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
  *
@@ -54,11 +55,9 @@ export const builtInOAuthProviders = {
  * @returns The credentials for the specified OAuth provider
  */
 const defineOAuthEnvironment = (oauth: string) => {
-    const clientIdSuffix = `${oauth.toUpperCase()}_CLIENT_ID`
-    const clientSecretSuffix = `${oauth.toUpperCase()}_CLIENT_SECRET`
     const loadEnvs = OAuthEnvSchema.safeParse({
-        clientId: env[`AURA_AUTH_${clientIdSuffix}`] ?? env[`AUTH_${clientIdSuffix}`] ?? env[`${clientIdSuffix}`],
-        clientSecret: env[`AURA_AUTH_${clientSecretSuffix}`] ?? env[`AUTH_${clientSecretSuffix}`] ?? env[`${clientSecretSuffix}`],
+        clientId: getEnv(`${oauth.toUpperCase()}_CLIENT_ID`),
+        clientSecret: getEnv(`${oauth.toUpperCase()}_CLIENT_SECRET`),
     })
     if (!loadEnvs.success) {
         const msg = JSON.stringify(formatZodError(loadEnvs.error), null, 2)

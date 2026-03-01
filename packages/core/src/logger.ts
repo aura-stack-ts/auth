@@ -1,4 +1,6 @@
-import type { SyslogOptions } from "@/@types/index.ts"
+import { getEnv, getEnvBoolean } from "./env.ts"
+import { createStructuredData } from "./utils.ts"
+import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
 
 /**
  * Log message definitions organized by category.
@@ -263,9 +265,79 @@ export const logMessages = {
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {
     const message = logMessages[key]
-
     return {
         ...message,
+        timestamp: new Date().toISOString(),
+        hostname: "aura-auth",
+        procId: typeof process !== "undefined" && process.pid ? process.pid.toString() : "-",
         ...overrides,
     }
+}
+
+/**
+ * Maps LogLevel to Severity hierarchically per RFC 5424.
+ * Each level includes itself and all more-severe levels.
+ */
+const logLevelToSeverity: Record<LogLevel, string[]> = {
+    debug: ["debug", "info", "notice", "warning", "error", "critical", "alert", "emergency"],
+    info: ["info", "notice", "warning", "error", "critical", "alert", "emergency"],
+    warn: ["warning", "error", "critical", "alert", "emergency"],
+    error: ["error", "critical", "alert", "emergency"],
+}
+
+const getSeverityLevel = (severity: string): number => {
+    const severities: Record<string, number> = {
+        emergency: 0,
+        alert: 1,
+        critical: 2,
+        error: 3,
+        warning: 4,
+        notice: 5,
+        info: 6,
+        debug: 7,
+    }
+    return severities[severity] ?? 6
+}
+
+export const createSyslogMessage = (options: SyslogOptions): string => {
+    const { timestamp, hostname, appName = "aura-auth", procId = "-", msgId, structuredData, message } = options
+    const pri = (options.facility ?? 16) * 8 + getSeverityLevel(options.severity)
+    const structuredDataStr = createStructuredData(structuredData ?? {})
+    return `<${pri}>1 ${timestamp} ${hostname} ${appName} ${procId} ${msgId} ${structuredDataStr} ${message}`
+}
+
+export const createLogger = (logger?: Logger): InternalLogger | undefined => {
+    if (!logger) return undefined
+    const level = logger.level
+    const allowedSeverities = logLevelToSeverity[level] ?? []
+
+    const internalLogger: InternalLogger = {
+        level,
+        log<T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>) {
+            const entry = createLogEntry(key, overrides)
+            if (!allowedSeverities.includes(entry.severity)) return entry
+
+            logger.log({
+                timestamp: entry.timestamp,
+                appName: entry.appName ?? "aura-auth",
+                hostname: entry.hostname ?? "aura-auth",
+                ...entry,
+            })
+
+            return entry
+        },
+    }
+    return internalLogger
+}
+
+export const createProxyLogger = (config?: AuthConfig) => {
+    const level = getEnv("LOG_LEVEL")
+    const debug = getEnvBoolean("DEBUG")
+    if (debug || config?.logger === true) {
+        return createLogger({
+            level: (level as LogLevel) ?? "debug",
+            log: createSyslogMessage,
+        })
+    }
+    return typeof config?.logger === "object" ? createLogger(config.logger) : undefined
 }

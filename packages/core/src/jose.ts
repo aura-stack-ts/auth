@@ -1,4 +1,4 @@
-import { env } from "@/env.ts"
+import { getEnv } from "@/env.ts"
 import {
     createJWT,
     createJWS,
@@ -21,7 +21,7 @@ export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypt
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
  */
 export const createJoseInstance = (secret?: string) => {
-    secret ??= env.AURA_AUTH_SECRET! ?? env.AUTH_SECRET!
+    secret ??= getEnv("SECRET")
     if (!secret) {
         throw new AuthInternalError(
             "JOSE_INITIALIZATION_FAILED",
@@ -29,7 +29,7 @@ export const createJoseInstance = (secret?: string) => {
         )
     }
 
-    const salt = env.AURA_AUTH_SALT ?? env.AUTH_SALT
+    const salt = getEnv("SALT")
     if (!salt) {
         throw new AuthInternalError(
             "JOSE_INITIALIZATION_FAILED",

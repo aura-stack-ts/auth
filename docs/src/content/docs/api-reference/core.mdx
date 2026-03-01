@@ -527,14 +527,26 @@ import { discord, type DiscordProfile, type Nameplate } from "@aura-stack/auth/o
 
 ## Environment Variables
 
-Aura Auth required some environment variables to create the OAuth flow and security measures. The environments required are:
+Aura Auth requires environment variables to create the OAuth flow and enforce security controls.
 
-- `AURA_AUTH_SECRET`: opaque value used to sign and encrypt user's session
-- `AURA_AUTH_SALT`: Salt value used for key derivation to sign and encrypt JWTs and CSRF tokens.
-- `AURA_AUTH_{PROVIDER}_CLIENT_ID`
-- `AURA_AUTH-{PROVIDER}_CLIENT_SECRET`
+For any `{KEY}`, Aura Auth checks the following names in order and uses the first non-empty value:
 
-> Aura Auth loads the environment variables that follows the previous patterns.
+1. `AURA_AUTH_{KEY}`
+2. `AURA_{KEY}`
+3. `AUTH_{KEY}`
+4. `{KEY}`
+
+Common variables are:
+
+- `SECRET`: opaque value used to sign and encrypt user sessions
+- `SALT`: salt value used for key derivation when signing/encrypting JWTs and CSRF tokens
+- `{PROVIDER}_CLIENT_ID`
+- `{PROVIDER}_CLIENT_SECRET`
+- `TRUSTED_ORIGINS`: comma/semicolon/newline-separated list of trusted origins
+- `DEBUG`: enables debug mode when set to `1`, `true`, `yes`, `on`, or `debug`
+- `LOG_LEVEL`: built-in logger level (`debug`, `info`, `warn`, `error`)
+
+> `APP_NAME` is not automatically loaded as an environment variable by the core runtime. Set `appName` from a custom logger if you need a custom syslog app name.
 
 ### Example
 
@@ -552,6 +564,11 @@ AURA_AUTH_GITHUB_CLIENT_SECRET=0123456789abcdef...
 # Custom Provider
 AURA_AUTH_CUSTOM_CLIENT_ID=your_client_id
 AURA_AUTH_CUSTOM_CLIENT_SECRET=your_client_secret
+
+# Runtime behavior
+AURA_AUTH_TRUSTED_ORIGINS="https://app.example.com,https://admin.example.com"
+AURA_AUTH_DEBUG="1"
+AURA_AUTH_LOG_LEVEL="info"
 ```
 
 <Callout type="warn">Never commit `.env` files to version control. Add them to `.gitignore`.</Callout>
