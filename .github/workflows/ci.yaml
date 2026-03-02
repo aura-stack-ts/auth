@@ -5,6 +5,7 @@ on:
     branches:
       - master
     paths:
+      - ".github/workflows/**"
       - "configs/**"
       - "packages/**"
       - "pnpm-lock.yaml"
@@ -13,10 +14,17 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - ".github/workflows/**"
+      - "configs/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "bun.lock"
+      - "deno.lock"
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -26,6 +34,7 @@ jobs:
   node:
     name: Node.js
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     env:
       WORKING_DIR: .
@@ -44,17 +53,18 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm build --filter="./packages/*"
-
-      - name: Run tests
-        run: pnpm test
+        run: pnpm build:prod
 
       - name: Run type checks
         run: pnpm type-check
 
+      - name: Run tests
+        run: pnpm test
+
   deno:
     name: Deno
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     permissions:
       contents: read
@@ -67,14 +77,18 @@ jobs:
           cache: true
 
       - name: Build packages
-        run: deno task build
+        run: deno task build:prod
 
       - name: Run type checks
         run: deno task type-check
 
+      - name: Run tests
+        run: deno task test
+
   bun:
-    name: Bun tests
+    name: Bun
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
       - uses: actions/checkout@v4
@@ -86,7 +100,10 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build packages
-        run: bun run build --filter="./packages/*"
+        run: bun run build:prod
 
       - name: Run type checks
         run: bun run type-check
+
+      - name: Run tests
+        run: bun run test

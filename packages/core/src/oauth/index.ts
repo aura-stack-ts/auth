@@ -52,7 +52,7 @@ export const builtInOAuthProviders = {
     twitch,
     notion,
     dropbox,
-    atlassian
+    atlassian,
 } as const
 
 /**
