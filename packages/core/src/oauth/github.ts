@@ -1,4 +1,4 @@
-import type { OAuthProviderConfig } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * @see [Get the authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user)
@@ -54,17 +54,29 @@ export interface GitHubProfile {
 
 /**
  * GitHub OAuth Provider
+ *
  * @see [GitHub - Creating an OAuth App](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
  * @see [GitHub - Authorizing OAuth Apps](https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps)
  * @see [GitHub - Configure your GitHub OAuth Apps](https://github.com/settings/developers)
  * @see [Github - Get the authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user)
  */
-export const github: OAuthProviderConfig<GitHubProfile> = {
-    id: "github",
-    name: "GitHub",
-    authorizeURL: "https://github.com/login/oauth/authorize",
-    accessToken: "https://github.com/login/oauth/access_token",
-    userInfo: "https://api.github.com/user",
-    scope: "read:user user:email",
-    responseType: "code",
+export const github = (options?: Partial<OAuthProviderCredentials<GitHubProfile>>): OAuthProviderCredentials<GitHubProfile> => {
+    return {
+        id: "github",
+        name: "GitHub",
+        authorizeURL: "https://github.com/login/oauth/authorize",
+        accessToken: "https://github.com/login/oauth/access_token",
+        userInfo: "https://api.github.com/user",
+        scope: "read:user user:email",
+        responseType: "code",
+        profile: (profile: GitHubProfile) => {
+            return {
+                sub: profile.id.toString(),
+                name: profile.name ?? profile.login,
+                email: profile.email ?? undefined,
+                image: profile.avatar_url,
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<GitHubProfile>
 }

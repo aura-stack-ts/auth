@@ -1,11 +1,11 @@
-import { createAuth } from "@/index.js"
-import { OAuthProviderCredentials } from "@/@types/index.js"
-import type { JWTPayload } from "@/jose.js"
+import { createAuth } from "@/index.ts"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { JWTPayload } from "@/jose.ts"
 
 export const oauthCustomService: OAuthProviderCredentials = {
     id: "oauth-provider",
     name: "OAuth",
-    authorizeURL: "https://example.com/oauth/authorize",
+    authorize: "https://example.com/oauth/authorize",
     accessToken: "https://example.com/oauth/access_token",
     scope: "profile email",
     responseType: "code",
@@ -14,10 +14,10 @@ export const oauthCustomService: OAuthProviderCredentials = {
     clientSecret: "oauth_client_secret",
 }
 
-export const oauthCustomServiceProfile: OAuthProviderCredentials = {
+export const oauthCustomServiceProfile: OAuthProviderCredentials<Record<string, string>> = {
     ...oauthCustomService,
     id: "oauth-profile",
-    profile(profile: any) {
+    profile(profile) {
         return {
             sub: profile.id,
             name: profile.name,
@@ -42,6 +42,4 @@ export const {
     jose,
 } = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile],
-    cookies: {},
-    secret: process.env.AURA_AUTH_SECRET,
 })

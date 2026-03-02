@@ -1,7 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
-import { getUserInfo } from "@/actions/callback/userinfo.js"
-import { OAuthProviderConfig, OAuthProviderCredentials } from "@/@types/index.js"
-import { oauthCustomService } from "@test/presets.js"
+import { getUserInfo } from "@/actions/callback/userinfo.ts"
+import { OAuthProviderConfig, OAuthProviderCredentials } from "@/@types/index.ts"
+import { oauthCustomService } from "@test/presets.ts"
+import { AURA_AUTH_VERSION } from "@/utils.ts"
 
 describe("getUserInfo", () => {
     test("get user info", async () => {
@@ -25,9 +26,11 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
+            signal: expect.any(AbortSignal),
         })
         expect(response).toEqual(mockResponse)
     })
@@ -65,9 +68,11 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
+            signal: expect.any(AbortSignal),
         })
         expect(response).toEqual({
             sub: "12345",
@@ -101,15 +106,17 @@ describe("getUserInfo", () => {
         }
 
         await expect(getUserInfo(oauthConfig as OAuthProviderCredentials, "access_token_123")).rejects.toThrow(
-            /Profile parsing error/
+            /Failed to fetch user information from OAuth provider/
         )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
+            signal: expect.any(AbortSignal),
         })
     })
 
@@ -127,14 +134,16 @@ describe("getUserInfo", () => {
             }))
         )
 
-        await expect(getUserInfo(oauthCustomService, "invalid_access_token")).rejects.toThrow(/Invalid access token/)
+        await expect(getUserInfo(oauthCustomService, "invalid_access_token")).rejects.toThrow(/Invalid userinfo response format/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer invalid_access_token",
             },
+            signal: expect.any(AbortSignal),
         })
     })
 
@@ -146,14 +155,18 @@ describe("getUserInfo", () => {
             })
         )
 
-        await expect(getUserInfo(oauthCustomService, "access_token")).rejects.toThrow(/Fetch Network error/)
+        await expect(getUserInfo(oauthCustomService, "access_token")).rejects.toThrow(
+            /Failed to fetch user information from OAuth provider/
+        )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token",
             },
+            signal: expect.any(AbortSignal),
         })
     })
 })

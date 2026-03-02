@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { createAuth } from "@/index.js"
+import { createAuth } from "@/index.ts"
 
 describe("createAuth", () => {
     describe("add custom basePath config", () => {

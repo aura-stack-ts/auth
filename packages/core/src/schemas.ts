@@ -1,14 +1,50 @@
-import { object, string, enum as options, number, httpUrl, array } from "zod/v4"
+import { object, string, enum as options, number, z, null as nullable, url } from "zod/v4"
+
+const AccessTokenConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        headers: z.record(string(), string()).optional(),
+    }),
+])
+
+const UserInfoConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        headers: z.record(string(), string()).optional(),
+    }),
+])
+
+export const OAuthProviderCredentialsSchema = object({
+    id: string(),
+    name: string(),
+    authorize: url().optional(),
+    /** @deprecated */
+    authorizeURL: string().url().optional(),
+    accessToken: AccessTokenConfigSchema,
+    /** @deprecated */
+    scope: string().optional(),
+    userInfo: UserInfoConfigSchema,
+    /** @deprecated */
+    responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
+    clientId: string(),
+    clientSecret: string(),
+    profile: z.function().optional(),
+})
 
 /**
  * Schema for OAuth Provider Configuration
  */
 export const OAuthProviderConfigSchema = object({
-    authorizeURL: httpUrl(),
-    accessToken: httpUrl(),
+    /** @deprecated */
+    authorizeURL: string().url().optional(),
+    accessToken: AccessTokenConfigSchema,
+    /** @deprecated */
     scope: string().optional(),
-    userInfo: httpUrl(),
-    responseType: options(["code", "token", "id_token"]),
+    userInfo: UserInfoConfigSchema,
+    /** @deprecated */
+    responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
     clientId: string(),
     clientSecret: string(),
 })
@@ -31,8 +67,8 @@ export const OAuthAuthorization = OAuthProviderConfigSchema.extend({
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2
  */
 export const OAuthAuthorizationResponse = object({
-    state: string("Missing state parameter in the OAuth authorization response."),
-    code: string("Missing code parameter in the OAuth authorization response."),
+    state: string({ message: "Missing state parameter in the OAuth authorization response." }),
+    code: string({ message: "Missing code parameter in the OAuth authorization response." }),
 })
 
 /**
@@ -72,10 +108,10 @@ export const OAuthAccessToken = OAuthProviderConfigSchema.extend({
  */
 export const OAuthAccessTokenResponse = object({
     access_token: string(),
-    token_type: string(),
+    token_type: string().optional(),
     expires_in: number().optional(),
     refresh_token: string().optional(),
-    scope: string().or(array(string())).optional(),
+    scope: string().optional().or(nullable()),
 })
 
 /**
@@ -102,4 +138,9 @@ export const OAuthAccessTokenErrorResponse = object({
 export const OAuthErrorResponse = object({
     error: string(),
     error_description: string().optional(),
+})
+
+export const OAuthEnvSchema = object({
+    clientId: z.string().min(1, "OAuth Client ID is required in the environment variables."),
+    clientSecret: z.string().min(1, "OAuth Client Secret is required in the environment variables."),
 })

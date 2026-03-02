@@ -1,0 +1,6 @@
+{
+  "extends": "@aura-stack/tsconfig/tsconfig.base.json",
+  "compilerOptions": {},
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
+}

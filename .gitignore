@@ -142,3 +142,49 @@ vite.config.ts.timestamp-*
 .turbo
 .vercel
 .env*.local
+
+# React Router
+.react-router
+
+# TanStack Start
+.DS_Store
+dist
+dist-ssr
+*.local
+count.txt
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+todos.json
+
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Cloudflare Workers
+worker-configuration.d.ts
+.wrangler/*
