@@ -48,6 +48,7 @@ export const OAuthProviderCredentialsSchema = object({
  * Schema for OAuth Provider Configuration
  */
 export const OAuthProviderConfigSchema = object({
+    authorize: AuthorizeConfigSchema.optional(),
     /** @deprecated */
     authorizeURL: string().url().optional(),
     accessToken: AccessTokenConfigSchema,

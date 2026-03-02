@@ -28,18 +28,20 @@ export interface TwitchProfile {
  * @see [Twitch - Scopes](https://dev.twitch.tv/docs/authentication/scopes/)
  */
 export const twitch = (options?: Partial<OAuthProviderCredentials<TwitchProfile>>): OAuthProviderCredentials<TwitchProfile> => {
+    const clientId = options?.clientId ?? getEnv("TWITCH_CLIENT_ID")
+
     return {
         id: "twitch",
         name: "Twitch",
         authorize: {
             url: "https://id.twitch.tv/oauth2/authorize",
-            params: { scope: "user:read:email", response_type: "code" },
+            params: { scope: "user:read:email", responseType: "code" },
         },
         accessToken: "https://id.twitch.tv/oauth2/token",
         userInfo: {
             url: "https://api.twitch.tv/helix/users",
             headers: {
-                "Client-ID": getEnv("TWITCH_CLIENT_ID"),
+                "Client-ID": clientId,
             },
         },
         profile(profile: { data: TwitchProfile[] }) {
