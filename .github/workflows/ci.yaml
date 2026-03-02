@@ -36,9 +36,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
-    env:
-      WORKING_DIR: .
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
