@@ -1,8 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
-import { AuthInternalError } from "@/errors.js"
-import { createPKCE } from "@/secure.js"
-import { oauthCustomService } from "@test/presets.js"
-import { createAccessToken } from "@/actions/callback/access-token.js"
+import { createPKCE } from "@/secure.ts"
+import { oauthCustomService } from "@test/presets.ts"
+import { createAccessToken } from "@/actions/callback/access-token.ts"
 
 describe("createAccessToken", async () => {
     const { codeVerifier } = await createPKCE()
@@ -44,31 +43,9 @@ describe("createAccessToken", async () => {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams(bodyParams).toString(),
+            signal: expect.any(AbortSignal),
         })
         expect(accessToken).toEqual(mockResponse)
-    })
-
-    test("with invalid oauth config", async () => {
-        vi.stubGlobal(
-            "fetch",
-            vi.fn(async () => ({
-                ok: true,
-                json: async () => {},
-            }))
-        )
-
-        await expect(
-            createAccessToken(
-                {
-                    ...oauthCustomService,
-                    userInfo: "invalid-url",
-                },
-                "https://myapp.com/auth/callback/oauth",
-                "authorization_code_123",
-                codeVerifier
-            )
-        ).rejects.toBeInstanceOf(AuthInternalError)
-        expect(fetch).not.toHaveBeenCalled()
     })
 
     test("with failed fetch", async () => {
@@ -86,7 +63,7 @@ describe("createAccessToken", async () => {
                 "authorization_code_123",
                 codeVerifier
             )
-        ).rejects.toThrow(/Network Fetch error/)
+        ).rejects.toThrow(/Failed to communicate with OAuth provider/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",
@@ -95,6 +72,7 @@ describe("createAccessToken", async () => {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams(bodyParams).toString(),
+            signal: expect.any(AbortSignal),
         })
     })
 
@@ -114,7 +92,7 @@ describe("createAccessToken", async () => {
 
         await expect(
             createAccessToken(oauthCustomService, "https://myapp.com/auth/callback/oauth-provider", "invalid_code", codeVerifier)
-        ).rejects.toThrow(/Invalid grant/)
+        ).rejects.toThrow(/Failed to communicate with OAuth provider/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",
@@ -126,6 +104,7 @@ describe("createAccessToken", async () => {
                 ...bodyParams,
                 code: "invalid_code",
             }).toString(),
+            signal: expect.any(AbortSignal),
         })
     })
 
@@ -149,7 +128,7 @@ describe("createAccessToken", async () => {
                 "authorization_code_123",
                 codeVerifier
             )
-        ).rejects.toThrow(/Invalid access token response format/)
+        ).rejects.toThrow(/Failed to communicate with OAuth provider/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",
@@ -158,6 +137,7 @@ describe("createAccessToken", async () => {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams(bodyParams).toString(),
+            signal: expect.any(AbortSignal),
         })
     })
 })

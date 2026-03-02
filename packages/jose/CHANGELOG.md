@@ -8,11 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.3.0] - 2026-02-16
+
 ### Added
 
-- Added configuration options for signature verification and decryption via `verifyJWS` and `decryptJWE` functions. [#48](https://github.com/aura-stack-ts/auth/pull/48)
+- Enhanced JWT verification with consistent, strict cryptographic validation across signing and encryption flows using `decodeJWT`. Also increased minimum entropy requirements for secrets to improve resistance against brute-force attacks. [#89](https://github.com/aura-stack-ts/auth/pull/89)
 
-- Added Key derivation support to `createJWT`, `encodeJWT` and `decodeJWT` functions which allows to pass the separated keys for signing and encrypting the JWTs using the `jws` and `jwe` properties as argument in the functions. [#45](https://github.com/aura-stack-ts/auth/pull/45)
+- Added entropy verification for secrets passed to signing, encryption, and key derivation functions. The `createSecret` function ensures secrets meet minimum requirements of at least 32 bytes and 4 bits of entropy per character. [#85](https://github.com/aura-stack-ts/auth/pull/85)
+
+- Added configuration options for signature verification and decryption via `verifyJWS` and `decryptJWE`. [#48](https://github.com/aura-stack-ts/auth/pull/48)
+
+- Added key derivation support to `createJWT`, `encodeJWT`, and `decodeJWT`, allowing separate signing and encryption keys via the `jws` and `jwe` options. [#45](https://github.com/aura-stack-ts/auth/pull/45)
 
 ---
 

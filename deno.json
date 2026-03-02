@@ -1,0 +1,3 @@
+{
+  "workspace": ["packages/core", "packages/jose", "apps/oak", "apps/deno", "apps/supabase/**"]
+}

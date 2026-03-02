@@ -1,9 +1,9 @@
-import crypto from "node:crypto"
-import { jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
-import { createSecret } from "@/secret.js"
-import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.js"
-import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "./errors.js"
-import type { SecretInput } from "@/index.js"
+import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
+import { createSecret } from "@/secret.ts"
+import { getRandomBytes } from "@/crypto.ts"
+import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.ts"
+import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "@/errors.ts"
+import type { SecretInput } from "@/index.ts"
 
 export type { JWTVerifyOptions } from "jose"
 
@@ -26,9 +26,9 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
             throw new InvalidPayloadError("The payload must be a non-empty object")
         }
         const secretKey = createSecret(secret)
-        const jti = crypto.randomBytes(32).toString("base64url")
+        const jti = base64url.encode(getRandomBytes(32))
 
-        return new SignJWT(payload)
+        return await new SignJWT(payload)
             .setProtectedHeader({ alg: "HS256", typ: "JWT" })
             .setIssuedAt()
             .setNotBefore(payload.nbf ?? "0s")
@@ -50,6 +50,7 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
  * @see https://datatracker.ietf.org/doc/html/rfc7519#section-6 Unsecured JWTs
  * @param token - JWT string to verify
  * @param secret - CryptoKey or KeyObject used to verify the JWT
+ * @param options - Additional JWT verification options
  * @returns verify and return the payload of the JWT
  */
 export const verifyJWS = async (token: string, secret: SecretInput, options?: JWTVerifyOptions): Promise<JWTPayload> => {

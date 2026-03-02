@@ -1,7 +1,8 @@
+import { env } from "@/env.ts"
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
-import { AuthInternalError } from "@/errors.js"
-import type { JWTPayload } from "@/jose.js"
-import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig } from "@/@types/index.js"
+import { AuthInternalError } from "@/errors.ts"
+import type { JWTPayload } from "@/jose.ts"
+import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig, InternalLogger } from "@/@types/index.ts"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -68,6 +69,7 @@ export const expiredCookieAttributes: SerializeOptions = {
     ...defaultCookieOptions,
     expires: new Date(0),
     maxAge: 0,
+    secure: true,
 }
 
 /**
@@ -112,10 +114,11 @@ export const getSetCookie = (response: Response, cookieName: string) => {
  * Create a session cookie containing a signed and encrypted JWT, using the
  * `@aura-stack/jose` package for the encoding.
  *
+ * @param jose - Jose Instance
  * @param session - The JWT payload to be encoded in the session cookie
  * @returns The serialized session cookie string
  */
-export const createSessionCookie = async (session: JWTPayload, jose: AuthRuntimeConfig["jose"]) => {
+export const createSessionCookie = async (jose: AuthRuntimeConfig["jose"], session: JWTPayload) => {
     try {
         const encoded = await jose.encodeJWT(session)
         return encoded
@@ -140,32 +143,29 @@ export const createSessionCookie = async (session: JWTPayload, jose: AuthRuntime
 export const defineSecureCookieOptions = (
     useSecure: boolean,
     attributes: SerializeOptions,
-    strategy: "host" | "secure" | "standard"
+    strategy: "host" | "secure" | "standard",
+    logger?: InternalLogger
 ): SerializeOptions => {
     if (!attributes.httpOnly) {
-        console.warn(
-            "[WARNING]: Cookie is configured without HttpOnly. This allows JavaScript access via document.cookie and increases XSS risk."
-        )
+        logger?.log("COOKIE_HTTPONLY_DISABLED")
     }
     if (attributes.domain === "*") {
         attributes.domain = undefined
-        console.warn("[WARNING]: Cookie 'Domain' is set to '*', which is insecure. Avoid wildcard domains.")
+        logger?.log("COOKIE_WILDCARD_DOMAIN")
     }
     if (!useSecure) {
         if (attributes.secure) {
-            console.warn(
-                "[WARNING]: The 'Secure' attribute will be disabled for this cookie. Serve over HTTPS to enforce Secure cookies."
-            )
+            logger?.log("COOKIE_SECURE_DISABLED")
         }
         if (attributes.sameSite == "none") {
             attributes.sameSite = "lax"
-            console.warn("[WARNING]: SameSite=None requires Secure attribute. Changing SameSite to 'Lax'.")
+            logger?.log("COOKIE_SAMESITE_NONE_WITHOUT_SECURE")
         }
-        if (process.env.NODE_ENV === "production") {
-            console.warn("[WARNING]: In production, ensure cookies are served over HTTPS to maintain security.")
+        if (env.NODE_ENV === "production") {
+            logger?.log("COOKIE_INSECURE_IN_PRODUCTION")
         }
         if (strategy === "host") {
-            console.warn("[WARNING]: __Host- cookies require a secure context. Falling back to standard cookie settings.")
+            logger?.log("COOKIE_HOST_STRATEGY_INSECURE")
         }
         return {
             ...defaultCookieOptions,
@@ -191,21 +191,23 @@ export const defineSecureCookieOptions = (
 export const createCookieStore = (
     useSecure: boolean,
     prefix?: string,
-    overrides?: CookieConfig["overrides"]
+    overrides?: CookieConfig["overrides"],
+    logger?: InternalLogger
 ): CookieStoreConfig => {
     prefix ??= COOKIE_NAME
     const securePrefix = useSecure ? "__Secure-" : ""
     const hostPrefix = useSecure ? "__Host-" : ""
     return {
         sessionToken: {
-            name: `${securePrefix}${prefix}.${overrides?.sessionToken?.name ?? "sessionToken"}`,
+            name: `${securePrefix}${prefix}.${overrides?.sessionToken?.name ?? "session_token"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...defaultCookieOptions,
                     ...overrides?.sessionToken?.attributes,
                 },
-                overrides?.sessionToken?.attributes?.strategy ?? "secure"
+                overrides?.sessionToken?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
         state: {
@@ -216,51 +218,57 @@ export const createCookieStore = (
                     ...oauthCookieOptions,
                     ...overrides?.state?.attributes,
                 },
-                overrides?.state?.attributes?.strategy ?? "secure"
+                overrides?.state?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
         csrfToken: {
-            name: `${hostPrefix}${prefix}.${overrides?.csrfToken?.name ?? "csrfToken"}`,
+            name: `${hostPrefix}${prefix}.${overrides?.csrfToken?.name ?? "csrf_token"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...overrides?.csrfToken?.attributes,
                     ...defaultHostCookieConfig,
+                    sameSite: "strict",
                 },
-                overrides?.csrfToken?.attributes?.strategy ?? "host"
+                overrides?.csrfToken?.attributes?.strategy ?? "host",
+                logger
             ),
         },
-        redirect_to: {
-            name: `${securePrefix}${prefix}.${overrides?.redirect_to?.name ?? "redirect_to"}`,
+        redirectTo: {
+            name: `${securePrefix}${prefix}.${overrides?.redirectTo?.name ?? "redirect_to"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...overrides?.redirect_to?.attributes,
+                    ...overrides?.redirectTo?.attributes,
                 },
-                overrides?.redirect_to?.attributes?.strategy ?? "secure"
+                overrides?.redirectTo?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
-        redirect_uri: {
-            name: `${securePrefix}${prefix}.${overrides?.redirect_uri?.name ?? "redirect_uri"}`,
+        redirectURI: {
+            name: `${securePrefix}${prefix}.${overrides?.redirectURI?.name ?? "redirect_uri"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...overrides?.redirect_uri?.attributes,
+                    ...overrides?.redirectURI?.attributes,
                 },
-                overrides?.redirect_uri?.attributes?.strategy ?? "secure"
+                overrides?.redirectURI?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
-        code_verifier: {
-            name: `${securePrefix}${prefix}.${overrides?.code_verifier?.name ?? "code_verifier"}`,
+        codeVerifier: {
+            name: `${securePrefix}${prefix}.${overrides?.codeVerifier?.name ?? "code_verifier"}`,
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
                     ...oauthCookieOptions,
-                    ...overrides?.code_verifier?.attributes,
+                    ...overrides?.codeVerifier?.attributes,
                 },
-                overrides?.code_verifier?.attributes?.strategy ?? "secure"
+                overrides?.codeVerifier?.attributes?.strategy ?? "secure",
+                logger
             ),
         },
     }

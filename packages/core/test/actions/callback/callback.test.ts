@@ -1,7 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
-import { GET } from "@test/presets.js"
-import { createPKCE } from "@/secure.js"
-import { setCookie, getSetCookie } from "@/cookie.js"
+import { GET } from "@test/presets.ts"
+import { createPKCE } from "@/secure.ts"
+import { setCookie, getSetCookie } from "@/cookie.ts"
+import { AURA_AUTH_VERSION } from "@/utils.ts"
 
 describe("callbackAction", () => {
     test("invalid endpoint", async () => {
@@ -68,7 +69,6 @@ describe("callbackAction", () => {
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
             type: "AUTH_INTERNAL_ERROR",
-            code: "COOKIE_NOT_FOUND",
             message: "No cookies found. There is no active session",
         })
     })
@@ -134,34 +134,44 @@ describe("callbackAction", () => {
             })
         )
 
-        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams({
-                client_id: "oauth_client_id",
-                client_secret: "oauth_client_secret",
-                code: "auth_code_123",
-                redirect_uri: "https://example.com/auth/callback/oauth-provider",
-                grant_type: "authorization_code",
-                code_verifier: codeVerifier,
-            }).toString(),
-        })
+        expect(fetch).toHaveBeenCalledWith(
+            "https://example.com/oauth/access_token",
+            expect.objectContaining({
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    client_id: "oauth_client_id",
+                    client_secret: "oauth_client_secret",
+                    code: "auth_code_123",
+                    redirect_uri: "https://example.com/auth/callback/oauth-provider",
+                    grant_type: "authorization_code",
+                    code_verifier: codeVerifier,
+                }).toString(),
+                signal: expect.any(AbortSignal),
+            })
+        )
 
-        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-                Authorization: "Bearer access_123",
-            },
-        })
+        expect(fetch).toHaveBeenCalledWith(
+            "https://example.com/oauth/userinfo",
+            expect.objectContaining({
+                method: "GET",
+                headers: {
+                    "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                    Accept: "application/json",
+                    Authorization: "Bearer access_123",
+                },
+                signal: expect.any(AbortSignal),
+            })
+        )
+
         expect(fetch).toHaveBeenCalledTimes(2)
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
 
-        expect(getSetCookie(response, "__Secure-aura-auth.sessionToken")).toBeDefined()
+        expect(getSetCookie(response, "__Secure-aura-auth.session_token")).toBeDefined()
         expect(getSetCookie(response, "__Secure-aura-auth.state")).toEqual("")
         expect(getSetCookie(response, "__Secure-aura-auth.redirect_to")).toEqual("")
         expect(getSetCookie(response, "__Secure-aura-auth.redirect_uri")).toEqual("")

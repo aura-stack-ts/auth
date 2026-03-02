@@ -1,0 +1,20 @@
+{
+  "name": "hono",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
+    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
+  },
+  "dependencies": {
+    "hono": "^4.12.0",
+    "@aura-stack/auth": "workspace:*",
+    "@aura-stack/jose": "workspace:*"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@types/bun": "^1.3.9"
+  }
+}
