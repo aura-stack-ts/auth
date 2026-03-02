@@ -4,7 +4,15 @@ const AccessTokenConfigSchema = z.union([
     string().url(),
     object({
         url: string().url(),
-        headers: z.object(string()).optional(),
+        headers: z.record(string(), string()).optional(),
+    }),
+])
+
+const UserInfoConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        headers: z.record(string(), string()).optional(),
     }),
 ])
 
@@ -14,7 +22,7 @@ export const OAuthProviderCredentialsSchema = object({
     authorizeURL: string().url(),
     accessToken: AccessTokenConfigSchema,
     scope: string(),
-    userInfo: string().url(),
+    userInfo: UserInfoConfigSchema,
     responseType: options(["code", "token", "id_token"]),
     clientId: string(),
     clientSecret: string(),
@@ -28,7 +36,7 @@ export const OAuthProviderConfigSchema = object({
     authorizeURL: string().url(),
     accessToken: AccessTokenConfigSchema,
     scope: string().optional(),
-    userInfo: string().url(),
+    userInfo: UserInfoConfigSchema,
     responseType: options(["code", "token", "id_token"]),
     clientId: string(),
     clientSecret: string(),
