@@ -1,0 +1,10 @@
+{
+  "extends": "@aura-stack/tsconfig/tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx"
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
+}

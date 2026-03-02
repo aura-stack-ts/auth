@@ -1,14 +1,63 @@
-import { object, string, enum as options, number, httpUrl, z } from "zod/v4"
+import { object, string, enum as options, number, z, null as nullable, union, array } from "zod/v4"
+
+const AuthorizeConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        params: object({
+            responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
+            scope: string().optional(),
+        }),
+    }),
+])
+
+const AccessTokenConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        headers: z.record(string(), string()).optional(),
+    }),
+])
+
+const UserInfoConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        headers: z.record(string(), string()).optional(),
+        method: string().optional(),
+    }),
+])
+
+export const OAuthProviderCredentialsSchema = object({
+    id: string(),
+    name: string(),
+    authorize: AuthorizeConfigSchema.optional(),
+    /** @deprecated */
+    authorizeURL: string().url().optional(),
+    accessToken: AccessTokenConfigSchema,
+    /** @deprecated */
+    scope: string().optional(),
+    userInfo: UserInfoConfigSchema,
+    /** @deprecated */
+    responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
+    clientId: string(),
+    clientSecret: string(),
+    profile: z.function().optional(),
+})
 
 /**
  * Schema for OAuth Provider Configuration
  */
 export const OAuthProviderConfigSchema = object({
-    authorizeURL: httpUrl(),
-    accessToken: httpUrl(),
+    authorize: AuthorizeConfigSchema.optional(),
+    /** @deprecated */
+    authorizeURL: string().url().optional(),
+    accessToken: AccessTokenConfigSchema,
+    /** @deprecated */
     scope: string().optional(),
-    userInfo: httpUrl(),
-    responseType: options(["code", "token", "id_token"]),
+    userInfo: UserInfoConfigSchema,
+    /** @deprecated */
+    responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
     clientId: string(),
     clientSecret: string(),
 })
@@ -31,8 +80,8 @@ export const OAuthAuthorization = OAuthProviderConfigSchema.extend({
  * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2
  */
 export const OAuthAuthorizationResponse = object({
-    state: string("Missing state parameter in the OAuth authorization response."),
-    code: string("Missing code parameter in the OAuth authorization response."),
+    state: string({ message: "Missing state parameter in the OAuth authorization response." }),
+    code: string({ message: "Missing code parameter in the OAuth authorization response." }),
 })
 
 /**
@@ -72,10 +121,10 @@ export const OAuthAccessToken = OAuthProviderConfigSchema.extend({
  */
 export const OAuthAccessTokenResponse = object({
     access_token: string(),
-    token_type: string(),
+    token_type: string().optional(),
     expires_in: number().optional(),
     refresh_token: string().optional(),
-    scope: string().optional(),
+    scope: union([string().optional().or(nullable()), array(string()).optional()]),
 })
 
 /**

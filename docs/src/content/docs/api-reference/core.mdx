@@ -74,13 +74,14 @@ Creates an authentication instance with handlers for OAuth flows, session manage
 
 Configuration object for authentication settings.
 
-| Parameter             | Type                                                    | Description                                                                                                                          |
-| --------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `oauth`               | `(BuiltInOAuthProvider  \| OAuthProviderCredentials)[]` | Array of OAuth provider configurations                                                                                               |
-| `cookies`             | `CookieConfig`                                          | Cookie configuration for session management                                                                                          |
-| `secret`              | `string`                                                | Secret value used for signing and encrypting JWTs and CSRF tokens. This option overrides the `AURA_AUTH_SECRET` environment variable |
-| `basePath`            | `/${string}`                                            | Base path for the authentication routes; defaults to `/auth`                                                                         |
-| `trustedProxyHeaders` | `boolean`                                               | Enables proxy headers when the app is behind a proxy                                                                                 |
+| Parameter             | Type                                                              | Description                                                                                                                          |
+| --------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `oauth`               | `(BuiltInOAuthProvider  \| OAuthProviderCredentials)[]`           | Array of OAuth provider configurations                                                                                               |
+| `cookies`             | `CookieConfig`                                                    | Cookie configuration for session management                                                                                          |
+| `secret`              | `string`                                                          | Secret value used for signing and encrypting JWTs and CSRF tokens. This option overrides the `AURA_AUTH_SECRET` environment variable |
+| `basePath`            | `/${string}`                                                      | Base path for the authentication routes; defaults to `/auth`                                                                         |
+| `trustedProxyHeaders` | `boolean`                                                         | Enables proxy headers when the app is behind a proxy                                                                                 |
+| `trustedOrigins`      | `string[] \| (request: Request) => string[] \| Promise<string[]>` | List of allowed origins for CORS and redirect URI validation. Supports wildcards (e.g., `https://*.example.com`)                     |
 
 ##### `oauth`
 
@@ -344,6 +345,42 @@ Aura Auth reads proxy headers to determine if connection is secure:
 | `X-Forwarded-Host`  | Original host         | `example.com`                  |
 | `Forwarded`         | RFC 7239 standard     | `for=203.0.113.45;proto=https` |
 
+##### `trustedOrigins`
+
+List of allowed origins for CORS and redirect URI validation. This option can be a static array of strings or a function that returns an array of strings based on the incoming request. Wildcards are supported for subdomains (e.g., `https://*.example.com`) and port numbers (e.g., `http://localhost:*`).
+
+```ts lineNumbers
+type TrustedOrigins = string[] | ((request: Request) => string[] | Promise<string[]>)
+```
+
+###### Static Array [!toc]
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: ["http://example.com", "https://app.example.com:3000"],
+})
+```
+
+###### Dynamic Function [!toc]
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: (request) => {
+    const origin = request.headers.get("origin")
+    if (origin && origin.endsWith(".example.com")) {
+      return [origin]
+    }
+    return []
+  },
+})
+```
+
 #### Returns
 
 | Return     | Type                               | Description                                                                                                                                                                               |
@@ -490,14 +527,26 @@ import { discord, type DiscordProfile, type Nameplate } from "@aura-stack/auth/o
 
 ## Environment Variables
 
-Aura Auth required some environment variables to create the OAuth flow and security measures. The environments required are:
+Aura Auth requires environment variables to create the OAuth flow and enforce security controls.
 
-- `AURA_AUTH_SECRET`: opaque value used to sign and encrypt user's session
-- `AURA_AUTH_SALT`: Salt value used for key derivation to sign and encrypt JWTs and CSRF tokens.
-- `AURA_AUTH_{PROVIDER}_CLIENT_ID`
-- `AURA_AUTH-{PROVIDER}_CLIENT_SECRET`
+For any `{KEY}`, Aura Auth checks the following names in order and uses the first non-empty value:
 
-> Aura Auth loads the environment variables that follows the previous patterns.
+1. `AURA_AUTH_{KEY}`
+2. `AURA_{KEY}`
+3. `AUTH_{KEY}`
+4. `{KEY}`
+
+Common variables are:
+
+- `SECRET`: opaque value used to sign and encrypt user sessions
+- `SALT`: salt value used for key derivation when signing/encrypting JWTs and CSRF tokens
+- `{PROVIDER}_CLIENT_ID`
+- `{PROVIDER}_CLIENT_SECRET`
+- `TRUSTED_ORIGINS`: comma/semicolon/newline-separated list of trusted origins
+- `DEBUG`: enables debug mode when set to `1`, `true`, `yes`, `on`, or `debug`
+- `LOG_LEVEL`: built-in logger level (`debug`, `info`, `warn`, `error`)
+
+> `APP_NAME` is not automatically loaded as an environment variable by the core runtime. Set `appName` from a custom logger if you need a custom syslog app name.
 
 ### Example
 
@@ -515,6 +564,11 @@ AURA_AUTH_GITHUB_CLIENT_SECRET=0123456789abcdef...
 # Custom Provider
 AURA_AUTH_CUSTOM_CLIENT_ID=your_client_id
 AURA_AUTH_CUSTOM_CLIENT_SECRET=your_client_secret
+
+# Runtime behavior
+AURA_AUTH_TRUSTED_ORIGINS="https://app.example.com,https://admin.example.com"
+AURA_AUTH_DEBUG="1"
+AURA_AUTH_LOG_LEVEL="info"
 ```
 
 <Callout type="warn">Never commit `.env` files to version control. Add them to `.gitignore`.</Callout>

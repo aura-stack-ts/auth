@@ -89,13 +89,32 @@ AURA_AUTH_SECRET="32-bytes-secret"
 
 ### Configure the provider
 
-Set the `oauth` option of the `createAuth` instance and writing `"strava"` name.
+Set the `oauth` option of the `createAuth` instance. You can use the provider name as a string to use default settings, or use the `strava` factory function to customize the configuration.
+
+#### Default configuration
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["strava"],
+})
+
+export const { handlers } = auth
+```
+
+#### Custom configuration
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { strava } from "@aura-stack/auth/oauth/strava"
+
+export const auth = createAuth({
+  oauth: [
+    strava({
+      scope: "read,activity:read_all", // Custom scopes
+    }),
+  ],
 })
 
 export const { handlers } = auth

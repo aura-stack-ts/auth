@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
-import { GET } from "@test/presets.js"
-import { setCookie } from "@/cookie.js"
+import { GET } from "@test/presets.ts"
+import { setCookie } from "@/cookie.ts"
 
 describe("csrfTokenAction", () => {
     test("generates a CSRF token and sets it in a cookie", async () => {

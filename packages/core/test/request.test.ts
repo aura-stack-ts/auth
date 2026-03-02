@@ -1,4 +1,4 @@
-import { fetchAsync } from "@/request.js"
+import { fetchAsync } from "@/request.ts"
 import { describe, expect, test, vi } from "vitest"
 
 describe("fetchAsync", () => {
@@ -31,7 +31,7 @@ describe("fetchAsync", () => {
         vi.useRealTimers()
     })
 
-    test("fetch with abort is triggered at the correct timeout", async () => {
+    test("fetch with abort is triggered at the correct timeout", () => {
         vi.useFakeTimers()
 
         const abortSpy = vi.spyOn(AbortController.prototype, "abort")
@@ -52,7 +52,7 @@ describe("fetchAsync", () => {
     test("clears timeout after successful fetch", async () => {
         vi.useFakeTimers()
 
-        const clearSpy = vi.spyOn(global, "clearTimeout")
+        const clearSpy = vi.spyOn(globalThis, "clearTimeout")
         vi.stubGlobal("fetch", vi.fn().mockResolvedValue("OK"))
 
         await fetchAsync("https://example.com/timeout", {}, 1000)

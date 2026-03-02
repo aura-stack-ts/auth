@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { setCookie, createCookieStore, getCookie, getSetCookie, defineSecureCookieOptions } from "@/cookie.js"
+import { setCookie, createCookieStore, getCookie, getSetCookie, defineSecureCookieOptions } from "@/cookie.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 
 const cookieStore = createCookieStore(true)
@@ -16,7 +16,7 @@ describe("setCookie", () => {
         const { expires, ...exclude } = cookieStore.csrfToken.attributes
         const cookie = setCookie(cookieStore.csrfToken.name, "xyz123", exclude)
         expect(cookie).toBeDefined()
-        expect(cookie).toEqual("__Host-aura-auth.csrf_token=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Lax")
+        expect(cookie).toEqual("__Host-aura-auth.csrf_token=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Strict")
     })
 
     test("set pkce cookie with secure flag on cookie", () => {
