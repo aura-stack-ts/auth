@@ -21,6 +21,9 @@ export const buildAuthorizationURL = (
 ): string => {
     const authorizeConfig = oauth.authorize
     const baseURL = typeof authorizeConfig === "string" ? authorizeConfig : (authorizeConfig?.url ?? oauth.authorizeURL)
+    if(!baseURL) {
+        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing authorization URL in OAuth provider configuration.")
+    }
     const url = new URL(baseURL)
     const authorizeParams = typeof authorizeConfig === "string" ? undefined : authorizeConfig?.params
 
@@ -59,7 +62,7 @@ export const createAuthorizationURL = async (oauth: OAuthProvider, redirectURI: 
     if (!parsed.success) {
         ctx?.logger?.log("INVALID_OAUTH_CONFIGURATION", {
             structuredData: {
-                scope: oauth.scope,
+                scope: oauth?.scope ?? "",
                 redirect_uri: redirectURI,
                 has_state: Boolean(state),
                 has_code_challenge: Boolean(codeChallenge),

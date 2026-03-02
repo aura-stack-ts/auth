@@ -56,7 +56,7 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
      * @deprecated
      * use `authorize` instead of `authorizeURL`
      */
-    authorizeURL: string
+    authorizeURL?: string
     authorize:
         | string
         | {
@@ -74,12 +74,12 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
      * @deprecated
      * use `authorize.params.scope` instead of `scope`
      */
-    scope: string
+    scope?: string
     /**
      * @deprecated
      * use `authorize.params.response_type` instead of `responseType`
      */
-    responseType: ResponseType
+    responseType?: ResponseType
     profile?: (profile: Profile) => User | Promise<User>
 }
 

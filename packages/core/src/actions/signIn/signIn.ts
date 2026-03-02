@@ -2,7 +2,7 @@ import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { cacheControl } from "@/headers.ts"
 import { createRedirectURI, createRedirectTo } from "@/actions/signIn/authorization.ts"
-import { createAuthorizationURL as createAuthURL } from "@/actions/signIn/authorization-url.ts"
+import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
 
 const signInConfig = (oauth: OAuthProviderRecord) => {
@@ -36,7 +36,7 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
             const redirectURI = await createRedirectURI(request, oauth, context)
             const redirectToValue = await createRedirectTo(request, redirectTo, context)
 
-            const { authorization, state, codeVerifier, method } = await createAuthURL(providers[oauth], redirectURI, context)
+            const { authorization, state, codeVerifier, method } = await createAuthorizationURL(providers[oauth], redirectURI, context)
 
             logger?.log("SIGN_IN_INITIATED", {
                 structuredData: { oauth_provider: oauth, code_challenge_method: method },

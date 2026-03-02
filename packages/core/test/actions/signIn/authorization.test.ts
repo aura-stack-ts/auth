@@ -77,7 +77,7 @@ describe("createAuthorizationURL", () => {
             expect(searchParams.has("client_secret")).toBeFalsy()
             expect(searchParams.get("client_id")).toBe("oauth_client_id")
             expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
-            expect(searchParams.get("state")).toBeDefined()
+            expect(searchParams.get("state")).toBeTruthy()
             expect(searchParams.get("scope")).toBe("profile email")
             expect(searchParams.get("response_type")).toBe("code")
         })

@@ -1,4 +1,4 @@
-import { object, string, enum as options, number, z, null as nullable } from "zod/v4"
+import { object, string, enum as options, number, z, null as nullable, url } from "zod/v4"
 
 const AccessTokenConfigSchema = z.union([
     string().url(),
@@ -19,11 +19,15 @@ const UserInfoConfigSchema = z.union([
 export const OAuthProviderCredentialsSchema = object({
     id: string(),
     name: string(),
-    authorizeURL: string().url(),
+    authorize: url().optional(),
+    /** @deprecated */
+    authorizeURL: string().url().optional(),
     accessToken: AccessTokenConfigSchema,
-    scope: string(),
+    /** @deprecated */
+    scope: string().optional(),
     userInfo: UserInfoConfigSchema,
-    responseType: options(["code", "token", "id_token"]),
+    /** @deprecated */
+    responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
     clientId: string(),
     clientSecret: string(),
     profile: z.function().optional(),
@@ -33,11 +37,14 @@ export const OAuthProviderCredentialsSchema = object({
  * Schema for OAuth Provider Configuration
  */
 export const OAuthProviderConfigSchema = object({
-    authorizeURL: string().url(),
+    /** @deprecated */
+    authorizeURL: string().url().optional(),
     accessToken: AccessTokenConfigSchema,
+    /** @deprecated */
     scope: string().optional(),
     userInfo: UserInfoConfigSchema,
-    responseType: options(["code", "token", "id_token"]),
+    /** @deprecated */
+    responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
     clientId: string(),
     clientSecret: string(),
 })

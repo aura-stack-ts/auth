@@ -50,9 +50,9 @@ export const createAccessToken = async (
         const response = await fetchAsync(tokenURL, {
             method: "POST",
             headers: {
+                ...(extraHeaders ?? {}),
                 Accept: "application/json",
                 "Content-Type": "application/x-www-form-urlencoded",
-                ...(extraHeaders ?? {}),
             },
             body: new URLSearchParams({
                 client_id: clientId,

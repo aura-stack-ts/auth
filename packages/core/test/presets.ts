@@ -5,7 +5,7 @@ import type { JWTPayload } from "@/jose.ts"
 export const oauthCustomService: OAuthProviderCredentials = {
     id: "oauth-provider",
     name: "OAuth",
-    authorizeURL: "https://example.com/oauth/authorize",
+    authorize: "https://example.com/oauth/authorize",
     accessToken: "https://example.com/oauth/access_token",
     scope: "profile email",
     responseType: "code",
