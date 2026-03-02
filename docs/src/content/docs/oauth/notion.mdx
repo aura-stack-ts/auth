@@ -1,6 +1,6 @@
 ---
 title: Notion Authorization Provider
-description: Add Twitch authorization provider to Aura Auth to authenticate and authorize
+description: Add Notion authorization provider to Aura Auth to authenticate and authorize
 ---
 
 ## Notion
@@ -92,7 +92,7 @@ AURA_AUTH_SECRET="32-bytes-secret"
 
 ### Configure the provider
 
-Set the `oauth` option of the `createAuth` instance. You can use the provider name as a string to use default settings, or use the `Notion` factory function to customize the configuration.
+Set the `oauth` option of the `createAuth` instance. You can use the provider name as a string to use default settings, or use the `notion` factory function to customize the configuration.
 
 #### Default configuration
 
@@ -110,11 +110,11 @@ export const { handlers } = auth
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
-import { Notion } from "@aura-stack/auth/oauth/Notion"
+import { notion } from "@aura-stack/auth/oauth/notion"
 
 export const auth = createAuth({
   oauth: [
-    Notion({
+    notion({
       scope: "read:user user:email repo",
     }),
   ],
