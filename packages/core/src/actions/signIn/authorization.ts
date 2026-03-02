@@ -1,48 +1,8 @@
 import { AuthInternalError } from "@/errors.ts"
-import { OAuthAuthorization } from "@/schemas.ts"
-import { equals, extractPath, toCastCase } from "@/utils.ts"
+import { equals, extractPath } from "@/utils.ts"
 import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin, patternToRegex } from "@/assert.ts"
 import type { GlobalContext } from "@aura-stack/router"
-import type { AuthConfig, InternalLogger, OAuthProviderCredentials } from "@/@types/index.ts"
-
-/**
- * Constructs the request URI for the Authorization Request to the third-party OAuth service. It includes
- * the necessary query parameters such as `client_id`, `redirect_uri`, `response_type`, `scope`, `state`,
- * `code_challenge`, and `code_challenge_method`.
- *
- * @see https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1
- * @see https://datatracker.ietf.org/doc/html/rfc7636#section-4
- *
- * @param oauthConfig - The OAuth configuration for the third-party service.
- * @param redirectURI - The redirect URI where the OAuth service will send the user after authorization.
- * @param state - A unique string used to maintain state between the request and callback.
- */
-export const createAuthorizationURL = (
-    oauthConfig: OAuthProviderCredentials,
-    redirectURI: string,
-    state: string,
-    codeChallenge: string,
-    codeChallengeMethod: string,
-    logger?: InternalLogger
-) => {
-    const parsed = OAuthAuthorization.safeParse({ ...oauthConfig, redirectURI, state, codeChallenge, codeChallengeMethod })
-    if (!parsed.success) {
-        logger?.log("INVALID_OAUTH_CONFIGURATION", {
-            structuredData: {
-                scope: oauthConfig.scope,
-                redirect_uri: redirectURI,
-                has_state: Boolean(state),
-                has_code_challenge: Boolean(codeChallenge),
-                code_challenge_method: codeChallengeMethod,
-            },
-        })
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "The OAuth provider configuration is invalid.")
-    }
-    const { authorizeURL, ...options } = parsed.data
-    const { userInfo, accessToken, clientSecret, ...required } = options
-    const searchParams = new URLSearchParams(toCastCase(required))
-    return `${authorizeURL}?${searchParams}`
-}
+import type { AuthConfig } from "@/@types/index.ts"
 
 /**
  * Resolves trusted origins from config (array or function).

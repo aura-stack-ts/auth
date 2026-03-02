@@ -1,6 +1,6 @@
 import { fetchAsync } from "@/request.ts"
 import { AuthInternalError, OAuthProtocolError } from "@/errors.ts"
-import { OAuthAccessToken, OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.ts"
+import { OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.ts"
 import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
@@ -21,31 +21,44 @@ export const createAccessToken = async (
     codeVerifier: string,
     logger?: InternalLogger
 ) => {
-    const parsed = OAuthAccessToken.safeParse({ ...oauthConfig, redirectURI, code, codeVerifier })
-    if (!parsed.success) {
-        logger?.log("INVALID_OAUTH_CONFIGURATION")
+    const { accessToken, clientId, clientSecret } = oauthConfig
+    if (!clientId || !clientSecret || !redirectURI || !code || !codeVerifier || !accessToken) {
+        logger?.log("INVALID_OAUTH_CONFIGURATION", {
+            structuredData: {
+                has_client_id: Boolean(clientId),
+                has_client_secret: Boolean(clientSecret),
+                has_access_token: Boolean(accessToken),
+                has_redirect_uri: Boolean(redirectURI),
+                has_code: Boolean(code),
+                has_code_verifier: Boolean(codeVerifier),
+            },
+        })
         throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "The OAuth provider configuration is invalid.")
     }
-    const { accessToken, clientId, clientSecret, code: codeParsed, redirectURI: redirectParsed } = parsed.data
+
+    const tokenURL = typeof accessToken === "string" ? accessToken : accessToken.url
+    const extraHeaders = typeof accessToken === "string" ? undefined : accessToken.headers
+
     try {
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
                 has_client_id: Boolean(clientId),
-                redirect_uri: redirectParsed,
+                redirect_uri: redirectURI,
                 grant_type: "authorization_code",
             },
         })
-        const response = await fetchAsync(accessToken, {
+        const response = await fetchAsync(tokenURL, {
             method: "POST",
             headers: {
                 Accept: "application/json",
                 "Content-Type": "application/x-www-form-urlencoded",
+                ...(extraHeaders ?? {}),
             },
             body: new URLSearchParams({
                 client_id: clientId,
                 client_secret: clientSecret,
-                code: codeParsed,
-                redirect_uri: redirectParsed,
+                code,
+                redirect_uri: redirectURI,
                 grant_type: "authorization_code",
                 code_verifier: codeVerifier,
             }).toString(),

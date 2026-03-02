@@ -1,10 +1,18 @@
-import { object, string, enum as options, number, z, null as nullable } from "zod"
+import { object, string, enum as options, number, z, null as nullable } from "zod/v4"
+
+const AccessTokenConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        headers: z.object(string()).optional(),
+    }),
+])
 
 export const OAuthProviderCredentialsSchema = object({
     id: string(),
     name: string(),
     authorizeURL: string().url(),
-    accessToken: string().url(),
+    accessToken: AccessTokenConfigSchema,
     scope: string(),
     userInfo: string().url(),
     responseType: options(["code", "token", "id_token"]),
@@ -18,7 +26,7 @@ export const OAuthProviderCredentialsSchema = object({
  */
 export const OAuthProviderConfigSchema = object({
     authorizeURL: string().url(),
-    accessToken: string().url(),
+    accessToken: AccessTokenConfigSchema,
     scope: string().optional(),
     userInfo: string().url(),
     responseType: options(["code", "token", "id_token"]),
