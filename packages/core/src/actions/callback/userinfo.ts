@@ -35,6 +35,7 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
     const userInfoConfig = oauthConfig.userInfo
     const userinfoURL = typeof userInfoConfig === "string" ? userInfoConfig : userInfoConfig.url
     const extraHeaders = typeof userInfoConfig === "string" ? undefined : userInfoConfig.headers
+    const method = typeof userInfoConfig === "string" ? "GET" : (userInfoConfig.method ?? "GET").toUpperCase()
 
     try {
         logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
@@ -43,7 +44,7 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
             },
         })
         const response = await fetchAsync(userinfoURL, {
-            method: "GET",
+            method,
             headers: {
                 "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",

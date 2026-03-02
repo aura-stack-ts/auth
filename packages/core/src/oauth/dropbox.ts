@@ -1,4 +1,4 @@
-import type { OAuthProviderConfig } from "@/@types/index.js"
+import type { OAuthProviderCredentials } from "@/@types/index.js"
 
 export type AccountType = "basic" | "pro" | "business"
 
@@ -47,20 +47,29 @@ export interface DropboxProfile {
  * @see [Dropbox - My Apps](https://www.dropbox.com/developers/apps)
  * @see [Dropbox - Developer Guide](https://www.dropbox.com/developers/reference/developer-guide)
  */
-export const dropbox: OAuthProviderConfig<DropboxProfile> = {
-    id: "dropbox",
-    name: "Dropbox",
-    authorizeURL: "https://www.dropbox.com/oauth2/authorize",
-    accessToken: "https://api.dropboxapi.com/oauth2/token",
-    userInfo: "https://api.dropboxapi.com/2/users/get_current_account",
-    scope: "account_info.read",
-    responseType: "code",
-    profile(profile) {
-        return {
-            sub: profile.account_id,
-            name: profile.name.display_name,
-            email: profile.email,
-            image: profile.profile_photo_url,
-        }
-    },
+export const dropbox = (
+    options?: Partial<OAuthProviderCredentials<DropboxProfile>>
+): OAuthProviderCredentials<DropboxProfile> => {
+    return {
+        id: "dropbox",
+        name: "Dropbox",
+        authorize: {
+            url: "https://www.dropbox.com/oauth2/authorize",
+            params: { scope: "account_info.read" },
+        },
+        accessToken: "https://api.dropboxapi.com/oauth2/token",
+        userInfo: {
+            method: "POST",
+            url: "https://api.dropboxapi.com/2/users/get_current_account",
+        },
+        profile(profile) {
+            return {
+                sub: profile.account_id,
+                name: profile.name.display_name,
+                email: profile.email,
+                image: profile.profile_photo_url,
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<DropboxProfile>
 }

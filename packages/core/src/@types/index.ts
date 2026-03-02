@@ -69,7 +69,13 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
               url: string
               headers?: Record<string, string>
           }
-    userInfo: string | { url: string; headers?: Record<string, string> }
+    userInfo:
+        | string
+        | {
+              url: string
+              headers?: Record<string, string>
+              method?: string
+          }
     /**
      * @deprecated
      * use `authorize.params.scope` instead of `scope`

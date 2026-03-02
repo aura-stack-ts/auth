@@ -17,6 +17,7 @@ import { mailchimp } from "./mailchimp.ts"
 import { pinterest } from "./pinterest.ts"
 import { twitch } from "./twitch.ts"
 import { notion } from "./notion.ts"
+import { dropbox } from "./dropbox.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
 import { AuthInternalError } from "@/errors.ts"
 import { formatZodError } from "@/utils.ts"
@@ -33,6 +34,7 @@ export * from "./mailchimp.ts"
 export * from "./pinterest.ts"
 export * from "./twitch.ts"
 export * from "./notion.ts"
+export * from "./dropbox.ts"
 
 export const builtInOAuthProviders = {
     github,
@@ -47,6 +49,7 @@ export const builtInOAuthProviders = {
     pinterest,
     twitch,
     notion,
+    dropbox,
 } as const
 
 /**

@@ -1,6 +1,6 @@
 ---
 title: Dropbox Authorization Provider
-description: Add Dropbox authorization provider to Aura Auth to authentication and authorize
+description: Add Dropbox authorization provider to Aura Auth to authenticate and authorize
 ---
 
 ## Dropbox
@@ -115,6 +115,23 @@ import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["dropbox"],
+})
+
+export const { handlers } = auth
+```
+
+#### Custom configuration
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { dropbox } from "@aura-stack/auth/oauth/dropbox"
+
+export const auth = createAuth({
+  oauth: [
+    dropbox({
+      scope: "account_info.read files.content.read",
+    }),
+  ],
 })
 
 export const { handlers } = auth
