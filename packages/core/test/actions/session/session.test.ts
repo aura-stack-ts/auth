@@ -1,7 +1,8 @@
 import { describe, test, expect, vi, afterEach } from "vitest"
-import { createPKCE } from "@/secure.js"
-import { GET, jose, sessionPayload } from "@test/presets.js"
-import { setCookie, getSetCookie, createCookieStore } from "@/cookie.js"
+import { createPKCE } from "@/secure.ts"
+import { GET, jose, sessionPayload } from "@test/presets.ts"
+import { setCookie, getSetCookie, createCookieStore } from "@/cookie.ts"
+import { AURA_AUTH_VERSION } from "@/utils.ts"
 
 afterEach(() => {
     vi.restoreAllMocks()
@@ -172,6 +173,7 @@ describe("sessionAction", () => {
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_123",
             },

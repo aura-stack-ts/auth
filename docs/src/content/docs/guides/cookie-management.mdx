@@ -1,0 +1,172 @@
+---
+title: Cookie Management
+description: How Aura Auth stores, secures, and customizes authentication cookies
+---
+
+Aura Auth uses a **stateless authentication strategy**, storing encrypted tokens and temporary secrets in HTTP cookies. All cookies are configured with **secure-by-default attributes**, ensuring strong protection without requiring manual setup.
+
+Aura Auth treats cookies as a **security boundary**, not merely a storage mechanism.
+
+---
+
+## What you'll learn
+
+- [Default Cookie Configuration](#default-cookie-configuration).
+  - [Security Priority](#security-priority).
+  - [Cookies Used by Aura Auth](#cookies-used-by-aura-auth).
+- [The `cookies` Configuration Option](#cookies)
+  - [Global Cookie Prefix `prefix`](#prefix)
+  - [Per-Cookie Overrides `overrides`](#overrides)
+- [Secure Context](#secure-context)
+- [Resources](#resources)
+
+---
+
+## Default Cookie Configuration
+
+Out of the box, Aura Auth configures all cookies with secure defaults aligned with modern browser and OAuth security recommendations.
+
+### Security Priority
+
+Aura Auth prioritizes security over configuration. If a provided configuration is deemed insecure (e.g., trying to disable `HttpOnly` on a sensitive cookie), Aura Auth may overwrite it with safe defaults and issue a warning in the console.
+
+### Cookies Used by Aura Auth
+
+| Option         | Cookie Name     | Purpose                                            |
+| -------------- | --------------- | -------------------------------------------------- |
+| `sessionToken` | `session_token` | Stores the encrypted user session (JWE).           |
+| `csrfToken`    | `csrf_token`    | Stores the token used for CSRF verification.       |
+| `state`        | `state`         | Temporarily stores the OAuth state during sign-in. |
+| `codeVerifier` | `code_verifier` | Temporarily stores the PKCE code verifier.         |
+| `redirectTo`   | `redirect_to`   | Stores the post-authentication redirect path.      |
+| `redirectURI`  | `redirect_uri`  | Stores the OAuth callback redirect URI.            |
+
+<Callout>
+  If your application runs on `https` (production), the `__Secure-` and `__Host-` prefixes may be automatically applied depending
+  on browser and framework behavior, but Aura Auth handles this logic internally.
+</Callout>
+
+---
+
+## The `cookies` Configuration Option [#cookies]
+
+The `createAuth` function exposes a `cookies` configuration object that allows controlled customization of cookie behavior.
+
+Aura Auth supports two levels of customization:
+
+- Global cookie name prefixing
+- Per-cookie overrides with safety constraints
+
+### Global Cookie Prefix `prefix` [#prefix]
+
+The global cookie prefix to be added to all of the cookies consumed. By default it is `aura-auth` and it's applied as: `<prefix>.<cookie_name>`.
+
+```ts title="@/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: []
+  cookies: {
+    prefix: "my_app.",
+  },
+})
+```
+
+> This would change `aura-auth.session_token` to `my_app.session_token`.
+
+### Per-Cookie Overrides `overrides` [#overrides]
+
+For more granular control, it's possible to override or re-write the default cookie specification options for the cookies used by Aura Auth (`sessionToken`, `csrfToken`, `state`, `codeVerifier`, `redirectTo` and `redirectURI`).
+
+To override the default per-cookie options, it's possible to change the default cookie name via `name` and cookie attributes (like `path`, `domain`, `maxAge`, `sameSite`, etc.) via the `attributes` property.
+
+```ts title="@/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  cookies: {
+    overrides: {
+      sessionToken: {
+        name: "jwt_session",
+        attributes: {
+          maxAge: 3600,
+          domain: ".example.com",
+          sameSite: "strict",
+        },
+      },
+      redirecURI: {
+        name: "callback_url",
+      },
+    },
+  },
+})
+```
+
+<Callout type="warn">
+
+Not all cookie attributes are always respected. If a configuration weakens security guarantees, Aura Auth will enforce a safer alternative.
+
+For a complete attribute reference, see the [Cookies API Reference](/docs/api-reference/core#overrides)
+
+</Callout>
+
+#### Cookie Strategy `strategy`
+
+For safety, a `strategy` optional field is provided within the `attributes` field for per-cookie configuration. This recommends appropriate cookie attributes for setting cookie prefixes correctly (`__Secure-` and `__Host-`). The accepted values are: `standard`, `secure`, and `host`, with `standard` as the default strategy value. For more detailed documentation related to cookie strategies, read [Cookie Strategy API Reference](/docs/api-reference/core#standard).
+
+| Strategy   | Description                                                |
+| ---------- | ---------------------------------------------------------- |
+| `standard` | Default behavior. Secure when possible.                    |
+| `secure`   | Enforces compatibility with `__Secure-` cookies.           |
+| `host`     | Enforces compatibility with `__Host-` cookies (strictest). |
+
+```ts title="@/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  cookies: {
+    overrides: {
+      sessionToken: {
+        attributes: {
+          strategy: "secure",
+        },
+      },
+    },
+  },
+})
+```
+
+---
+
+## Secure Context
+
+Aura Auth automatically detects if the request is coming via HTTPS.
+
+- **Production**: Cookies are set with `Secure: true` and `SameSite: Lax`.
+- **Development (localhost)**: `Secure` is false to allow local testing.
+
+If you are running behind a proxy (like Nginx or Vercel) that terminates SSL, ensure your `trustProxy` settings or headers (`X-Forwarded-Proto`) are correctly forwarded so Aura Auth knows to treat the request as secure.
+
+The `createAuth` function accepts a `trustedProxyHeaders` boolean option to enable reading the `X-Forwarded-Proto` header.
+
+<Callout type="warn">The `trustedProxyHeaders` option is currently **experimental** and may change in future versions.</Callout>
+
+```ts title="@/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: []
+  trustedProxyHeaders: true,
+})
+```
+
+---
+
+## Resources
+
+- [HTTP State Management Mechanism](https://datatracker.ietf.org/doc/html/rfc6265)
+- [Set-Cookie Header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie)
+- [Cookie Prefixes](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix)
+- [Proxy Headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers#non-standard_headers)

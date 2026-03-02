@@ -1,0 +1,22 @@
+{
+  "name": "@aura-stack/auth",
+  "version": "0.4.0",
+  "license": "MIT",
+  "tasks": {
+    "dev": "deno run --watch src/index.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./oauth": "./src/oauth/*.ts",
+    "./types": "./src/@types/index.ts"
+  },
+  "imports": {
+    "@/": "./src/",
+    "@aura-stack/router": "npm:@aura-stack/router@^0.6.0",
+    "zod": "npm:zod@4.3.5"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
+  },
+  "exclude": ["dist", "node_modules"]
+}

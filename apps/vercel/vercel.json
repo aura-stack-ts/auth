@@ -1,0 +1,19 @@
+{
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/auth/:action",
+      "destination": "/api/auth"
+    },
+    {
+      "source": "/api/auth/:action/:provider",
+      "destination": "/api/auth"
+    }
+  ]
+}

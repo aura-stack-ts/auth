@@ -1,0 +1,22 @@
+{
+  "name": "supabase",
+  "version": "0.1.0",
+  "tasks": {
+    "dev": "deno --allow-net --allow-env --env-file --watch index.ts",
+    "format": "deno fmt",
+    "dev:server": "pnpm exec supabase functions serve auth",
+    "start": "pnpm exec supabase start",
+    "stop": "pnpm exec supabase stop"
+  },
+  "exports": "./index.ts",
+  "imports": {
+    "@supabase/functions-js": "jsr:@supabase/functions-js@^2"
+  },
+  "fmt": {
+    "semiColons": false,
+    "indentWidth": 4,
+    "lineWidth": 130,
+    "trailingCommas": "onlyMultiLine",
+    "include": ["index.ts"]
+  }
+}
