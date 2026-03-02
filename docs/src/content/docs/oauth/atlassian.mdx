@@ -1,6 +1,6 @@
 ---
 title: Atlassian Authorization Provider
-description: Add Atlassian authorization provider to Aura Auth to authentication and authorize
+description: Add Atlassian authorization provider to Aura Auth to authenticate and authorize
 ---
 
 ## Atlassian
@@ -32,7 +32,10 @@ Through this quick start guide you are going to learn and understand the basics 
 
 ### Creating an OAuth app
 
-The first step is to create and register an [`Atlassian OAuth 2.0 Integration`](https://developer.atlassian.com/console/myapps/) to grant access to the user's accessible resources like `Get Authenticated User` (used by Aura Auth), `Repositories`, `Organizations`, etc. For more detailed information, read [Creating an OAuth app](https://docs.atlassian.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app) and [Get authenticated user](https://docs.atlassian.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user).
+The first step is to create and register an [`Atlassian OAuth 2.0 Integration`](https://developer.atlassian.com/console/myapps/) to
+grant access to the user's accessible resources like `Get Authenticated User` (used by Aura Auth), `Repositories`, `Organizations`, etc.
+For more detailed information, read [OAuth 2.0 (3LO) apps](https://developer.atlassian.com/cloud/confluence/oauth-2-3lo-apps/) and
+[Get authenticated user](https://developer.atlassian.com/cloud/jira/software/oauth-2-3lo-apps/#how-do-i-retrieve-the-public-profile-of-the-authenticated-user-).
 
 Registering an Atlassian OAuth app includes:
 
@@ -104,6 +107,23 @@ import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["atlassian"],
+})
+
+export const { handlers } = auth
+```
+
+#### Custom configuration
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { atlassian } from "@aura-stack/auth/oauth/atlassian"
+
+export const auth = createAuth({
+  oauth: [
+    atlassian({
+      scope: "read:jira-user", // Custom scopes
+    }),
+  ],
 })
 
 export const { handlers } = auth
