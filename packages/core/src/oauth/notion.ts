@@ -1,4 +1,5 @@
-import { OAuthProviderConfig } from "@/@types/index.js"
+import { createBasicAuthHeader } from "@/utils.ts"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 
 export interface Person {
     email: string
@@ -39,25 +40,42 @@ export interface NotionProfile {
  * @see [Notion - Authorization](https://developers.notion.com/docs/authorization)
  * @see [Notion - Authentication](https://developers.notion.com/reference/authentication)
  * @see [Notion - Retrieve your token's bot user](https://developers.notion.com/reference/get-self)
- * @todo: It's required to pass the Notion-Version header to access the user info endpoint.
- *   headers: { Notion-Version: "2022-06-28" }
- * @todo: It's required to add Basic headers for access token request.
- *   headers: { Authorization: "Basic base64(client_id:client_secret)" }
  */
-export const notion: OAuthProviderConfig<NotionProfile> = {
-    id: "notion",
-    name: "Notion",
-    authorizeURL: "https://api.notion.com/v1/oauth/authorize?owner=user",
-    accessToken: "https://api.notion.com/v1/oauth/token",
-    userInfo: "https://api.notion.com/v1/users/me",
-    scope: "user:read",
-    responseType: "code",
-    profile(profile) {
-        return {
-            sub: profile.id,
-            name: profile.name,
-            image: profile.avatar_url ?? "",
-            email: profile?.bot?.owner?.user?.person?.email,
-        }
-    },
+export const notion = (options?: Partial<OAuthProviderCredentials<NotionProfile>>): OAuthProviderCredentials<NotionProfile> => {
+    return {
+        id: "notion",
+        name: "Notion",
+        authorize: {
+            url: "https://api.notion.com/v1/oauth/authorize",
+            params: {
+                owner: "user",
+                scope: "user:read",
+                responseType: "code",
+            },
+        },
+        accessToken: {
+            url: "https://api.notion.com/v1/oauth/token",
+            headers: {
+                Authorization: createBasicAuthHeader(
+                    options?.clientId ?? "NOTION_CLIENT_ID",
+                    options?.clientSecret ?? "NOTION_CLIENT_SECRET"
+                ),
+            },
+        },
+        userInfo: {
+            url: "https://api.notion.com/v1/users/me",
+            headers: {
+                "Notion-Version": "2022-06-28",
+            },
+        },
+        profile(profile) {
+            return {
+                sub: profile.id,
+                name: profile.name,
+                image: profile.avatar_url ?? "",
+                email: profile?.bot?.owner?.user?.person?.email,
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<NotionProfile>
 }
