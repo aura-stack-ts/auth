@@ -1,49 +1,92 @@
-name: ci
+name: CI
 
 on:
   push:
+    branches:
+      - master
     paths:
       - "configs/**"
       - "packages/**"
       - "pnpm-lock.yaml"
+      - "bun.lock"
+      - "deno.lock"
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  type-check:
-    name: Type Check
+  node:
+    name: Node.js
     runs-on: ubuntu-latest
+
+    env:
+      WORKING_DIR: .
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "24.x"
-      - uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build --filter="./packages/*"
+          cache: "pnpm"
 
-      - run: pnpm type-check
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
 
-  test:
-    name: Test
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build --filter="./packages/*"
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Run type checks
+        run: pnpm type-check
+
+  deno:
+    name: Deno
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: denoland/setup-deno@v2
         with:
-          node-version: "24.x"
-      - uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build --filter="./packages/*"
-      - run: pnpm test
+          deno-version: v2.x
+          cache: true
 
-  build:
-    name: Build
+      - name: Build packages
+        run: deno task build
+
+      - name: Run type checks
+        run: deno task type-check
+
+  bun:
+    name: Bun tests
     runs-on: ubuntu-latest
-    needs: [type-check, test]
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: "24.x"
-      - uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build --filter="./packages/*"
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build packages
+        run: bun run build --filter="./packages/*"
+
+      - name: Run type checks
+        run: bun run type-check
