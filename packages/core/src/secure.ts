@@ -4,7 +4,12 @@ import { isJWTPayloadWithToken, timingSafeEqual } from "@/assert.ts"
 import { jwtVerificationOptions, base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import type { AuthRuntimeConfig } from "@/@types/index.ts"
 
+/** @deprecated use `createSecretValue` instead */
 export const generateSecure = (length: number = 32) => {
+    return base64url.encode(getRandomBytes(length))
+}
+
+export const createSecretValue = (length: number = 32) => {
     return base64url.encode(getRandomBytes(length))
 }
 

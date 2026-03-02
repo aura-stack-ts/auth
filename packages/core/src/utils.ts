@@ -1,7 +1,8 @@
 import { isInvalidZodSchemaError, isRouterError, RouterConfig } from "@aura-stack/router"
-import { isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "@/errors.ts"
+import { AuthInternalError, isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "@/errors.ts"
 import type { ZodError } from "zod"
 import type { APIErrorMap, InternalLogger } from "@/@types/index.ts"
+import { getEnv } from "./env.ts"
 
 export const AURA_AUTH_VERSION = "0.4.0"
 
@@ -154,4 +155,14 @@ export const getErrorName = (error: unknown): string => {
         return error.name
     }
     return typeof error === "string" ? error : "UnknownError"
+}
+
+export const createBasicAuthHeader = (username: string, password: string): string => {
+    const getUsername = getEnv(username.toUpperCase()) ?? username
+    const getPassword = getEnv(password.toUpperCase()) ?? password
+    if(!getUsername || !getPassword) {
+        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing client credentials for OAuth provider configuration.")
+    }
+    const credentials = `${getUsername}:${getPassword}`
+    return `Basic ${btoa(credentials)}`
 }

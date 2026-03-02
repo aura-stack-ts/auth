@@ -32,19 +32,23 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
  * @returns The user information retrieved from the userinfo endpoint
  */
 export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string, logger?: InternalLogger) => {
-    const userinfoEndpoint = oauthConfig.userInfo
+    const userInfoConfig = oauthConfig.userInfo
+    const userinfoURL = typeof userInfoConfig === "string" ? userInfoConfig : userInfoConfig.url
+    const extraHeaders = typeof userInfoConfig === "string" ? undefined : userInfoConfig.headers
+
     try {
         logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
             structuredData: {
-                endpoint: userinfoEndpoint,
+                endpoint: userinfoURL,
             },
         })
-        const response = await fetchAsync(userinfoEndpoint, {
+        const response = await fetchAsync(userinfoURL, {
             method: "GET",
             headers: {
                 "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: `Bearer ${accessToken}`,
+                ...(extraHeaders ?? {}),
             },
         })
         if (!response.ok) {

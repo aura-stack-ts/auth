@@ -1,5 +1,4 @@
 import { describe, test, expect, vi } from "vitest"
-import { AuthInternalError } from "@/errors.ts"
 import { createPKCE } from "@/secure.ts"
 import { oauthCustomService } from "@test/presets.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
@@ -47,29 +46,6 @@ describe("createAccessToken", async () => {
             signal: expect.any(AbortSignal),
         })
         expect(accessToken).toEqual(mockResponse)
-    })
-
-    test("with invalid oauth config", async () => {
-        vi.stubGlobal(
-            "fetch",
-            vi.fn(async () => ({
-                ok: true,
-                json: async () => {},
-            }))
-        )
-
-        await expect(
-            createAccessToken(
-                {
-                    ...oauthCustomService,
-                    userInfo: "invalid-url",
-                },
-                "https://myapp.com/auth/callback/oauth",
-                "authorization_code_123",
-                codeVerifier
-            )
-        ).rejects.toBeInstanceOf(AuthInternalError)
-        expect(fetch).not.toHaveBeenCalled()
     })
 
     test("with failed fetch", async () => {

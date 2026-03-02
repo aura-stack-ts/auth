@@ -39,6 +39,12 @@ export interface Session {
     expires: string
 }
 
+export type AuthorizeParams = LiteralUnion<
+    "clientId" | "prompt" | "scope" | "responseMode" | "audience" | "loginHint" | "nonce" | "display"
+>
+
+export type ResponseType = LiteralUnion<"code" | "token" | "refresh_token" | "id_token">
+
 /**
  * Configuration for an OAuth provider without credentials.
  * Use this type when defining provider metadata and endpoints.
@@ -46,11 +52,34 @@ export interface Session {
 export interface OAuthProviderConfig<Profile extends object = Record<string, any>> {
     id: string
     name: string
-    authorizeURL: string
-    accessToken: string
-    userInfo: string
-    scope: string
-    responseType: "code" | "token" | "refresh_token" | "id_token"
+    /**
+     * @deprecated
+     * use `authorize` instead of `authorizeURL`
+     */
+    authorizeURL?: string
+    authorize:
+        | string
+        | {
+              url: string
+              params?: Partial<Record<AuthorizeParams, string> & { responseType: ResponseType }>
+          }
+    accessToken:
+        | string
+        | {
+              url: string
+              headers?: Record<string, string>
+          }
+    userInfo: string | { url: string; headers?: Record<string, string> }
+    /**
+     * @deprecated
+     * use `authorize.params.scope` instead of `scope`
+     */
+    scope?: string
+    /**
+     * @deprecated
+     * use `authorize.params.response_type` instead of `responseType`
+     */
+    responseType?: ResponseType
     profile?: (profile: Profile) => User | Promise<User>
 }
 

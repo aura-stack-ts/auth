@@ -1,13 +1,33 @@
-import { object, string, enum as options, number, z, null as nullable } from "zod"
+import { object, string, enum as options, number, z, null as nullable, url } from "zod/v4"
+
+const AccessTokenConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        headers: z.record(string(), string()).optional(),
+    }),
+])
+
+const UserInfoConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        headers: z.record(string(), string()).optional(),
+    }),
+])
 
 export const OAuthProviderCredentialsSchema = object({
     id: string(),
     name: string(),
-    authorizeURL: string().url(),
-    accessToken: string().url(),
-    scope: string(),
-    userInfo: string().url(),
-    responseType: options(["code", "token", "id_token"]),
+    authorize: url().optional(),
+    /** @deprecated */
+    authorizeURL: string().url().optional(),
+    accessToken: AccessTokenConfigSchema,
+    /** @deprecated */
+    scope: string().optional(),
+    userInfo: UserInfoConfigSchema,
+    /** @deprecated */
+    responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
     clientId: string(),
     clientSecret: string(),
     profile: z.function().optional(),
@@ -17,11 +37,14 @@ export const OAuthProviderCredentialsSchema = object({
  * Schema for OAuth Provider Configuration
  */
 export const OAuthProviderConfigSchema = object({
-    authorizeURL: string().url(),
-    accessToken: string().url(),
+    /** @deprecated */
+    authorizeURL: string().url().optional(),
+    accessToken: AccessTokenConfigSchema,
+    /** @deprecated */
     scope: string().optional(),
-    userInfo: string().url(),
-    responseType: options(["code", "token", "id_token"]),
+    userInfo: UserInfoConfigSchema,
+    /** @deprecated */
+    responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
     clientId: string(),
     clientSecret: string(),
 })

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { oauthCustomService } from "@test/presets.ts"
-import { createAuthorizationURL, createRedirectTo, createRedirectURI, getOriginURL } from "@/actions/signIn/authorization.ts"
+import { createRedirectTo, createRedirectURI, getOriginURL } from "@/actions/signIn/authorization.ts"
+import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import type { OAuthProviderCredentials } from "@/index.ts"
 import type { GlobalContext } from "@aura-stack/router/types"
 
@@ -66,20 +67,17 @@ describe("createRedirectURI", () => {
 
 describe("createAuthorizationURL", () => {
     describe("valid OAuth configuration", () => {
-        test("valid OAuth configuration with all fields", () => {
-            const url = createAuthorizationURL(
+        test("valid OAuth configuration with all fields", async () => {
+            const { authorization } = await createAuthorizationURL(
                 oauthCustomService,
-                "https://example.com/auth/callback/oauth-provider",
-                "123",
-                "challenge",
-                "S256"
+                "https://example.com/auth/callback/oauth-provider"
             )
 
-            const searchParams = new URL(url).searchParams
+            const searchParams = new URL(authorization).searchParams
             expect(searchParams.has("client_secret")).toBeFalsy()
             expect(searchParams.get("client_id")).toBe("oauth_client_id")
             expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
-            expect(searchParams.get("state")).toBe("123")
+            expect(searchParams.get("state")).toBeTruthy()
             expect(searchParams.get("scope")).toBe("profile email")
             expect(searchParams.get("response_type")).toBe("code")
         })
@@ -116,16 +114,10 @@ describe("createAuthorizationURL", () => {
         ]
 
         for (const { description, oauthConfig, redirectURL, expected } of testCases) {
-            test(description, () => {
-                expect(() =>
-                    createAuthorizationURL(
-                        oauthConfig as unknown as OAuthProviderCredentials,
-                        redirectURL,
-                        "123",
-                        "challenge",
-                        "S256"
-                    )
-                ).toThrow(expected)
+            test(description, async () => {
+                await expect(() =>
+                    createAuthorizationURL(oauthConfig as unknown as OAuthProviderCredentials, redirectURL, {} as GlobalContext)
+                ).rejects.toThrow(expected)
             })
         }
     })
