@@ -1,4 +1,5 @@
-import { OAuthProviderConfig } from "@/@types/index.js"
+import { getEnv } from "@/env.ts"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 
 /**
  * @see [Twitch - Get Users](https://dev.twitch.tv/docs/api/reference#get-users)
@@ -14,17 +15,27 @@ export interface TwitchProfile {}
  * @see [Twitch - Get Users](https://dev.twitch.tv/docs/api/reference#get-users)
  * @see [Twitch - Scopes](https://dev.twitch.tv/docs/authentication/scopes/)
  */
-export const twitch: OAuthProviderConfig<TwitchProfile> = {
-    id: "twitch",
-    name: "Twitch",
-    authorizeURL: "https://id.twitch.tv/oauth2/authorize",
-    accessToken: "https://id.twitch.tv/oauth2/token",
-    userInfo: "https://api.twitch.tv/helix/users",
-    scope: "user:read:email",
-    responseType: "code",
-    profile() {
-        return {
-            sub: "",
-        }
-    },
+export const twitch = (options?: Partial<OAuthProviderCredentials<TwitchProfile>>): OAuthProviderCredentials<TwitchProfile> => {
+    return {
+        id: "twitch",
+        name: "Twitch",
+        authorize: "https://id.twitch.tv/oauth2/authorize",
+        authorizeURL: "https://id.twitch.tv/oauth2/authorize",
+        accessToken: "https://id.twitch.tv/oauth2/token",
+        userInfo: {
+            url: "https://api.twitch.tv/helix/users",
+            headers: {
+                "Client-ID": getEnv("TWITCH_CLIENT_ID")
+            }
+        },
+        scope: "user:read:email",
+        responseType: "code",
+        profile(profile) {
+            console.log("Twitch profile data:", profile)
+            return {
+                sub: "",
+            }
+        },
+        ...options,
+    } as OAuthProviderCredentials<TwitchProfile>
 }

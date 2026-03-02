@@ -15,7 +15,8 @@ import { x } from "./x.ts"
 import { strava } from "./strava.ts"
 import { mailchimp } from "./mailchimp.ts"
 import { pinterest } from "./pinterest.ts"
-import { OAuthEnvSchema, OAuthProviderCredentialsSchema  } from "@/schemas.ts"
+import { twitch } from "./twitch.ts"
+import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
 import { AuthInternalError } from "@/errors.ts"
 import { formatZodError } from "@/utils.ts"
 
@@ -29,6 +30,7 @@ export * from "./x.ts"
 export * from "./strava.ts"
 export * from "./mailchimp.ts"
 export * from "./pinterest.ts"
+export * from "./twitch.ts"
 
 export const builtInOAuthProviders = {
     github,
@@ -41,6 +43,7 @@ export const builtInOAuthProviders = {
     strava,
     mailchimp,
     pinterest,
+    twitch,
 } as const
 
 /**
