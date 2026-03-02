@@ -36,7 +36,11 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
             const redirectURI = await createRedirectURI(request, oauth, context)
             const redirectToValue = await createRedirectTo(request, redirectTo, context)
 
-            const { authorization, state, codeVerifier, method } = await createAuthorizationURL(providers[oauth], redirectURI, context)
+            const { authorization, state, codeVerifier, method } = await createAuthorizationURL(
+                providers[oauth],
+                redirectURI,
+                context
+            )
 
             logger?.log("SIGN_IN_INITIATED", {
                 structuredData: { oauth_provider: oauth, code_challenge_method: method },

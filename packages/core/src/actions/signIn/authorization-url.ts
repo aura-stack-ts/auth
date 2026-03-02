@@ -21,7 +21,7 @@ export const buildAuthorizationURL = (
 ): string => {
     const authorizeConfig = oauth.authorize
     const baseURL = typeof authorizeConfig === "string" ? authorizeConfig : (authorizeConfig?.url ?? oauth.authorizeURL)
-    if(!baseURL) {
+    if (!baseURL) {
         throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing authorization URL in OAuth provider configuration.")
     }
     const url = new URL(baseURL)

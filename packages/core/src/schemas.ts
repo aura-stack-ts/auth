@@ -1,4 +1,15 @@
-import { object, string, enum as options, number, z, null as nullable, url } from "zod/v4"
+import { object, string, enum as options, number, z, null as nullable, union, array } from "zod/v4"
+
+const AuthorizeConfigSchema = z.union([
+    string().url(),
+    object({
+        url: string().url(),
+        params: object({
+            responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
+            scope: string().optional(),
+        }),
+    }),
+])
 
 const AccessTokenConfigSchema = z.union([
     string().url(),
@@ -19,7 +30,7 @@ const UserInfoConfigSchema = z.union([
 export const OAuthProviderCredentialsSchema = object({
     id: string(),
     name: string(),
-    authorize: url().optional(),
+    authorize: AuthorizeConfigSchema.optional(),
     /** @deprecated */
     authorizeURL: string().url().optional(),
     accessToken: AccessTokenConfigSchema,
@@ -37,6 +48,7 @@ export const OAuthProviderCredentialsSchema = object({
  * Schema for OAuth Provider Configuration
  */
 export const OAuthProviderConfigSchema = object({
+    authorize: AuthorizeConfigSchema.optional(),
     /** @deprecated */
     authorizeURL: string().url().optional(),
     accessToken: AccessTokenConfigSchema,
@@ -111,7 +123,7 @@ export const OAuthAccessTokenResponse = object({
     token_type: string().optional(),
     expires_in: number().optional(),
     refresh_token: string().optional(),
-    scope: string().optional().or(nullable()),
+    scope: union([string().optional().or(nullable()), array(string()).optional()]),
 })
 
 /**

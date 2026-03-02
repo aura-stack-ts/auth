@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `Twitch` OAuth provider to the supported integrations in Aura Auth. [#47](https://github.com/aura-stack-ts/auth/pull/47)
+
 - Added support for loading authentication configuration from environment variables, including `DEBUG`, `LOG_LEVEL`, `TRUSTED_ORIGINS`, and `TRUSTED_PROXY_HEADERS`. Also updated automatic environment variable loading patterns. [#108](https://github.com/aura-stack-ts/auth/pull/108)
 
 - Added the `User-Agent` header to requests sent to the `/userInfo` endpoint, allowing the service to identify the calling client or application. [#105](https://github.com/aura-stack-ts/auth/pull/105)

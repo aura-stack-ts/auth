@@ -160,7 +160,7 @@ export const getErrorName = (error: unknown): string => {
 export const createBasicAuthHeader = (username: string, password: string): string => {
     const getUsername = getEnv(username.toUpperCase()) ?? username
     const getPassword = getEnv(password.toUpperCase()) ?? password
-    if(!getUsername || !getPassword) {
+    if (!getUsername || !getPassword) {
         throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing client credentials for OAuth provider configuration.")
     }
     const credentials = `${getUsername}:${getPassword}`
