@@ -43,7 +43,6 @@ export const twitch = (options?: Partial<OAuthProviderCredentials<TwitchProfile>
             },
         },
         profile(profile: { data: TwitchProfile[] }) {
-            console.log("Twitch profile data:", profile)
             const user = profile.data[0]
             if (!user) {
                 throw new Error("No user data found in Twitch profile response")

@@ -1,6 +1,6 @@
 ---
 title: Twitch Authorization Provider
-description: Add Twitch authorization provider to Aura Auth to authentication and authorize
+description: Add Twitch authorization provider to Aura Auth to authenticate and authorize
 ---
 
 ## Twitch
@@ -13,9 +13,9 @@ Set up `Twitch` authorization provider to the authentication instance to Aura Au
 
 Through this quick start guide you are going to learn and understand the basics and how to set up `Twitch` provider to Aura Auth.
 
-- [Twitch OAuth App](#Twitch-oauth-app)
+- [Twitch OAuth App](#twitch-oauth-app)
   - [Creating an OAuth App](#creating-an-oauth-app)
-- [Twitch Aura Auth](#Twitch-aura-auth)
+- [Twitch Aura Auth](#twitch-aura-auth)
   - [Installation](#installation)
   - [Environment setup](#environment-setup)
   - [Configure the provider](#configure-the-provider)
@@ -55,7 +55,7 @@ Registering a Twitch OAuth app includes:
 
 ### Installation
 
-install the package using a package manager like `npm`, `pnpm` or `yarn`
+Install the package using a package manager like `npm`, `pnpm` or `yarn`
 
 ```npm
 npm install @aura-stack/auth
@@ -78,11 +78,14 @@ AURA_AUTH_TWITCH_CLIENT_SECRET="twitch_client_secret"
 
 # Aura Secret
 AURA_AUTH_SECRET="32-bytes-secret"
+
+# Aura Salt
+AURA_AUTH_SALT="32-bytes-salt"
 ```
 
 <Callout type="warning">
-  The `AURA_AUTH_SECRET` will recommended to be random and high antropy key to avoid attackers decifer the secret used by the Aura
-  Auth application.
+  The `AURA_AUTH_SECRET` is recommended to be a random, high-entropy key to prevent attackers from deciphering the secret used by
+  the Aura Auth application.
 </Callout>
 
 </Step>
@@ -98,6 +101,23 @@ import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["twitch"],
+})
+
+export const { handlers } = auth
+```
+
+#### Custom configuration
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { twitch } from "@aura-stack/auth/oauth/twitch"
+
+export const auth = createAuth({
+  oauth: [
+    twitch({
+      scope: "user:read:email",
+    }),
+  ],
 })
 
 export const { handlers } = auth
