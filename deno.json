@@ -1,3 +1,6 @@
 {
-  "workspace": ["packages/core", "packages/jose", "apps/oak", "apps/deno", "apps/supabase/**"]
+  "workspace": ["packages/core", "packages/jose", "apps/oak", "apps/deno", "apps/supabase/**"],
+  "imports": {
+    "turbo": "npm:turbo@^2.7.5"
+  }
 }

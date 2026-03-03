@@ -7,8 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
+    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

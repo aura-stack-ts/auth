@@ -34,6 +34,9 @@
   ],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "license": "MIT",
+  "dependencies": {
+    "turbo": "2.7.5"
+  },
   "devDependencies": {
     "@aura-stack/prettier-config": "workspace:*",
     "@types/node": "catalog:node",
@@ -41,7 +44,6 @@
     "eslint": "^9.35.0",
     "prettier": "^3.6.2",
     "tsup": "^8.5.1",
-    "turbo": "^2.7.5",
     "typescript": "catalog:typescript",
     "vitest": "^4.0.14"
   },
@@ -64,7 +66,7 @@
         "next": "^16.1.6"
       },
       "node": {
-        "@types/node": "^24.9.2"
+        "@types/node": "^25.3.3"
       },
       "react": {
         "@types/react": "^19.2.7",
