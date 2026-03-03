@@ -45,5 +45,9 @@
   "ui": "stream",
   "cacheDir": ".turbo/cache",
   "globalDependencies": [".env", "tsconfig.json"],
-  "globalEnv": [".env"]
+  "globalEnv": [".env"],
+  "remoteCache": {
+    "enabled": true,
+    "signature": false
+  }
 }

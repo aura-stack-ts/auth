@@ -9,8 +9,6 @@ on:
       - "configs/**"
       - "packages/**"
       - "pnpm-lock.yaml"
-      - "bun.lock"
-      - "deno.lock"
   pull_request:
     branches:
       - master
@@ -19,8 +17,6 @@ on:
       - "configs/**"
       - "packages/**"
       - "pnpm-lock.yaml"
-      - "bun.lock"
-      - "deno.lock"
   workflow_dispatch:
 
 concurrency:
