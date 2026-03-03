@@ -1,23 +1,29 @@
 "use server"
+
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
+const toHeaders = (incoming: Awaited<ReturnType<typeof headers>>) => {
+    return Object.fromEntries(incoming.entries())
+}
+
+/**
+ * @todo: fix bug related to rendered statically
+ * @see https://nextjs.org/docs/messages/dynamic-server-error
+ */
 const client = createClient({
     baseURL: typeof window !== "undefined" ? window.location.origin : (process.env.AUTH_URL ?? "http://localhost:3000"),
     basePath: "/auth",
     cache: "no-store",
     credentials: "include",
-    headers: async () => {
-        "use server"
-        const headersStore = await headers()
-        return Object.fromEntries(headersStore.entries())
-    },
 })
 
 export const getCSRFToken = async (): Promise<string | null> => {
     try {
-        const response = await client.get("/csrfToken")
+        const response = await client.get("/csrfToken", {
+            headers: toHeaders(await headers()),
+        })
         if (!response.ok) return null
         const json = await response.json()
         return json && json?.csrfToken ? json.csrfToken : null
@@ -28,8 +34,11 @@ export const getCSRFToken = async (): Promise<string | null> => {
 }
 
 export const getSession = async (): Promise<Session | null> => {
+    "use server"
     try {
-        const response = await client.get("/session")
+        const response = await client.get("/session", {
+            headers: toHeaders(await headers()),
+        })
         if (!response.ok) return null
         const session = await response.json()
         return session && session?.user ? session : null
@@ -58,6 +67,7 @@ export const signOut = async (redirectTo: string = "/") => {
                 token_type_hint: "session_token",
             },
             headers: {
+                ...toHeaders(await headers()),
                 "X-CSRF-Token": csrfToken,
             },
         })

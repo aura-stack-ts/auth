@@ -1,5 +1,5 @@
 import { createContext, use, useEffect, useState } from "react"
-import { getSession } from "@/lib/auth.client"
+import { getSession } from "@/lib/auth-client"
 import type { Session } from "@aura-stack/auth"
 import type { AuthContextValue } from "@/@types/types"
 import type { AuthProviderProps } from "@/@types/props"

@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { getSession } from "@/lib/auth.server"
+import { getSession } from "@/lib/auth-server"
 import { Server, Smartphone } from "lucide-react"
 import { GetSessionClient } from "@/components/get-session-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
