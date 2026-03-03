@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Link, useRouter } from "@tanstack/react-router"
 import { Button } from "./ui/button"
 import { Menu, X } from "lucide-react"
-import { signOut } from "@/lib/auth.client"
+import { signOut } from "@/lib/auth-client"
 import { useSession } from "@/contexts/auth"
 
 export const Header = () => {

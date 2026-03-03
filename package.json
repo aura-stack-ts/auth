@@ -80,19 +80,24 @@
         "typescript": "^5.9.2"
       },
       "vite": {
-        "vite": "^7.1.7"
+        "vite": "^7.1.11"
       }
     }
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "supabase"
+    ],
     "overrides": {
       "seroval": "^1.4.1",
       "lodash-es": "^4.17.23",
       "tar": ">=7.5.7",
-      "zod": "4.3.5"
-    },
-    "onlyBuiltDependencies": [
-      "supabase"
-    ]
+      "zod": "4.3.5",
+      "@tanstack/router-generator>zod": "3.25.76",
+      "@tanstack/router-plugin>zod": "3.25.76",
+      "@tanstack/react-router-ssr-query>zod": "3.25.76",
+      "@tanstack/react-start>zod": "3.25.76",
+      "@tanstack/start-plugin-core>zod": "3.25.76"
+    }
   }
 }

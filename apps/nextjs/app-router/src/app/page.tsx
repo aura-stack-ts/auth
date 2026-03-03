@@ -1,3 +1,4 @@
+"use server"
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 import { Button } from "@/components/ui/button"
