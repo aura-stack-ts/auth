@@ -33,18 +33,17 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     const useProxyHeaders =
         trustedProxyHeadersEnv === undefined ? (authConfig?.trustedProxyHeaders ?? false) : getEnvBoolean("TRUSTED_PROXY_HEADERS")
     const logger = createProxyLogger(authConfig)
+    const cookiePrefix = authConfig?.cookies?.prefix
+    const cookieOverrides = authConfig?.cookies?.overrides ?? {}
+    const secureCookieStore = createCookieStore(true, cookiePrefix, cookieOverrides, logger)
+    const standardCookieStore = createCookieStore(false, cookiePrefix, cookieOverrides, logger)
 
     return {
         basePath: authConfig?.basePath ?? "/auth",
         onError: createErrorHandler(logger),
         context: {
             oauth: createBuiltInOAuthProviders(authConfig?.oauth),
-            cookies: createCookieStore(
-                useProxyHeaders,
-                authConfig?.cookies?.prefix,
-                authConfig?.cookies?.overrides ?? {},
-                logger
-            ),
+            cookies: standardCookieStore,
             jose: createJoseInstance(authConfig?.secret),
             secret: authConfig?.secret,
             basePath: authConfig?.basePath ?? "/auth",
@@ -56,13 +55,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
         use: [
             (ctx) => {
                 const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
-                const cookies = createCookieStore(
-                    useSecure,
-                    authConfig?.cookies?.prefix,
-                    authConfig?.cookies?.overrides ?? {},
-                    logger
-                )
-                ctx.context.cookies = cookies
+                ctx.context.cookies = useSecure ? secureCookieStore : standardCookieStore
                 return ctx
             },
         ],
