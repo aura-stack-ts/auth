@@ -296,6 +296,7 @@ export interface AuthInstance {
         POST: (request: Request) => Response | Promise<Response>
     }
     jose: JoseInstance
+    server: AuthServerAPI
 }
 
 /**

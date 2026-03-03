@@ -1,11 +1,11 @@
-import { Elysia, type Context } from "elysia"
-import { getSession } from "../lib/get-session"
+import { Elysia } from "elysia"
+import { server } from "../auth"
 
 export const withAuthPlugin = new Elysia({ name: "with-auth" })
     .resolve({ as: "scoped" }, async (ctx) => {
         try {
-            const session = await getSession(ctx as Context)
-            if (!session) {
+            const session = await server.getSession(ctx.request)
+            if (!session!.authenticated) {
                 return { session: null }
             }
             return { session }

@@ -1,5 +1,4 @@
 import { handlers } from "./auth.ts"
-import { getSession } from "./lib/get-session.ts"
 
 Deno.serve({ port: 3000 }, async (request) => {
     const pathname = new URL(request.url).pathname
@@ -7,7 +6,7 @@ Deno.serve({ port: 3000 }, async (request) => {
         case "/":
             return new Response("Welcome to the Aura Stack Deno App!")
         case "/api/protected": {
-            const session = await getSession(request)
+            const session = await server.getSession(request)
             if (!session) {
                 return Response.json(
                     {

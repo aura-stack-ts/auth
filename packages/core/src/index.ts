@@ -74,6 +74,6 @@ export const createAuth = (authConfig: AuthConfig) => {
     return {
         handlers: router,
         jose: config.context.jose,
-        server: config.context.server
+        server: config.context.server,
     }
 }

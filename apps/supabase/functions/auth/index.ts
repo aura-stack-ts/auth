@@ -1,5 +1,4 @@
-import { handlers } from "../_shared/auth.ts"
-import { getSession } from "../_shared/get-session.ts"
+import { handlers, server } from "../_shared/auth.ts"
 
 // Follow this setup guide to integrate the Deno language server with your editor:
 // https://deno.land/manual/getting_started/setup_your_environment
@@ -12,8 +11,8 @@ Deno.serve(async (request) => {
         case "/":
             return new Response("Welcome to the Aura Auth Supabase App!")
         case "/api/protected": {
-            const session = await getSession(request)
-            if (!session) {
+            const session = await server.getSession(request)
+            if (!session.user) {
                 return Response.json(
                     {
                         error: "Unauthorized",
@@ -24,7 +23,7 @@ Deno.serve(async (request) => {
             }
             return Response.json({
                 message: "You have access to this protected resource.",
-                session,
+                session: session.session,
             })
         }
         default: {

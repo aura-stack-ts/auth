@@ -1,5 +1,5 @@
+import { server } from "../auth"
 import { createMiddleware } from "hono/factory"
-import { getSession } from "../lib/get-session"
 import type { Session } from "@aura-stack/auth"
 
 /**
@@ -11,11 +11,11 @@ export type AuthVariables = {
 
 export const withAuth = createMiddleware<{ Variables: AuthVariables }>(async (ctx, next) => {
     try {
-        const session = await getSession(ctx)
-        if (!session) {
+        const session = await server.getSession(ctx.req.raw)
+        if (!session.authenticated) {
             return ctx.json({ error: "Unauthorized", message: "Active session required." }, 401)
         }
-        ctx.set("session", session)
+        ctx.set("session", session.session)
         return await next()
     } catch {
         return ctx.json({ error: "Unauthorized", message: "Active session required." }, 401)
