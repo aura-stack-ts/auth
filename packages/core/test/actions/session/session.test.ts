@@ -15,7 +15,7 @@ describe("sessionAction", () => {
     test("sessionToken cookie not found", async () => {
         const request = await GET(new Request("https://example.com/auth/session"))
         expect(request.status).toBe(401)
-        expect(await request.json()).toEqual({ authenticated: false, message: "Unauthorized" })
+        expect(await request.json()).toEqual({ authenticated: false, session: null })
     })
 
     test("invalid sessionToken cookie", async () => {
@@ -27,7 +27,7 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(401)
-        expect(await request.json()).toEqual({ authenticated: false, message: "Unauthorized" })
+        expect(await request.json()).toEqual({ authenticated: false, session: null })
     })
 
     test("valid sessionToken cookie with correct version", async () => {
@@ -41,7 +41,27 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(200)
-        expect(await request.json()).toEqual({ user: sessionPayload, expires: expect.any(String) })
+        expect(await request.json()).toEqual({
+            authenticated: true,
+            session: { user: sessionPayload, expires: expect.any(String) },
+        })
+    })
+
+    test("valid sessionToken cookie in insecure connection", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+
+        const request = await GET(
+            new Request("http://example.com/auth/session", {
+                headers: {
+                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(request.status).toBe(200)
+        expect(await request.json()).toEqual({
+            authenticated: true,
+            session: { user: sessionPayload, expires: expect.any(String) },
+        })
     })
 
     test("expired sessionToken cookie", async () => {
@@ -58,7 +78,7 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(401)
-        expect(await request.json()).toEqual({ authenticated: false, message: "Unauthorized" })
+        expect(await request.json()).toEqual({ authenticated: false, session: null })
         decodeJWTMock.mockRestore()
     })
 
@@ -195,8 +215,11 @@ describe("sessionAction", () => {
         const session = await requestSession.json()
         const { id, ...rest } = userInfoMock
         expect(session).toEqual({
-            user: { sub: id, ...rest },
-            expires: expect.any(String),
+            authenticated: true,
+            session: {
+                user: { sub: id, ...rest },
+                expires: expect.any(String),
+            },
         })
     })
 })

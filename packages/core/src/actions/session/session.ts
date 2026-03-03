@@ -1,26 +1,23 @@
 import { createEndpoint, HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/headers.ts"
-import { getErrorName, toISOString } from "@/utils.ts"
-import { expiredCookieAttributes, getCookie } from "@/cookie.ts"
-import type { JWTStandardClaims, Session, User } from "@/@types/index.ts"
+import { expiredCookieAttributes } from "@/cookie.ts"
+import { AuthInternalError } from "@/errors.ts"
 
 export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
     const {
         request,
-        context: { jose, cookies, logger },
+        context: { server, cookies },
     } = ctx
     try {
-        const session = getCookie(request, cookies.sessionToken.name)
-        const decoded = await jose.decodeJWT(session)
-        logger?.log("AUTH_SESSION_VALID")
-        const { exp, iat, jti, nbf, ...user } = decoded as User & JWTStandardClaims
-        const headers = new Headers(secureApiHeaders)
-        return Response.json({ user, expires: toISOString(exp! * 1000) } as Session, { headers })
+        const session = await server.getSession(request)
+        if (!session.authenticated) {
+            throw new AuthInternalError("INVALID_JWT_TOKEN", "Session not authenticated")
+        }
+        return Response.json(session, { headers: secureApiHeaders })
     } catch (error) {
-        logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
         const headers = new HeadersBuilder(secureApiHeaders)
             .setCookie(cookies.sessionToken.name, "", expiredCookieAttributes)
             .toHeaders()
-        return Response.json({ authenticated: false, message: "Unauthorized" }, { status: 401, headers })
+        return Response.json({ session: null, authenticated: false }, { status: 401, headers })
     }
 })

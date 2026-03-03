@@ -266,6 +266,12 @@ export type InternalLogger = {
     log: typeof createLogEntry
 }
 
+export type SessionResponse = { session: Session; authenticated: true } | { session: null; authenticated: false }
+
+export interface AuthServerAPI {
+    getSession: (request: Request) => Promise<SessionResponse>
+}
+
 export interface RouterGlobalContext {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
@@ -275,6 +281,7 @@ export interface RouterGlobalContext {
     trustedProxyHeaders: boolean
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
+    server: AuthServerAPI
 }
 
 /**

@@ -1,5 +1,5 @@
 import { handlers } from "../auth"
-import type { Session } from "@aura-stack/auth"
+import { type Session } from "@aura-stack/auth"
 
 export const getSession = async (request: Request): Promise<Session | null> => {
     try {
