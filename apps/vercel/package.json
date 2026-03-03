@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "echo 'Welcome to Aura Auth Vercel Functions App!'",
-    "build": "tsc"
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [],
   "author": "Aura Stack Team",

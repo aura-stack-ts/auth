@@ -6,4 +6,4 @@ export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[
 export const { handlers } = createAuth({
     oauth,
     trustedProxyHeaders: true,
-}) as AuthInstance
+})

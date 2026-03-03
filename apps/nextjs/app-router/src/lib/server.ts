@@ -3,10 +3,9 @@
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
-import type { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers"
 
-const toHeaders = (headers: ReadonlyHeaders) => {
-    return Object.fromEntries(headers.entries())
+const toHeaders = (incoming: Awaited<ReturnType<typeof headers>>) => {
+    return Object.fromEntries(incoming.entries())
 }
 
 /**
@@ -68,8 +67,8 @@ export const signOut = async (redirectTo: string = "/") => {
                 token_type_hint: "session_token",
             },
             headers: {
-                "X-CSRF-Token": csrfToken,
                 ...toHeaders(await headers()),
+                "X-CSRF-Token": csrfToken,
             },
         })
         if (response.status === 202) {
