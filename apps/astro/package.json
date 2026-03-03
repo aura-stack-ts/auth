@@ -14,11 +14,11 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
-    "@astrojs/node": "^9.5.4",
+    "@astrojs/node": "^9.5.2",
     "@astrojs/react": "^4.4.2",
     "@aura-stack/auth": "workspace:*",
     "@radix-ui/react-slot": "^1.2.4",
-    "astro": "^5.18.0",
+    "astro": "^5.16.16",
     "lucide-react": "catalog:lucide-react",
     "react": "catalog:react",
     "react-dom": "catalog:react",
