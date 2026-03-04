@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation"
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
 const client = createClient({
@@ -32,10 +33,7 @@ export const getSession = async (): Promise<Session | null> => {
 }
 
 export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
-    await client.get("/signIn/:oauth", {
-        params: { oauth: provider },
-        searchParams: { redirectTo },
-    })
+    return redirect(`/auth/signIn/${provider}?redirectTo=${encodeURIComponent(redirectTo)}`)
 }
 
 export const signOut = async (redirectTo: string = "/") => {

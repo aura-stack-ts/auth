@@ -1,3 +1,4 @@
+import { server } from "@/auth.ts"
 import type { Session } from "@aura-stack/auth"
 import type { Next, RouteParams, RouterContext } from "@oak/oak"
 

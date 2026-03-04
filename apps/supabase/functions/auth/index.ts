@@ -12,7 +12,7 @@ Deno.serve(async (request) => {
             return new Response("Welcome to the Aura Auth Supabase App!")
         case "/api/protected": {
             const session = await server.getSession(request)
-            if (!session.user) {
+            if (!session.authenticated) {
                 return Response.json(
                     {
                         error: "Unauthorized",
