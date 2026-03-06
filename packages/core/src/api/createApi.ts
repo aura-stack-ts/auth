@@ -12,12 +12,12 @@ export interface APIOptions {
 export const createAPI = (ctx: GlobalContext) => {
     return {
         getSession: async ({ headers }: { headers: HeadersInit }): Promise<SessionResponse> => {
-            const session = await getSession({ ctx: ctx as GlobalContext, headers })
+            const session = await getSession({ ctx, headers })
             return session
         },
         signOut: async (options: APIOptions) => {
             const redirectTo = validateRedirectTo(options.redirectTo ?? "/")
-            return signOut({ ctx: ctx as GlobalContext, headers: options.headers, redirectTo, skipCSRFCheck: true })
+            return signOut({ ctx, headers: options.headers, redirectTo, skipCSRFCheck: true })
         },
     }
 }

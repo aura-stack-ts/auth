@@ -59,7 +59,12 @@ export const signOut = async ({ ctx, headers: headersInit, redirectTo = "/", ski
         }
         ctx?.logger?.log("SIGN_OUT_CSRF_VERIFIED")
     } else {
-        await ctx.jose.verifyJWS(csrfToken)
+        try {
+            await ctx.jose.verifyJWS(csrfToken)
+        } catch (error) {
+            ctx?.logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
+            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
+        }
     }
     try {
         await ctx.jose.decodeJWT(session)

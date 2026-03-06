@@ -52,7 +52,7 @@ export const createAuthServer = async (context: AuthServerContext) => {
                 headers: request.headers,
             })
             if (response.status === 202) {
-                return redirect(redirectTo)
+                return response
             }
             const json = await response.json()
             return json

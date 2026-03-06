@@ -2,17 +2,19 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { Session } from "@aura-stack/auth"
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
-import { createAuthServer } from "@/lib/server"
 import { Button } from "@/components/ui/button"
 import { SessionClient } from "@/components/get-session-client"
 import { useAuthClient } from "@/contexts/auth"
+import { api } from "@/auth"
 
 const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
 
 export const getServerSideProps: GetServerSideProps<{ session: Session | null }> = async ({ req }) => {
-    const session = await createAuthServer.getSession(req)
+    const session = await api.getSession({
+        headers: req.headers as Record<string, string>,
+    })
     return {
-        props: { session },
+        props: { session: session.authenticated ? session.session : null },
     }
 }
 

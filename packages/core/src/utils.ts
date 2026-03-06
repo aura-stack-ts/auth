@@ -170,6 +170,11 @@ export const createBasicAuthHeader = (username: string, password: string): strin
     return `Basic ${btoa(credentials)}`
 }
 
+/**
+ * Validates and sanitizes redirect URLs to prevent open redirect attacks.
+ * Only relative URLs (starting with /) are allowed; absolute URLs are
+ * rejected and replaced with "/" to enforce same-origin redirects.
+ */
 export const validateRedirectTo = (url: string): string => {
     if (!isRelativeURL(url) && !isValidURL(url)) return "/"
     if (isRelativeURL(url)) return url

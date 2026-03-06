@@ -38,7 +38,7 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
         const response = await client().get("/session")
         if (!response.ok) return null
         const session = await response.json()
-        return session && session?.user ? session : null
+        return session?.authenticated ? session : null
     } catch (error) {
         console.log("[error:server] getSession", error)
         return null
