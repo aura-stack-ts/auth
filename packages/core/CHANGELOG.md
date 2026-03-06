@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Introduced an `api` object via `createAuth` for retrieving and signing out sessions on the server without calling mounted endpoints, improving resource access in trusted environments. [#112](https://github.com/aura-stack-ts/auth/pull/112)
+
 - Added the `Dropbox` OAuth provider to the supported integrations in Aura Auth. [#59](https://github.com/aura-stack-ts/auth/pull/59)
 
 - Added the `Notion` OAuth provider to the supported integrations in Aura Auth. [#49](https://github.com/aura-stack-ts/auth/pull/49)
