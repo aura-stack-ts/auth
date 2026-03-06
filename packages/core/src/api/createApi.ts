@@ -19,8 +19,5 @@ export const createAPI = (ctx: GlobalContext) => {
             const redirectTo = validateRedirectTo(options.redirectTo ?? "/")
             return signOut({ ctx: ctx as GlobalContext, headers: options.headers, redirectTo, skipCSRFCheck: true })
         },
-        signIn: async () => {
-            return Response.redirect("/sign-in", 302)
-        },
     }
 }

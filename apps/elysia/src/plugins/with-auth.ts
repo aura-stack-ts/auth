@@ -1,10 +1,12 @@
 import { Elysia } from "elysia"
-import { server } from "../auth"
+import { api } from "../auth"
 
 export const withAuthPlugin = new Elysia({ name: "with-auth" })
     .resolve({ as: "scoped" }, async (ctx) => {
         try {
-            const session = await server.getSession(ctx.request)
+            const session = await api.getSession({
+                headers: ctx.request.headers,
+            })
             if (!session!.authenticated) {
                 return { session: null }
             }

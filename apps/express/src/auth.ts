@@ -3,7 +3,7 @@ import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/au
 
 export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[]
 
-export const { handlers, jose, server }: AuthInstance = createAuth({
+export const { handlers, jose, api }: AuthInstance = createAuth({
     // Built-in OAuth providers configured. For testing, only GitHub is enabled.
     oauth: ["github"],
     basePath: "/api/auth",

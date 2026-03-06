@@ -7,7 +7,7 @@ import { SessionClient } from "@/components/get-session-client"
 const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
 
 export default async function Home() {
-    const { getSession, signIn } = createAuthServer
+    const { getSession, signIn, signOut } = createAuthServer
     const session = await getSession()
     const isAuthenticated = Boolean(session && session?.user)
 

@@ -3,7 +3,7 @@ import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/au
 
 export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[]
 
-export const { handlers, jose }: AuthInstance = createAuth({
+export const { handlers, jose, api }: AuthInstance = createAuth({
     oauth,
     basePath: "/api/auth",
     trustedOrigins: ["https://*.vercel.app"],

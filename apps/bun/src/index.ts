@@ -1,4 +1,4 @@
-import { handlers, server } from "./auth"
+import { handlers, api } from "./auth"
 
 Bun.serve({
     port: 3000,
@@ -15,7 +15,9 @@ Bun.serve({
             return response
         },
         "/api/protected": async (request) => {
-            const session = await server.getSession(request)
+            const session = await api.getSession({
+                headers: request.headers,
+            })
             if (!session.authenticated) {
                 return Response.json(
                     {

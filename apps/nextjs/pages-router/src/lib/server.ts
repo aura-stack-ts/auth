@@ -1,27 +1,22 @@
+import { api } from "@/auth"
 import type { NextApiRequest } from "next"
 import type { Session } from "@aura-stack/auth"
-import type { IncomingMessage } from "http"
-import { client } from "./client.api"
 
 /**
  * Standard server-side auth function to retrieve the current session.
  * Compatible with getServerSideProps and API routes.
  */
-export async function getSession(req: IncomingMessage | NextApiRequest): Promise<Session | null> {
+export async function getSession(req: NextApiRequest): Promise<Session | null> {
     try {
-        const response = await client.get("/session", {
+        const session = await api.getSession({
             headers: req.headers as Record<string, string>,
         })
-        if (!response.ok) {
+        if (!session.authenticated) {
             return null
         }
-        const session = await response.json()
-        return session && session?.user ? session : null
-    } catch (error) {
+        return session.session
+    } catch {
+        console.log("[error:server] getSession - Failed to retrieve session")
         return null
     }
-}
-
-export const createAuthServer = {
-    getSession,
 }

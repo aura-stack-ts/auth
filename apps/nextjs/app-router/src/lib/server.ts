@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
+import { api } from "@/auth"
 
 const toHeaders = (incoming: Awaited<ReturnType<typeof headers>>) => {
     return Object.fromEntries(incoming.entries())
@@ -34,16 +35,16 @@ export const getCSRFToken = async (): Promise<string | null> => {
 }
 
 export const getSession = async (): Promise<Session | null> => {
-    "use server"
     try {
-        const response = await client.get("/session", {
-            headers: toHeaders(await headers()),
+        const session = await api.getSession({
+            headers: await headers(),
         })
-        if (!response.ok) return null
-        const session = await response.json()
-        return session && session?.user ? session : null
-    } catch (error) {
-        console.log("[error:server] getSession", error)
+        if (!session.authenticated) {
+            return null
+        }
+        return session.session
+    } catch {
+        console.log("[error:server] getSession - Failed to retrieve session")
         return null
     }
 }
@@ -55,27 +56,15 @@ export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redir
 
 export const signOut = async (redirectTo: string = "/") => {
     try {
-        const cookiesStore = await cookies()
-        const csrfToken = await getCSRFToken()
-        if (!csrfToken) {
-            console.log("[error:server] signOut - No CSRF token")
-            return null
-        }
-        const response = await client.post("/signOut", {
-            searchParams: {
-                redirectTo,
-                token_type_hint: "session_token",
-            },
-            headers: {
-                ...toHeaders(await headers()),
-                "X-CSRF-Token": csrfToken,
-            },
+        const cookieStore = await cookies()
+        const response = await api.signOut({
+            headers: await headers(),
         })
         if (response.status === 202) {
             const setCookies = response.headers.getSetCookie()
             for (const cookie of setCookies) {
                 const nameMatch = cookie.match(/^([^=]+)=/)
-                nameMatch && cookiesStore.delete(nameMatch[1])
+                nameMatch && cookieStore.delete(nameMatch[1])
             }
             redirect(redirectTo)
         }

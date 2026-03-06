@@ -1,4 +1,4 @@
-import { server } from "@/auth.js"
+import { api } from "@/auth.js"
 import { toWebRequest } from "@/middlewares/auth.js"
 import type { Request, Response, NextFunction } from "express"
 
@@ -12,7 +12,9 @@ import type { Request, Response, NextFunction } from "express"
  */
 export const verifySession = async (req: Request, res: Response, next: NextFunction) => {
     const webRequest = toWebRequest(req)
-    const session = await server.getSession(webRequest)
+    const session = await api.getSession({
+        headers: webRequest.headers,
+    })
     if (!session.authenticated) {
         return res.status(401).json({
             error: "Unauthorized",
