@@ -14,7 +14,8 @@
     "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
   },
   "dependencies": {
-    "@aura-stack/auth": "workspace:*"
+    "@aura-stack/auth": "workspace:*",
+    "@aura-stack/tsconfig": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.12.4",

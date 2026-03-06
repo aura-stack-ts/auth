@@ -10,7 +10,8 @@
     "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
   },
   "dependencies": {
-    "@aura-stack/auth": "workspace:*"
+    "@aura-stack/auth": "workspace:*",
+    "@aura-stack/tsconfig": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "^1.3.9"

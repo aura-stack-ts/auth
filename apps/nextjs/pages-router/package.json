@@ -10,6 +10,7 @@
     "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
   },
   "dependencies": {
+    "@aura-stack/auth": "workspace:*",
     "@radix-ui/react-slot": "^1.2.4",
     "lucide-react": "catalog:lucide-react",
     "next": "catalog:next",
@@ -17,7 +18,7 @@
     "react-dom": "catalog:react"
   },
   "devDependencies": {
-    "@aura-stack/auth": "workspace:*",
+    "@aura-stack/tsconfig": "workspace:*",
     "@tailwindcss/postcss": "catalog:tailwindcss",
     "@types/node": "catalog:node",
     "@types/react": "catalog:react",
