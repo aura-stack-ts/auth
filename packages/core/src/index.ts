@@ -1,9 +1,6 @@
 import { createRouter, type RouterConfig } from "@aura-stack/router"
-import { createJoseInstance } from "@/jose.ts"
-import { createCookieStore } from "@/cookie.ts"
-import { createProxyLogger } from "@/logger.ts"
-import { getEnv, getEnvArray, getEnvBoolean } from "@/env.ts"
-import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
+import { createContext } from "@/context.ts"
+import { createAPI } from "@/api/createApi.ts"
 import { createErrorHandler, useSecureCookies } from "@/utils.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
 import type { AuthConfig } from "@/@types/index.ts"
@@ -29,33 +26,15 @@ export type {
 export { createClient, type AuthClient, type Client, type ClientOptions } from "@/client.ts"
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
-    const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
-    const useProxyHeaders =
-        trustedProxyHeadersEnv === undefined ? (authConfig?.trustedProxyHeaders ?? false) : getEnvBoolean("TRUSTED_PROXY_HEADERS")
-    const logger = createProxyLogger(authConfig)
-    const cookiePrefix = authConfig?.cookies?.prefix
-    const cookieOverrides = authConfig?.cookies?.overrides ?? {}
-    const secureCookieStore = createCookieStore(true, cookiePrefix, cookieOverrides, logger)
-    const standardCookieStore = createCookieStore(false, cookiePrefix, cookieOverrides, logger)
-
+    const context = createContext(authConfig)
     return {
         basePath: authConfig?.basePath ?? "/auth",
-        onError: createErrorHandler(logger),
-        context: {
-            oauth: createBuiltInOAuthProviders(authConfig?.oauth),
-            cookies: standardCookieStore,
-            jose: createJoseInstance(authConfig?.secret),
-            secret: authConfig?.secret,
-            basePath: authConfig?.basePath ?? "/auth",
-            trustedProxyHeaders: useProxyHeaders,
-            trustedOrigins:
-                getEnvArray("TRUSTED_ORIGINS").length > 0 ? getEnvArray("TRUSTED_ORIGINS") : authConfig?.trustedOrigins,
-            logger,
-        },
+        onError: createErrorHandler(context?.logger),
+        context,
         use: [
             (ctx) => {
                 const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
-                ctx.context.cookies = useSecure ? secureCookieStore : standardCookieStore
+                ctx.context.cookies = useSecure ? context.cookieConfig.secure : context.cookieConfig.standard
                 return ctx
             },
         ],
@@ -94,5 +73,6 @@ export const createAuth = (authConfig: AuthConfig) => {
     return {
         handlers: router,
         jose: config.context.jose,
+        api: createAPI(config.context),
     }
 }

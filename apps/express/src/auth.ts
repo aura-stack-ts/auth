@@ -3,7 +3,8 @@ import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/au
 
 export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[]
 
-export const { handlers, jose }: AuthInstance = createAuth({
+export const { handlers, jose, api }: AuthInstance = createAuth({
+    // Built-in OAuth providers configured. For testing, only GitHub is enabled.
     oauth: ["github"],
     basePath: "/api/auth",
     trustedOrigins: ["http://localhost:3000", "http://localhost:3001", "https://*.vercel.app"],

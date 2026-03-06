@@ -116,6 +116,13 @@ describe("getCookie", () => {
         })
         expect(getSetCookie(response, cookieStore.sessionToken.name)).toBe("sessionValue")
     })
+
+    test("getCookie from headers object", () => {
+        const sessionCookie = setCookie(cookieStore.sessionToken.name, "sessionValue")
+        const headers = new Headers()
+        headers.set("Cookie", sessionCookie)
+        expect(getCookie(headers, cookieStore.sessionToken.name)).toBe("sessionValue")
+    })
 })
 
 describe("defineSecureCookieOptions", () => {

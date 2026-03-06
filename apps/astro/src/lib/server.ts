@@ -1,4 +1,5 @@
 import type { AuthServerContext } from "@/@types/types"
+import { api } from "@/auth"
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
 
 export const createAuthServer = async (context: AuthServerContext) => {
@@ -29,10 +30,11 @@ export const createAuthServer = async (context: AuthServerContext) => {
 
     const getSession = async (): Promise<Session | null> => {
         try {
-            const response = await client.get("/session")
-            if (!response.ok) return null
-            const session = await response.json()
-            return session && session?.user ? session : null
+            const session = await api.getSession({
+                headers: request.headers,
+            })
+            if (!session.authenticated) return null
+            return session.session
         } catch (error) {
             console.log("[error:server] getSession", error)
             return null
@@ -45,23 +47,12 @@ export const createAuthServer = async (context: AuthServerContext) => {
 
     const signOut = async (redirectTo: string = "/") => {
         try {
-            const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                console.log("[error:server] signOut - No CSRF token found")
-                return null
-            }
-
-            const response = await client.post("/signOut", {
-                searchParams: {
-                    redirectTo,
-                    token_type_hint: "session_token",
-                },
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                },
+            const response = await api.signOut({
+                redirectTo,
+                headers: request.headers,
             })
             if (response.status === 202) {
-                return redirect(redirectTo)
+                return response
             }
             const json = await response.json()
             return json

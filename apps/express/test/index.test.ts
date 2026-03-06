@@ -18,7 +18,7 @@ describe("GET /api/auth/session", () => {
         expect(response.status).toBe(401)
         expect(response.body).toMatchObject({
             authenticated: false,
-            message: "Unauthorized",
+            session: null,
         })
     })
 
@@ -33,10 +33,12 @@ describe("GET /api/auth/session", () => {
             .set("Cookie", [`aura-auth.session_token=${sessionToken}`])
         expect(request.status).toBe(200)
         expect(request.body).toMatchObject({
-            user: {
-                sub: "johndoe",
-                name: "John Doe",
-                email: "johndoe@example.com",
+            session: {
+                user: {
+                    sub: "johndoe",
+                    name: "John Doe",
+                    email: "johndoe@example.com",
+                },
             },
         })
     })

@@ -5,6 +5,7 @@ import { createJoseInstance, type JWTPayload } from "@/jose.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
+import { createAPI } from "@/api/createApi.ts"
 
 export * from "./utility.ts"
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
@@ -266,6 +267,12 @@ export type InternalLogger = {
     log: typeof createLogEntry
 }
 
+export type SessionResponse = { session: Session; authenticated: true } | { session: null; authenticated: false }
+
+export type GetSessionAPI = (options: { headers: HeadersInit }) => Promise<SessionResponse>
+
+export type AuthAPI = ReturnType<typeof createAPI>
+
 export interface RouterGlobalContext {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
@@ -289,6 +296,7 @@ export interface AuthInstance {
         POST: (request: Request) => Response | Promise<Response>
     }
     jose: JoseInstance
+    api: AuthAPI
 }
 
 /**

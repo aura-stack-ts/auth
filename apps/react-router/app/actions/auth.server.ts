@@ -1,5 +1,6 @@
 import { redirect } from "react-router"
 import { createClient, type Session } from "@aura-stack/auth"
+import { api } from "~/auth"
 
 const client = (request: Request) => {
     const baseURL = new URL(request.url).origin
@@ -32,10 +33,11 @@ export const getCSRFToken = async (request: Request): Promise<string | null> => 
 
 export const getSession = async (request: Request): Promise<Session | null> => {
     try {
-        const response = await client(request).get("/session")
-        if (!response.ok) return null
-        const session = await response.json()
-        return session && session?.user ? session : null
+        const session = await api.getSession({
+            headers: request.headers,
+        })
+        if (!session.authenticated) return null
+        return session.session
     } catch (error) {
         console.log("[error:server] getSession", error)
         return null
@@ -48,19 +50,9 @@ export const signIn = async (providerId: string) => {
 
 export const signOut = async (request: Request, redirectTo: string = "/") => {
     try {
-        const csrfToken = await getCSRFToken(request)
-        if (!csrfToken) {
-            console.error("[error:server] signOut - No CSRF token")
-            return null
-        }
-        const response = await client(request).post("/signOut", {
-            searchParams: {
-                redirectTo,
-                token_type_hint: "session_token",
-            },
-            headers: {
-                "X-CSRF-Token": csrfToken,
-            },
+        const response = await api.signOut({
+            redirectTo,
+            headers: request.headers,
         })
         if (response.status === 202) {
             return redirect(redirectTo, {

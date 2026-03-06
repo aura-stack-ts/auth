@@ -1,4 +1,4 @@
-import { getSession } from "../lib/get-session.ts"
+import { api } from "@/auth.ts"
 import type { Session } from "@aura-stack/auth"
 import type { Next, RouteParams, RouterContext } from "@oak/oak"
 
@@ -19,13 +19,15 @@ export type RouterContextWithState<Route extends string, Params extends RoutePar
 
 export const withAuth = async <Route extends string>(ctx: RouterContextWithState<Route>, next: Next) => {
     try {
-        const session = await getSession(ctx)
-        if (!session) {
+        const session = await api.getSession({
+            headers: ctx.request.headers
+        })
+        if (!session.authenticated) {
             ctx.response.status = 401
             ctx.response.body = unauthorizedBody
             return
         }
-        ctx.state.session = session
+        ctx.state.session = session.session
         return await next()
     } catch {
         ctx.response.status = 401

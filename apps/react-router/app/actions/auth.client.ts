@@ -22,7 +22,7 @@ export const getSession = async (): Promise<Session | null> => {
     try {
         const response = await client.get("/session")
         const session = await response.json()
-        return session && session?.user ? session : null
+        return session?.authenticated ? session : null
     } catch (error) {
         console.log("[error:client] getSession", error)
         return null

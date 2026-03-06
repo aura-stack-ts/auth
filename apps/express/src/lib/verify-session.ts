@@ -1,4 +1,5 @@
-import { getSession } from "@/lib/get-session.js"
+import { api } from "@/auth.js"
+import { toWebRequest } from "@/middlewares/auth.js"
 import type { Request, Response, NextFunction } from "express"
 
 /**
@@ -10,13 +11,16 @@ import type { Request, Response, NextFunction } from "express"
  * })
  */
 export const verifySession = async (req: Request, res: Response, next: NextFunction) => {
-    const session = await getSession(req)
-    if (!session) {
+    const webRequest = toWebRequest(req)
+    const session = await api.getSession({
+        headers: webRequest.headers,
+    })
+    if (!session.authenticated) {
         return res.status(401).json({
             error: "Unauthorized",
             message: "You must be signed in to access this resource.",
         })
     }
-    res.locals.session = session
+    res.locals.session = session.session
     return next()
 }
