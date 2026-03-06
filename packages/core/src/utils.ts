@@ -3,6 +3,7 @@ import { AuthInternalError, isAuthInternalError, isAuthSecurityError, isOAuthPro
 import type { ZodError } from "zod"
 import type { APIErrorMap, InternalLogger } from "@/@types/index.ts"
 import { getEnv } from "./env.ts"
+import { isRelativeURL, isValidURL } from "./assert.ts"
 
 export const AURA_AUTH_VERSION = "0.4.0"
 
@@ -113,12 +114,14 @@ export const toISOString = (date: Date | string | number): string => {
     return new Date(date).toISOString()
 }
 
-export const useSecureCookies = (request: Request, trustedProxyHeaders: boolean): boolean => {
+export const useSecureCookies = (request: Request | Headers, trustedProxyHeaders: boolean): boolean => {
+    const headers = request instanceof Headers ? request : request.headers
+    const url = request instanceof Headers ? null : request.url
     return trustedProxyHeaders
-        ? request.url.startsWith("https://") ||
-              request.headers.get("X-Forwarded-Proto") === "https" ||
-              (request.headers.get("Forwarded")?.includes("proto=https") ?? false)
-        : request.url.startsWith("https://")
+        ? url?.startsWith("https://") ||
+              headers.get("X-Forwarded-Proto") === "https" ||
+              (headers.get("Forwarded")?.includes("proto=https") ?? false)
+        : (url?.startsWith("https://") ?? false)
 }
 
 export const formatZodError = <T extends Record<string, unknown> = Record<string, unknown>>(error: ZodError<T>): APIErrorMap => {
@@ -165,4 +168,10 @@ export const createBasicAuthHeader = (username: string, password: string): strin
     }
     const credentials = `${getUsername}:${getPassword}`
     return `Basic ${btoa(credentials)}`
+}
+
+export const validateRedirectTo = (url: string): string => {
+    if (!isRelativeURL(url) && !isValidURL(url)) return "/"
+    if (isRelativeURL(url)) return url
+    return "/"
 }

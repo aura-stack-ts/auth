@@ -7,7 +7,7 @@ import type { AuthConfig, CookieStoreConfig } from "@/@types/index.ts"
 import type { GlobalContext } from "@aura-stack/router"
 
 export type InternalContext = GlobalContext & {
-    cookieCofig: {
+    cookieConfig: {
         secure: CookieStoreConfig
         standard: CookieStoreConfig
     }
@@ -25,14 +25,13 @@ export const createContext = (config?: AuthConfig): InternalContext => {
 
     return {
         oauth: createBuiltInOAuthProviders(config?.oauth),
-        cookies: secureCookieStore,
+        cookies: standardCookieStore,
         jose: createJoseInstance(config?.secret),
         secret: config?.secret,
         basePath: config?.basePath ?? "/auth",
         trustedProxyHeaders: useProxyHeaders,
         trustedOrigins: getEnvArray("TRUSTED_ORIGINS").length > 0 ? getEnvArray("TRUSTED_ORIGINS") : config?.trustedOrigins,
         logger,
-        cookieCofig: { secure: secureCookieStore, standard: standardCookieStore },
-        server: undefined as any,
+        cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
     }
 }

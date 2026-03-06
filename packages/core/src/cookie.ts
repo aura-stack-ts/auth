@@ -79,8 +79,8 @@ export const expiredCookieAttributes: SerializeOptions = {
  * @param cookie Cookie name to retrieve
  * @returns The value of the cookie or throw an error if not found
  */
-export const getCookie = (request: Request, cookieName: string) => {
-    const cookies = request.headers.get("Cookie")
+export const getCookie = (request: Request | Headers, cookieName: string) => {
+    const cookies = request instanceof Request ? request.headers.get("Cookie") : request.get("Cookie")
     if (!cookies) {
         throw new AuthInternalError("COOKIE_NOT_FOUND", "No cookies found. There is no active session")
     }

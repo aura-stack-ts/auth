@@ -1,6 +1,6 @@
 import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { createContext } from "@/context.ts"
-import { createServerAPI } from "@/server/create-server.ts"
+import { createAPI } from "@/api/createApi.ts"
 import { createErrorHandler, useSecureCookies } from "@/utils.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
 import type { AuthConfig } from "@/@types/index.ts"
@@ -27,7 +27,6 @@ export { createClient, type AuthClient, type Client, type ClientOptions } from "
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     const context = createContext(authConfig)
-    context.server = createServerAPI(context)
     return {
         basePath: authConfig?.basePath ?? "/auth",
         onError: createErrorHandler(context?.logger),
@@ -35,7 +34,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
         use: [
             (ctx) => {
                 const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
-                ctx.context.cookies = useSecure ? context.cookieCofig.secure : context.cookieCofig.standard
+                ctx.context.cookies = useSecure ? context.cookieConfig.secure : context.cookieConfig.standard
                 return ctx
             },
         ],
@@ -74,6 +73,6 @@ export const createAuth = (authConfig: AuthConfig) => {
     return {
         handlers: router,
         jose: config.context.jose,
-        server: config.context.server,
+        api: createAPI(config.context),
     }
 }

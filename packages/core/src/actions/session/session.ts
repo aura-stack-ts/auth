@@ -2,14 +2,15 @@ import { createEndpoint, HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/headers.ts"
 import { expiredCookieAttributes } from "@/cookie.ts"
 import { AuthInternalError } from "@/errors.ts"
+import { getSession } from "@/api/getSession.ts"
 
 export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
     const {
         request,
-        context: { server, cookies },
+        context: { cookies },
     } = ctx
     try {
-        const session = await server.getSession(request)
+        const session = await getSession({ ctx: ctx.context, headers: request.headers })
         if (!session.authenticated) {
             throw new AuthInternalError("INVALID_JWT_TOKEN", "Session not authenticated")
         }
