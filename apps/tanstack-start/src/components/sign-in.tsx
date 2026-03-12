@@ -1,4 +1,4 @@
-import { SignInProps } from "@/@types/props"
+import type { SignInProps } from "@/@types/props"
 import { Button } from "@/components/ui/button"
 
 export const SignIn = ({ id, name }: SignInProps) => {

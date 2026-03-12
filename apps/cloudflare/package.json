@@ -17,6 +17,7 @@
     "@aura-stack/auth": "workspace:*"
   },
   "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
     "@cloudflare/vitest-pool-workers": "^0.12.4",
     "@types/node": "catalog:node",
     "typescript": "catalog:typescript",

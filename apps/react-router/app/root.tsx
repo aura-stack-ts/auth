@@ -1,9 +1,6 @@
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 import type { Route } from "./+types/root"
 import "./app.css"
-import { Header } from "./components/header"
-import { AuthProvider } from "./contexts/auth"
-import { Footer } from "./components/footer"
 
 export const links: Route.LinksFunction = () => [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },

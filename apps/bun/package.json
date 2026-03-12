@@ -13,6 +13,7 @@
     "@aura-stack/auth": "workspace:*"
   },
   "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
     "@types/bun": "^1.3.9"
   },
   "peerDependencies": {

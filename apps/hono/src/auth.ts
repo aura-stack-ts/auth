@@ -1,4 +1,4 @@
-import { AuthInstance, createAuth } from "@aura-stack/auth"
+import { createAuth, type AuthInstance } from "@aura-stack/auth"
 
 export const { handlers, jose, api }: AuthInstance = createAuth({
     oauth: ["github"],

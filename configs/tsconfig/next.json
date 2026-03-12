@@ -1,0 +1,14 @@
+{
+  "extends": "./bundler.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "declaration": false
+  }
+}
