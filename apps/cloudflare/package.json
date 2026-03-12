@@ -14,10 +14,10 @@
     "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
   },
   "dependencies": {
-    "@aura-stack/auth": "workspace:*",
-    "@aura-stack/tsconfig": "workspace:*"
+    "@aura-stack/auth": "workspace:*"
   },
   "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
     "@cloudflare/vitest-pool-workers": "^0.12.4",
     "@types/node": "catalog:node",
     "typescript": "catalog:typescript",

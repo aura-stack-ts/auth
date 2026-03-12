@@ -1,15 +1,13 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./bundler.json",
   "compilerOptions": {
     "lib": ["ESNext"],
     "target": "ESNext",
     "module": "Preserve",
-    "jsx": "react-jsx",
-    "moduleResolution": "bundler",
+    "declaration": false,
+    "allowImportingTsExtensions": true,
+    "noImplicitOverride": true,
     "verbatimModuleSyntax": true,
-    "noEmit": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true
+    "noUncheckedIndexedAccess": true
   }
 }

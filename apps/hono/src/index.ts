@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { toHonoHandler } from "./lib/handler"
-import { AuthVariables, withAuth } from "./middleware/with-auth"
+import { type AuthVariables, withAuth } from "./middleware/with-auth"
 
 const app = new Hono<{ Variables: AuthVariables }>()
 

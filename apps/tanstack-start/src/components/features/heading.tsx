@@ -1,4 +1,4 @@
-import { CardHeadingProps } from "@/@types/props"
+import type { CardHeadingProps } from "@/@types/props"
 
 export const CardHeading = ({ icon: Icon, title, description }: CardHeadingProps) => (
     <div className="p-6">

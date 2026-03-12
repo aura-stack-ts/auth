@@ -1,5 +1,5 @@
-import { Context } from "elysia"
 import { handlers } from "../auth"
+import type { Context } from "elysia"
 
 export const toElysiaHandler = async (ctx: Context) => {
     const handler = handlers[ctx.request.method as keyof typeof handlers]

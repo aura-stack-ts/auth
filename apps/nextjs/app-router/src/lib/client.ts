@@ -36,12 +36,12 @@ export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redir
     return redirect(`/auth/signIn/${provider}?redirectTo=${encodeURIComponent(redirectTo)}`)
 }
 
-export const signOut = async (redirectTo: string = "/") => {
+export const signOut = async (redirectTo: string = "/"): Promise<void> => {
     try {
         const csrfToken = await getCSRFToken()
         if (!csrfToken) {
             console.log("[error:client] signOut - No CSRF token")
-            return null
+            return
         }
         await client.post("/signOut", {
             searchParams: {

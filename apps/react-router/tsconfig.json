@@ -1,4 +1,3 @@
-
 {
   "extends": "@aura-stack/tsconfig/react-router.json",
   "compilerOptions": {

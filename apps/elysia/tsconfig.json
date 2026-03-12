@@ -1,6 +1,5 @@
 {
   "extends": "@aura-stack/tsconfig/bun.json",
-  "compilerOptions": {},
   "include": ["src"],
   "exclude": ["dist", "node_modules"]
 }
