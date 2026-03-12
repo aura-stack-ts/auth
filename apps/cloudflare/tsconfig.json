@@ -1,7 +1,8 @@
 {
   "extends": "@aura-stack/tsconfig/worker.json",
   "compilerOptions": {
-    "types": ["./worker-configuration.d.ts", "node"]
+    "types": ["./worker-configuration.d.ts", "node"],
+    "declaration": false
   },
   "exclude": ["test"],
   "include": ["worker-configuration.d.ts", "src"]

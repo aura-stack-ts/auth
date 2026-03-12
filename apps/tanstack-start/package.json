@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 3000",
-    "build": "vite build",
+    "build:prod": "vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
