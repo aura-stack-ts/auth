@@ -76,6 +76,7 @@ export const toExpressResponse = async (webResponse: globalThis.Response, res: R
  * Express middleware that bridges Aura Auth Web-API handlers to Express.
  * Mount this on the `basePath` configured in `createAuth()` (default: `/api/auth`).
  */
-export const toExpressHandler = async (req: Request) => {
-    return await handlers.ALL(toWebRequest(req))
+export const toExpressHandler = async (req: Request, res: Response) => {
+    const webResponse = await handlers.ALL(toWebRequest(req))
+    return toExpressResponse(webResponse, res)
 }

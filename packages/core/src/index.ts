@@ -1,9 +1,9 @@
 export { createAuth } from "@/createAuth.ts"
-
-export * from "@/client/index.ts"
-export { builtInOAuthProviders } from "@/oauth/index.ts"
 export { createSyslogMessage } from "@/logger.ts"
+export { builtInOAuthProviders } from "@/oauth/index.ts"
+export { createAuthClient, createClient } from "@/client/index.ts"
 
+export type * from "@/client/index.ts"
 export type {
     AuthConfig,
     AuthInstance,
