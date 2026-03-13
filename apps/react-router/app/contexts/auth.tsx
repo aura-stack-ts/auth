@@ -1,6 +1,6 @@
 import { createContext, use, useState, useEffect } from "react"
-import { createAuthClient } from "~/actions/auth.client"
-import type { Session } from "@aura-stack/auth"
+import { authClient } from "~/actions/auth.client"
+import type { Session, LiteralUnion, BuiltInOAuthProvider, SignInOptions, SignOutOptions } from "@aura-stack/auth"
 import type { AuthContextValue } from "~/@types/types"
 import type { AuthProviderProps } from "~/@types/props"
 
@@ -11,22 +11,21 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
     const isAuthenticated = Boolean(session?.user)
 
-    const signOut = async (...args: Parameters<typeof createAuthClient.signOut>) => {
+    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
         setIsLoading(true)
         try {
-            await createAuthClient.signOut(...args)
-            setSession(null)
+            return await authClient.signIn(provider, options)
         } finally {
             setIsLoading(false)
         }
     }
 
-    const signIn = async (...args: Parameters<typeof createAuthClient.signIn>) => {
+    const signOut = async (options?: SignOutOptions) => {
         setIsLoading(true)
         try {
-            await createAuthClient.signIn(...args)
-            const session = await createAuthClient.getSession()
-            setSession(session)
+            const value = await authClient.signOut(options)
+            setSession(null)
+            return value
         } finally {
             setIsLoading(false)
         }
@@ -40,7 +39,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
         }
         const fetchSession = async () => {
             try {
-                const session = await createAuthClient.getSession()
+                const session = await authClient.getSession()
                 setSession(session)
             } catch {
                 setSession(null)

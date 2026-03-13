@@ -78,7 +78,7 @@ export const signOut = async ({ ctx, headers: headersInit, redirectTo = "/", ski
         .setCookie(ctx.cookies.sessionToken.name, "", expiredCookieAttributes)
         .toHeaders()
     return Response.json(
-        { message: "Signed out successfully" },
+        { redirect: Boolean(redirectTo), url: redirectTo },
         {
             status: 202,
             headers: headersList,

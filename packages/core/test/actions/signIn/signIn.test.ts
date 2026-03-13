@@ -1,9 +1,23 @@
 import { describe, test, expect } from "vitest"
-import { createAuth } from "@/index.ts"
+import { createAuth } from "@/createAuth.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { GET, oauthCustomService } from "@test/presets.ts"
 
 describe("signIn action", () => {
+    test("default signIn", async () => {
+        const signIn = await GET(new Request("https://example.com/auth/signIn/oauth-provider"))
+        expect(signIn.status).toBe(302)
+    })
+
+    test("signIn with disabled redirect", async () => {
+        const signIn = await GET(new Request("https://example.com/auth/signIn/oauth-provider?redirect=false"))
+        expect(signIn.status).toBe(200)
+        expect(await signIn.json()).toEqual({
+            redirect: false,
+            url: expect.stringContaining("https://example.com/oauth/authorize?"),
+        })
+    })
+
     test("rejects unsupported OAuth provider", async () => {
         const request = await GET(new Request("http://example.com/auth/signIn/unsupported"))
         expect(request.status).toBe(422)

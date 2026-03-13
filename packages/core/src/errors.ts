@@ -57,6 +57,18 @@ export class AuthSecurityError extends Error {
     }
 }
 
+export class AuthClientError extends Error {
+    readonly type = "AUTH_CLIENT_ERROR"
+    readonly code: string
+
+    constructor(code: string, message?: string, options?: ErrorOptions) {
+        super(message, options)
+        this.code = code
+        this.name = new.target.name
+        Error.captureStackTrace(this, new.target)
+    }
+}
+
 export const isNativeError = (error: unknown): error is Error => {
     return error instanceof Error
 }
@@ -71,4 +83,8 @@ export const isAuthInternalError = (error: unknown): error is AuthInternalError 
 
 export const isAuthSecurityError = (error: unknown): error is AuthSecurityError => {
     return error instanceof AuthSecurityError
+}
+
+export const isAuthClientError = (error: unknown): error is AuthClientError => {
+    return error instanceof AuthClientError
 }

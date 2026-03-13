@@ -1,4 +1,4 @@
-import { createAuth } from "@/index.ts"
+import { createAuth } from "@/createAuth.ts"
 import type { OAuthProviderCredentials } from "@/@types/index.ts"
 import type { JWTPayload } from "@/jose.ts"
 

@@ -1,34 +1,32 @@
 import { createContext, use, useState, useEffect } from "react"
-import { createAuthClient } from "@/lib/client"
-import type { Session } from "@aura-stack/auth"
+import { authClient } from "@/lib/client"
+import type { Session, LiteralUnion, BuiltInOAuthProvider, SignInOptions, SignOutOptions } from "@aura-stack/auth"
 import type { AuthContextValue } from "@/@types/types"
 import type { AuthProviderProps } from "@/@types/props"
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
-
-const { getSession, signIn: signInClient, signOut: signOutClient } = createAuthClient
 
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState(defaultSession === undefined)
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
     const isAuthenticated = Boolean(session?.user)
 
-    const signOut = async (...args: Parameters<typeof signOutClient>) => {
+    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
         setIsLoading(true)
         try {
-            await signOutClient(...args)
-            setSession(null)
-        } catch (error) {
+            return await authClient.signIn(provider, options)
         } finally {
             setIsLoading(false)
         }
     }
 
-    const signIn = async (...args: Parameters<typeof signInClient>) => {
+    const signOut = async (options?: SignOutOptions) => {
         setIsLoading(true)
         try {
-            return await signInClient(...args)
-        } catch (error) {
+            const value = await authClient.signOut(options)
+            setSession(null)
+            return value
+        } finally {
             setIsLoading(false)
         }
     }
@@ -42,7 +40,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
 
         const fetchSession = async () => {
             try {
-                const session = await getSession()
+                const session = await authClient.getSession()
                 setSession(session)
             } catch {
                 setSession(null)
@@ -69,9 +67,6 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     )
 }
 
-/**
- * Standard hook to access auth state and actions on the client.
- */
 export const useAuthClient = () => {
     const ctx = use(AuthContext)
     if (!ctx) {

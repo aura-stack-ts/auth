@@ -1,13 +1,12 @@
 "use server"
 
-import { redirect } from "next/navigation"
+import { redirect, RedirectType } from "next/navigation"
 import { cookies, headers } from "next/headers"
 import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
+import { type SignInOptions, type SignOutOptions } from "@aura-stack/auth/client"
 import { api } from "@/auth"
-
-const toHeaders = (incoming: Awaited<ReturnType<typeof headers>>) => {
-    return Object.fromEntries(incoming.entries())
-}
+import { isRedirectError } from "next/dist/client/components/redirect-error"
+import { refresh, revalidatePath } from "next/cache"
 
 /**
  * @todo: fix bug related to rendered statically
@@ -23,7 +22,7 @@ const client = createClient({
 export const getCSRFToken = async (): Promise<string | null> => {
     try {
         const response = await client.get("/csrfToken", {
-            headers: toHeaders(await headers()),
+            headers: await headers(),
         })
         if (!response.ok) return null
         const json = await response.json()
@@ -49,12 +48,13 @@ export const getSession = async (): Promise<Session | null> => {
     }
 }
 
-export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
+export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
     "use server"
-    return redirect(`/auth/signIn/${provider}?${new URLSearchParams({ redirectTo }).toString()}`)
+    return redirect(`/api/auth/signIn/${provider}?${new URLSearchParams({ redirectTo: options?.redirectTo ?? "/" }).toString()}`)
 }
 
-export const signOut = async (redirectTo: string = "/") => {
+export const signOut = async (options?: SignOutOptions) => {
+    "use server"
     try {
         const cookieStore = await cookies()
         const response = await api.signOut({
@@ -66,10 +66,13 @@ export const signOut = async (redirectTo: string = "/") => {
                 const nameMatch = cookie.match(/^([^=]+)=/)
                 nameMatch && cookieStore.delete(nameMatch[1])
             }
-            redirect(redirectTo)
+            refresh()
+            revalidatePath("/", "layout")
+            redirect(options?.redirectTo ?? "/", RedirectType.replace)
         }
         return response.json()
     } catch (error) {
+        if (isRedirectError(error)) throw error
         console.log("[error:server] signOut", error)
     }
 }

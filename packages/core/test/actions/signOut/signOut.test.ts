@@ -75,7 +75,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(202)
-        expect(await request.json()).toEqual({ message: "Signed out successfully" })
+        expect(await request.json()).toEqual({ redirect: true, url: "/" })
         expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
         expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
     })
@@ -93,7 +93,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(202)
-        expect(await request.json()).toEqual({ message: "Signed out successfully" })
+        expect(await request.json()).toEqual({ redirect: true, url: "/auth/form" })
         expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
         expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
         expect(request.headers.get("Location")).toContain("/auth/form")
@@ -111,7 +111,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(202)
-        expect(await request.json()).toEqual({ message: "Signed out successfully" })
+        expect(await request.json()).toEqual({ redirect: true, url: "/" })
         expect(request.headers.get("Set-Cookie")).toContain("aura-auth.session_token=;")
         expect(request.headers.get("Set-Cookie")).toContain("aura-auth.csrf_token=;")
     })
@@ -146,7 +146,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(202)
-        expect(await request.json()).toEqual({ message: "Signed out successfully" })
+        expect(await request.json()).toEqual({ redirect: true, url: "/custom-logout-page" })
         expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
         expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
         expect(request.headers.get("Location")).toBe("/custom-logout-page")
@@ -165,7 +165,8 @@ describe("signOut action", async () => {
         )
         expect(request.status).toBe(202)
         expect(await request.json()).toEqual({
-            message: "Signed out successfully",
+            redirect: true,
+            url: "/",
         })
     })
 })
