@@ -15,9 +15,8 @@ const signInConfig = (oauth: OAuthProviderRecord) => {
                 ),
             }),
             searchParams: z.object({
+                redirect: z.stringbool().default(true).optional(),
                 redirectTo: z.string().optional(),
-                redirectURI: z.string().optional(),
-                redirect: z.coerce.boolean().optional(),
             }),
         },
     })
@@ -31,11 +30,11 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
             const {
                 request,
                 params: { oauth },
-                searchParams: { redirectTo, redirectURI: redirectURISearchParam },
+                searchParams: { redirectTo, redirect },
                 context,
             } = ctx
             const { oauth: providers, cookies, logger } = context
-            const redirectURI = redirectURISearchParam || (await createRedirectURI(request, oauth, context))
+            const redirectURI = await createRedirectURI(request, oauth, context)
             const redirectToValue = await createRedirectTo(request, redirectTo, context)
 
             const { authorization, state, codeVerifier, method } = await createAuthorizationURL(
@@ -56,9 +55,9 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
                 .setCookie(cookies.codeVerifier.name, codeVerifier, cookies.codeVerifier.attributes)
                 .toHeaders()
             return Response.json(
-                { oauth },
+                { redirect, url: authorization },
                 {
-                    status: 302,
+                    status: redirect ? 302 : 200,
                     headers,
                 }
             )

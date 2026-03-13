@@ -33,7 +33,7 @@ export const useAuthClient = () => {
             return
         }
         try {
-            session.value = (await authClient.getSession()) as any
+            session.value = await authClient.getSession()
         } catch {
             session.value = null
         } finally {

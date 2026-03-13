@@ -14,8 +14,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     const signOut = async (options?: SignOutOptions) => {
         setIsLoading(true)
         try {
-            await authClient.signOut(options)
-            setSession(null)
+            return await authClient.signOut(options)
         } finally {
             setIsLoading(false)
         }
@@ -24,7 +23,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
         setIsLoading(true)
         try {
-            await authClient.signIn(provider, { ...options, redirect: true })
+            return await authClient.signIn(provider, { redirect: true, ...options })
         } finally {
             setIsLoading(false)
         }

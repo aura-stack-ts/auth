@@ -1,32 +1,26 @@
-import type { createAuthInstance } from "@/createAuth.ts"
+import { AuthClientError } from "@/errors.ts"
 import { createClient as createClientAPI } from "@aura-stack/router"
-import type { Session, LiteralUnion, BuiltInOAuthProvider, Prettify } from "@/@types/index.ts"
-import type { ClientOptions } from "@aura-stack/router/types"
+import type {
+    Session,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+    AuthClientOptions,
+    AuthClient,
+    SignInOptions,
+    SignOutOptions,
+} from "@/@types/index.ts"
 
 export const createClient = createClientAPI<AuthClient>
 
-export type AuthClient = ReturnType<typeof createAuthInstance>["handlers"]
-export type AuthClientOptions = Prettify<
-    Omit<ClientOptions, "baseURL"> & {
-        baseURL?: string
-    }
->
-
-export interface SignInOptions {
-    redirectTo?: string
-    redirectURI?: string
-    redirect?: boolean
-}
-
-export interface SignOutOptions {
-    redirectTo?: string
-}
-
 export const createAuthClient = (options: AuthClientOptions) => {
+    if (typeof window === "undefined" && !options.baseURL) {
+        throw new AuthClientError("`baseURL` is required when createAuthClient is used outside the browser.")
+    }
+
     const client = createClient({
         cache: "no-store",
         credentials: "include",
-        baseURL: options?.baseURL ?? (typeof window !== "undefined" ? window.location.origin : "/"),
+        baseURL: options.baseURL ?? window.location.origin,
         ...options,
     })
 
@@ -63,26 +57,24 @@ export const createAuthClient = (options: AuthClientOptions) => {
                 },
                 searchParams: {
                     redirectTo: options?.redirectTo,
-                    redirectURI: options?.redirectURI,
-                    redirect: options?.redirect,
+                    redirect: false,
                 },
             })
-            const data = await response.json()
-
-            if (data?.redirect && typeof window !== "undefined" && data?.authorizationURL) {
-                window.location.assign(data.authorizationURL)
+            const json = await response.json()
+            if (options?.redirect && typeof window !== "undefined" && json?.url) {
+                window.location.assign(json.url)
             }
-
-            return data
+            return json
         } catch (error) {
             console.error("Error during sign-in:", error)
+            return { redirect: false, url: "/" }
         }
     }
 
     const signOut = async (options?: SignOutOptions) => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) return { message: "Failed to sign out." }
+            if (!csrfToken) return { redirect: false, url: "/" }
 
             const response = await client.post("/signOut", {
                 searchParams: {
@@ -93,10 +85,14 @@ export const createAuthClient = (options: AuthClientOptions) => {
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            return await response.json()
+            const json = await response.json()
+            if (options?.redirect && typeof window !== "undefined" && json?.url) {
+                window.location.assign(json.url)
+            }
+            return json
         } catch (error) {
             console.error("Error during sign-out:", error)
-            return { message: "Failed to sign out." }
+            return { redirect: false, url: "/" }
         }
     }
 

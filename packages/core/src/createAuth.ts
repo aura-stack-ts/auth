@@ -9,7 +9,7 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     const context = createContext(authConfig)
     return {
         basePath: authConfig?.basePath ?? "/auth",
-        onError: createErrorHandler(context?.logger),
+        onError: createErrorHandler(context.logger),
         context,
         use: [
             (ctx) => {

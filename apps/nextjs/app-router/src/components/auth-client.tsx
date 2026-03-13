@@ -36,13 +36,7 @@ export const AuthClient = () => {
                                         <span className="text-white/60 truncate max-w-37.5">{session?.user?.sub}</span>
                                     </div>
                                 </div>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={isLoading}
-                                    onClick={() => signOut({ redirectTo: "/" })}
-                                >
+                                <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={() => signOut()}>
                                     Sign Out
                                 </Button>
                             </div>

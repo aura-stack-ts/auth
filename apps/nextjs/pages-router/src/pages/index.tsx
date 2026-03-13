@@ -1,20 +1,20 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
-import { builtInOAuthProviders, OAuthProviderCredentials, Session } from "@aura-stack/auth"
+import { builtInOAuthProviders, type Session } from "@aura-stack/auth"
+import { api } from "@/auth"
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { SessionClient } from "@/components/get-session-client"
 import { useAuthClient } from "@/contexts/auth"
-import { api } from "@/auth"
-import { BitbucketProfile, GitHubProfile, GitLabProfile } from "@aura-stack/auth/oauth/index"
+import { SessionClient } from "@/components/get-session-client"
 
-type Providers = (
-    | OAuthProviderCredentials<GitHubProfile>
-    | OAuthProviderCredentials<GitLabProfile>
-    | OAuthProviderCredentials<BitbucketProfile>
-)[]
+type Providers = Array<{ name: string; id: string }>
 
 export const getServerSideProps: GetServerSideProps<{ session: Session | null; providers: Providers }> = async ({ req }) => {
-    const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
+    const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()].map(
+        (provider) => ({
+            id: provider.id,
+            name: provider.name,
+        })
+    )
     const session = await api.getSession({
         headers: req.headers as Record<string, string>,
     })
@@ -22,7 +22,7 @@ export const getServerSideProps: GetServerSideProps<{ session: Session | null; p
     return {
         props: {
             session: session.authenticated ? session.session : null,
-            providers: JSON.parse(JSON.stringify(providers)),
+            providers,
         },
     }
 }

@@ -72,16 +72,7 @@ const defineOAuthEnvironment = (oauth: string) => {
         clientSecret: getEnv(`${oauth.toUpperCase()}_CLIENT_SECRET`),
     })
     if (!loadEnvs.success) {
-        console.log(
-            "Failed to load environment variables for OAuth provider:",
-            "oauth: ",
-            oauth,
-            "error: ",
-            loadEnvs.error,
-            ", loads: ",
-            loadEnvs
-        )
-        const msg = JSON.stringify(formatZodError(loadEnvs.error), null, 2)
+        const msg = JSON.stringify({ [oauth]: formatZodError(loadEnvs.error) }, null, 2)
         throw new AuthInternalError("INVALID_ENVIRONMENT_CONFIGURATION", msg)
     }
     return loadEnvs.data
@@ -93,7 +84,7 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
         const oauthConfig = builtInOAuthProviders[config]()
         const parsed = OAuthProviderCredentialsSchema.safeParse({ ...oauthConfig, ...definition })
         if (!parsed.success) {
-            const details = JSON.stringify({ [config]: parsed.error }, null, 2)
+            const details = JSON.stringify({ [config]: formatZodError(parsed.error) }, null, 2)
             throw new AuthInternalError(
                 "INVALID_OAUTH_PROVIDER_CONFIGURATION",
                 `Invalid configuration for OAuth provider "${config}": ${details}`
@@ -105,7 +96,7 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
     const envConfig = hasCredentials ? {} : defineOAuthEnvironment(config.id)
     const parsed = OAuthProviderCredentialsSchema.safeParse({ ...envConfig, ...config })
     if (!parsed.success) {
-        const details = JSON.stringify(formatZodError(parsed.error), null, 2)
+        const details = JSON.stringify({ [config.id]: formatZodError(parsed.error) }, null, 2)
         throw new AuthInternalError(
             "INVALID_OAUTH_PROVIDER_CONFIGURATION",
             `Invalid configuration for OAuth provider "${config.id}": ${details}`

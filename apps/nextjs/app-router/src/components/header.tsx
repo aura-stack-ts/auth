@@ -4,21 +4,18 @@ import Link from "next/link"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { useAuthClient } from "@/contexts/auth"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
 export const Header = () => {
-    const router = useRouter()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const { isAuthenticated, isLoading, signOut, signIn } = useAuthClient()
 
     const handleSignOut = async () => {
-        await signOut({ redirectTo: "/" })
-        router.push("/")
+        await signOut()
     }
 
     const handleSignIn = async () => {
-        await signIn("github", { redirectTo: "/" })
+        await signIn("github")
     }
 
     return (
@@ -106,11 +103,9 @@ export const Header = () => {
                         </a>
                         <div className="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
                             {!isLoading && !isAuthenticated && (
-                                <>
-                                    <Button type="button" asChild onClick={handleSignIn}>
-                                        <Link href="/">Sign in with GitHub</Link>
-                                    </Button>
-                                </>
+                                <Button type="button" onClick={handleSignIn}>
+                                    Sign in with GitHub
+                                </Button>
                             )}
                             {isAuthenticated && (
                                 <div className="flex flex-col items-center gap-y-3 md:hidden">

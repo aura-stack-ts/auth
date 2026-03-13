@@ -5,7 +5,9 @@ import { createJoseInstance, type JWTPayload } from "@/jose.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
-import { createAPI } from "@/api/createApi.ts"
+import type { createAuthInstance } from "@/createAuth.ts"
+import type { createAPI } from "@/api/createApi.ts"
+import type { ClientOptions } from "@aura-stack/router"
 
 export * from "./utility.ts"
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
@@ -384,4 +386,21 @@ export type SyslogOptions = {
 export type Logger = {
     level: LogLevel
     log: (args: SyslogOptions) => void
+}
+
+export type AuthClient = ReturnType<typeof createAuthInstance>["handlers"]
+export type AuthClientOptions = Prettify<
+    Omit<ClientOptions, "baseURL"> & {
+        baseURL?: string
+    }
+>
+
+export interface SignInOptions {
+    redirect?: boolean
+    redirectTo?: string
+}
+
+export interface SignOutOptions {
+    redirect?: boolean
+    redirectTo?: string
 }

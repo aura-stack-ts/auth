@@ -11,22 +11,20 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
     const isAuthenticated = Boolean(session?.user)
 
-    const signOut = async (options?: SignOutOptions) => {
+    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
         setIsLoading(true)
         try {
-            await authClient.signOut(options)
-            setSession(null)
-        } catch (error) {
+            return await authClient.signIn(provider, { redirect: true, ...options })
         } finally {
             setIsLoading(false)
         }
     }
 
-    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
+    const signOut = async (options?: SignOutOptions) => {
         setIsLoading(true)
         try {
-            await authClient.signIn(provider, { ...options, redirect: true })
-        } catch (error) {
+            return await authClient.signOut({ redirect: true, ...options })
+        } finally {
             setIsLoading(false)
         }
     }

@@ -1,61 +1,60 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { createAuthClient } from "@/client/client.ts"
-import { createClient as createClientAPI } from "@aura-stack/router"
+import { createClient } from "@aura-stack/router"
 
 vi.mock("@aura-stack/router", () => ({
     createClient: vi.fn(),
 }))
 
-const createClientMock = vi.mocked(createClientAPI)
+const createClientMock = vi.mocked(createClient)
 
-const createJSONResponse = (body: unknown, status = 200) =>
-    new Response(JSON.stringify(body), {
+const createJSONResponse = (body: unknown, status = 200) => {
+    return new Response(JSON.stringify(body), {
         status,
         headers: {
             "Content-Type": "application/json",
         },
     })
+}
 
 describe("createAuthClient", () => {
     beforeEach(() => {
         vi.clearAllMocks()
     })
 
-    test("uses default client options and default baseURL", () => {
+    test("uses client options", () => {
         createClientMock.mockReturnValue({
             get: vi.fn(),
             post: vi.fn(),
-        } as never)
+        })
 
-        createAuthClient({} as never)
-
+        createAuthClient({ baseURL: "https://example.com" })
         expect(createClientMock).toHaveBeenCalledWith({
+            baseURL: "https://example.com",
             cache: "no-store",
             credentials: "include",
-            baseURL: "/",
         })
     })
 
-    test("allows custom options to override defaults", () => {
+    test("overrides default client options", () => {
         createClientMock.mockReturnValue({
             get: vi.fn(),
             post: vi.fn(),
-        } as never)
+        })
 
         createAuthClient({
             baseURL: "/api/auth",
             cache: "reload",
             credentials: "same-origin",
-        } as never)
-
+        })
         expect(createClientMock).toHaveBeenCalledWith({
+            baseURL: "/api/auth",
             cache: "reload",
             credentials: "same-origin",
-            baseURL: "/api/auth",
         })
     })
 
-    test("getSession returns parsed session when authenticated", async () => {
+    test("getSession returns valid session", async () => {
         const get = vi.fn().mockResolvedValue(
             createJSONResponse({
                 authenticated: true,
@@ -66,9 +65,9 @@ describe("createAuthClient", () => {
         createClientMock.mockReturnValue({
             get,
             post: vi.fn(),
-        } as never)
+        })
 
-        const client = createAuthClient({} as never)
+        const client = createAuthClient({ baseURL: "https://example.com" })
         const session = await client.getSession()
 
         expect(get).toHaveBeenCalledWith("/session")
@@ -81,45 +80,63 @@ describe("createAuthClient", () => {
         createClientMock.mockReturnValue({
             get,
             post: vi.fn(),
-        } as never)
+        })
 
-        const client = createAuthClient({} as never)
-
+        const client = createAuthClient({ baseURL: "https://example.com" })
         await expect(client.getSession()).resolves.toBeNull()
     })
 
-    test("signIn calls endpoint with oauth and redirectTo", async () => {
+    test("signIn with redirectTo option", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({ url: "https://example.com/oauth" }))
 
         createClientMock.mockReturnValue({
             get,
             post: vi.fn(),
-        } as never)
-
-        const client = createAuthClient({} as never)
-        const result = await client.signIn("github", { redirectTo: "/dashboard" })
+        })
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.signIn("github", { redirectTo: "/dashboard" })
 
         expect(get).toHaveBeenCalledWith("/signIn/:oauth", {
             params: { oauth: "github" },
             searchParams: {
+                redirect: false,
                 redirectTo: "/dashboard",
-                redirectURI: undefined,
             },
         })
-        expect(result).toEqual({ url: "https://example.com/oauth" })
+        expect(response).toEqual({ url: "https://example.com/oauth" })
     })
 
-    test("signOut includes csrf token in headers", async () => {
+    test("signIn with redirect option", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ url: "https://example.com/oauth" }))
+
+        createClientMock.mockReturnValue({
+            get,
+            post: vi.fn(),
+        })
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.signIn("github", { redirect: false, redirectTo: "/dashboard" })
+
+        expect(get).toHaveBeenCalledWith("/signIn/:oauth", {
+            params: { oauth: "github" },
+            searchParams: {
+                redirect: false,
+                redirectTo: "/dashboard",
+            },
+        })
+        expect(response).toEqual({ url: "https://example.com/oauth" })
+    })
+
+    test("signOut", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
-        const post = vi.fn().mockResolvedValue(createJSONResponse({ message: "Signed out successfully" }, 202))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ redirect: true, url: "/logout" }, 202))
 
         createClientMock.mockReturnValue({
             get,
             post,
-        } as never)
+        })
 
-        const client = createAuthClient({} as never)
-        const result = await client.signOut({ redirectTo: "/logout" })
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.signOut({ redirectTo: "/logout" })
 
         expect(get).toHaveBeenCalledWith("/csrfToken")
         expect(post).toHaveBeenCalledWith("/signOut", {
@@ -131,22 +148,22 @@ describe("createAuthClient", () => {
                 "X-CSRF-Token": "csrf_token_1",
             },
         })
-        expect(result).toEqual({ message: "Signed out successfully" })
+        expect(response).toEqual({ redirect: true, url: "/logout" })
     })
 
-    test("signOut returns failure message when csrf token fetch fails", async () => {
+    test("signOut with invalid CSRF Token", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({}, 500))
         const post = vi.fn()
 
         createClientMock.mockReturnValue({
             get,
             post,
-        } as never)
+        })
 
-        const client = createAuthClient({} as never)
-        const result = await client.signOut()
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.signOut()
 
         expect(post).not.toHaveBeenCalled()
-        expect(result).toEqual({ message: "Failed to sign out." })
+        expect(response).toEqual({ redirect: false, url: "/" })
     })
 })

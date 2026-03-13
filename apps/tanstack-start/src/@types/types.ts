@@ -1,6 +1,6 @@
 import type { Session } from "@aura-stack/auth"
 import type { Dispatch, SetStateAction } from "react"
-import { authClient } from "@/lib/auth-client"
+import type { authClient } from "@/lib/auth-client"
 
 export interface AuthContextValue {
     session: Session | null
