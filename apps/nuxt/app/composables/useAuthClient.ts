@@ -1,31 +1,25 @@
 import { computed } from "vue"
-import { createAuthClient } from "~/lib/client"
-import type { Session } from "@aura-stack/auth"
-import type { BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
-import type { LiteralUnion } from "@aura-stack/auth/types"
+import { authClient } from "~/lib/client"
+import type { Session, LiteralUnion, BuiltInOAuthProvider, SignInOptions, SignOutOptions } from "@aura-stack/auth"
 
 export const useAuthClient = () => {
     const session = useState<Session | null>("aura-session", () => null)
     const isLoading = useState("aura-loading", () => false)
     const isAuthenticated = computed(() => Boolean(session.value?.user))
 
-    const { signIn: signInClient, signOut: signOutClient, getSession } = createAuthClient
-
-    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>) => {
+    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
         isLoading.value = true
         try {
-            await signInClient(provider)
-            const newSession = await getSession()
-            return newSession
+            await authClient.signIn(provider, { ...options, redirect: true })
         } finally {
             isLoading.value = false
         }
     }
 
-    const signOut = async () => {
+    const signOut = async (options?: SignOutOptions) => {
         isLoading.value = true
         try {
-            await signOutClient()
+            await authClient.signOut(options)
             session.value = null
             window.location.reload()
         } finally {
@@ -39,7 +33,7 @@ export const useAuthClient = () => {
             return
         }
         try {
-            session.value = await getSession()
+            session.value = (await authClient.getSession()) as any
         } catch {
             session.value = null
         } finally {

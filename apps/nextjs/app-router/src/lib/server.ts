@@ -22,7 +22,7 @@ const client = createClient({
 export const getCSRFToken = async (): Promise<string | null> => {
     try {
         const response = await client.get("/csrfToken", {
-            headers: await headers()
+            headers: await headers(),
         })
         if (!response.ok) return null
         const json = await response.json()
@@ -72,7 +72,7 @@ export const signOut = async (options?: SignOutOptions) => {
         }
         return response.json()
     } catch (error) {
-        if(isRedirectError(error)) throw error
+        if (isRedirectError(error)) throw error
         console.log("[error:server] signOut", error)
     }
 }

@@ -1,6 +1,6 @@
-import { createAuthClient } from "@aura-stack/auth";
+import { createAuthClient } from "@aura-stack/auth"
 
-export const client = createAuthClient({
+export const authClient = createAuthClient({
     baseURL: "http://localhost:3000",
     basePath: "/api/auth",
 })

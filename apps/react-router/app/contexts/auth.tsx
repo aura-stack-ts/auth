@@ -1,6 +1,6 @@
 import { createContext, use, useState, useEffect } from "react"
 import { authClient } from "~/actions/auth.client"
-import type { Session } from "@aura-stack/auth"
+import type { Session, LiteralUnion, BuiltInOAuthProvider, SignInOptions, SignOutOptions } from "@aura-stack/auth"
 import type { AuthContextValue } from "~/@types/types"
 import type { AuthProviderProps } from "~/@types/props"
 
@@ -11,22 +11,20 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
     const isAuthenticated = Boolean(session?.user)
 
-    const signOut = async (...args: Parameters<typeof authClient.signOut>) => {
+    const signOut = async (options?: SignOutOptions) => {
         setIsLoading(true)
         try {
-            await authClient.signOut(...args)
+            await authClient.signOut(options)
             setSession(null)
         } finally {
             setIsLoading(false)
         }
     }
 
-    const signIn = async (...args: Parameters<typeof authClient.signIn>) => {
+    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
         setIsLoading(true)
         try {
-            await authClient.signIn(...args)
-            const session = await authClient.getSession()
-            setSession(session)
+            await authClient.signIn(provider, { ...options, redirect: true })
         } finally {
             setIsLoading(false)
         }

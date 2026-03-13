@@ -1,34 +1,30 @@
 import { createContext, use, useState, useEffect } from "react"
-import { createAuthClient } from "@/lib/client"
-import type { Session } from "@aura-stack/auth"
+import { authClient } from "@/lib/client"
+import type { Session, LiteralUnion, BuiltInOAuthProvider, SignInOptions, SignOutOptions } from "@aura-stack/auth"
 import type { AuthProviderProps } from "@/@types/props"
 import type { AuthContextValue } from "@/@types/types"
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
-
-const { signIn: signInClient, signOut: signOutClient, getSession } = createAuthClient
 
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
     const [isLoading, setIsLoading] = useState(defaultSession === undefined)
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
     const isAuthenticated = Boolean(session?.user)
 
-    const signOut = async (...args: Parameters<typeof signOutClient>) => {
+    const signOut = async (options?: SignOutOptions) => {
         setIsLoading(true)
         try {
-            await signOutClient(...args)
+            await authClient.signOut(options)
             setSession(null)
         } finally {
             setIsLoading(false)
         }
     }
 
-    const signIn = async (...args: Parameters<typeof signInClient>) => {
+    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
         setIsLoading(true)
         try {
-            await signInClient(...args)
-            const session = await getSession()
-            setSession(session)
+            await authClient.signIn(provider, { ...options, redirect: true })
         } finally {
             setIsLoading(false)
         }
@@ -42,7 +38,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
         }
         const fetchSession = async () => {
             try {
-                const session = await getSession()
+                const session = await authClient.getSession()
                 setSession(session)
             } catch {
                 setSession(null)
