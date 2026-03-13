@@ -1,4 +1,4 @@
-import { AuthClientError } from "@/errors.ts"
+import { AuthClientError, isAuthClientError, isNativeError } from "@/errors.ts"
 import { createClient as createClientAPI } from "@aura-stack/router"
 import type {
     Session,
@@ -74,7 +74,9 @@ export const createAuthClient = (options: AuthClientOptions) => {
     const signOut = async (options?: SignOutOptions) => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) return { redirect: false, url: "/" }
+            if (!csrfToken) {
+                throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
+            }
 
             const response = await client.post("/signOut", {
                 searchParams: {
@@ -92,7 +94,9 @@ export const createAuthClient = (options: AuthClientOptions) => {
             return json
         } catch (error) {
             console.error("Error during sign-out:", error)
-            return { redirect: false, url: "/" }
+            throw isNativeError(error)
+                ? error
+                : new AuthClientError("Sign-out failed.", "The sign-out request failed.", { cause: error })
         }
     }
 

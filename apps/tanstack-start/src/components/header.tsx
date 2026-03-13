@@ -1,19 +1,15 @@
 import { useState } from "react"
-import { Link, useRouter } from "@tanstack/react-router"
-import { Button } from "./ui/button"
 import { Menu, X } from "lucide-react"
-import { authClient } from "@/lib/auth-client"
 import { useSession } from "@/contexts/auth"
+import { Link } from "@tanstack/react-router"
+import { Button } from "@/components/ui/button"
 
 export const Header = () => {
-    const { isAuthenticated, isLoading, setSession } = useSession()
-    const router = useRouter()
+    const { isAuthenticated, isLoading, signOut } = useSession()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     const handleSignOut = async () => {
-        await authClient.signOut()
-        setSession(null)
-        router.navigate({ to: "/" })
+        await signOut()
     }
 
     return (

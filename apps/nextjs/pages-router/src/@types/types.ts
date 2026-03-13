@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/client"
+import type { authClient } from "@/lib/client"
 import type { Session } from "@aura-stack/auth"
 
 export interface AuthContextValue {

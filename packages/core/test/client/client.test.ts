@@ -161,9 +161,7 @@ describe("createAuthClient", () => {
         })
 
         const client = createAuthClient({ baseURL: "https://example.com" })
-        const response = await client.signOut()
-
+        await expect(client.signOut()).rejects.toThrow()
         expect(post).not.toHaveBeenCalled()
-        expect(response).toEqual({ redirect: false, url: "/" })
     })
 })
