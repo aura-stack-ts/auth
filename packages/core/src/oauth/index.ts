@@ -72,7 +72,15 @@ const defineOAuthEnvironment = (oauth: string) => {
         clientSecret: getEnv(`${oauth.toUpperCase()}_CLIENT_SECRET`),
     })
     if (!loadEnvs.success) {
-        console.log("Failed to load environment variables for OAuth provider:", "oauth: ", oauth, "error: ", loadEnvs.error, ", loads: ", loadEnvs)
+        console.log(
+            "Failed to load environment variables for OAuth provider:",
+            "oauth: ",
+            oauth,
+            "error: ",
+            loadEnvs.error,
+            ", loads: ",
+            loadEnvs
+        )
         const msg = JSON.stringify(formatZodError(loadEnvs.error), null, 2)
         throw new AuthInternalError("INVALID_ENVIRONMENT_CONFIGURATION", msg)
     }

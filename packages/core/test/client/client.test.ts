@@ -101,7 +101,10 @@ describe("createAuthClient", () => {
 
         expect(get).toHaveBeenCalledWith("/signIn/:oauth", {
             params: { oauth: "github" },
-            searchParams: { redirectTo: "/dashboard" },
+            searchParams: {
+                redirectTo: "/dashboard",
+                redirectURI: undefined,
+            },
         })
         expect(result).toEqual({ url: "https://example.com/oauth" })
     })

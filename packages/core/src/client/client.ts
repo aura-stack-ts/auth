@@ -6,12 +6,16 @@ import type { ClientOptions } from "@aura-stack/router/types"
 export const createClient = createClientAPI<AuthClient>
 
 export type AuthClient = ReturnType<typeof createAuthInstance>["handlers"]
-export type AuthClientOptions = Prettify<Omit<ClientOptions, "baseURL"> & {
-    baseURL?: string
-}>
+export type AuthClientOptions = Prettify<
+    Omit<ClientOptions, "baseURL"> & {
+        baseURL?: string
+    }
+>
 
 export interface SignInOptions {
     redirectTo?: string
+    redirectURI?: string
+    redirect?: boolean
 }
 
 export interface SignOutOptions {
@@ -21,8 +25,8 @@ export interface SignOutOptions {
 export const createAuthClient = (options: AuthClientOptions) => {
     const client = createClient({
         cache: "no-store",
-        credentials: "include",        
-        baseURL: options?.baseURL ?? "",
+        credentials: "include",
+        baseURL: options?.baseURL ?? (typeof window !== "undefined" ? window.location.origin : "/"),
         ...options,
     })
 
@@ -57,9 +61,19 @@ export const createAuthClient = (options: AuthClientOptions) => {
                 params: {
                     oauth,
                 },
-                searchParams: { redirectTo: options?.redirectTo }
+                searchParams: {
+                    redirectTo: options?.redirectTo,
+                    redirectURI: options?.redirectURI,
+                    redirect: options?.redirect,
+                },
             })
-            return await response.json()
+            const data = await response.json()
+
+            if (data?.redirect && typeof window !== "undefined" && data?.authorizationURL) {
+                window.location.assign(data.authorizationURL)
+            }
+
+            return data
         } catch (error) {
             console.error("Error during sign-in:", error)
         }

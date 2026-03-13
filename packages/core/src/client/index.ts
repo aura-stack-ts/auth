@@ -4,10 +4,7 @@ export {
     type AuthClient,
     type AuthClientOptions,
     type SignInOptions,
-    type SignOutOptions
+    type SignOutOptions,
 } from "@/client/client.ts"
 
-export type {
-    Client,
-    ClientOptions,
-} from "@aura-stack/router/types"
+export type { Client, ClientOptions } from "@aura-stack/router/types"
