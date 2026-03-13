@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest"
 import { oauthCustomService } from "@test/presets.ts"
 import { createRedirectTo, createRedirectURI, getOriginURL } from "@/actions/signIn/authorization.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
-import type { OAuthProviderCredentials } from "@/index.ts"
+import type { OAuthProviderCredentials } from "@/createAuth.ts"
 import type { GlobalContext } from "@aura-stack/router/types"
 
 describe("createRedirectURI", () => {

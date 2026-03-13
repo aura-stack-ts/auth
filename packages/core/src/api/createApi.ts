@@ -1,8 +1,8 @@
 import { signOut } from "@/api/signOut.ts"
+import { validateRedirectTo } from "@/utils.ts"
 import { getSession } from "@/api/getSession.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type { SessionResponse } from "@/@types/index.ts"
-import { validateRedirectTo } from "@/utils.ts"
 
 export interface APIOptions {
     headers: HeadersInit

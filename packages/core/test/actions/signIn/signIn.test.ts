@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { createAuth } from "@/index.ts"
+import { createAuth } from "@/createAuth.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { GET, oauthCustomService } from "@test/presets.ts"
 
