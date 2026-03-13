@@ -1,16 +1,8 @@
-import { createAuthClient as createBaseAuthClient } from "@aura-stack/auth"
+import { createAuthClient } from "@aura-stack/auth/client"
 
-const authClient = createBaseAuthClient({
-    baseURL: window.location.origin,
+export const authClient = createAuthClient({
+    baseURL: "http://localhost:3000",
     basePath: "/auth",
     cache: "no-store",
     credentials: "include",
 })
-
-export const { getSession, signIn, signOut } = authClient
-
-export const createAuthClient = {
-    getSession,
-    signIn,
-    signOut,
-}

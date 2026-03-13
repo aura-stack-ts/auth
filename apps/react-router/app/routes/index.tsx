@@ -2,7 +2,7 @@ import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 import { Button } from "~/components/ui/button"
 import { getSession } from "~/actions/auth.server"
-import { createAuthClient } from "~/actions/auth.client"
+import { authClient } from "~/actions/auth.client"
 import { GetSessionClient } from "~/components/get-session-client"
 import type { Route } from "./+types/index"
 
@@ -46,7 +46,7 @@ const IndexPage = ({ loaderData }: Route.ComponentProps) => {
                             <div className="flex items-center gap-3 text-foreground">
                                 <Fingerprint className="h-4 w-4" />
                                 <span className="text-white text-xs font-mono uppercase tracking-widest">
-                                    NextAuth Integration
+                                    React Router Integration
                                 </span>
                             </div>
                             <p className="text-sm text-white/40 leading-relaxed">
@@ -102,7 +102,7 @@ const IndexPage = ({ loaderData }: Route.ComponentProps) => {
                                                     variant="outline"
                                                     size="sm"
                                                     key={provider.id}
-                                                    onClick={() => createAuthClient.signIn(provider.id)}
+                                                    onClick={() => authClient.signIn(provider.id)}
                                                 >
                                                     Sign In with {provider.name}
                                                 </Button>

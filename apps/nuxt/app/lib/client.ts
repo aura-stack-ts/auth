@@ -15,7 +15,7 @@ const signIn = async (provider: string, redirectTo: string = "/") => {
 
 const signOut = async () => {
     const csrfToken = await getCSRFToken()
-    const session = await $fetch("/api/auth/signOut", {
+    await $fetch("/api/auth/signOut", {
         method: "POST",
         query: {
             token_type_hint: "session_token",
