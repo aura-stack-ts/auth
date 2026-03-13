@@ -13,8 +13,12 @@ export const Header = () => {
     const { isAuthenticated, isLoading, signOut, signIn } = useAuthClient()
 
     const handleSignOut = async () => {
-        signOut()
+        await signOut({ redirectTo: "/" })
         router.push("/")
+    }
+
+    const handleSignIn = async () => {
+        await signIn("github", { redirectTo: "/" })
     }
 
     return (
@@ -103,7 +107,7 @@ export const Header = () => {
                         <div className="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
                             {!isLoading && !isAuthenticated && (
                                 <>
-                                    <Button type="button" asChild onClick={() => signIn("github")}>
+                                    <Button type="button" asChild onClick={handleSignIn}>
                                         <Link href="/">Sign in with GitHub</Link>
                                     </Button>
                                 </>

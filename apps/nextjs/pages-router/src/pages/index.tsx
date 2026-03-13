@@ -1,24 +1,33 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
-import { Session } from "@aura-stack/auth"
+import { builtInOAuthProviders, OAuthProviderCredentials, Session } from "@aura-stack/auth"
 import { Fingerprint, LayoutDashboard } from "lucide-react"
-import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 import { Button } from "@/components/ui/button"
 import { SessionClient } from "@/components/get-session-client"
 import { useAuthClient } from "@/contexts/auth"
 import { api } from "@/auth"
+import { BitbucketProfile, GitHubProfile, GitLabProfile } from "@aura-stack/auth/oauth/index"
 
-const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
+type Providers = (
+    | OAuthProviderCredentials<GitHubProfile>
+    | OAuthProviderCredentials<GitLabProfile>
+    | OAuthProviderCredentials<BitbucketProfile>
+)[]
 
-export const getServerSideProps: GetServerSideProps<{ session: Session | null }> = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps<{ session: Session | null; providers: Providers }> = async ({ req }) => {
+    const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
     const session = await api.getSession({
         headers: req.headers as Record<string, string>,
     })
+
     return {
-        props: { session: session.authenticated ? session.session : null },
+        props: {
+            session: session.authenticated ? session.session : null,
+            providers: JSON.parse(JSON.stringify(providers)),
+        },
     }
 }
 
-export default function Home({ session }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Home({ session, providers }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const isAuthenticated = session?.user !== undefined
     const { signIn } = useAuthClient()
 
@@ -53,7 +62,7 @@ export default function Home({ session }: InferGetServerSidePropsType<typeof get
                             <div className="flex items-center gap-3 text-foreground">
                                 <Fingerprint className="h-4 w-4" />
                                 <span className="text-white text-xs font-mono uppercase tracking-widest">
-                                    NextAuth Integration
+                                    Nextjs Auth Integration
                                 </span>
                             </div>
                             <p className="text-sm text-white/40 leading-relaxed">

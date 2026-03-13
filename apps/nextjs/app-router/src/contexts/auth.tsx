@@ -1,35 +1,37 @@
 "use client"
+
 import { createContext, use, useState, useEffect } from "react"
-import { createAuthClient } from "@/lib/index"
+import { client } from "@/lib/client"
+import { useRouter } from "next/navigation"
 import type { Session } from "@aura-stack/auth"
 import type { AuthContextValue } from "@/@types/types"
 import type { AuthProviderProps } from "@/@types/props"
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-const { signIn: signInClient, signOut: signOutClient, getSession } = createAuthClient
-
 export const AuthProvider = ({ children, session: defaultSession }: AuthProviderProps) => {
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState(defaultSession === undefined)
     const [session, setSession] = useState<Session | null>(defaultSession ?? null)
     const isAuthenticated = Boolean(session?.user)
 
-    const signOut = async (...args: Parameters<typeof signOutClient>) => {
+    const signOut = async (...args: Parameters<typeof client.signOut>) => {
         setIsLoading(true)
         try {
-            await signOutClient(...args)
+            await client.signOut(...args)
             setSession(null)
+            router.refresh()
         } finally {
             setIsLoading(false)
         }
     }
 
-    const signIn = async (...args: Parameters<typeof signInClient>) => {
+    const signIn = async (...args: Parameters<typeof client.signIn>) => {
         setIsLoading(true)
         try {
-            await signInClient(...args)
-            const session = await getSession()
-            setSession(session)
+            window.location.assign(
+                `/api/auth/signIn/${args[0]}?${new URLSearchParams({ redirectTo: args[1]?.redirectTo ?? "/" }).toString()}`
+            )
         } finally {
             setIsLoading(false)
         }
@@ -43,9 +45,10 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
         }
         const fetchSession = async () => {
             try {
-                const session = await getSession()
+                const session = await client.getSession()
                 setSession(session)
-            } catch {
+            } catch (error) {
+                console.error("Error fetching session:", error)
                 setSession(null)
             } finally {
                 setIsLoading(false)
