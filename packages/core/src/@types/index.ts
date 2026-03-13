@@ -296,6 +296,7 @@ export interface AuthInstance {
     handlers: {
         GET: (request: Request) => Response | Promise<Response>
         POST: (request: Request) => Response | Promise<Response>
+        ALL: (request: Request) => Response | Promise<Response>
     }
     jose: JoseInstance
     api: AuthAPI

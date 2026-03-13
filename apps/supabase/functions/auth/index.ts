@@ -29,14 +29,7 @@ Deno.serve(async (request) => {
             })
         }
         default: {
-            if (!pathname.startsWith("/api/auth")) {
-                return Response.json({ error: "Not Found" }, { status: 404 })
-            }
-            const handler = handlers[request.method as keyof typeof handlers]
-            if (!handler) {
-                return Response.json({ error: "Method Not Allowed" }, { status: 405 })
-            }
-            return await handler(request)
+            return await handlers.ALL(request)
         }
     }
 })

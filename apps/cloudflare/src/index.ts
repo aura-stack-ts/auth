@@ -20,11 +20,7 @@ export default {
             return new Response("Welcome to Aura Auth Cloudflare Worker App!")
         }
         if (pathname.startsWith("/api/auth/")) {
-            const handler = handlers[request.method as keyof typeof handlers]
-            if (!handler) {
-                return Response.json({ error: "Method Not Allowed" }, { status: 405 })
-            }
-            return await handler(request)
+            return await handlers.ALL(request)
         }
         return new Response("Not Found", { status: 404 })
     },

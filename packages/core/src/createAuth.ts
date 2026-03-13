@@ -57,4 +57,14 @@ export const createAuthInstance = (authConfig: AuthConfig) => {
     }
 }
 
-export const createAuth = (config: AuthConfig) => createAuthInstance(config) as AuthInstance
+export const createAuth = (config: AuthConfig) => {
+    const authInstance = createAuthInstance(config) as AuthInstance
+    authInstance.handlers.ALL = async (request: Request) => {
+        const method = request.method.toUpperCase()
+        if (method in authInstance.handlers) {
+            return await authInstance.handlers[method as keyof typeof authInstance.handlers](request)
+        }
+        return new Response("Method Not Allowed", { status: 405, headers: { Allow: "GET, POST" } })
+    }
+    return authInstance
+}

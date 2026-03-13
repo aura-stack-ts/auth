@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Introduced an `ALL` HTTP handler that consolidates `GET` and `POST` handling into a single entry point for backend applications. [#115](https://github.com/aura-stack-ts/auth/pull/115)
+
+- Introduced the `createAuthClient` API, enabling applications to interact with Aura Auth endpoints through a dedicated client interface with built-in `getSession`, `signIn`, and `signOut` functions. [#114](https://github.com/aura-stack-ts/auth/pull/114)
+
 - Introduced an `api` object via `createAuth` for retrieving and signing out sessions on the server without calling mounted endpoints, improving resource access in trusted environments. [#112](https://github.com/aura-stack-ts/auth/pull/112)
 
 - Added the `Dropbox` OAuth provider to the supported integrations in Aura Auth. [#59](https://github.com/aura-stack-ts/auth/pull/59)
