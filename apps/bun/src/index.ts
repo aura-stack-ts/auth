@@ -7,12 +7,7 @@ Bun.serve({
             return new Response("Welcome to the Aura Stack Bun App!")
         },
         "/api/auth/*": async (request) => {
-            const handler = handlers[request.method as keyof typeof handlers]
-            if (!handler) {
-                return Response.json({ error: "Method Not Allowed" }, { status: 405 })
-            }
-            const response = await handler(request)
-            return response
+            return await handlers.ALL(request)
         },
         "/api/protected": async (request) => {
             const session = await api.getSession({
