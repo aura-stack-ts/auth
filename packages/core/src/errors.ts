@@ -84,3 +84,7 @@ export const isAuthInternalError = (error: unknown): error is AuthInternalError 
 export const isAuthSecurityError = (error: unknown): error is AuthSecurityError => {
     return error instanceof AuthSecurityError
 }
+
+export const isAuthClientError = (error: unknown): error is AuthClientError => {
+    return error instanceof AuthClientError
+}

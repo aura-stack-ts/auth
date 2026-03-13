@@ -61,7 +61,7 @@ export const createAuthClient = (options: AuthClientOptions) => {
                 },
             })
             const json = await response.json()
-            if (options?.redirect && typeof window !== "undefined" && json?.url) {
+            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.url) {
                 window.location.assign(json.url)
             }
             return json
@@ -86,7 +86,7 @@ export const createAuthClient = (options: AuthClientOptions) => {
                 },
             })
             const json = await response.json()
-            if (options?.redirect && typeof window !== "undefined" && json?.url) {
+            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.url) {
                 window.location.assign(json.url)
             }
             return json
