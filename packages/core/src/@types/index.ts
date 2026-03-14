@@ -27,7 +27,7 @@ export type JWTPayloadWithToken = JWTPayload & { token: string }
  * Standardized user profile returned by OAuth providers after fetching user information
  * and mapping the response to this format by default or via the `profile` custom function.
  */
-export interface User {
+export interface User extends Record<string, unknown> {
     sub: string
     name?: string | null
     email?: string | null
@@ -405,3 +405,17 @@ export interface SignOutOptions {
     redirect?: boolean
     redirectTo?: string
 }
+
+export interface GetSessionAPIOptions {
+    headers: HeadersInit
+}
+
+export interface SignOutAPIOptions {
+    headers: HeadersInit
+    redirectTo?: string
+    skipCSRFCheck?: boolean
+}
+
+export type FunctionAPIContext<Options extends object> = {
+    ctx: RouterGlobalContext
+} & Options

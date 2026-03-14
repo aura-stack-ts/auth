@@ -1,8 +1,7 @@
 import { env } from "@/env.ts"
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
 import { AuthInternalError } from "@/errors.ts"
-import type { JWTPayload } from "@/jose.ts"
-import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig, InternalLogger } from "@/@types/index.ts"
+import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig, InternalLogger, User } from "@/@types/index.ts"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -118,7 +117,7 @@ export const getSetCookie = (response: Response, cookieName: string) => {
  * @param session - The JWT payload to be encoded in the session cookie
  * @returns The serialized session cookie string
  */
-export const createSessionCookie = async (jose: AuthRuntimeConfig["jose"], session: JWTPayload) => {
+export const createSessionCookie = async (jose: AuthRuntimeConfig["jose"], session: User) => {
     try {
         const encoded = await jose.encodeJWT(session)
         return encoded

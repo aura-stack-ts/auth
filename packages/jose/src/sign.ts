@@ -3,7 +3,7 @@ import { createSecret } from "@/secret.ts"
 import { getRandomBytes } from "@/crypto.ts"
 import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.ts"
 import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "@/errors.ts"
-import type { SecretInput } from "@/index.ts"
+import type { SecretInput, TypedJWTPayload } from "@/index.ts"
 
 export type { JWTVerifyOptions } from "jose"
 
@@ -20,7 +20,10 @@ export type { JWTVerifyOptions } from "jose"
  * @param secret - Secret key to sign the JWT (CryptoKey, KeyObject, string or Uint8Array)
  * @returns Signed JWT string
  */
-export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise<string> => {
+export const signJWS = async <Payload extends JWTPayload>(
+    payload: TypedJWTPayload<Partial<Payload>>,
+    secret: SecretInput
+): Promise<string> => {
     try {
         if (isInvalidPayload(payload)) {
             throw new InvalidPayloadError("The payload must be a non-empty object")
@@ -53,14 +56,18 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
  * @param options - Additional JWT verification options
  * @returns verify and return the payload of the JWT
  */
-export const verifyJWS = async (token: string, secret: SecretInput, options?: JWTVerifyOptions): Promise<JWTPayload> => {
+export const verifyJWS = async <Payload extends JWTPayload>(
+    token: string,
+    secret: SecretInput,
+    options?: JWTVerifyOptions
+): Promise<TypedJWTPayload<Payload>> => {
     try {
         if (isFalsy(token)) {
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
         const { payload } = await jwtVerify(token, secretKey, options)
-        return payload
+        return payload as TypedJWTPayload<Payload>
     } catch (error) {
         if (isAuraJoseError(error)) {
             throw error
@@ -76,9 +83,11 @@ export const verifyJWS = async (token: string, secret: SecretInput, options?: JW
  * @param secret - Secret key used for signing and verifying the JWS
  * @returns signJWS and verifyJWS functions
  */
-export const createJWS = (secret: SecretInput) => {
+export const createJWS = <Payload extends JWTPayload>(secret: SecretInput) => {
     return {
-        signJWS: (payload: JWTPayload) => signJWS(payload, secret),
-        verifyJWS: (payload: string, options?: JWTVerifyOptions) => verifyJWS(payload, secret, options),
+        signJWS: <SignPayload extends JWTPayload = Payload>(payload: TypedJWTPayload<Partial<SignPayload>>) =>
+            signJWS(payload, secret),
+        verifyJWS: <VerifyPayload extends JWTPayload = Payload>(payload: string, options?: JWTVerifyOptions) =>
+            verifyJWS<VerifyPayload>(payload, secret, options),
     }
 }
