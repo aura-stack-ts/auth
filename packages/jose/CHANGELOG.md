@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Introduced type-safe payloads in `createJWT`, `encodeJWT`, `decodeJWT`, `createJWS`, and `verifyJWS` to provide stronger typing for JWT encoding and decoding, including improved autocompletion for payload attributes during creation and verification. [#116](https://github.com/aura-stack-ts/auth/pull/116)
+- Introduced type-safe payloads in `createJWT`, `encodeJWT`, `decodeJWT`, `createJWS`, `signJWS` and `verifyJWS` to provide stronger typing for JWT encoding and decoding, including improved autocompletion for payload attributes during creation and verification. [#116](https://github.com/aura-stack-ts/auth/pull/116)
 
 ---
 
