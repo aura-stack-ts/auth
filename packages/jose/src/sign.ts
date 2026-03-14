@@ -3,7 +3,7 @@ import { createSecret } from "@/secret.ts"
 import { getRandomBytes } from "@/crypto.ts"
 import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.ts"
 import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "@/errors.ts"
-import type { SecretInput } from "@/index.ts"
+import type { SecretInput, TypedJWTPayload } from "@/index.ts"
 
 export type { JWTVerifyOptions } from "jose"
 
@@ -53,14 +53,18 @@ export const signJWS = async (payload: JWTPayload, secret: SecretInput): Promise
  * @param options - Additional JWT verification options
  * @returns verify and return the payload of the JWT
  */
-export const verifyJWS = async (token: string, secret: SecretInput, options?: JWTVerifyOptions): Promise<JWTPayload> => {
+export const verifyJWS = async <Payload extends JWTPayload>(
+    token: string,
+    secret: SecretInput,
+    options?: JWTVerifyOptions
+): Promise<TypedJWTPayload<Payload>> => {
     try {
         if (isFalsy(token)) {
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
         const { payload } = await jwtVerify(token, secretKey, options)
-        return payload
+        return payload as Payload
     } catch (error) {
         if (isAuraJoseError(error)) {
             throw error
@@ -76,9 +80,10 @@ export const verifyJWS = async (token: string, secret: SecretInput, options?: JW
  * @param secret - Secret key used for signing and verifying the JWS
  * @returns signJWS and verifyJWS functions
  */
-export const createJWS = (secret: SecretInput) => {
+export const createJWS = <Payload extends JWTPayload>(secret: SecretInput) => {
     return {
-        signJWS: (payload: JWTPayload) => signJWS(payload, secret),
-        verifyJWS: (payload: string, options?: JWTVerifyOptions) => verifyJWS(payload, secret, options),
+        signJWS: (payload: TypedJWTPayload<Payload>) => signJWS(payload, secret),
+        verifyJWS: <VerifyPayload extends JWTPayload = Payload>(payload: string, options?: JWTVerifyOptions) =>
+            verifyJWS<VerifyPayload>(payload, secret, options),
     }
 }
