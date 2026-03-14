@@ -98,7 +98,9 @@ export const decodeJWT = async <Payload extends JWTPayload>(
  */
 export const createJWT = <Payload extends JWTPayload>(secret: SecretInput | DerivedKeyInput) => {
     return {
-        encodeJWT: async <EncodePayload extends JWTPayload = Payload>(payload: EncodePayload) => await encodeJWT<EncodePayload>(payload, secret),
-        decodeJWT: async <DecodePayload extends JWTPayload = Payload>(token: string) => await decodeJWT<DecodePayload>(token, secret),
+        encodeJWT: async <EncodePayload extends JWTPayload = Payload>(payload: EncodePayload) =>
+            await encodeJWT<EncodePayload>(payload, secret),
+        decodeJWT: async <DecodePayload extends JWTPayload = Payload>(token: string) =>
+            await decodeJWT<DecodePayload>(token, secret),
     }
 }
