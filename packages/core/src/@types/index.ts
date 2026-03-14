@@ -416,6 +416,13 @@ export interface SignOutAPIOptions {
     skipCSRFCheck?: boolean
 }
 
+export interface SignInAPIOptions {
+    headers: HeadersInit
+    redirect?: boolean
+    redirectTo?: string
+    request?: Request
+}
+
 export type FunctionAPIContext<Options extends object> = {
     ctx: RouterGlobalContext
 } & Options

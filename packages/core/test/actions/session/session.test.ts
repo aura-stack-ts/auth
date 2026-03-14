@@ -1,8 +1,12 @@
-import { describe, test, expect, vi, afterEach } from "vitest"
+import { describe, test, expect, vi, afterEach, beforeEach } from "vitest"
 import { createPKCE } from "@/secure.ts"
 import { GET, jose, sessionPayload } from "@test/presets.ts"
 import { setCookie, getSetCookie, createCookieStore } from "@/cookie.ts"
 import { AURA_AUTH_VERSION } from "@/utils.ts"
+
+beforeEach(() => {
+    vi.stubEnv("BASE_URL", undefined)
+})
 
 afterEach(() => {
     vi.restoreAllMocks()

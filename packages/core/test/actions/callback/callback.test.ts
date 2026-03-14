@@ -1,8 +1,16 @@
-import { describe, test, expect, vi } from "vitest"
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
 import { GET } from "@test/presets.ts"
 import { createPKCE } from "@/secure.ts"
 import { setCookie, getSetCookie } from "@/cookie.ts"
 import { AURA_AUTH_VERSION } from "@/utils.ts"
+
+beforeEach(() => {
+    vi.stubEnv("BASE_URL", undefined)
+})
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe("callbackAction", () => {
     test("invalid endpoint", async () => {

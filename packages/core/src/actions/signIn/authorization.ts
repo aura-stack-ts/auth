@@ -1,8 +1,9 @@
+import { getEnv } from "@/env.ts"
 import { AuthInternalError } from "@/errors.ts"
 import { equals, extractPath } from "@/utils.ts"
 import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin, patternToRegex } from "@/assert.ts"
-import type { GlobalContext } from "@aura-stack/router"
 import type { AuthConfig } from "@/@types/index.ts"
+import type { GlobalContext } from "@aura-stack/router"
 
 /**
  * Resolves trusted origins from config (array or function).
@@ -13,20 +14,33 @@ export const getTrustedOrigins = async (request: Request, trustedOrigins: AuthCo
     return Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : []
 }
 
-export const getOriginURL = async (request: Request, context?: GlobalContext) => {
-    const headers = request.headers
-    let origin = new URL(request.url).origin
-    const trustedOrigins = await getTrustedOrigins(request, context?.trustedOrigins)
-    trustedOrigins.push(origin)
-    if (context?.trustedProxyHeaders) {
-        const protocol = headers.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? headers.get("X-Forwarded-Proto") ?? "http"
+export const getBaseURL = async ({ ctx, request }: { ctx?: GlobalContext; request?: Request }) => {
+    const origin = getEnv("BASE_URL")
+    if (origin) return origin
+    if (ctx?.trustedProxyHeaders) {
+        const headers = request?.headers
+        const protocol = headers?.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? headers?.get("X-Forwarded-Proto") ?? "http"
         const host =
-            headers.get("Host") ??
-            headers.get("Forwarded")?.match(/host=([^;]+)/i)?.[1] ??
-            headers.get("X-Forwarded-Host") ??
+            headers?.get("Host") ??
+            headers?.get("Forwarded")?.match(/host=([^;]+)/i)?.[1] ??
+            headers?.get("X-Forwarded-Host") ??
             null
-        origin = `${protocol}://${host}`
+        return `${protocol}://${host}`
     }
+    try {
+        return new URL(request?.url ?? "not-found").origin
+    } catch {
+        throw new AuthInternalError(
+            "INVALID_OAUTH_CONFIGURATION",
+            "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders."
+        )
+    }
+}
+
+export const getOriginURL = async (request: Request, context?: GlobalContext) => {
+    const trustedOrigins = await getTrustedOrigins(request, context?.trustedOrigins)
+    trustedOrigins.push(new URL(request.url).origin)
+    const origin = await getBaseURL({ request, ctx: context })
     if (!isTrustedOrigin(origin, trustedOrigins)) {
         context?.logger?.log("UNTRUSTED_ORIGIN", { structuredData: { origin: origin } })
         throw new AuthInternalError("UNTRUSTED_ORIGIN", "The constructed origin URL is not trusted.")
@@ -46,6 +60,8 @@ export const createRedirectURI = async (request: Request, oauth: string, context
     const origin = await getOriginURL(request, context)
     return `${origin}${context.basePath}/callback/${oauth}`
 }
+
+export const unstable_createRedirectURI = async ({}) => {}
 
 /**
  * Verifies if the request's origin matches the expected origin. It accepts the redirectTo search
