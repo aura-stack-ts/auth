@@ -11,6 +11,7 @@ import {
 import { AuthInternalError } from "@/errors.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
+import type { User } from "@/@types/index.ts"
 
 /**
  * Creates the JOSE instance used for signing and verifying tokens. It derives keys
@@ -52,7 +53,7 @@ export const createJoseInstance = (secret?: string) => {
         const derivedCsrfTokenKey = await createDeriveKey(secret, salt, "csrfToken")
 
         return {
-            jwt: createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey }),
+            jwt: createJWT<User>({ jws: derivedSigningKey, jwe: derivedEncryptionKey }),
             jws: createJWS(derivedCsrfTokenKey),
             jwe: createJWE(derivedEncryptionKey),
         }

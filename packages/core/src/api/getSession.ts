@@ -1,14 +1,13 @@
 import { getCookie } from "@/cookie.ts"
 import { getErrorName, toISOString } from "@/utils.ts"
-import type { GlobalContext } from "@aura-stack/router/types"
-import type { JWTStandardClaims, SessionResponse, User } from "@/@types/index.ts"
+import type { FunctionAPIContext, GetSessionAPIOptions, SessionResponse } from "@/@types/index.ts"
 
-export const getSession = async ({ ctx, headers }: { ctx: GlobalContext; headers: HeadersInit }): Promise<SessionResponse> => {
+export const getSession = async ({ ctx, headers }: FunctionAPIContext<GetSessionAPIOptions>): Promise<SessionResponse> => {
     try {
         const session = getCookie(new Headers(headers), ctx.cookies.sessionToken.name)
         const decoded = await ctx.jose.decodeJWT(session)
         ctx?.logger?.log("AUTH_SESSION_VALID")
-        const { exp, iat, jti, nbf, ...user } = decoded as User & JWTStandardClaims
+        const { exp, iat, jti, nbf, ...user } = decoded
         return {
             session: {
                 user,

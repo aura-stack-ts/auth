@@ -3,19 +3,15 @@ import { verifyCSRF } from "@/secure.ts"
 import { getErrorName } from "@/utils.ts"
 import { AuthSecurityError } from "@/errors.ts"
 import { secureApiHeaders } from "@/headers.ts"
-import { HeadersBuilder, type GlobalContext } from "@aura-stack/router"
+import { HeadersBuilder } from "@aura-stack/router"
+import type { FunctionAPIContext, SignOutAPIOptions } from "@/@types/index.ts"
 
-export type SignOutOptions = {
-    ctx: GlobalContext
-    headers: HeadersInit
-    redirectTo?: string
-}
-
-export type SignOutWithCSRFOptions = SignOutOptions & {
-    skipCSRFCheck?: boolean
-}
-
-export const signOut = async ({ ctx, headers: headersInit, redirectTo = "/", skipCSRFCheck = false }: SignOutWithCSRFOptions) => {
+export const signOut = async ({
+    ctx,
+    headers: headersInit,
+    redirectTo = "/",
+    skipCSRFCheck = false,
+}: FunctionAPIContext<SignOutAPIOptions>) => {
     const headers = new Headers(headersInit)
     const header = headers.get("X-CSRF-Token")
     let session = null

@@ -1,12 +1,12 @@
 /**
  * @module @aura-stack/jose
  */
-import { decodeJwt, type JWTDecryptOptions, type JWTPayload, type JWTVerifyOptions } from "jose"
+import type { JWTDecryptOptions, JWTPayload, JWTVerifyOptions } from "jose"
 import { createJWS } from "@/sign.ts"
 import { getSecrets } from "@/secret.ts"
 import { createJWE } from "@/encrypt.ts"
 import { isAuraJoseError } from "@/assert.ts"
-import { JWTDecodingError, JWTEncodingError } from "./errors.ts"
+import { JWTDecodingError, JWTEncodingError } from "@/errors.ts"
 
 export * from "@/sign.ts"
 export * from "@/encrypt.ts"
@@ -98,7 +98,7 @@ export const decodeJWT = async <Payload extends JWTPayload>(
  */
 export const createJWT = <Payload extends JWTPayload>(secret: SecretInput | DerivedKeyInput) => {
     return {
-        encodeJWT: async (payload: TypedJWTPayload<Payload>) => await encodeJWT<Payload>(payload, secret),
-        decodeJWT: async (token: string) => await decodeJWT<Payload>(token, secret),
+        encodeJWT: async <EncodePayload extends JWTPayload = Payload>(payload: EncodePayload) => await encodeJWT<EncodePayload>(payload, secret),
+        decodeJWT: async <DecodePayload extends JWTPayload = Payload>(token: string) => await decodeJWT<DecodePayload>(token, secret),
     }
 }

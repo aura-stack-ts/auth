@@ -9,7 +9,6 @@ import { AuthSecurityError, OAuthProtocolError } from "@/errors.ts"
 import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
 import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.ts"
-import type { JWTPayload } from "@/jose.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
@@ -109,7 +108,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             }
 
             const userInfo = await getUserInfo(oauthConfig, accessToken.access_token, logger)
-            const sessionCookie = await createSessionCookie(jose, userInfo as JWTPayload)
+            const sessionCookie = await createSessionCookie(jose, userInfo)
             const csrfToken = await createCSRF(jose)
 
             logger?.log("OAUTH_CALLBACK_SUCCESS", {
