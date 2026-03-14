@@ -7,12 +7,12 @@ import type { GetSessionAPIOptions, SessionResponse, SignOutAPIOptions } from "@
 export const createAPI = (ctx: GlobalContext) => {
     return {
         getSession: async (options: GetSessionAPIOptions): Promise<SessionResponse> => {
-            const session = await getSession({ ctx, headers: options.headers })
+            const session = await getSession({ ctx, headers: options?.headers })
             return session
         },
         signOut: async (options: SignOutAPIOptions) => {
-            const redirectTo = validateRedirectTo(options.redirectTo ?? "/")
-            return signOut({ ctx, headers: options.headers, redirectTo, skipCSRFCheck: true })
+            const redirectTo = validateRedirectTo(options?.redirectTo ?? "/")
+            return signOut({ ctx, headers: options?.headers, redirectTo, skipCSRFCheck: true })
         },
     }
 }

@@ -23,6 +23,7 @@ export * from "@/crypto.ts"
 export type SecretInput = Uint8Array | string | CryptoKey
 export type DerivedKeyInput = { jws: SecretInput; jwe: SecretInput }
 export type DecodedJWTPayloadOptions = { jws: JWTVerifyOptions; jwt: JWTDecryptOptions }
+export type Prettify<T> = { [K in keyof T]: T[K] } & {}
 export type TypedJWTPayload<Payload extends JWTPayload> = JWTPayload & Payload
 
 /**
@@ -40,7 +41,7 @@ export type TypedJWTPayload<Payload extends JWTPayload> = JWTPayload & Payload
  * @returns Promise resolving to the signed and encrypted JWT string
  */
 export const encodeJWT = async <Payload extends JWTPayload>(
-    token: TypedJWTPayload<Payload>,
+    token: TypedJWTPayload<Partial<Payload>>,
     secret: SecretInput | DerivedKeyInput
 ) => {
     try {
@@ -100,7 +101,7 @@ export const createJWT = <Payload extends JWTPayload>(secret: SecretInput | Deri
     return {
         encodeJWT: async <EncodePayload extends JWTPayload = Payload>(payload: TypedJWTPayload<EncodePayload>) =>
             await encodeJWT<EncodePayload>(payload, secret),
-        decodeJWT: async <DecodePayload extends JWTPayload = Payload>(token: string) =>
-            await decodeJWT<DecodePayload>(token, secret),
+        decodeJWT: async <DecodePayload extends JWTPayload = Payload>(token: string, options?: DecodedJWTPayloadOptions) =>
+            await decodeJWT<DecodePayload>(token, secret, options),
     }
 }

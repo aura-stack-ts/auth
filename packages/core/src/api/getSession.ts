@@ -7,7 +7,7 @@ export const getSession = async ({ ctx, headers }: FunctionAPIContext<GetSession
         const session = getCookie(new Headers(headers), ctx.cookies.sessionToken.name)
         const decoded = await ctx.jose.decodeJWT(session)
         ctx?.logger?.log("AUTH_SESSION_VALID")
-        const { exp, iat, jti, nbf, ...user } = decoded
+        const { exp, iat, jti, nbf, aud, ...user } = decoded
         return {
             session: {
                 user,

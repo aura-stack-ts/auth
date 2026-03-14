@@ -27,7 +27,7 @@ export type JWTPayloadWithToken = JWTPayload & { token: string }
  * Standardized user profile returned by OAuth providers after fetching user information
  * and mapping the response to this format by default or via the `profile` custom function.
  */
-export interface User extends Record<string, string | undefined | null> {
+export interface User extends Record<string, unknown> {
     sub: string
     name?: string | null
     email?: string | null

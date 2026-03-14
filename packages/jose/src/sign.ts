@@ -21,7 +21,7 @@ export type { JWTVerifyOptions } from "jose"
  * @returns Signed JWT string
  */
 export const signJWS = async <Payload extends JWTPayload>(
-    payload: TypedJWTPayload<Payload>,
+    payload: TypedJWTPayload<Partial<Payload>>,
     secret: SecretInput
 ): Promise<string> => {
     try {
@@ -67,7 +67,7 @@ export const verifyJWS = async <Payload extends JWTPayload>(
         }
         const secretKey = createSecret(secret)
         const { payload } = await jwtVerify(token, secretKey, options)
-        return payload as Payload
+        return payload as TypedJWTPayload<Payload>
     } catch (error) {
         if (isAuraJoseError(error)) {
             throw error
@@ -85,7 +85,8 @@ export const verifyJWS = async <Payload extends JWTPayload>(
  */
 export const createJWS = <Payload extends JWTPayload>(secret: SecretInput) => {
     return {
-        signJWS: (payload: TypedJWTPayload<Payload>) => signJWS(payload, secret),
+        signJWS: <SignPayload extends JWTPayload = Payload>(payload: TypedJWTPayload<Partial<SignPayload>>) =>
+            signJWS(payload, secret),
         verifyJWS: <VerifyPayload extends JWTPayload = Payload>(payload: string, options?: JWTVerifyOptions) =>
             verifyJWS<VerifyPayload>(payload, secret, options),
     }

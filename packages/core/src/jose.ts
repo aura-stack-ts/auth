@@ -7,6 +7,7 @@ import {
     createSecret,
     type JWTVerifyOptions,
     type DecodedJWTPayloadOptions,
+    type TypedJWTPayload,
 } from "@aura-stack/jose"
 import { AuthInternalError } from "@/errors.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
@@ -61,13 +62,13 @@ export const createJoseInstance = (secret?: string) => {
     jose.catch(() => {})
 
     return {
-        decodeJWT: async (...args: Parameters<ReturnType<typeof createJWT>["decodeJWT"]>) => {
+        decodeJWT: async (token: string, options?: DecodedJWTPayloadOptions) => {
             const { jwt } = await jose
-            return jwt.decodeJWT(...args)
+            return jwt.decodeJWT(token, options)
         },
-        encodeJWT: async (...args: Parameters<ReturnType<typeof createJWT>["encodeJWT"]>) => {
+        encodeJWT: async (payload: TypedJWTPayload<Partial<User>>) => {
             const { jwt } = await jose
-            return jwt.encodeJWT(...args)
+            return jwt.encodeJWT(payload)
         },
         signJWS: async (...args: Parameters<ReturnType<typeof createJWS>["signJWS"]>) => {
             const { jws } = await jose
