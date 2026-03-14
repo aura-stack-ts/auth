@@ -3,3 +3,4 @@
  * @module @aura-stack/jose/jose
  */
 export * from "jose"
+export type * from "jose"

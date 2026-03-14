@@ -29,7 +29,7 @@ describe("type-safe payload", () => {
     test("createJWT", async () => {
         const jwt = createJWT<User>("secret")
         expectTypeOf(jwt.encodeJWT).toEqualTypeOf<
-            <EncodePayload extends JWTPayload = User>(payload: TypedJWTPayload<EncodePayload>) => Promise<string>
+            <EncodePayload extends JWTPayload = User>(payload: TypedJWTPayload<Partial<EncodePayload>>) => Promise<string>
         >()
         expectTypeOf(jwt.decodeJWT).toEqualTypeOf<
             <DecodePayload extends JWTPayload = User>(
