@@ -6,7 +6,7 @@ import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
 import type { createAuthInstance } from "@/createAuth.ts"
-import type { createAPI } from "@/api/createApi.ts"
+import type { createAuthAPI } from "@/api/createApi.ts"
 import type { ClientOptions } from "@aura-stack/router"
 
 export * from "./utility.ts"
@@ -212,6 +212,10 @@ export interface AuthConfig {
      */
     secret?: string
     /**
+     * Base URL of the application, used to construct the incoming request's origin.
+     */
+    baseURL?: string
+    /**
      * Base path for all authentication routes. Default is `/auth`.
      */
     basePath?: `/${string}`
@@ -273,13 +277,14 @@ export type SessionResponse = { session: Session; authenticated: true } | { sess
 
 export type GetSessionAPI = (options: { headers: HeadersInit }) => Promise<SessionResponse>
 
-export type AuthAPI = ReturnType<typeof createAPI>
+export type AuthAPI = ReturnType<typeof createAuthAPI>
 
 export interface RouterGlobalContext {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
     jose: JoseInstance
     secret?: string
+    baseURL?: string
     basePath: string
     trustedProxyHeaders: boolean
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
@@ -416,6 +421,21 @@ export interface SignOutAPIOptions {
     skipCSRFCheck?: boolean
 }
 
+export interface SignInAPIOptions<Redirect extends boolean = boolean> {
+    headers?: HeadersInit
+    redirect?: Redirect
+    redirectTo?: string
+    request?: Request
+}
+
 export type FunctionAPIContext<Options extends object> = {
     ctx: RouterGlobalContext
 } & Options
+
+export type SignOutReturn<Redirect extends boolean = boolean> = Redirect extends true
+    ? Response
+    : { redirect: false; signInURL: string }
+
+export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
+    ? Response
+    : { redirect: false; signInURL: string }

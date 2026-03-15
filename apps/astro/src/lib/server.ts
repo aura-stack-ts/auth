@@ -1,37 +1,22 @@
-import type { AuthServerContext } from "@/@types/types"
 import { api } from "@/auth"
-import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
+import type { AuthServerContext } from "@/@types/types"
+import type {
+    Session,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+    SignInAPIOptions,
+    SignOutAPIOptions,
+    GetSessionAPIOptions,
+} from "@aura-stack/auth"
 
 export const createAuthServer = async (context: AuthServerContext) => {
-    const { request, redirect } = context
+    const { request } = context
 
-    const client = createClient({
-        baseURL: new URL(request.url).origin,
-        basePath: "/api/auth",
-        cache: "no-store",
-        credentials: "include",
-        headers: {
-            ...Object.fromEntries(request.headers.entries()),
-            cookie: request.headers.get("cookie") ?? "",
-        },
-    })
-
-    const getCSRFToken = async (): Promise<string | null> => {
-        try {
-            const response = await client.get("/csrfToken")
-            if (!response.ok) return null
-            const json = await response.json()
-            return json && json?.csrfToken ? json.csrfToken : null
-        } catch (error) {
-            console.log("[error:server] getCSRFToken", error)
-            return null
-        }
-    }
-
-    const getSession = async (): Promise<Session | null> => {
+    const getSession = async (options?: GetSessionAPIOptions): Promise<Session | null> => {
         try {
             const session = await api.getSession({
                 headers: request.headers,
+                ...options,
             })
             if (!session.authenticated) return null
             return session.session
@@ -41,15 +26,15 @@ export const createAuthServer = async (context: AuthServerContext) => {
         }
     }
 
-    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, redirectTo: string = "/") => {
-        return redirect(`/api/auth/signIn/${provider}?${new URLSearchParams({ redirectTo }).toString()}`)
+    const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions) => {
+        return await api.signIn(provider, options)
     }
 
-    const signOut = async (redirectTo: string = "/") => {
+    const signOut = async (options?: SignOutAPIOptions) => {
         try {
             const response = await api.signOut({
-                redirectTo,
                 headers: request.headers,
+                ...options,
             })
             if (response.status === 202) {
                 return response
@@ -63,7 +48,6 @@ export const createAuthServer = async (context: AuthServerContext) => {
     }
 
     return {
-        getCSRFToken,
         getSession,
         signIn,
         signOut,

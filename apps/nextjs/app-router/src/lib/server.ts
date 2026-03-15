@@ -1,42 +1,24 @@
 "use server"
 
-import { redirect, RedirectType } from "next/navigation"
+import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
-import { createClient, type Session, type LiteralUnion, type BuiltInOAuthProvider } from "@aura-stack/auth"
-import { type SignInOptions, type SignOutOptions } from "@aura-stack/auth/client"
 import { api } from "@/auth"
-import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { refresh, revalidatePath } from "next/cache"
+import { isRedirectError } from "next/dist/client/components/redirect-error"
+import type {
+    Session,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+    GetSessionAPIOptions,
+    SignInAPIOptions,
+    SignOutAPIOptions,
+} from "@aura-stack/auth"
 
-/**
- * @todo: fix bug related to rendered statically
- * @see https://nextjs.org/docs/messages/dynamic-server-error
- */
-const client = createClient({
-    baseURL: typeof window !== "undefined" ? window.location.origin : (process.env.AUTH_URL ?? "http://localhost:3000"),
-    basePath: "/auth",
-    cache: "no-store",
-    credentials: "include",
-})
-
-export const getCSRFToken = async (): Promise<string | null> => {
-    try {
-        const response = await client.get("/csrfToken", {
-            headers: await headers(),
-        })
-        if (!response.ok) return null
-        const json = await response.json()
-        return json && json?.csrfToken ? json.csrfToken : null
-    } catch (error) {
-        console.log("[error:server] getCSRFToken", error)
-        return null
-    }
-}
-
-export const getSession = async (): Promise<Session | null> => {
+export const getSession = async (options?: GetSessionAPIOptions): Promise<Session | null> => {
     try {
         const session = await api.getSession({
             headers: await headers(),
+            ...options,
         })
         if (!session.authenticated) {
             return null
@@ -48,17 +30,23 @@ export const getSession = async (): Promise<Session | null> => {
     }
 }
 
-export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
+export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions) => {
     "use server"
-    return redirect(`/api/auth/signIn/${provider}?${new URLSearchParams({ redirectTo: options?.redirectTo ?? "/" }).toString()}`)
+    const signIn = await api.signIn(provider, {
+        headers: await headers(),
+        ...options,
+        redirect: false,
+    })
+    return redirect(signIn.signInURL)
 }
 
-export const signOut = async (options?: SignOutOptions) => {
+export const signOut = async (options?: SignOutAPIOptions) => {
     "use server"
     try {
         const cookieStore = await cookies()
         const response = await api.signOut({
             headers: await headers(),
+            ...options,
         })
         if (response.status === 202) {
             const setCookies = response.headers.getSetCookie()
@@ -68,7 +56,7 @@ export const signOut = async (options?: SignOutOptions) => {
             }
             refresh()
             revalidatePath("/", "layout")
-            redirect(options?.redirectTo ?? "/", RedirectType.replace)
+            redirect(options?.redirectTo ?? "/")
         }
         return response.json()
     } catch (error) {

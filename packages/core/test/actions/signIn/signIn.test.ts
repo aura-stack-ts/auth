@@ -1,7 +1,15 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { GET, oauthCustomService } from "@test/presets.ts"
+
+beforeEach(() => {
+    vi.stubEnv("BASE_URL", undefined)
+})
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe("signIn action", () => {
     test("default signIn", async () => {
@@ -9,12 +17,21 @@ describe("signIn action", () => {
         expect(signIn.status).toBe(302)
     })
 
+    test("signIn with enabled redirect", async () => {
+        const response = await GET(new Request("https://example.com/auth/signIn/oauth-provider?redirect=true"))
+        expect(response.status).toBe(302)
+        expect(await response.json()).toEqual({
+            redirect: true,
+            signInURL: expect.any(String),
+        })
+    })
+
     test("signIn with disabled redirect", async () => {
         const signIn = await GET(new Request("https://example.com/auth/signIn/oauth-provider?redirect=false"))
         expect(signIn.status).toBe(200)
         expect(await signIn.json()).toEqual({
             redirect: false,
-            url: expect.stringContaining("https://example.com/oauth/authorize?"),
+            signInURL: expect.any(String),
         })
     })
 

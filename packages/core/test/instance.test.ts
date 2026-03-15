@@ -1,5 +1,13 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
 import { createAuth } from "@/createAuth.ts"
+
+beforeEach(() => {
+    vi.stubEnv("BASE_URL", undefined)
+})
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe("createAuth", () => {
     describe("handlers.ALL", () => {

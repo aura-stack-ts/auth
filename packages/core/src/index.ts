@@ -22,4 +22,7 @@ export type {
     LiteralUnion,
     AuthAPI,
     Prettify,
+    GetSessionAPIOptions,
+    SignInAPIOptions,
+    SignOutAPIOptions,
 } from "@/@types/index.ts"

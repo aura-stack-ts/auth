@@ -1,9 +1,17 @@
-import { describe, expect, test } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { oauthCustomService } from "@test/presets.ts"
-import { createRedirectTo, createRedirectURI, getOriginURL } from "@/actions/signIn/authorization.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
+import { createRedirectTo, createRedirectURI, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { OAuthProviderCredentials } from "@/@types/index.ts"
 import type { GlobalContext } from "@aura-stack/router/types"
+
+beforeEach(() => {
+    vi.stubEnv("BASE_URL", undefined)
+})
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe("createRedirectURI", () => {
     const testCases = [
@@ -66,6 +74,8 @@ describe("createRedirectURI", () => {
 })
 
 describe("createAuthorizationURL", () => {
+    vi.stubEnv("BASE_URL", undefined)
+
     describe("valid OAuth configuration", () => {
         test("valid OAuth configuration with all fields", async () => {
             const { authorization } = await createAuthorizationURL(
@@ -648,5 +658,68 @@ describe("getOriginURL", () => {
                 await expect(getOriginURL(request, { trustedOrigins, trustedProxyHeaders } as GlobalContext)).rejects.toThrow()
             })
         }
+    })
+})
+
+describe("getBaseURL", () => {
+    const testCases = [
+        {
+            description: "baseURL from request URL",
+            request: new Request("https://example.com/auth/signIn/github"),
+            trustedProxyHeaders: false,
+            expected: "https://example.com",
+        },
+        {
+            description: "baseURL from request URL with trustedProxyHeaders",
+            request: new Request("https://example.com/auth/signIn/github", {
+                headers: {
+                    "X-Forwarded-Proto": "https",
+                    "X-Forwarded-Host": "example.com",
+                },
+            }),
+            trustedProxyHeaders: true,
+            expected: "https://example.com",
+        },
+        {
+            description: "baseURL from request URL with trusted proxy headers and localhost",
+            request: new Request("http://localhost:3000/auth/signIn/github", {
+                headers: {
+                    "X-Forwarded-Proto": "http",
+                    "X-Forwarded-Host": "localhost:4000",
+                },
+            }),
+            trustedProxyHeaders: true,
+            expected: "http://localhost:4000",
+        },
+        {
+            description: "baseURL from request object with trustedProxyHeaders and priority headers",
+            request: new Request("https://example.com/auth/signIn/github", {
+                headers: {
+                    Forwarded: "proto=https;host=example.com",
+                    "X-Forwarded-Proto": "http",
+                    "X-Forwarded-Host": "malicious.com",
+                },
+            }),
+            trustedProxyHeaders: true,
+            expected: "https://example.com",
+        },
+    ]
+
+    for (const { description, request, trustedProxyHeaders, expected } of testCases) {
+        test(description, async () => {
+            const baseURL = await getBaseURL({ request, ctx: { trustedProxyHeaders } as GlobalContext })
+            expect(baseURL).toBe(expected)
+        })
+    }
+
+    test("with BASE_URL environment variable", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const baseURL = await getBaseURL({})
+        expect(baseURL).toBe("https://example.com")
+    })
+
+    test("with baseURL in context", async () => {
+        const baseURL = await getBaseURL({ ctx: { baseURL: "https://example.com" } as GlobalContext })
+        expect(baseURL).toBe("https://example.com")
     })
 })
