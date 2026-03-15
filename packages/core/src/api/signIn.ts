@@ -5,9 +5,20 @@ import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createRedirectTo, createRedirectURI, getBaseURL } from "@/actions/signIn/authorization.ts"
 import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions } from "@/@types/index.ts"
 
+/**
+ * Initiates the sign-in flow on the server. Called when the client invokes the `signIn` API route.
+ * By default, it redirects to the authorization URL. If the `redirect` option is set to `false`,
+ * it returns a JSON response containing the authorization URL, allowing the client to handle redirection.
+ * @experimental This API is not finalized.
+ * @example
+ * const response = await api.signIn("github", {
+ *   redirect: true,
+ *   headers: await getAuthHeaders(),
+ * })
+ */
 export const signIn = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
-    { ctx, headers: headersInit, redirectTo, redirect, request: requestInit }: FunctionAPIContext<SignInAPIOptions>
+    { ctx, headers: headersInit, redirectTo, redirect = true, request: requestInit }: FunctionAPIContext<SignInAPIOptions>
 ) => {
     const headers = new Headers(headersInit)
     const provider = ctx.oauth[oauth]
@@ -17,7 +28,7 @@ export const signIn = async (
 
     let request = requestInit
     if (!request) {
-        const origin = await getBaseURL({ ctx: ctx })
+        const origin = await getBaseURL({ ctx: ctx, headers })
         const url = `${origin}${ctx.basePath}/signIn/${oauth}`
         request = new Request(url, { headers })
     }

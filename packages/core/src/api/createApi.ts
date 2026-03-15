@@ -18,14 +18,14 @@ export const createAPI = (ctx: GlobalContext) => {
             const session = await getSession({ ctx, headers: options.headers })
             return session
         },
-        signIn: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options: SignInAPIOptions) => {
+        signIn: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions) => {
             const redirectTo = validateRedirectTo(options?.redirectTo ?? "/")
             return signIn(oauth, {
                 ctx,
-                headers: options.headers,
-                redirect: options.redirect,
+                headers: options?.headers,
+                redirect: options?.redirect,
                 redirectTo,
-                request: options.request,
+                request: options?.request,
             })
         },
         signOut: async (options: SignOutAPIOptions) => {

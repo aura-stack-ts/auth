@@ -212,6 +212,10 @@ export interface AuthConfig {
      */
     secret?: string
     /**
+     * Base URL of the application, used to construct the incoming request's origin.
+     */
+    baseURL?: string
+    /**
      * Base path for all authentication routes. Default is `/auth`.
      */
     basePath?: `/${string}`
@@ -280,6 +284,7 @@ export interface RouterGlobalContext {
     cookies: CookieStoreConfig
     jose: JoseInstance
     secret?: string
+    baseURL?: string
     basePath: string
     trustedProxyHeaders: boolean
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
@@ -417,7 +422,7 @@ export interface SignOutAPIOptions {
 }
 
 export interface SignInAPIOptions {
-    headers: HeadersInit
+    headers?: HeadersInit
     redirect?: boolean
     redirectTo?: string
     request?: Request

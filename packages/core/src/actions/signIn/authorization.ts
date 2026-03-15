@@ -14,11 +14,19 @@ export const getTrustedOrigins = async (request: Request, trustedOrigins: AuthCo
     return Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : []
 }
 
-export const getBaseURL = async ({ ctx, request }: { ctx?: GlobalContext; request?: Request }) => {
-    const origin = getEnv("BASE_URL")
+export const getBaseURL = async ({
+    ctx,
+    request,
+    headers: headersInit,
+}: {
+    ctx?: GlobalContext
+    request?: Request
+    headers?: HeadersInit
+}) => {
+    const origin = getEnv("BASE_URL") || ctx?.baseURL
     if (origin) return origin
     if (ctx?.trustedProxyHeaders) {
-        const headers = request?.headers
+        const headers = (headersInit && new Headers(headersInit)) || request?.headers
         const protocol = headers?.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? headers?.get("X-Forwarded-Proto") ?? "http"
         const host =
             headers?.get("Host") ??
