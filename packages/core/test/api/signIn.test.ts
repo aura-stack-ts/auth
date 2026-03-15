@@ -34,6 +34,7 @@ describe("signIn API", () => {
             baseURL: "https://example.com",
         }).api
         const response = await api.signIn("oauth-provider")
+        expect(response.status).toBe(302)
         const searchParams = new URL(response.headers.get("Location")!).searchParams
         expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
     })
@@ -49,6 +50,7 @@ describe("signIn API", () => {
                 "X-Forwarded-Host": "example.com",
             },
         })
+        expect(response.status).toBe(302)
         const searchParams = new URL(response.headers.get("Location")!).searchParams
         expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
     })
@@ -72,13 +74,28 @@ describe("signIn API", () => {
     test("signIn with disabled redirect", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const response = await api.signIn("oauth-provider", { redirect: false })
-        expect(response.status).toBe(200)
-        const data = await response.json()
-        expect(data).toEqual({
+        const response = await api.signIn("oauth-provider", {
             redirect: false,
-            url: expect.any(String),
         })
+        expect(response).toEqual({
+            redirect: false,
+            signInURL: expect.any(String),
+        })
+    })
+
+    test("signIn with asResponse", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const response = await api.signIn("oauth-provider", {
+            redirect: true,
+        })
+        expect(response).toBeInstanceOf(Response)
+        expect(response.status).toBe(302)
+        expect(await response.json()).toEqual({
+            redirect: true,
+            signInURL: expect.any(String),
+        })
+        expect(getSetCookie(response, "aura-auth.state")).toBeDefined()
     })
 
     test("signIn with valid redirectTo", async () => {

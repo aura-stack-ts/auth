@@ -421,9 +421,9 @@ export interface SignOutAPIOptions {
     skipCSRFCheck?: boolean
 }
 
-export interface SignInAPIOptions {
+export interface SignInAPIOptions<Redirect extends boolean = boolean> {
     headers?: HeadersInit
-    redirect?: boolean
+    redirect?: Redirect
     redirectTo?: string
     request?: Request
 }
@@ -431,3 +431,11 @@ export interface SignInAPIOptions {
 export type FunctionAPIContext<Options extends object> = {
     ctx: RouterGlobalContext
 } & Options
+
+export type SignOutReturn<Redirect extends boolean = boolean> = Redirect extends true
+    ? Response
+    : { redirect: false; signInURL: string }
+
+export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
+    ? Response
+    : { redirect: false; signInURL: string }

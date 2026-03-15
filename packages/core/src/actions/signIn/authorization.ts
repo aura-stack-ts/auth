@@ -73,6 +73,23 @@ export const createRedirectURI = async (request: Request, oauth: string, context
     return `${origin}${context.basePath}/callback/${oauth}`
 }
 
+export const createSignInURL = async ({
+    request,
+    oauth,
+    ctx,
+    redirectTo,
+}: {
+    request: Request
+    oauth: string
+    ctx: GlobalContext
+    redirectTo?: string
+}) => {
+    const origin = await getOriginURL(request, ctx)
+    const searchParams = new URLSearchParams()
+    if (redirectTo !== undefined) searchParams.set("redirectTo", String(redirectTo))
+    return `${origin}${ctx.basePath}/signIn/${oauth}?${searchParams.toString()}`
+}
+
 /**
  * Verifies if the request's origin matches the expected origin. It accepts the redirectTo search
  * parameter for redirection. It checks the Referer and Origin headers and the request URL against

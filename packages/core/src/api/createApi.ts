@@ -9,6 +9,7 @@ import type {
     GetSessionAPIOptions,
     SessionResponse,
     SignInAPIOptions,
+    SignInReturn,
     SignOutAPIOptions,
 } from "@/@types/index.ts"
 
@@ -18,12 +19,15 @@ export const createAuthAPI = (ctx: GlobalContext) => {
             const session = await getSession({ ctx, headers: options.headers })
             return session
         },
-        signIn: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions) => {
-            return signIn(oauth, {
+        signIn: async <Redirect extends boolean = true>(
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: SignInAPIOptions<Redirect>
+        ): Promise<SignInReturn<Redirect>> => {
+            return signIn<Redirect>(oauth, {
                 ctx,
                 headers: options?.headers,
                 request: options?.request,
-                redirect: options?.redirect,
+                redirect: (options?.redirect ?? true) as Redirect,
                 redirectTo: options?.redirectTo,
             })
         },

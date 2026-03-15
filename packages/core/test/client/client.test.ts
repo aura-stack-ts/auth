@@ -87,7 +87,7 @@ describe("createAuthClient", () => {
     })
 
     test("signIn with redirectTo option", async () => {
-        const get = vi.fn().mockResolvedValue(createJSONResponse({ url: "https://example.com/oauth" }))
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ signInURL: "https://example.com/oauth" }))
 
         createClientMock.mockReturnValue({
             get,
@@ -103,11 +103,11 @@ describe("createAuthClient", () => {
                 redirectTo: "/dashboard",
             },
         })
-        expect(response).toEqual({ url: "https://example.com/oauth" })
+        expect(response).toEqual({ signInURL: "https://example.com/oauth" })
     })
 
     test("signIn with redirect option", async () => {
-        const get = vi.fn().mockResolvedValue(createJSONResponse({ url: "https://example.com/oauth" }))
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ signInURL: "https://example.com/oauth" }))
 
         createClientMock.mockReturnValue({
             get,
@@ -123,7 +123,7 @@ describe("createAuthClient", () => {
                 redirectTo: "/dashboard",
             },
         })
-        expect(response).toEqual({ url: "https://example.com/oauth" })
+        expect(response).toEqual({ signInURL: "https://example.com/oauth" })
     })
 
     test("signOut", async () => {

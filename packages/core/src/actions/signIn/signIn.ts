@@ -13,7 +13,7 @@ const signInConfig = (oauth: OAuthProviderRecord) => {
                 ),
             }),
             searchParams: z.object({
-                redirect: z.stringbool().default(true).optional(),
+                redirect: z.stringbool().default(true).optional().default(true),
                 redirectTo: z.string().optional(),
             }),
         },
@@ -32,13 +32,17 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
                 context,
             } = ctx
 
-            return await signIn(oauth, {
+            const signInResult = await signIn(oauth, {
                 ctx: context,
                 headers: request.headers,
                 redirect,
                 redirectTo,
                 request,
             })
+            if (!redirect) {
+                return Response.json(signInResult, { status: 200 })
+            }
+            return signInResult as Response
         },
         signInConfig(oauth)
     )
