@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added support for defining the base URL through the `BASE_URL` environment variable or the `baseURL` option in `createAuth`. This value is used to construct the incoming URL. [#117](https://github.com/aura-stack-ts/auth/pull/117)
+
+- Added a `signIn` server function to the `createAuth.api` object to initialize an OAuth sign-in flow on the server. [#117](https://github.com/aura-stack-ts/auth/pull/117)
+
 - Introduced an `ALL` HTTP handler that consolidates `GET` and `POST` handling into a single entry point for backend applications. [#115](https://github.com/aura-stack-ts/auth/pull/115)
 
 - Introduced the `createAuthClient` API, enabling applications to interact with Aura Auth endpoints through a dedicated client interface with built-in `getSession`, `signIn`, and `signOut` functions. [#114](https://github.com/aura-stack-ts/auth/pull/114)
