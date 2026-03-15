@@ -717,4 +717,9 @@ describe("getBaseURL", () => {
         const baseURL = await getBaseURL({})
         expect(baseURL).toBe("https://example.com")
     })
+
+    test("with baseURL in context", async () => {
+        const baseURL = await getBaseURL({ ctx: { baseURL: "https://example.com" } as GlobalContext })
+        expect(baseURL).toBe("https://example.com")
+    })
 })
