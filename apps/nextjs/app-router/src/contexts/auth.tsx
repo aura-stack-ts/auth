@@ -16,7 +16,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
         setIsLoading(true)
         try {
-            return await authClient.signIn(provider, options)
+            return await authClient.signIn(provider, { redirect: true, ...options })
         } finally {
             setIsLoading(false)
         }

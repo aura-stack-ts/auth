@@ -7,4 +7,5 @@ export const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.
 export const { handlers, jose, api }: AuthInstance = createAuth({
     oauth,
     basePath: "/api/auth",
+    trustedProxyHeaders: true,
 })

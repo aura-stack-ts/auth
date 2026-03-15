@@ -1,5 +1,5 @@
 import type { Session } from "@aura-stack/auth"
-import type { authClient } from "~/actions/auth.client"
+import type { authClient } from "~/actions/auth-client"
 
 export interface AuthContextValue {
     session: Session | null
