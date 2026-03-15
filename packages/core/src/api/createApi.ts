@@ -12,20 +12,19 @@ import type {
     SignOutAPIOptions,
 } from "@/@types/index.ts"
 
-export const createAPI = (ctx: GlobalContext) => {
+export const createAuthAPI = (ctx: GlobalContext) => {
     return {
         getSession: async (options: GetSessionAPIOptions): Promise<SessionResponse> => {
             const session = await getSession({ ctx, headers: options.headers })
             return session
         },
         signIn: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions) => {
-            const redirectTo = validateRedirectTo(options?.redirectTo ?? "/")
             return signIn(oauth, {
                 ctx,
                 headers: options?.headers,
-                redirect: options?.redirect,
-                redirectTo,
                 request: options?.request,
+                redirect: options?.redirect,
+                redirectTo: options?.redirectTo,
             })
         },
         signOut: async (options: SignOutAPIOptions) => {

@@ -33,7 +33,11 @@ export const getBaseURL = async ({
             headers?.get("Forwarded")?.match(/host=([^;]+)/i)?.[1] ??
             headers?.get("X-Forwarded-Host") ??
             null
-        return `${protocol}://${host}`
+        if (host) return `${protocol}://${host}`
+        throw new AuthInternalError(
+            "INVALID_OAUTH_CONFIGURATION",
+            "The URL cannot be constructed. Please set the BASE_URL environment variable or provide trusted proxy host headers."
+        )
     }
     try {
         return new URL(request?.url ?? "not-found").origin
@@ -68,8 +72,6 @@ export const createRedirectURI = async (request: Request, oauth: string, context
     const origin = await getOriginURL(request, context)
     return `${origin}${context.basePath}/callback/${oauth}`
 }
-
-export const unstable_createRedirectURI = async ({}) => {}
 
 /**
  * Verifies if the request's origin matches the expected origin. It accepts the redirectTo search
