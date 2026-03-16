@@ -21,7 +21,7 @@ export const createAuthServer = async (context: AuthServerContext) => {
             if (!session.authenticated) return null
             return session.session
         } catch (error) {
-            console.log("[error:server] getSession", error)
+            console.error("[error:server] getSession", error)
             return null
         }
     }
@@ -42,7 +42,7 @@ export const createAuthServer = async (context: AuthServerContext) => {
             const json = await response.json()
             return json
         } catch (error) {
-            console.log("[error:server] signOut", error)
+            console.error("[error:server] signOut", error)
             return null
         }
     }

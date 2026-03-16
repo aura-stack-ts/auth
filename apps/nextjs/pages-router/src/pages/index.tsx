@@ -66,7 +66,7 @@ export default function Home({ session }: InferGetServerSidePropsType<typeof get
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <div className="py-3 px-2 border border-muted rounded-md space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-mono italic">client session active</span>
+                                            <span className="text-xs font-mono italic">server session active</span>
                                             <LayoutDashboard className="size-4 text-foreground" />
                                         </div>
                                         <div className="flex items-center gap-4">

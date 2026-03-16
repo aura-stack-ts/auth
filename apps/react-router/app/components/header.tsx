@@ -10,7 +10,7 @@ export const Header = () => {
     const { isAuthenticated, isLoading, signOut, signIn } = useAuth()
 
     const handleSignOut = async () => {
-        signOut()
+        await signOut()
         revalidator.revalidate()
     }
 

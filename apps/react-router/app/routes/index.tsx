@@ -1,6 +1,6 @@
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { AuthClient } from "~/components/auth-client"
-import { getSession, signOut } from "~/actions/auth-server"
+import { getSession, signIn, signOut } from "~/actions/auth-server"
 import { Form } from "react-router"
 import { Button } from "~/components/ui/button"
 import type { Route } from "./+types/index"
@@ -14,7 +14,11 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const formData = await request.formData()
     const action = formData.get("action")
     if (action === "signOut") {
-        return await signOut(request, { redirectTo: "/profile" })
+        return await signOut(request)
+    } else if (action === "signIn") {
+        return await signIn(formData.get("provider") as string, {
+            request,
+        })
     }
     return null
 }
@@ -69,7 +73,7 @@ const IndexPage = ({ loaderData }: Route.ComponentProps) => {
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <div className="py-3 px-2 border border-muted rounded-md space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-mono italic">client session active</span>
+                                            <span className="text-xs font-mono italic">server session active</span>
                                             <LayoutDashboard className="size-4 text-foreground" />
                                         </div>
                                         <div className="flex items-center gap-4">
@@ -105,17 +109,18 @@ const IndexPage = ({ loaderData }: Route.ComponentProps) => {
                                         </p>
                                         <div className="flex flex-col gap-y-2">
                                             {["Github", "Gitlab", "Bitbucket"].map((provider) => (
-                                                <div className="w-full" key={provider}>
+                                                <Form className="w-full" method="post" key={provider}>
+                                                    <input type="hidden" name="provider" value={provider.toLowerCase()} />
                                                     <Button
-                                                        type="button"
                                                         className="w-full rounded-none"
                                                         variant="outline"
                                                         size="sm"
-                                                        //onClick={() => signIn(provider.toLowerCase())}
+                                                        name="action"
+                                                        value="signIn"
                                                     >
                                                         Sign In with {provider}
                                                     </Button>
-                                                </div>
+                                                </Form>
                                             ))}
                                         </div>
                                     </div>

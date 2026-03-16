@@ -50,13 +50,13 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
         fetchSession()
     }, [defaultSession])
 
-    return <AuthContext value={{ session, setSession, isAuthenticated, isLoading, signIn, signOut }}>{children}</AuthContext>
+    return <AuthContext value={{ session, isAuthenticated, isLoading, signIn, signOut }}>{children}</AuthContext>
 }
 
-export const useSession = () => {
+export const useAuth = () => {
     const ctx = use(AuthContext)
     if (!ctx) {
-        throw new Error("useSession must be used within an <AuthProvider /> component.")
+        throw new Error("useAuth must be used within an <AuthProvider /> component.")
     }
     return ctx
 }

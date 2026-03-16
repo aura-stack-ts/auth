@@ -11,7 +11,7 @@ export const getSession = async (request: Request, options?: GetSessionAPIOption
         if (!session.authenticated) return null
         return session.session
     } catch (error) {
-        console.log("[error:server] getSession", error)
+        console.error("[error:server] getSession", error)
         return null
     }
 }
@@ -27,14 +27,15 @@ export const signOut = async (request: Request, options?: Omit<SignOutAPIOptions
             ...options,
         })
         if (response.ok) {
-            throw redirect(options?.redirectTo ?? "/", {
+            return redirect(options?.redirectTo ?? "/", {
                 headers: response.headers,
             })
         }
         const json = await response.json()
         return json
     } catch (error) {
-        console.log("[error:server] signOut", error)
+        if (error instanceof Response) throw error
+        console.error("[error:server] signOut", error)
         return null
     }
 }

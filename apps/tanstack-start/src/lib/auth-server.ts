@@ -1,6 +1,7 @@
 import { api } from "@/auth"
+import { redirect } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
-import { getRequestHeaders, setResponseHeaders } from "@tanstack/react-start/server"
+import { getRequest, getRequestHeaders } from "@tanstack/react-start/server"
 
 export const getSession = createServerFn({ method: "GET" }).handler(async () => {
     try {
@@ -10,21 +11,36 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
         if (!session.authenticated) return null
         return session.session as any
     } catch (error) {
-        console.log("[error:server] getSession", error)
+        console.error("[error:server] getSession", error)
         return null
     }
 })
 
-export const signOut = createServerFn({ method: "POST" }).handler(async () => {
+export const signOutFn = createServerFn({ method: "POST" }).handler(async () => {
     try {
         const response = await api.signOut({
             headers: getRequestHeaders(),
         })
-        setResponseHeaders(response.headers)
-        const json = await response.json()
-        return json
+        return redirect({ to: "/", headers: response.headers, reloadDocument: true })
     } catch (error) {
-        console.log("[error:server] signOut", error)
+        console.error("[error:server] signOut", error)
         return null
     }
 })
+
+export const signInFn = createServerFn({ method: "POST" })
+    .inputValidator((data: { provider: string }) => data)
+    .handler(async ({ data }) => {
+        try {
+            const response = await api.signIn(data.provider, {
+                request: getRequest(),
+                redirect: false,
+            })
+            return redirect({
+                href: response.signInURL,
+            })
+        } catch (error) {
+            console.error("[error:server] signIn", error)
+            return null
+        }
+    })

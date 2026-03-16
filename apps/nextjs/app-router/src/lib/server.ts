@@ -24,7 +24,7 @@ export const getSession = async (options?: GetSessionAPIOptions): Promise<Sessio
         }
         return session.session
     } catch {
-        console.log("[error:server] getSession - Failed to retrieve session")
+        console.error("[error:server] getSession - Failed to retrieve session")
         return null
     }
 }
@@ -58,6 +58,6 @@ export const signOut = async (options?: SignOutAPIOptions) => {
         return response.json()
     } catch (error) {
         if (isRedirectError(error)) throw error
-        console.log("[error:server] signOut", error)
+        console.error("[error:server] signOut", error)
     }
 }
