@@ -1,5 +1,3 @@
-"use client"
-
 import { useAuth } from "@/contexts/auth"
 import { LayoutDashboard } from "lucide-react"
 import { Button } from "./ui/button"
@@ -8,7 +6,7 @@ export const AuthClient = () => {
     const { session, isAuthenticated, isLoading, signIn, signOut } = useAuth()
 
     return (
-        <div className="w-full p-6 pr-3 bg-black md:py-10">
+        <div className="w-full p-6 bg-black md:py-10">
             <div className="w-full p-6 relative space-y-6 border border-muted border-dashed">
                 <span className="px-2 text-xs font-mono italic absolute -top-2 left-3 bg-green-600">Client Component</span>
                 {isAuthenticated ? (

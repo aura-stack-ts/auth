@@ -17,7 +17,13 @@ import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIO
  */
 export const signIn = async <Redirect extends boolean = true>(
     oauth: LiteralUnion<BuiltInOAuthProvider>,
-    { ctx, headers: headersInit, redirectTo, redirect, request: requestInit }: FunctionAPIContext<SignInAPIOptions<Redirect>>
+    {
+        ctx,
+        headers: headersInit,
+        redirectTo = "/",
+        redirect,
+        request: requestInit,
+    }: FunctionAPIContext<SignInAPIOptions<Redirect>>
 ): Promise<SignInReturn<Redirect>> => {
     const headers = new Headers(headersInit)
     const provider = ctx.oauth[oauth]

@@ -1,9 +1,8 @@
 "use server"
 
+import { api } from "@/auth"
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
-import { api } from "@/auth"
-import { refresh, revalidatePath } from "next/cache"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import type {
     Session,
@@ -54,8 +53,6 @@ export const signOut = async (options?: SignOutAPIOptions) => {
                 const nameMatch = cookie.match(/^([^=]+)=/)
                 nameMatch && cookieStore.delete(nameMatch[1])
             }
-            refresh()
-            revalidatePath("/", "layout")
             redirect(options?.redirectTo ?? "/")
         }
         return response.json()

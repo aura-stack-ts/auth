@@ -20,14 +20,14 @@ export const signIn = async (providerId: string, options?: SignInAPIOptions) => 
     return await api.signIn(providerId, options)
 }
 
-export const signOut = async (request: Request, options?: SignOutAPIOptions) => {
+export const signOut = async (request: Request, options?: Omit<SignOutAPIOptions, "headers">) => {
     try {
         const response = await api.signOut({
             headers: request.headers,
             ...options,
         })
-        if (response.status === 202) {
-            return redirect(options?.redirectTo ?? "/", {
+        if (response.ok) {
+            throw redirect(options?.redirectTo ?? "/", {
                 headers: response.headers,
             })
         }

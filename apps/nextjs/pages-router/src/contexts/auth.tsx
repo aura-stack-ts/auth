@@ -67,7 +67,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     )
 }
 
-export const useAuthClient = () => {
+export const useAuth = () => {
     const ctx = use(AuthContext)
     if (!ctx) {
         throw new Error("useAuth must be used within an AuthProvider")

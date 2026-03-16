@@ -1,8 +1,8 @@
+import { Fingerprint, LayoutDashboard } from "lucide-react"
+import { AuthClient } from "~/components/auth-client"
+import { getSession, signOut } from "~/actions/auth-server"
 import { Form } from "react-router"
 import { Button } from "~/components/ui/button"
-import { AuthClient } from "~/components/auth-client"
-import { Fingerprint, LayoutDashboard } from "lucide-react"
-import { getSession, signIn } from "~/actions/auth-server"
 import type { Route } from "./+types/index"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
@@ -10,9 +10,14 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     return { session }
 }
 
-//export const action = async ({ request }: Route.ActionArgs) => {
-//    await signOut(request)
-//}
+export const action = async ({ request }: Route.ActionArgs) => {
+    const formData = await request.formData()
+    const action = formData.get("action")
+    if (action === "signOut") {
+        return await signOut(request, { redirectTo: "/profile" })
+    }
+    return null
+}
 
 const IndexPage = ({ loaderData }: Route.ComponentProps) => {
     const { session } = loaderData
@@ -85,7 +90,7 @@ const IndexPage = ({ loaderData }: Route.ComponentProps) => {
                                             </div>
                                         </div>
                                         <Form method="post">
-                                            <Button type="button" variant="outline" size="sm">
+                                            <Button variant="outline" size="sm" name="action" value="signOut">
                                                 Sign Out
                                             </Button>
                                         </Form>
@@ -106,7 +111,7 @@ const IndexPage = ({ loaderData }: Route.ComponentProps) => {
                                                         className="w-full rounded-none"
                                                         variant="outline"
                                                         size="sm"
-                                                        onClick={() => signIn(provider.toLowerCase())}
+                                                        //onClick={() => signIn(provider.toLowerCase())}
                                                     >
                                                         Sign In with {provider}
                                                     </Button>

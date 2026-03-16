@@ -1,5 +1,5 @@
 import { createContext, use, useState, useEffect } from "react"
-import { authClient } from "~/actions/auth-client"
+import { authClient } from "~/actions/auth.client"
 import type { Session, LiteralUnion, BuiltInOAuthProvider, SignInOptions, SignOutOptions } from "@aura-stack/auth"
 import type { AuthContextValue } from "~/@types/types"
 import type { AuthProviderProps } from "~/@types/props"
@@ -14,8 +14,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
         setIsLoading(true)
         try {
-            const value =  await authClient.signIn(provider, { redirect: true, ...options })
-            console.log("SignIn Result:", value)
+            return await authClient.signIn(provider, options)
         } finally {
             setIsLoading(false)
         }
@@ -54,7 +53,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     return <AuthContext value={{ session, isAuthenticated, isLoading, signIn, signOut }}>{children}</AuthContext>
 }
 
-export const useAuthClient = () => {
+export const useAuth = () => {
     const ctx = use(AuthContext)
     if (!ctx) {
         throw new Error("useAuth must be used within an AuthProvider")

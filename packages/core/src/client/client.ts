@@ -56,7 +56,7 @@ export const createAuthClient = (options: AuthClientOptions) => {
                     oauth,
                 },
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    ...options,
                     redirect: false,
                 },
             })

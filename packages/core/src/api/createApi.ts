@@ -27,7 +27,7 @@ export const createAuthAPI = (ctx: GlobalContext) => {
                 ctx,
                 headers: options?.headers,
                 request: options?.request,
-                redirect: (options?.redirect ?? true) as Redirect,
+                redirect: options?.redirect,
                 redirectTo: options?.redirectTo,
             })
         },

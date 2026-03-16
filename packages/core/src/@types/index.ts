@@ -432,10 +432,6 @@ export type FunctionAPIContext<Options extends object> = {
     ctx: RouterGlobalContext
 } & Options
 
-export type SignOutReturn<Redirect extends boolean = boolean> = Redirect extends true
-    ? Response
-    : { redirect: false; signInURL: string }
-
 export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
     ? Response
     : { redirect: false; signInURL: string }

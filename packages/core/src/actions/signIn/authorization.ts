@@ -24,7 +24,7 @@ export const getBaseURL = async ({
     headers?: HeadersInit
 }) => {
     const origin = getEnv("BASE_URL") || ctx?.baseURL
-    if (origin) return origin
+    if (origin && origin !== "/") return origin
     if (ctx?.trustedProxyHeaders) {
         const headers = (headersInit && new Headers(headersInit)) || request?.headers
         const protocol = headers?.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? headers?.get("X-Forwarded-Proto") ?? "http"
@@ -41,10 +41,11 @@ export const getBaseURL = async ({
     }
     try {
         return new URL(request?.url ?? "not-found").origin
-    } catch {
+    } catch (error) {
         throw new AuthInternalError(
             "INVALID_OAUTH_CONFIGURATION",
-            "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders."
+            "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
+            { cause: error }
         )
     }
 }

@@ -1,11 +1,9 @@
-"use client"
-
-import { useAuthClient } from "~/contexts/auth"
+import { useAuth } from "~/contexts/auth"
 import { LayoutDashboard } from "lucide-react"
 import { Button } from "~/components/ui/button"
 
 export const AuthClient = () => {
-    const { session, isAuthenticated, isLoading, signIn, signOut } = useAuthClient()
+    const { session, isAuthenticated, isLoading, signIn, signOut } = useAuth()
 
     return (
         <div className="w-full p-6 pr-3 bg-black md:py-10">

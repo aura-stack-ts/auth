@@ -13,7 +13,7 @@ const signInConfig = (oauth: OAuthProviderRecord) => {
                 ),
             }),
             searchParams: z.object({
-                redirect: z.stringbool().default(true).optional().default(true),
+                redirect: z.stringbool().optional().default(true),
                 redirectTo: z.string().optional(),
             }),
         },
