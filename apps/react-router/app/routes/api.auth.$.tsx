@@ -1,5 +1,5 @@
 import { handlers } from "~/auth"
-import type { Route } from "./+types/auth.$"
+import type { Route } from "./+types/api.auth.$"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
     return handlers.GET(request)

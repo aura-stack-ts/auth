@@ -56,18 +56,18 @@ export const createAuthClient = (options: AuthClientOptions) => {
                     oauth,
                 },
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    ...options,
                     redirect: false,
                 },
             })
             const json = await response.json()
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.url) {
-                window.location.assign(json.url)
+            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.signInURL) {
+                window.location.assign(json.signInURL)
             }
             return json
         } catch (error) {
             console.error("Error during sign-in:", error)
-            return { redirect: false, url: "/" }
+            return { redirect: false, signInURL: "/" }
         }
     }
 

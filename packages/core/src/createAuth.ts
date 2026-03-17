@@ -1,6 +1,6 @@
 import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { createContext } from "@/context.ts"
-import { createAPI } from "@/api/createApi.ts"
+import { createAuthAPI } from "@/api/createApi.ts"
 import { createErrorHandler, useSecureCookies } from "@/utils.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
 import type { AuthConfig, AuthInstance } from "@/@types/index.ts"
@@ -53,7 +53,7 @@ export const createAuthInstance = (authConfig: AuthConfig) => {
     return {
         handlers: router,
         jose: config.context.jose,
-        api: createAPI(config.context),
+        api: createAuthAPI(config.context),
     }
 }
 

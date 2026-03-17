@@ -1,26 +1,37 @@
-"use client"
-
-import { useAuth } from "@/contexts/auth"
 import { LayoutDashboard } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button } from "@/components/ui/button"
+import { useServerFn } from "@tanstack/react-start"
+import { signInFn, signOutFn } from "@/lib/auth-server"
+import { Route } from "@/routes/index"
 
-export const AuthClient = () => {
-    const { session, isAuthenticated, isLoading, signIn, signOut } = useAuth()
+export const AuthServer = () => {
+    const signIn = useServerFn(signInFn)
+    const signOut = useServerFn(signOutFn)
+    const { session } = Route.useLoaderData()
+    const isAuthenticated = Boolean(session?.user)
+
+    const handleSignIn = async (provider: string) => {
+        await signIn({ data: { provider } })
+    }
+
+    const handleSignOut = async () => {
+        await signOut()
+    }
 
     return (
-        <div className="w-full p-6 pr-3 bg-black md:py-10">
+        <div className="w-full p-6 pl-3 bg-black md:py-10">
             <div className="w-full p-6 relative space-y-6 border border-muted border-dashed">
-                <span className="px-2 text-xs font-mono italic absolute -top-2 left-3 bg-green-600">Client Component</span>
+                <span className="px-2 text-xs font-mono italic absolute -top-2 left-3 bg-blue-500">Server Component</span>
                 {isAuthenticated ? (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="py-3 px-2 border border-muted rounded-md space-y-3">
+                        <div className="py-3 px-2 border border-muted space-y-3">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-mono italic">client session active</span>
+                                <span className="text-xs font-mono italic">server session active</span>
                                 <LayoutDashboard className="size-4 text-foreground" />
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
-                                    <div className="h-full w-full rounded-full aspect-square bg-black flex items-center justify-center text-xl font-bold">
+                                    <div className="h-full w-full aspect-square rounded-full bg-black flex items-center justify-center text-xl font-bold">
                                         {session?.user?.name?.[0] || "?"}
                                     </div>
                                 </div>
@@ -35,7 +46,7 @@ export const AuthClient = () => {
                                     <span className="text-white/60 truncate max-w-37.5">{session?.user?.sub}</span>
                                 </div>
                             </div>
-                            <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={() => signOut()}>
+                            <Button className="rounded-none" variant="outline" size="sm" onClick={handleSignOut}>
                                 Sign Out
                             </Button>
                         </div>
@@ -49,18 +60,15 @@ export const AuthClient = () => {
                             </p>
                             <div className="flex flex-col gap-y-2">
                                 {["Github", "Gitlab", "Bitbucket"].map((provider) => (
-                                    <div className="w-full" key={provider}>
-                                        <Button
-                                            type="button"
-                                            className="w-full rounded-none"
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={isLoading}
-                                            onClick={() => signIn(provider.toLowerCase())}
-                                        >
-                                            Sign In with {provider}
-                                        </Button>
-                                    </div>
+                                    <Button
+                                        key={provider}
+                                        className="w-full rounded-none"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleSignIn(provider.toLowerCase())}
+                                    >
+                                        Sign In with {provider}
+                                    </Button>
                                 ))}
                             </div>
                         </div>

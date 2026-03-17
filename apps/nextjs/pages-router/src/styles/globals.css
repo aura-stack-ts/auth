@@ -137,3 +137,18 @@ code {
         @apply bg-background text-foreground;
     }
 }
+
+.box-auth {
+    @apply grid;
+    &[data-auth="false"] {
+        @apply w-11/12 max-w-5xl mx-auto border-x border-muted grid-cols-2;
+
+        & > :nth-child(1) {
+            @apply w-full max-w-full border-0;
+        }
+
+        & > :nth-child(2) {
+            @apply w-full max-w-full border-r-0 md:grid-cols-1;
+        }
+    }
+}

@@ -53,7 +53,7 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     return <AuthContext value={{ session, isAuthenticated, isLoading, signIn, signOut }}>{children}</AuthContext>
 }
 
-export const useAuthClient = () => {
+export const useAuth = () => {
     const ctx = use(AuthContext)
     if (!ctx) {
         throw new Error("useAuth must be used within an AuthProvider")

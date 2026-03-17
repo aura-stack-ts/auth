@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
-import { useSession } from "@/contexts/auth"
+import { useAuth } from "@/contexts/auth"
 import { Link } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 
 export const Header = () => {
-    const { isAuthenticated, isLoading, signOut } = useSession()
+    const { isAuthenticated, signOut } = useAuth()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     const handleSignOut = async () => {
@@ -24,6 +24,7 @@ export const Header = () => {
                             href="https://aura-stack-auth.vercel.app/docs"
                             className="text-sm text-white/60 hover:text-white transition-colors"
                             target="_blank"
+                            rel="noopener noreferrer"
                         >
                             Documentation
                         </a>
@@ -31,6 +32,7 @@ export const Header = () => {
                             href="https://github.com/aura-stack-ts/auth"
                             className="text-sm text-white/60 hover:text-white transition-colors"
                             target="_blank"
+                            rel="noopener noreferrer"
                         >
                             Repository
                         </a>
@@ -38,24 +40,20 @@ export const Header = () => {
                             href="https://discord.com/invite/anXExMR5"
                             className="text-sm text-white/60 hover:text-white transition-colors"
                             target="_blank"
+                            rel="noopener noreferrer"
                         >
                             Discord
                         </a>
                     </div>
                     {!isAuthenticated && (
-                        <Button className="hidden md:flex" variant="outline" size="sm" asChild>
-                            <Link to="/signIn">Sign In</Link>
-                        </Button>
+                        <a className="hidden md:flex" href="https://tanstack.com/" target="_blank" rel="noopener noreferrer">
+                            TanStack Start
+                        </a>
                     )}
                     {isAuthenticated && (
-                        <div className="hidden md:flex items-center gap-x-2">
-                            <Button variant="outline" size="sm" onClick={handleSignOut}>
-                                Sign Out
-                            </Button>
-                            <Button size="sm" asChild>
-                                <Link to="/users/profile">Profile</Link>
-                            </Button>
-                        </div>
+                        <Button className="hidden md:flex" variant="outline" size="sm" onClick={handleSignOut}>
+                            Sign Out
+                        </Button>
                     )}
                     <button
                         type="button"
@@ -70,17 +68,20 @@ export const Header = () => {
             {mobileMenuOpen && (
                 <div className="md:hidden bg-black/95 backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]">
                     <div className="px-6 py-4 flex flex-col gap-4">
-                        <Link
-                            to="/signIn"
-                            className="text-sm text-white/60 hover:text-white transition-colors py-2"
+                        <a
+                            href="https://aura-stack-auth.vercel.app/docs"
+                            className="text-sm text-white/60 hover:text-white transition-colors"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             onClick={() => setMobileMenuOpen(false)}
                         >
-                            Getting started
-                        </Link>
+                            Documentation
+                        </a>
                         <a
                             href="https://github.com/aura-stack-ts/auth"
                             className="text-sm text-white/60 hover:text-white transition-colors py-2"
                             target="_blank"
+                            rel="noopener noreferrer"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Repository
@@ -89,25 +90,16 @@ export const Header = () => {
                             href="https://discord.com/invite/anXExMR5"
                             className="text-sm text-white/60 hover:text-white transition-colors py-2"
                             target="_blank"
+                            rel="noopener noreferrer"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Discord
                         </a>
                         <div className="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
-                            {!isLoading && !isAuthenticated && (
-                                <Button type="button" variant="ghost" size="sm" asChild>
-                                    <Link to="/signIn">Sign in</Link>
-                                </Button>
-                            )}
                             {isAuthenticated && (
-                                <div className="flex flex-col items-center gap-y-3 md:hidden">
-                                    <Button className="w-full" variant="outline" size="sm" onClick={handleSignOut}>
-                                        Sign Out
-                                    </Button>
-                                    <Button className="w-full" size="sm" asChild>
-                                        <Link to="/users/profile">Profile</Link>
-                                    </Button>
-                                </div>
+                                <Button className="w-full" variant="outline" size="sm" onClick={handleSignOut}>
+                                    Sign Out
+                                </Button>
                             )}
                         </div>
                     </div>

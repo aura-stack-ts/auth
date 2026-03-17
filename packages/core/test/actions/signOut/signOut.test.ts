@@ -1,6 +1,14 @@
-import { describe, test, expect, vi } from "vitest"
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
 import { createCSRF } from "@/secure.ts"
 import { POST, jose, sessionPayload } from "@test/presets.ts"
+
+beforeEach(() => {
+    vi.stubEnv("BASE_URL", undefined)
+})
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe("signOut action", async () => {
     const csrf = await createCSRF(jose)

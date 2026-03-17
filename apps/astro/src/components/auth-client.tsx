@@ -1,10 +1,9 @@
-"use client"
-
-import { useAuth } from "@/contexts/auth"
 import { LayoutDashboard } from "lucide-react"
-import { Button } from "./ui/button"
+import { useAuth, AuthProvider } from "@/contexts/auth"
+import { Button } from "@/components/ui/button"
+import type { Session } from "@aura-stack/auth"
 
-export const AuthClient = () => {
+const AuthClientContent = () => {
     const { session, isAuthenticated, isLoading, signIn, signOut } = useAuth()
 
     return (
@@ -20,7 +19,7 @@ export const AuthClient = () => {
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
-                                    <div className="h-full w-full rounded-full aspect-square bg-black flex items-center justify-center text-xl font-bold">
+                                    <div className="h-full w-full rounded-full bg-black flex items-center justify-center text-xl font-bold">
                                         {session?.user?.name?.[0] || "?"}
                                     </div>
                                 </div>
@@ -68,5 +67,13 @@ export const AuthClient = () => {
                 )}
             </div>
         </div>
+    )
+}
+
+export const AuthClient = (props: { session?: Session | null }) => {
+    return (
+        <AuthProvider session={props.session}>
+            <AuthClientContent />
+        </AuthProvider>
     )
 }

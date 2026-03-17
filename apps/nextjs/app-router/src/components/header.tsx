@@ -3,12 +3,12 @@
 import Link from "next/link"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
-import { useAuthClient } from "@/contexts/auth"
+import { useAuth } from "@/contexts/auth"
 import { Button } from "@/components/ui/button"
 
 export const Header = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { isAuthenticated, isLoading, signOut, signIn } = useAuthClient()
+    const { isAuthenticated, isLoading, signOut, signIn } = useAuth()
 
     const handleSignOut = async () => {
         await signOut()

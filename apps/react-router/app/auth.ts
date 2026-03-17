@@ -1,9 +1,9 @@
-import { type AuthInstance, createAuth } from "@aura-stack/auth"
+import { createAuth } from "@aura-stack/auth"
 import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
 
 export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[]
 
-export const { handlers, jose, api }: AuthInstance = createAuth({
+export const { handlers, jose, api } = createAuth({
     oauth,
-    trustedProxyHeaders: true,
+    basePath: "/api/auth",
 })

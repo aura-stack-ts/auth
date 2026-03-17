@@ -1,16 +1,16 @@
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
-import { useAuthClient } from "~/contexts/auth"
+import { useAuth } from "~/contexts/auth"
 import { Button } from "~/components/ui/button"
 import { Link, useRevalidator } from "react-router"
 
 export const Header = () => {
     const revalidator = useRevalidator()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { isAuthenticated, isLoading, signOut, signIn } = useAuthClient()
+    const { isAuthenticated, isLoading, signOut, signIn } = useAuth()
 
     const handleSignOut = async () => {
-        signOut()
+        await signOut()
         revalidator.revalidate()
     }
 

@@ -1,12 +1,6 @@
-import { api } from "@/auth"
-import type {
-    Session,
-    LiteralUnion,
-    BuiltInOAuthProvider,
-    SignInAPIOptions,
-    SignOutAPIOptions,
-    GetSessionAPIOptions,
-} from "@aura-stack/auth"
+import { api } from "~/auth"
+import { redirect } from "react-router"
+import type { GetSessionAPIOptions, Session, SignInAPIOptions, SignOutAPIOptions } from "@aura-stack/auth"
 
 export const getSession = async (request: Request, options?: GetSessionAPIOptions): Promise<Session | null> => {
     try {
@@ -22,18 +16,25 @@ export const getSession = async (request: Request, options?: GetSessionAPIOption
     }
 }
 
-export const signOut = async (request: Request, options?: SignOutAPIOptions) => {
+export const signIn = async (providerId: string, options?: SignInAPIOptions) => {
+    return await api.signIn(providerId, options)
+}
+
+export const signOut = async (request: Request, options?: Omit<SignOutAPIOptions, "headers">) => {
     try {
         const response = await api.signOut({
             headers: request.headers,
             ...options,
         })
-        if (response.status === 202) {
-            return response
+        if (response.ok) {
+            return redirect(options?.redirectTo ?? "/", {
+                headers: response.headers,
+            })
         }
         const json = await response.json()
         return json
     } catch (error) {
+        if (error instanceof Response) throw error
         console.error("[error:server] signOut", error)
         return null
     }

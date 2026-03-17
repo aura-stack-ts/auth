@@ -1,9 +1,8 @@
 import { Fingerprint, LayoutDashboard } from "lucide-react"
-import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
+import { AuthClient } from "~/components/auth-client"
+import { getSession, signIn, signOut } from "~/actions/auth-server"
+import { Form } from "react-router"
 import { Button } from "~/components/ui/button"
-import { getSession } from "~/actions/auth.server"
-import { authClient } from "~/actions/auth.client"
-import { GetSessionClient } from "~/components/get-session-client"
 import type { Route } from "./+types/index"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
@@ -11,10 +10,22 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     return { session }
 }
 
+export const action = async ({ request }: Route.ActionArgs) => {
+    const formData = await request.formData()
+    const action = formData.get("action")
+    if (action === "signOut") {
+        return await signOut(request)
+    } else if (action === "signIn") {
+        return await signIn(formData.get("provider") as string, {
+            request,
+        })
+    }
+    return null
+}
+
 const IndexPage = ({ loaderData }: Route.ComponentProps) => {
     const { session } = loaderData
     const isAuthenticated = Boolean(session && session?.user)
-    const providers = [builtInOAuthProviders.github(), builtInOAuthProviders.gitlab(), builtInOAuthProviders.bitbucket()]
 
     return (
         <main className="flex-1 bg-black">
@@ -26,68 +37,69 @@ const IndexPage = ({ loaderData }: Route.ComponentProps) => {
                             Integration Example
                         </div>
                         <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-7xl">
-                            Next.js Auth Powered by
+                            React Router Powered by
                             <br />
                             <span className="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text">
                                 Aura Auth Core
                             </span>
                         </h1>
                         <p className="max-w-xl text-lg text-foreground leading-relaxed">
-                            This example demonstrates how to integrate Aura Auth Core into a Next.js application. It showcases
-                            OAuth providers, server-side session management, and seamless client-server state synchronization.
+                            This example demonstrates how to integrate Aura Auth Core into a React Router application. It
+                            showcases OAuth providers, server-side session management, and seamless client-server state
+                            synchronization.
                         </p>
                     </div>
                 </div>
             </section>
             <section className="overflow-hidden">
-                <div className="w-11/12 max-w-5xl mx-auto border-x border-muted grid grid-cols-1 md:grid-cols-2">
-                    <div className="p-8 md:p-12 border-b md:border-b-0 md:border-r border-muted space-y-12 bg-white/1">
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3 text-foreground">
-                                <Fingerprint className="h-4 w-4" />
-                                <span className="text-white text-xs font-mono uppercase tracking-widest">
-                                    React Router Integration
-                                </span>
-                            </div>
-                            <p className="text-sm text-white/40 leading-relaxed">
-                                This integration example is not representative of a production application. It demonstrates core
-                                authentication flows and session management patterns for showcase purposes.
-                            </p>
-                        </div>
+                <div className="w-11/12 max-w-5xl mx-auto py-10 px-6 border-x border-b border-muted space-y-4">
+                    <div className="flex items-center gap-3 text-foreground">
+                        <Fingerprint className="h-4 w-4" />
+                        <span className="text-white text-xs font-mono uppercase tracking-widest">React Router Integration</span>
                     </div>
-                    <div className="p-8 flex items-center justify-center bg-black md:p-12">
-                        <div className="w-full max-w-sm space-y-6">
+                    <p className="text-sm text-white/40 leading-relaxed">
+                        This integration example is not representative of a production application. It demonstrates core
+                        authentication flows and session management patterns for showcase purposes.
+                    </p>
+                </div>
+                <div className="w-11/12 max-w-5xl mx-auto border-x border-muted grid grid-cols-1 md:grid-cols-2">
+                    <AuthClient />
+                    <div className="w-full p-6 pr-3 bg-black md:py-10">
+                        <div className="w-full p-6 relative space-y-6 border border-muted border-dashed">
+                            <span className="px-2 text-xs font-mono italic absolute -top-2 left-3 bg-blue-600">
+                                Server Component
+                            </span>
                             {isAuthenticated ? (
-                                <>
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                        <div className="py-3 px-2 border border-muted rounded-md space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-xs font-mono italic">server session active</span>
-                                                <LayoutDashboard className="size-4 text-foreground" />
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
-                                                    <div className="h-full w-full rounded-full bg-black flex items-center justify-center text-xl font-bold">
-                                                        {session?.user?.name?.[0] || "?"}
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <p className="text-lg font-medium text-white">{session?.user?.name}</p>
-                                                    <p className="text-xs text-white/40 font-mono">{session?.user?.email}</p>
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="py-3 px-2 border border-muted rounded-md space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-mono italic">server session active</span>
+                                            <LayoutDashboard className="size-4 text-foreground" />
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
+                                                <div className="h-full w-full rounded-full aspect-square bg-black flex items-center justify-center text-xl font-bold">
+                                                    {session?.user?.name?.[0] || "?"}
                                                 </div>
                                             </div>
-                                            <div className="pt-3 border-t border-muted">
-                                                <div className="flex justify-between items-center text-[10px] font-mono">
-                                                    <span className="text-white/20 uppercase">ID</span>
-                                                    <span className="text-white/60 truncate max-w-37.5">
-                                                        {session?.user?.sub}
-                                                    </span>
-                                                </div>
+                                            <div>
+                                                <p className="text-lg font-medium text-white">{session?.user?.name}</p>
+                                                <p className="text-xs text-white/40 font-mono">{session?.user?.email}</p>
                                             </div>
                                         </div>
+                                        <div className="pt-3 border-t border-muted">
+                                            <div className="flex justify-between items-center text-[10px] font-mono">
+                                                <span className="text-white/20 uppercase">ID</span>
+                                                <span className="text-white/60 truncate max-w-37.5">{session?.user?.sub}</span>
+                                            </div>
+                                        </div>
+                                        <Form method="post">
+                                            <Button variant="outline" size="sm" name="action" value="signOut">
+                                                Sign Out
+                                            </Button>
+                                        </Form>
                                     </div>
-                                    <GetSessionClient />
-                                </>
+                                </div>
                             ) : (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <div className="space-y-4 text-center">
@@ -96,16 +108,19 @@ const IndexPage = ({ loaderData }: Route.ComponentProps) => {
                                             Choose a provider below to authenticate and start your session.
                                         </p>
                                         <div className="flex flex-col gap-y-2">
-                                            {providers.map((provider) => (
-                                                <Button
-                                                    className="w-full"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    key={provider.id}
-                                                    onClick={() => authClient.signIn(provider.id)}
-                                                >
-                                                    Sign In with {provider.name}
-                                                </Button>
+                                            {["Github", "Gitlab", "Bitbucket"].map((provider) => (
+                                                <Form className="w-full" method="post" key={provider}>
+                                                    <input type="hidden" name="provider" value={provider.toLowerCase()} />
+                                                    <Button
+                                                        className="w-full rounded-none"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        name="action"
+                                                        value="signIn"
+                                                    >
+                                                        Sign In with {provider}
+                                                    </Button>
+                                                </Form>
                                             ))}
                                         </div>
                                     </div>

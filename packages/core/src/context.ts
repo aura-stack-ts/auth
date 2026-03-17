@@ -33,5 +33,6 @@ export const createContext = (config?: AuthConfig): InternalContext => {
         trustedOrigins: getEnvArray("TRUSTED_ORIGINS").length > 0 ? getEnvArray("TRUSTED_ORIGINS") : config?.trustedOrigins,
         logger,
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
+        baseURL: config?.baseURL,
     }
 }
