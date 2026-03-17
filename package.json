@@ -86,20 +86,15 @@
   },
   "pnpm": {
     "overrides": {
-      "dompurify": ">=3.3.2",
-      "file-type": ">=21.3.2",
-      "undici": ">=7.24.0",
+      "dompurify": "^3.3.2",
+      "file-type": "^21.3.2",
+      "undici": "^7.24.0",
       "seroval": "^1.4.1",
-      "lodash": ">=4.17.23",
-      "lodash-es": ">=4.17.23",
-      "tar": ">=7.5.11",
-      "path-to-regexp": ">=1.9.0",
-      "serialize-javascript": ">=7.0.3",
-      "tanstack-start>zod": "3.23.8",
-      "@tanstack/react-start>zod": "3.23.8",
-      "@tanstack/router-plugin>zod": "3.23.8",
-      "@tanstack/router-generator>zod": "3.23.8",
-      "@tanstack/start-plugin-core>zod": "3.23.8"
+      "lodash": "^4.17.23",
+      "lodash-es": "^4.17.23",
+      "tar": "^7.5.11",
+      "path-to-regexp": "^1.9.0",
+      "serialize-javascript": "^7.0.3"
     }
   }
 }
