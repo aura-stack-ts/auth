@@ -1,12 +1,12 @@
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useAuthClient, AuthProvider } from "@/contexts/auth"
+import { useAuth, AuthProvider } from "@/contexts/auth"
 import type { Session } from "@aura-stack/auth"
 
 const HeaderContent = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { isAuthenticated, isLoading, signOut, signIn } = useAuthClient()
+    const { isAuthenticated, isLoading, signOut, signIn } = useAuth()
 
     const handleSignOut = async () => {
         await signOut()

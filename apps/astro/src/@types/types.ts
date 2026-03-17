@@ -8,8 +8,3 @@ export interface AuthContextValue {
     signIn: typeof authClient.signIn
     signOut: typeof authClient.signOut
 }
-
-export interface AuthServerContext {
-    request: Request
-    redirect: (path: string, status?: 301 | 302 | 303 | 307 | 308 | 300 | 304) => Response
-}
