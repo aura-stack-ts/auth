@@ -93,6 +93,8 @@
       "lodash": ">=4.17.23",
       "lodash-es": ">=4.17.23",
       "tar": ">=7.5.11",
+      "path-to-regexp": ">=1.9.0",
+      "serialize-javascript": ">=7.0.3",
       "tanstack-start>zod": "3.23.8",
       "@tanstack/react-start>zod": "3.23.8",
       "@tanstack/router-plugin>zod": "3.23.8",
