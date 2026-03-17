@@ -9,9 +9,9 @@
     "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
   },
   "dependencies": {
-    "hono": "^4.12.0",
     "@aura-stack/auth": "workspace:*",
-    "@aura-stack/jose": "workspace:*"
+    "@aura-stack/jose": "workspace:*",
+    "hono": "^4.12.8"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
