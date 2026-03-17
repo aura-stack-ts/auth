@@ -22,15 +22,6 @@ export const getSession = async (request: Request, options?: GetSessionAPIOption
     }
 }
 
-/**
- * @deprecated
- */
-export const signIn = async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions) => {
-    const response = await api.signIn(provider, { ...options, redirect: false })
-    console.log("[debug:server] signIn", { provider, response })
-    return response
-}
-
 export const signOut = async (request: Request, options?: SignOutAPIOptions) => {
     try {
         const response = await api.signOut({

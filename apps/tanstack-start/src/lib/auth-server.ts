@@ -17,30 +17,35 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
 })
 
 export const signOutFn = createServerFn({ method: "POST" }).handler(async () => {
-    try {
-        const response = await api.signOut({
+    const response = await api
+        .signOut({
             headers: getRequestHeaders(),
         })
-        return redirect({ to: "/", headers: response.headers, reloadDocument: true })
-    } catch (error) {
-        console.error("[error:server] signOut", error)
-        return null
-    }
+        .catch((error) => {
+            console.error("[error:server] signOut", error)
+            return null
+        })
+    throw redirect({ to: "/", headers: response.headers, reloadDocument: true })
 })
 
 export const signInFn = createServerFn({ method: "POST" })
-    .inputValidator((data: { provider: string }) => data)
+    .inputValidator((data: { provider: string }) => {
+        if (!data || typeof data.provider !== "string" || !data.provider.trim()) {
+            throw new Error("provider must be a non-empty string")
+        }
+        return data
+    })
     .handler(async ({ data }) => {
-        try {
-            const response = await api.signIn(data.provider, {
+        const response = await api
+            .signIn(data.provider, {
                 request: getRequest(),
                 redirect: false,
             })
-            return redirect({
-                href: response.signInURL,
+            .catch((error) => {
+                console.error("[error:server] signIn", error)
+                return null
             })
-        } catch (error) {
-            console.error("[error:server] signIn", error)
-            return null
-        }
+        throw redirect({
+            href: response.signInURL,
+        })
     })

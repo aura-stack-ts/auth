@@ -60,17 +60,15 @@ export const AuthServer = () => {
                             </p>
                             <div className="flex flex-col gap-y-2">
                                 {["Github", "Gitlab", "Bitbucket"].map((provider) => (
-                                    <form className="w-full" key={provider}>
-                                        <input type="hidden" name="provider" value={provider.toLowerCase()} />
-                                        <Button
-                                            className="w-full rounded-none"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleSignIn(provider.toLowerCase())}
-                                        >
-                                            Sign In with {provider}
-                                        </Button>
-                                    </form>
+                                    <Button
+                                        key={provider}
+                                        className="w-full rounded-none"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleSignIn(provider.toLowerCase())}
+                                    >
+                                        Sign In with {provider}
+                                    </Button>
                                 ))}
                             </div>
                         </div>

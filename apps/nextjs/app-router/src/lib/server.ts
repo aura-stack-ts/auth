@@ -59,5 +59,6 @@ export const signOut = async (options?: SignOutAPIOptions) => {
     } catch (error) {
         if (isRedirectError(error)) throw error
         console.error("[error:server] signOut", error)
+        return null
     }
 }

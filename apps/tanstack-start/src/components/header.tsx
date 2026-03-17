@@ -73,6 +73,7 @@ export const Header = () => {
                             className="text-sm text-white/60 hover:text-white transition-colors"
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => setMobileMenuOpen(false)}
                         >
                             Documentation
                         </a>

@@ -1,7 +1,6 @@
 ---
-import { actions } from "astro:actions"
-import { LayoutDashboard } from "lucide-react"
 import { signOut } from "@/lib/server"
+import { LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Session } from "@aura-stack/auth"
 
@@ -45,7 +44,7 @@ const signOutAction = async () => {
                                 <span class="text-white/60 truncate max-w-37.5">{session?.user?.sub}</span>
                             </div>
                         </div>
-                        <Button className="w-full" variant="outline" size="sm" onClick={signOutAction}>
+                        <Button variant="outline" size="sm" onClick={signOutAction}>
                             Sign Out
                         </Button>
                     </div>
@@ -57,12 +56,11 @@ const signOutAction = async () => {
                         <p class="text-sm text-white/40">Choose a provider below to authenticate and start your session.</p>
                         <div class="flex flex-col gap-y-2">
                             {["Github", "Gitlab", "Bitbucket"].map((provider) => (
-                                <form method="post" action={actions.signIn}>
-                                    <input type="hidden" name="provider" value={provider.toLowerCase()} />
-                                    <Button className="w-full rounded-none" variant="outline" size="sm">
+                                <a href={`/api/auth/signIn/${provider.toLowerCase()}`}>
+                                    <Button className="w-full" variant="outline" size="sm">
                                         Sign In with {provider}
                                     </Button>
-                                </form>
+                                </a>
                             ))}
                         </div>
                     </div>
