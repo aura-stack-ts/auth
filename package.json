@@ -43,7 +43,7 @@
     "tsup": "^8.5.1",
     "turbo": "^2.7.5",
     "typescript": "catalog:typescript",
-    "vitest": "^4.0.14"
+    "vitest": "^4.1.0"
   },
   "packageManager": "pnpm@10.15.0",
   "workspaces": {
@@ -81,19 +81,24 @@
       },
       "vite": {
         "vite": "^7.1.7"
+      },
+      "zod-v3": {
+        "zod": "3.25.76"
+      },
+      "zod-v4": {
+        "zod": "4.3.5"
       }
     }
   },
-  "pnpm": {
-    "overrides": {
-      "seroval": "^1.4.1",
-      "lodash-es": "^4.17.23",
-      "tar": ">=7.5.7",
-      "tanstack-start>zod": "3.23.8",
-      "@tanstack/react-start>zod": "3.23.8",
-      "@tanstack/router-plugin>zod": "3.23.8",
-      "@tanstack/router-generator>zod": "3.23.8",
-      "@tanstack/start-plugin-core>zod": "3.23.8"
-    }
+  "overrides": {
+    "dompurify": "^3.3.2",
+    "file-type": "^21.3.2",
+    "undici": "^7.24.0",
+    "seroval": "^1.4.1",
+    "lodash": "^4.17.23",
+    "lodash-es": "^4.17.23",
+    "tar": "^7.5.11",
+    "path-to-regexp": "^1.9.0",
+    "serialize-javascript": "^7.0.3"
   }
 }

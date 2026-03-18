@@ -64,7 +64,7 @@
   "dependencies": {
     "@aura-stack/jose": "workspace:*",
     "@aura-stack/router": "^0.6.0",
-    "zod": "4.3.5"
+    "zod": "catalog:zod-v4"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
