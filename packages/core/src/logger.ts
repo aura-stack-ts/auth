@@ -285,6 +285,10 @@ const logLevelToSeverity: Record<LogLevel, string[]> = {
     error: ["error", "critical", "alert", "emergency"],
 }
 
+const isValidLogLevel = (value: string | undefined): value is LogLevel => {
+    return value === "debug" || value === "info" || value === "warn" || value === "error"
+}
+
 const getSeverityLevel = (severity: string): number => {
     const severities: Record<string, number> = {
         emergency: 0,
@@ -311,33 +315,44 @@ export const createLogger = (logger?: Logger): InternalLogger | undefined => {
     const level = logger.level
     const allowedSeverities = logLevelToSeverity[level] ?? []
 
-    const internalLogger: InternalLogger = {
+    return {
         level,
         log<T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>) {
             const entry = createLogEntry(key, overrides)
             if (!allowedSeverities.includes(entry.severity)) return entry
-
             logger.log({
                 timestamp: entry.timestamp,
                 appName: entry.appName ?? "aura-auth",
                 hostname: entry.hostname ?? "aura-auth",
                 ...entry,
             })
-
             return entry
         },
     }
-    return internalLogger
 }
 
+/**
+ * Creates the logger instance based on the provided configuration and environment variables.
+ * Priority: config.logger, LOG_LEVEL env, DEBUG env and defaults to undefined if logging is not enabled.
+ *
+ */
 export const createProxyLogger = (config?: AuthConfig) => {
     const level = getEnv("LOG_LEVEL")
     const debug = getEnvBoolean("DEBUG")
-    if (debug || config?.logger === true) {
+    if (typeof config?.logger === "object") {
         return createLogger({
-            level: (level as LogLevel) ?? "debug",
-            log: createSyslogMessage,
+            log: config.logger.log,
+            level: isValidLogLevel(config.logger.level) ? config.logger.level : isValidLogLevel(level) ? level : "error",
         })
     }
-    return typeof config?.logger === "object" ? createLogger(config.logger) : undefined
+    if (debug || config?.logger === true || level) {
+        return createLogger({
+            level: isValidLogLevel(level) ? level : "debug",
+            log: (options) => {
+                const message = createSyslogMessage(options)
+                console.log(message)
+            },
+        })
+    }
+    return undefined
 }
