@@ -389,7 +389,7 @@ export type SyslogOptions = {
  * Logger function interface for structured logging.
  * Called when errors or warnings occur during authentication flows.
  */
-export type Logger = {
+export interface Logger {
     level?: LogLevel
     log?: (args: SyslogOptions) => void
 }

@@ -342,7 +342,7 @@ export const createProxyLogger = (config?: AuthConfig) => {
     if (typeof config?.logger === "object") {
         return createLogger({
             log: config.logger?.log || createSyslogMessage,
-            level: isValidLogLevel(config.logger.level) ? config.logger.level : isValidLogLevel(level) ? level : "error",
+            level: isValidLogLevel(config.logger?.level) ? config.logger?.level : isValidLogLevel(level) ? level : "error",
         })
     }
     if (debug || config?.logger === true || level) {
