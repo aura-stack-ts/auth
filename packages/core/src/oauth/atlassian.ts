@@ -1,4 +1,4 @@
-import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.js"
+import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.ts"
 
 export interface ExtendedProfile {
     job_title: string
