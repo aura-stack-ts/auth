@@ -1,14 +1,29 @@
 {
   "name": "@aura-stack/auth",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
   },
   "exports": {
     ".": "./src/index.ts",
-    "./oauth": "./src/oauth/*.ts",
-    "./types": "./src/@types/index.ts"
+    "./oauth": "./src/oauth/index.ts",
+    "./oauth/atlassian": "./src/oauth/atlassian.ts",
+    "./oauth/bitbucket": "./src/oauth/bitbucket.ts",
+    "./oauth/discord": "./src/oauth/discord.ts",
+    "./oauth/dropbox": "./src/oauth/dropbox.ts",
+    "./oauth/figma": "./src/oauth/figma.ts",
+    "./oauth/github": "./src/oauth/github.ts",
+    "./oauth/gitlab": "./src/oauth/gitlab.ts",
+    "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
+    "./oauth/notion": "./src/oauth/notion.ts",
+    "./oauth/pinterest": "./src/oauth/pinterest.ts",
+    "./oauth/spotify": "./src/oauth/spotify.ts",
+    "./oauth/strava": "./src/oauth/strava.ts",
+    "./oauth/twitch": "./src/oauth/twitch.ts",
+    "./oauth/x": "./src/oauth/x.ts",
+    "./types": "./src/@types/index.ts",
+    "./client": "./src/client/index.ts"
   },
   "imports": {
     "@/": "./src/",
