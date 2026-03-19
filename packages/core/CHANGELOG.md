@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.4.0] - 2026-03-19
+
 ### Added
 
 - Added support for defining the base URL through the `BASE_URL` environment variable or the `baseURL` option in `createAuth`. This value is used to construct the incoming URL. [#117](https://github.com/aura-stack-ts/auth/pull/117)
