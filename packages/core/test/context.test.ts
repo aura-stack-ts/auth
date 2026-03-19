@@ -58,7 +58,7 @@ describe("createProxyLogger", () => {
     })
 
     test("proxyLogger with empty config", () => {
-        const logger = createProxyLogger({ oauth: [], logger: {} as Logger })
+        const logger = createProxyLogger({ oauth: [], logger: {} })
         expect(logger?.level).toBe("error")
     })
 

@@ -390,8 +390,8 @@ export type SyslogOptions = {
  * Called when errors or warnings occur during authentication flows.
  */
 export type Logger = {
-    level: LogLevel
-    log: (args: SyslogOptions) => void
+    level?: LogLevel
+    log?: (args: SyslogOptions) => void
 }
 
 export type AuthClient = ReturnType<typeof createAuthInstance>["handlers"]
@@ -435,3 +435,10 @@ export type FunctionAPIContext<Options extends object> = {
 export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
     ? Response
     : { redirect: false; signInURL: string }
+
+export type InternalContext = RouterGlobalContext & {
+    cookieConfig: {
+        secure: CookieStoreConfig
+        standard: CookieStoreConfig
+    }
+}

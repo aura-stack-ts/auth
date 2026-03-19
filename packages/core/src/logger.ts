@@ -310,7 +310,7 @@ export const createSyslogMessage = (options: SyslogOptions): string => {
     return `<${pri}>1 ${timestamp} ${hostname} ${appName} ${procId} ${msgId} ${structuredDataStr} ${message}`
 }
 
-export const createLogger = (logger?: Logger): InternalLogger | undefined => {
+export const createLogger = (logger?: Required<Logger>): InternalLogger | undefined => {
     if (!logger) return undefined
     const level = logger.level
     const allowedSeverities = logLevelToSeverity[level] ?? []
@@ -341,7 +341,7 @@ export const createProxyLogger = (config?: AuthConfig) => {
     const debug = getEnvBoolean("DEBUG")
     if (typeof config?.logger === "object") {
         return createLogger({
-            log: config.logger.log,
+            log: config.logger?.log || createSyslogMessage,
             level: isValidLogLevel(config.logger.level) ? config.logger.level : isValidLogLevel(level) ? level : "error",
         })
     }
