@@ -43,4 +43,5 @@ export const {
     api,
 } = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile],
+    logger: true,
 })

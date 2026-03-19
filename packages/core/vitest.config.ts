@@ -26,7 +26,6 @@ export default defineConfig({
             "AURA_AUTH_OAUTH-PROVIDER_CLIENT_SECRET": "oauth_client_secret",
             "AURA_AUTH_OAUTH-PROFILE_CLIENT_ID": "oauth_profile_client_id",
             "AURA_AUTH_OAUTH-PROFILE_CLIENT_SECRET": "oauth_profile_client_secret",
-            AURA_AUTH_DEBUG: "1",
         },
     },
     resolve: {
