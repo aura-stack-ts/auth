@@ -24,17 +24,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Introduced an `api` object via `createAuth` for retrieving and signing out sessions on the server without calling mounted endpoints, improving resource access in trusted environments. [#112](https://github.com/aura-stack-ts/auth/pull/112)
 
-- Added the `Dropbox` OAuth provider to the supported integrations in Aura Auth. [#59](https://github.com/aura-stack-ts/auth/pull/59)
-
-- Added the `Notion` OAuth provider to the supported integrations in Aura Auth. [#49](https://github.com/aura-stack-ts/auth/pull/49)
-
-- Added the `Twitch` OAuth provider to the supported integrations in Aura Auth. [#47](https://github.com/aura-stack-ts/auth/pull/47)
+- Introduced a new OAuth provider configuration API that enables passing custom values and properties to the `/authorization`, `/access_token`, and `/userinfo` endpoints of OAuth services, improving flexibility and compatibility when integrating with a broader range of providers. [#109](https://github.com/aura-stack-ts/auth/pull/109)
 
 - Added support for loading authentication configuration from environment variables, including `DEBUG`, `LOG_LEVEL`, `TRUSTED_ORIGINS`, and `TRUSTED_PROXY_HEADERS`. Also updated automatic environment variable loading patterns. [#108](https://github.com/aura-stack-ts/auth/pull/108)
 
 - Added the `User-Agent` header to requests sent to the `/userInfo` endpoint, allowing the service to identify the calling client or application. [#105](https://github.com/aura-stack-ts/auth/pull/105)
 
 - Added `timingSafeEqual` function for constant-time string comparison across runtimes. [#99](https://github.com/aura-stack-ts/auth/pull/99)
+
+- Added the `Atlassian` OAuth provider to the supported integrations in Aura Auth. [#60](https://github.com/aura-stack-ts/auth/pull/60)
+
+- Added the `Dropbox` OAuth provider to the supported integrations in Aura Auth. [#59](https://github.com/aura-stack-ts/auth/pull/59)
+
+- Added the `Notion` OAuth provider to the supported integrations in Aura Auth. [#49](https://github.com/aura-stack-ts/auth/pull/49)
+
+- Added the `Twitch` OAuth provider to the supported integrations in Aura Auth. [#47](https://github.com/aura-stack-ts/auth/pull/47)
 
 ### Changed
 
