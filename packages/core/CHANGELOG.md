@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The built-in JOSE functions now provide type safety and type inference based on the `User` type. Additionally, `encryptJWE` and `decryptJWE` now accept and return `JWTPayload`. [#123](https://github.com/aura-stack-ts/auth/pull/123)
+
 ---
 
 ## [0.5.0] - 2026-03-19

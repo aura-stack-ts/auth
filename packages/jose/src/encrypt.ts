@@ -144,7 +144,7 @@ export const createJWE = <Payload extends JWTPayload>(secret: SecretInput) => {
         encryptJWE: <Encrypted extends JWTPayload = Payload>(
             payload: TypedJWTPayload<Partial<Encrypted>>,
             options?: JWEHeaderParameters
-        ) => encryptJWE(payload, secret, options),
+        ) => encryptJWE<Encrypted>(payload, secret, options),
         decryptJWE: <Decrypted extends JWTPayload = Payload>(payload: string, options?: JWTDecryptOptions) =>
             decryptJWE<Decrypted>(payload, secret, options),
     }

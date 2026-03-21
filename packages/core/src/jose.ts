@@ -6,8 +6,12 @@ import {
     createDeriveKey,
     createSecret,
     type JWTVerifyOptions,
-    type DecodedJWTPayloadOptions,
+    type DecodeJWTOptions,
     type TypedJWTPayload,
+    type EncodeJWTOptions,
+    type JWTHeaderParameters,
+    type JWEHeaderParameters,
+    type JWTDecryptOptions,
 } from "@aura-stack/jose"
 import { AuthInternalError } from "@/errors.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
@@ -49,42 +53,44 @@ export const createJoseInstance = (secret?: string) => {
     }
 
     const jose = (async () => {
-        const derivedSigningKey = await createDeriveKey(secret, salt, "signing")
-        const derivedEncryptionKey = await createDeriveKey(secret, salt, "encryption")
-        const derivedCsrfTokenKey = await createDeriveKey(secret, salt, "csrfToken")
+        const [derivedSigningKey, derivedEncryptionKey, derivedCsrfTokenKey] = await Promise.all([
+            createDeriveKey(secret, salt, "signing"),
+            createDeriveKey(secret, salt, "encryption"),
+            createDeriveKey(secret, salt, "encryption"),
+        ])
 
         return {
-            jwt: createJWT<User>({ jws: derivedSigningKey, jwe: derivedEncryptionKey }),
-            jws: createJWS(derivedCsrfTokenKey),
-            jwe: createJWE(derivedEncryptionKey),
+            jwt: createJWT<User>({ sign: derivedSigningKey, encrypt: derivedEncryptionKey }),
+            jws: createJWS<User>(derivedCsrfTokenKey),
+            jwe: createJWE<User>(derivedEncryptionKey),
         }
     })()
     jose.catch(() => {})
 
     return {
-        decodeJWT: async (token: string, options?: DecodedJWTPayloadOptions) => {
+        decodeJWT: async (token: string, options?: DecodeJWTOptions) => {
             const { jwt } = await jose
             return jwt.decodeJWT(token, options)
         },
-        encodeJWT: async (payload: TypedJWTPayload<Partial<User>>) => {
+        encodeJWT: async (payload: TypedJWTPayload<Partial<User>>, options?: EncodeJWTOptions) => {
             const { jwt } = await jose
-            return jwt.encodeJWT(payload)
+            return jwt.encodeJWT(payload, options)
         },
-        signJWS: async (...args: Parameters<ReturnType<typeof createJWS>["signJWS"]>) => {
+        signJWS: async (payload: TypedJWTPayload<Partial<User>>, options?: JWTHeaderParameters) => {
             const { jws } = await jose
-            return jws.signJWS(...args)
+            return jws.signJWS(payload, options)
         },
-        verifyJWS: async (...args: Parameters<ReturnType<typeof createJWS>["verifyJWS"]>) => {
+        verifyJWS: async (token: string, options?: JWTVerifyOptions) => {
             const { jws } = await jose
-            return jws.verifyJWS(...args)
+            return jws.verifyJWS(token, options)
         },
-        encryptJWE: async (...args: Parameters<ReturnType<typeof createJWE>["encryptJWE"]>) => {
+        encryptJWE: async (payload: TypedJWTPayload<Partial<User>>, options?: JWEHeaderParameters) => {
             const { jwe } = await jose
-            return jwe.encryptJWE(...args)
+            return jwe.encryptJWE(payload, options)
         },
-        decryptJWE: async (...args: Parameters<ReturnType<typeof createJWE>["decryptJWE"]>) => {
+        decryptJWE: async (token: string, options?: JWTDecryptOptions) => {
             const { jwe } = await jose
-            return jwe.decryptJWE(...args)
+            return jwe.decryptJWE(token, options)
         },
     }
 }
@@ -94,9 +100,9 @@ export const jwtVerificationOptions: JWTVerifyOptions = {
     typ: "JWT",
 }
 
-export const decodeJWTOptions: DecodedJWTPayloadOptions = {
-    jws: jwtVerificationOptions,
-    jwt: {
+export const decodeJWTOptions: DecodeJWTOptions = {
+    encrypt: jwtVerificationOptions,
+    sign: {
         typ: "JWT",
     },
 }

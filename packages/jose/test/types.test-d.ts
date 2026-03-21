@@ -11,6 +11,7 @@ import {
     type DecodeJWTOptions,
     type TypedJWTPayload,
     type DerivedKeyInput,
+    type EncodeJWTOptions,
 } from "@/index.ts"
 
 interface User extends Record<string, unknown> {
@@ -29,7 +30,10 @@ describe("type-safe payload", () => {
     test("createJWT", async () => {
         const jwt = createJWT<User>("secret")
         expectTypeOf(jwt.encodeJWT).toEqualTypeOf<
-            <EncodePayload extends JWTPayload = User>(payload: TypedJWTPayload<Partial<EncodePayload>>) => Promise<string>
+            <EncodePayload extends JWTPayload = User>(
+                payload: TypedJWTPayload<Partial<EncodePayload>>,
+                options?: EncodeJWTOptions
+            ) => Promise<string>
         >()
         expectTypeOf(jwt.decodeJWT).toEqualTypeOf<
             <DecodePayload extends JWTPayload = User>(

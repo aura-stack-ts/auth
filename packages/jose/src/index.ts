@@ -41,6 +41,11 @@ export interface DecodeJWTOptions {
     encrypt: JWTDecryptOptions
 }
 
+export interface CreateJWTOptions {
+    encode: EncodeJWTOptions
+    decode: DecodeJWTOptions
+}
+
 /**
  * Encode a JWT signed and encrypted token. The token first signed using JWS
  * and then encrypted using JWE to ensure both integrity and confidentiality.
@@ -111,11 +116,13 @@ export const decodeJWT = async <Payload extends JWTPayload>(
  * @param options - Optional algorithm configuration for signing and encryption
  * @returns JWT handler object with `signJWS/encryptJWE` and `verifyJWS/decryptJWE` methods
  */
-export const createJWT = <Payload extends JWTPayload>(secret: SecretInput | DerivedKeyInput, options?: any) => {
+export const createJWT = <Payload extends JWTPayload>(secret: SecretInput | DerivedKeyInput) => {
     return {
-        encodeJWT: async <EncodePayload extends JWTPayload = Payload>(payload: TypedJWTPayload<Partial<EncodePayload>>) =>
-            await encodeJWT<EncodePayload>(payload, secret, options),
-        decodeJWT: async <DecodePayload extends JWTPayload = Payload>(token: string, decodeOptions?: DecodeJWTOptions) =>
-            await decodeJWT<DecodePayload>(token, secret, decodeOptions),
+        encodeJWT: async <EncodePayload extends JWTPayload = Payload>(
+            payload: TypedJWTPayload<Partial<EncodePayload>>,
+            options?: EncodeJWTOptions
+        ) => await encodeJWT<EncodePayload>(payload, secret, options),
+        decodeJWT: async <DecodePayload extends JWTPayload = Payload>(token: string, options?: DecodeJWTOptions) =>
+            await decodeJWT<DecodePayload>(token, secret, options),
     }
 }

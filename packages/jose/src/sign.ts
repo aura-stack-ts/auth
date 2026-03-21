@@ -78,7 +78,7 @@ export const verifyJWS = async <Payload extends JWTPayload>(
     }
 }
 
-/**
+/*
  * Create a JWS (JSON Web Signature) signer and verifier. It implements the `signJWS`
  * and `verifyJWS` functions of the module.
  *
@@ -91,7 +91,7 @@ export const createJWS = <Payload extends JWTPayload>(secret: SecretInput) => {
         signJWS: <SignPayload extends JWTPayload = Payload>(
             payload: TypedJWTPayload<Partial<SignPayload>>,
             options?: JWTHeaderParameters
-        ) => signJWS(payload, secret, options),
+        ) => signJWS<SignPayload>(payload, secret, options),
         verifyJWS: <VerifyPayload extends JWTPayload = Payload>(payload: string, verifyOptions?: JWTVerifyOptions) =>
             verifyJWS<VerifyPayload>(payload, secret, verifyOptions),
     }
