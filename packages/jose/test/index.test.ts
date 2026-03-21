@@ -3,7 +3,7 @@ import { createSecret } from "@/secret.ts"
 import { encoder, getRandomBytes } from "@/crypto.ts"
 import { createJWS, signJWS, verifyJWS } from "@/sign.ts"
 import { deriveKey, createDeriveKey } from "@/deriveKey.ts"
-import { createJWE, encryptJWE, decryptJWE } from "@/encrypt.ts"
+import { createCompactJWE, createJWE, decryptCompactJWE, decryptJWE, encryptJWE, compactEncryptJWE } from "@/encrypt.ts"
 import { createJWT, MIN_SECRET_ENTROPY_BITS, type SecretInput } from "@/index.ts"
 import type { JWTPayload } from "jose"
 
@@ -85,6 +85,67 @@ describe("JWSs", () => {
         const jws = await signJWS({ exp, name: "John Doe" }, secretKey)
         expect(await verifyJWS(jws, secretKey)).toMatchObject({ name: "John Doe", exp })
     })
+
+    test("set not before time in the payload of a JWS and verify it", async () => {
+        const secretKey = getRandomBytes(32)
+        const now = Math.floor(Date.now() / 1000)
+        const nbf = now + 60
+        const jws = await signJWS({ nbf, name: "John Doe" }, secretKey)
+        await expect(verifyJWS(jws, secretKey)).rejects.toThrow("JWS signature verification failed")
+    })
+
+    test("set issued at time in the payload of a JWS and verify it", async () => {
+        const secretKey = getRandomBytes(32)
+        const iat = Math.floor(Date.now() / 1000)
+        const jws = await signJWS({ iat, name: "John Doe" }, secretKey)
+        expect(await verifyJWS(jws, secretKey)).toMatchObject({ name: "John Doe", iat })
+    })
+
+    test("set JWT ID in the payload of a JWS and verify it", async () => {
+        const secretKey = getRandomBytes(32)
+        const jti = "unique-jwt-id-123"
+        const jws = await signJWS({ jti, name: "John Doe" }, secretKey)
+        expect(await verifyJWS(jws, secretKey)).toMatchObject({ name: "John Doe", jti })
+    })
+
+    test("set protected header parameters in a JWS and verify it", async () => {
+        const secretKey = getRandomBytes(32)
+        const jws = await signJWS({ name: "John Doe" }, secretKey, { alg: "HS256", typ: "JWT" })
+        expect(await verifyJWS(jws, secretKey)).toMatchObject({ name: "John Doe" })
+    })
+
+    test("fail JWT to sign a JWS with invalid protected header parameters", async () => {
+        const secretKey = getRandomBytes(32)
+        await expect(signJWS({ name: "John Doe" }, secretKey, { alg: "invalid-algorithm" })).rejects.toThrow("JWS signing failed")
+    })
+
+    test("set none algorithm in the protected header of a JWS and fail to verify it", async () => {
+        const secretKey = getRandomBytes(32)
+        await expect(signJWS({ name: "John Doe" }, secretKey, { alg: "none" })).rejects.toThrow("JWS signing failed")
+    })
+
+    test("set custom protected header parameters in a JWS and verify it", async () => {
+        const secretKey = getRandomBytes(32)
+        const jws = await signJWS({ name: "John Doe" }, secretKey, { alg: "HS256", typ: "JWT", kid: "key-id-123" })
+        expect(await verifyJWS(jws, secretKey)).toMatchObject({ name: "John Doe" })
+    })
+
+    test("verify JWT with audience claim", async () => {
+        const secretKey = getRandomBytes(32)
+        const jws = await signJWS({ name: "John Doe", aud: "https://example.com" }, secretKey)
+        expect(await verifyJWS(jws, secretKey, { audience: "https://example.com" })).toMatchObject({
+            name: "John Doe",
+            aud: "https://example.com",
+        })
+    })
+
+    test("fail JWT to verify a JWS with incorrect audience claim", async () => {
+        const secretKey = getRandomBytes(32)
+        const jws = await signJWS({ name: "John Doe", aud: "https://example.com" }, secretKey)
+        await expect(verifyJWS(jws, secretKey, { audience: "https://wrong-audience.com" })).rejects.toThrow(
+            "JWS signature verification failed"
+        )
+    })
 })
 
 describe("JWEs", () => {
@@ -92,15 +153,11 @@ describe("JWEs", () => {
         const secretKey = getRandomBytes(32)
         const derivedKey = await createDeriveKey(secretKey)
 
-        const jwe = await encryptJWE(JSON.stringify(payload), derivedKey)
+        const jwe = await encryptJWE({ payload }, derivedKey)
         expect(jwe).toBeDefined()
 
-        const decryptedPayload = await decryptJWE(jwe, derivedKey)
-        const decodedPayload = JSON.parse(decryptedPayload) as JWTPayload
-
-        expect(decodedPayload.sub).toBe(payload.sub)
-        expect(decodedPayload.name).toBe(payload.name)
-        expect(decodedPayload.email).toBe(payload.email)
+        const decryptedPayload = await decryptJWE<{ payload: string }>(jwe, derivedKey)
+        expect(decryptedPayload.payload).toMatchObject(payload)
     })
 
     test("encrypt and decrypt a JWE using createJWE", async () => {
@@ -111,36 +168,53 @@ describe("JWEs", () => {
         const { encryptJWE, decryptJWE } = createJWE(derivedKey)
 
         const jws = await signJWS(payload)
-        const jwe = await encryptJWE(jws)
+        const jwe = await encryptJWE({ payload: jws })
         expect(jwe).toBeDefined()
 
-        const decryptedJWS = await decryptJWE(jwe)
-        expect(decryptedJWS).toBe(jws)
+        const decryptedJWS = await decryptJWE<{ payload: string }>(jwe)
+        expect(decryptedJWS.payload).toBe(jws)
     })
 
     test("fail JWT to try to decrypt an invalid JWE", async () => {
         const secretKey = getRandomBytes(32)
-        const derivedKey = await createDeriveKey(secretKey)
-
-        const { decryptJWE } = createJWE(derivedKey)
-        await expect(decryptJWE("header.payload.signature")).rejects.toThrow()
+        await expect(decryptJWE("header.payload.signature", secretKey)).rejects.toThrow()
     })
 
     test("set audience in a JWE and decrypt it", async () => {
         const secretKey = getRandomBytes(32)
-        const jwe = await encryptJWE(JSON.stringify({ aud: "client_id_123", name: "John Doe" }), secretKey)
+        const jwe = await encryptJWE({ aud: "client_id_123", name: "John Doe" }, secretKey)
         const decrypted = await decryptJWE(jwe, secretKey)
-        const payload = JSON.parse(decrypted) as JWTPayload
-        expect(payload).toMatchObject({ aud: "client_id_123", name: "John Doe" })
+        expect(decrypted).toMatchObject({ aud: "client_id_123", name: "John Doe" })
     })
 
     test("fail JWT to verify a JWE with incorrect audience", async () => {
         const secretKey = getRandomBytes(32)
         const jws = await signJWS({ aud: "client_id_123", name: "John Doe" }, secretKey)
-        const jwe = await encryptJWE(jws, secretKey)
+        const jwe = await encryptJWE({ payload: jws }, secretKey)
         await expect(decryptJWE(jwe, secretKey, { audience: "wrong_audience" })).rejects.toThrow(
             "JWE decryption verification failed"
         )
+    })
+
+    test("encrypt and decrypt compact JWE payload", async () => {
+        const secretKey = getRandomBytes(32)
+        const jws = await signJWS(payload, secretKey)
+
+        const compactJWE = await compactEncryptJWE(jws, secretKey)
+        expect(compactJWE).toBeDefined()
+
+        const decryptedJWS = await decryptCompactJWE(compactJWE, secretKey)
+        expect(decryptedJWS).toBe(jws)
+    })
+
+    test("encrypt and decrypt compact JWE payload using createCompactJWE", async () => {
+        const secretKey = getRandomBytes(32)
+        const jws = await signJWS(payload, secretKey)
+        const { compactEncryptJWE, decryptCompactJWE } = createCompactJWE(secretKey)
+
+        const compactJWE = await compactEncryptJWE(jws)
+        const decryptedJWS = await decryptCompactJWE(compactJWE)
+        expect(decryptedJWS).toBe(jws)
     })
 })
 
@@ -153,13 +227,13 @@ describe("JWTs", () => {
         const { encryptJWE, decryptJWE } = createJWE(derivedKey)
 
         const jws = await signJWS(payload)
-        const jwe = await encryptJWE(jws)
+        const jwe = await encryptJWE({ payload: jws })
         expect(jwe).toBeDefined()
 
-        const decryptedJWS = await decryptJWE(jwe)
-        expect(decryptedJWS).toBe(jws)
+        const decryptedJWS = await decryptJWE<{ payload: string }>(jwe)
+        expect(decryptedJWS.payload).toBe(jws)
 
-        const decodedPayload = await verifyJWS(decryptedJWS)
+        const decodedPayload = await verifyJWS(decryptedJWS.payload)
         expect(decodedPayload.sub).toBe(payload.sub)
         expect(decodedPayload.name).toBe(payload.name)
         expect(decodedPayload.email).toBe(payload.email)
@@ -193,7 +267,7 @@ describe("JWTs", () => {
         const derivedSigningKey = await createDeriveKey(secret, "salt", "signing")
         const derivedEncryptionKey = await createDeriveKey(secret, "salt", "encryption")
 
-        const { encodeJWT, decodeJWT } = createJWT({ jws: derivedSigningKey, jwe: derivedEncryptionKey })
+        const { encodeJWT, decodeJWT } = createJWT({ sign: derivedSigningKey, encrypt: derivedEncryptionKey })
 
         const jwt = await encodeJWT(payload)
         expect(jwt).toBeDefined()

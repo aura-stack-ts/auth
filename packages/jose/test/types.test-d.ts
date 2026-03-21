@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, test } from "vitest"
-import type { JWTPayload, JWTVerifyOptions } from "jose"
+import type { JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose"
 import {
     createJWS,
     createJWT,
@@ -8,7 +8,7 @@ import {
     signJWS,
     verifyJWS,
     type SecretInput,
-    type DecodedJWTPayloadOptions,
+    type DecodeJWTOptions,
     type TypedJWTPayload,
     type DerivedKeyInput,
 } from "@/index.ts"
@@ -34,7 +34,7 @@ describe("type-safe payload", () => {
         expectTypeOf(jwt.decodeJWT).toEqualTypeOf<
             <DecodePayload extends JWTPayload = User>(
                 token: string,
-                options?: DecodedJWTPayloadOptions
+                options?: DecodeJWTOptions
             ) => Promise<TypedJWTPayload<DecodePayload>>
         >()
 
@@ -67,13 +67,16 @@ describe("type-safe payload", () => {
             .toEqualTypeOf<SecretInput | DerivedKeyInput>()
         expectTypeOf(decodeJWT<User>)
             .parameter(2)
-            .toEqualTypeOf<DecodedJWTPayloadOptions | undefined>()
+            .toEqualTypeOf<DecodeJWTOptions | undefined>()
     })
 
     test("createJWS", async () => {
         const jws = createJWS<User>("secret")
         expectTypeOf(jws.signJWS).toEqualTypeOf<
-            <SignPayload extends JWTPayload = User>(payload: TypedJWTPayload<Partial<SignPayload>>) => Promise<string>
+            <SignPayload extends JWTPayload = User>(
+                payload: TypedJWTPayload<Partial<SignPayload>>,
+                options?: JWTHeaderParameters
+            ) => Promise<string>
         >()
         expectTypeOf(jws.verifyJWS).toEqualTypeOf<
             <VerifyPayload extends JWTPayload = User>(
@@ -97,6 +100,9 @@ describe("type-safe payload", () => {
         expectTypeOf(signJWS<User>)
             .parameter(1)
             .toEqualTypeOf<SecretInput>()
+        expectTypeOf(signJWS<User>)
+            .parameter(2)
+            .toEqualTypeOf<JWTHeaderParameters | undefined>()
     })
 
     test("verifyJWS", async () => {

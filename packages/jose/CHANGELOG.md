@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added `compactEncryptJWE`, `decryptCompactJWE`, and `createCompactJWE` to handle compact JWE (JSON Web Encryption) serialization, and introduced `EncodeJWTOptions` and `DecodeJWTOptions` to configure additional payload headers and verification options for signing and encryption flows. [#123](https://github.com/aura-stack-ts/auth/pull/123)
+
+### Changed
+
+- Updated `encryptJWE` and `decryptJWE` to accept `JWTPayload` values and no longer support string payloads. Use the compact JWE functions for string payloads. [#123](https://github.com/aura-stack-ts/auth/pull/123)
+
 ---
 
 ## [0.4.0] - 2026-03-19

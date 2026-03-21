@@ -55,8 +55,8 @@ export const createSecret = (secret: SecretInput, length: number = 32) => {
 }
 
 export const getSecrets = (secret: SecretInput | DerivedKeyInput) => {
-    const jwsSecret = isObject(secret) && "jws" in secret ? secret.jws : secret
-    const jweSecret = isObject(secret) && "jwe" in secret ? secret.jwe : secret
+    const jwsSecret = isObject(secret) && "sign" in secret ? secret.sign : secret
+    const jweSecret = isObject(secret) && "encrypt" in secret ? secret.encrypt : secret
     return {
         jwsSecret,
         jweSecret,

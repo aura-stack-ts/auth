@@ -1,11 +1,11 @@
-import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions } from "jose"
+import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions, type JWTHeaderParameters } from "jose"
 import { createSecret } from "@/secret.ts"
 import { getRandomBytes } from "@/crypto.ts"
 import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.ts"
 import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "@/errors.ts"
 import type { SecretInput, TypedJWTPayload } from "@/index.ts"
 
-export type { JWTVerifyOptions } from "jose"
+export type { JWTVerifyOptions, JWTHeaderParameters } from "jose"
 
 /**
  * Sign a standard JWT token with the following claims:
@@ -18,11 +18,13 @@ export type { JWTVerifyOptions } from "jose"
  *
  * @param payload - Payload data information to sign the JWT
  * @param secret - Secret key to sign the JWT (CryptoKey, KeyObject, string or Uint8Array)
+ * @param options - Optional signing options (e.g. algorithm)
  * @returns Signed JWT string
  */
 export const signJWS = async <Payload extends JWTPayload>(
     payload: TypedJWTPayload<Partial<Payload>>,
-    secret: SecretInput
+    secret: SecretInput,
+    options?: JWTHeaderParameters
 ): Promise<string> => {
     try {
         if (isInvalidPayload(payload)) {
@@ -32,11 +34,11 @@ export const signJWS = async <Payload extends JWTPayload>(
         const jti = base64url.encode(getRandomBytes(32))
 
         return await new SignJWT(payload)
-            .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-            .setIssuedAt()
+            .setProtectedHeader({ alg: "HS256", typ: "JWT", ...options })
+            .setIssuedAt(payload.iat ?? "0s")
             .setNotBefore(payload.nbf ?? "0s")
             .setExpirationTime(payload.exp ?? "15d")
-            .setJti(jti)
+            .setJti(payload.jti ?? jti)
             .sign(secretKey)
     } catch (error) {
         if (isAuraJoseError(error)) {
@@ -81,13 +83,16 @@ export const verifyJWS = async <Payload extends JWTPayload>(
  * and `verifyJWS` functions of the module.
  *
  * @param secret - Secret key used for signing and verifying the JWS
+ * @param options - Optional signing options (e.g. algorithm)
  * @returns signJWS and verifyJWS functions
  */
 export const createJWS = <Payload extends JWTPayload>(secret: SecretInput) => {
     return {
-        signJWS: <SignPayload extends JWTPayload = Payload>(payload: TypedJWTPayload<Partial<SignPayload>>) =>
-            signJWS(payload, secret),
-        verifyJWS: <VerifyPayload extends JWTPayload = Payload>(payload: string, options?: JWTVerifyOptions) =>
-            verifyJWS<VerifyPayload>(payload, secret, options),
+        signJWS: <SignPayload extends JWTPayload = Payload>(
+            payload: TypedJWTPayload<Partial<SignPayload>>,
+            options?: JWTHeaderParameters
+        ) => signJWS(payload, secret, options),
+        verifyJWS: <VerifyPayload extends JWTPayload = Payload>(payload: string, verifyOptions?: JWTVerifyOptions) =>
+            verifyJWS<VerifyPayload>(payload, secret, verifyOptions),
     }
 }
