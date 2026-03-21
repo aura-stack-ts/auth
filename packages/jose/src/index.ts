@@ -1,18 +1,23 @@
 /**
  * @module @aura-stack/jose
  */
-import type { JWTDecryptOptions, JWTPayload, JWTVerifyOptions } from "jose"
-import { createJWS } from "@/sign.ts"
+import type { DecryptOptions, JWEHeaderParameters, JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose"
 import { getSecrets } from "@/secret.ts"
-import { createJWE } from "@/encrypt.ts"
+import { signJWS, verifyJWS } from "@/sign.ts"
 import { isAuraJoseError } from "@/assert.ts"
 import { JWTDecodingError, JWTEncodingError } from "@/errors.ts"
+import { compactEncryptJWE, decryptCompactJWE } from "@/encrypt.ts"
 
 export * from "@/sign.ts"
+export type * from "@/sign.ts"
 export * from "@/encrypt.ts"
+export type * from "@/encrypt.ts"
 export * from "@/deriveKey.ts"
+export type * from "@/deriveKey.ts"
 export * from "@/secret.ts"
+export type * from "@/secret.ts"
 export * from "@/crypto.ts"
+export type * from "@/crypto.ts"
 
 /**
  * Secret input can be:
@@ -21,10 +26,30 @@ export * from "@/crypto.ts"
  * - string: String that will be encoded to UTF-8
  */
 export type SecretInput = Uint8Array | string | CryptoKey
-export type DerivedKeyInput = { jws: SecretInput; jwe: SecretInput }
-export type DecodedJWTPayloadOptions = { jws: JWTVerifyOptions; jwt: JWTDecryptOptions }
+export type DerivedKeyInput = { sign: SecretInput; encrypt: SecretInput }
 export type Prettify<T> = { [K in keyof T]: T[K] } & {}
 export type TypedJWTPayload<Payload extends JWTPayload> = JWTPayload & Payload
+
+/**
+ * JWT options for signin and encryption.
+ */
+export interface EncodeJWTOptions {
+    sign?: JWTHeaderParameters
+    encrypt?: JWEHeaderParameters
+}
+
+/**
+ * Decoded JWT payload options for verification and decryption.
+ */
+export interface DecodeJWTOptions {
+    verify: JWTVerifyOptions
+    decrypt: DecryptOptions
+}
+
+export interface CreateJWTOptions {
+    encode: EncodeJWTOptions
+    decode: DecodeJWTOptions
+}
 
 /**
  * Encode a JWT signed and encrypted token. The token first signed using JWS
@@ -38,18 +63,18 @@ export type TypedJWTPayload<Payload extends JWTPayload> = JWTPayload & Payload
  *
  * @param token - Payload data to encode in the JWT
  * @param secret - Secret key used for both signing and encrypting the JWT
+ * @param options - Optional algorithm configuration for signing and encryption
  * @returns Promise resolving to the signed and encrypted JWT string
  */
 export const encodeJWT = async <Payload extends JWTPayload>(
     token: TypedJWTPayload<Partial<Payload>>,
-    secret: SecretInput | DerivedKeyInput
+    secret: SecretInput | DerivedKeyInput,
+    options?: EncodeJWTOptions
 ) => {
     try {
         const { jweSecret, jwsSecret } = getSecrets(secret)
-        const { signJWS } = createJWS(jwsSecret)
-        const { encryptJWE } = createJWE(jweSecret)
-        const signed = await signJWS(token)
-        return await encryptJWE(signed)
+        const signed = await signJWS(token, jwsSecret, options?.sign)
+        return await compactEncryptJWE(signed, jweSecret, options?.encrypt)
     } catch (error) {
         if (isAuraJoseError(error)) {
             throw error
@@ -66,21 +91,19 @@ export const encodeJWT = async <Payload extends JWTPayload>(
  * Based on the RFC 7519 standard
  * - Official RFC: https://datatracker.ietf.org/doc/html/rfc7519
  * - Validating a JWT: https://datatracker.ietf.org/doc/html/rfc7519#section-7.2
- * @param token
- * @param secret
- * @returns
+ * @param token - JWT string to decode
+ * @param secret - Secret key used for both decrypting and verifying the JWT (CryptoKey, KeyObject, string or Uint8Array)
+ * @param options - Optional algorithm configuration for decryption and verification
  */
 export const decodeJWT = async <Payload extends JWTPayload>(
     token: string,
     secret: SecretInput | DerivedKeyInput,
-    options?: DecodedJWTPayloadOptions
+    options?: DecodeJWTOptions
 ): Promise<TypedJWTPayload<Payload>> => {
     try {
         const { jweSecret, jwsSecret } = getSecrets(secret)
-        const { verifyJWS } = createJWS<Payload>(jwsSecret)
-        const { decryptJWE } = createJWE(jweSecret)
-        const decrypted = await decryptJWE(token, options?.jwt)
-        return await verifyJWS(decrypted, options?.jws)
+        const decrypted = await decryptCompactJWE(token, jweSecret, options?.decrypt)
+        return await verifyJWS(decrypted, jwsSecret, options?.verify)
     } catch (error) {
         if (isAuraJoseError(error)) {
             throw error
@@ -95,13 +118,16 @@ export const decodeJWT = async <Payload extends JWTPayload>(
  * implements the `signJWS`, `verifyJWS`, `encryptJWE` and `decryptJWE` functions of the module.
  *
  * @param secret - Secret key used for signing, verifying, encrypting and decrypting the JWT
+ * @param options - Optional algorithm configuration for signing and encryption
  * @returns JWT handler object with `signJWS/encryptJWE` and `verifyJWS/decryptJWE` methods
  */
 export const createJWT = <Payload extends JWTPayload>(secret: SecretInput | DerivedKeyInput) => {
     return {
-        encodeJWT: async <EncodePayload extends JWTPayload = Payload>(payload: TypedJWTPayload<Partial<EncodePayload>>) =>
-            await encodeJWT<EncodePayload>(payload, secret),
-        decodeJWT: async <DecodePayload extends JWTPayload = Payload>(token: string, options?: DecodedJWTPayloadOptions) =>
+        encodeJWT: async <EncodePayload extends JWTPayload = Payload>(
+            payload: TypedJWTPayload<Partial<EncodePayload>>,
+            options?: EncodeJWTOptions
+        ) => await encodeJWT<EncodePayload>(payload, secret, options),
+        decodeJWT: async <DecodePayload extends JWTPayload = Payload>(token: string, options?: DecodeJWTOptions) =>
             await decodeJWT<DecodePayload>(token, secret, options),
     }
 }

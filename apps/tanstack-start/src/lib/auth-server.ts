@@ -25,7 +25,7 @@ export const signOutFn = createServerFn({ method: "POST" }).handler(async () => 
             console.error("[error:server] signOut", error)
             return null
         })
-    throw redirect({ to: "/", headers: response.headers, reloadDocument: true })
+    throw redirect({ to: "/", headers: response?.headers, reloadDocument: true })
 })
 
 export const signInFn = createServerFn({ method: "POST" })
@@ -46,6 +46,6 @@ export const signInFn = createServerFn({ method: "POST" })
                 return null
             })
         throw redirect({
-            href: response.signInURL,
+            href: response?.signInURL,
         })
     })
