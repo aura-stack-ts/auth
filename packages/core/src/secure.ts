@@ -1,7 +1,7 @@
 import { equals } from "@/utils.ts"
 import { AuthSecurityError } from "@/errors.ts"
 import { isJWTPayloadWithToken, timingSafeEqual } from "@/assert.ts"
-import { jwtVerificationOptions, base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
+import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import type { AuthRuntimeConfig } from "@/@types/index.ts"
 
 /** @deprecated use `createSecretValue` instead */
@@ -49,7 +49,7 @@ export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: s
     try {
         const token = generateSecure(32)
         if (csrfCookie) {
-            await jose.verifyJWS(csrfCookie, jwtVerificationOptions)
+            await jose.verifyJWS(csrfCookie)
             return csrfCookie
         }
         return jose.signJWS({ token })
@@ -61,8 +61,8 @@ export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: s
 
 export const verifyCSRF = async (jose: AuthRuntimeConfig["jose"], cookie: string, header: string): Promise<boolean> => {
     try {
-        const cookiePayload = await jose.verifyJWS(cookie, jwtVerificationOptions)
-        const headerPayload = await jose.verifyJWS(header, jwtVerificationOptions)
+        const cookiePayload = await jose.verifyJWS(cookie)
+        const headerPayload = await jose.verifyJWS(header)
 
         if (!isJWTPayloadWithToken(cookiePayload)) {
             throw new AuthSecurityError("CSRF_TOKEN_INVALID", "Cookie payload missing token field.")

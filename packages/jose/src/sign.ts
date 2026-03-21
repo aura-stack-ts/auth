@@ -68,7 +68,11 @@ export const verifyJWS = async <Payload extends JWTPayload>(
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
-        const { payload } = await jwtVerify(token, secretKey, options)
+        const { payload } = await jwtVerify(token, secretKey, {
+            algorithms: ["HS256"],
+            typ: "JWT",
+            ...options,
+        })
         return payload as TypedJWTPayload<Payload>
     } catch (error) {
         if (isAuraJoseError(error)) {

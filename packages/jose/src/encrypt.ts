@@ -7,6 +7,7 @@ import {
     CompactEncrypt,
     type JWEHeaderParameters,
     type JWTDecryptOptions,
+    DecryptOptions,
 } from "jose"
 import { createSecret } from "@/secret.ts"
 import { decoder, encoder, getRandomBytes } from "@/crypto.ts"
@@ -14,7 +15,7 @@ import { isAuraJoseError, isFalsy } from "@/assert.ts"
 import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.ts"
 import type { SecretInput, TypedJWTPayload } from "@/index.ts"
 
-export type { JWTDecryptOptions, JWEHeaderParameters } from "jose"
+export type { JWTDecryptOptions, JWEHeaderParameters, DecryptOptions } from "jose"
 
 /**
  * Encrypt a standard JWT token with the following claims:
@@ -41,7 +42,7 @@ export const encryptJWE = async <Payload extends JWTPayload>(
         const jti = base64url.encode(getRandomBytes(32))
 
         return await new EncryptJWT(payload)
-            .setProtectedHeader({ alg: "dir", enc: "A256GCM", typ: "JWT", cty: "JWT", ...options })
+            .setProtectedHeader({ alg: "dir", enc: "A256GCM", cty: "JWT", typ: "JWT", ...options })
             .setIssuedAt()
             .setNotBefore(payload?.nbf ?? "0s")
             .setExpirationTime(payload?.exp ?? "15d")
@@ -69,7 +70,7 @@ export const compactEncryptJWE = async (payload: string, secret: SecretInput, op
         }
         const secretKey = createSecret(secret)
         return await new CompactEncrypt(encoder.encode(payload))
-            .setProtectedHeader({ alg: "dir", enc: "A256GCM", ...options })
+            .setProtectedHeader({ alg: "dir", enc: "A256GCM", cty: "JWT", typ: "JWT", ...options })
             .encrypt(secretKey)
     } catch (error) {
         if (isAuraJoseError(error)) {
@@ -97,7 +98,11 @@ export const decryptJWE = async <Payload extends JWTPayload>(
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
-        const { payload } = await jwtDecrypt(token, secretKey, options)
+        const { payload } = await jwtDecrypt(token, secretKey, {
+            keyManagementAlgorithms: ["dir"],
+            contentEncryptionAlgorithms: ["A256GCM"],
+            ...options,
+        })
         return payload as TypedJWTPayload<Payload>
     } catch (error) {
         if (isAuraJoseError(error)) {
@@ -115,14 +120,18 @@ export const decryptJWE = async <Payload extends JWTPayload>(
  * @param options - Additional JWT decryption options
  * @returns Decrypted JWT payload string
  */
-export const decryptCompactJWE = async (token: string, secret: SecretInput, options?: JWTDecryptOptions) => {
+export const decryptCompactJWE = async (token: string, secret: SecretInput, options?: DecryptOptions) => {
     try {
         if (isFalsy(token)) {
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
 
-        const { plaintext } = await compactDecrypt(token, secretKey, options)
+        const { plaintext } = await compactDecrypt(token, secretKey, {
+            keyManagementAlgorithms: ["dir"],
+            contentEncryptionAlgorithms: ["A256GCM"],
+            ...options,
+        })
         return decoder.decode(plaintext)
     } catch (error) {
         if (isAuraJoseError(error)) {
@@ -159,6 +168,6 @@ export const createJWE = <Payload extends JWTPayload>(secret: SecretInput) => {
 export const createCompactJWE = (secret: SecretInput) => {
     return {
         compactEncryptJWE: (payload: string, options?: JWEHeaderParameters) => compactEncryptJWE(payload, secret, options),
-        decryptCompactJWE: (payload: string, options?: JWTDecryptOptions) => decryptCompactJWE(payload, secret, options),
+        decryptCompactJWE: (payload: string, options?: DecryptOptions) => decryptCompactJWE(payload, secret, options),
     }
 }

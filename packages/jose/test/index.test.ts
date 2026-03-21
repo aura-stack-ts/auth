@@ -366,3 +366,25 @@ describe("deriveKey", () => {
         expect(derivedKey2).toEqual(derivedKey3)
     })
 })
+
+describe("createJWT", () => {
+    test("createJWT with separate JWS and JWE secrets", async () => {
+        const secret = getRandomBytes(32)
+        const derivedSigningKey = await createDeriveKey(secret, "salt", "signing")
+        const derivedEncryptionKey = await createDeriveKey(secret, "salt", "encryption")
+
+        const { encodeJWT, decodeJWT } = createJWT({ sign: derivedSigningKey, encrypt: derivedEncryptionKey })
+
+        const jwt = await encodeJWT(payload)
+        expect(jwt).toBeDefined()
+        const decodedPayload = await decodeJWT(jwt)
+        expect(decodedPayload.sub).toBe(payload.sub)
+        expect(decodedPayload.name).toBe(payload.name)
+        expect(decodedPayload.email).toBe(payload.email)
+    })
+
+    test("createJWT with invalid secret", async () => {
+        const { encodeJWT } = createJWT("short")
+        await expect(encodeJWT(payload)).rejects.toThrow("Secret string must be at least 32 bytes long")
+    })
+})

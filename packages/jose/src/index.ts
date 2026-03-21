@@ -37,8 +37,8 @@ export interface EncodeJWTOptions {
  * Decoded JWT payload options for verification and decryption.
  */
 export interface DecodeJWTOptions {
-    sign: JWTVerifyOptions
-    encrypt: JWTDecryptOptions
+    verify: JWTVerifyOptions
+    decrypt: JWTDecryptOptions
 }
 
 export interface CreateJWTOptions {
@@ -97,8 +97,8 @@ export const decodeJWT = async <Payload extends JWTPayload>(
 ): Promise<TypedJWTPayload<Payload>> => {
     try {
         const { jweSecret, jwsSecret } = getSecrets(secret)
-        const decrypted = await decryptCompactJWE(token, jweSecret, options?.encrypt)
-        return await verifyJWS(decrypted, jwsSecret, options?.sign)
+        const decrypted = await decryptCompactJWE(token, jweSecret, options?.decrypt)
+        return await verifyJWS(decrypted, jwsSecret, options?.verify)
     } catch (error) {
         if (isAuraJoseError(error)) {
             throw error

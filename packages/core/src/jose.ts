@@ -56,7 +56,7 @@ export const createJoseInstance = (secret?: string) => {
         const [derivedSigningKey, derivedEncryptionKey, derivedCsrfTokenKey] = await Promise.all([
             createDeriveKey(secret, salt, "signing"),
             createDeriveKey(secret, salt, "encryption"),
-            createDeriveKey(secret, salt, "encryption"),
+            createDeriveKey(secret, salt, "csrfToken"),
         ])
 
         return {
@@ -68,13 +68,13 @@ export const createJoseInstance = (secret?: string) => {
     jose.catch(() => {})
 
     return {
-        decodeJWT: async (token: string, options?: DecodeJWTOptions) => {
-            const { jwt } = await jose
-            return jwt.decodeJWT(token, options)
-        },
         encodeJWT: async (payload: TypedJWTPayload<Partial<User>>, options?: EncodeJWTOptions) => {
             const { jwt } = await jose
             return jwt.encodeJWT(payload, options)
+        },
+        decodeJWT: async (token: string, options?: DecodeJWTOptions) => {
+            const { jwt } = await jose
+            return jwt.decodeJWT(token, options)
         },
         signJWS: async (payload: TypedJWTPayload<Partial<User>>, options?: JWTHeaderParameters) => {
             const { jws } = await jose
@@ -93,16 +93,4 @@ export const createJoseInstance = (secret?: string) => {
             return jwe.decryptJWE(token, options)
         },
     }
-}
-
-export const jwtVerificationOptions: JWTVerifyOptions = {
-    algorithms: ["HS256"],
-    typ: "JWT",
-}
-
-export const decodeJWTOptions: DecodeJWTOptions = {
-    encrypt: jwtVerificationOptions,
-    sign: {
-        typ: "JWT",
-    },
 }
