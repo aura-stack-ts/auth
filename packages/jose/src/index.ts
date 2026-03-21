@@ -1,7 +1,7 @@
 /**
  * @module @aura-stack/jose
  */
-import type { JWEHeaderParameters, JWTDecryptOptions, JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose"
+import type { DecryptOptions, JWEHeaderParameters, JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose"
 import { getSecrets } from "@/secret.ts"
 import { signJWS, verifyJWS } from "@/sign.ts"
 import { isAuraJoseError } from "@/assert.ts"
@@ -9,10 +9,15 @@ import { JWTDecodingError, JWTEncodingError } from "@/errors.ts"
 import { compactEncryptJWE, decryptCompactJWE } from "@/encrypt.ts"
 
 export * from "@/sign.ts"
+export type * from "@/sign.ts"
 export * from "@/encrypt.ts"
+export type * from "@/encrypt.ts"
 export * from "@/deriveKey.ts"
+export type * from "@/deriveKey.ts"
 export * from "@/secret.ts"
+export type * from "@/secret.ts"
 export * from "@/crypto.ts"
+export type * from "@/crypto.ts"
 
 /**
  * Secret input can be:
@@ -38,7 +43,7 @@ export interface EncodeJWTOptions {
  */
 export interface DecodeJWTOptions {
     verify: JWTVerifyOptions
-    decrypt: JWTDecryptOptions
+    decrypt: DecryptOptions
 }
 
 export interface CreateJWTOptions {

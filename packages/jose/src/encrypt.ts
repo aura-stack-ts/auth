@@ -7,7 +7,7 @@ import {
     CompactEncrypt,
     type JWEHeaderParameters,
     type JWTDecryptOptions,
-    DecryptOptions,
+    type DecryptOptions,
 } from "jose"
 import { createSecret } from "@/secret.ts"
 import { decoder, encoder, getRandomBytes } from "@/crypto.ts"
