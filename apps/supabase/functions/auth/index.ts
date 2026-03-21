@@ -20,7 +20,7 @@ Deno.serve(async (request) => {
                         error: "Unauthorized",
                         message: "Active session required.",
                     },
-                    { status: 401 },
+                    { status: 401 }
                 )
             }
             return Response.json({

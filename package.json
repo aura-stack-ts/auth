@@ -14,7 +14,9 @@
     "format": "turbo run format format:root --parallel",
     "format:root": "prettier --write . \"!packages\" \"!apps\" \"!configs\" --cache --cache-location .cache/.prettiercache",
     "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache",
-    "type-check": "turbo run type-check --parallel"
+    "type-check": "turbo run type-check --parallel",
+    "format:oxfmt": "oxfmt",
+    "format:check:oxfmt": "oxfmt --check"
   },
   "repository": {
     "type": "git",
@@ -39,6 +41,7 @@
     "@types/node": "catalog:node",
     "@vitest/coverage-v8": "^4.0.14",
     "eslint": "^9.35.0",
+    "oxfmt": "^0.41.0",
     "prettier": "^3.6.2",
     "tsup": "^8.5.1",
     "turbo": "^2.7.5",
