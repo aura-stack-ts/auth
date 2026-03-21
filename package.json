@@ -12,8 +12,10 @@
     "build:prod": "turbo run build --filter=./packages/*",
     "test": "turbo run test --parallel",
     "format": "turbo run format format:root --parallel",
-    "format:root": "prettier --write . \"!packages\" \"!apps\" \"!configs\" --cache --cache-location .cache/.prettiercache",
-    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache",
+    "format:root": "oxfmt \"!packages\" \"!apps\" \"!configs\"",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "type-check": "turbo run type-check --parallel"
   },
   "repository": {
@@ -35,11 +37,11 @@
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@aura-stack/prettier-config": "workspace:*",
     "@types/node": "catalog:node",
     "@vitest/coverage-v8": "^4.0.14",
     "eslint": "^9.35.0",
-    "prettier": "^3.6.2",
+    "oxfmt": "^0.41.0",
+    "oxlint": "^1.56.0",
     "tsup": "^8.5.1",
     "turbo": "^2.7.5",
     "typescript": "catalog:typescript",

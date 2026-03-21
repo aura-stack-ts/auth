@@ -1,12 +1,5 @@
 import { api } from "@/auth"
-import type {
-    Session,
-    LiteralUnion,
-    BuiltInOAuthProvider,
-    SignInAPIOptions,
-    SignOutAPIOptions,
-    GetSessionAPIOptions,
-} from "@aura-stack/auth"
+import type { Session, SignOutAPIOptions, GetSessionAPIOptions } from "@aura-stack/auth"
 
 export const getSession = async (request: Request, options?: GetSessionAPIOptions): Promise<Session | null> => {
     try {

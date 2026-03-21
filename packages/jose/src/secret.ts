@@ -30,7 +30,7 @@ export const getEntropy = (secret: string): number => {
  * @returns The secret in Uint8Array format
  */
 export const createSecret = (secret: SecretInput, length: number = 32) => {
-    if (!Boolean(secret)) throw new InvalidSecretError("Secret is required")
+    if (!secret) throw new InvalidSecretError("Secret is required")
     if (typeof secret === "string") {
         const encoded = encoder.encode(secret)
         const byteLength = encoded.byteLength

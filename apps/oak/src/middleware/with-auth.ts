@@ -20,7 +20,7 @@ export type RouterContextWithState<Route extends string, Params extends RoutePar
 export const withAuth = async <Route extends string>(ctx: RouterContextWithState<Route>, next: Next) => {
     try {
         const session = await api.getSession({
-            headers: ctx.request.headers
+            headers: ctx.request.headers,
         })
         if (!session.authenticated) {
             ctx.response.status = 401

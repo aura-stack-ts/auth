@@ -28,7 +28,7 @@ pnpm install
 # Vercel
 vercel
 vercel dev
-vercel deploy 
+vercel deploy
 ```
 
 Once started, open your browser at `http://localhost:3000` to view the app.

@@ -6,21 +6,21 @@ const cookieStore = createCookieStore(true)
 
 describe("setCookie", () => {
     test("set state cookie with default options", () => {
-        const { expires, ...exclude } = cookieStore.state.attributes
+        const { expires: _expires, ...exclude } = cookieStore.state.attributes
         const cookie = setCookie("state", "xyz123", exclude)
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("state=xyz123; Max-Age=300; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 
     test("set csrfToken cookie with disabled httpOnly flag on cookie", () => {
-        const { expires, ...exclude } = cookieStore.csrfToken.attributes
+        const { expires: _expires, ...exclude } = cookieStore.csrfToken.attributes
         const cookie = setCookie(cookieStore.csrfToken.name, "xyz123", exclude)
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("__Host-aura-auth.csrf_token=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Strict")
     })
 
     test("set pkce cookie with secure flag on cookie", () => {
-        const { expires, ...exclude } = cookieStore.codeVerifier.attributes
+        const { expires: _expires, ...exclude } = cookieStore.codeVerifier.attributes
         const cookie = setCookie(cookieStore.codeVerifier.name, "xyz123", exclude)
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("__Secure-aura-auth.code_verifier=xyz123; Max-Age=300; Path=/; HttpOnly; Secure; SameSite=Lax")

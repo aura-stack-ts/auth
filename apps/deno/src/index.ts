@@ -7,7 +7,7 @@ Deno.serve({ port: 3000 }, async (request) => {
             return new Response("Welcome to the Aura Stack Deno App!")
         case "/api/protected": {
             const session = await api.getSession({
-                headers: request.headers
+                headers: request.headers,
             })
             if (!session.authenticated) {
                 return Response.json(
@@ -15,7 +15,7 @@ Deno.serve({ port: 3000 }, async (request) => {
                         error: "Unauthorized",
                         message: "Active session required.",
                     },
-                    { status: 401 },
+                    { status: 401 }
                 )
             }
             return Response.json({

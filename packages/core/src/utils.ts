@@ -141,7 +141,7 @@ export const formatZodError = <T extends Record<string, unknown> = Record<string
 }
 
 export const extractPath = (url: string): string => {
-    const pathRegex = /^https?:\/\/[a-zA-Z0-9_\-\.]+(:\d+)?(\/.*)$/
+    const pathRegex = /^https?:\/\/[a-zA-Z0-9_\-.]+(:\d+)?(\/.*)$/
     const match = url.match(pathRegex)
     return match && match[2] ? match[2] : "/"
 }

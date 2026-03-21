@@ -36,7 +36,7 @@ export const Footer = () => {
             <div className="w-11/12 mx-auto max-w-5xl border-x border-muted">
                 <div className="py-10 px-6 max-w-5xl grid grid-cols-6 gap-6">
                     <div className="col-span-6 flex flex-col gap-5 md:col-span-4">
-                        <a href="" className="w-max opacity-25">
+                        <a href="https://github.com/aura-stack-ts/auth" className="w-max opacity-25">
                             Aura Auth
                         </a>
                         <p className="max-w-sm text-muted-foreground font-mono text-sm text-balance">

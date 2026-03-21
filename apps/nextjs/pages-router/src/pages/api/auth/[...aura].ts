@@ -31,7 +31,7 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         res.setHeaders(response.headers)
         const data = await response.json()
         return res.status(response.status).json(data)
-    } catch (error) {
+    } catch {
         return res.status(500).json({ error: "Internal Server Error" })
     }
 }
