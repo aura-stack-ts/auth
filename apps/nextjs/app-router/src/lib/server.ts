@@ -51,7 +51,9 @@ export const signOut = async (options?: SignOutAPIOptions) => {
             const setCookies = response.headers.getSetCookie()
             for (const cookie of setCookies) {
                 const nameMatch = cookie.match(/^([^=]+)=/)
-                nameMatch && cookieStore.delete(nameMatch[1])
+                if (nameMatch) {
+                    cookieStore.delete(nameMatch[1])
+                }
             }
             redirect(options?.redirectTo ?? "/")
         }

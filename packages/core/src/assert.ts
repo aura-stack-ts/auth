@@ -62,7 +62,7 @@ export const isRelativeURL = (value: string): boolean => {
     for (const char of unsafeChars) {
         if (value.includes(char)) return false
     }
-    const regex = /^\/[a-zA-Z0-9\-_\/.?&=#]*\/?$/
+    const regex = /^\/[a-zA-Z0-9\-_/.?&=#]*\/?$/
     return regex.test(value)
 }
 

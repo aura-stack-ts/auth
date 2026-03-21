@@ -135,7 +135,7 @@ export const createRedirectTo = async (request: Request, redirectTo?: string, co
             return "/"
         }
         return validateURL(redirectTo ?? headers.get("Referer") ?? headers.get("Origin") ?? "/")
-    } catch (error) {
+    } catch {
         context?.logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED")
         return "/"
     }

@@ -50,7 +50,7 @@ export const createAccessToken = async (
         const response = await fetchAsync(tokenURL, {
             method: "POST",
             headers: {
-                ...(extraHeaders ?? {}),
+                ...extraHeaders,
                 Accept: "application/json",
                 "Content-Type": "application/x-www-form-urlencoded",
             },

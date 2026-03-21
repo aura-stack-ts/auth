@@ -49,7 +49,7 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
                 "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
                 Accept: "application/json",
                 Authorization: `Bearer ${accessToken}`,
-                ...(extraHeaders ?? {}),
+                ...extraHeaders,
             },
         })
         if (!response.ok) {

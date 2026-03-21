@@ -443,7 +443,7 @@ describe("isTrustedOrigin", () => {
     ]
 
     for (const { description, url, trustedOrigins, expected } of testCases) {
-        test(description, () => {
+        test(`${description}`, () => {
             expect(isTrustedOrigin(url, trustedOrigins)).toBe(expected)
         })
     }

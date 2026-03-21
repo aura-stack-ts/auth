@@ -177,7 +177,7 @@ describe("JWEs", () => {
 
     test("fail JWT to try to decrypt an invalid JWE", async () => {
         const secretKey = getRandomBytes(32)
-        await expect(decryptJWE("header.payload.signature", secretKey)).rejects.toThrow()
+        await expect(decryptJWE("header.payload.signature", secretKey)).rejects.toThrow(/JWE decryption verification failed/)
     })
 
     test("set audience in a JWE and decrypt it", async () => {
@@ -254,7 +254,7 @@ describe("JWTs", () => {
     test("fail JWT to try to decode an invalid JWT", async () => {
         const secret = getRandomBytes(32)
         const { decodeJWT } = createJWT(secret)
-        await expect(decodeJWT("invalid.jwt.token")).rejects.toThrow()
+        await expect(decodeJWT("invalid.jwt.token")).rejects.toThrow(/JWE decryption verification failed/)
     })
 
     test("createJWT with invalid secret", async () => {
