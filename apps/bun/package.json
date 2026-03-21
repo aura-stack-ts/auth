@@ -6,8 +6,8 @@
     "dev": "bun run --hot src/index.ts",
     "build": "bun build src/index.ts --outdir dist",
     "type-check": "tsc --noEmit",
-    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
-    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
   },
   "dependencies": {
     "@aura-stack/auth": "workspace:*"

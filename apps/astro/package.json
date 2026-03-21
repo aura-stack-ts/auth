@@ -9,8 +9,8 @@
     "astro": "astro",
     "check": "astro check",
     "type-check": "tsc --noEmit",
-    "format": "prettier --write . --cache --cache-location .cache/.prettiercache",
-    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache"
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",

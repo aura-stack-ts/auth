@@ -12,8 +12,8 @@
     "build:prod": "turbo run build --filter=./packages/*",
     "test": "turbo run test --parallel",
     "format": "turbo run format format:root --parallel",
-    "format:root": "prettier --write . \"!packages\" \"!apps\" \"!configs\" --cache --cache-location .cache/.prettiercache",
-    "format:check": "prettier --check . --cache --cache-location .cache/.prettiercache",
+    "format:root": "oxfmt \"!packages\" \"!apps\" \"!configs\"",
+    "format:check": "oxfmt --check",
     "type-check": "turbo run type-check --parallel",
     "format:oxfmt": "oxfmt",
     "format:check:oxfmt": "oxfmt --check"
