@@ -10,7 +10,7 @@ import type {
     TypedJWTPayload,
 } from "@/@types/index.ts"
 
-type JWTStrategyOptions = { config: StatelessStrategyConfig; jose: JoseInstance; cookies: CookieStoreConfig }
+type JWTStrategyOptions = { config: StatelessStrategyConfig; jose: JoseInstance; cookies: () => CookieStoreConfig }
 
 export const createJWTStrategy = ({ config, jose, cookies }: JWTStrategyOptions): SessionStrategy => {
     const jwt = createJWTManager(config.jwt!, jose)
@@ -18,7 +18,6 @@ export const createJWTStrategy = ({ config, jose, cookies }: JWTStrategyOptions)
 
     const getSession = async (headers: Headers): Promise<Session | null> => {
         try {
-            console.log("cookies-createJWTStrategy-getSession", cookies.sessionToken)
             const { sessionToken } = cookieConfig.getCookie(headers)
             if (!sessionToken) return null
 
@@ -31,8 +30,7 @@ export const createJWTStrategy = ({ config, jose, cookies }: JWTStrategyOptions)
                 user,
                 expires: new Date((exp ?? 0) * 1000).toISOString(),
             }
-        } catch (error) {
-            console.error("JWT_STRATEGY_GET_SESSION_ERROR", { error })
+        } catch {
             return null
         }
     }

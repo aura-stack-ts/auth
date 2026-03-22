@@ -3,9 +3,9 @@ import { secureApiHeaders } from "@/headers.ts"
 import { expiredCookieAttributes, getCookie as getCookieByName } from "@/cookie.ts"
 import type { CookieStoreConfig } from "@/@types/index.ts"
 
-export const createCookieManager = (config: CookieStoreConfig) => {
+export const createCookieManager = (config: () => CookieStoreConfig) => {
     const getCookie = (request: Request | Headers) => {
-        const sessionToken = getCookieByName(request, config.sessionToken.name)
+        const sessionToken = getCookieByName(request, config().sessionToken.name)
         return {
             sessionToken,
         }
@@ -13,14 +13,14 @@ export const createCookieManager = (config: CookieStoreConfig) => {
 
     const setCookie = ({ sessionToken }: { sessionToken: string }) => {
         return new HeadersBuilder(secureApiHeaders)
-            .setCookie(config.sessionToken.name, sessionToken, config.sessionToken.attributes)
+            .setCookie(config().sessionToken.name, sessionToken, config().sessionToken.attributes)
             .toHeaders()
     }
 
     const clear = () => {
         return new HeadersBuilder(secureApiHeaders)
-            .setCookie(config.csrfToken.name, "", expiredCookieAttributes)
-            .setCookie(config.sessionToken.name, "", expiredCookieAttributes)
+            .setCookie(config().csrfToken.name, "", expiredCookieAttributes)
+            .setCookie(config().sessionToken.name, "", expiredCookieAttributes)
             .toHeaders()
     }
     return { getCookie, setCookie, clear }

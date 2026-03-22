@@ -1,22 +1,12 @@
-import { getCookie } from "@/cookie.ts"
-import { getErrorName, toISOString } from "@/utils.ts"
+import { getErrorName } from "@/utils.ts"
 import type { FunctionAPIContext, GetSessionAPIOptions, SessionResponse } from "@/@types/index.ts"
 
 export const getSession = async ({ ctx, headers }: FunctionAPIContext<GetSessionAPIOptions>): Promise<SessionResponse> => {
     try {
-        console.log("cookies-getSession", ctx.cookies.sessionToken)
-        const sessionFromCtx = await ctx.session.getSession(new Headers(headers))
-        const session = getCookie(new Headers(headers), ctx.cookies.sessionToken.name)
-        const decoded = await ctx.jose.decodeJWT(session)
-        ctx?.logger?.log("AUTH_SESSION_VALID")
-        const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = decoded
-        console.log("SESSION_FROM_CTX", { session: sessionFromCtx })
-        console.log("SESSION_FROM_COOKIE", { session: user })
+        const session = await ctx.session.getSession(new Headers(headers))
+        if (!session) throw new Error("No session found")
         return {
-            session: {
-                user,
-                expires: toISOString(exp! * 1000),
-            },
+            session,
             authenticated: true,
         }
     } catch (error) {
