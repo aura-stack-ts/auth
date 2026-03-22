@@ -4,10 +4,14 @@ import type { FunctionAPIContext, GetSessionAPIOptions, SessionResponse } from "
 
 export const getSession = async ({ ctx, headers }: FunctionAPIContext<GetSessionAPIOptions>): Promise<SessionResponse> => {
     try {
+        console.log("cookies-getSession", ctx.cookies.sessionToken)
+        const sessionFromCtx = await ctx.session.getSession(new Headers(headers))
         const session = getCookie(new Headers(headers), ctx.cookies.sessionToken.name)
         const decoded = await ctx.jose.decodeJWT(session)
         ctx?.logger?.log("AUTH_SESSION_VALID")
         const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = decoded
+        console.log("SESSION_FROM_CTX", { session: sessionFromCtx })
+        console.log("SESSION_FROM_COOKIE", { session: user })
         return {
             session: {
                 user,

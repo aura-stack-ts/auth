@@ -32,13 +32,11 @@ export const isSealedMode = (config?: SessionConfig): config is { jwt: Extract<J
  * Defaults to "sealed" when no mode is specified.
  */
 const getJWTMode = (config?: SessionConfig): JWTMode => {
-    if (!config || config.strategy === "database") return "sealed"
-    return config.jwt?.mode ?? "sealed"
+    return config?.jwt?.mode ?? "sealed"
 }
 
 const getJWTConfig = (config?: SessionConfig) => {
-    if (!config || config.strategy === "database") return undefined
-    return config.jwt
+    return config?.jwt
 }
 
 export const getJWTClaims = (config?: SessionConfig) => {

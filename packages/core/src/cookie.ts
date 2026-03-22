@@ -1,7 +1,7 @@
 import { env } from "@/env.ts"
-import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
 import { AuthInternalError } from "@/errors.ts"
-import type { AuthRuntimeConfig, CookieStoreConfig, CookieConfig, InternalLogger, User } from "@/@types/index.ts"
+import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
+import type { CookieStoreConfig, CookieConfig, InternalLogger } from "@/@types/index.ts"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -107,23 +107,6 @@ export const getSetCookie = (response: Response, cookieName: string) => {
         throw new AuthInternalError("COOKIE_NOT_FOUND", `Cookie "${cookieName}" not found in response.`)
     }
     return parseSetCookie(strCookie).value
-}
-
-/**
- * Create a session cookie containing a signed and encrypted JWT, using the
- * `@aura-stack/jose` package for the encoding.
- *
- * @param jose - Jose Instance
- * @param session - The JWT payload to be encoded in the session cookie
- * @returns The serialized session cookie string
- */
-export const createSessionCookie = async (jose: AuthRuntimeConfig["jose"], session: User) => {
-    try {
-        const encoded = await jose.encodeJWT(session)
-        return encoded
-    } catch (error) {
-        throw new AuthInternalError("INVALID_JWT_TOKEN", "Failed to create session cookie", { cause: error })
-    }
 }
 
 /**

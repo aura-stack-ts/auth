@@ -2,17 +2,18 @@ import { z } from "zod"
 import { createLogEntry } from "@/logger.ts"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.ts"
 import { createJoseInstance, type JWTPayload } from "@/jose.ts"
-import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
-import type { createAuthInstance } from "@/createAuth.ts"
 import type { createAuthAPI } from "@/api/createApi.ts"
 import type { ClientOptions } from "@aura-stack/router"
-import type { SessionConfig } from "./session.ts"
+import type { createAuthInstance } from "@/createAuth.ts"
+import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
+import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
+import type { SerializeOptions } from "@aura-stack/router/cookie"
+import type { Session, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
 
 export type * from "./utility.ts"
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 export type * from "@/@types/session.ts"
+export type { TypedJWTPayload } from "@aura-stack/jose"
 
 /**
  * Standard JWT claims that are managed internally by the token system.
@@ -24,25 +25,6 @@ export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" |
  * JWT payload structure that includes a mandatory `token` field used to verify CSRF Tokens
  */
 export type JWTPayloadWithToken = JWTPayload & { token: string }
-
-/**
- * Standardized user profile returned by OAuth providers after fetching user information
- * and mapping the response to this format by default or via the `profile` custom function.
- */
-export interface User extends Record<string, unknown> {
-    sub: string
-    name?: string | null
-    email?: string | null
-    image?: string | null
-}
-
-/**
- * Session data returned by the session endpoint.
- */
-export interface Session {
-    user: User
-    expires: string
-}
 
 export type AuthorizeParams = LiteralUnion<
     "clientId" | "prompt" | "scope" | "responseMode" | "audience" | "loginHint" | "nonce" | "display"
@@ -298,7 +280,7 @@ export interface RouterGlobalContext {
     trustedProxyHeaders: boolean
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
-    session?: SessionConfig
+    session: SessionStrategy
 }
 
 /**

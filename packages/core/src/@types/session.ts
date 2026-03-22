@@ -1,4 +1,21 @@
-import type { DatabaseAdapter } from "@/@types/adapter.ts"
+/**
+ * Standardized user profile returned by OAuth providers after fetching user information
+ * and mapping the response to this format by default or via the `profile` custom function.
+ */
+export interface User extends Record<string, unknown> {
+    sub: string
+    name?: string | null
+    email?: string | null
+    image?: string | null
+}
+
+/**
+ * Session data returned by the session endpoint.
+ */
+export interface Session {
+    user: User
+    expires: string
+}
 
 /** A duration expressed as seconds (number) or a human-readable string. */
 export type Duration = number | `${number}s` | `${number}m` | `${number}h` | `${number}d` | `${number}w`
@@ -106,92 +123,6 @@ export type JWTConfig = {
 } & JWTConfigBase
 
 /**
- * Detect and react to refresh token reuse — the primary signal for token theft.
- * When a used token is presented again:
- *   - "revoke_family": revoke all tokens in the rotation chain (default, recommended)
- *   - "revoke_session": revoke only the associated session
- *   - "ignore": log and continue (not recommended; for debugging only)
- * @todo: implement in  `RefreshTokenConfig`
- */
-export type ReuseDetectionStrategy = "revoke_family" | "revoke_session" | "ignore"
-
-export interface RefreshTokenConfig {
-    /**
-     * Enable refresh token issuance.
-     * When false, the session lives until maxAge with no renewal path.
-     * @default true
-     */
-    enabled?: boolean
-    /**
-     * Absolute lifetime of a refresh token.
-     * After this the user must fully re-authenticate regardless of activity.
-     * @default "7d"
-     */
-    maxAge?: Duration
-    /**
-     * Sliding window: if the token is used before this window elapses,
-     * a new token is issued and the window resets.
-     * Set to 0 to use absolute expiry only.
-     * @default "1d"
-     */
-    rollingWindow?: Duration
-}
-
-export interface SessionBehaviorConfig {
-    /**
-     * Opaque session token / database row lifetime.
-     * After this the session is expired regardless of activity.
-     * @default "30d"
-     */
-    maxAge?: Duration
-    /**
-     * Sliding window: each validated request extends the session by this duration.
-     * Set to 0 to use absolute expiry only (maxAge is the hard ceiling).
-     * @default "1d"
-     */
-    rollingWindow?: Duration
-    /**
-     * Maximum number of concurrent active sessions per user.
-     * When the limit is reached, the oldest session is automatically revoked
-     * before the new one is created.
-     * @default undefined (no limit)
-     */
-    maxSessions?: number
-    /**
-     * Allow one user to hold sessions linked to multiple provider accounts
-     * simultaneously (e.g. GitHub + Microsoft, or two GitHub accounts).
-     *
-     * When false, starting a new OAuth flow for a provider that already has
-     * a linked session revokes the previous session for that provider.
-     * @default true
-     */
-    allowMultipleAccounts?: boolean
-    /**
-     * Revoke all active sessions when the user changes their password
-     * via the credentials flow.
-     *
-     * The session that initiated the password change is also revoked unless
-     * `keepCurrentOnRevoke` is true.
-     * @default true
-     */
-    revokeOnPasswordChange?: boolean
-    /**
-     * Revoke all active sessions when the user's primary email is changed
-     * and the new address has not yet been verified.
-     * @default true
-     */
-    revokeOnEmailChange?: boolean
-    /**
-     * When any bulk-revocation is triggered (password change, email change,
-     * admin action), preserve the session that initiated the action.
-     *
-     * Applies to both `revokeOnPasswordChange` and `revokeOnEmailChange`.
-     * @default false
-     */
-    keepCurrentOnRevoke?: boolean
-}
-
-/**
  * Stateless JWT strategy.
  * No database required. Tokens are self-contained and cannot be revoked
  * before they expire — keep `jwt.maxAge` short or enable refresh tokens.
@@ -206,54 +137,6 @@ export interface SessionBehaviorConfig {
 export type StatelessStrategyConfig = {
     strategy?: "jwt"
     jwt?: JWTConfig
-    refreshToken?: RefreshTokenConfig
-}
-
-/**
- * Stateful database strategy.
- * Every request validates the session against the database.
- * Enables instant revocation, multi-device management, and activity tracking.
- *
- * @example
- * {
- *   strategy: "database",
- *   adapter: PrismaAdapter(prisma),
- *   session: { maxAge: "30d", maxSessions: 5, revokeOnPasswordChange: true },
- *   refreshToken: { enabled: true, maxAge: "7d" },
- * }
- */
-export type StatefulStrategyConfig = {
-    strategy: "database"
-    adapter: DatabaseAdapter
-    session?: SessionBehaviorConfig
-    refreshToken?: RefreshTokenConfig
-}
-
-/**
- * Hybrid strategy: JWT transport + database revocation authority.
- *
- * The JWT carries claims and is validated cryptographically on every request
- * (fast, no DB hit). The database session row is the revocation authority —
- * a revoked database session invalidates any JWT referencing it on next refresh.
- *
- * Rule of thumb: jwt.maxAge = how long a revoked session stays "alive" in
- * the worst case. session.maxAge = how long the user stays logged in.
- *
- * @example
- * {
- *   strategy: "hybrid",
- *   adapter: PrismaAdapter(prisma),
- *   jwt: { mode: "sealed", maxAge: "15m" },
- *   session: { maxAge: "30d", revokeOnPasswordChange: true },
- *   refreshToken: { enabled: true, maxAge: "7d" },
- * }
- */
-export type HybridStrategyConfig = {
-    strategy: "hybrid"
-    adapter: DatabaseAdapter
-    jwt?: JWTConfig
-    session?: SessionBehaviorConfig
-    refreshToken?: RefreshTokenConfig
 }
 
 /**
@@ -265,4 +148,37 @@ export type HybridStrategyConfig = {
  *
  * @default "jwt"
  */
-export type SessionConfig = StatelessStrategyConfig | StatefulStrategyConfig | HybridStrategyConfig
+export type SessionConfig = StatelessStrategyConfig
+
+export interface SessionStrategy {
+    /**
+     * Read and validate the session from an incoming request.
+     * Returns null if absent, invalid, or expired. Never throws on auth failure.
+     */
+    getSession(request: Headers): Promise<Session | null>
+
+    /**
+     * Create a session after successful authentication.
+     * Signs the JWT / writes the DB row / sets cookies.
+     */
+    createSession(session: User): Promise<string>
+
+    /**
+     * Attempt to refresh using the refresh token cookie.
+     * Returns null session + cookie-clearing response on any failure.
+     */
+    refreshSession(request: Headers): Promise<Session | null>
+
+    /**
+     * Revoke a session by ID.
+     * JWT strategy: best-effort (clears cookies, no server state).
+     * Database / hybrid: marks row inactive.
+     */
+    revokeSession(sessionId: string): Promise<void>
+
+    /**
+     * Destroy the session attached to this request (logout).
+     * Returns a response that clears cookies.
+     */
+    destroySession(request: Headers): Promise<Headers>
+}

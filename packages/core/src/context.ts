@@ -14,11 +14,12 @@ export const createContext = (config?: AuthConfig): InternalContext => {
     const cookieOverrides = config?.cookies?.overrides ?? {}
     const secureCookieStore = createCookieStore(true, cookiePrefix, cookieOverrides, logger)
     const standardCookieStore = createCookieStore(false, cookiePrefix, cookieOverrides, logger)
+    const jose = createJoseInstance(config?.secret, config?.session)
 
     return {
         oauth: createBuiltInOAuthProviders(config?.oauth),
         cookies: standardCookieStore,
-        jose: createJoseInstance(config?.secret, config?.session),
+        jose,
         secret: config?.secret,
         basePath: config?.basePath ?? "/auth",
         trustedProxyHeaders: useProxyHeaders,
@@ -26,6 +27,5 @@ export const createContext = (config?: AuthConfig): InternalContext => {
         logger,
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
         baseURL: config?.baseURL,
-        session: config?.session,
-    }
+    } as InternalContext
 }

@@ -4,9 +4,11 @@ import { createAuthAPI } from "@/api/createApi.ts"
 import { createErrorHandler, useSecureCookies } from "@/utils.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
 import type { AuthConfig, AuthInstance } from "@/@types/index.ts"
+import { createSessionStrategy } from "./session/session.ts"
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     const context = createContext(authConfig)
+    context.session = createSessionStrategy(authConfig?.session ?? {}, context.jose, context.cookies)
     return {
         basePath: authConfig?.basePath ?? "/auth",
         onError: createErrorHandler(context.logger),
@@ -14,7 +16,9 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
         use: [
             (ctx) => {
                 const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
+                console.log("before: ", ctx.context.cookies.sessionToken)
                 ctx.context.cookies = useSecure ? context.cookieConfig.secure : context.cookieConfig.standard
+                console.log("after: ", ctx.context.cookies.sessionToken)
                 return ctx
             },
         ],
