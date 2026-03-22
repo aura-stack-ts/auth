@@ -19,8 +19,8 @@ export const createCookieManager = (store: () => CookieStoreConfig) => {
 
     const clear = () => {
         return new HeadersBuilder(secureApiHeaders)
-            .setCookie(store().csrfToken.name, "", { ...store().csrfToken.attributes, ...expiredCookieAttributes })
-            .setCookie(store().sessionToken.name, "", { ...store().sessionToken.attributes, ...expiredCookieAttributes })
+            .setCookie(store().csrfToken.name, "", { ...expiredCookieAttributes, ...store().csrfToken.attributes })
+            .setCookie(store().sessionToken.name, "", { ...expiredCookieAttributes, ...store().sessionToken.attributes })
             .toHeaders()
     }
     return { getCookie, setCookie, clear }

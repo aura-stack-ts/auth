@@ -1,3 +1,4 @@
+import { AuthInvalidConfigurationError } from "@/errors.ts"
 import { createStatelessStrategy } from "@/session/strategies/stateless.ts"
 import type { CreateSessionStrategyOptions, SessionStrategy } from "@/@types/session.ts"
 
@@ -13,6 +14,6 @@ export const createSessionStrategy = ({ config, jose, cookies, logger }: CreateS
                 logger,
             })
         default:
-            throw new Error(`[auth] unknown session strategy "${strategy}". ` + `Valid options are: "jwt", "database", "hybrid".`)
+            throw new AuthInvalidConfigurationError(`[auth] unknown session strategy "${strategy}". Valid options are: "jwt".`)
     }
 }

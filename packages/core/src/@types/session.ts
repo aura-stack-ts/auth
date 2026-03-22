@@ -81,7 +81,7 @@ export type JWTKeyAlgorithm =
     | "RSA-OAEP-256"
 
 /** Content-encryption algorithms for JWE. */
-export type JwtEncryptionAlgorithm = "A128CBC-HS256" | "A192CBC-HS384" | "A256CBC-HS512" | "A128GCM" | "A192GCM" | "A256GCM"
+export type JWTEncryptionAlgorithm = "A128CBC-HS256" | "A192CBC-HS384" | "A256CBC-HS512" | "A128GCM" | "A192GCM" | "A256GCM"
 
 /** Signed JWT mode configuration. */
 export type JWTSignedMode = {
@@ -93,7 +93,7 @@ export type JWTSignedMode = {
 export type JWTEncryptedMode = {
     mode: "encrypted"
     keyAlgorithm?: JWTKeyAlgorithm
-    encryptionAlgorithm?: JwtEncryptionAlgorithm
+    encryptionAlgorithm?: JWTEncryptionAlgorithm
 }
 
 /** Signed and Encrypted JWT mode configuration. */
@@ -101,7 +101,7 @@ export type JWTSealedMode = {
     mode?: "sealed"
     signingAlgorithm?: JWTSigningAlgorithm
     keyAlgorithm?: JWTKeyAlgorithm
-    encryptionAlgorithm?: JwtEncryptionAlgorithm
+    encryptionAlgorithm?: JWTEncryptionAlgorithm
 }
 
 export type JWTConfigBase = JWTSignedMode | JWTEncryptedMode | JWTSealedMode

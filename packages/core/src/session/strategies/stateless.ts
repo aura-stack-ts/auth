@@ -11,17 +11,21 @@ export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTSt
     const cookieConfig = createCookieManager(cookies)
 
     const getSession = async (headers: Headers): Promise<Session | null> => {
-        const { sessionToken } = cookieConfig.getCookie(headers)
-        if (!sessionToken) return null
+        try {
+            const { sessionToken } = cookieConfig.getCookie(headers)
+            if (!sessionToken) return null
 
-        const decoded = await jwt.verifyToken(sessionToken)
-        const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = decoded
+            const decoded = await jwt.verifyToken(sessionToken)
+            const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = decoded
 
-        if (!user.sub) return null
+            if (!user.sub) return null
 
-        return {
-            user,
-            expires: exp ? new Date(exp * 1000).toISOString() : "",
+            return {
+                user,
+                expires: exp ? new Date(exp * 1000).toISOString() : "",
+            }
+        } catch {
+            return null
         }
     }
 

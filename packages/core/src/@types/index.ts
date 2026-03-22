@@ -274,7 +274,7 @@ export interface RouterGlobalContext {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
     jose: JoseInstance
-    secret?: string
+    secret?: JWTKey
     baseURL?: string
     basePath: string
     trustedProxyHeaders: boolean
