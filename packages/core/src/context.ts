@@ -18,7 +18,7 @@ export const createContext = (config?: AuthConfig): InternalContext => {
     return {
         oauth: createBuiltInOAuthProviders(config?.oauth),
         cookies: standardCookieStore,
-        jose: createJoseInstance(config?.secret),
+        jose: createJoseInstance(config?.secret, config?.session),
         secret: config?.secret,
         basePath: config?.basePath ?? "/auth",
         trustedProxyHeaders: useProxyHeaders,
@@ -26,5 +26,6 @@ export const createContext = (config?: AuthConfig): InternalContext => {
         logger,
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
         baseURL: config?.baseURL,
+        session: config?.session,
     }
 }

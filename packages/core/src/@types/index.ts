@@ -8,9 +8,11 @@ import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
 import type { createAuthInstance } from "@/createAuth.ts"
 import type { createAuthAPI } from "@/api/createApi.ts"
 import type { ClientOptions } from "@aura-stack/router"
+import type { SessionConfig } from "./session.ts"
 
-export * from "./utility.ts"
+export type * from "./utility.ts"
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
+export type * from "@/@types/session.ts"
 
 /**
  * Standard JWT claims that are managed internally by the token system.
@@ -236,7 +238,10 @@ export interface AuthConfig {
      * @experimental
      */
     trustedProxyHeaders?: boolean
-
+    /**
+     * Logger configuration for handling authentication-related logs and errors. It can be set to `true`,
+     * `DEBUG=true`, `LOG_LEVEL=debug`, or a custom logger. It implements the syslog format.
+     */
     logger?: boolean | Logger
     /**
      * Defines trusted origins for your application to prevent open redirect attacks.
@@ -255,6 +260,10 @@ export interface AuthConfig {
      * }
      */
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
+    /**
+     * Defines the session management strategy for Aura Auth. It determines how sessions are created, stored, and validated.
+     */
+    session?: SessionConfig
 }
 
 /**
@@ -289,6 +298,7 @@ export interface RouterGlobalContext {
     trustedProxyHeaders: boolean
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
+    session?: SessionConfig
 }
 
 /**
