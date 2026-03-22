@@ -69,6 +69,14 @@ export class AuthClientError extends Error {
     }
 }
 
+export class AuthInvalidConfigurationError extends Error {
+    constructor(message?: string, options?: ErrorOptions) {
+        super(message, options)
+        this.name = new.target.name
+        Error?.captureStackTrace?.(this, new.target)
+    }
+}
+
 export const isNativeError = (error: unknown): error is Error => {
     return error instanceof Error
 }
@@ -87,4 +95,8 @@ export const isAuthSecurityError = (error: unknown): error is AuthSecurityError 
 
 export const isAuthClientError = (error: unknown): error is AuthClientError => {
     return error instanceof AuthClientError
+}
+
+export const isAuthInvalidConfigurationError = (error: unknown): error is AuthInvalidConfigurationError => {
+    return error instanceof AuthInvalidConfigurationError
 }

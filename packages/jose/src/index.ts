@@ -42,8 +42,8 @@ export interface EncodeJWTOptions {
  * Decoded JWT payload options for verification and decryption.
  */
 export interface DecodeJWTOptions {
-    verify: JWTVerifyOptions
-    decrypt: DecryptOptions
+    verify?: JWTVerifyOptions
+    decrypt?: DecryptOptions
 }
 
 export interface CreateJWTOptions {

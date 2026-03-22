@@ -70,11 +70,7 @@ describe("sessionAction", () => {
     })
 
     test("expired sessionToken cookie", async () => {
-        const decodeJWTMock = vi.spyOn(jose, "decodeJWT").mockImplementation(async () => {
-            throw new Error("Token expired")
-        })
-
-        const sessionToken = await encodeJWT(sessionPayload)
+        const sessionToken = await encodeJWT({ exp: Math.floor(Date.now() / 1000) - 3600, ...sessionPayload }) // expired 1 hour ago
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
@@ -84,7 +80,6 @@ describe("sessionAction", () => {
         )
         expect(request.status).toBe(401)
         expect(await request.json()).toEqual({ authenticated: false, session: null })
-        decodeJWTMock.mockRestore()
     })
 
     test("verify cache control headers are set", async () => {

@@ -8,7 +8,7 @@ import { OAuthAuthorizationErrorResponse } from "@/schemas.ts"
 import { AuthSecurityError, OAuthProtocolError } from "@/errors.ts"
 import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
-import { createSessionCookie, getCookie, expiredCookieAttributes } from "@/cookie.ts"
+import { getCookie, expiredCookieAttributes } from "@/cookie.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
@@ -108,7 +108,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             }
 
             const userInfo = await getUserInfo(oauthConfig, accessToken.access_token, logger)
-            const sessionCookie = await createSessionCookie(jose, userInfo)
+            const session = await context.session.createSession(userInfo)
             const csrfToken = await createCSRF(jose)
 
             logger?.log("OAUTH_CALLBACK_SUCCESS", {
@@ -119,7 +119,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
 
             const headers = new HeadersBuilder(cacheControl)
                 .setHeader("Location", cookieRedirectTo)
-                .setCookie(cookies.sessionToken.name, sessionCookie, cookies.sessionToken.attributes)
+                .setCookie(cookies.sessionToken.name, session, cookies.sessionToken.attributes)
                 .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
                 .setCookie(cookies.state.name, "", expiredCookieAttributes)
                 .setCookie(cookies.redirectURI.name, "", expiredCookieAttributes)

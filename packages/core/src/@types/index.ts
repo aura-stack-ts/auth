@@ -2,15 +2,18 @@ import { z } from "zod"
 import { createLogEntry } from "@/logger.ts"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse, OAuthEnvSchema } from "@/schemas.ts"
 import { createJoseInstance, type JWTPayload } from "@/jose.ts"
-import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
-import type { createAuthInstance } from "@/createAuth.ts"
 import type { createAuthAPI } from "@/api/createApi.ts"
 import type { ClientOptions } from "@aura-stack/router"
+import type { createAuthInstance } from "@/createAuth.ts"
+import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
+import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
+import type { SerializeOptions } from "@aura-stack/router/cookie"
+import type { JWTKey, Session, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
 
-export * from "./utility.ts"
+export type * from "./utility.ts"
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
+export type * from "@/@types/session.ts"
+export type { TypedJWTPayload } from "@aura-stack/jose"
 
 /**
  * Standard JWT claims that are managed internally by the token system.
@@ -22,25 +25,6 @@ export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" |
  * JWT payload structure that includes a mandatory `token` field used to verify CSRF Tokens
  */
 export type JWTPayloadWithToken = JWTPayload & { token: string }
-
-/**
- * Standardized user profile returned by OAuth providers after fetching user information
- * and mapping the response to this format by default or via the `profile` custom function.
- */
-export interface User extends Record<string, unknown> {
-    sub: string
-    name?: string | null
-    email?: string | null
-    image?: string | null
-}
-
-/**
- * Session data returned by the session endpoint.
- */
-export interface Session {
-    user: User
-    expires: string
-}
 
 export type AuthorizeParams = LiteralUnion<
     "clientId" | "prompt" | "scope" | "responseMode" | "audience" | "loginHint" | "nonce" | "display"
@@ -210,7 +194,7 @@ export interface AuthConfig {
      * If not provided, it will load from the environment variable `AURA_AUTH_SECRET` or `AUTH_SECRET`, but if it
      * doesn't exist, it will throw an error during the initialization of the Auth module.
      */
-    secret?: string
+    secret?: JWTKey
     /**
      * Base URL of the application, used to construct the incoming request's origin.
      */
@@ -236,7 +220,10 @@ export interface AuthConfig {
      * @experimental
      */
     trustedProxyHeaders?: boolean
-
+    /**
+     * Logger configuration for handling authentication-related logs and errors. It can be set to `true`,
+     * `DEBUG=true`, `LOG_LEVEL=debug`, or a custom logger. It implements the syslog format.
+     */
     logger?: boolean | Logger
     /**
      * Defines trusted origins for your application to prevent open redirect attacks.
@@ -255,6 +242,10 @@ export interface AuthConfig {
      * }
      */
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
+    /**
+     * Defines the session management strategy for Aura Auth. It determines how sessions are created, stored, and validated.
+     */
+    session?: SessionConfig
 }
 
 /**
@@ -283,12 +274,13 @@ export interface RouterGlobalContext {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
     jose: JoseInstance
-    secret?: string
+    secret?: JWTKey
     baseURL?: string
     basePath: string
     trustedProxyHeaders: boolean
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
+    session: SessionStrategy
 }
 
 /**

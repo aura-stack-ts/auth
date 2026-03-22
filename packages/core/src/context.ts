@@ -1,6 +1,7 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createProxyLogger } from "@/logger.ts"
 import { createCookieStore } from "@/cookie.ts"
+import { createSessionStrategy } from "@/session/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/env.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import type { AuthConfig, InternalContext } from "@/@types/index.ts"
@@ -14,11 +15,12 @@ export const createContext = (config?: AuthConfig): InternalContext => {
     const cookieOverrides = config?.cookies?.overrides ?? {}
     const secureCookieStore = createCookieStore(true, cookiePrefix, cookieOverrides, logger)
     const standardCookieStore = createCookieStore(false, cookiePrefix, cookieOverrides, logger)
+    const jose = createJoseInstance(config?.secret, config?.session)
 
-    return {
+    const ctx = {
         oauth: createBuiltInOAuthProviders(config?.oauth),
         cookies: standardCookieStore,
-        jose: createJoseInstance(config?.secret),
+        jose,
         secret: config?.secret,
         basePath: config?.basePath ?? "/auth",
         trustedProxyHeaders: useProxyHeaders,
@@ -26,5 +28,12 @@ export const createContext = (config?: AuthConfig): InternalContext => {
         logger,
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
         baseURL: config?.baseURL,
-    }
+    } as InternalContext
+    ctx.session = createSessionStrategy({
+        cookies: () => ctx.cookies,
+        jose,
+        config: config?.session,
+        logger: ctx.logger,
+    })
+    return ctx
 }
