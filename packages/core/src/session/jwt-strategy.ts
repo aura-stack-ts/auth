@@ -3,17 +3,14 @@ import { createCookieManager } from "@/session/cookie-manager.ts"
 import type {
     Session,
     SessionStrategy,
-    StatelessStrategyConfig,
     User,
-    CookieStoreConfig,
-    JoseInstance,
     TypedJWTPayload,
+    JWTStrategyOptions,
 } from "@/@types/index.ts"
 
-type JWTStrategyOptions = { config: StatelessStrategyConfig; jose: JoseInstance; cookies: () => CookieStoreConfig }
 
 export const createJWTStrategy = ({ config, jose, cookies }: JWTStrategyOptions): SessionStrategy => {
-    const jwt = createJWTManager(config.jwt!, jose)
+    const jwt = createJWTManager(config?.jwt, jose)
     const cookieConfig = createCookieManager(cookies)
 
     const getSession = async (headers: Headers): Promise<Session | null> => {
@@ -24,11 +21,11 @@ export const createJWTStrategy = ({ config, jose, cookies }: JWTStrategyOptions)
             const decoded = await jwt.verifyToken(sessionToken)
             const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = decoded
 
-            if (!user) return null
+            if (!user.sub) return null
 
             return {
                 user,
-                expires: new Date((exp ?? 0) * 1000).toISOString(),
+                expires: exp ? new Date(exp * 1000).toISOString() : "",
             }
         } catch {
             return null

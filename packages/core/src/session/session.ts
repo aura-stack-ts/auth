@@ -3,11 +3,11 @@ import { createJWTStrategy } from "./jwt-strategy.ts"
 import { CookieStoreConfig, JoseInstance } from "@/@types/index.ts"
 
 export const createSessionStrategy = (
-    config: SessionConfig,
+    config: SessionConfig | undefined,
     jose: JoseInstance,
     cookies: () => CookieStoreConfig
 ): SessionStrategy => {
-    const strategy = config.strategy ?? "jwt"
+    const strategy = config?.strategy ?? "jwt"
 
     switch (strategy) {
         case "jwt":

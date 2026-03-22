@@ -1,3 +1,5 @@
+import type { JoseInstance, CookieStoreConfig } from "@/@types/index.ts"
+
 /**
  * Standardized user profile returned by OAuth providers after fetching user information
  * and mapping the response to this format by default or via the `profile` custom function.
@@ -17,9 +19,6 @@ export interface Session {
     expires: string
 }
 
-/** A duration expressed as seconds (number) or a human-readable string. */
-export type Duration = number | `${number}s` | `${number}m` | `${number}h` | `${number}d` | `${number}w`
-
 /**
  * A symmetric secret or asymmetric key pair used for JWT operations.
  *
@@ -34,7 +33,10 @@ export interface KeyPair {
     publicKey: CryptoKey
 }
 
-export type JWTKey = SecretKey | KeyPair | [SecretKey | KeyPair, ...(SecretKey | KeyPair)[]]
+/**
+ * @todo: add key rotation support for "SecretKey | KeyPair | [SecretKey | KeyPair, ...(SecretKey | KeyPair)[]]"
+ */
+export type JWTKey = SecretKey
 
 /**
  * - "signed"    → standard JWS (e.g. HS256, RS256, ES256).
@@ -67,7 +69,7 @@ export type JWTSigningAlgorithm =
  * ECDH:      ECDH-ES | ECDH-ES+A128KW | ECDH-ES+A256KW
  * RSA:       RSA-OAEP | RSA-OAEP-256
  */
-export type JwtKeyAlgorithm =
+export type JWTKeyAlgorithm =
     | "A128KW"
     | "A192KW"
     | "A256KW"
@@ -90,7 +92,7 @@ export type JWTSignedMode = {
 /** Encrypted JWT mode configuration. */
 export type JWTEncryptedMode = {
     mode: "encrypted"
-    keyAlgorithm?: JwtKeyAlgorithm
+    keyAlgorithm?: JWTKeyAlgorithm
     encryptionAlgorithm?: JwtEncryptionAlgorithm
 }
 
@@ -98,7 +100,7 @@ export type JWTEncryptedMode = {
 export type JWTSealedMode = {
     mode?: "sealed"
     signingAlgorithm?: JWTSigningAlgorithm
-    keyAlgorithm?: JwtKeyAlgorithm
+    keyAlgorithm?: JWTKeyAlgorithm
     encryptionAlgorithm?: JwtEncryptionAlgorithm
 }
 
@@ -106,10 +108,9 @@ export type JWTConfigBase = JWTSignedMode | JWTEncryptedMode | JWTSealedMode
 
 export type JWTConfig = {
     /**
-     * Token lifetime. After this duration the token is rejected regardless of
-     * any database state. Defaults to "15m" for access tokens.
+     * Token lifetime.
      */
-    maxAge?: Duration
+    maxAge?: number
     /**
      * JWT `iss` (issuer) claim. Set this to your app's canonical URL.
      * @example "https://auth.example.com"
@@ -181,4 +182,10 @@ export interface SessionStrategy {
      * Returns a response that clears cookies.
      */
     destroySession(request: Headers): Promise<Headers>
+}
+
+export interface JWTStrategyOptions { 
+    config?: StatelessStrategyConfig
+    jose: JoseInstance; 
+    cookies: () => CookieStoreConfig 
 }

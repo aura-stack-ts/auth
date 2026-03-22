@@ -16,7 +16,7 @@ import {
 import { AuthInternalError } from "@/errors.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
-import type { User, SessionConfig, JWTMode, JWTConfig } from "@/@types/index.ts"
+import type { User, SessionConfig, JWTMode, JWTConfig, JWTKey } from "@/@types/index.ts"
 
 export const isSignedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "signed" }> } =>
     getJWTMode(config) === "signed"
@@ -47,6 +47,9 @@ export const getJWTClaims = (config?: SessionConfig) => {
     }
     if (jwt?.issuer) {
         claims.iss = jwt.issuer
+    }
+    if(jwt?.maxAge) {
+        claims.exp = jwt.maxAge
     }
     return claims
 }
@@ -118,7 +121,7 @@ export const getDecryptOptions = (config?: SessionConfig, options?: JWTDecryptOp
  * @param session the session configuration that drives algorithm and mode selection
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
  */
-export const createJoseInstance = (secret?: string, session?: SessionConfig) => {
+export const createJoseInstance = (secret?: JWTKey, session?: SessionConfig) => {
     secret ??= getEnv("SECRET")
     if (!secret) {
         throw new AuthInternalError(

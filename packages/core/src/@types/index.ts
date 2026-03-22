@@ -8,7 +8,7 @@ import type { createAuthInstance } from "@/createAuth.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { LiteralUnion, Prettify } from "@/@types/utility.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { Session, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
+import type { JWTKey, Session, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
 
 export type * from "./utility.ts"
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
@@ -194,7 +194,7 @@ export interface AuthConfig {
      * If not provided, it will load from the environment variable `AURA_AUTH_SECRET` or `AUTH_SECRET`, but if it
      * doesn't exist, it will throw an error during the initialization of the Auth module.
      */
-    secret?: string
+    secret?: JWTKey
     /**
      * Base URL of the application, used to construct the incoming request's origin.
      */

@@ -4,6 +4,7 @@ import { createCookieStore } from "@/cookie.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/env.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import type { AuthConfig, InternalContext } from "@/@types/index.ts"
+import { createSessionStrategy } from "./session/session.ts"
 
 export const createContext = (config?: AuthConfig): InternalContext => {
     const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
@@ -16,7 +17,7 @@ export const createContext = (config?: AuthConfig): InternalContext => {
     const standardCookieStore = createCookieStore(false, cookiePrefix, cookieOverrides, logger)
     const jose = createJoseInstance(config?.secret, config?.session)
 
-    return {
+    const ctx = {
         oauth: createBuiltInOAuthProviders(config?.oauth),
         cookies: standardCookieStore,
         jose,
@@ -28,4 +29,6 @@ export const createContext = (config?: AuthConfig): InternalContext => {
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
         baseURL: config?.baseURL,
     } as InternalContext
+    ctx.session = createSessionStrategy(config?.session, jose, () => ctx.cookies)
+    return ctx
 }

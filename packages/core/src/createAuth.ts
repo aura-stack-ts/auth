@@ -4,11 +4,9 @@ import { createAuthAPI } from "@/api/createApi.ts"
 import { createErrorHandler, useSecureCookies } from "@/utils.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
 import type { AuthConfig, AuthInstance } from "@/@types/index.ts"
-import { createSessionStrategy } from "./session/session.ts"
 
 const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
     const context = createContext(authConfig)
-    context.session = createSessionStrategy(authConfig?.session ?? {}, context.jose, () => context.cookies)
     return {
         basePath: authConfig?.basePath ?? "/auth",
         onError: createErrorHandler(context.logger),
