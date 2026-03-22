@@ -1,12 +1,7 @@
-import { SessionConfig, SessionStrategy } from "@/@types/session.ts"
-import { createJWTStrategy } from "./jwt-strategy.ts"
-import { CookieStoreConfig, JoseInstance } from "@/@types/index.ts"
+import { createJWTStrategy } from "@/session/strategies/stateless.ts"
+import type { CreateSessionStrategyOptions, SessionStrategy } from "@/@types/session.ts"
 
-export const createSessionStrategy = (
-    config: SessionConfig | undefined,
-    jose: JoseInstance,
-    cookies: () => CookieStoreConfig
-): SessionStrategy => {
+export const createSessionStrategy = ({ config, jose, cookies, logger }: CreateSessionStrategyOptions): SessionStrategy => {
     const strategy = config?.strategy ?? "jwt"
 
     switch (strategy) {
@@ -15,6 +10,7 @@ export const createSessionStrategy = (
                 jose,
                 config,
                 cookies,
+                logger,
             })
         default:
             throw new Error(`[auth] unknown session strategy "${strategy}". ` + `Valid options are: "jwt", "database", "hybrid".`)

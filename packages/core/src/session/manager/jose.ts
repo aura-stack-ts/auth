@@ -7,11 +7,13 @@ export type JWTManager = {
     verifyToken(token: string): Promise<TypedJWTPayload<User>>
 }
 
-export const createJWTManager = (config: JWTConfig | undefined, jose: JoseInstance): JWTManager => {
+export const createJoseManager = (config: JWTConfig | undefined, jose: JoseInstance): JWTManager => {
     const mode = config?.mode ?? "sealed"
 
-    if(!["sealed", "signed", "encrypted"].includes(mode)) {
-        throw new AuthInvalidConfigurationError(`[auth] invalid JWT mode "${mode}". Valid options are: "sealed", "signed", "encrypted".`)
+    if (!["sealed", "signed", "encrypted"].includes(mode)) {
+        throw new AuthInvalidConfigurationError(
+            `[auth] invalid JWT mode "${mode}". Valid options are: "sealed", "signed", "encrypted".`
+        )
     }
 
     return {

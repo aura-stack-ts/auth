@@ -48,7 +48,7 @@ export const getJWTClaims = (config?: SessionConfig) => {
     if (jwt?.issuer) {
         claims.iss = jwt.issuer
     }
-    if(jwt?.maxAge) {
+    if (jwt?.maxAge) {
         claims.exp = jwt.maxAge
     }
     return claims

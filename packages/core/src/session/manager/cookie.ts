@@ -4,7 +4,6 @@ import { expiredCookieAttributes, getCookie as getCookieByName } from "@/cookie.
 import type { CookieStoreConfig } from "@/@types/index.ts"
 
 export const createCookieManager = (store: () => CookieStoreConfig) => {
-
     const getCookie = (request: Request | Headers) => {
         const sessionToken = getCookieByName(request, store().sessionToken.name)
         return {

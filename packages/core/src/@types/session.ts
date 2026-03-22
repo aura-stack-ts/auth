@@ -1,4 +1,4 @@
-import type { JoseInstance, CookieStoreConfig } from "@/@types/index.ts"
+import type { JoseInstance, CookieStoreConfig, InternalLogger } from "@/@types/index.ts"
 
 /**
  * Standardized user profile returned by OAuth providers after fetching user information
@@ -181,11 +181,19 @@ export interface SessionStrategy {
      * Destroy the session attached to this request (logout).
      * Returns a response that clears cookies.
      */
-    destroySession(request: Headers): Promise<Headers>
+    destroySession(request: Headers, skipCSRFCheck?: boolean): Promise<Headers>
 }
 
-export interface JWTStrategyOptions { 
+export interface CreateSessionStrategyOptions {
+    config?: SessionConfig
+    jose: JoseInstance
+    cookies: () => CookieStoreConfig
+    logger?: InternalLogger
+}
+
+export interface JWTStrategyOptions {
     config?: StatelessStrategyConfig
-    jose: JoseInstance; 
-    cookies: () => CookieStoreConfig 
+    jose: JoseInstance
+    logger?: InternalLogger
+    cookies: () => CookieStoreConfig
 }
