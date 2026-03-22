@@ -1,7 +1,7 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createProxyLogger } from "@/logger.ts"
 import { createCookieStore } from "@/cookie.ts"
-import { createSessionStrategy } from "@/session/session.ts"
+import { createSessionStrategy } from "@/session/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/env.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import type { AuthConfig, InternalContext } from "@/@types/index.ts"

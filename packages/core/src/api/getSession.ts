@@ -4,7 +4,7 @@ import type { FunctionAPIContext, GetSessionAPIOptions, SessionResponse } from "
 export const getSession = async ({ ctx, headers }: FunctionAPIContext<GetSessionAPIOptions>): Promise<SessionResponse> => {
     try {
         const session = await ctx.session.getSession(new Headers(headers))
-        if (!session) throw new Error("No session found")
+        if (!session) return { session: null, authenticated: false }
         return {
             session,
             authenticated: true,

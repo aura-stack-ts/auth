@@ -6,34 +6,34 @@ import { createJoseManager } from "@/session/manager/jose.ts"
 import { createCookieManager } from "@/session/manager/cookie.ts"
 import type { Session, SessionStrategy, User, TypedJWTPayload, JWTStrategyOptions } from "@/@types/index.ts"
 
-export const createJWTStrategy = ({ config, jose, logger, cookies }: JWTStrategyOptions): SessionStrategy => {
+export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTStrategyOptions): SessionStrategy => {
     const jwt = createJoseManager(config?.jwt, jose)
     const cookieConfig = createCookieManager(cookies)
 
     const getSession = async (headers: Headers): Promise<Session | null> => {
-        try {
-            const { sessionToken } = cookieConfig.getCookie(headers)
-            if (!sessionToken) return null
+        const { sessionToken } = cookieConfig.getCookie(headers)
+        if (!sessionToken) return null
 
-            const decoded = await jwt.verifyToken(sessionToken)
-            const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = decoded
+        const decoded = await jwt.verifyToken(sessionToken)
+        const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = decoded
 
-            if (!user.sub) return null
+        if (!user.sub) return null
 
-            return {
-                user,
-                expires: exp ? new Date(exp * 1000).toISOString() : "",
-            }
-        } catch {
-            return null
+        return {
+            user,
+            expires: exp ? new Date(exp * 1000).toISOString() : "",
         }
     }
 
     const createSession = async (session: TypedJWTPayload<User>) => jwt.createToken(session)
 
     /** @todo: implement refresh session logic */
-    const refreshSession = async (_headers: Headers): Promise<any> => {}
+    const refreshSession = async (_headers: Headers): Promise<Session | null> => {
+        // JWT strategy: refresh not implemented; return null per interface contract
+        return null
+    }
 
+    // JWT strategy: stateless tokens cannot be revoked server-side
     const revokeSession = async (_sessionId: string): Promise<void> => {}
 
     const destroySession = async (headers: Headers, skipCSRFCheck: boolean = false) => {
