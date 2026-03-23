@@ -4,36 +4,66 @@ import { getErrorName } from "@/utils.ts"
 import { AuthSecurityError } from "@/errors.ts"
 import { createJoseManager } from "@/session/manager/jose.ts"
 import { createCookieManager } from "@/session/manager/cookie.ts"
-import type { Session, SessionStrategy, User, TypedJWTPayload, JWTStrategyOptions } from "@/@types/index.ts"
+import type { Session, SessionStrategy, User, TypedJWTPayload, JWTStrategyOptions, GetSessionReturn } from "@/@types/index.ts"
 
 export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTStrategyOptions): SessionStrategy => {
     const jwt = createJoseManager(config?.jwt, jose)
     const cookieConfig = createCookieManager(cookies)
+    const maxAge = config?.jwt?.maxAge ?? 60 * 60 * 24 * 7 * 2
+    const strategy = config?.jwt?.expirationStrategy ?? "absolute"
 
-    const getSession = async (headers: Headers): Promise<Session | null> => {
+    const updateExpires = ({ exp }: { exp: number | undefined }): Date | null => {
+        if (!exp) return null
+        const now = Math.floor(Date.now() / 1000)
+        switch (strategy) {
+            case "fixed":
+            case "absolute":
+                return null
+            case "rolling":
+                return new Date((now + maxAge) * 1000)
+            case "sliding": {
+                const threshold = maxAge * 0.25
+                if (exp - now < threshold) {
+                    return new Date((now + maxAge) * 1000)
+                }
+                return null
+            }
+            default:
+                return null
+        }
+    }
+
+    const getSession = async (headers: Headers): Promise<GetSessionReturn> => {
         try {
             const { sessionToken } = cookieConfig.getCookie(headers)
-            if (!sessionToken) return null
+            if (!sessionToken) return { session: null, headers }
 
-            const decoded = await jwt.verifyToken(sessionToken)
-            const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = decoded
-
-            if (!user.sub) return null
-
-            return {
-                user,
+            const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = await jwt.verifyToken(sessionToken)
+            if (!user.sub) return { session: null, headers }
+            const session: Session = {
+                user: user,
                 expires: exp ? new Date(exp * 1000).toISOString() : "",
             }
-        } catch {
-            return null
+
+            const expiresAt = updateExpires({ exp })
+            if (!expiresAt) return { session, headers }
+
+            const newSession = { ...session, expires: expiresAt.toISOString() }
+            const newSessionToken = await jwt.createToken({ ...user, exp: Math.floor(expiresAt.getTime() / 1000) })
+            logger?.log("SESSION_REFRESHED", { structuredData: { strategy: "stateless", expiresAt: expiresAt.toISOString() } })
+            return {
+                session: newSession,
+                headers: cookieConfig.setCookie({ sessionToken: newSessionToken }),
+            }
+        } catch (error) {
+            logger?.log("AUTH_SESSION_VALID", { structuredData: { error_type: getErrorName(error) } })
+            return { session: null, headers }
         }
     }
 
     const createSession = async (session: TypedJWTPayload<User>) => jwt.createToken(session)
 
-    /** @todo: implement refresh session logic */
-    const refreshSession = async (_headers: Headers): Promise<Session | null> => {
-        // JWT strategy: refresh not implemented; return null per interface contract
+    const refreshSession = async (_session: Session): Promise<Session | null> => {
         return null
     }
 

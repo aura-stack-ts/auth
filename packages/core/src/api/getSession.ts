@@ -1,16 +1,22 @@
 import { getErrorName } from "@/utils.ts"
 import type { FunctionAPIContext, GetSessionAPIOptions, SessionResponse } from "@/@types/index.ts"
 
-export const getSession = async ({ ctx, headers }: FunctionAPIContext<GetSessionAPIOptions>): Promise<SessionResponse> => {
+const unauthorized: SessionResponse = { session: null, headers: new Headers(), authenticated: false }
+
+export const getSession = async ({
+    ctx,
+    headers: headersInit,
+}: FunctionAPIContext<GetSessionAPIOptions>): Promise<SessionResponse> => {
     try {
-        const session = await ctx.session.getSession(new Headers(headers))
-        if (!session) return { session: null, authenticated: false }
+        const { session, headers } = await ctx.sessionStrategy.getSession(new Headers(headersInit))
+        if (!session || !session) return unauthorized
         return {
             session,
+            headers,
             authenticated: true,
         }
     } catch (error) {
         ctx?.logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
-        return { session: null, authenticated: false }
+        return unauthorized
     }
 }

@@ -7,7 +7,7 @@ export const signOut = async ({
     redirectTo = "/",
     skipCSRFCheck = false,
 }: FunctionAPIContext<SignOutAPIOptions>) => {
-    const headers = await ctx.session.destroySession(new Headers(headersInit), skipCSRFCheck)
+    const headers = await ctx.sessionStrategy.destroySession(new Headers(headersInit), skipCSRFCheck)
 
     const headersList = new HeadersBuilder(headers).setHeader("Location", redirectTo).toHeaders()
     return Response.json(
