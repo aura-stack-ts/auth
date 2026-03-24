@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [X - Get my User](https://docs.x.com/x-api/users/get-my-user)
@@ -20,7 +20,9 @@ export interface XProfile {
  * @see [X - OAuth 2.0 Scopes](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code#scopes)
  * @see [X - OAuth 2.0 Bearer Token](https://docs.x.com/fundamentals/authentication/oauth-2-0/application-only)
  */
-export const x = (options?: Partial<OAuthProviderCredentials<XProfile>>): OAuthProviderCredentials<XProfile> => {
+export const x = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<XProfile, DefaultUser>>
+): OAuthProviderCredentials<XProfile, DefaultUser> => {
     return {
         id: "x",
         name: "X",
@@ -38,5 +40,5 @@ export const x = (options?: Partial<OAuthProviderCredentials<XProfile>>): OAuthP
             }
         },
         ...options,
-    } as OAuthProviderCredentials<XProfile>
+    } as OAuthProviderCredentials<XProfile, DefaultUser>
 }

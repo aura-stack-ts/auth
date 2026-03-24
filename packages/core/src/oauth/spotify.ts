@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface SpotifyImage {
     url: string
@@ -36,9 +36,9 @@ export interface SpotifyProfile {
  * @see [Spotify - Scopes](https://developer.spotify.com/documentation/web-api/concepts/scopes)
  * @see [Spotify - Redirect URIs](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
  */
-export const spotify = (
-    options?: Partial<OAuthProviderCredentials<SpotifyProfile>>
-): OAuthProviderCredentials<SpotifyProfile> => {
+export const spotify = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<SpotifyProfile, DefaultUser>>
+): OAuthProviderCredentials<SpotifyProfile, DefaultUser> => {
     return {
         id: "spotify",
         name: "Spotify",
@@ -56,5 +56,5 @@ export const spotify = (
             }
         },
         ...options,
-    } as OAuthProviderCredentials<SpotifyProfile>
+    } as OAuthProviderCredentials<SpotifyProfile, DefaultUser>
 }

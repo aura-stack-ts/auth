@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Get the authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user)
@@ -60,7 +60,9 @@ export interface GitHubProfile {
  * @see [GitHub - Configure your GitHub OAuth Apps](https://github.com/settings/developers)
  * @see [Github - Get the authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user)
  */
-export const github = (options?: Partial<OAuthProviderCredentials<GitHubProfile>>): OAuthProviderCredentials<GitHubProfile> => {
+export const github = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<GitHubProfile, DefaultUser>>
+): OAuthProviderCredentials<GitHubProfile, DefaultUser> => {
     return {
         id: "github",
         name: "GitHub",
@@ -78,5 +80,5 @@ export const github = (options?: Partial<OAuthProviderCredentials<GitHubProfile>
             }
         },
         ...options,
-    } as OAuthProviderCredentials<GitHubProfile>
+    } as OAuthProviderCredentials<GitHubProfile, DefaultUser>
 }

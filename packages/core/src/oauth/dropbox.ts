@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export type AccountType = "basic" | "pro" | "business"
 
@@ -47,9 +47,9 @@ export interface DropboxProfile {
  * @see [Dropbox - My Apps](https://www.dropbox.com/developers/apps)
  * @see [Dropbox - Developer Guide](https://www.dropbox.com/developers/reference/developer-guide)
  */
-export const dropbox = (
-    options?: Partial<OAuthProviderCredentials<DropboxProfile>>
-): OAuthProviderCredentials<DropboxProfile> => {
+export const dropbox = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<DropboxProfile, DefaultUser>>
+): OAuthProviderCredentials<DropboxProfile, DefaultUser> => {
     return {
         id: "dropbox",
         name: "Dropbox",
@@ -71,5 +71,5 @@ export const dropbox = (
             }
         },
         ...options,
-    } as OAuthProviderCredentials<DropboxProfile>
+    } as OAuthProviderCredentials<DropboxProfile, DefaultUser>
 }

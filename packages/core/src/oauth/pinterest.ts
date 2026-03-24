@@ -1,4 +1,4 @@
-import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.ts"
+import type { LiteralUnion, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Pinterest - Get User Account](https://developers.pinterest.com/docs/api/v5/user_account-get)
@@ -23,9 +23,9 @@ export interface PinterestProfile {
  * @see [Pinterest - My Apps](https://developers.pinterest.com/apps/)
  * @see [Pinterest - Get User Account](https://developers.pinterest.com/docs/api/v5/user_account-get)
  */
-export const pinterest = (
-    options?: Partial<OAuthProviderCredentials<PinterestProfile>>
-): OAuthProviderCredentials<PinterestProfile> => {
+export const pinterest = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<PinterestProfile, DefaultUser>>
+): OAuthProviderCredentials<PinterestProfile, DefaultUser> => {
     return {
         id: "pinterest",
         name: "Pinterest",
@@ -43,5 +43,5 @@ export const pinterest = (
             }
         },
         ...options,
-    } as OAuthProviderCredentials<PinterestProfile>
+    } as OAuthProviderCredentials<PinterestProfile, DefaultUser>
 }

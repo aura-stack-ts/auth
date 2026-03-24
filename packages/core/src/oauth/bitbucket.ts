@@ -1,4 +1,4 @@
-import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.ts"
+import type { LiteralUnion, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Get current user](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get)
@@ -29,9 +29,9 @@ export interface BitbucketProfile {
  * @see [Bitbucket - Cloud REST API](https://developer.atlassian.com/cloud/bitbucket/rest/intro/)
  * @see [Bitbucket - User Endpoint](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-users-endpoint)
  */
-export const bitbucket = (
-    options?: Partial<OAuthProviderCredentials<BitbucketProfile>>
-): OAuthProviderCredentials<BitbucketProfile> => {
+export const bitbucket = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<BitbucketProfile, DefaultUser>>
+): OAuthProviderCredentials<BitbucketProfile, DefaultUser> => {
     return {
         id: "bitbucket",
         name: "Bitbucket",
@@ -49,5 +49,5 @@ export const bitbucket = (
             }
         },
         ...options,
-    } as OAuthProviderCredentials<BitbucketProfile>
+    } as OAuthProviderCredentials<BitbucketProfile, DefaultUser>
 }

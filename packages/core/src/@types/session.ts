@@ -201,16 +201,16 @@ export interface SessionStrategy {
     destroySession(request: Headers, skipCSRFCheck?: boolean): Promise<Headers>
 }
 
-export interface CreateSessionStrategyOptions {
+export interface CreateSessionStrategyOptions<DefaultUser extends User = User> {
     config?: SessionConfig
-    jose: JoseInstance
+    jose: JoseInstance<DefaultUser>
     cookies: () => CookieStoreConfig
     logger?: InternalLogger
 }
 
-export interface JWTStrategyOptions {
+export interface JWTStrategyOptions<DefaultUser extends User = User> {
     config?: StatelessStrategyConfig
-    jose: JoseInstance
+    jose: JoseInstance<DefaultUser>
     logger?: InternalLogger
     cookies: () => CookieStoreConfig
 }

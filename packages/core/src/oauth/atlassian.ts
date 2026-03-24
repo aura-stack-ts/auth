@@ -1,4 +1,4 @@
-import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.ts"
+import type { LiteralUnion, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface ExtendedProfile {
     job_title: string
@@ -28,9 +28,9 @@ export interface AtlassianProfile {
  * @see [Atlassian - My Apps](https://developer.atlassian.com/console/myapps/)
  * @see [Atlassian - Retrieve Authenticated User](https://developer.atlassian.com/cloud/jira/software/oauth-2-3lo-apps/#how-do-i-retrieve-the-public-profile-of-the-authenticated-user-)
  */
-export const atlassian = (
-    options?: Partial<OAuthProviderCredentials<AtlassianProfile>>
-): OAuthProviderCredentials<AtlassianProfile> => {
+export const atlassian = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<AtlassianProfile, DefaultUser>>
+): OAuthProviderCredentials<AtlassianProfile, DefaultUser> => {
     return {
         id: "atlassian",
         name: "Atlassian",
@@ -56,5 +56,5 @@ export const atlassian = (
             }
         },
         ...options,
-    } as OAuthProviderCredentials<AtlassianProfile>
+    } as OAuthProviderCredentials<AtlassianProfile, DefaultUser>
 }

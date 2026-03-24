@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Figma API - Users](https://developers.figma.com/docs/rest-api/users-types/)
@@ -17,7 +17,9 @@ export interface FigmaProfile {
  * @see [Figma - Create an OAuth App](https://developers.figma.com/docs/rest-api/authentication/#create-an-oauth-app)
  * @see [Figma - OAuth Scopes](https://developers.figma.com/docs/rest-api/scopes/)
  */
-export const figma = (options?: Partial<OAuthProviderCredentials<FigmaProfile>>): OAuthProviderCredentials<FigmaProfile> => {
+export const figma = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<FigmaProfile, DefaultUser>>
+): OAuthProviderCredentials<FigmaProfile, DefaultUser> => {
     return {
         id: "figma",
         name: "Figma",
@@ -35,5 +37,5 @@ export const figma = (options?: Partial<OAuthProviderCredentials<FigmaProfile>>)
             }
         },
         ...options,
-    } as OAuthProviderCredentials<FigmaProfile>
+    } as OAuthProviderCredentials<FigmaProfile, DefaultUser>
 }

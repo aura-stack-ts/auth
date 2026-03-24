@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface Login {
     email: string
@@ -29,9 +29,9 @@ export interface MailchimpProfile {
  * @see [Mailchimp - OAuth 2.0 Docs](https://mailchimp.com/developer/marketing/guides/access-user-data-oauth-2/)
  * @see [Mailchimp - API Root](https://mailchimp.com/developer/marketing/api/root/)
  */
-export const mailchimp = (
-    options?: Partial<OAuthProviderCredentials<MailchimpProfile>>
-): OAuthProviderCredentials<MailchimpProfile> => {
+export const mailchimp = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<MailchimpProfile, DefaultUser>>
+): OAuthProviderCredentials<MailchimpProfile, DefaultUser> => {
     return {
         id: "mailchimp",
         name: "Mailchimp",
@@ -49,5 +49,5 @@ export const mailchimp = (
             }
         },
         ...options,
-    } as OAuthProviderCredentials<MailchimpProfile>
+    } as OAuthProviderCredentials<MailchimpProfile, DefaultUser>
 }

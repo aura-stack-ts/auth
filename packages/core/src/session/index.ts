@@ -1,8 +1,13 @@
 import { AuthInvalidConfigurationError } from "@/errors.ts"
 import { createStatelessStrategy } from "@/session/strategies/stateless.ts"
-import type { CreateSessionStrategyOptions, SessionStrategy } from "@/@types/session.ts"
+import type { CreateSessionStrategyOptions, SessionStrategy, User } from "@/@types/session.ts"
 
-export const createSessionStrategy = ({ config, jose, cookies, logger }: CreateSessionStrategyOptions): SessionStrategy => {
+export const createSessionStrategy = <DefaultUser extends User = User>({
+    config,
+    jose,
+    cookies,
+    logger,
+}: CreateSessionStrategyOptions<DefaultUser>): SessionStrategy => {
     const strategy = config?.strategy ?? "jwt"
 
     switch (strategy) {

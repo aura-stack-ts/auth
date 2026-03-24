@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [GitLab - User Structure](https://docs.gitlab.com/ee/api/users.html#external-user-structure)
@@ -61,7 +61,9 @@ export interface GitLabProfile {
  * @see [GitLab - Scopes](https://docs.gitlab.com/integration/oauth_provider/#view-all-authorized-applications)
  * @see [GitLab - Get current user](https://docs.gitlab.com/api/users/#get-the-current-user)
  */
-export const gitlab = (options?: Partial<OAuthProviderCredentials<GitLabProfile>>): OAuthProviderCredentials<GitLabProfile> => {
+export const gitlab = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<GitLabProfile, DefaultUser>>
+): OAuthProviderCredentials<GitLabProfile, DefaultUser> => {
     return {
         id: "gitlab",
         name: "GitLab",
@@ -79,5 +81,5 @@ export const gitlab = (options?: Partial<OAuthProviderCredentials<GitLabProfile>
             }
         },
         ...options,
-    } as OAuthProviderCredentials<GitLabProfile>
+    } as OAuthProviderCredentials<GitLabProfile, DefaultUser>
 }

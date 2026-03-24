@@ -6,7 +6,12 @@ import { createJoseManager } from "@/session/manager/jose.ts"
 import { createCookieManager } from "@/session/manager/cookie.ts"
 import type { Session, SessionStrategy, User, TypedJWTPayload, JWTStrategyOptions, GetSessionReturn } from "@/@types/index.ts"
 
-export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTStrategyOptions): SessionStrategy => {
+export const createStatelessStrategy = <DefaultUser extends User = User>({
+    config,
+    jose,
+    logger,
+    cookies,
+}: JWTStrategyOptions<DefaultUser>): SessionStrategy => {
     const jwt = createJoseManager(config?.jwt, jose)
     const cookieConfig = createCookieManager(cookies)
     const maxAge = config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
@@ -71,7 +76,7 @@ export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTSt
         }
     }
 
-    const createSession = async (session: TypedJWTPayload<User>) => jwt.createToken(session)
+    const createSession = async (session: TypedJWTPayload<DefaultUser>) => jwt.createToken(session)
 
     const refreshSession = async (_session: Session): Promise<Session | null> => {
         return null

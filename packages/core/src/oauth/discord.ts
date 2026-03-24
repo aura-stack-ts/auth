@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Discord - Nameplate Object](https://discord.com/developers/docs/resources/user#nameplate-nameplate-structure)
@@ -59,9 +59,9 @@ export interface DiscordProfile {
  * @see [Discord - Image Formatting](https://discord.com/developers/docs/reference#image-formatting)
  * @see [Discord - Display Names](https://discord.com/developers/docs/change-log#display-names)
  */
-export const discord = (
-    options?: Partial<OAuthProviderCredentials<DiscordProfile>>
-): OAuthProviderCredentials<DiscordProfile> => {
+export const discord = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<DiscordProfile, DefaultUser>>
+): OAuthProviderCredentials<DiscordProfile, DefaultUser> => {
     return {
         id: "discord",
         name: "Discord",
@@ -87,5 +87,5 @@ export const discord = (
             }
         },
         ...options,
-    } as OAuthProviderCredentials<DiscordProfile>
+    } as OAuthProviderCredentials<DiscordProfile, DefaultUser>
 }

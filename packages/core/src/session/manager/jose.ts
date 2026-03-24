@@ -7,7 +7,10 @@ export type JWTManager = {
     verifyToken(token: string): Promise<TypedJWTPayload<User>>
 }
 
-export const createJoseManager = (config: JWTConfig | undefined, jose: JoseInstance): JWTManager => {
+export const createJoseManager = <DefaultUser extends User = User>(
+    config: JWTConfig | undefined,
+    jose: JoseInstance<DefaultUser>
+): JWTManager => {
     const mode = config?.mode ?? "sealed"
 
     if (!["sealed", "signed", "encrypted"].includes(mode)) {

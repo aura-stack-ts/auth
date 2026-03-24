@@ -132,7 +132,7 @@ export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => 
  * @param session the session configuration that drives algorithm and mode selection
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
  */
-export const createJoseInstance = (secret?: JWTKey, session?: SessionConfig) => {
+export const createJoseInstance = <DefaultUser extends User = User>(secret?: JWTKey, session?: SessionConfig) => {
     secret ??= getEnv("SECRET")
     if (!secret) {
         throw new AuthInternalError(
@@ -166,15 +166,15 @@ export const createJoseInstance = (secret?: JWTKey, session?: SessionConfig) => 
         ])
 
         return {
-            jwt: createJWT<User>({ sign: derivedSigningKey, encrypt: derivedEncryptionKey }),
-            jws: createJWS<User>(derivedCsrfTokenKey),
-            jwe: createJWE<User>(derivedEncryptionKey),
+            jwt: createJWT<DefaultUser>({ sign: derivedSigningKey, encrypt: derivedEncryptionKey }),
+            jws: createJWS<DefaultUser>(derivedCsrfTokenKey),
+            jwe: createJWE<DefaultUser>(derivedEncryptionKey),
         }
     })()
     jose.catch(() => {})
 
     return {
-        signJWS: async (payload: TypedJWTPayload<Partial<User>>, options?: JWTHeaderParameters) => {
+        signJWS: async (payload: TypedJWTPayload<Partial<DefaultUser>>, options?: JWTHeaderParameters) => {
             const { jws } = await jose
             return jws.signJWS(getPayloadClaims(payload, session), getSignOptions(session, options))
         },
@@ -184,7 +184,7 @@ export const createJoseInstance = (secret?: JWTKey, session?: SessionConfig) => 
             verifyMaxExpiration(payload)
             return payload
         },
-        encryptJWE: async (payload: TypedJWTPayload<Partial<User>>, options?: JWEHeaderParameters) => {
+        encryptJWE: async (payload: TypedJWTPayload<Partial<DefaultUser>>, options?: JWEHeaderParameters) => {
             const { jwe } = await jose
             return jwe.encryptJWE(getPayloadClaims(payload, session), getEncryptOptions(session, options))
         },
@@ -194,7 +194,7 @@ export const createJoseInstance = (secret?: JWTKey, session?: SessionConfig) => 
             verifyMaxExpiration(payload)
             return payload
         },
-        encodeJWT: async (payload: TypedJWTPayload<Partial<User>>, options?: EncodeJWTOptions) => {
+        encodeJWT: async (payload: TypedJWTPayload<Partial<DefaultUser>>, options?: EncodeJWTOptions) => {
             const { jwt } = await jose
             return await jwt.encodeJWT(getPayloadClaims(payload, session), {
                 sign: getSignOptions(session, options?.sign),
