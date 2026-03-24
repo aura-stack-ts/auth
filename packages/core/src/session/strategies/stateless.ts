@@ -9,7 +9,7 @@ import type { Session, SessionStrategy, User, TypedJWTPayload, JWTStrategyOption
 export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTStrategyOptions): SessionStrategy => {
     const jwt = createJoseManager(config?.jwt, jose)
     const cookieConfig = createCookieManager(cookies)
-    const maxAge = config?.jwt?.maxAge ?? 60 * 60 * 24 * 7 * 2
+    const maxAge = config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = config?.jwt?.expirationStrategy ?? "absolute"
 
     const updateExpires = ({ exp }: { exp: number | undefined }): Date | null => {
@@ -39,7 +39,16 @@ export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTSt
             const { sessionToken } = cookieConfig.getCookie(headers)
             if (!sessionToken) return { session: null, headers: newHeaders }
 
-            const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = await jwt.verifyToken(sessionToken)
+            const {
+                exp,
+                iat: _iat,
+                jti: _jti,
+                nbf: _nbf,
+                aud: _aud,
+                iss: _iss,
+                mexp,
+                ...user
+            } = await jwt.verifyToken(sessionToken)
             if (!user.sub) return { session: null, headers: newHeaders }
             const session: Session = {
                 user: user,
@@ -50,7 +59,7 @@ export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTSt
             if (!expiresAt) return { session, headers: newHeaders }
 
             const newSession = { ...session, expires: expiresAt.toISOString() }
-            const newSessionToken = await jwt.createToken({ ...user, exp: Math.floor(expiresAt.getTime() / 1000) })
+            const newSessionToken = await jwt.createToken({ ...user, exp: Math.floor(expiresAt.getTime() / 1000), mexp })
             logger?.log("SESSION_REFRESHED", { structuredData: { strategy: "stateless", expiresAt: expiresAt.toISOString() } })
             return {
                 session: newSession,

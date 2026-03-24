@@ -13,7 +13,7 @@ import {
     type JWEHeaderParameters,
     type JWTDecryptOptions,
 } from "@aura-stack/jose"
-import { AuthInternalError } from "@/errors.ts"
+import { AuthInternalError, AuthSecurityError } from "@/errors.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 import type { User, SessionConfig, JWTMode, JWTConfig, JWTKey } from "@/@types/index.ts"
@@ -48,11 +48,12 @@ export const getJWTClaims = (config?: SessionConfig) => {
     if (jwt?.issuer) {
         claims.iss = jwt.issuer
     }
+    const now = Math.floor(Date.now() / 1000)
     if (jwt?.maxAge) {
-        claims.exp = jwt.maxAge
+        claims.exp = now + jwt.maxAge
     }
     if (jwt?.maxExpiration) {
-        claims.mexp = jwt.maxExpiration
+        claims.mexp = now + jwt.maxExpiration
     }
     return claims
 }
@@ -108,6 +109,13 @@ export const getDecryptOptions = (config?: SessionConfig, options?: JWTDecryptOp
         decryptOptions.audience = config?.jwt?.audience
     }
     return { ...decryptOptions, ...options }
+}
+
+export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => {
+    const now = Math.floor(Date.now() / 1000)
+    if (payload.mexp && typeof payload.mexp === "number" && now > payload.mexp) {
+        throw new AuthSecurityError("TOKEN_EXPIRED", "The token has expired based on its maxExpiration (mexp) claim.")
+    }
 }
 
 /**
@@ -172,7 +180,9 @@ export const createJoseInstance = (secret?: JWTKey, session?: SessionConfig) => 
         },
         verifyJWS: async (token: string, options?: JWTVerifyOptions) => {
             const { jws } = await jose
-            return jws.verifyJWS(token, getVerifyOptions(session, options))
+            const payload = await jws.verifyJWS(token, getVerifyOptions(session, options))
+            verifyMaxExpiration(payload)
+            return payload
         },
         encryptJWE: async (payload: TypedJWTPayload<Partial<User>>, options?: JWEHeaderParameters) => {
             const { jwe } = await jose
@@ -180,21 +190,25 @@ export const createJoseInstance = (secret?: JWTKey, session?: SessionConfig) => 
         },
         decryptJWE: async (token: string, options?: JWTDecryptOptions) => {
             const { jwe } = await jose
-            return jwe.decryptJWE(token, getDecryptOptions(session, options))
+            const payload = await jwe.decryptJWE(token, getDecryptOptions(session, options))
+            verifyMaxExpiration(payload)
+            return payload
         },
         encodeJWT: async (payload: TypedJWTPayload<Partial<User>>, options?: EncodeJWTOptions) => {
             const { jwt } = await jose
-            return jwt.encodeJWT(getPayloadClaims(payload, session), {
+            return await jwt.encodeJWT(getPayloadClaims(payload, session), {
                 sign: getSignOptions(session, options?.sign),
                 encrypt: getEncryptOptions(session, options?.encrypt),
             })
         },
         decodeJWT: async (token: string, options?: DecodeJWTOptions) => {
             const { jwt } = await jose
-            return jwt.decodeJWT(token, {
+            const payload = await jwt.decodeJWT(token, {
                 verify: getVerifyOptions(session, options?.verify),
                 decrypt: getDecryptOptions(session, options?.decrypt),
             })
+            verifyMaxExpiration(payload)
+            return payload
         },
     }
 }
