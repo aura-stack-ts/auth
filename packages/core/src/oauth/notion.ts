@@ -1,11 +1,11 @@
 import { createBasicAuthHeader } from "@/utils.ts"
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface Person {
     email: string
 }
 
-export interface User {
+export interface NotionUser {
     object: "user"
     id: string
     name: string
@@ -16,7 +16,7 @@ export interface User {
 
 export interface Owner {
     type: "user"
-    user: User
+    user: NotionUser
 }
 
 export interface Bot {
@@ -41,7 +41,9 @@ export interface NotionProfile {
  * @see [Notion - Authentication](https://developers.notion.com/reference/authentication)
  * @see [Notion - Retrieve your token's bot user](https://developers.notion.com/reference/get-self)
  */
-export const notion = (options?: Partial<OAuthProviderCredentials<NotionProfile>>): OAuthProviderCredentials<NotionProfile> => {
+export const notion = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<NotionProfile, DefaultUser>>
+): OAuthProviderCredentials<NotionProfile, DefaultUser> => {
     return {
         id: "notion",
         name: "Notion",
@@ -68,14 +70,13 @@ export const notion = (options?: Partial<OAuthProviderCredentials<NotionProfile>
                 "Notion-Version": "2022-06-28",
             },
         },
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.id,
                 name: profile.name,
                 image: profile.avatar_url ?? "",
                 email: profile?.bot?.owner?.user?.person?.email,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<NotionProfile>
+    }
 }

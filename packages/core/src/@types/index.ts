@@ -36,7 +36,7 @@ export type ResponseType = LiteralUnion<"code" | "token" | "refresh_token" | "id
  * Configuration for an OAuth provider without credentials.
  * Use this type when defining provider metadata and endpoints.
  */
-export interface OAuthProviderConfig<Profile extends object = Record<string, any>> {
+export interface OAuthProviderConfig<Profile extends object = Record<string, any>, DefaultUser extends User = User> {
     id: string
     name: string
     /**
@@ -73,14 +73,17 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
      * use `authorize.params.response_type` instead of `responseType`
      */
     responseType?: ResponseType
-    profile?: (profile: Profile) => User | Promise<User>
+    profile?: (profile: Profile) => DefaultUser | Promise<DefaultUser>
 }
 
 /**
  * OAuth provider configuration with client credentials.
  * Extends OAuthProviderConfig with clientId and clientSecret.
  */
-export interface OAuthProviderCredentials<Profile extends object = Record<string, any>> extends OAuthProviderConfig<Profile> {
+export interface OAuthProviderCredentials<
+    Profile extends object = Record<string, any>,
+    DefaultUser extends User = User,
+> extends OAuthProviderConfig<Profile, DefaultUser> {
     clientId?: string
     clientSecret?: string
 }
@@ -88,7 +91,10 @@ export interface OAuthProviderCredentials<Profile extends object = Record<string
 /**
  * Complete OAuth provider type combining configuration and credentials.
  */
-export type OAuthProvider<Profile extends object = Record<string, any>> = OAuthProviderCredentials<Profile>
+export type OAuthProvider<
+    Profile extends object = Record<string, any>,
+    DefaultUser extends User = User,
+> = OAuthProviderCredentials<Profile, DefaultUser>
 
 /**
  * Cookie type with __Secure- prefix, must be Secure.
@@ -142,7 +148,7 @@ export interface CookieConfig {
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export interface AuthConfig {
+export interface AuthConfig<DefaultUser extends User = User> {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
@@ -169,7 +175,7 @@ export interface AuthConfig {
      *   }
      * ]
      */
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any>)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, DefaultUser>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -255,9 +261,12 @@ export interface AuthConfig {
  */
 export type TrustedOrigin = string
 
-export type JoseInstance = ReturnType<typeof createJoseInstance>
+export type JoseInstance<DefaultUser extends User = User> = ReturnType<typeof createJoseInstance<DefaultUser>>
 
-export type OAuthProviderRecord = Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+export type OAuthProviderRecord<DefaultUser extends User = User> = Record<
+    LiteralUnion<BuiltInOAuthProvider>,
+    OAuthProviderCredentials<any, DefaultUser>
+>
 
 export type InternalLogger = {
     level: LogLevel
@@ -272,17 +281,17 @@ export type GetSessionAPI = (options: { headers: HeadersInit }) => Promise<Sessi
 
 export type AuthAPI = ReturnType<typeof createAuthAPI>
 
-export interface RouterGlobalContext {
+export interface RouterGlobalContext<DefaultUser extends User = User> {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
-    jose: JoseInstance
+    jose: JoseInstance<DefaultUser>
     secret?: JWTKey
     baseURL?: string
     basePath: string
     trustedProxyHeaders: boolean
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
-    sessionStrategy: SessionStrategy
+    sessionStrategy: SessionStrategy<DefaultUser>
 }
 
 /**
@@ -291,13 +300,13 @@ export interface RouterGlobalContext {
  */
 export type AuthRuntimeConfig = RouterGlobalContext
 
-export interface AuthInstance {
+export interface AuthInstance<DefaultUser extends User = User> {
     handlers: {
         GET: (request: Request) => Response | Promise<Response>
         POST: (request: Request) => Response | Promise<Response>
         ALL: (request: Request) => Response | Promise<Response>
     }
-    jose: JoseInstance
+    jose: JoseInstance<DefaultUser>
     api: AuthAPI
 }
 
@@ -430,7 +439,7 @@ export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends 
     ? Response
     : { redirect: false; signInURL: string }
 
-export type InternalContext = RouterGlobalContext & {
+export type InternalContext<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser> & {
     cookieConfig: {
         secure: CookieStoreConfig
         standard: CookieStoreConfig

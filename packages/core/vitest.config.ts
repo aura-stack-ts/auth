@@ -27,6 +27,10 @@ export default defineConfig({
             "AURA_AUTH_OAUTH-PROFILE_CLIENT_ID": "oauth_profile_client_id",
             "AURA_AUTH_OAUTH-PROFILE_CLIENT_SECRET": "oauth_profile_client_secret",
         },
+        typecheck: {
+            include: ["test/**/*.test-d.ts"],
+            enabled: false,
+        },
     },
     resolve: {
         alias: {

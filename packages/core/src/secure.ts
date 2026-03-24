@@ -2,7 +2,7 @@ import { equals } from "@/utils.ts"
 import { AuthSecurityError } from "@/errors.ts"
 import { isJWTPayloadWithToken, timingSafeEqual } from "@/assert.ts"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
-import type { AuthRuntimeConfig } from "@/@types/index.ts"
+import type { AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
 
 /** @deprecated use `createSecretValue` instead */
 export const generateSecure = (length: number = 32) => {
@@ -59,7 +59,11 @@ export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: s
     }
 }
 
-export const verifyCSRF = async (jose: AuthRuntimeConfig["jose"], cookie: string, header: string): Promise<boolean> => {
+export const verifyCSRF = async <DefaultUser extends User = User>(
+    jose: JoseInstance<DefaultUser>,
+    cookie: string,
+    header: string
+): Promise<boolean> => {
     try {
         const cookiePayload = await jose.verifyJWS(cookie)
         const headerPayload = await jose.verifyJWS(header)

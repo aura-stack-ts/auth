@@ -3,7 +3,7 @@
  *
  * This modules re-exports OAuth providers available in Aura Auth to be used in the Auth instance configuration.
  */
-import type { LiteralUnion, OAuthProviderCredentials } from "@/@types/index.ts"
+import { type LiteralUnion, type OAuthProviderCredentials } from "@/@types/index.ts"
 import { getEnv } from "@/env.ts"
 import { github } from "./github.ts"
 import { bitbucket } from "./bitbucket.ts"

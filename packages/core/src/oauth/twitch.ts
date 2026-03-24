@@ -1,5 +1,5 @@
 import { getEnv } from "@/env.ts"
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Twitch - Get Users](https://dev.twitch.tv/docs/api/reference#get-users)
@@ -27,7 +27,9 @@ export interface TwitchProfile {
  * @see [Twitch - Get Users](https://dev.twitch.tv/docs/api/reference#get-users)
  * @see [Twitch - Scopes](https://dev.twitch.tv/docs/authentication/scopes/)
  */
-export const twitch = (options?: Partial<OAuthProviderCredentials<TwitchProfile>>): OAuthProviderCredentials<TwitchProfile> => {
+export const twitch = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<TwitchProfile, DefaultUser>>
+): OAuthProviderCredentials<TwitchProfile, DefaultUser> => {
     const clientId = options?.clientId ?? getEnv("TWITCH_CLIENT_ID")
 
     return {
@@ -41,7 +43,7 @@ export const twitch = (options?: Partial<OAuthProviderCredentials<TwitchProfile>
         userInfo: {
             url: "https://api.twitch.tv/helix/users",
             headers: {
-                "Client-ID": clientId,
+                "Client-ID": clientId!,
             },
         },
         profile(profile: { data: TwitchProfile[] }) {
@@ -53,9 +55,9 @@ export const twitch = (options?: Partial<OAuthProviderCredentials<TwitchProfile>
                 sub: user.id,
                 name: user.display_name,
                 email: user.email,
-                picture: user.profile_image_url,
+                image: user.profile_image_url,
             }
         },
         ...options,
-    } as OAuthProviderCredentials<TwitchProfile>
+    } as OAuthProviderCredentials<TwitchProfile, DefaultUser>
 }

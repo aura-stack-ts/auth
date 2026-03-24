@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Discord - Nameplate Object](https://discord.com/developers/docs/resources/user#nameplate-nameplate-structure)
@@ -59,17 +59,22 @@ export interface DiscordProfile {
  * @see [Discord - Image Formatting](https://discord.com/developers/docs/reference#image-formatting)
  * @see [Discord - Display Names](https://discord.com/developers/docs/change-log#display-names)
  */
-export const discord = (
-    options?: Partial<OAuthProviderCredentials<DiscordProfile>>
-): OAuthProviderCredentials<DiscordProfile> => {
+export const discord = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<DiscordProfile, DefaultUser>>
+): OAuthProviderCredentials<DiscordProfile, DefaultUser> => {
     return {
         id: "discord",
         name: "Discord",
+        authorize: {
+            url: "https://discord.com/oauth2/authorize",
+            params: {
+                scope: "identify email",
+                responseType: "code",
+            },
+        },
         authorizeURL: "https://discord.com/oauth2/authorize",
         accessToken: "https://discord.com/api/oauth2/token",
         userInfo: "https://discord.com/api/users/@me",
-        scope: "identify email",
-        responseType: "code",
         profile(profile) {
             let image = ""
             if (profile.avatar === null) {
@@ -84,8 +89,8 @@ export const discord = (
                 name: profile.global_name ?? profile.username,
                 email: profile.email ?? "",
                 image,
-            }
+            } as DefaultUser
         },
         ...options,
-    } as OAuthProviderCredentials<DiscordProfile>
+    }
 }

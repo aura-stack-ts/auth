@@ -1,4 +1,4 @@
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface SpotifyImage {
     url: string
@@ -36,25 +36,29 @@ export interface SpotifyProfile {
  * @see [Spotify - Scopes](https://developer.spotify.com/documentation/web-api/concepts/scopes)
  * @see [Spotify - Redirect URIs](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
  */
-export const spotify = (
-    options?: Partial<OAuthProviderCredentials<SpotifyProfile>>
-): OAuthProviderCredentials<SpotifyProfile> => {
+export const spotify = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<SpotifyProfile, DefaultUser>>
+): OAuthProviderCredentials<SpotifyProfile, DefaultUser> => {
     return {
         id: "spotify",
         name: "Spotify",
+        authorize: {
+            url: "https://accounts.spotify.com/authorize",
+            params: {
+                responseType: "code",
+                scope: "user-read-private user-read-email",
+            },
+        },
         authorizeURL: "https://accounts.spotify.com/authorize",
         accessToken: "https://accounts.spotify.com/api/token",
         userInfo: "https://api.spotify.com/v1/me",
-        scope: "user-read-private user-read-email",
-        responseType: "code",
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.id,
                 name: profile.display_name,
                 email: profile.email,
                 image: profile.images[0]?.url ?? undefined,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<SpotifyProfile>
+    }
 }

@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Introduced support for custom user type configuration across the authentication system and OAuth providers, enabling type-safe handling of extended user data in `jose` utilities and the `profile` field of providers such as `github`, `gitlab`, and `bitbucket`. [#127](https://github.com/aura-stack-ts/auth/pull/127)
+
+- Introduced JWT session expiration models within the session strategy system via the `expirationStrategy` option. This configuration enables flexible control over how session expiration is handled and updated over time. Supported models are `fixed`, `absolute`, `rolling`, and `sliding`. [#126](https://github.com/aura-stack-ts/auth/pull/126)
+
+- Introduced the `session` configuration option in `createAuth` to manage session strategies (currently JWT only), with support for multiple JWT modes: `signed`, `encrypted`, and `sealed` (secure by default). It also supports custom signing and encryption algorithms, plus customization of `audience`, `issuer`, and `maxAge` claims. [#125](https://github.com/aura-stack-ts/auth/pull/125)
+
 ### Changed
 
 - The built-in JOSE functions now provide type safety and type inference based on the `User` type. Additionally, `encryptJWE` and `decryptJWE` now accept and return `JWTPayload`. [#123](https://github.com/aura-stack-ts/auth/pull/123)

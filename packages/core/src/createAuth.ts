@@ -3,14 +3,14 @@ import { createContext } from "@/context.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createErrorHandler, useSecureCookies } from "@/utils.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
-import type { AuthConfig, AuthInstance } from "@/@types/index.ts"
+import type { AuthConfig, AuthInstance, User } from "@/@types/index.ts"
 
-const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
-    const context = createContext(authConfig)
+const createInternalConfig = <DefaultUser extends User = User>(authConfig?: AuthConfig): RouterConfig => {
+    const context = createContext<DefaultUser>(authConfig)
     return {
         basePath: authConfig?.basePath ?? "/auth",
         onError: createErrorHandler(context.logger),
-        context,
+        context: context as unknown as RouterConfig["context"],
         use: [
             (ctx) => {
                 const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
@@ -43,8 +43,8 @@ const createInternalConfig = (authConfig?: AuthConfig): RouterConfig => {
  *   }]
  * })
  */
-export const createAuthInstance = (authConfig: AuthConfig) => {
-    const config = createInternalConfig(authConfig)
+export const createAuthInstance = <DefaultUser extends User = User>(authConfig: AuthConfig) => {
+    const config = createInternalConfig<DefaultUser>(authConfig)
     const router = createRouter(
         [signInAction(config.context.oauth), callbackAction(config.context.oauth), sessionAction, signOutAction, csrfTokenAction],
         config
@@ -57,8 +57,8 @@ export const createAuthInstance = (authConfig: AuthConfig) => {
     }
 }
 
-export const createAuth = (config: AuthConfig) => {
-    const authInstance = createAuthInstance(config) as AuthInstance
+export const createAuth = <DefaultUser extends User = User>(config: AuthConfig) => {
+    const authInstance = createAuthInstance<DefaultUser>(config) as unknown as AuthInstance<DefaultUser>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()
         const methodHandlers = {
