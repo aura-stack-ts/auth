@@ -43,7 +43,7 @@ export const twitch = <DefaultUser extends User = User>(
         userInfo: {
             url: "https://api.twitch.tv/helix/users",
             headers: {
-                "Client-ID": clientId,
+                "Client-ID": clientId!,
             },
         },
         profile(profile: { data: TwitchProfile[] }) {
@@ -55,7 +55,7 @@ export const twitch = <DefaultUser extends User = User>(
                 sub: user.id,
                 name: user.display_name,
                 email: user.email,
-                picture: user.profile_image_url,
+                image: user.profile_image_url,
             }
         },
         ...options,

@@ -35,19 +35,16 @@ export const mailchimp = <DefaultUser extends User = User>(
     return {
         id: "mailchimp",
         name: "Mailchimp",
-        authorizeURL: "https://login.mailchimp.com/oauth2/authorize",
+        authorize: "https://login.mailchimp.com/oauth2/authorize",
         accessToken: "https://login.mailchimp.com/oauth2/token",
         userInfo: "https://login.mailchimp.com/oauth2/metadata",
-        scope: "",
-        responseType: "code",
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.user_id,
                 name: profile.accountname,
                 email: profile.login.email,
                 image: profile.login.avatar,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<MailchimpProfile, DefaultUser>
+    }
 }

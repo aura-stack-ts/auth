@@ -65,11 +65,16 @@ export const discord = <DefaultUser extends User = User>(
     return {
         id: "discord",
         name: "Discord",
+        authorize: {
+            url: "https://discord.com/oauth2/authorize",
+            params: {
+                scope: "identify email",
+                response_type: "code",
+            },
+        },
         authorizeURL: "https://discord.com/oauth2/authorize",
         accessToken: "https://discord.com/api/oauth2/token",
         userInfo: "https://discord.com/api/users/@me",
-        scope: "identify email",
-        responseType: "code",
         profile(profile) {
             let image = ""
             if (profile.avatar === null) {
@@ -84,8 +89,8 @@ export const discord = <DefaultUser extends User = User>(
                 name: profile.global_name ?? profile.username,
                 email: profile.email ?? "",
                 image,
-            }
+            } as DefaultUser
         },
         ...options,
-    } as OAuthProviderCredentials<DiscordProfile, DefaultUser>
+    }
 }

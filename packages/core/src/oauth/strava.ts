@@ -79,19 +79,22 @@ export const strava = <DefaultUser extends User = User>(
     return {
         id: "strava",
         name: "Strava",
-        authorizeURL: "https://www.strava.com/oauth/authorize",
+        authorize: {
+            url: "https://www.strava.com/oauth/authorize",
+            params: {
+                scope: "read",
+                responseType: "code",
+            },
+        },
         accessToken: "https://www.strava.com/oauth/token",
         userInfo: "https://www.strava.com/api/v3/athlete",
-        scope: "read",
-        responseType: "code",
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.id.toString(),
                 name: `${profile.firstname} ${profile.lastname}`,
                 image: profile.profile,
                 email: undefined,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<StravaProfile, DefaultUser>
+    }
 }

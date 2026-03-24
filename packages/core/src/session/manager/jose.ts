@@ -2,15 +2,15 @@ import { AuthInvalidConfigurationError } from "@/errors.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { JoseInstance, User, JWTConfig } from "@/@types/index.ts"
 
-export type JWTManager = {
-    createToken(user: TypedJWTPayload<Partial<User>>): Promise<string>
-    verifyToken(token: string): Promise<TypedJWTPayload<User>>
+export type JWTManager<DefaultUser extends User = User> = {
+    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
+    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }
 
 export const createJoseManager = <DefaultUser extends User = User>(
     config: JWTConfig | undefined,
     jose: JoseInstance<DefaultUser>
-): JWTManager => {
+): JWTManager<DefaultUser> => {
     const mode = config?.mode ?? "sealed"
 
     if (!["sealed", "signed", "encrypted"].includes(mode)) {

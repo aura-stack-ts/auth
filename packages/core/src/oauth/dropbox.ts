@@ -62,14 +62,13 @@ export const dropbox = <DefaultUser extends User = User>(
             method: "POST",
             url: "https://api.dropboxapi.com/2/users/get_current_account",
         },
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.account_id,
                 name: profile.name.display_name,
                 email: profile.email,
                 image: profile.profile_photo_url,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<DropboxProfile, DefaultUser>
+    }
 }

@@ -67,19 +67,23 @@ export const gitlab = <DefaultUser extends User = User>(
     return {
         id: "gitlab",
         name: "GitLab",
+        authorize: {
+            url: "https://gitlab.com/oauth/authorize",
+            params: {
+                scope: "read_user",
+                responseType: "code",
+            },
+        },
         authorizeURL: "https://gitlab.com/oauth/authorize",
         accessToken: "https://gitlab.com/oauth/token",
         userInfo: "https://gitlab.com/api/v4/user",
-        scope: "read_user",
-        responseType: "code",
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.id.toString(),
                 name: profile.name ?? profile.username,
                 email: profile.email,
                 image: profile.avatar_url,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<GitLabProfile, DefaultUser>
+    }
 }

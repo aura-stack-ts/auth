@@ -35,19 +35,23 @@ export const bitbucket = <DefaultUser extends User = User>(
     return {
         id: "bitbucket",
         name: "Bitbucket",
+        authorize: {
+            url: "https://bitbucket.org/site/oauth2/authorize",
+            params: {
+                scope: "account email",
+                responseType: "code",
+            },
+        },
         authorizeURL: "https://bitbucket.org/site/oauth2/authorize",
         accessToken: "https://bitbucket.org/site/oauth2/access_token",
         userInfo: "https://api.bitbucket.org/2.0/user",
-        scope: "account email",
-        responseType: "code",
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.uuid ?? profile.account_id,
                 name: profile.display_name ?? profile.nickname,
                 image: profile.links.avatar?.href,
                 email: undefined,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<BitbucketProfile, DefaultUser>
+    }
 }

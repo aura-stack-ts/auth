@@ -66,19 +66,23 @@ export const github = <DefaultUser extends User = User>(
     return {
         id: "github",
         name: "GitHub",
+        authorize: {
+            url: "https://github.com/login/oauth/authorize",
+            params: {
+                scope: "read:user user:email",
+                responseType: "code",
+            },
+        },
         authorizeURL: "https://github.com/login/oauth/authorize",
         accessToken: "https://github.com/login/oauth/access_token",
         userInfo: "https://api.github.com/user",
-        scope: "read:user user:email",
-        responseType: "code",
-        profile: (profile: GitHubProfile) => {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.id.toString(),
                 name: profile.name ?? profile.login,
                 email: profile.email ?? undefined,
                 image: profile.avatar_url,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<GitHubProfile, DefaultUser>
+    }
 }

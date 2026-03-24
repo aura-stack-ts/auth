@@ -23,19 +23,22 @@ export const figma = <DefaultUser extends User = User>(
     return {
         id: "figma",
         name: "Figma",
-        authorizeURL: "https://www.figma.com/oauth",
+        authorize: {
+            url: "https://www.figma.com/oauth",
+            params: {
+                scope: "current_user:read",
+                responseType: "code",
+            },
+        },
         accessToken: "https://api.figma.com/v1/oauth/token",
         userInfo: "https://api.figma.com/v1/me",
-        scope: "current_user:read",
-        responseType: "code",
-        profile(profile: FigmaProfile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.id,
                 name: profile.handle,
                 email: profile.email,
                 image: profile.img_url,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<FigmaProfile, DefaultUser>
+    }
 }

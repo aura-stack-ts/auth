@@ -29,19 +29,23 @@ export const pinterest = <DefaultUser extends User = User>(
     return {
         id: "pinterest",
         name: "Pinterest",
+        authorize: {
+            url: "https://www.pinterest.com/oauth",
+            params: {
+                scope: "user_accounts:read",
+                responseType: "code",
+            },
+        },
         authorizeURL: "https://www.pinterest.com/oauth",
         accessToken: "https://api.pinterest.com/v5/oauth/token",
         userInfo: "https://api.pinterest.com/v5/user_account",
-        scope: "user_accounts:read",
-        responseType: "code",
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.id,
                 name: profile.username,
                 image: profile.profile_image,
                 email: undefined,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<PinterestProfile, DefaultUser>
+    }
 }

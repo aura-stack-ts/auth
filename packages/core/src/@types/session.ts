@@ -14,8 +14,8 @@ export interface User extends Record<string, unknown> {
 /**
  * Session data returned by the session endpoint.
  */
-export interface Session {
-    user: User
+export interface Session<DefaultUser extends User = User> {
+    user: DefaultUser
     expires: string
 }
 
@@ -163,17 +163,17 @@ export type StatelessStrategyConfig = {
  */
 export type SessionConfig = StatelessStrategyConfig
 
-export interface GetSessionReturn {
-    session: Session | null
+export interface GetSessionReturn<DefaultUser extends User = User> {
+    session: Session<DefaultUser> | null
     headers: Headers
 }
 
-export interface SessionStrategy {
+export interface SessionStrategy<DefaultUser extends User = User> {
     /**
      * Read and validate the session from an incoming request.
      * Returns null if absent, invalid, or expired. Never throws on auth failure.
      */
-    getSession(request: Headers): Promise<GetSessionReturn>
+    getSession(request: Headers): Promise<GetSessionReturn<DefaultUser>>
 
     /**
      * Create a session after successful authentication.
@@ -185,7 +185,7 @@ export interface SessionStrategy {
      * Attempt to refresh using the refresh token cookie.
      * Returns null session + cookie-clearing response on any failure.
      */
-    refreshSession(session: Session): Promise<Session | null>
+    refreshSession(session: Session<DefaultUser>): Promise<Session<DefaultUser> | null>
 
     /**
      * Revoke a session by ID.

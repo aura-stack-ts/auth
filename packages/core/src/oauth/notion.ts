@@ -70,14 +70,13 @@ export const notion = <DefaultUser extends User = User>(
                 "Notion-Version": "2022-06-28",
             },
         },
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.id,
                 name: profile.name,
                 image: profile.avatar_url ?? "",
                 email: profile?.bot?.owner?.user?.person?.email,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<NotionProfile, DefaultUser>
+    }
 }

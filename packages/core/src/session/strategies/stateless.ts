@@ -11,8 +11,8 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
     jose,
     logger,
     cookies,
-}: JWTStrategyOptions<DefaultUser>): SessionStrategy => {
-    const jwt = createJoseManager(config?.jwt, jose)
+}: JWTStrategyOptions<DefaultUser>): SessionStrategy<DefaultUser> => {
+    const jwt = createJoseManager<DefaultUser>(config?.jwt, jose)
     const cookieConfig = createCookieManager(cookies)
     const maxAge = config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = config?.jwt?.expirationStrategy ?? "absolute"
@@ -38,7 +38,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         }
     }
 
-    const getSession = async (headers: Headers): Promise<GetSessionReturn> => {
+    const getSession = async (headers: Headers): Promise<GetSessionReturn<DefaultUser>> => {
         const newHeaders = new Headers()
         try {
             const { sessionToken } = cookieConfig.getCookie(headers)
@@ -55,8 +55,8 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 ...user
             } = await jwt.verifyToken(sessionToken)
             if (!user.sub) return { session: null, headers: newHeaders }
-            const session: Session = {
-                user: user,
+            const session: Session<DefaultUser> = {
+                user: user as DefaultUser,
                 expires: exp ? new Date(exp * 1000).toISOString() : "",
             }
 
@@ -64,7 +64,11 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             if (!expiresAt) return { session, headers: newHeaders }
 
             const newSession = { ...session, expires: expiresAt.toISOString() }
-            const newSessionToken = await jwt.createToken({ ...user, exp: Math.floor(expiresAt.getTime() / 1000), mexp })
+            const newSessionToken = await jwt.createToken({
+                ...(user as DefaultUser),
+                exp: Math.floor(expiresAt.getTime() / 1000),
+                mexp,
+            })
             logger?.log("SESSION_REFRESHED", { structuredData: { strategy: "stateless", expiresAt: expiresAt.toISOString() } })
             return {
                 session: newSession,
@@ -78,7 +82,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
 
     const createSession = async (session: TypedJWTPayload<DefaultUser>) => jwt.createToken(session)
 
-    const refreshSession = async (_session: Session): Promise<Session | null> => {
+    const refreshSession = async (_session: Session<DefaultUser>): Promise<Session<DefaultUser> | null> => {
         return null
     }
 

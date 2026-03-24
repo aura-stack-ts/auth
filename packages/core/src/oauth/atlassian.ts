@@ -45,16 +45,13 @@ export const atlassian = <DefaultUser extends User = User>(
         authorizeURL: "https://auth.atlassian.com/authorize",
         accessToken: "https://auth.atlassian.com/oauth/token",
         userInfo: "https://api.atlassian.com/me",
-        scope: "read:me read:account",
-        responseType: "code",
-        profile(profile) {
-            return {
+        profile: (profile) =>
+            ({
                 sub: profile.account_id,
                 name: profile.name,
                 email: profile.email,
                 image: profile.picture,
-            }
-        },
+            }) as DefaultUser,
         ...options,
-    } as OAuthProviderCredentials<AtlassianProfile, DefaultUser>
+    }
 }
