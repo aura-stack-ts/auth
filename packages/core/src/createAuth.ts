@@ -57,7 +57,7 @@ export const createAuthInstance = <DefaultUser extends User = User>(authConfig: 
     }
 }
 
-export const createAuth = <DefaultUser extends User = User>(config: AuthConfig) => {
+export const createAuth = <DefaultUser extends User = User>(config: AuthConfig<DefaultUser>) => {
     const authInstance = createAuthInstance<DefaultUser>(config) as unknown as AuthInstance<DefaultUser>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()

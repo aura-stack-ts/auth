@@ -148,7 +148,7 @@ export interface CookieConfig {
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export interface AuthConfig {
+export interface AuthConfig<DefaultUser extends User = User> {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
@@ -175,7 +175,7 @@ export interface AuthConfig {
      *   }
      * ]
      */
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any>)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, DefaultUser>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
