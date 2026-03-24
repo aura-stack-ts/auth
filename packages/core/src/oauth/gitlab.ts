@@ -74,7 +74,6 @@ export const gitlab = <DefaultUser extends User = User>(
                 responseType: "code",
             },
         },
-        authorizeURL: "https://gitlab.com/oauth/authorize",
         accessToken: "https://gitlab.com/oauth/token",
         userInfo: "https://gitlab.com/api/v4/user",
         profile: (profile) =>
@@ -82,7 +81,7 @@ export const gitlab = <DefaultUser extends User = User>(
                 sub: profile.id.toString(),
                 name: profile.name ?? profile.username,
                 email: profile.email,
-                image: profile.avatar_url,
+                image: profile.avatar_url,                
             }) as DefaultUser,
         ...options,
     }

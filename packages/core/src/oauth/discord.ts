@@ -69,7 +69,7 @@ export const discord = <DefaultUser extends User = User>(
             url: "https://discord.com/oauth2/authorize",
             params: {
                 scope: "identify email",
-                response_type: "code",
+                responseType: "code",
             },
         },
         authorizeURL: "https://discord.com/oauth2/authorize",

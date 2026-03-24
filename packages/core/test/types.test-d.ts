@@ -5,7 +5,9 @@ import { github, GitHubProfile } from "@/oauth/github.ts"
 
 describe("createAuth", () => {
     expectTypeOf(createAuth).parameter(0).toEqualTypeOf<AuthConfig>()
-    expectTypeOf(createAuth).toEqualTypeOf<<DefaultUser extends User = User>(config: AuthConfig<DefaultUser>) => AuthInstance<DefaultUser>>()
+    expectTypeOf(createAuth).toEqualTypeOf<
+        <DefaultUser extends User = User>(config: AuthConfig<DefaultUser>) => AuthInstance<DefaultUser>
+    >()
     expectTypeOf(createAuth<User & { role: string }>).returns.toEqualTypeOf<AuthInstance<User & { role: string }>>()
     expectTypeOf(createAuth<User & { role: string }>({ oauth: [] })["jose"]).toEqualTypeOf<
         JoseInstance<User & { role: string }>

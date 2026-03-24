@@ -263,7 +263,10 @@ export type TrustedOrigin = string
 
 export type JoseInstance<DefaultUser extends User = User> = ReturnType<typeof createJoseInstance<DefaultUser>>
 
-export type OAuthProviderRecord = Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials>
+export type OAuthProviderRecord<DefaultUser extends User = User> = Record<
+    LiteralUnion<BuiltInOAuthProvider>,
+    OAuthProviderCredentials<any, DefaultUser>
+>
 
 export type InternalLogger = {
     level: LogLevel
@@ -288,7 +291,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
     trustedProxyHeaders: boolean
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
-    sessionStrategy: SessionStrategy
+    sessionStrategy: SessionStrategy<DefaultUser>
 }
 
 /**
