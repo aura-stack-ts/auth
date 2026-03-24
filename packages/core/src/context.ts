@@ -29,7 +29,7 @@ export const createContext = (config?: AuthConfig): InternalContext => {
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
         baseURL: config?.baseURL,
     } as InternalContext
-    ctx.session = createSessionStrategy({
+    ctx.sessionStrategy = createSessionStrategy({
         cookies: () => ctx.cookies,
         jose,
         config: config?.session,

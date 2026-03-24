@@ -106,6 +106,8 @@ export type JWTSealedMode = {
 
 export type JWTConfigBase = JWTSignedMode | JWTEncryptedMode | JWTSealedMode
 
+export type JWTExpirationStrategy = "fixed" | "rolling" | "absolute" | "sliding"
+
 export type JWTConfig = {
     /**
      * Token lifetime.
@@ -121,6 +123,16 @@ export type JWTConfig = {
      * @example ["https://api.example.com", "https://app.example.com"]
      */
     audience?: string | string[]
+    /**
+     * Maximum absolute session duration in seconds.
+     * Required for "absolute" and "sliding" strategies.
+     * Enforced via jose's maxTokenAge against the iat claim.
+     */
+    maxExpiration?: number
+    /**
+     *
+     */
+    expirationStrategy?: JWTExpirationStrategy
 } & JWTConfigBase
 
 /**
@@ -151,12 +163,17 @@ export type StatelessStrategyConfig = {
  */
 export type SessionConfig = StatelessStrategyConfig
 
+export interface GetSessionReturn {
+    session: Session | null
+    headers: Headers
+}
+
 export interface SessionStrategy {
     /**
      * Read and validate the session from an incoming request.
      * Returns null if absent, invalid, or expired. Never throws on auth failure.
      */
-    getSession(request: Headers): Promise<Session | null>
+    getSession(request: Headers): Promise<GetSessionReturn>
 
     /**
      * Create a session after successful authentication.
@@ -168,7 +185,7 @@ export interface SessionStrategy {
      * Attempt to refresh using the refresh token cookie.
      * Returns null session + cookie-clearing response on any failure.
      */
-    refreshSession(request: Headers): Promise<Session | null>
+    refreshSession(session: Session): Promise<Session | null>
 
     /**
      * Revoke a session by ID.

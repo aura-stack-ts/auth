@@ -261,6 +261,12 @@ export const logMessages = {
         msgId: "UNTRUSTED_ORIGIN",
         message: "The constructed origin URL is not trusted.",
     },
+    SESSION_REFRESHED: {
+        facility: 4,
+        severity: "info",
+        msgId: "SESSION_REFRESHED",
+        message: "User session was refreshed with a new expiration time",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

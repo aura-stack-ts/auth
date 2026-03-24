@@ -264,7 +264,9 @@ export type InternalLogger = {
     log: typeof createLogEntry
 }
 
-export type SessionResponse = { session: Session; authenticated: true } | { session: null; authenticated: false }
+export type SessionResponse =
+    | { session: Session; headers: Headers; authenticated: true }
+    | { session: null; headers: Headers; authenticated: false }
 
 export type GetSessionAPI = (options: { headers: HeadersInit }) => Promise<SessionResponse>
 
@@ -280,7 +282,7 @@ export interface RouterGlobalContext {
     trustedProxyHeaders: boolean
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
-    session: SessionStrategy
+    sessionStrategy: SessionStrategy
 }
 
 /**
