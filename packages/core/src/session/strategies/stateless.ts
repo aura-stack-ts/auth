@@ -34,19 +34,20 @@ export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTSt
     }
 
     const getSession = async (headers: Headers): Promise<GetSessionReturn> => {
+        const newHeaders = new Headers()
         try {
             const { sessionToken } = cookieConfig.getCookie(headers)
-            if (!sessionToken) return { session: null, headers }
+            if (!sessionToken) return { session: null, headers: newHeaders }
 
             const { exp, iat: _iat, jti: _jti, nbf: _nbf, aud: _aud, iss: _iss, ...user } = await jwt.verifyToken(sessionToken)
-            if (!user.sub) return { session: null, headers }
+            if (!user.sub) return { session: null, headers: newHeaders }
             const session: Session = {
                 user: user,
                 expires: exp ? new Date(exp * 1000).toISOString() : "",
             }
 
             const expiresAt = updateExpires({ exp })
-            if (!expiresAt) return { session, headers }
+            if (!expiresAt) return { session, headers: newHeaders }
 
             const newSession = { ...session, expires: expiresAt.toISOString() }
             const newSessionToken = await jwt.createToken({ ...user, exp: Math.floor(expiresAt.getTime() / 1000) })
@@ -57,7 +58,7 @@ export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTSt
             }
         } catch (error) {
             logger?.log("AUTH_SESSION_VALID", { structuredData: { error_type: getErrorName(error) } })
-            return { session: null, headers }
+            return { session: null, headers: newHeaders }
         }
     }
 

@@ -51,6 +51,9 @@ export const getJWTClaims = (config?: SessionConfig) => {
     if (jwt?.maxAge) {
         claims.exp = jwt.maxAge
     }
+    if (jwt?.maxExpiration) {
+        claims.mexp = jwt.maxExpiration
+    }
     return claims
 }
 
@@ -80,7 +83,7 @@ export const getEncryptOptions = (config?: SessionConfig, options?: JWEHeaderPar
     return { ...encryptOptions, ...options }
 }
 
-export const getVerifyOptions = (config?: SessionConfig, options?: JWTVerifyOptions) => {
+export const getVerifyOptions = (config?: SessionConfig, options?: JWTVerifyOptions): JWTVerifyOptions => {
     const verifyOptions: JWTVerifyOptions = {}
     if (isSignedMode(config) || isSealedMode(config)) {
         if (config?.jwt?.signingAlgorithm) {

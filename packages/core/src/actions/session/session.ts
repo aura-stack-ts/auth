@@ -15,7 +15,9 @@ export const sessionAction = createEndpoint("GET", "/session", async (ctx) => {
             throw new AuthInternalError("INVALID_JWT_TOKEN", "Session not authenticated")
         }
         const headers = new Headers(secureApiHeaders)
-        headersInit.forEach((value, key) => headers.append(key, value))
+        if (headersInit.has("Set-Cookie")) {
+            headers.set("Set-Cookie", headersInit.get("Set-Cookie")!)
+        }
         return Response.json({ session, authenticated }, { headers })
     } catch {
         const headers = new HeadersBuilder(secureApiHeaders)

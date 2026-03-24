@@ -128,7 +128,7 @@ export type JWTConfig = {
      * Required for "absolute" and "sliding" strategies.
      * Enforced via jose's maxTokenAge against the iat claim.
      */
-    maxDuration?: number
+    maxExpiration?: number
     /**
      *
      */

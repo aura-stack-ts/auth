@@ -9,7 +9,7 @@ export const getSession = async ({
 }: FunctionAPIContext<GetSessionAPIOptions>): Promise<SessionResponse> => {
     try {
         const { session, headers } = await ctx.sessionStrategy.getSession(new Headers(headersInit))
-        if (!session || !session) return unauthorized
+        if (!session) return unauthorized
         return {
             session,
             headers,
