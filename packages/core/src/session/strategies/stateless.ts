@@ -66,7 +66,7 @@ export const createStatelessStrategy = ({ config, jose, logger, cookies }: JWTSt
                 headers: cookieConfig.setCookie({ sessionToken: newSessionToken }),
             }
         } catch (error) {
-            logger?.log("AUTH_SESSION_VALID", { structuredData: { error_type: getErrorName(error) } })
+            logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
             return { session: null, headers: newHeaders }
         }
     }
