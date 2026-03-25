@@ -1,6 +1,5 @@
-import { equals } from "@/utils.ts"
-import { encoder } from "@aura-stack/jose/crypto"
-import type { JWTPayloadWithToken } from "@/@types/index.ts"
+import { equals, patternToRegex } from "@/shared/utils.ts"
+import type { JWTConfig, JWTMode, JWTPayloadWithToken, SessionConfig } from "@/@types/index.ts"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -73,35 +72,6 @@ export const isSameOrigin = (origin: string, expected: string): boolean => {
 }
 
 /**
- * Converts a trusted origin pattern to a regex for matching.
- * Supports `*` as subdomain wildcard: `https://*.example.com` matches `https://app.example.com`
- * @todo: add support to Custom URI Schemes (e.g. `myapp://*`).
- */
-export const patternToRegex = (pattern: string): RegExp | null => {
-    try {
-        if (pattern.length > 2048) return null
-
-        pattern = pattern.replace(/\\/g, "")
-        const match = pattern.match(/^(https?):\/\/([a-zA-Z0-9.*-]{1,253})(?::(\d{1,5}|\*))?(?:\/.*)?$/)
-        if (!match) return null
-
-        const [, protocol, host, port] = match
-        const hasWildcard = host.includes("*")
-        if (hasWildcard && !host.startsWith("*.")) return null
-        if (hasWildcard && host.slice(2).includes("*")) return null
-
-        const domain = hasWildcard ? host.slice(2) : host
-        const escapedDomain = domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-        const hostRegex = hasWildcard ? `[^.]+\\.${escapedDomain}` : escapedDomain
-        const portRegex = port === "*" ? ":\\d{1,5}" : port ? `:${port}` : ""
-
-        return new RegExp(`^${protocol}:\\/\\/${hostRegex}${portRegex}$`)
-    } catch {
-        return null
-    }
-}
-
-/**
  * Checks if a URL matches any of the trusted origin patterns.
  * A URL is trusted if its origin matches any pattern (exact or wildcard).
  *
@@ -123,13 +93,19 @@ export const isTrustedOrigin = (url: string, trustedOrigins: string[]): boolean 
     return false
 }
 
-export const timingSafeEqual = (a: string, b: string): boolean => {
-    const bufferA = encoder.encode(a)
-    const bufferB = encoder.encode(b)
-    const len = Math.max(bufferA.length, bufferB.length)
-    let diff = 0
-    for (let i = 0; i < len; i++) {
-        diff |= (bufferA[i] ?? 0) ^ (bufferB[i] ?? 0)
-    }
-    return diff === 0 && bufferA.length === bufferB.length
+/**
+ * Extracts the JWT mode from a SessionConfig.
+ * Defaults to "sealed" when no mode is specified.
+ */
+const getJWTMode = (config?: SessionConfig): JWTMode => {
+    return config?.jwt?.mode ?? "sealed"
 }
+
+export const isSignedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "signed" }> } =>
+    getJWTMode(config) === "signed"
+
+export const isEncryptedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "encrypted" }> } =>
+    getJWTMode(config) === "encrypted"
+
+export const isSealedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "sealed" }> } =>
+    getJWTMode(config) === "sealed"

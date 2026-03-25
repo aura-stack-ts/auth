@@ -1,5 +1,5 @@
 import { describe, expect, vi, test } from "vitest"
-import { createProxyLogger } from "@/logger.ts"
+import { createProxyLogger } from "@/shared/logger.ts"
 import type { Logger } from "@/@types/index.ts"
 
 describe("createProxyLogger", () => {

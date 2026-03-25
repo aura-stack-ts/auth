@@ -1,4 +1,5 @@
-import type { JoseInstance, CookieStoreConfig, InternalLogger } from "@/@types/index.ts"
+import type { TypedJWTPayload } from "@aura-stack/jose"
+import type { CookieStoreConfig, InternalLogger, JoseInstance, RouterGlobalContext } from "@/@types/config.ts"
 
 /**
  * Standardized user profile returned by OAuth providers after fetching user information
@@ -163,11 +164,9 @@ export type StatelessStrategyConfig = {
  */
 export type SessionConfig = StatelessStrategyConfig
 
-export interface GetSessionReturn<DefaultUser extends User = User> {
-    session: Session<DefaultUser> | null
-    headers: Headers
-}
-
+/**
+ * Abstraction layer for session management.
+ */
 export interface SessionStrategy<DefaultUser extends User = User> {
     /**
      * Read and validate the session from an incoming request.
@@ -201,6 +200,11 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     destroySession(request: Headers, skipCSRFCheck?: boolean): Promise<Headers>
 }
 
+export interface GetSessionReturn<DefaultUser extends User = User> {
+    session: Session<DefaultUser> | null
+    headers: Headers
+}
+
 export interface CreateSessionStrategyOptions<DefaultUser extends User = User> {
     config?: SessionConfig
     jose: JoseInstance<DefaultUser>
@@ -213,4 +217,48 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
     jose: JoseInstance<DefaultUser>
     logger?: InternalLogger
     cookies: () => CookieStoreConfig
+}
+
+export interface SignInOptions {
+    redirect?: boolean
+    redirectTo?: string
+}
+
+export interface SignOutOptions {
+    redirect?: boolean
+    redirectTo?: string
+}
+
+export interface GetSessionAPIOptions {
+    headers: HeadersInit
+}
+
+export interface SignOutAPIOptions {
+    headers: HeadersInit
+    redirectTo?: string
+    skipCSRFCheck?: boolean
+}
+
+export interface SignInAPIOptions<Redirect extends boolean = boolean> {
+    headers?: HeadersInit
+    redirect?: Redirect
+    redirectTo?: string
+    request?: Request
+}
+
+export type FunctionAPIContext<Options extends object> = {
+    ctx: RouterGlobalContext
+} & Options
+
+export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
+    ? Response
+    : { redirect: false; signInURL: string }
+
+export type SessionResponse =
+    | { session: Session; headers: Headers; authenticated: true }
+    | { session: null; headers: Headers; authenticated: false }
+
+export type JWTManager<DefaultUser extends User = User> = {
+    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
+    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }

@@ -1,11 +1,12 @@
 import { createRouter, type RouterConfig } from "@aura-stack/router"
-import { createContext } from "@/context.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
-import { createErrorHandler, useSecureCookies } from "@/utils.ts"
+import { createContext } from "@/router/context.ts"
+import { isSecureConnection } from "@/shared/utils.ts"
+import { createErrorHandler } from "@/router/errorHandler.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
 import type { AuthConfig, AuthInstance, User } from "@/@types/index.ts"
 
-const createInternalConfig = <DefaultUser extends User = User>(authConfig?: AuthConfig): RouterConfig => {
+const createInternalConfig = <DefaultUser extends User = User>(authConfig?: AuthConfig<DefaultUser>): RouterConfig => {
     const context = createContext<DefaultUser>(authConfig)
     return {
         basePath: authConfig?.basePath ?? "/auth",
@@ -13,7 +14,7 @@ const createInternalConfig = <DefaultUser extends User = User>(authConfig?: Auth
         context: context as unknown as RouterConfig["context"],
         use: [
             (ctx) => {
-                const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
+                const useSecure = isSecureConnection(ctx.request, ctx.context.trustedProxyHeaders)
                 ctx.context.cookies = useSecure ? context.cookieConfig.secure : context.cookieConfig.standard
                 return ctx
             },
@@ -43,7 +44,7 @@ const createInternalConfig = <DefaultUser extends User = User>(authConfig?: Auth
  *   }]
  * })
  */
-export const createAuthInstance = <DefaultUser extends User = User>(authConfig: AuthConfig) => {
+export const createAuthInstance = <DefaultUser extends User = User>(authConfig: AuthConfig<DefaultUser>) => {
     const config = createInternalConfig<DefaultUser>(authConfig)
     const router = createRouter(
         [signInAction(config.context.oauth), callbackAction(config.context.oauth), sessionAction, signOutAction, csrfTokenAction],
@@ -57,7 +58,7 @@ export const createAuthInstance = <DefaultUser extends User = User>(authConfig: 
     }
 }
 
-export const createAuth = <DefaultUser extends User = User>(config: AuthConfig) => {
+export const createAuth = <DefaultUser extends User = User>(config: AuthConfig<DefaultUser>) => {
     const authInstance = createAuthInstance<DefaultUser>(config) as unknown as AuthInstance<DefaultUser>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()

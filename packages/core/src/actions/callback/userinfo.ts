@@ -1,8 +1,8 @@
-import { fetchAsync } from "@/request.ts"
-import { generateSecure } from "@/secure.ts"
-import { AURA_AUTH_VERSION } from "@/utils.ts"
+import { fetchAsync } from "@/shared/fetch-async.ts"
+import { createSecretValue } from "@/shared/security.ts"
+import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
-import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/errors.ts"
+import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/shared/errors.ts"
 import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
@@ -12,7 +12,7 @@ import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/in
  * @returns The standardized OAuth user profile
  */
 const getDefaultUserInfo = (profile: Record<string, string>): User => {
-    const sub = generateSecure(16)
+    const sub = createSecretValue(16)
 
     return {
         sub: profile?.id ?? profile?.sub ?? sub,

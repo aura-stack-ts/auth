@@ -1,7 +1,7 @@
 import { signIn } from "@/api/signIn.ts"
 import { signOut } from "@/api/signOut.ts"
-import { validateRedirectTo } from "@/utils.ts"
 import { getSession } from "@/api/getSession.ts"
+import { validateRedirectTo } from "@/shared/utils.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type {
     BuiltInOAuthProvider,

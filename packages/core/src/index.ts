@@ -1,5 +1,6 @@
 export { createAuth } from "@/createAuth.ts"
-export { createSyslogMessage } from "@/logger.ts"
+export { createJoseInstance } from "@/jose.ts"
+export { createSyslogMessage } from "@/shared/logger.ts"
 export { builtInOAuthProviders } from "@/oauth/index.ts"
 export { createAuthClient, createClient } from "@/client/index.ts"
 
@@ -25,4 +26,18 @@ export type {
     GetSessionAPIOptions,
     SignInAPIOptions,
     SignOutAPIOptions,
+    JWTConfig,
+    JWTKey,
+    JWTMode,
+    JWTSigningAlgorithm,
+    JWTKeyAlgorithm,
+    JWTEncryptedMode,
+    JWTSignedMode,
+    JWTEncryptionAlgorithm,
+    JWTSealedMode,
+    JWTConfigBase,
+    JWTExpirationStrategy,
+    StatelessStrategyConfig,
+    SessionConfig,
+    SessionStrategy,
 } from "@/@types/index.ts"

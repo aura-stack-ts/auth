@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { createJoseInstance } from "@/jose.ts"
-import { createSecretValue } from "@/secure.ts"
+import { createSecretValue } from "@/shared/security.ts"
 
 const payload = {
     sub: "1234567890",

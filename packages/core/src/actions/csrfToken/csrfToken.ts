@@ -1,6 +1,6 @@
 import { createEndpoint } from "@aura-stack/router"
-import { createCSRF } from "@/secure.ts"
-import { secureApiHeaders } from "@/headers.ts"
+import { createCSRF } from "@/shared/security.ts"
+import { secureApiHeaders } from "@/shared/headers.ts"
 import { setCookie, getCookie } from "@/cookie.ts"
 
 const getCSRFToken = (request: Request, cookieName: string) => {

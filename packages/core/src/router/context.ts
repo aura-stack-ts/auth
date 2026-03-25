@@ -1,9 +1,9 @@
 import { createJoseInstance } from "@/jose.ts"
-import { createProxyLogger } from "@/logger.ts"
 import { createCookieStore } from "@/cookie.ts"
-import { createSessionStrategy } from "@/session/index.ts"
-import { getEnv, getEnvArray, getEnvBoolean } from "@/env.ts"
+import { createProxyLogger } from "@/shared/logger.ts"
+import { createSessionStrategy } from "@/session/strategy.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
+import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import type { AuthConfig, InternalContext, User } from "@/@types/index.ts"
 
 export const createContext = <DefaultUser extends User = User>(config?: AuthConfig): InternalContext<DefaultUser> => {

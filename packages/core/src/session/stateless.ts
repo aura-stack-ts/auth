@@ -1,9 +1,9 @@
 import { getCookie } from "@/cookie.ts"
-import { verifyCSRF } from "@/secure.ts"
-import { getErrorName } from "@/utils.ts"
-import { AuthSecurityError } from "@/errors.ts"
-import { createJoseManager } from "@/session/manager/jose.ts"
-import { createCookieManager } from "@/session/manager/cookie.ts"
+import { verifyCSRF } from "@/shared/security.ts"
+import { getErrorName } from "@/shared/utils.ts"
+import { AuthSecurityError } from "@/shared/errors.ts"
+import { createJoseManager } from "@/session/jose-manager.ts"
+import { createCookieManager } from "@/session/cookie-manager.ts"
 import type { Session, SessionStrategy, User, TypedJWTPayload, JWTStrategyOptions, GetSessionReturn } from "@/@types/index.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({

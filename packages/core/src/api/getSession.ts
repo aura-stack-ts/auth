@@ -1,4 +1,4 @@
-import { getErrorName } from "@/utils.ts"
+import { getErrorName } from "@/shared/utils.ts"
 import type { FunctionAPIContext, GetSessionAPIOptions, SessionResponse } from "@/@types/index.ts"
 
 const unauthorized: SessionResponse = { session: null, headers: new Headers(), authenticated: false }
