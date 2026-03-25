@@ -82,8 +82,41 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
 
     const createSession = async (session: TypedJWTPayload<DefaultUser>) => jwt.createToken(session)
 
-    const refreshSession = async (_session: Session<DefaultUser>): Promise<Session<DefaultUser> | null> => {
-        return null
+    const refreshSession = async (
+        headers: Headers,
+        session: Session<DefaultUser>
+    ): Promise<{
+        session: Session<DefaultUser> | null
+        headers: Headers
+    }> => {
+        try {
+            const { sessionToken } = cookieConfig.getCookie(headers)
+            const {
+                exp,
+                iat: _iat,
+                jti: _jti,
+                nbf: _nbf,
+                aud: _aud,
+                iss: _iss,
+                mexp,
+                ...user
+            } = await jwt.verifyToken(sessionToken)
+            const updatedSession: Session<DefaultUser> = {
+                user: {
+                    ...user,
+                    ...session.user,
+                },
+                expires: session.expires ?? exp,
+            }
+            const newToken = await jwt.createToken({
+                ...updatedSession.user,
+                exp: new Date(updatedSession.expires).getTime() / 1000,
+                mexp,
+            })
+            return { session: updatedSession, headers: cookieConfig.setCookie({ sessionToken: newToken }) }
+        } catch {
+            return { session, headers: new Headers() }
+        }
     }
 
     // JWT strategy: stateless tokens cannot be revoked server-side

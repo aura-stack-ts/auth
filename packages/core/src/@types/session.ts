@@ -184,7 +184,13 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Attempt to refresh using the refresh token cookie.
      * Returns null session + cookie-clearing response on any failure.
      */
-    refreshSession(session: Session<DefaultUser>): Promise<Session<DefaultUser> | null>
+    refreshSession(
+        headers: Headers,
+        session: Session<DefaultUser>
+    ): Promise<{
+        session: Session<DefaultUser> | null
+        headers: Headers
+    }>
 
     /**
      * Revoke a session by ID.
@@ -261,4 +267,9 @@ export type SessionResponse =
 export type JWTManager<DefaultUser extends User = User> = {
     createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
     verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
+}
+
+export interface UpdateSessionAPIOptions {
+    headers: HeadersInit
+    session: Session
 }
