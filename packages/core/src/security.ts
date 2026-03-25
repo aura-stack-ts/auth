@@ -1,13 +1,8 @@
-import { equals } from "@/utils.ts"
-import { AuthSecurityError } from "@/errors.ts"
-import { isJWTPayloadWithToken, timingSafeEqual } from "@/assert.ts"
+import { AuthSecurityError } from "@/lib/errors.ts"
+import { isJWTPayloadWithToken } from "@/lib/assert.ts"
+import { equals, timingSafeEqual } from "@/lib/utils.ts"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import type { AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
-
-/** @deprecated use `createSecretValue` instead */
-export const generateSecure = (length: number = 32) => {
-    return base64url.encode(getRandomBytes(length))
-}
 
 export const createSecretValue = (length: number = 32) => {
     return base64url.encode(getRandomBytes(length))
@@ -31,7 +26,7 @@ export const createHash = async (data: string) => {
 export const createPKCE = async (verifier?: string) => {
     // Base64url: n bytes → ceil(n * 4/3) chars. For 43-128 chars, need 32-96 bytes.
     const byteLength = verifier ? undefined : Math.floor(Math.random() * (96 - 32 + 1) + 32)
-    const codeVerifier = verifier ?? generateSecure(byteLength ?? 64)
+    const codeVerifier = verifier ?? createSecretValue(byteLength ?? 64)
     if (codeVerifier.length < 43 || codeVerifier.length > 128) {
         throw new AuthSecurityError("PKCE_VERIFIER_INVALID", "The code verifier must be between 43 and 128 characters in length.")
     }
@@ -47,14 +42,14 @@ export const createPKCE = async (verifier?: string) => {
  */
 export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: string) => {
     try {
-        const token = generateSecure(32)
+        const token = createSecretValue(32)
         if (csrfCookie) {
             await jose.verifyJWS(csrfCookie)
             return csrfCookie
         }
         return jose.signJWS({ token })
     } catch {
-        const token = generateSecure(32)
+        const token = createSecretValue(32)
         return jose.signJWS({ token })
     }
 }

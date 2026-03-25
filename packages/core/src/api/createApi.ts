@@ -1,6 +1,6 @@
 import { signIn } from "@/api/signIn.ts"
 import { signOut } from "@/api/signOut.ts"
-import { validateRedirectTo } from "@/utils.ts"
+import { validateRedirectTo } from "@/lib/utils.ts"
 import { getSession } from "@/api/getSession.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type {

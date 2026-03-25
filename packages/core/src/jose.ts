@@ -13,27 +13,11 @@ import {
     type JWEHeaderParameters,
     type JWTDecryptOptions,
 } from "@aura-stack/jose"
-import { AuthInternalError, AuthSecurityError } from "@/errors.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
+import { AuthInternalError, AuthSecurityError } from "@/lib/errors.ts"
+import { isEncryptedMode, isSealedMode, isSignedMode } from "@/lib/assert.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
-import type { User, SessionConfig, JWTMode, JWTConfig, JWTKey } from "@/@types/index.ts"
-
-export const isSignedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "signed" }> } =>
-    getJWTMode(config) === "signed"
-
-export const isEncryptedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "encrypted" }> } =>
-    getJWTMode(config) === "encrypted"
-
-export const isSealedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "sealed" }> } =>
-    getJWTMode(config) === "sealed"
-
-/**
- * Extracts the JWT mode from a SessionConfig.
- * Defaults to "sealed" when no mode is specified.
- */
-const getJWTMode = (config?: SessionConfig): JWTMode => {
-    return config?.jwt?.mode ?? "sealed"
-}
+import type { User, SessionConfig, JWTKey } from "@/@types/index.ts"
 
 const getJWTConfig = (config?: SessionConfig) => {
     return config?.jwt

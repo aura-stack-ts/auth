@@ -1,7 +1,7 @@
 import { getEnv } from "@/env.ts"
-import { AuthInternalError } from "@/errors.ts"
-import { equals, extractPath } from "@/utils.ts"
-import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin, patternToRegex } from "@/assert.ts"
+import { AuthInternalError } from "@/lib/errors.ts"
+import { equals, extractPath, patternToRegex } from "@/lib/utils.ts"
+import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin } from "@/lib/assert.ts"
 import type { AuthConfig } from "@/@types/index.ts"
 import type { GlobalContext } from "@aura-stack/router"
 

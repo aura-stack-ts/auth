@@ -1,4 +1,4 @@
-import { AuthInvalidConfigurationError } from "@/errors.ts"
+import { AuthInvalidConfigurationError } from "@/lib/errors.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { JoseInstance, User, JWTConfig } from "@/@types/index.ts"
 

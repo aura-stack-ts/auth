@@ -1,5 +1,5 @@
 import { env } from "@/env.ts"
-import { AuthInternalError } from "@/errors.ts"
+import { AuthInternalError } from "@/lib/errors.ts"
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
 import type { CookieStoreConfig, CookieConfig, InternalLogger } from "@/@types/index.ts"
 

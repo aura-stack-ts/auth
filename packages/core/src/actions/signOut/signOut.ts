@@ -1,6 +1,6 @@
 import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { getBaseURL } from "@/utils.ts"
+import { getBaseURL } from "@/lib/utils.ts"
 import { signOut } from "@/api/signOut.ts"
 import { createRedirectTo } from "@/actions/signIn/authorization.ts"
 

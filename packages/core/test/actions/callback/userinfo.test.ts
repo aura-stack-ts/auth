@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { OAuthProviderConfig, OAuthProviderCredentials } from "@/@types/index.ts"
 import { oauthCustomService } from "@test/presets.ts"
-import { AURA_AUTH_VERSION } from "@/utils.ts"
+import { AURA_AUTH_VERSION } from "@/lib/utils.ts"
 
 describe("getUserInfo", () => {
     test("get user info", async () => {

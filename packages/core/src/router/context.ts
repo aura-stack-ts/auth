@@ -1,5 +1,5 @@
 import { createJoseInstance } from "@/jose.ts"
-import { createProxyLogger } from "@/logger.ts"
+import { createProxyLogger } from "@/lib/logger.ts"
 import { createCookieStore } from "@/cookie.ts"
 import { createSessionStrategy } from "@/session/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/env.ts"
@@ -34,6 +34,6 @@ export const createContext = <DefaultUser extends User = User>(config?: AuthConf
         jose,
         config: config?.session,
         logger: ctx.logger,
-    })
+    }) as InternalContext<DefaultUser>["sessionStrategy"]
     return ctx
 }

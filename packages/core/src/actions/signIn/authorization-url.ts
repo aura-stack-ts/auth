@@ -1,7 +1,7 @@
 import { OAuthProvider } from "@/@types/index.ts"
-import { AuthInternalError } from "@/errors.ts"
+import { AuthInternalError } from "@/lib/errors.ts"
 import { OAuthAuthorization } from "@/schemas.ts"
-import { createPKCE, createSecretValue } from "@/secure.ts"
+import { createPKCE, createSecretValue } from "@/security.ts"
 import type { GlobalContext } from "@aura-stack/router"
 
 export const setSearchParams = (url: URL, params: Record<string, string | undefined>) => {

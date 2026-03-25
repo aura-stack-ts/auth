@@ -1,4 +1,4 @@
-import { AuthInvalidConfigurationError } from "@/errors.ts"
+import { AuthInvalidConfigurationError } from "@/lib/errors.ts"
 import { createStatelessStrategy } from "@/session/strategies/stateless.ts"
 import type { CreateSessionStrategyOptions, SessionStrategy, User } from "@/@types/session.ts"
 

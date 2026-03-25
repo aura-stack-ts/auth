@@ -1,4 +1,4 @@
-import type { JoseInstance, CookieStoreConfig, InternalLogger } from "@/@types/index.ts"
+import type { CookieStoreConfig, InternalLogger, JoseInstance, RouterGlobalContext } from "@/@types/config.ts"
 
 /**
  * Standardized user profile returned by OAuth providers after fetching user information
@@ -214,3 +214,44 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
     logger?: InternalLogger
     cookies: () => CookieStoreConfig
 }
+
+export interface SignInOptions {
+    redirect?: boolean
+    redirectTo?: string
+}
+
+export interface SignOutOptions {
+    redirect?: boolean
+    redirectTo?: string
+}
+
+export interface GetSessionAPIOptions {
+    headers: HeadersInit
+}
+
+export interface SignOutAPIOptions {
+    headers: HeadersInit
+    redirectTo?: string
+    skipCSRFCheck?: boolean
+}
+
+export interface SignInAPIOptions<Redirect extends boolean = boolean> {
+    headers?: HeadersInit
+    redirect?: Redirect
+    redirectTo?: string
+    request?: Request
+}
+
+export type FunctionAPIContext<Options extends object> = {
+    ctx: RouterGlobalContext
+} & Options
+
+export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
+    ? Response
+    : { redirect: false; signInURL: string }
+
+export type SessionResponse =
+    | { session: Session; headers: Headers; authenticated: true }
+    | { session: null; headers: Headers; authenticated: false }
+
+export type GetSessionAPI = (options: { headers: HeadersInit }) => Promise<SessionResponse>

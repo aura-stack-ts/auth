@@ -1,5 +1,5 @@
-import { cacheControl } from "@/headers.ts"
-import { AuthInternalError } from "@/errors.ts"
+import { cacheControl } from "@/lib/headers.ts"
+import { AuthInternalError } from "@/lib/errors.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"

@@ -1,4 +1,4 @@
-import { createBasicAuthHeader } from "@/utils.ts"
+import { createBasicAuthHeader } from "@/lib/utils.ts"
 import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface Person {

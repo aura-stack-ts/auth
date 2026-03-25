@@ -1,4 +1,4 @@
-import { fetchAsync } from "@/request.ts"
+import { fetchAsync } from "@/lib/fetch-async.ts"
 import { describe, expect, test, vi } from "vitest"
 
 describe("fetchAsync", () => {

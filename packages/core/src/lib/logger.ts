@@ -1,5 +1,5 @@
-import { getEnv, getEnvBoolean } from "./env.ts"
-import { createStructuredData } from "./utils.ts"
+import { getEnv, getEnvBoolean } from "@/env.ts"
+import { createStructuredData } from "@/lib/utils.ts"
 import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
 
 /**

@@ -81,7 +81,7 @@ export const gitlab = <DefaultUser extends User = User>(
                 sub: profile.id.toString(),
                 name: profile.name ?? profile.username,
                 email: profile.email,
-                image: profile.avatar_url,                
+                image: profile.avatar_url,
             }) as DefaultUser,
         ...options,
     }
