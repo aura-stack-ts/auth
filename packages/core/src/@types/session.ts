@@ -1,3 +1,4 @@
+import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { CookieStoreConfig, InternalLogger, JoseInstance, RouterGlobalContext } from "@/@types/config.ts"
 
 /**
@@ -163,11 +164,9 @@ export type StatelessStrategyConfig = {
  */
 export type SessionConfig = StatelessStrategyConfig
 
-export interface GetSessionReturn<DefaultUser extends User = User> {
-    session: Session<DefaultUser> | null
-    headers: Headers
-}
-
+/**
+ * Abstraction layer for session management.
+ */
 export interface SessionStrategy<DefaultUser extends User = User> {
     /**
      * Read and validate the session from an incoming request.
@@ -199,6 +198,11 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Returns a response that clears cookies.
      */
     destroySession(request: Headers, skipCSRFCheck?: boolean): Promise<Headers>
+}
+
+export interface GetSessionReturn<DefaultUser extends User = User> {
+    session: Session<DefaultUser> | null
+    headers: Headers
 }
 
 export interface CreateSessionStrategyOptions<DefaultUser extends User = User> {
@@ -254,4 +258,7 @@ export type SessionResponse =
     | { session: Session; headers: Headers; authenticated: true }
     | { session: null; headers: Headers; authenticated: false }
 
-export type GetSessionAPI = (options: { headers: HeadersInit }) => Promise<SessionResponse>
+export type JWTManager<DefaultUser extends User = User> = {
+    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
+    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
+}

@@ -1,5 +1,5 @@
 import { createJoseInstance } from "@/jose.ts"
-import { createLogEntry } from "@/lib/logger.ts"
+import { createLogEntry } from "@/shared/logger.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import type { Prettify } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
@@ -229,7 +229,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
  * Internal runtime configuration used within Aura Auth after initialization.
  * All optional fields from AuthConfig are resolved to their default values.
  */
-export type AuthRuntimeConfig = RouterGlobalContext
+export type AuthRuntimeConfig<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser>
 
 export interface AuthInstance<DefaultUser extends User = User> {
     api: AuthAPI

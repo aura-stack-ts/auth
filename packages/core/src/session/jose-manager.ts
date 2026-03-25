@@ -1,11 +1,5 @@
-import { AuthInvalidConfigurationError } from "@/lib/errors.ts"
-import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { JoseInstance, User, JWTConfig } from "@/@types/index.ts"
-
-export type JWTManager<DefaultUser extends User = User> = {
-    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
-    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
-}
+import { AuthInvalidConfigurationError } from "@/shared/errors.ts"
+import type { JoseInstance, User, JWTConfig, JWTManager } from "@/@types/index.ts"
 
 export const createJoseManager = <DefaultUser extends User = User>(
     config: JWTConfig | undefined,

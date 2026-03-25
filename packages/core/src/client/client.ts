@@ -1,4 +1,4 @@
-import { AuthClientError, isNativeError } from "@/lib/errors.ts"
+import { AuthClientError, isNativeError } from "@/shared/errors.ts"
 import { createClient as createClientAPI } from "@aura-stack/router"
 import type {
     Session,

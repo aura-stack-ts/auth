@@ -1,5 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders } from "@/lib/headers.ts"
+import { secureApiHeaders } from "@/shared/headers.ts"
 import { expiredCookieAttributes, getCookie as getCookieByName } from "@/cookie.ts"
 import type { CookieStoreConfig } from "@/@types/index.ts"
 

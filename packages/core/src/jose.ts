@@ -1,4 +1,4 @@
-import { getEnv } from "@/env.ts"
+import { getEnv } from "@/shared/env.ts"
 import {
     createJWT,
     createJWS,
@@ -14,8 +14,8 @@ import {
     type JWTDecryptOptions,
 } from "@aura-stack/jose"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
-import { AuthInternalError, AuthSecurityError } from "@/lib/errors.ts"
-import { isEncryptedMode, isSealedMode, isSignedMode } from "@/lib/assert.ts"
+import { AuthInternalError, AuthSecurityError } from "@/shared/errors.ts"
+import { isEncryptedMode, isSealedMode, isSignedMode } from "@/shared/assert.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 import type { User, SessionConfig, JWTKey } from "@/@types/index.ts"
 

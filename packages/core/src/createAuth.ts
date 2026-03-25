@@ -1,12 +1,12 @@
 import { createRouter, type RouterConfig } from "@aura-stack/router"
-import { useSecureCookies } from "@/lib/utils.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createContext } from "@/router/context.ts"
+import { isSecureConnection } from "@/shared/utils.ts"
 import { createErrorHandler } from "@/router/errorHandler.ts"
 import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
 import type { AuthConfig, AuthInstance, User } from "@/@types/index.ts"
 
-const createInternalConfig = <DefaultUser extends User = User>(authConfig?: AuthConfig): RouterConfig => {
+const createInternalConfig = <DefaultUser extends User = User>(authConfig?: AuthConfig<DefaultUser>): RouterConfig => {
     const context = createContext<DefaultUser>(authConfig)
     return {
         basePath: authConfig?.basePath ?? "/auth",
@@ -14,7 +14,7 @@ const createInternalConfig = <DefaultUser extends User = User>(authConfig?: Auth
         context: context as unknown as RouterConfig["context"],
         use: [
             (ctx) => {
-                const useSecure = useSecureCookies(ctx.request, ctx.context.trustedProxyHeaders)
+                const useSecure = isSecureConnection(ctx.request, ctx.context.trustedProxyHeaders)
                 ctx.context.cookies = useSecure ? context.cookieConfig.secure : context.cookieConfig.standard
                 return ctx
             },

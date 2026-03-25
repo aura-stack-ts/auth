@@ -1,5 +1,5 @@
-import { fetchAsync } from "@/lib/fetch-async.ts"
-import { AuthInternalError, OAuthProtocolError } from "@/lib/errors.ts"
+import { fetchAsync } from "@/shared/fetch-async.ts"
+import { AuthInternalError, OAuthProtocolError } from "@/shared/errors.ts"
 import { OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.ts"
 import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.ts"
 

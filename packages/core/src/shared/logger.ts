@@ -1,5 +1,4 @@
-import { getEnv, getEnvBoolean } from "@/env.ts"
-import { createStructuredData } from "@/lib/utils.ts"
+import { getEnv, getEnvBoolean } from "@/shared/env.ts"
 import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
 
 /**
@@ -267,6 +266,12 @@ export const logMessages = {
         msgId: "SESSION_REFRESHED",
         message: "User session was refreshed with a new expiration time",
     },
+    AUTH_SECURITY_ERROR: {
+        facility: 10,
+        severity: "error",
+        msgId: "AUTH_SECURITY_ERROR",
+        message: "An authentication security error occurred",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {
@@ -309,6 +314,13 @@ const getSeverityLevel = (severity: string): number => {
     return severities[severity] ?? 6
 }
 
+export const createStructuredData = (data: Record<string, string | number | boolean>, sdID = "metadata"): string => {
+    const entries = Object.entries(data)
+    if (entries.length === 0) return `[${sdID}]`
+    const values = entries.map(([key, value]) => `${key}="${String(value).replace(/(["\\\]])/g, "\\$1")}"`).join(" ")
+    return `[${sdID} ${values}]`
+}
+
 export const createSyslogMessage = (options: SyslogOptions): string => {
     const { timestamp, hostname, appName = "aura-auth", procId = "-", msgId, structuredData, message } = options
     const pri = (options.facility ?? 16) * 8 + getSeverityLevel(options.severity)
@@ -340,7 +352,6 @@ export const createLogger = (logger?: Required<Logger>): InternalLogger | undefi
 /**
  * Creates the logger instance based on the provided configuration and environment variables.
  * Priority: config.logger, LOG_LEVEL env, DEBUG env and defaults to undefined if logging is not enabled.
- *
  */
 export const createProxyLogger = (config?: AuthConfig) => {
     const level = getEnv("LOG_LEVEL")

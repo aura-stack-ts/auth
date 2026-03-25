@@ -1,5 +1,5 @@
-import { isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "@/lib/errors.ts"
 import { isInvalidZodSchemaError, isRouterError, type RouterConfig } from "@aura-stack/router"
+import { isAuthInternalError, isAuthSecurityError, isOAuthProtocolError } from "@/shared/errors.ts"
 import type { InternalLogger } from "@/@types/index.ts"
 
 export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onError"] => {
@@ -25,7 +25,7 @@ export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onErr
             return Response.json(
                 {
                     type,
-                    message: message,
+                    message,
                 },
                 { status: 400 }
             )
@@ -48,7 +48,7 @@ export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onErr
         }
         if (isAuthSecurityError(error)) {
             const { type, code, message } = error
-            logger?.log("INVALID_OAUTH_CONFIGURATION", {
+            logger?.log("AUTH_SECURITY_ERROR", {
                 structuredData: {
                     error: code,
                     error_description: message,

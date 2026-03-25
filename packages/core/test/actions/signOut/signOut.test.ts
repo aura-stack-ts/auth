@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
-import { createCSRF } from "@/security.ts"
+import { createCSRF } from "@/shared/security.ts"
 import { POST, jose, sessionPayload } from "@test/presets.ts"
 
 beforeEach(() => {

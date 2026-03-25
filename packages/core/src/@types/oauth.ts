@@ -46,7 +46,7 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
     scope?: string
     /**
      * @deprecated
-     * use `authorize.params.response_type` instead of `responseType`
+     * use `authorize.params.responseType` instead of `responseType`
      */
     responseType?: ResponseType
     profile?: (profile: Profile) => DefaultUser | Promise<DefaultUser>

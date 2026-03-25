@@ -1,16 +1,16 @@
 import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
-import { createCSRF } from "@/security.ts"
-import { cacheControl } from "@/lib/headers.ts"
-import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/lib/assert.ts"
+import { createCSRF } from "@/shared/security.ts"
+import { cacheControl } from "@/shared/headers.ts"
+import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { OAuthAuthorizationErrorResponse } from "@/schemas.ts"
-import { AuthSecurityError, OAuthProtocolError } from "@/lib/errors.ts"
+import { AuthSecurityError, OAuthProtocolError } from "@/shared/errors.ts"
 import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
 import { getCookie, expiredCookieAttributes } from "@/cookie.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
-import { timingSafeEqual } from "@/lib/utils.ts"
+import { timingSafeEqual } from "@/shared/utils.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/callback/:oauth", {

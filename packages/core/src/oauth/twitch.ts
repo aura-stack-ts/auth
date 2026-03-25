@@ -1,4 +1,4 @@
-import { getEnv } from "@/env.ts"
+import { getEnv } from "@/shared/env.ts"
 import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**

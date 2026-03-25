@@ -1,4 +1,4 @@
-import { equals, patternToRegex } from "@/lib/utils.ts"
+import { equals, patternToRegex } from "@/shared/utils.ts"
 import type { JWTConfig, JWTMode, JWTPayloadWithToken, SessionConfig } from "@/@types/index.ts"
 
 export const isFalsy = (value: unknown): boolean => {

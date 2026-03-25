@@ -1,6 +1,6 @@
 export { createAuth } from "@/createAuth.ts"
 export { createJoseInstance } from "@/jose.ts"
-export { createSyslogMessage } from "@/lib/logger.ts"
+export { createSyslogMessage } from "@/shared/logger.ts"
 export { builtInOAuthProviders } from "@/oauth/index.ts"
 export { createAuthClient, createClient } from "@/client/index.ts"
 

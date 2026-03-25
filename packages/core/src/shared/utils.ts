@@ -1,11 +1,9 @@
-import { getEnv } from "@/env.ts"
 import { encoder } from "@aura-stack/jose/crypto"
-import { AuthInternalError } from "@/lib/errors.ts"
-import { isRelativeURL, isValidURL } from "@/lib/assert.ts"
+import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
 import type { ZodError } from "zod"
 import type { APIErrorMap } from "@/@types/index.ts"
 
-export const AURA_AUTH_VERSION = "0.4.0"
+export const AURA_AUTH_VERSION = "0.5.0"
 
 export const equals = (a: string | number | undefined | null, b: string | number | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
@@ -17,11 +15,7 @@ export const getBaseURL = (request: Request) => {
     return `${url.origin}${url.pathname}`
 }
 
-export const toISOString = (date: Date | string | number): string => {
-    return new Date(date).toISOString()
-}
-
-export const useSecureCookies = (request: Request | Headers, trustedProxyHeaders: boolean): boolean => {
+export const isSecureConnection = (request: Request | Headers, trustedProxyHeaders: boolean): boolean => {
     const headers = request instanceof Headers ? request : request.headers
     const url = request instanceof Headers ? null : request.url
     return trustedProxyHeaders
@@ -53,28 +47,11 @@ export const extractPath = (url: string): string => {
     return match && match[2] ? match[2] : "/"
 }
 
-export const createStructuredData = (data: Record<string, string | number | boolean>, sdID = "metadata"): string => {
-    const entries = Object.entries(data)
-    if (entries.length === 0) return `[${sdID}]`
-    const values = entries.map(([key, value]) => `${key}="${String(value).replace(/(["\\\]])/g, "\\$1")}"`).join(" ")
-    return `[${sdID} ${values}]`
-}
-
 export const getErrorName = (error: unknown): string => {
     if (error instanceof Error) {
         return error.name
     }
     return typeof error === "string" ? error : "UnknownError"
-}
-
-export const createBasicAuthHeader = (username: string, password: string): string => {
-    const getUsername = getEnv(username.toUpperCase()) ?? username
-    const getPassword = getEnv(password.toUpperCase()) ?? password
-    if (!getUsername || !getPassword) {
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing client credentials for OAuth provider configuration.")
-    }
-    const credentials = `${getUsername}:${getPassword}`
-    return `Basic ${btoa(credentials)}`
 }
 
 /**

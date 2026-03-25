@@ -1,6 +1,6 @@
-import { AuthSecurityError } from "@/lib/errors.ts"
-import { isJWTPayloadWithToken } from "@/lib/assert.ts"
-import { equals, timingSafeEqual } from "@/lib/utils.ts"
+import { AuthSecurityError } from "@/shared/errors.ts"
+import { isJWTPayloadWithToken } from "@/shared/assert.ts"
+import { equals, timingSafeEqual } from "@/shared/utils.ts"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import type { AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
 
@@ -42,11 +42,11 @@ export const createPKCE = async (verifier?: string) => {
  */
 export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: string) => {
     try {
-        const token = createSecretValue(32)
         if (csrfCookie) {
             await jose.verifyJWS(csrfCookie)
             return csrfCookie
         }
+        const token = createSecretValue(32)
         return jose.signJWS({ token })
     } catch {
         const token = createSecretValue(32)

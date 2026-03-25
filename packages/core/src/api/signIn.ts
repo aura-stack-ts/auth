@@ -1,6 +1,6 @@
-import { cacheControl } from "@/lib/headers.ts"
-import { AuthInternalError } from "@/lib/errors.ts"
+import { cacheControl } from "@/shared/headers.ts"
 import { HeadersBuilder } from "@aura-stack/router"
+import { AuthInternalError } from "@/shared/errors.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"
 import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInReturn } from "@/@types/index.ts"

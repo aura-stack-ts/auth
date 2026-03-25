@@ -1,6 +1,6 @@
 import { createEndpoint, HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders } from "@/lib/headers.ts"
-import { AuthInternalError } from "@/lib/errors.ts"
+import { secureApiHeaders } from "@/shared/headers.ts"
+import { AuthInternalError } from "@/shared/errors.ts"
 import { getSession } from "@/api/getSession.ts"
 import { expiredCookieAttributes } from "@/cookie.ts"
 

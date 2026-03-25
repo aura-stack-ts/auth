@@ -1,8 +1,8 @@
-import { fetchAsync } from "@/lib/fetch-async.ts"
-import { createSecretValue } from "@/security.ts"
-import { AURA_AUTH_VERSION } from "@/lib/utils.ts"
+import { fetchAsync } from "@/shared/fetch-async.ts"
+import { createSecretValue } from "@/shared/security.ts"
+import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
-import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/lib/errors.ts"
+import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/shared/errors.ts"
 import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**

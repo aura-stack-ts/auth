@@ -4,7 +4,7 @@
  * This modules re-exports OAuth providers available in Aura Auth to be used in the Auth instance configuration.
  */
 import { type LiteralUnion, type OAuthProviderCredentials } from "@/@types/index.ts"
-import { getEnv } from "@/env.ts"
+import { getEnv } from "@/shared/env.ts"
 import { github } from "./github.ts"
 import { bitbucket } from "./bitbucket.ts"
 import { figma } from "./figma.ts"
@@ -19,9 +19,9 @@ import { twitch } from "./twitch.ts"
 import { notion } from "./notion.ts"
 import { dropbox } from "./dropbox.ts"
 import { atlassian } from "./atlassian.ts"
+import { formatZodError } from "@/shared/utils.ts"
+import { AuthInternalError } from "@/shared/errors.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
-import { AuthInternalError } from "@/lib/errors.ts"
-import { formatZodError } from "@/lib/utils.ts"
 
 export * from "./github.ts"
 export * from "./bitbucket.ts"
@@ -130,6 +130,16 @@ export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuth
 
         return { ...previous, [oauthConfig.id]: oauthConfig }
     }, {}) as Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials<any>>
+}
+
+export const createBasicAuthHeader = (username: string, password: string): string => {
+    const getUsername = getEnv(username.toUpperCase()) ?? username
+    const getPassword = getEnv(password.toUpperCase()) ?? password
+    if (!getUsername || !getPassword) {
+        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing client credentials for OAuth provider configuration.")
+    }
+    const credentials = `${getUsername}:${getPassword}`
+    return `Basic ${btoa(credentials)}`
 }
 
 export type BuiltInOAuthProvider = keyof typeof builtInOAuthProviders
