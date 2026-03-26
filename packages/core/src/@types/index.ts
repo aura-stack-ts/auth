@@ -5,7 +5,6 @@ import type { Prettify } from "@/@types/utility.ts"
 import type { ClientOptions } from "@aura-stack/router"
 import type { createAuthInstance } from "@/createAuth.ts"
 
-export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 export type { TypedJWTPayload } from "@aura-stack/jose"
 
 export type * from "@/@types/config.ts"

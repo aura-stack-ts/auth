@@ -8,11 +8,13 @@ import type {
     AuthClient,
     SignInOptions,
     SignOutOptions,
+    User,
+    DeepPartial,
 } from "@/@types/index.ts"
 
 export const createClient = createClientAPI<AuthClient>
 
-export const createAuthClient = (options: AuthClientOptions) => {
+export const createAuthClient = <DefaultUser extends User = User>(options: AuthClientOptions) => {
     if (typeof window === "undefined" && !options.baseURL) {
         throw new AuthClientError("`baseURL` is required when createAuthClient is used outside the browser.")
     }
@@ -36,7 +38,7 @@ export const createAuthClient = (options: AuthClientOptions) => {
         }
     }
 
-    const getSession = async (): Promise<Session | null> => {
+    const getSession = async (): Promise<Session<DefaultUser> | null> => {
         try {
             const response = await client.get("/session")
             if (!response.ok) return null
@@ -100,9 +102,22 @@ export const createAuthClient = (options: AuthClientOptions) => {
         }
     }
 
+    const updateSession = async (session: DeepPartial<Session<DefaultUser>>) => {
+        const { sub: _sub, ...spread } = session.user as DefaultUser
+        const response = await client.patch("/session", {
+            body: {
+                ...spread,
+                expires: session.expires,
+            },
+        })
+        const json = await response.json()
+        return json
+    }
+
     return {
         getSession,
         signIn,
         signOut,
+        updateSession,
     }
 }

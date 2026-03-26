@@ -4,10 +4,12 @@ import { describe, test, expect } from "vitest"
 
 describe("updateSession action", () => {
     test("invalid session", async () => {
-        const response = await PATCH(new Request("http://localhost:3000/auth/session", {
-            method: "PATCH",
-            body: JSON.stringify({})
-        }))
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session", {
+                method: "PATCH",
+                body: JSON.stringify({}),
+            })
+        )
         expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             session: null,
@@ -31,14 +33,16 @@ describe("updateSession action", () => {
             image: "https://example.com/alicesmith-avatar.jpg",
         }
 
-        const response = await PATCH(new Request("http://localhost:3000/auth/session", {
-            method: "PATCH",
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                "Cookie": `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
-            },
-            body: JSON.stringify(newUser)
-        }))
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify(newUser),
+            })
+        )
         expect(response.status).toBe(200)
         expect(await response.json()).toEqual({
             session: {
@@ -53,7 +57,7 @@ describe("updateSession action", () => {
         })
     })
 
-    test("updates user session with missing csrf token", async () => {
+    test("rejects session update when X-CSRF-Token header is missing", async () => {
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
             name: "John Doe",
@@ -68,13 +72,15 @@ describe("updateSession action", () => {
             image: "https://example.com/alicesmith-avatar.jpg",
         }
 
-        const response = await PATCH(new Request("http://localhost:3000/auth/session", {
-            method: "PATCH",
-            headers: {
-                "Cookie": `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
-            },
-            body: JSON.stringify(newUser)
-        }))
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session", {
+                method: "PATCH",
+                headers: {
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify(newUser),
+            })
+        )
         expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             session: null,

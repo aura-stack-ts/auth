@@ -5,6 +5,7 @@ const AuthorizeConfigSchema = z.union([
     object({
         url: string().url(),
         params: object({
+            owner: string().optional(),
             responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
             scope: string().optional(),
         }),

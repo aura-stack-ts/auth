@@ -2,6 +2,8 @@ import type { User } from "@/@types/session.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 
+export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
+
 export type AuthorizeParams = LiteralUnion<
     "clientId" | "prompt" | "scope" | "responseMode" | "audience" | "loginHint" | "nonce" | "display"
 >

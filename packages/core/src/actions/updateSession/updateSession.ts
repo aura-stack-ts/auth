@@ -8,6 +8,7 @@ export const config = createEndpointConfig({
             name: z.string().optional(),
             email: z.email().optional(),
             image: z.string().optional(),
+            expires: z.string().optional(),
         }),
     },
 })

@@ -63,8 +63,7 @@ export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onErr
                 { status: 400 }
             )
         }
-        console.error("Unexpected error in router:", error)
-        logger?.log("SERVER_ERROR")
+        logger?.log("SERVER_ERROR", { structuredData: { error_type: error.name, error_message: error.message } })
         return Response.json(
             { type: "SERVER_ERROR", code: "SERVER_ERROR", message: "An unexpected error occurred" },
             { status: 500 }

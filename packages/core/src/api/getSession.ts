@@ -1,12 +1,11 @@
 import { getErrorName } from "@/shared/utils.ts"
 import type { FunctionAPIContext, GetSessionAPIOptions, SessionResponse, User } from "@/@types/index.ts"
 
-const unauthorized: SessionResponse = { session: null, headers: new Headers(), authenticated: false }
-
 export const getSession = async <DefaultUser extends User = User>({
     ctx,
     headers: headersInit,
 }: FunctionAPIContext<GetSessionAPIOptions>): Promise<SessionResponse<DefaultUser>> => {
+    const unauthorized: SessionResponse<DefaultUser> = { session: null, headers: new Headers(), authenticated: false }
     try {
         const { session, headers } = await ctx.sessionStrategy.getSession(new Headers(headersInit))
         if (!session) return unauthorized
