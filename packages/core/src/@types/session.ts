@@ -1,5 +1,7 @@
 import type { TypedJWTPayload } from "@aura-stack/jose"
+import type { ZodObject } from "zod/v4"
 import type { CookieStoreConfig, InternalLogger, JoseInstance, RouterGlobalContext } from "@/@types/config.ts"
+import type { UserIdentityType } from "@/shared/identity.ts"
 
 /**
  * Standardized user profile returned by OAuth providers after fetching user information
@@ -216,18 +218,26 @@ export interface GetSessionReturn<DefaultUser extends User = User> {
     headers: Headers
 }
 
-export interface CreateSessionStrategyOptions<DefaultUser extends User = User> {
+export interface CreateSessionStrategyOptions<DefaultUser extends UserIdentityType = UserIdentityType> {
     config?: SessionConfig
     jose: JoseInstance<DefaultUser>
     cookies: () => CookieStoreConfig
     logger?: InternalLogger
+    identity: {
+        schema: ZodObject<any>
+        strict: boolean
+    }
 }
 
-export interface JWTStrategyOptions<DefaultUser extends User = User> {
+export interface JWTStrategyOptions<DefaultUser extends UserIdentityType = UserIdentityType> {
     config?: StatelessStrategyConfig
     jose: JoseInstance<DefaultUser>
     logger?: InternalLogger
     cookies: () => CookieStoreConfig
+    identity: {
+        schema: ZodObject<any>
+        strict: boolean
+    }
 }
 
 export interface SignInOptions {

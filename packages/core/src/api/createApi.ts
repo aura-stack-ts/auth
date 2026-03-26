@@ -13,10 +13,10 @@ import type {
     SignInReturn,
     SignOutAPIOptions,
     UpdateSessionAPIOptions,
-    User,
 } from "@/@types/index.ts"
+import { UserIdentityType } from "@/shared/identity.ts"
 
-export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContext) => {
+export const createAuthAPI = <DefaultUser extends UserIdentityType = UserIdentityType>(ctx: GlobalContext) => {
     return {
         getSession: async (options: GetSessionAPIOptions): Promise<SessionResponse<DefaultUser>> => {
             const session = await getSession<DefaultUser>({ ctx, headers: options.headers })

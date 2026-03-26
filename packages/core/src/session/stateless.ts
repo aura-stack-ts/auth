@@ -1,7 +1,7 @@
 import { getCookie } from "@/cookie.ts"
 import { verifyCSRF } from "@/shared/security.ts"
 import { getErrorName } from "@/shared/utils.ts"
-import { AuthSecurityError } from "@/shared/errors.ts"
+import { AuthInternalError, AuthSecurityError } from "@/shared/errors.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import type {
@@ -19,6 +19,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
     jose,
     logger,
     cookies,
+    identity,
 }: JWTStrategyOptions<DefaultUser>): SessionStrategy<DefaultUser> => {
     const jwt = createJoseManager<DefaultUser>(config?.jwt, jose)
     const cookieConfig = createCookieManager(cookies)
@@ -122,6 +123,13 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 ...user
             } = await jwt.verifyToken(sessionToken)
             if (!user.sub) return { session: null, headers: newHeaders }
+
+            const payload = await jwt.verifyToken(sessionToken)
+            const parsed = await identity.schema.safeParseAsync(payload)
+            if (!parsed.success) {
+                throw new Error("Identity validation failed: ")
+            }
+
             const session: Session<DefaultUser> = {
                 user: user as DefaultUser,
                 expires: exp ? new Date(exp * 1000).toISOString() : "",

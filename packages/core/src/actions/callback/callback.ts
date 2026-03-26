@@ -108,7 +108,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 }
             }
 
-            const userInfo = await getUserInfo(oauthConfig, accessToken.access_token, logger)
+            const userInfo = await getUserInfo(oauthConfig, accessToken.access_token, context.identity.schema, logger)
             const session = await context.sessionStrategy.createSession(userInfo)
             const csrfToken = await createCSRF(jose)
 

@@ -3,7 +3,9 @@ import { createSecretValue } from "@/shared/security.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/shared/errors.ts"
+import { validateUserIdentity } from "@/shared/identity.ts"
 import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.ts"
+import type { ZodObject } from "zod/v4"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response
@@ -29,9 +31,16 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
  *
  * @param oauthConfig - OAuth provider configuration
  * @param accessToken - Access Token to access the userinfo endpoint
+ * @param identitySchema - Optional Zod schema to validate the user identity
+ * @param logger - Optional logger instance
  * @returns The user information retrieved from the userinfo endpoint
  */
-export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string, logger?: InternalLogger) => {
+export const getUserInfo = async (
+    oauthConfig: OAuthProviderCredentials,
+    accessToken: string,
+    identitySchema?: ZodObject<any>,
+    logger?: InternalLogger
+) => {
     const userInfoConfig = oauthConfig.userInfo
     const userinfoURL = typeof userInfoConfig === "string" ? userInfoConfig : userInfoConfig.url
     const extraHeaders = typeof userInfoConfig === "string" ? undefined : userInfoConfig.headers
@@ -70,7 +79,15 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
             throw new OAuthProtocolError("INVALID_REQUEST", "An error was received from the OAuth userinfo endpoint.")
         }
         logger?.log("OAUTH_USERINFO_SUCCESS")
-        return oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
+
+        const userInfo = oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
+
+        // Validate user identity against the provided schema
+        if (identitySchema) {
+            return validateUserIdentity(identitySchema, userInfo, { logger })
+        }
+
+        return userInfo
     } catch (error) {
         if (isOAuthProtocolError(error)) {
             throw error

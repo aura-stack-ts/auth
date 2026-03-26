@@ -11,12 +11,16 @@ import {
     csrfTokenAction,
     updateSessionAction,
 } from "@/actions/index.ts"
-import type { AuthConfig, AuthInstance, User } from "@/@types/index.ts"
+import type { AuthConfig, AuthInstance } from "@/@types/index.ts"
+import z, { ZodObject, ZodRawShape } from "zod"
+import { UserIdentity } from "./shared/identity.ts"
 
-const createInternalConfig = <DefaultUser extends User = User>(authConfig?: AuthConfig<DefaultUser>): RouterConfig => {
-    const context = createContext<DefaultUser>(authConfig)
+const createInternalConfig = <IdentitySchema extends ZodObject<any> = ZodObject<any>>(
+    config?: AuthConfig<IdentitySchema>
+): RouterConfig => {
+    const context = createContext<IdentitySchema>(config)
     return {
-        basePath: authConfig?.basePath ?? "/auth",
+        basePath: config?.basePath ?? "/auth",
         onError: createErrorHandler(context.logger),
         context: context as unknown as RouterConfig["context"],
         use: [
@@ -29,30 +33,10 @@ const createInternalConfig = <DefaultUser extends User = User>(authConfig?: Auth
     }
 }
 
-/**
- * Creates the authentication instance with the configuration provided for OAuth provider.
- * > NOTE: The handlers returned by this function should be used in the server to handle the authentication routes
- * and within the `/auth` base path
- *
- * @param authConfig - Authentication configuration including OAuth provider
- * @returns Authentication instance with handlers to be used in the server
- * @example
- * const auth = createAuth({
- *   oauth: ["github", {
- *     id: "custom-oauth",
- *     name: "custom-oauth",
- *     authorizationURL: "https://custom-oauth.com/oauth/authorize",
- *     accessToken: "https://custom-oauth.com/oauth/token",
- *     scope: "profile email",
- *     responseType: "code",
- *     userInfo: "https://custom-oauth.com/api/userinfo",
- *     clientId: process.env.AURA_AUTH_CUSTOM_OAUTH_CLIENT_ID!,
- *     clientSecret: process.env.AURA_AUTH_CUSTOM_OAUTH_CLIENT_SECRET!,
- *   }]
- * })
- */
-export const createAuthInstance = <DefaultUser extends User = User>(authConfig: AuthConfig<DefaultUser>) => {
-    const config = createInternalConfig<DefaultUser>(authConfig)
+export const createAuthInstance = <IdentitySchema extends ZodObject<any> = ZodObject<any>>(
+    authConfig: AuthConfig<IdentitySchema>
+) => {
+    const config = createInternalConfig<IdentitySchema>(authConfig)
     const router = createRouter(
         [
             signInAction(config.context.oauth),
@@ -68,12 +52,39 @@ export const createAuthInstance = <DefaultUser extends User = User>(authConfig: 
     return {
         handlers: router,
         jose: config.context.jose,
-        api: createAuthAPI<DefaultUser>(config.context),
+        api: createAuthAPI(config.context),
     }
 }
 
-export const createAuth = <DefaultUser extends User = User>(config: AuthConfig<DefaultUser>) => {
-    const authInstance = createAuthInstance<DefaultUser>(config) as unknown as AuthInstance<DefaultUser>
+/**
+ * Creates the authentication instance with the configuration provided for OAuth provider.
+ * > NOTE: The handlers returned by this function should be used in the server to handle the authentication routes
+ * and within the `/auth` base path
+ *
+ * @param authConfig - Authentication configuration including OAuth provider
+ * @returns Authentication instance with handlers to be used in the server
+ * @example
+ * const auth = createAuth({
+ *   oauth: ["github", {
+ *     id: "custom-oauth",
+ *     name: "custom-oauth",
+ *     authorize: {
+ *       url: "https://custom-oauth.com/oauth/authorize",
+ *       params: { responseType: "code", scope: "profile email" },
+ *     },
+ *     accessToken: "https://custom-oauth.com/oauth/token",
+ *     userInfo: "https://custom-oauth.com/api/userinfo",
+ *     clientId: process.env.AURA_AUTH_CUSTOM_OAUTH_CLIENT_ID!,
+ *     clientSecret: process.env.AURA_AUTH_CUSTOM_OAUTH_CLIENT_SECRET!,
+ *   }]
+ * })
+ */
+//export const createAuth = <DefaultUser extends User = User>(config: AuthConfig<DefaultUser>) => {
+//export const createAuth = <Config extends AuthConfig<any>>(config: Config) => {
+export const createAuth = <IdentitySchema extends ZodObject<ZodRawShape> = typeof UserIdentity>(
+    config: AuthConfig<IdentitySchema & typeof UserIdentity>
+) => {
+    const authInstance = createAuthInstance<IdentitySchema>(config) as AuthInstance<z.infer<typeof UserIdentity>>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()
         const methodHandlers = {

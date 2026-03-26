@@ -1,6 +1,8 @@
 import { createJoseInstance } from "@/jose.ts"
-import { createLogEntry } from "@/shared/logger.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
+import { UserIdentity, UserIdentityType } from "@/shared/identity.ts"
+import { createLogEntry } from "@/shared/logger.ts"
+import type { ZodObject } from "zod/v4"
 import type { Prettify } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
@@ -11,7 +13,7 @@ import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/sess
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export interface AuthConfig<DefaultUser extends User = User> {
+export interface AuthConfig<IdentitySchema extends ZodObject = typeof UserIdentity> {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
@@ -38,7 +40,7 @@ export interface AuthConfig<DefaultUser extends User = User> {
      *   }
      * ]
      */
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, DefaultUser>)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, any>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -115,6 +117,28 @@ export interface AuthConfig<DefaultUser extends User = User> {
      * Defines the session management strategy for Aura Auth. It determines how sessions are created, stored, and validated.
      */
     session?: SessionConfig
+
+    /**
+     * Identity schema configuration for user data validation.
+     * Allows you to define a custom Zod schema that will be used to validate:
+     * - OAuth provider profile data
+     * - Session user data
+     * - JWT payload data
+     *
+     * If not provided, the default `UserIdentity` schema will be used.
+     *
+     * @example
+     * identity: {
+     *   schema: z.object({
+     *     sub: z.string(),
+     *     email: z.string().email(),
+     *     name: z.string().optional(),
+     *     custom_field: z.string().optional(),
+     *   }),
+     *   strict: false, // Allow coercion and optional fields
+     * }
+     */
+    identity?: Partial<IdentityConfig<IdentitySchema>>
 }
 
 /**
@@ -204,15 +228,23 @@ export interface Logger {
     log?: (args: SyslogOptions) => void
 }
 
-export type AuthAPI<DefaultUser extends User = User> = ReturnType<typeof createAuthAPI<DefaultUser>>
-export type JoseInstance<DefaultUser extends User = User> = ReturnType<typeof createJoseInstance<DefaultUser>>
+export type AuthAPI<DefaultUser extends UserIdentityType = UserIdentityType> = ReturnType<typeof createAuthAPI<DefaultUser>>
+export type JoseInstance<DefaultUser extends UserIdentityType = UserIdentityType> = ReturnType<
+    typeof createJoseInstance<DefaultUser>
+>
 
 export interface InternalLogger {
     level: LogLevel
     log: typeof createLogEntry
 }
 
-export interface RouterGlobalContext<DefaultUser extends User = User> {
+//export interface IdentityConfig<Schema extends ZodObject<any> = typeof UserIdentity> {
+export interface IdentityConfig<Schema extends ZodObject<any> = ZodObject<any>> {
+    strict: boolean
+    schema: Schema
+}
+
+export interface RouterGlobalContext<DefaultUser extends UserIdentityType = UserIdentityType> {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
     jose: JoseInstance<DefaultUser>
@@ -223,15 +255,16 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
     sessionStrategy: SessionStrategy<DefaultUser>
+    identity: IdentityConfig
 }
 
 /**
  * Internal runtime configuration used within Aura Auth after initialization.
  * All optional fields from AuthConfig are resolved to their default values.
  */
-export type AuthRuntimeConfig<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser>
+export type AuthRuntimeConfig<DefaultUser extends UserIdentityType = UserIdentityType> = RouterGlobalContext<DefaultUser>
 
-export interface AuthInstance<DefaultUser extends User = User> {
+export interface AuthInstance<DefaultUser extends UserIdentityType = UserIdentityType> {
     api: AuthAPI<DefaultUser>
     jose: JoseInstance<DefaultUser>
     handlers: {
@@ -242,7 +275,7 @@ export interface AuthInstance<DefaultUser extends User = User> {
     }
 }
 
-export type InternalContext<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser> & {
+export type InternalContext<DefaultUser extends UserIdentityType = UserIdentityType> = RouterGlobalContext<DefaultUser> & {
     cookieConfig: {
         secure: CookieStoreConfig
         standard: CookieStoreConfig
