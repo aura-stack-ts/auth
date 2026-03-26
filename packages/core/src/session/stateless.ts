@@ -4,7 +4,15 @@ import { getErrorName } from "@/shared/utils.ts"
 import { AuthSecurityError } from "@/shared/errors.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
-import type { Session, SessionStrategy, User, TypedJWTPayload, JWTStrategyOptions, GetSessionReturn } from "@/@types/index.ts"
+import type {
+    Session,
+    SessionStrategy,
+    User,
+    TypedJWTPayload,
+    JWTStrategyOptions,
+    GetSessionReturn,
+    DeepPartial,
+} from "@/@types/index.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({
     config,
@@ -35,6 +43,65 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             }
             default:
                 return null
+        }
+    }
+
+    const verifyCSRFToken = async (headers: Headers, skipCSRFCheck: boolean = false): Promise<boolean> => {
+        let session = null
+        let csrfToken = null
+        const header = headers.get("X-CSRF-Token")
+        try {
+            session = getCookie(headers, cookies().sessionToken.name)
+        } catch {
+            throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
+        }
+        try {
+            csrfToken = getCookie(headers, cookies().csrfToken.name)
+        } catch {
+            throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
+        }
+        logger?.log("CSRF_TOKEN_REQUESTED", {
+            structuredData: {
+                has_session: Boolean(session),
+                has_csrf_token: Boolean(csrfToken),
+                has_csrf_header: Boolean(header),
+                skip_csrf_check: skipCSRFCheck,
+            },
+        })
+        if (!session) {
+            logger?.log("SESSION_TOKEN_MISSING")
+            throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
+        }
+        if (!skipCSRFCheck) {
+            if (!csrfToken) {
+                logger?.log("CSRF_TOKEN_MISSING")
+                throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
+            }
+            if (!header) {
+                logger?.log("CSRF_HEADER_MISSING")
+                throw new AuthSecurityError("CSRF_HEADER_MISSING", "The CSRF header is missing.")
+            }
+            try {
+                await verifyCSRF(jose, csrfToken, header)
+            } catch (error) {
+                logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
+                throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
+            }
+            logger?.log("CSRF_TOKEN_VERIFIED")
+        } else {
+            try {
+                await jose.verifyJWS(csrfToken)
+            } catch (error) {
+                logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
+                throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
+            }
+        }
+        try {
+            await jose.decodeJWT(session)
+            return true
+        } catch (error) {
+            logger?.log("INVALID_JWT_TOKEN", { structuredData: { error_type: getErrorName(error) } })
+            return false
         }
     }
 
@@ -82,69 +149,65 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
 
     const createSession = async (session: TypedJWTPayload<DefaultUser>) => jwt.createToken(session)
 
-    const refreshSession = async (_session: Session<DefaultUser>): Promise<Session<DefaultUser> | null> => {
-        return null
+    const refreshSession = async (
+        headers: Headers,
+        session: DeepPartial<Session<DefaultUser>>,
+        skipCSRFCheck: boolean = false
+    ): Promise<{
+        session: Session<DefaultUser> | null
+        headers: Headers
+    }> => {
+        try {
+            const { sessionToken } = cookieConfig.getCookie(headers)
+            if (!sessionToken) {
+                return { session: null, headers: cookieConfig.clear() }
+            }
+            const isValidToken = await verifyCSRFToken(headers, skipCSRFCheck)
+            if (!isValidToken) {
+                return { session: null, headers: cookieConfig.clear() }
+            }
+            const {
+                exp,
+                mexp,
+                sub,
+                iat,
+                jti: _jti,
+                nbf: _nbf,
+                aud: _aud,
+                iss: _iss,
+                ...user
+            } = await jwt.verifyToken(sessionToken)
+            const expiresAt = session.expires
+                ? new Date(session.expires)
+                : (updateExpires({ exp }) ?? new Date(Date.now() + maxAge * 1000))
+            const updatedSession: Session<DefaultUser> = {
+                user: {
+                    ...user,
+                    ...session.user,
+                    sub,
+                } as DefaultUser,
+                expires: expiresAt.toISOString(),
+            }
+            const issuedAt = strategy === "absolute" ? iat : Math.floor(Date.now() / 1000)
+            const newToken = await jwt.createToken({
+                ...updatedSession.user,
+                exp: Math.floor(expiresAt.getTime() / 1000),
+                iat: issuedAt,
+                mexp,
+            })
+            updatedSession.expires = new Date(updatedSession.expires).toISOString()
+            return { session: updatedSession, headers: cookieConfig.setCookie({ sessionToken: newToken }) }
+        } catch (error) {
+            logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
+            return { session: null, headers: cookieConfig.clear() }
+        }
     }
 
     // JWT strategy: stateless tokens cannot be revoked server-side
     const revokeSession = async (_sessionId: string): Promise<void> => {}
 
     const destroySession = async (headers: Headers, skipCSRFCheck: boolean = false) => {
-        let session = null
-        let csrfToken = null
-        const header = headers.get("X-CSRF-Token")
-        try {
-            session = getCookie(headers, cookies().sessionToken.name)
-        } catch {
-            throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
-        }
-        try {
-            csrfToken = getCookie(headers, cookies().csrfToken.name)
-        } catch {
-            throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
-        }
-        logger?.log("SIGN_OUT_ATTEMPT", {
-            structuredData: {
-                has_session: Boolean(session),
-                has_csrf_token: Boolean(csrfToken),
-                has_csrf_header: Boolean(header),
-                skip_csrf_check: skipCSRFCheck,
-            },
-        })
-        if (!session) {
-            logger?.log("SESSION_TOKEN_MISSING")
-            throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
-        }
-        if (!skipCSRFCheck) {
-            if (!csrfToken) {
-                logger?.log("CSRF_TOKEN_MISSING")
-                throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
-            }
-            if (!header) {
-                logger?.log("CSRF_HEADER_MISSING")
-                throw new AuthSecurityError("CSRF_HEADER_MISSING", "The CSRF header is missing.")
-            }
-            try {
-                await verifyCSRF(jose, csrfToken, header)
-            } catch (error) {
-                logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
-                throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
-            }
-            logger?.log("SIGN_OUT_CSRF_VERIFIED")
-        } else {
-            try {
-                await jose.verifyJWS(csrfToken)
-            } catch (error) {
-                logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
-                throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
-            }
-        }
-        try {
-            await jose.decodeJWT(session)
-            logger?.log("SIGN_OUT_SUCCESS")
-        } catch (error) {
-            logger?.log("INVALID_JWT_TOKEN", { structuredData: { error_type: getErrorName(error) } })
-        }
+        await verifyCSRFToken(headers, skipCSRFCheck)
         return cookieConfig.clear()
     }
 

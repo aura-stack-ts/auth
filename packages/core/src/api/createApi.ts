@@ -1,6 +1,7 @@
 import { signIn } from "@/api/signIn.ts"
 import { signOut } from "@/api/signOut.ts"
 import { getSession } from "@/api/getSession.ts"
+import { updateSession } from "./updateSession.ts"
 import { validateRedirectTo } from "@/shared/utils.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type {
@@ -11,12 +12,14 @@ import type {
     SignInAPIOptions,
     SignInReturn,
     SignOutAPIOptions,
+    UpdateSessionAPIOptions,
+    User,
 } from "@/@types/index.ts"
 
-export const createAuthAPI = (ctx: GlobalContext) => {
+export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContext) => {
     return {
-        getSession: async (options: GetSessionAPIOptions): Promise<SessionResponse> => {
-            const session = await getSession({ ctx, headers: options.headers })
+        getSession: async (options: GetSessionAPIOptions): Promise<SessionResponse<DefaultUser>> => {
+            const session = await getSession<DefaultUser>({ ctx, headers: options.headers })
             return session
         },
         signIn: async <Redirect extends boolean = true>(
@@ -34,6 +37,14 @@ export const createAuthAPI = (ctx: GlobalContext) => {
         signOut: async (options: SignOutAPIOptions) => {
             const redirectTo = validateRedirectTo(options?.redirectTo ?? "/")
             return signOut({ ctx, headers: options.headers, redirectTo, skipCSRFCheck: true })
+        },
+        updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>) => {
+            return updateSession<DefaultUser>({
+                ctx,
+                headers: options.headers,
+                session: options.session,
+                skipCSRFCheck: options.skipCSRFCheck,
+            })
         },
     }
 }

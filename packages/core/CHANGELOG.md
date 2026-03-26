@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Introduced an experimental `/session` endpoint to update default session data from the initial OAuth profile data. It currently supports updates only for the `email`, `name`, and `image` fields. For broader claim support, use the experimental `api.updateSession` function. [#129](https://github.com/aura-stack-ts/auth/pull/129)
+
+- Introduced an experimental `updateSession` API to update default session data from the initial OAuth profile data. The function infers the user generic type provided in `createAuth` and offers autocomplete. For security, the `sub` value cannot be overridden. [#129](https://github.com/aura-stack-ts/auth/pull/129)
+
 - Introduced support for custom user type configuration across the authentication system and OAuth providers, enabling type-safe handling of extended user data in `jose` utilities and the `profile` field of providers such as `github`, `gitlab`, and `bitbucket`. [#127](https://github.com/aura-stack-ts/auth/pull/127)
 
 - Introduced JWT session expiration models within the session strategy system via the `expirationStrategy` option. This configuration enables flexible control over how session expiration is handled and updated over time. Supported models are `fixed`, `absolute`, `rolling`, and `sliding`. [#126](https://github.com/aura-stack-ts/auth/pull/126)

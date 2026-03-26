@@ -164,6 +164,10 @@ export type StatelessStrategyConfig = {
  */
 export type SessionConfig = StatelessStrategyConfig
 
+export type DeepPartial<T> = {
+    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+}
+
 /**
  * Abstraction layer for session management.
  */
@@ -184,7 +188,14 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Attempt to refresh using the refresh token cookie.
      * Returns null session + cookie-clearing response on any failure.
      */
-    refreshSession(session: Session<DefaultUser>): Promise<Session<DefaultUser> | null>
+    refreshSession(
+        headers: Headers,
+        session: DeepPartial<Session<DefaultUser>>,
+        skipCSRFCheck?: boolean
+    ): Promise<{
+        session: Session<DefaultUser> | null
+        headers: Headers
+    }>
 
     /**
      * Revoke a session by ID.
@@ -254,11 +265,21 @@ export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends 
     ? Response
     : { redirect: false; signInURL: string }
 
-export type SessionResponse =
-    | { session: Session; headers: Headers; authenticated: true }
+export type SessionResponse<DefaultUser extends User = User> =
+    | { session: Session<DefaultUser>; headers: Headers; authenticated: true }
     | { session: null; headers: Headers; authenticated: false }
 
 export type JWTManager<DefaultUser extends User = User> = {
     createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
     verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }
+
+export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
+    headers: HeadersInit
+    session: DeepPartial<Session<DefaultUser>>
+    skipCSRFCheck?: boolean
+}
+
+export type UpdateSessionReturn<DefaultUser extends User = User> =
+    | { session: Session<DefaultUser>; headers: Headers; updated: true }
+    | { session: null; headers: Headers; updated: false }

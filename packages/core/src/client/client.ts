@@ -8,11 +8,13 @@ import type {
     AuthClient,
     SignInOptions,
     SignOutOptions,
+    User,
+    DeepPartial,
 } from "@/@types/index.ts"
 
 export const createClient = createClientAPI<AuthClient>
 
-export const createAuthClient = (options: AuthClientOptions) => {
+export const createAuthClient = <DefaultUser extends User = User>(options: AuthClientOptions) => {
     if (typeof window === "undefined" && !options.baseURL) {
         throw new AuthClientError("`baseURL` is required when createAuthClient is used outside the browser.")
     }
@@ -36,7 +38,7 @@ export const createAuthClient = (options: AuthClientOptions) => {
         }
     }
 
-    const getSession = async (): Promise<Session | null> => {
+    const getSession = async (): Promise<Session<DefaultUser> | null> => {
         try {
             const response = await client.get("/session")
             if (!response.ok) return null
@@ -100,9 +102,39 @@ export const createAuthClient = (options: AuthClientOptions) => {
         }
     }
 
+    const updateSession = async (session: DeepPartial<Session<DefaultUser>>) => {
+        try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
+            }
+            const { sub: _sub, ...spread } = (session.user ?? {}) as DefaultUser
+            const response = await client.patch("/session", {
+                body: {
+                    ...spread,
+                    expires: session.expires,
+                },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            if (!response.ok) {
+                return { session: null, updated: false }
+            }
+            const json = await response.json()
+            return json
+        } catch (error) {
+            console.error("Error updating session:", error)
+            throw isNativeError(error)
+                ? error
+                : new AuthClientError("Session update failed.", "The session update request failed.", { cause: error })
+        }
+    }
+
     return {
         getSession,
         signIn,
         signOut,
+        updateSession,
     }
 }

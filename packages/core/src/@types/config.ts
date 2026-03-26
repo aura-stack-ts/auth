@@ -204,7 +204,7 @@ export interface Logger {
     log?: (args: SyslogOptions) => void
 }
 
-export type AuthAPI = ReturnType<typeof createAuthAPI>
+export type AuthAPI<DefaultUser extends User = User> = ReturnType<typeof createAuthAPI<DefaultUser>>
 export type JoseInstance<DefaultUser extends User = User> = ReturnType<typeof createJoseInstance<DefaultUser>>
 
 export interface InternalLogger {
@@ -232,11 +232,12 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
 export type AuthRuntimeConfig<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser>
 
 export interface AuthInstance<DefaultUser extends User = User> {
-    api: AuthAPI
+    api: AuthAPI<DefaultUser>
     jose: JoseInstance<DefaultUser>
     handlers: {
         GET: (request: Request) => Response | Promise<Response>
         POST: (request: Request) => Response | Promise<Response>
+        PATCH: (request: Request) => Response | Promise<Response>
         ALL: (request: Request) => Response | Promise<Response>
     }
 }

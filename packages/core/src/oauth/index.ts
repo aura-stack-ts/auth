@@ -127,19 +127,8 @@ export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuth
                 `Duplicate OAuth provider id "${oauthConfig.id}" found. Each provider must have a unique id.`
             )
         }
-
         return { ...previous, [oauthConfig.id]: oauthConfig }
     }, {}) as Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials<any>>
-}
-
-export const createBasicAuthHeader = (username: string, password: string): string => {
-    const getUsername = getEnv(username.toUpperCase()) ?? username
-    const getPassword = getEnv(password.toUpperCase()) ?? password
-    if (!getUsername || !getPassword) {
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing client credentials for OAuth provider configuration.")
-    }
-    const credentials = `${getUsername}:${getPassword}`
-    return `Basic ${btoa(credentials)}`
 }
 
 export type BuiltInOAuthProvider = keyof typeof builtInOAuthProviders

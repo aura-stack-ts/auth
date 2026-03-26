@@ -3,7 +3,14 @@ import { createAuthAPI } from "@/api/createApi.ts"
 import { createContext } from "@/router/context.ts"
 import { isSecureConnection } from "@/shared/utils.ts"
 import { createErrorHandler } from "@/router/errorHandler.ts"
-import { signInAction, callbackAction, sessionAction, signOutAction, csrfTokenAction } from "@/actions/index.ts"
+import {
+    signInAction,
+    callbackAction,
+    sessionAction,
+    signOutAction,
+    csrfTokenAction,
+    updateSessionAction,
+} from "@/actions/index.ts"
 import type { AuthConfig, AuthInstance, User } from "@/@types/index.ts"
 
 const createInternalConfig = <DefaultUser extends User = User>(authConfig?: AuthConfig<DefaultUser>): RouterConfig => {
@@ -47,14 +54,21 @@ const createInternalConfig = <DefaultUser extends User = User>(authConfig?: Auth
 export const createAuthInstance = <DefaultUser extends User = User>(authConfig: AuthConfig<DefaultUser>) => {
     const config = createInternalConfig<DefaultUser>(authConfig)
     const router = createRouter(
-        [signInAction(config.context.oauth), callbackAction(config.context.oauth), sessionAction, signOutAction, csrfTokenAction],
+        [
+            signInAction(config.context.oauth),
+            callbackAction(config.context.oauth),
+            sessionAction,
+            signOutAction,
+            csrfTokenAction,
+            updateSessionAction,
+        ],
         config
     )
 
     return {
         handlers: router,
         jose: config.context.jose,
-        api: createAuthAPI(config.context),
+        api: createAuthAPI<DefaultUser>(config.context),
     }
 }
 
@@ -65,6 +79,7 @@ export const createAuth = <DefaultUser extends User = User>(config: AuthConfig<D
         const methodHandlers = {
             GET: authInstance.handlers.GET,
             POST: authInstance.handlers.POST,
+            PATCH: authInstance.handlers.PATCH,
         } as const
         if (method in methodHandlers) {
             return await methodHandlers[method as keyof typeof methodHandlers](request)

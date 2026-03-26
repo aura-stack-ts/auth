@@ -1,4 +1,6 @@
+import { getEnv } from "@/shared/env.ts"
 import { encoder } from "@aura-stack/jose/crypto"
+import { AuthInternalError } from "@/shared/errors.ts"
 import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
 import type { ZodError } from "zod"
 import type { APIErrorMap } from "@/@types/index.ts"
@@ -103,4 +105,15 @@ export const timingSafeEqual = (a: string, b: string): boolean => {
         diff |= (bufferA[i] ?? 0) ^ (bufferB[i] ?? 0)
     }
     return diff === 0 && bufferA.length === bufferB.length
+}
+
+export const createBasicAuthHeader = (username: string, password: string): string => {
+    const getUsername = getEnv(username) ?? username
+    const getPassword = getEnv(password) ?? password
+    if (!getUsername || !getPassword) {
+        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing client credentials for OAuth provider configuration.")
+    }
+    const credentials = `${getUsername}:${getPassword}`
+    const binaryCredentials = String.fromCharCode.apply(null, Array.from(encoder.encode(credentials)))
+    return `Basic ${btoa(binaryCredentials)}`
 }
