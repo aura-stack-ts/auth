@@ -272,6 +272,12 @@ export const logMessages = {
         msgId: "AUTH_SECURITY_ERROR",
         message: "An authentication security error occurred",
     },
+    CSRF_TOKEN_VERIFIED: {
+        facility: 4,
+        severity: "info",
+        msgId: "CSRF_TOKEN_VERIFIED",
+        message: "CSRF token verification succeeded",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

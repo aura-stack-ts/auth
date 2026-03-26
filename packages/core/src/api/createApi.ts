@@ -1,6 +1,7 @@
 import { signIn } from "@/api/signIn.ts"
 import { signOut } from "@/api/signOut.ts"
 import { getSession } from "@/api/getSession.ts"
+import { updateSession } from "./updateSession.ts"
 import { validateRedirectTo } from "@/shared/utils.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type {
@@ -11,6 +12,7 @@ import type {
     SignInAPIOptions,
     SignInReturn,
     SignOutAPIOptions,
+    UpdateSessionAPIOptions,
 } from "@/@types/index.ts"
 
 export const createAuthAPI = (ctx: GlobalContext) => {
@@ -34,6 +36,9 @@ export const createAuthAPI = (ctx: GlobalContext) => {
         signOut: async (options: SignOutAPIOptions) => {
             const redirectTo = validateRedirectTo(options?.redirectTo ?? "/")
             return signOut({ ctx, headers: options.headers, redirectTo, skipCSRFCheck: true })
+        },
+        updateSession: async (options: UpdateSessionAPIOptions) => {
+            return updateSession({ ctx, headers: options.headers, session: options.session })
         },
     }
 }

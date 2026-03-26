@@ -164,6 +164,10 @@ export type StatelessStrategyConfig = {
  */
 export type SessionConfig = StatelessStrategyConfig
 
+export type DeepPartial<T> = {
+    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+}
+
 /**
  * Abstraction layer for session management.
  */
@@ -186,7 +190,8 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      */
     refreshSession(
         headers: Headers,
-        session: Session<DefaultUser>
+        session: DeepPartial<Session<DefaultUser>>,
+        skipCSRFCheck?: boolean
     ): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
@@ -271,5 +276,6 @@ export type JWTManager<DefaultUser extends User = User> = {
 
 export interface UpdateSessionAPIOptions {
     headers: HeadersInit
-    session: Session
+    session: DeepPartial<Session>
+    skipCSRFCheck?: boolean
 }
