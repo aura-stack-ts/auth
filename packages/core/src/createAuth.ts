@@ -54,7 +54,7 @@ export const createAuthInstance = <DefaultUser extends User = User>(authConfig: 
     return {
         handlers: router,
         jose: config.context.jose,
-        api: createAuthAPI(config.context),
+        api: createAuthAPI<DefaultUser>(config.context),
     }
 }
 

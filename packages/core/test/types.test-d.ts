@@ -1,7 +1,8 @@
 import { describe, expectTypeOf } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { AuthConfig, AuthInstance, JoseInstance, OAuthProviderCredentials, User } from "@/index.ts"
-import { github, GitHubProfile } from "@/oauth/github.ts"
+import { github, type GitHubProfile } from "@/oauth/github.ts"
+import type { AuthConfig, AuthInstance, JoseInstance, OAuthProviderCredentials, User } from "@/index.ts"
+import type { GetSessionAPIOptions, SessionResponse, UpdateSessionAPIOptions, UpdateSessionReturn } from "@/@types/session.ts"
 
 describe("createAuth", () => {
     expectTypeOf(createAuth).parameter(0).toEqualTypeOf<AuthConfig>()
@@ -11,6 +12,19 @@ describe("createAuth", () => {
     expectTypeOf(createAuth<User & { role: string }>).returns.toEqualTypeOf<AuthInstance<User & { role: string }>>()
     expectTypeOf(createAuth<User & { role: string }>({ oauth: [] })["jose"]).toEqualTypeOf<
         JoseInstance<User & { role: string }>
+    >()
+    expectTypeOf(createAuth({ oauth: [] })["api"].getSession).toEqualTypeOf<
+        (options: GetSessionAPIOptions) => Promise<SessionResponse<User>>
+    >()
+    expectTypeOf(createAuth({ oauth: [] })["api"].updateSession).toEqualTypeOf<
+        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionReturn<User>>
+    >()
+
+    expectTypeOf(createAuth<User & { role: string }>({ oauth: [] })["api"].getSession).toEqualTypeOf<
+        (options: GetSessionAPIOptions) => Promise<SessionResponse<User & { role: string }>>
+    >()
+    expectTypeOf(createAuth<User & { role: string }>({ oauth: [] })["api"].updateSession).toEqualTypeOf<
+        (options: UpdateSessionAPIOptions<User & { role: string }>) => Promise<UpdateSessionReturn<User & { role: string }>>
     >()
 })
 

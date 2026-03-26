@@ -265,8 +265,8 @@ export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends 
     ? Response
     : { redirect: false; signInURL: string }
 
-export type SessionResponse =
-    | { session: Session; headers: Headers; authenticated: true }
+export type SessionResponse<DefaultUser extends User = User> =
+    | { session: Session<DefaultUser>; headers: Headers; authenticated: true }
     | { session: null; headers: Headers; authenticated: false }
 
 export type JWTManager<DefaultUser extends User = User> = {
@@ -274,8 +274,12 @@ export type JWTManager<DefaultUser extends User = User> = {
     verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }
 
-export interface UpdateSessionAPIOptions {
+export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
     headers: HeadersInit
-    session: DeepPartial<Session>
+    session: DeepPartial<Session<DefaultUser>>
     skipCSRFCheck?: boolean
 }
+
+export type UpdateSessionReturn<DefaultUser extends User = User> =
+    | { session: Session<DefaultUser>; headers: Headers; updated: true }
+    | { session: null; headers: Headers; updated: false }
