@@ -38,7 +38,7 @@ export const sessionPayload: JWTPayload = {
 }
 
 export const {
-    handlers: { GET, POST },
+    handlers: { GET, POST, PATCH },
     jose,
     api,
 } = createAuth({

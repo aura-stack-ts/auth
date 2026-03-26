@@ -1,7 +1,6 @@
 import { z } from "zod/v4"
 import { updateSession } from "@/api/updateSession.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import type { RouterGlobalContext } from "@/@types/config.ts"
 
 export const config = createEndpointConfig({
     schemas: {
@@ -13,19 +12,18 @@ export const config = createEndpointConfig({
     },
 })
 
-export const update = createEndpoint(
+export const updateSessionAction = createEndpoint(
     "PATCH",
-    "/session/update",
+    "/session",
     async (ctx) => {
         const updated = await updateSession({
-            ctx: ctx as unknown as RouterGlobalContext,
+            ctx: ctx.context,
             headers: ctx.request.headers,
             session: {
                 user: ctx.body,
             },
-            skipCSRFCheck: false,
         })
-        return Response.json(updated)
+        return Response.json(updated, { status: updated.updated ? 200 : 401 })
     },
     config
 )

@@ -237,6 +237,7 @@ export interface AuthInstance<DefaultUser extends User = User> {
     handlers: {
         GET: (request: Request) => Response | Promise<Response>
         POST: (request: Request) => Response | Promise<Response>
+        PATCH: (request: Request) => Response | Promise<Response>
         ALL: (request: Request) => Response | Promise<Response>
     }
 }

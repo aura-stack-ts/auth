@@ -1,0 +1,85 @@
+import { createCSRF } from "@/shared/security.ts"
+import { jose, PATCH } from "@test/presets.ts"
+import { describe, test, expect } from "vitest"
+
+describe("updateSession action", () => {
+    test("invalid session", async () => {
+        const response = await PATCH(new Request("http://localhost:3000/auth/session", {
+            method: "PATCH",
+            body: JSON.stringify({})
+        }))
+        expect(response.status).toBe(401)
+        expect(await response.json()).toEqual({
+            session: null,
+            headers: {},
+            updated: false,
+        })
+    })
+
+    test("updates user session", async () => {
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const newUser = {
+            name: "Alice Smith",
+            email: "alicesmith@example.com",
+            image: "https://example.com/alicesmith-avatar.jpg",
+        }
+
+        const response = await PATCH(new Request("http://localhost:3000/auth/session", {
+            method: "PATCH",
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                "Cookie": `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+            body: JSON.stringify(newUser)
+        }))
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    ...newUser,
+                },
+                expires: expect.any(String),
+            },
+            headers: expect.any(Object),
+            updated: true,
+        })
+    })
+
+    test("updates user session with missing csrf token", async () => {
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const newUser = {
+            name: "Alice Smith",
+            email: "alicesmith@example.com",
+            image: "https://example.com/alicesmith-avatar.jpg",
+        }
+
+        const response = await PATCH(new Request("http://localhost:3000/auth/session", {
+            method: "PATCH",
+            headers: {
+                "Cookie": `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+            body: JSON.stringify(newUser)
+        }))
+        expect(response.status).toBe(401)
+        expect(await response.json()).toEqual({
+            session: null,
+            headers: {},
+            updated: false,
+        })
+    })
+})
