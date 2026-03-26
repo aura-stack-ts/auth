@@ -207,10 +207,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
     const revokeSession = async (_sessionId: string): Promise<void> => {}
 
     const destroySession = async (headers: Headers, skipCSRFCheck: boolean = false) => {
-        const isValidToken = await verifyCSRFToken(headers, skipCSRFCheck)
-        if (!isValidToken) {
-            return new Headers()
-        }
+        await verifyCSRFToken(headers, skipCSRFCheck)
         return cookieConfig.clear()
     }
 

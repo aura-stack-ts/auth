@@ -114,5 +114,6 @@ export const createBasicAuthHeader = (username: string, password: string): strin
         throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing client credentials for OAuth provider configuration.")
     }
     const credentials = `${getUsername}:${getPassword}`
-    return `Basic ${btoa(credentials)}`
+    const binaryCredentials = String.fromCharCode.apply(null, Array.from(encoder.encode(credentials)))
+    return `Basic ${btoa(binaryCredentials)}`
 }

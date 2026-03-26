@@ -103,15 +103,32 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
     }
 
     const updateSession = async (session: DeepPartial<Session<DefaultUser>>) => {
-        const { sub: _sub, ...spread } = session.user as DefaultUser
-        const response = await client.patch("/session", {
-            body: {
-                ...spread,
-                expires: session.expires,
-            },
-        })
-        const json = await response.json()
-        return json
+        try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
+            }
+            const { sub: _sub, ...spread } = (session.user ?? {}) as DefaultUser
+            const response = await client.patch("/session", {
+                body: {
+                    ...spread,
+                    expires: session.expires,
+                },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            if (!response.ok) {
+                return { session: null, updated: false }
+            }
+            const json = await response.json()
+            return json
+        } catch (error) {
+            console.error("Error updating session:", error)
+            throw isNativeError(error)
+                ? error
+                : new AuthClientError("Session update failed.", "The session update request failed.", { cause: error })
+        }
     }
 
     return {
