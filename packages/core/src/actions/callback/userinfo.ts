@@ -3,7 +3,6 @@ import { createSecretValue } from "@/shared/security.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/shared/errors.ts"
-import { validateUserIdentity } from "@/shared/identity.ts"
 import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.ts"
 import type { ZodObject } from "zod/v4"
 
@@ -38,7 +37,7 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
 export const getUserInfo = async (
     oauthConfig: OAuthProviderCredentials,
     accessToken: string,
-    identitySchema?: ZodObject<any>,
+    _identitySchema?: ZodObject<any>,
     logger?: InternalLogger
 ) => {
     const userInfoConfig = oauthConfig.userInfo
@@ -81,11 +80,6 @@ export const getUserInfo = async (
         logger?.log("OAUTH_USERINFO_SUCCESS")
 
         const userInfo = oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
-
-        // Validate user identity against the provided schema
-        if (identitySchema) {
-            return validateUserIdentity(identitySchema, userInfo, { logger })
-        }
 
         return userInfo
     } catch (error) {

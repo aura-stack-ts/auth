@@ -111,7 +111,8 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             const { sub: _sub, ...spread } = (session.user ?? {}) as DefaultUser
             const response = await client.patch("/session", {
                 body: {
-                    ...spread,
+                    /** @todo: Remove the `as any` cast once the session update endpoint is properly typed to accept partial session updates. */
+                    ...(spread as any),
                     expires: session.expires,
                 },
                 headers: {

@@ -11,14 +11,14 @@ import {
     csrfTokenAction,
     updateSessionAction,
 } from "@/actions/index.ts"
-import type { AuthConfig, AuthInstance } from "@/@types/index.ts"
-import z, { ZodObject, ZodRawShape } from "zod"
-import { UserIdentity } from "./shared/identity.ts"
+import type { UserIdentity } from "@/shared/identity.ts"
+import type { infer as Infer, ZodObject, ZodRawShape } from "zod/v4"
+import type { AuthConfig, AuthInstance, User } from "@/@types/index.ts"
 
-const createInternalConfig = <IdentitySchema extends ZodObject<any> = ZodObject<any>>(
-    config?: AuthConfig<IdentitySchema>
+const createInternalConfig = <Identity extends ZodObject<ZodRawShape> = ZodObject<any>>(
+    config?: AuthConfig<Identity>
 ): RouterConfig => {
-    const context = createContext<IdentitySchema>(config)
+    const context = createContext<Identity>(config)
     return {
         basePath: config?.basePath ?? "/auth",
         onError: createErrorHandler(context.logger),
@@ -33,10 +33,8 @@ const createInternalConfig = <IdentitySchema extends ZodObject<any> = ZodObject<
     }
 }
 
-export const createAuthInstance = <IdentitySchema extends ZodObject<any> = ZodObject<any>>(
-    authConfig: AuthConfig<IdentitySchema>
-) => {
-    const config = createInternalConfig<IdentitySchema>(authConfig)
+export const createAuthInstance = <Identity extends ZodObject<any> = ZodObject<any>>(authConfig: AuthConfig<Identity>) => {
+    const config = createInternalConfig<Identity>(authConfig)
     const router = createRouter(
         [
             signInAction(config.context.oauth),
@@ -79,12 +77,13 @@ export const createAuthInstance = <IdentitySchema extends ZodObject<any> = ZodOb
  *   }]
  * })
  */
-//export const createAuth = <DefaultUser extends User = User>(config: AuthConfig<DefaultUser>) => {
-//export const createAuth = <Config extends AuthConfig<any>>(config: Config) => {
-export const createAuth = <IdentitySchema extends ZodObject<ZodRawShape> = typeof UserIdentity>(
-    config: AuthConfig<IdentitySchema & typeof UserIdentity>
+export const createAuth = <
+    Identity extends ZodObject<any> = typeof UserIdentity,
+    Plain extends Infer<Identity> & User = Infer<Identity> & User,
+>(
+    config: AuthConfig<Identity>
 ) => {
-    const authInstance = createAuthInstance<IdentitySchema>(config) as AuthInstance<z.infer<typeof UserIdentity>>
+    const authInstance = createAuthInstance<Identity>(config) as AuthInstance<Plain>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()
         const methodHandlers = {

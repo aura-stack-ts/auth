@@ -1,8 +1,9 @@
 import { describe, test, expect } from "vitest"
+import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/presets.ts"
 import { createCSRF } from "@/shared/security.ts"
-import type { User } from "@/index.ts"
+import { UserIdentity } from "@/shared/identity.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
@@ -93,8 +94,14 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with generic user type", async () => {
-        const { jose, api } = createAuth<User & { role: string; department: string }>({
+        const { jose, api } = createAuth({
             oauth: [],
+            identity: {
+                schema: UserIdentity.extend({
+                    role: z.string(),
+                    department: z.string(),
+                }),
+            },
         })
 
         const sessionToken = await jose.encodeJWT({

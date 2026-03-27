@@ -1,3 +1,4 @@
+import { ZodObject } from "zod"
 import { getEnv, getEnvBoolean } from "@/shared/env.ts"
 import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
 
@@ -359,7 +360,7 @@ export const createLogger = (logger?: Required<Logger>): InternalLogger | undefi
  * Creates the logger instance based on the provided configuration and environment variables.
  * Priority: config.logger, LOG_LEVEL env, DEBUG env and defaults to undefined if logging is not enabled.
  */
-export const createProxyLogger = (config?: AuthConfig) => {
+export const createProxyLogger = <Identity extends ZodObject = ZodObject>(config?: AuthConfig<Identity>) => {
     const level = getEnv("LOG_LEVEL")
     const debug = getEnvBoolean("DEBUG")
     if (typeof config?.logger === "object") {
