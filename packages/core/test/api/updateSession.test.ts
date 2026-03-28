@@ -1,8 +1,9 @@
 import { describe, test, expect } from "vitest"
+import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/presets.ts"
 import { createCSRF } from "@/shared/security.ts"
-import type { User } from "@/index.ts"
+import { UserIdentity } from "@/shared/identity.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
@@ -93,8 +94,14 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with generic user type", async () => {
-        const { jose, api } = createAuth<User & { role: string; department: string }>({
+        const { jose, api } = createAuth({
             oauth: [],
+            identity: {
+                schema: UserIdentity.extend({
+                    role: z.string(),
+                    department: z.string(),
+                }),
+            },
         })
 
         const sessionToken = await jose.encodeJWT({
@@ -125,6 +132,43 @@ describe("updateSession API", () => {
                     image: "https://example.com/johndoe-avatar.jpg",
                     role: "superadmin",
                     department: "Executive",
+                },
+                expires: expect.any(String),
+            },
+            headers: expect.any(Headers),
+            updated: true,
+        })
+    })
+
+    test("updates user session with invalid user data", async () => {
+        const { jose, api } = createAuth({
+            oauth: [],
+        })
+
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+
+        const csrfToken = await createCSRF(jose)
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: {
+                user: { role: "superadmin", money: "100000" } as any,
+            },
+            skipCSRFCheck: true,
+        })
+        expect(updated).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    name: "John Doe",
+                    email: "johndoe@example.com",
+                    image: "https://example.com/johndoe-avatar.jpg",
                 },
                 expires: expect.any(String),
             },

@@ -1,13 +1,15 @@
 import { AuthInvalidConfigurationError } from "@/shared/errors.ts"
 import { createStatelessStrategy } from "@/session/stateless.ts"
-import type { CreateSessionStrategyOptions, SessionStrategy, User } from "@/@types/session.ts"
+import type { CreateSessionStrategyOptions, SessionStrategy, User, UserShape } from "@/@types/session.ts"
+import { EditableShape, ShapeToObject } from "@/@types/utility.ts"
 
-export const createSessionStrategy = <DefaultUser extends User = User>({
+export const createSessionStrategy = <Identity extends EditableShape<UserShape>>({
     config,
     jose,
     cookies,
     logger,
-}: CreateSessionStrategyOptions<DefaultUser>): SessionStrategy<DefaultUser> => {
+    identity,
+}: CreateSessionStrategyOptions<Identity>): SessionStrategy<ShapeToObject<Identity> & User> => {
     const strategy = config?.strategy ?? "jwt"
 
     switch (strategy) {
@@ -17,6 +19,7 @@ export const createSessionStrategy = <DefaultUser extends User = User>({
                 config,
                 cookies,
                 logger,
+                identity,
             })
         default:
             throw new AuthInvalidConfigurationError(`[auth] unknown session strategy "${strategy}". Valid options are: "jwt".`)

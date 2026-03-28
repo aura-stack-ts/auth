@@ -13,17 +13,20 @@ import type {
     GetSessionReturn,
     DeepPartial,
 } from "@/@types/index.ts"
+import { createSchemaRegistry } from "@/schema-registry.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({
     config,
     jose,
     logger,
     cookies,
+    identity,
 }: JWTStrategyOptions<DefaultUser>): SessionStrategy<DefaultUser> => {
     const jwt = createJoseManager<DefaultUser>(config?.jwt, jose)
     const cookieConfig = createCookieManager(cookies)
     const maxAge = config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = config?.jwt?.expirationStrategy ?? "absolute"
+    const schema = createSchemaRegistry(identity)
 
     const updateExpires = ({ exp }: { exp: number | undefined }): Date | null => {
         if (!exp) return null
@@ -122,23 +125,35 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 ...user
             } = await jwt.verifyToken(sessionToken)
             if (!user.sub) return { session: null, headers: newHeaders }
+
             const session: Session<DefaultUser> = {
                 user: user as DefaultUser,
                 expires: exp ? new Date(exp * 1000).toISOString() : "",
             }
 
             const expiresAt = updateExpires({ exp })
-            if (!expiresAt) return { session, headers: newHeaders }
+            if (!expiresAt) {
+                const userSession = identity.skipValidation
+                    ? session.user
+                    : await schema.parse<TypedJWTPayload<DefaultUser>>(session.user)
+                return { session: { expires: session.expires, user: userSession }, headers }
+            }
 
-            const newSession = { ...session, expires: expiresAt.toISOString() }
+            const newSessionPayload = identity.skipValidation
+                ? session.user
+                : await schema.parse<TypedJWTPayload<DefaultUser>>(session.user)
+            const newSession = { user: newSessionPayload, expires: expiresAt.toISOString() }
+
+            const issuedAt = strategy === "absolute" ? _iat : Math.floor(Date.now() / 1000)
             const newSessionToken = await jwt.createToken({
-                ...(user as DefaultUser),
+                ...newSessionPayload,
                 exp: Math.floor(expiresAt.getTime() / 1000),
+                iat: issuedAt,
                 mexp,
             })
             logger?.log("SESSION_REFRESHED", { structuredData: { strategy: "stateless", expiresAt: expiresAt.toISOString() } })
             return {
-                session: newSession,
+                session: newSession as unknown as Session<DefaultUser>,
                 headers: cookieConfig.setCookie({ sessionToken: newSessionToken }),
             }
         } catch (error) {
@@ -147,7 +162,17 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         }
     }
 
-    const createSession = async (session: TypedJWTPayload<DefaultUser>) => jwt.createToken(session)
+    const createSession = async (session: TypedJWTPayload<DefaultUser>) => {
+        if (identity.skipValidation) {
+            logger?.log("IDENTITY_VALIDATION_DISABLED", {
+                structuredData: {
+                    identity_validation_disabled: true,
+                },
+            })
+        }
+        const payload = identity.skipValidation ? session : await schema.parse<TypedJWTPayload<DefaultUser>>(session)
+        return jwt.createToken(payload)
+    }
 
     const refreshSession = async (
         headers: Headers,
@@ -166,24 +191,18 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             if (!isValidToken) {
                 return { session: null, headers: cookieConfig.clear() }
             }
-            const {
-                exp,
-                mexp,
-                sub,
-                iat,
-                jti: _jti,
-                nbf: _nbf,
-                aud: _aud,
-                iss: _iss,
-                ...user
-            } = await jwt.verifyToken(sessionToken)
+            const verifiedToken = await jwt.verifyToken(sessionToken)
+            const { exp, mexp, sub, iat } = verifiedToken
+            const defaultPayload = identity.skipValidation ? verifiedToken : await schema.parse(verifiedToken)
+            const sessionPayload = identity.skipValidation ? session.user : await schema.parseAsPartial(session.user)
+
             const expiresAt = session.expires
                 ? new Date(session.expires)
                 : (updateExpires({ exp }) ?? new Date(Date.now() + maxAge * 1000))
             const updatedSession: Session<DefaultUser> = {
                 user: {
-                    ...user,
-                    ...session.user,
+                    ...defaultPayload,
+                    ...sessionPayload,
                     sub,
                 } as DefaultUser,
                 expires: expiresAt.toISOString(),

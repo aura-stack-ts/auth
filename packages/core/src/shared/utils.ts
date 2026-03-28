@@ -2,7 +2,7 @@ import { getEnv } from "@/shared/env.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuthInternalError } from "@/shared/errors.ts"
 import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
-import type { ZodError } from "zod"
+import type { ZodError } from "zod/v4"
 import type { APIErrorMap } from "@/@types/index.ts"
 
 export const AURA_AUTH_VERSION = "0.5.0"

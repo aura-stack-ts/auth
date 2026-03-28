@@ -40,7 +40,7 @@ describe("updateSession action", () => {
                     "X-CSRF-Token": csrfToken,
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
-                body: JSON.stringify(newUser),
+                body: JSON.stringify({ user: newUser }),
             })
         )
         expect(response.status).toBe(200)
@@ -78,7 +78,7 @@ describe("updateSession action", () => {
                 headers: {
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
-                body: JSON.stringify(newUser),
+                body: JSON.stringify({ user: newUser }),
             })
         )
         expect(response.status).toBe(401)
@@ -86,6 +86,48 @@ describe("updateSession action", () => {
             session: null,
             headers: {},
             updated: false,
+        })
+    })
+
+    test("updates user session with stripped fields", async () => {
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const newUser = {
+            name: "Alice Smith",
+            email: "alicesmith@example.com",
+            image: "https://example.com/alicesmith-avatar.jpg",
+            role: "admin",
+            permissions: ["read", "write", "delete"],
+        }
+
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({ user: newUser }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            session: expect.objectContaining({
+                user: {
+                    sub: "1234567890",
+                    name: "Alice Smith",
+                    email: "alicesmith@example.com",
+                    image: "https://example.com/alicesmith-avatar.jpg",
+                },
+            }),
+            headers: expect.any(Object),
+            updated: true,
         })
     })
 })

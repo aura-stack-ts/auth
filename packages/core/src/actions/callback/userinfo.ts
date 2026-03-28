@@ -29,6 +29,7 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
  *
  * @param oauthConfig - OAuth provider configuration
  * @param accessToken - Access Token to access the userinfo endpoint
+ * @param logger - Optional logger instance
  * @returns The user information retrieved from the userinfo endpoint
  */
 export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string, logger?: InternalLogger) => {
@@ -70,7 +71,10 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
             throw new OAuthProtocolError("INVALID_REQUEST", "An error was received from the OAuth userinfo endpoint.")
         }
         logger?.log("OAUTH_USERINFO_SUCCESS")
-        return oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
+
+        const userInfo = oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
+
+        return userInfo
     } catch (error) {
         if (isOAuthProtocolError(error)) {
             throw error

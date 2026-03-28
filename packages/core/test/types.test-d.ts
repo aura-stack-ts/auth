@@ -1,30 +1,75 @@
 import { describe, expectTypeOf } from "vitest"
+import { z, ZodString } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
+import { UserIdentity } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
-import type { AuthConfig, AuthInstance, JoseInstance, OAuthProviderCredentials, User } from "@/index.ts"
-import type { GetSessionAPIOptions, SessionResponse, UpdateSessionAPIOptions, UpdateSessionReturn } from "@/@types/session.ts"
+import { JWTHeaderParameters, JWTVerifyOptions, TypedJWTPayload } from "@aura-stack/jose"
+import type { AuthConfig, AuthInstance, OAuthProviderCredentials, User } from "@/index.ts"
+import type {
+    GetSessionAPIOptions,
+    SessionResponse,
+    UpdateSessionAPIOptions,
+    UpdateSessionReturn,
+    UserShape,
+} from "@/@types/session.ts"
+import type { EditableShape, ShapeToObject } from "@/@types/utility.ts"
 
 describe("createAuth", () => {
-    expectTypeOf(createAuth).parameter(0).toEqualTypeOf<AuthConfig>()
     expectTypeOf(createAuth).toEqualTypeOf<
-        <DefaultUser extends User = User>(config: AuthConfig<DefaultUser>) => AuthInstance<DefaultUser>
+        <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => AuthInstance<ShapeToObject<Identity>>
     >()
-    expectTypeOf(createAuth<User & { role: string }>).returns.toEqualTypeOf<AuthInstance<User & { role: string }>>()
-    expectTypeOf(createAuth<User & { role: string }>({ oauth: [] })["jose"]).toEqualTypeOf<
-        JoseInstance<User & { role: string }>
+    expectTypeOf(createAuth({ oauth: [] }).api.getSession).toEqualTypeOf<
+        (options: GetSessionAPIOptions) => Promise<SessionResponse<ShapeToObject<UserShape>>>
     >()
-    expectTypeOf(createAuth({ oauth: [] })["api"].getSession).toEqualTypeOf<
-        (options: GetSessionAPIOptions) => Promise<SessionResponse<User>>
-    >()
-    expectTypeOf(createAuth({ oauth: [] })["api"].updateSession).toEqualTypeOf<
-        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionReturn<User>>
+    expectTypeOf(createAuth({ oauth: [] }).api.updateSession).toEqualTypeOf<
+        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionReturn<ShapeToObject<UserShape>>>
     >()
 
-    expectTypeOf(createAuth<User & { role: string }>({ oauth: [] })["api"].getSession).toEqualTypeOf<
-        (options: GetSessionAPIOptions) => Promise<SessionResponse<User & { role: string }>>
+    expectTypeOf(createAuth({ oauth: [] }).jose.signJWS).toEqualTypeOf<
+        (payload: TypedJWTPayload<Partial<User>>, options?: JWTHeaderParameters) => Promise<string>
     >()
-    expectTypeOf(createAuth<User & { role: string }>({ oauth: [] })["api"].updateSession).toEqualTypeOf<
-        (options: UpdateSessionAPIOptions<User & { role: string }>) => Promise<UpdateSessionReturn<User & { role: string }>>
+    expectTypeOf(createAuth({ oauth: [] }).jose.verifyJWS).toEqualTypeOf<
+        (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<ShapeToObject<UserShape>>>
+    >()
+
+    expectTypeOf(
+        createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).jose.signJWS
+    ).toEqualTypeOf<
+        (
+            payload: TypedJWTPayload<
+                Partial<
+                    {
+                        sub: string
+                        role: string
+                        name?: string | null | undefined
+                        image?: string | null | undefined
+                        email?: string | null | undefined
+                    } & {
+                        sub: string
+                        name?: string | null | undefined
+                        image?: string | null | undefined
+                        email?: string | null | undefined
+                    }
+                >
+            >,
+            options?: JWTHeaderParameters
+        ) => Promise<string>
+    >()
+    expectTypeOf(
+        createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).jose.verifyJWS
+    ).toEqualTypeOf<
+        (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<ShapeToObject<UserShape & { role: ZodString }>>>
+    >()
+
+    expectTypeOf(
+        createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).api.getSession
+    ).toEqualTypeOf<(options: GetSessionAPIOptions) => Promise<SessionResponse<ShapeToObject<UserShape & { role: ZodString }>>>>()
+    expectTypeOf(
+        createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).api.updateSession
+    ).toEqualTypeOf<
+        (
+            options: UpdateSessionAPIOptions<ShapeToObject<UserShape & { role: ZodString }>>
+        ) => Promise<UpdateSessionReturn<ShapeToObject<UserShape & { role: ZodString }>>>
     >()
 })
 

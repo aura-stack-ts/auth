@@ -1,30 +1,35 @@
 import { z } from "zod/v4"
-import { updateSession } from "@/api/updateSession.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { updateSession } from "@/api/updateSession.ts"
+import type { User } from "@/@types/session.ts"
+import type { IdentityConfig } from "@/@types/config.ts"
 
-export const config = createEndpointConfig({
-    schemas: {
-        body: z.object({
-            name: z.string().optional(),
-            email: z.email().optional(),
-            image: z.string().optional(),
-            expires: z.string().optional(),
-        }),
-    },
-})
+export const config = (identity: IdentityConfig) => {
+    return createEndpointConfig({
+        schemas: {
+            body: z.object({
+                user: identity.schema?.partial().optional(),
+                expires: z.coerce.date().optional(),
+            }),
+        },
+    })
+}
 
-export const updateSessionAction = createEndpoint(
-    "PATCH",
-    "/session",
-    async (ctx) => {
-        const updated = await updateSession({
-            ctx: ctx.context,
-            headers: ctx.request.headers,
-            session: {
-                user: ctx.body,
-            },
-        })
-        return Response.json(updated, { status: updated.updated ? 200 : 401 })
-    },
-    config
-)
+export const updateSessionAction = (identity: IdentityConfig) => {
+    return createEndpoint(
+        "PATCH",
+        "/session",
+        async (ctx) => {
+            const updated = await updateSession({
+                ctx: ctx.context,
+                headers: ctx.request.headers,
+                session: {
+                    user: ctx.body.user as User,
+                    expires: ctx.body.expires?.toISOString(),
+                },
+            })
+            return Response.json(updated, { status: updated.updated ? 200 : 401 })
+        },
+        config(identity)
+    )
+}

@@ -1,29 +1,34 @@
 import { createJoseInstance } from "@/jose.ts"
-import { createLogEntry } from "@/shared/logger.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
-import type { Prettify } from "@/@types/utility.ts"
+import { createLogEntry } from "@/shared/logger.ts"
+import { UserIdentity } from "@/shared/identity.ts"
+import type { ZodObject } from "zod/v4"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
+import type { EditableShape, Prettify, ShapeToObject } from "@/@types/utility.ts"
+import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
+import type { JWTKey, SessionConfig, SessionStrategy, User, UserShape } from "@/@types/session.ts"
 
 /**
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export interface AuthConfig<DefaultUser extends User = User> {
+export interface AuthConfig<Identity extends EditableShape<UserShape> = EditableShape<UserShape>> {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
      * OAuth third-party authorization service by implementing the `OAuthProviderCredentials` interface.
      *
      * Built-in OAuth providers:
+     * ```ts
      * oauth: ["github", "google"]
-     *
+     * ```
      * Custom credentials via factory:
+     * ```ts
      * oauth: [github({ clientId: "...", clientSecret: "..." })]
-     *
+     * ```
      * Custom OAuth providers:
+     * ```ts
      * oauth: [
      *   {
      *     id: "oauth-providers",
@@ -37,8 +42,10 @@ export interface AuthConfig<DefaultUser extends User = User> {
      *     clientSecret: process.env.AURA_AUTH_PROVIDER_CLIENT_SECRET,
      *   }
      * ]
+     * ```
      */
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, DefaultUser>)[]
+    // @todo: add type inference for built-in providers
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, ShapeToObject<Identity>>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -115,6 +122,33 @@ export interface AuthConfig<DefaultUser extends User = User> {
      * Defines the session management strategy for Aura Auth. It determines how sessions are created, stored, and validated.
      */
     session?: SessionConfig
+
+    /**
+     * Identity schema configuration for user data validation.
+     * Allows you to define a custom Zod schema that will be used to validate:
+     * - OAuth provider profile data
+     * - Session user data
+     * - JWT payload data
+     *
+     * If not provided, the default `UserIdentity` schema will be used.
+     *
+     * @example
+     * identity: {
+     *   schema: z.object({
+     *     sub: z.string(),
+     *     email: z.string().email(),
+     *     name: z.string().optional(),
+     *     custom_field: z.string().optional(),
+     *   }),
+     *   skipValidation: false,
+     *   unknownKeys: "strip",
+     * }
+     */
+    identity?: Partial<{
+        skipValidation: boolean
+        schema: ZodObject<Identity>
+        unknownKeys: "passthrough" | "strict" | "strip"
+    }>
 }
 
 /**
@@ -212,6 +246,12 @@ export interface InternalLogger {
     log: typeof createLogEntry
 }
 
+export interface IdentityConfig<Schema extends ZodObject<any> = typeof UserIdentity> {
+    schema?: Schema
+    skipValidation?: boolean
+    unknownKeys?: "passthrough" | "strict" | "strip"
+}
+
 export interface RouterGlobalContext<DefaultUser extends User = User> {
     oauth: OAuthProviderRecord
     cookies: CookieStoreConfig
@@ -223,6 +263,11 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
     sessionStrategy: SessionStrategy<DefaultUser>
+    identity: {
+        unknownKeys: "passthrough" | "strict" | "strip"
+        schema: ZodObject<any>
+        skipValidation?: boolean
+    }
 }
 
 /**
@@ -242,7 +287,7 @@ export interface AuthInstance<DefaultUser extends User = User> {
     }
 }
 
-export type InternalContext<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser> & {
+export type InternalContext<Identity extends EditableShape<UserShape>> = RouterGlobalContext<ShapeToObject<Identity> & User> & {
     cookieConfig: {
         secure: CookieStoreConfig
         standard: CookieStoreConfig

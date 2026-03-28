@@ -11,12 +11,12 @@ import {
     csrfTokenAction,
     updateSessionAction,
 } from "@/actions/index.ts"
-import type { AuthConfig, AuthInstance, User } from "@/@types/index.ts"
+import type { AuthConfig, AuthInstance, EditableShape, ShapeToObject, UserShape } from "@/@types/index.ts"
 
-const createInternalConfig = <DefaultUser extends User = User>(authConfig?: AuthConfig<DefaultUser>): RouterConfig => {
-    const context = createContext<DefaultUser>(authConfig)
+const createInternalConfig = <Identity extends EditableShape<UserShape>>(config?: AuthConfig<Identity>): RouterConfig => {
+    const context = createContext<Identity>(config)
     return {
-        basePath: authConfig?.basePath ?? "/auth",
+        basePath: config?.basePath ?? "/auth",
         onError: createErrorHandler(context.logger),
         context: context as unknown as RouterConfig["context"],
         use: [
@@ -26,6 +26,27 @@ const createInternalConfig = <DefaultUser extends User = User>(authConfig?: Auth
                 return ctx
             },
         ],
+    }
+}
+
+export const createAuthInstance = <Identity extends EditableShape<UserShape>>(authConfig: AuthConfig<Identity>) => {
+    const config = createInternalConfig<Identity>(authConfig)
+    const router = createRouter(
+        [
+            signInAction(config.context.oauth),
+            callbackAction(config.context.oauth),
+            sessionAction,
+            signOutAction,
+            csrfTokenAction,
+            updateSessionAction(config.context.identity),
+        ],
+        config
+    )
+
+    return {
+        handlers: router,
+        jose: config.context.jose,
+        api: createAuthAPI(config.context),
     }
 }
 
@@ -41,39 +62,19 @@ const createInternalConfig = <DefaultUser extends User = User>(authConfig?: Auth
  *   oauth: ["github", {
  *     id: "custom-oauth",
  *     name: "custom-oauth",
- *     authorizationURL: "https://custom-oauth.com/oauth/authorize",
+ *     authorize: {
+ *       url: "https://custom-oauth.com/oauth/authorize",
+ *       params: { responseType: "code", scope: "profile email" },
+ *     },
  *     accessToken: "https://custom-oauth.com/oauth/token",
- *     scope: "profile email",
- *     responseType: "code",
  *     userInfo: "https://custom-oauth.com/api/userinfo",
  *     clientId: process.env.AURA_AUTH_CUSTOM_OAUTH_CLIENT_ID!,
  *     clientSecret: process.env.AURA_AUTH_CUSTOM_OAUTH_CLIENT_SECRET!,
  *   }]
  * })
  */
-export const createAuthInstance = <DefaultUser extends User = User>(authConfig: AuthConfig<DefaultUser>) => {
-    const config = createInternalConfig<DefaultUser>(authConfig)
-    const router = createRouter(
-        [
-            signInAction(config.context.oauth),
-            callbackAction(config.context.oauth),
-            sessionAction,
-            signOutAction,
-            csrfTokenAction,
-            updateSessionAction,
-        ],
-        config
-    )
-
-    return {
-        handlers: router,
-        jose: config.context.jose,
-        api: createAuthAPI<DefaultUser>(config.context),
-    }
-}
-
-export const createAuth = <DefaultUser extends User = User>(config: AuthConfig<DefaultUser>) => {
-    const authInstance = createAuthInstance<DefaultUser>(config) as unknown as AuthInstance<DefaultUser>
+export const createAuth = <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => {
+    const authInstance = createAuthInstance<Identity>(config) as AuthInstance<ShapeToObject<Identity>>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()
         const methodHandlers = {

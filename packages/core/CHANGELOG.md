@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Introduced the `identity` configuration option in `createAuth` to validate and extend default user fields (for example, role and permissions) using the `identity.schema` Zod schema. It also supports unknown field handling through `unknownKeys`, which can strip, pass through, or reject unknown fields. Additionally, the `/session` endpoint now supports any fields defined in `identity.schema`. [#130](https://github.com/aura-stack-ts/auth/pull/130)
+
 - Introduced an experimental `/session` endpoint to update default session data from the initial OAuth profile data. It currently supports updates only for the `email`, `name`, and `image` fields. For broader claim support, use the experimental `api.updateSession` function. [#129](https://github.com/aura-stack-ts/auth/pull/129)
 
 - Introduced an experimental `updateSession` API to update default session data from the initial OAuth profile data. The function infers the user generic type provided in `createAuth` and offers autocomplete. For security, the `sub` value cannot be overridden. [#129](https://github.com/aura-stack-ts/auth/pull/129)

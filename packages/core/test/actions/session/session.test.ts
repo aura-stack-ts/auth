@@ -213,11 +213,11 @@ describe("sessionAction", () => {
             })
         )
         const session = await requestSession.json()
-        const { id, ...rest } = userInfoMock
+        const { id, name, image, email } = userInfoMock
         expect(session).toEqual({
             authenticated: true,
             session: {
-                user: { sub: id, ...rest },
+                user: { sub: id, name, image, email },
                 expires: expect.any(String),
             },
         })
