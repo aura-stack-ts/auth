@@ -29,7 +29,6 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
  *
  * @param oauthConfig - OAuth provider configuration
  * @param accessToken - Access Token to access the userinfo endpoint
- * @param identitySchema - Optional Zod schema to validate the user identity
  * @param logger - Optional logger instance
  * @returns The user information retrieved from the userinfo endpoint
  */

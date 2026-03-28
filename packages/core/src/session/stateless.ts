@@ -132,17 +132,28 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             }
 
             const expiresAt = updateExpires({ exp })
-            if (!expiresAt) return { session, headers: newHeaders }
+            if (!expiresAt) {
+                const userSession = identity.skipValidation
+                    ? session.user
+                    : await schema.parse<TypedJWTPayload<DefaultUser>>(session.user)
+                return { session: { expires: session.expires, user: userSession }, headers }
+            }
 
-            const newSession = { ...session, expires: expiresAt.toISOString() }
+            const newSessionPayload = identity.skipValidation
+                ? session.user
+                : await schema.parse<TypedJWTPayload<DefaultUser>>(session.user)
+            const newSession = { user: newSessionPayload, expires: expiresAt.toISOString() }
+
+            const issuedAt = strategy === "absolute" ? _iat : Math.floor(Date.now() / 1000)
             const newSessionToken = await jwt.createToken({
-                ...(user as DefaultUser),
+                ...newSessionPayload,
                 exp: Math.floor(expiresAt.getTime() / 1000),
+                iat: issuedAt,
                 mexp,
             })
             logger?.log("SESSION_REFRESHED", { structuredData: { strategy: "stateless", expiresAt: expiresAt.toISOString() } })
             return {
-                session: newSession,
+                session: newSession as unknown as Session<DefaultUser>,
                 headers: cookieConfig.setCookie({ sessionToken: newSessionToken }),
             }
         } catch (error) {
@@ -152,14 +163,14 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
     }
 
     const createSession = async (session: TypedJWTPayload<DefaultUser>) => {
-        if (!identity.disabled) {
+        if (identity.skipValidation) {
             logger?.log("IDENTITY_VALIDATION_DISABLED", {
                 structuredData: {
                     identity_validation_disabled: true,
                 },
             })
         }
-        const payload = await schema.parse<TypedJWTPayload<DefaultUser>>(session)
+        const payload = identity.skipValidation ? session : await schema.parse<TypedJWTPayload<DefaultUser>>(session)
         return jwt.createToken(payload)
     }
 
@@ -180,10 +191,10 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             if (!isValidToken) {
                 return { session: null, headers: cookieConfig.clear() }
             }
-            const { exp, mexp, sub, iat } = await jwt.verifyToken(sessionToken)
-            const tokenVerified = await jwt.verifyToken(sessionToken)
-            const defaultPayload = await schema.parse(tokenVerified)
-            const sessionPayload = await schema.parseAsPartial(session.user)
+            const verifiedToken = await jwt.verifyToken(sessionToken)
+            const { exp, mexp, sub, iat } = verifiedToken
+            const defaultPayload = identity.skipValidation ? verifiedToken : await schema.parse(verifiedToken)
+            const sessionPayload = identity.skipValidation ? session.user : await schema.parseAsPartial(session.user)
 
             const expiresAt = session.expires
                 ? new Date(session.expires)

@@ -34,7 +34,7 @@ export const createContext = <Identity extends EditableShape<UserShape>, Plain =
         identity: {
             schema: config?.identity?.schema ?? UserIdentity,
             unknownKeys: config?.identity?.unknownKeys ?? "strip",
-            disabled: config?.identity?.disabled ?? false,
+            skipValidation: config?.identity?.skipValidation ?? false,
         },
     } as InternalContext<Identity>
     ctx.sessionStrategy = createSessionStrategy<Identity>({

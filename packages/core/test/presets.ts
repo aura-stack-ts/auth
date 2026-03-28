@@ -44,26 +44,6 @@ export const {
     jose,
     api,
 } = createAuth({
-    //oauth: [oauthCustomService as any, oauthCustomServiceProfile],
-    oauth: [
-        {
-            id: "",
-            accessToken: "",
-            authorize: "",
-            name: "",
-            userInfo: "",
-            profile: (profile) => ({
-                sub: "123",
-                name: profile.name,
-                email: "",
-                image: "",
-            }),
-        },
-    ],
+    oauth: [oauthCustomService, oauthCustomServiceProfile],
     logger: true,
-    identity: {
-        schema: UserIdentity.extend({
-            role: z.enum(["user", "admin"]),
-        }),
-    },
 })

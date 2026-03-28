@@ -140,13 +140,9 @@ export interface AuthConfig<Identity extends EditableShape<UserShape> = Editable
      * }
      */
     identity?: Partial<{
-        disabled: boolean
+        skipValidation: boolean
         schema: ZodObject<Identity>
         unknownKeys: "passthrough" | "strict" | "strip"
-        /**
-         * @deprecated use `unknownKeys: "strict"` instead.
-         */
-        strict: boolean
     }>
 }
 
@@ -247,7 +243,7 @@ export interface InternalLogger {
 
 export interface IdentityConfig<Schema extends ZodObject<any> = typeof UserIdentity> {
     schema?: Schema
-    disabled?: boolean
+    skipValidation?: boolean
     unknownKeys?: "passthrough" | "strict" | "strip"
 }
 
@@ -265,7 +261,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
     identity: {
         unknownKeys: "passthrough" | "strict" | "strip"
         schema: ZodObject<any>
-        disabled?: boolean
+        skipValidation?: boolean
     }
 }
 

@@ -64,8 +64,8 @@ export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onErr
             )
         }
         if (isAuthValidationError(error)) {
-            logger?.log("IDENTITY_VALIDATION_FAILED")
             const { type, code, message } = error
+            logger?.log("IDENTITY_VALIDATION_FAILED", { structuredData: { error: code, error_description: message } })
             return Response.json({ type, code, message }, { status: 422 })
         }
         logger?.log("SERVER_ERROR", { structuredData: { error_type: error.name, error_message: error.message } })

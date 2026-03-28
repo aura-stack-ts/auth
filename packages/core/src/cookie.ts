@@ -97,8 +97,8 @@ export const getCookie = (request: Request | Headers, cookieName: string) => {
  * @param cookieName Cookie name to retrieve
  * @returns The value of the Set-Cookie header or throw an error if not found
  */
-export const getSetCookie = (response: Response, cookieName: string) => {
-    const cookies = response.headers.getSetCookie()
+export const getSetCookie = (response: Response | Headers, cookieName: string) => {
+    const cookies = response instanceof Response ? response.headers.getSetCookie() : response.getSetCookie()
     if (!cookies) {
         throw new AuthInternalError("COOKIE_NOT_FOUND", "No cookies found in response.")
     }

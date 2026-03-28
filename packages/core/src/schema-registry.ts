@@ -1,6 +1,6 @@
-import { infer as Infer, type ZodObject } from "zod"
 import { formatZodError } from "@/shared/utils.ts"
 import { UserIdentity } from "@/shared/identity.ts"
+import { infer as Infer, type ZodObject } from "zod/v4"
 import { AuthValidationError } from "@/shared/errors.ts"
 import type { IdentityConfig } from "@/@types/config.ts"
 
@@ -17,6 +17,7 @@ export const stripUnknownKeys = <T extends ZodObject<any>>(schema: T, unknownKey
 
 export const createSchemaRegistry = <Identity extends ZodObject<any>>(config: IdentityConfig<Identity>) => {
     const schema = stripUnknownKeys(config.schema ?? UserIdentity, config.unknownKeys ?? "strip")
+    const partialSchema = schema.partial()
 
     const parse = async <T = Infer<typeof schema>>(data: unknown = {}) => {
         const parsed = await schema.safeParseAsync(data)
@@ -30,7 +31,7 @@ export const createSchemaRegistry = <Identity extends ZodObject<any>>(config: Id
     }
 
     const parseAsPartial = async <T = Partial<Infer<typeof schema>>>(data: unknown = {}) => {
-        const parsed = await schema.partial().safeParseAsync(data)
+        const parsed = await partialSchema.safeParseAsync(data)
         if (!parsed.success) {
             const details = JSON.stringify(formatZodError(parsed.error), null, 2)
             throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", details, {

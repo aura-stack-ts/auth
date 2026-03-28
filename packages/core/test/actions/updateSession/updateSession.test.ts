@@ -40,7 +40,7 @@ describe("updateSession action", () => {
                     "X-CSRF-Token": csrfToken,
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
-                body: JSON.stringify(newUser),
+                body: JSON.stringify({ user: newUser }),
             })
         )
         expect(response.status).toBe(200)
@@ -78,7 +78,7 @@ describe("updateSession action", () => {
                 headers: {
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
-                body: JSON.stringify(newUser),
+                body: JSON.stringify({ user: newUser }),
             })
         )
         expect(response.status).toBe(401)
@@ -89,7 +89,7 @@ describe("updateSession action", () => {
         })
     })
 
-    test("updates user session with invalid user data", async () => {
+    test("updates user session with stripped fields", async () => {
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
             name: "John Doe",
@@ -113,7 +113,7 @@ describe("updateSession action", () => {
                     "X-CSRF-Token": csrfToken,
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
-                body: JSON.stringify(newUser),
+                body: JSON.stringify({ user: newUser }),
             })
         )
         expect(response.status).toBe(200)
