@@ -1,6 +1,5 @@
-import { ZodObject } from "zod"
 import { getEnv, getEnvBoolean } from "@/shared/env.ts"
-import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
+import type { AuthConfig, EditableShape, InternalLogger, Logger, LogLevel, SyslogOptions, UserShape } from "@/@types/index.ts"
 
 /**
  * Log message definitions organized by category.
@@ -279,6 +278,18 @@ export const logMessages = {
         msgId: "CSRF_TOKEN_VERIFIED",
         message: "CSRF token verification succeeded",
     },
+    IDENTITY_VALIDATION_DISABLED: {
+        facility: 4,
+        severity: "warning",
+        msgId: "IDENTITY_VALIDATION_DISABLED",
+        message: "Identity validation is disabled. User data will not be validated against a schema.",
+    },
+    IDENTITY_VALIDATION_FAILED: {
+        facility: 4,
+        severity: "error",
+        msgId: "IDENTITY_VALIDATION_FAILED",
+        message: "User identity validation against the schema failed",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {
@@ -360,7 +371,7 @@ export const createLogger = (logger?: Required<Logger>): InternalLogger | undefi
  * Creates the logger instance based on the provided configuration and environment variables.
  * Priority: config.logger, LOG_LEVEL env, DEBUG env and defaults to undefined if logging is not enabled.
  */
-export const createProxyLogger = <Identity extends ZodObject = ZodObject>(config?: AuthConfig<Identity>) => {
+export const createProxyLogger = <Identity extends EditableShape<UserShape>>(config?: AuthConfig<Identity>) => {
     const level = getEnv("LOG_LEVEL")
     const debug = getEnvBoolean("DEBUG")
     if (typeof config?.logger === "object") {

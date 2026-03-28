@@ -11,13 +11,9 @@ import {
     csrfTokenAction,
     updateSessionAction,
 } from "@/actions/index.ts"
-import type { UserIdentity } from "@/shared/identity.ts"
-import type { infer as Infer, ZodObject, ZodRawShape } from "zod/v4"
-import type { AuthConfig, AuthInstance, User } from "@/@types/index.ts"
+import type { AuthConfig, AuthInstance, EditableShape, ShapeToObject, User, UserShape } from "@/@types/index.ts"
 
-const createInternalConfig = <Identity extends ZodObject<ZodRawShape> = ZodObject<any>>(
-    config?: AuthConfig<Identity>
-): RouterConfig => {
+const createInternalConfig = <Identity extends EditableShape<UserShape>>(config?: AuthConfig<Identity>): RouterConfig => {
     const context = createContext<Identity>(config)
     return {
         basePath: config?.basePath ?? "/auth",
@@ -33,7 +29,7 @@ const createInternalConfig = <Identity extends ZodObject<ZodRawShape> = ZodObjec
     }
 }
 
-export const createAuthInstance = <Identity extends ZodObject<any> = ZodObject<any>>(authConfig: AuthConfig<Identity>) => {
+export const createAuthInstance = <Identity extends EditableShape<UserShape>>(authConfig: AuthConfig<Identity>) => {
     const config = createInternalConfig<Identity>(authConfig)
     const router = createRouter(
         [
@@ -42,7 +38,7 @@ export const createAuthInstance = <Identity extends ZodObject<any> = ZodObject<a
             sessionAction,
             signOutAction,
             csrfTokenAction,
-            updateSessionAction,
+            updateSessionAction(config.context.identity),
         ],
         config
     )
@@ -77,13 +73,10 @@ export const createAuthInstance = <Identity extends ZodObject<any> = ZodObject<a
  *   }]
  * })
  */
-export const createAuth = <
-    Identity extends ZodObject<any> = typeof UserIdentity,
-    Plain extends Infer<Identity> & User = Infer<Identity> & User,
->(
+export const createAuth = <Identity extends EditableShape<UserShape>, Plain = ShapeToObject<Identity>>(
     config: AuthConfig<Identity>
 ) => {
-    const authInstance = createAuthInstance<Identity>(config) as AuthInstance<Plain>
+    const authInstance = createAuthInstance<Identity>(config) as unknown as AuthInstance<Plain & User>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()
         const methodHandlers = {

@@ -4,7 +4,6 @@ import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/shared/errors.ts"
 import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.ts"
-import type { ZodObject } from "zod/v4"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response
@@ -34,12 +33,7 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
  * @param logger - Optional logger instance
  * @returns The user information retrieved from the userinfo endpoint
  */
-export const getUserInfo = async (
-    oauthConfig: OAuthProviderCredentials,
-    accessToken: string,
-    _identitySchema?: ZodObject<any>,
-    logger?: InternalLogger
-) => {
+export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string, logger?: InternalLogger) => {
     const userInfoConfig = oauthConfig.userInfo
     const userinfoURL = typeof userInfoConfig === "string" ? userInfoConfig : userInfoConfig.url
     const extraHeaders = typeof userInfoConfig === "string" ? undefined : userInfoConfig.headers

@@ -1,18 +1,19 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
-import type { ZodObject, infer as Infer } from "zod/v4"
-import type { Prettify } from "@/@types/utility.ts"
+import { UserIdentity } from "@/shared/identity.ts"
+import type { ZodObject } from "zod/v4"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
+import type { EditableShape, Prettify, ShapeToObject } from "@/@types/utility.ts"
+import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
+import type { JWTKey, SessionConfig, SessionStrategy, User, UserShape } from "@/@types/session.ts"
 
 /**
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export interface AuthConfig<Identity extends ZodObject = ZodObject> {
+export interface AuthConfig<Identity extends EditableShape<UserShape> = EditableShape<UserShape>> {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
@@ -39,7 +40,8 @@ export interface AuthConfig<Identity extends ZodObject = ZodObject> {
      *   }
      * ]
      */
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, User & Infer<Identity>>)[]
+    // @todo: add type inference for built-in providers
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, User>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -137,7 +139,15 @@ export interface AuthConfig<Identity extends ZodObject = ZodObject> {
      *   strict: false, // Allow coercion and optional fields
      * }
      */
-    identity?: Partial<IdentityConfig<Identity>>
+    identity?: Partial<{
+        disabled: boolean
+        schema: ZodObject<Identity>
+        unknownKeys: "passthrough" | "strict" | "strip"
+        /**
+         * @deprecated use `unknownKeys: "strict"` instead.
+         */
+        strict: boolean
+    }>
 }
 
 /**
@@ -235,9 +245,10 @@ export interface InternalLogger {
     log: typeof createLogEntry
 }
 
-export interface IdentityConfig<Schema extends ZodObject<any> = ZodObject<any>> {
-    strict: boolean
-    schema: Schema
+export interface IdentityConfig<Schema extends ZodObject<any> = typeof UserIdentity> {
+    schema?: Schema
+    disabled?: boolean
+    unknownKeys?: "passthrough" | "strict" | "strip"
 }
 
 export interface RouterGlobalContext<DefaultUser extends User = User> {
@@ -251,7 +262,11 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
     sessionStrategy: SessionStrategy<DefaultUser>
-    identity: IdentityConfig
+    identity: {
+        unknownKeys: "passthrough" | "strict" | "strip"
+        schema: ZodObject<any>
+        disabled?: boolean
+    }
 }
 
 /**
@@ -271,7 +286,7 @@ export interface AuthInstance<DefaultUser extends User = User> {
     }
 }
 
-export type InternalContext<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser> & {
+export type InternalContext<Identity extends EditableShape<UserShape>> = RouterGlobalContext<ShapeToObject<Identity> & User> & {
     cookieConfig: {
         secure: CookieStoreConfig
         standard: CookieStoreConfig

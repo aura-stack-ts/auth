@@ -5,42 +5,78 @@ import { UserIdentity } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
 import { JWTHeaderParameters, JWTVerifyOptions, TypedJWTPayload } from "@aura-stack/jose"
 import type { AuthConfig, AuthInstance, OAuthProviderCredentials, User } from "@/index.ts"
-import type { GetSessionAPIOptions, SessionResponse, UpdateSessionAPIOptions, UpdateSessionReturn } from "@/@types/session.ts"
+import type {
+    GetSessionAPIOptions,
+    SessionResponse,
+    UpdateSessionAPIOptions,
+    UpdateSessionReturn,
+    UserShape,
+} from "@/@types/session.ts"
+import type { EditableShape, Prettify, ShapeToObject } from "@/@types/utility.ts"
 
 describe("createAuth", () => {
     expectTypeOf(createAuth).toEqualTypeOf<
-        <
-            Identity extends z.ZodObject<any, z.core.$strip> = z.ZodObject<
-                {
-                    sub: z.ZodString
-                    name: z.ZodOptional<z.ZodNullable<z.ZodString>>
-                    image: z.ZodOptional<z.ZodNullable<z.ZodString>>
-                    email: z.ZodOptional<z.ZodNullable<z.ZodString>>
-                },
-                z.core.$strip
-            >,
-            Plain extends z.core.output<Identity> & User = z.core.output<Identity> & {
-                sub: string
-                name?: string | null | undefined
-                image?: string | null | undefined
-                email?: string | null | undefined
-            },
-        >(
+        <Identity extends EditableShape<UserShape>, Plain = ShapeToObject<Identity>>(
             config: AuthConfig<Identity>
-        ) => AuthInstance<Plain>
+        ) => AuthInstance<Plain & User>
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.getSession).toEqualTypeOf<
-        (options: GetSessionAPIOptions) => Promise<SessionResponse<User>>
+        (options: GetSessionAPIOptions) => Promise<
+            SessionResponse<
+                Prettify<{
+                    sub: unknown
+                    name: unknown
+                    image: unknown
+                    email: unknown
+                }> & {
+                    sub: string
+                    name?: string | null | undefined
+                    image?: string | null | undefined
+                    email?: string | null | undefined
+                }
+            >
+        >
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.updateSession).toEqualTypeOf<
-        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionReturn<User>>
+        (options: UpdateSessionAPIOptions<User>) => Promise<
+            UpdateSessionReturn<
+                Prettify<{
+                    sub: unknown
+                    name: unknown
+                    image: unknown
+                    email: unknown
+                }> & {
+                    sub: string
+                    name?: string | null | undefined
+                    image?: string | null | undefined
+                    email?: string | null | undefined
+                }
+            >
+        >
     >()
 
     expectTypeOf(createAuth({ oauth: [] }).jose.signJWS).toEqualTypeOf<
         (payload: TypedJWTPayload<Partial<User>>, options?: JWTHeaderParameters) => Promise<string>
     >()
     expectTypeOf(createAuth({ oauth: [] }).jose.verifyJWS).toEqualTypeOf<
-        (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<User>>
+        (
+            token: string,
+            options?: JWTVerifyOptions
+        ) => Promise<
+            TypedJWTPayload<
+                Prettify<{
+                    sub: unknown
+                    name: unknown
+                    image: unknown
+                    email: unknown
+                }> & {
+                    sub: string
+                    name?: string | null | undefined
+                    image?: string | null | undefined
+                    email?: string | null | undefined
+                }
+            >
+        >
     >()
 
     expectTypeOf(
@@ -74,13 +110,13 @@ describe("createAuth", () => {
             options?: JWTVerifyOptions
         ) => Promise<
             TypedJWTPayload<
-                {
+                Prettify<{
                     sub: string
+                    name: string | null | undefined
+                    image: string | null | undefined
+                    email: string | null | undefined
                     role: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                } & {
+                }> & {
                     sub: string
                     name?: string | null | undefined
                     image?: string | null | undefined
@@ -95,13 +131,13 @@ describe("createAuth", () => {
     ).toEqualTypeOf<
         (options: GetSessionAPIOptions) => Promise<
             SessionResponse<
-                {
+                Prettify<{
                     sub: string
                     role: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                } & {
+                    name: string | null | undefined
+                    image: string | null | undefined
+                    email: string | null | undefined
+                }> & {
                     sub: string
                     name?: string | null | undefined
                     image?: string | null | undefined
@@ -115,13 +151,13 @@ describe("createAuth", () => {
     ).toEqualTypeOf<
         (
             options: UpdateSessionAPIOptions<
-                {
+                Prettify<{
                     sub: string
                     role: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                } & {
+                    name: string | null | undefined
+                    image: string | null | undefined
+                    email: string | null | undefined
+                }> & {
                     sub: string
                     name?: string | null | undefined
                     image?: string | null | undefined
@@ -130,13 +166,13 @@ describe("createAuth", () => {
             >
         ) => Promise<
             UpdateSessionReturn<
-                {
+                Prettify<{
                     sub: string
                     role: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                } & {
+                    name: string | null | undefined
+                    image: string | null | undefined
+                    email: string | null | undefined
+                }> & {
                     sub: string
                     name?: string | null | undefined
                     image?: string | null | undefined

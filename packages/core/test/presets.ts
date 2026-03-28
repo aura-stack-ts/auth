@@ -1,6 +1,8 @@
 import { createAuth } from "@/createAuth.ts"
 import type { OAuthProviderCredentials } from "@/@types/index.ts"
 import type { JWTPayload } from "@/jose.ts"
+import z from "zod"
+import { UserIdentity } from "@/shared/identity.ts"
 
 export const oauthCustomService: OAuthProviderCredentials = {
     id: "oauth-provider",
@@ -42,6 +44,26 @@ export const {
     jose,
     api,
 } = createAuth({
-    oauth: [oauthCustomService, oauthCustomServiceProfile],
+    //oauth: [oauthCustomService as any, oauthCustomServiceProfile],
+    oauth: [
+        {
+            id: "",
+            accessToken: "",
+            authorize: "",
+            name: "",
+            userInfo: "",
+            profile: (profile) => ({
+                sub: "123",
+                name: profile.name,
+                email: "",
+                image: "",
+            }),
+        },
+    ],
     logger: true,
+    identity: {
+        schema: UserIdentity.extend({
+            role: z.enum(["user", "admin"]),
+        }),
+    },
 })

@@ -140,6 +140,43 @@ describe("updateSession API", () => {
         })
     })
 
+    test("updates user session with invalid user data", async () => {
+        const { jose, api } = createAuth({
+            oauth: [],
+        })
+
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+
+        const csrfToken = await createCSRF(jose)
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: {
+                user: { role: "superadmin", money: "100000" } as any,
+            },
+            skipCSRFCheck: true,
+        })
+        expect(updated).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    name: "John Doe",
+                    email: "johndoe@example.com",
+                    image: "https://example.com/johndoe-avatar.jpg",
+                },
+                expires: expect.any(String),
+            },
+            headers: expect.any(Headers),
+            updated: true,
+        })
+    })
+
     test("updates expiry on valid session", async () => {
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",

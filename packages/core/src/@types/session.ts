@@ -1,9 +1,10 @@
-import type { ZodObject } from "zod/v4"
+import { EditableShape, ShapeToObject } from "./utility.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { UserIdentityType } from "@/shared/identity.ts"
-import type { CookieStoreConfig, InternalLogger, JoseInstance, RouterGlobalContext } from "@/@types/config.ts"
+import type { UserIdentityType, UserShape } from "@/shared/identity.ts"
+import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance, RouterGlobalContext } from "@/@types/config.ts"
 
 export type User = UserIdentityType
+export type { UserShape } from "@/shared/identity.ts"
 
 /**
  * Session data returned by the session endpoint.
@@ -209,15 +210,12 @@ export interface GetSessionReturn<DefaultUser extends User = User> {
     headers: Headers
 }
 
-export interface CreateSessionStrategyOptions<DefaultUser extends User = User> {
+export interface CreateSessionStrategyOptions<Identity extends EditableShape<UserShape>> {
     config?: SessionConfig
-    jose: JoseInstance<DefaultUser>
+    jose: JoseInstance<ShapeToObject<Identity> & User>
     cookies: () => CookieStoreConfig
     logger?: InternalLogger
-    identity: {
-        schema: ZodObject<any>
-        strict: boolean
-    }
+    identity: IdentityConfig
 }
 
 export interface JWTStrategyOptions<DefaultUser extends User = User> {
@@ -225,10 +223,7 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
     jose: JoseInstance<DefaultUser>
     logger?: InternalLogger
     cookies: () => CookieStoreConfig
-    identity: {
-        schema: ZodObject<any>
-        strict: boolean
-    }
+    identity: IdentityConfig
 }
 
 export interface SignInOptions {

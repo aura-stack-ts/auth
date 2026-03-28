@@ -70,8 +70,22 @@ export class AuthClientError extends Error {
 }
 
 export class AuthInvalidConfigurationError extends Error {
+    readonly type = "AUTH_INVALID_CONFIGURATION_ERROR"
+
     constructor(message?: string, options?: ErrorOptions) {
         super(message, options)
+        this.name = new.target.name
+        Error?.captureStackTrace?.(this, new.target)
+    }
+}
+
+export class AuthValidationError extends Error {
+    readonly type = "AUTH_VALIDATION_ERROR"
+    readonly code: string
+
+    constructor(code: string, message?: string, options?: ErrorOptions) {
+        super(message, options)
+        this.code = code
         this.name = new.target.name
         Error?.captureStackTrace?.(this, new.target)
     }
@@ -99,4 +113,8 @@ export const isAuthClientError = (error: unknown): error is AuthClientError => {
 
 export const isAuthInvalidConfigurationError = (error: unknown): error is AuthInvalidConfigurationError => {
     return error instanceof AuthInvalidConfigurationError
+}
+
+export const isAuthValidationError = (error: unknown): error is AuthValidationError => {
+    return error instanceof AuthValidationError
 }

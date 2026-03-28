@@ -5,13 +5,9 @@ import { createProxyLogger } from "@/shared/logger.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
-import type { infer as Infer, ZodObject } from "zod/v4"
-import type { AuthConfig, InternalContext, User } from "@/@types/index.ts"
+import type { AuthConfig, EditableShape, InternalContext, ShapeToObject, User, UserShape } from "@/@types/index.ts"
 
-export const createContext = <
-    Identity extends ZodObject = typeof UserIdentity,
-    Plain extends Infer<Identity> & User = Infer<Identity> & User,
->(
+export const createContext = <Identity extends EditableShape<UserShape>, Plain = ShapeToObject<Identity>>(
     config?: AuthConfig<Identity>
 ) => {
     const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
@@ -22,7 +18,7 @@ export const createContext = <
     const cookieOverrides = config?.cookies?.overrides ?? {}
     const secureCookieStore = createCookieStore(true, cookiePrefix, cookieOverrides, logger)
     const standardCookieStore = createCookieStore(false, cookiePrefix, cookieOverrides, logger)
-    const jose = createJoseInstance<Plain>(config?.secret, config?.session)
+    const jose = createJoseInstance<Plain & User>(config?.secret, config?.session)
 
     const ctx = {
         oauth: createBuiltInOAuthProviders(config?.oauth),
@@ -37,12 +33,13 @@ export const createContext = <
         baseURL: config?.baseURL,
         identity: {
             schema: config?.identity?.schema ?? UserIdentity,
-            strict: config?.identity?.strict ?? false,
+            unknownKeys: config?.identity?.unknownKeys ?? "strip",
+            disabled: config?.identity?.disabled ?? false,
         },
-    } as InternalContext<Plain>
-    ctx.sessionStrategy = createSessionStrategy<Plain>({
+    } as InternalContext<Identity>
+    ctx.sessionStrategy = createSessionStrategy<Identity>({
         cookies: () => ctx.cookies,
-        jose,
+        jose: ctx.jose,
         config: config?.session,
         logger: ctx.logger,
         identity: ctx.identity,

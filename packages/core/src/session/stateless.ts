@@ -13,6 +13,7 @@ import type {
     GetSessionReturn,
     DeepPartial,
 } from "@/@types/index.ts"
+import { createSchemaRegistry } from "@/schema-registry.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({
     config,
@@ -25,6 +26,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
     const cookieConfig = createCookieManager(cookies)
     const maxAge = config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = config?.jwt?.expirationStrategy ?? "absolute"
+    const schema = createSchemaRegistry(identity)
 
     const updateExpires = ({ exp }: { exp: number | undefined }): Date | null => {
         if (!exp) return null
@@ -124,12 +126,6 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             } = await jwt.verifyToken(sessionToken)
             if (!user.sub) return { session: null, headers: newHeaders }
 
-            const payload = await jwt.verifyToken(sessionToken)
-            const parsed = await identity.schema.safeParseAsync(payload)
-            if (!parsed.success) {
-                throw new Error("Identity validation failed: ")
-            }
-
             const session: Session<DefaultUser> = {
                 user: user as DefaultUser,
                 expires: exp ? new Date(exp * 1000).toISOString() : "",
@@ -155,7 +151,17 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         }
     }
 
-    const createSession = async (session: TypedJWTPayload<DefaultUser>) => jwt.createToken(session)
+    const createSession = async (session: TypedJWTPayload<DefaultUser>) => {
+        if (!identity.disabled) {
+            logger?.log("IDENTITY_VALIDATION_DISABLED", {
+                structuredData: {
+                    identity_validation_disabled: true,
+                },
+            })
+        }
+        const payload = await schema.parse<TypedJWTPayload<DefaultUser>>(session)
+        return jwt.createToken(payload)
+    }
 
     const refreshSession = async (
         headers: Headers,
@@ -174,24 +180,18 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             if (!isValidToken) {
                 return { session: null, headers: cookieConfig.clear() }
             }
-            const {
-                exp,
-                mexp,
-                sub,
-                iat,
-                jti: _jti,
-                nbf: _nbf,
-                aud: _aud,
-                iss: _iss,
-                ...user
-            } = await jwt.verifyToken(sessionToken)
+            const { exp, mexp, sub, iat } = await jwt.verifyToken(sessionToken)
+            const tokenVerified = await jwt.verifyToken(sessionToken)
+            const defaultPayload = await schema.parse(tokenVerified)
+            const sessionPayload = await schema.parseAsPartial(session.user)
+
             const expiresAt = session.expires
                 ? new Date(session.expires)
                 : (updateExpires({ exp }) ?? new Date(Date.now() + maxAge * 1000))
             const updatedSession: Session<DefaultUser> = {
                 user: {
-                    ...user,
-                    ...session.user,
+                    ...defaultPayload,
+                    ...sessionPayload,
                     sub,
                 } as DefaultUser,
                 expires: expiresAt.toISOString(),
