@@ -140,7 +140,8 @@ export interface AuthConfig<Identity extends EditableShape<UserShape> = Editable
      *     name: z.string().optional(),
      *     custom_field: z.string().optional(),
      *   }),
-     *   strict: false, // Allow coercion and optional fields
+     *   skipValidation: false,
+     *   unknownKeys: "strip",
      * }
      */
     identity?: Partial<{
