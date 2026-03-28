@@ -1,5 +1,5 @@
 import { describe, expectTypeOf } from "vitest"
-import { z } from "zod"
+import { z, ZodString } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { UserIdentity } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
@@ -12,71 +12,24 @@ import type {
     UpdateSessionReturn,
     UserShape,
 } from "@/@types/session.ts"
-import type { EditableShape, Prettify, ShapeToObject } from "@/@types/utility.ts"
+import type { EditableShape, ShapeToObject } from "@/@types/utility.ts"
 
 describe("createAuth", () => {
     expectTypeOf(createAuth).toEqualTypeOf<
-        <Identity extends EditableShape<UserShape>, Plain = ShapeToObject<Identity>>(
-            config: AuthConfig<Identity>
-        ) => AuthInstance<Plain & User>
+        <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => AuthInstance<ShapeToObject<Identity>>
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.getSession).toEqualTypeOf<
-        (options: GetSessionAPIOptions) => Promise<
-            SessionResponse<
-                Prettify<{
-                    sub: unknown
-                    name: unknown
-                    image: unknown
-                    email: unknown
-                }> & {
-                    sub: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                }
-            >
-        >
+        (options: GetSessionAPIOptions) => Promise<SessionResponse<ShapeToObject<UserShape>>>
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.updateSession).toEqualTypeOf<
-        (options: UpdateSessionAPIOptions<User>) => Promise<
-            UpdateSessionReturn<
-                Prettify<{
-                    sub: unknown
-                    name: unknown
-                    image: unknown
-                    email: unknown
-                }> & {
-                    sub: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                }
-            >
-        >
+        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionReturn<ShapeToObject<UserShape>>>
     >()
 
     expectTypeOf(createAuth({ oauth: [] }).jose.signJWS).toEqualTypeOf<
         (payload: TypedJWTPayload<Partial<User>>, options?: JWTHeaderParameters) => Promise<string>
     >()
     expectTypeOf(createAuth({ oauth: [] }).jose.verifyJWS).toEqualTypeOf<
-        (
-            token: string,
-            options?: JWTVerifyOptions
-        ) => Promise<
-            TypedJWTPayload<
-                Prettify<{
-                    sub: unknown
-                    name: unknown
-                    image: unknown
-                    email: unknown
-                }> & {
-                    sub: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                }
-            >
-        >
+        (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<ShapeToObject<UserShape>>>
     >()
 
     expectTypeOf(
@@ -105,81 +58,18 @@ describe("createAuth", () => {
     expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).jose.verifyJWS
     ).toEqualTypeOf<
-        (
-            token: string,
-            options?: JWTVerifyOptions
-        ) => Promise<
-            TypedJWTPayload<
-                Prettify<{
-                    sub: string
-                    name: string | null | undefined
-                    image: string | null | undefined
-                    email: string | null | undefined
-                    role: string
-                }> & {
-                    sub: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                }
-            >
-        >
+        (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<ShapeToObject<UserShape & { role: ZodString }>>>
     >()
 
     expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).api.getSession
-    ).toEqualTypeOf<
-        (options: GetSessionAPIOptions) => Promise<
-            SessionResponse<
-                Prettify<{
-                    sub: string
-                    role: string
-                    name: string | null | undefined
-                    image: string | null | undefined
-                    email: string | null | undefined
-                }> & {
-                    sub: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                }
-            >
-        >
-    >()
+    ).toEqualTypeOf<(options: GetSessionAPIOptions) => Promise<SessionResponse<ShapeToObject<UserShape & { role: ZodString }>>>>()
     expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).api.updateSession
     ).toEqualTypeOf<
         (
-            options: UpdateSessionAPIOptions<
-                Prettify<{
-                    sub: string
-                    role: string
-                    name: string | null | undefined
-                    image: string | null | undefined
-                    email: string | null | undefined
-                }> & {
-                    sub: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                }
-            >
-        ) => Promise<
-            UpdateSessionReturn<
-                Prettify<{
-                    sub: string
-                    role: string
-                    name: string | null | undefined
-                    image: string | null | undefined
-                    email: string | null | undefined
-                }> & {
-                    sub: string
-                    name?: string | null | undefined
-                    image?: string | null | undefined
-                    email?: string | null | undefined
-                }
-            >
-        >
+            options: UpdateSessionAPIOptions<ShapeToObject<UserShape & { role: ZodString }>>
+        ) => Promise<UpdateSessionReturn<ShapeToObject<UserShape & { role: ZodString }>>>
     >()
 })
 

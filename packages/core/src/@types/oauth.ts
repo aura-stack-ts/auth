@@ -14,7 +14,7 @@ export type ResponseType = LiteralUnion<"code" | "token" | "refresh_token" | "id
  * Configuration for an OAuth provider without credentials.
  * Use this type when defining provider metadata and endpoints.
  */
-export interface OAuthProviderConfig<Profile extends object = Record<string, any>, DefaultUser extends User = User> {
+export interface OAuthProviderConfig<Profile extends object = Record<string, any>, DefaultUser = User> {
     id: string
     name: string
     /**

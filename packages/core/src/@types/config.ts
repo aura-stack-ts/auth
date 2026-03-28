@@ -20,12 +20,15 @@ export interface AuthConfig<Identity extends EditableShape<UserShape> = Editable
      * OAuth third-party authorization service by implementing the `OAuthProviderCredentials` interface.
      *
      * Built-in OAuth providers:
+     * ```ts
      * oauth: ["github", "google"]
-     *
+     * ```
      * Custom credentials via factory:
+     * ```ts
      * oauth: [github({ clientId: "...", clientSecret: "..." })]
-     *
+     * ```
      * Custom OAuth providers:
+     * ```ts
      * oauth: [
      *   {
      *     id: "oauth-providers",
@@ -39,9 +42,10 @@ export interface AuthConfig<Identity extends EditableShape<UserShape> = Editable
      *     clientSecret: process.env.AURA_AUTH_PROVIDER_CLIENT_SECRET,
      *   }
      * ]
+     * ```
      */
     // @todo: add type inference for built-in providers
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, User>)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, ShapeToObject<Identity>>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine

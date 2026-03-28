@@ -1,8 +1,6 @@
 import { createAuth } from "@/createAuth.ts"
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
 import type { JWTPayload } from "@/jose.ts"
-import z from "zod"
-import { UserIdentity } from "@/shared/identity.ts"
+import type { OAuthProviderCredentials } from "@/@types/index.ts"
 
 export const oauthCustomService: OAuthProviderCredentials = {
     id: "oauth-provider",
@@ -16,7 +14,7 @@ export const oauthCustomService: OAuthProviderCredentials = {
     clientSecret: "oauth_client_secret",
 }
 
-export const oauthCustomServiceProfile: OAuthProviderCredentials<Record<string, string>> = {
+export const oauthCustomServiceProfile: OAuthProviderCredentials = {
     ...oauthCustomService,
     id: "oauth-profile",
     profile(profile) {
@@ -25,7 +23,6 @@ export const oauthCustomServiceProfile: OAuthProviderCredentials<Record<string, 
             name: profile.name,
             email: profile.email,
             image: profile.image,
-            username: profile.username,
             nickname: profile.nickname,
             email_verified: profile.email_verified,
         }
@@ -39,11 +36,13 @@ export const sessionPayload: JWTPayload = {
     image: "https://example.com/image.jpg",
 }
 
+const auth = createAuth({
+    oauth: [oauthCustomService, oauthCustomServiceProfile],
+    logger: true,
+})
+
 export const {
     handlers: { GET, POST, PATCH },
     jose,
     api,
-} = createAuth({
-    oauth: [oauthCustomService, oauthCustomServiceProfile],
-    logger: true,
-})
+} = auth
