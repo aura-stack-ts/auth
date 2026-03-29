@@ -1,0 +1,13 @@
+{
+  "extends": "@aura-stack/tsconfig/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "noEmit": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src", "tsup.config.ts"],
+  "exclude": ["dist", "node_modules"]
+}

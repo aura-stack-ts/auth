@@ -323,6 +323,14 @@
         "typescript": "catalog:typescript",
       },
     },
+    "packages/rate-limiter": {
+      "name": "@aura-stack/rate-limiter",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@aura-stack/tsconfig": "workspace:*",
+        "@aura-stack/tsup-config": "workspace:*",
+      },
+    },
   },
   "overrides": {
     "dompurify": "^3.3.2",
@@ -407,6 +415,8 @@
     "@aura-stack/auth": ["@aura-stack/auth@workspace:packages/core"],
 
     "@aura-stack/jose": ["@aura-stack/jose@workspace:packages/jose"],
+
+    "@aura-stack/rate-limiter": ["@aura-stack/rate-limiter@workspace:packages/rate-limiter"],
 
     "@aura-stack/router": ["@aura-stack/router@0.6.0", "", { "dependencies": { "cookie": "1.1.1" } }, "sha512-mb0iXHGgKeN5myC2PrmXxGydN8Gol3MlVARRoFc7/2+G3OD9/k3LqkQKDDnKnwVvrj6kE7EIwftXDxouEDdAxA=="],
 

@@ -673,6 +673,15 @@ importers:
         specifier: catalog:typescript
         version: 5.9.3
 
+  packages/rate-limiter:
+    devDependencies:
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsup-config':
+        specifier: workspace:*
+        version: link:../../configs/tsup-config
+
 packages:
 
   '@acemir/cssom@0.9.31':

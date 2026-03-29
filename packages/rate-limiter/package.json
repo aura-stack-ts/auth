@@ -1,0 +1,43 @@
+{
+  "name": "@aura-stack/rate-limiter",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Rate limiter for @aura-stack/auth",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/@aura-stack/rate-limiter"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [],
+  "exports": {},
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsup-config": "workspace:*"
+  },
+  "packageManager": "pnpm@10.15.0"
+}
