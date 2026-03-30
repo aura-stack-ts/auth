@@ -11,7 +11,7 @@ const buildAlgorithm = <RequestInit = Request>(rule: RateLimiterRule<RequestInit
         case "token-bucket":
             return createTokenBucketAlgorithm(rule)
         default: {
-            throw new Error(`Unknown algorithm:`)
+            throw new Error(`[rate-limiter] Unknown algorithm: "${String((rule as { algorithm?: string }).algorithm)}"`)
         }
     }
 }

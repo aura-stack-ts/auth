@@ -44,6 +44,7 @@ export const createMemoryStorage = (): RateLimiterStorage => {
         }
 
         existing.value += 1
+        existing.expiresAt = now + ttlMs
         return existing.value
     }
 

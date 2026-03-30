@@ -26,6 +26,13 @@ export const createTokenBucketAlgorithm = <RequestInit = Request>(
 ): RateLimiterAlgorithm<RequestInit> => {
     const { capacity, refillRate, storage = createMemoryStorage() } = rule
 
+    if (!Number.isFinite(capacity) || capacity <= 0) {
+        throw new Error(`[rate-limiter] Invalid token-bucket capacity: ${capacity}`)
+    }
+    if (!Number.isFinite(refillRate) || refillRate <= 0) {
+        throw new Error(`[rate-limiter] Invalid token-bucket refillRate: ${refillRate}`)
+    }
+
     const tokensKey = (key: string) => `${key}:tb:tokens`
     const lastRefillKey = (key: string) => `${key}:tb:lastRefill`
     const getTTL = () => Math.ceil((capacity / refillRate) * 2)
@@ -36,8 +43,11 @@ export const createTokenBucketAlgorithm = <RequestInit = Request>(
 
     const getBucketState = async (key: string, now: number): Promise<BucketState> => {
         const [tokensEntry, refillEntry] = await Promise.all([storage.get(tokensKey(key)), storage.get(lastRefillKey(key))])
-        if (!tokensEntry || !refillEntry) {
+        if (!tokensEntry && !refillEntry) {
             return { tokens: capacity, lastRefillAt: now }
+        }
+        if (!tokensEntry || !refillEntry) {
+            return { tokens: tokensEntry?.value ?? 0, lastRefillAt: refillEntry?.value ?? now }
         }
         return { tokens: tokensEntry.value, lastRefillAt: refillEntry.value }
     }

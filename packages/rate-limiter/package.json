@@ -21,8 +21,7 @@
     "url": "git+https://github.com/aura-stack-ts/auth"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/@aura-stack/rate-limiter"
+    "access": "public"
   },
   "files": [
     "dist"
