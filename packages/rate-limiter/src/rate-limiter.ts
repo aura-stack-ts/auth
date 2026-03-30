@@ -1,10 +1,12 @@
+import { createMemoryStorage } from "@/memory"
 import { createTokenBucketAlgorithm } from "@/algorithms/token-bucket"
-import type { RateLimiter, RateLimiterAlgorithm, RateLimiterConfig, RateLimitResult } from "@/types"
+import type { InferRules, RateLimiter, RateLimiterAlgorithm, RateLimiterConfig, RateLimiterRule } from "@/types"
 
 /**
  * Builds the algorithm instance for a rule, memoized per endpoint name.
  */
-function buildAlgorithm(rule: RateLimiterConfig["rules"][string]): RateLimiterAlgorithm {
+const buildAlgorithm = <RequestInit = Request>(rule: RateLimiterRule<RequestInit>): RateLimiterAlgorithm<RequestInit> => {
+    rule.algorithm ||= "token-bucket"
     switch (rule.algorithm) {
         case "token-bucket":
             return createTokenBucketAlgorithm(rule)
@@ -12,6 +14,40 @@ function buildAlgorithm(rule: RateLimiterConfig["rules"][string]): RateLimiterAl
             throw new Error(`Unknown algorithm:`)
         }
     }
+}
+
+const resetKeys = (rule: RateLimiterRule, key: string): string[] => {
+    switch (rule.algorithm) {
+        case "token-bucket":
+            return [`${key}:tb:tokens`, `${key}:tb:lastRefill`]
+    }
+}
+
+const buildHandle = <RequestInit = Request>(
+    rule: RateLimiterRule<RequestInit>,
+    algorithm: RateLimiterAlgorithm<RequestInit>,
+    config: RateLimiterConfig<Record<string, RateLimiterRule>>
+): RateLimiter<RequestInit> => {
+    const { storage } = config
+
+    const resolveKey = (request: RequestInit | string): string => {
+        return typeof request === "string" ? request : rule.keyGenerator(request)
+    }
+
+    const check = (request: RequestInit) => {
+        return algorithm.check(request)
+    }
+
+    const peek = (request: RequestInit) => {
+        return algorithm.peek(request)
+    }
+
+    const reset = async (request: RequestInit | string): Promise<void> => {
+        const key = resolveKey(request)
+        await Promise.all(resetKeys(rule as RateLimiterRule, key).map((k) => storage!.delete(k)))
+    }
+
+    return { check, peek, reset }
 }
 
 /**
@@ -36,54 +72,14 @@ function buildAlgorithm(rule: RateLimiterConfig["rules"][string]): RateLimiterAl
  *
  * ```
  */
-export function createRateLimiter(config: RateLimiterConfig): RateLimiter {
-    const { storage, rules, onRejected } = config
-
-    const algorithms = new Map<string, RateLimiterAlgorithm>()
-
-    for (const [endpoint, rule] of Object.entries(rules)) {
-        algorithms.set(endpoint, buildAlgorithm(rule))
+export const createRateLimiter = <Rules extends Record<string, RateLimiterRule>>(
+    config: RateLimiterConfig<Rules>
+): InferRules<Rules> => {
+    config.storage ||= createMemoryStorage()
+    const handlers = {} as InferRules<Rules>
+    for (const [rule, ruleConfig] of Object.entries(config.rules)) {
+        const algorithm = buildAlgorithm(ruleConfig)
+        handlers[rule as keyof Rules] = buildHandle(ruleConfig, algorithm, config) as InferRules<Rules>[keyof Rules]
     }
-
-    function getAlgorithm(endpoint: string): RateLimiterAlgorithm {
-        const algorithm = algorithms.get(endpoint)
-        if (!algorithm) {
-            throw new Error(
-                `[rate-limiter] No rule configured for endpoint "${endpoint}". ` +
-                    `Known endpoints: ${[...algorithms.keys()].join(", ")}`
-            )
-        }
-        return algorithm
-    }
-
-    async function check(endpoint: string, key: string): Promise<RateLimitResult> {
-        const algorithm = getAlgorithm(endpoint)
-        const result = await algorithm.check(key, storage)
-
-        if (!result.allowed) {
-            onRejected?.(result, endpoint)
-        }
-
-        return result
-    }
-
-    async function reset(endpoint: string, key: string): Promise<void> {
-        const rule = rules[endpoint]
-        if (!rule) {
-            throw new Error(`[rate-limiter] No rule configured for endpoint "${endpoint}".`)
-        }
-        if (rule.algorithm === "token-bucket") {
-            await Promise.all([storage.delete(`${key}:tb:tokens`), storage.delete(`${key}:tb:lastRefill`)])
-        }
-    }
-
-    async function peek(endpoint: string, key: string): Promise<RateLimitResult> {
-        const algorithm = getAlgorithm(endpoint)
-        if (algorithm.peek) {
-            return algorithm.peek(key, storage)
-        }
-        return algorithm.check(key, storage)
-    }
-
-    return { check, reset, peek }
+    return handlers
 }

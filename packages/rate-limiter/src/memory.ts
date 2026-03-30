@@ -12,32 +12,14 @@ import type { RateLimiterStorage, StorageEntry } from "@/types"
  * Expired entries are cleaned up lazily on `get` and proactively on a
  * configurable sweep interval so memory does not grow unbounded.
  */
-export function createMemoryStorage(sweepIntervalMs = 60_000): RateLimiterStorage {
+export const createMemoryStorage = (): RateLimiterStorage => {
     const store = new Map<string, StorageEntry>()
 
-    let sweepTimer: ReturnType<typeof setInterval> | undefined
-
-    function startSweep() {
-        if (sweepIntervalMs <= 0) return
-        sweepTimer = setInterval(() => {
-            const now = Date.now()
-            for (const [key, entry] of store) {
-                if (entry.expiresAt <= now) store.delete(key)
-            }
-        }, sweepIntervalMs)
-
-        if (typeof sweepTimer === "object" && "unref" in sweepTimer) {
-            sweepTimer.unref()
-        }
-    }
-
-    startSweep()
-
-    function isExpired(entry: StorageEntry): boolean {
+    const isExpired = (entry: StorageEntry): boolean => {
         return entry.expiresAt <= Date.now()
     }
 
-    async function get(key: string): Promise<StorageEntry | null> {
+    const get = async (key: string): Promise<StorageEntry | null> => {
         const entry = store.get(key)
         if (!entry) return null
         if (isExpired(entry)) {
@@ -47,11 +29,11 @@ export function createMemoryStorage(sweepIntervalMs = 60_000): RateLimiterStorag
         return entry
     }
 
-    async function set(key: string, entry: StorageEntry, _ttlMs: number): Promise<void> {
+    const set = async (key: string, entry: StorageEntry, _ttlMs: number): Promise<void> => {
         store.set(key, entry)
     }
 
-    async function increment(key: string, ttlMs: number): Promise<number> {
+    const increment = async (key: string, ttlMs: number): Promise<number> => {
         const now = Date.now()
         const existing = store.get(key)
 
@@ -65,9 +47,9 @@ export function createMemoryStorage(sweepIntervalMs = 60_000): RateLimiterStorag
         return existing.value
     }
 
-    async function del(key: string): Promise<void> {
+    const remove = async (key: string): Promise<void> => {
         store.delete(key)
     }
 
-    return { get, set, increment, delete: del }
+    return { get, set, increment, delete: remove }
 }

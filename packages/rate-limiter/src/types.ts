@@ -33,30 +33,34 @@ export interface RateLimiterStorage {
 
 export interface RateLimitResult {
     /** Whether the request is allowed to proceed. */
-    allowed: boolean
+    ok: boolean
     /** Configured maximum for this rule. */
     limit: number
     /** Requests / tokens remaining in the current window. */
     remaining: number
     /** Unix timestamp (ms) when the window / bucket resets. */
     resetAt: number
-    /** Only present when `allowed` is false. Milliseconds to wait before retrying. */
-    retryAfter?: number
+    /** Milliseconds to wait before retrying. */
+    retryAfter: number
+    /**
+     * Returns a standard 429 Response with `RateLimit-*` headers pre-applied.
+     * Use this as a zero-boilerplate rejection handler.
+     *
+     * @example
+     * const result = await limiter.signIn.check(request)
+     * if (!result.ok) return result.toResponse()
+     */
+    toResponse(): Response
 }
 
-export interface RateLimiterAlgorithm {
-    /**
-     * Evaluates whether the request identified by `key` should be allowed.
-     * Mutates storage as a side-effect (increments counters, drains tokens, …).
-     */
-    check(key: string, storage: RateLimiterStorage): Promise<RateLimitResult>
-
-    peek(key: string, storage: RateLimiterStorage): Promise<RateLimitResult>
+export interface RateLimiterAlgorithm<RequestInit = Request> {
+    peek(request: RequestInit): Promise<RateLimitResult>
+    check(request: RequestInit): Promise<RateLimitResult>
 }
 
 export type AlgorithmType = "token-bucket"
 
-interface BaseRule {
+interface BaseRule<RequestInit = Request> {
     algorithm: AlgorithmType
     /**
      * Derives the storage key from the incoming request.
@@ -64,48 +68,47 @@ interface BaseRule {
      *
      * @example (req) => `${req.ip}:${req.path}`
      */
-    keyGenerator?: (req: unknown) => string
+    keyGenerator: (request: RequestInit) => string
 }
 
-export interface TokenBucketRule extends BaseRule {
-    algorithm: "token-bucket"
+export type TokenBucketRule<RequestInit = Request> = BaseRule<RequestInit> & {
+    algorithm?: "token-bucket"
     /** Maximum token capacity (burst ceiling). */
     capacity: number
     /** Tokens added per millisecond. */
-    refillRatePerMs: number
+    refillRate: number
+    storage?: RateLimiterStorage
 }
 
-export type RateLimiterRule = TokenBucketRule
+export type RateLimiterRule<RequestInit = Request> = TokenBucketRule<RequestInit>
 
-export interface RateLimiterConfig {
-    storage: RateLimiterStorage
+export interface RateLimiterConfig<Rules extends Record<string, RateLimiterRule>> {
+    storage?: RateLimiterStorage
     /**
      * Per-endpoint rules, keyed by an arbitrary route/action name that you pass
-     * to `rateLimiter.check(endpoint, key)`.
+     * to `rateLimiter.<endpoint>.<method>`.
      */
-    rules: Record<string, RateLimiterRule>
-    /**
-     * Called when a request is rejected. Use this to return a framework-specific
-     * response object (e.g. a `Response` in Web API environments, or set headers
-     * in Express).
-     */
-    onRejected?: (result: RateLimitResult, endpoint: string) => unknown
+    rules: Rules
 }
 
-export interface RateLimiter {
+export interface RateLimiter<RequestInit = Request> {
     /**
      * Checks `key` against the rule registered for `endpoint`.
      * Returns the result and calls `onRejected` when the request is blocked.
      */
-    check(endpoint: string, key: string): Promise<RateLimitResult>
+    check(request: RequestInit): Promise<RateLimitResult>
     /**
      * Resets the counter/bucket for `key` on the given `endpoint`.
      * Useful after a successful login to clear failed-attempt counters.
      */
-    reset(endpoint: string, key: string): Promise<void>
+    reset(request: RequestInit): Promise<void>
     /**
      * Returns the current state without mutating any counters.
      * Useful for surfacing limit headers on every response, not just limited ones.
      */
-    peek(endpoint: string, key: string): Promise<RateLimitResult>
+    peek(request: RequestInit): Promise<RateLimitResult>
+}
+
+export type InferRules<TRules extends Record<string, RateLimiterRule>> = {
+    [K in keyof TRules]: TRules[K] extends RateLimiterRule<infer TRequest> ? RateLimiter<TRequest> : never
 }

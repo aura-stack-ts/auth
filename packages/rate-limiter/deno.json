@@ -1,0 +1,21 @@
+{
+  "name": "@aura-stack/rate-limiter",
+  "version": "0.0.0",
+  "license": "MIT",
+  "tasks": {
+    "dev": "deno run --watch src/index.ts"
+  },
+  "export": {
+    ".": "./src/index.ts",
+    "./algorithms": "./src/algorithms/index.ts",
+    "./algorithms/token-bucket": "./src/algorithms/token-bucket.ts",
+    "./types": "./src/@types/index.ts"
+  },
+  "import": {
+    "@/": "./src/"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
+  },
+  "exclude": ["dist", "node_modules"]
+}
