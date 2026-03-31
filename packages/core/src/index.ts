@@ -42,8 +42,7 @@ export type {
     SessionConfig,
     SessionStrategy,
     UserIdentityType,
-    UserShape
+    UserShape,
 } from "@/@types/index.ts"
-
 
 export type { Merge, ShapeToObject, EditableShape, InferShape, InferIdentity, InferAuthIdentity } from "@/@types/utility.ts"
