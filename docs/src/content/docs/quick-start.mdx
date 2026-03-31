@@ -39,15 +39,17 @@ npm install @aura-stack/auth
 Store secrets and provider credentials in environment variables.
 Aura Auth follows this naming convention:
 
+- `AURA_AUTH_SECRET` Required opaque value used to sign and encrypt sessions/csrf tokens
+- `AURA_AUTH_SALT`: Required random salt used for derivation keys for signing and encryption.
 - `AURA_AUTH_{PROVIDER}_CLIENT_ID`
 - `AURA_AUTH_{PROVIDER}_CLIENT_SECRET`
-- `AURA_AUTH_SECRET` (used to sign and encrypt sessions/csrf tokens)
 
 Create a .env file (do not commit it):
 
 ```bash title=".env"
 # 32-byte (256-bit) secret used to sign and encrypt sessions. Use a secure random value.
 AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
 
 # GitHub OAuth credentials
 AURA_AUTH_GITHUB_CLIENT_ID=your_github_client_id
@@ -62,56 +64,36 @@ AURA_AUTH_GITHUB_CLIENT_SECRET=your_github_client_secret
 
 ### Create an Auth instance [#auth-instance]
 
-The `createAuth` function is used to create the Aura Auth instance configuration. This defines the [`OAuth Providers`](/docs/oauth) to be consumed, cookie configuration options, and other settings to control the library's behavior and flows.
+The `createAuth` function is used to create the Aura Auth instance configuration. This defines the [`OAuth Providers`](/docs/oauth) to be consumed, [`Cookie Management`](/docs/guides/cookie-management), Trusted Origins, Session management and other settings to control the library's behavior and flows.
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
-const auth = createAuth({
-  oauth: [],
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
 })
 ```
+
+The `createAuth` function returns an Aura Auth instance, which includes HTTP handlers for authentication flows, jose utilities for token signing and verification, and api methods to interact with the auth flows (programmatically trigger sign-in, sign-out, get session, etc.).
 
 </Step>
 
 <Step>
 
-### Get HTTP Handlers
+#### Client-side
 
-Once the Aura Instance is configured, HTTP handlers (`GET` and `POST`) are available for integration into routers or frameworks.
+Once the Aura Instance is configured, HTTP handlers (`GET`, `POST`) are available for integration into routers or frameworks.
 
 The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`, and `/csrfToken`).
 These can be mounted in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
 
-```ts title="@/auth" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-const auth = createAuth({
-  oauth: [],
-})
+```ts title="@/server" lineNumbers
+import { auth } from "@/auth"
 
 export const {
   handlers: { GET, POST },
 } = auth
 ```
-
-These handlers internally provide:
-
-The usage of the HTTP handlers depends of the library and frameworks integration, just, Aura Auth provides the endpoint for the `OAuth 2.0` flows which includes:
-
-| Route              | Description                                   |
-| ------------------ | --------------------------------------------- |
-| `/signIn/:oauth`   | Starts the OAuth flow (Authorization Request) |
-| `/callback/:oauth` | Completes the OAuth flow and issues a session |
-| `/session`         | Returns the current session                   |
-| `/signOut`         | invalidates the active session                |
-| `/csrfToken`       | Generates a CSRF token (for forms)            |
-
-</Step>
-
-<Step>
-
-### Set up HTTP Handlers
 
 Now integrate the handlers into your framework or router.
 
@@ -122,4 +104,99 @@ Now integrate the handlers into your framework or router.
 
 </Step>
 
+<Step>
+
+### Interact with API methods
+
+The Aura Auth instance also provides API methods to interact with the authentication flows programmatically. For example, you can trigger a sign-in flow, get the current session, or sign out a user.
+
+```ts title="@/api" lineNumbers
+import { auth } from "@/auth"
+
+const signIn = await auth.api.signIn("github", {
+  redirectTo: "https://yourapp.com/dashboard",
+})
+
+const session = await auth.api.getSession({
+  headers: request.headers,
+})
+
+const signOut = await auth.api.signOut({
+  headers: request.headers,
+  redirectTo: "https://yourapp.com",
+})
+
+const updateSession = await auth.api.updateSession({
+  headers: request.headers,
+  session: {
+    user: {
+      name: "John Doe",
+      email: "johndoe@example.com",
+    },
+  },
+})
+```
+
+</Step>
+
+<Step>
+
+### Interact with Client API
+
+The Aura Auth instance also provides a client API for use in frontend applications. This allows you to trigger sign-in flows, get the current session, and sign out users directly from the client side.
+
+```ts title="@/client" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "http://localhost:3000",
+  basePath: "/api/auth",
+})
+
+const signIn = await authClient.signIn("github", {
+  redirectTo: "https://yourapp.com/dashboard",
+})
+
+const signOut = await authClient.signOut({
+  redirectTo: "https://yourapp.com",
+})
+
+const session = await authClient.getSession()
+
+const updatedSession = await authClient.updateSession({
+  user: {
+    name: "John Doe",
+    email: "johndoe@example.com",
+  },
+})
+```
+
+</Step>
+
+<Step>
+
+### Next Steps
+
+Aura Auth is framework-agnostic. To use it in a real application, it must be integrated into a server runtime.
+
+Choose your integration based on your stack:
+
+- [Astro](/docs/integrations/astro)
+- [Bun](/docs/integrations/bun)
+- [Cloudflare Workers](/docs/integrations/cloudflare-workers)
+- [Deno](/docs/integrations/deno)
+- [Elysia](/docs/integrations/elysia)
+- [Express](/docs/integrations/express)
+- [Hono](/docs/integrations/hono)
+- [Next.js](/docs/integrations/next)
+- [Nuxt.js](/docs/integrations/nuxt)
+- [Oak](/docs/integrations/oak)
+- [React Router](/docs/integrations/react-router)
+- [Supabase Edge Functions](/docs/integrations/supabase-edge-functions)
+- [TanStack Start](/docs/integrations/tanstack-start)
+- [Vercel Edge Functions](/docs/integrations/vercel-edge-functions)
+
+</Step>
+
 </Steps>
+```

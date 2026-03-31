@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
-@import "@halvaradop/tailwindcss-utilities";
 
 @theme {
     --foreground: oklch(0.985 0 0);
@@ -12,4 +11,12 @@
     --color-background: #000000;
     --color-muted-foreground: color-mix(in oklab, var(--color-white) 60%, transparent);
     --breakpoint-xs: 540px;
+    --radius-xl: 0rem;
+    --radius-lg: 0rem;
 }
+
+/*
+.dark {
+  --color-fd-background: #000000;
+}
+*/

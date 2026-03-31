@@ -59,6 +59,7 @@ Actions are the units of logic that handle specific authentication tasks.
 - **Session Action**: Verifies the session cookie, validates token integrity, and returns authenticated user data.
 - **CsrfToken Action**: Emits CSRF tokens for the critical signOut action.
 - **SignOut Action**: IInvalidates the active session and clears relevant cookies.
+- **UpdateSession Action**: Updates the session data and refreshes the session cookie.
 
 ## Data Flow: OAuth Sign-In
 

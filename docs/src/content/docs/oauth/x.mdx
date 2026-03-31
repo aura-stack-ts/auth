@@ -19,7 +19,7 @@ Through this quick start guide, you will learn and understand the basics of how 
   - [Installation](#installation)
   - [Environment setup](#environment-setup)
   - [Configure the provider](#configure-the-provider)
-  - [Get HTTP handlers](#get-http-handlers)
+  - [Sign In to Atlassian](#sign-in-to-atlassian)
 - [Resources](#resources)
 
 ---
@@ -87,8 +87,10 @@ AURA_AUTH_SECRET="32-bytes-secret"
 ```
 
 <Callout type="warning">
-  The `AURA_AUTH_SECRET` is recommended to be a random and high entropy key to avoid attackers deciphering the secret used by the
-  Aura Auth application.
+  The `AURA_AUTH_SECRET` and `AURA_AUTH_SALT` will recommended to be random and high antropy key to avoid attackers decifer the
+  secret used by the Aura Auth application. It requires to be at least 32 bytes long and 4.5 bits of entropy per character, which
+  means it should be a string of at least 43 characters (32 bytes * 8 bits/byte / 4.5 bits/character = ~57.78 characters). You can
+  generate a secure random string using tools like `openssl` or online password generators.
 </Callout>
 
 </Step>
@@ -132,7 +134,7 @@ export const { handlers } = auth
 
 <Step>
 
-### Get HTTP Handlers
+#### Client-side
 
 Use the HTTP handlers to consume the authentication logic and flow from the Aura Auth library to integrate it into routers and frameworks.
 

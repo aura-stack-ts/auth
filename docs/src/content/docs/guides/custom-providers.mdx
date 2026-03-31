@@ -43,8 +43,7 @@ import { builtInOAuthProviders, type GitHubProfile } from "@aura-stack/auth/oaut
 
 export const auth = createAuth({
   oauth: [
-    {
-      ...builtInOAuthProviders.github,
+    builtInOAuthProviders.github({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       profile(profile: GitHubProfile) {
@@ -55,7 +54,7 @@ export const auth = createAuth({
           name: profile.name,
         }
       },
-    } as OAuthProviderCredentials,
+    }),
   ],
 })
 ```
@@ -68,8 +67,7 @@ import { github, type GitHubProfile } from "@aura-stack/auth/oauth/github"
 
 export const auth = createAuth({
   oauth: [
-    {
-      ...github,
+    github({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       profile(profile: GitHubProfile) {
@@ -80,7 +78,7 @@ export const auth = createAuth({
           name: profile.name,
         }
       },
-    } as OAuthProviderCredentials,
+    }),
   ],
 })
 ```
@@ -103,13 +101,15 @@ export const auth = createAuth({
     {
       id: "custom",
       name: "Custom Provider",
-      authorizeURL: "https://custom.com/authorization",
+      authorize: {
+        url: "https://custom.com/authorization",
+        params: {
+          scope: "user:email user:profile",
+          responseType: "code",
+        },
+      },
       accessToken: "https://custom.com/access_token",
       userInfo: "https://api.custom.com/v1/user",
-      scope: "user:email user:profile",
-      responseType: "code",
-      clientId: process.env.CLIENT_ID!,
-      clientSecret: process.env.CLIENT_SECRET!,
     },
   ],
 })
@@ -134,13 +134,15 @@ interface CustomProvider {
 const provider: OAuthProviderCredentials<CustomProvider> = {
   id: "custom",
   name: "Custom Provider",
-  authorizeURL: "https://custom.com/authorization",
+  authorize: {
+    url: "https://custom.com/authorization",
+    params: {
+      scope: "user:email user:profile",
+      responseType: "code",
+    },
+  },
   accessToken: "https://custom.com/access_token",
   userInfo: "https://api.custom.com/v1/user",
-  scope: "user:email user:profile",
-  responseType: "code",
-  clientId: process.env.CLIENT_ID!,
-  clientSecret: process.env.CLIENT_SECRET!,
   profile(profile: CustomProvider) {
     return {
       sub: profile.id.toString(),
@@ -152,7 +154,7 @@ const provider: OAuthProviderCredentials<CustomProvider> = {
 }
 
 export const auth = createAuth({
-  oauth: [provider as OAuthProviderCredentials],
+  oauth: [provider],
 })
 ```
 

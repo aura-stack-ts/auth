@@ -5,20 +5,77 @@ description: Configure and customize Aura Auth defaults via createAuth.
 
 ## `createAuth` configuration options
 
-### `basePath`
+### `oauth`
 
-Base path prefix where Aura Auth endpoints are mounted and exposed to your routing system. Defaults to `/auth`.
-
-<Callout type="warning">The `basePath` must start with a leading `/`.</Callout>
+Configures OAuth providers for an auth instance. Aura Auth's built-in providers can be used, or custom providers supplied.
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: [],
-  basePath: "/auth",
 })
 ```
+
+##### Built-in OAuth Providers
+
+Aura Auth ships ready-to-use OAuth providers. The `oauth` option in `createAuth` autocompletes these provider IDs (names are lowercase).
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+```
+
+##### Custom OAuth Providers
+
+Provider configs are available via `@aura-stack/auth/oauth/index` (all providers) or `@aura-stack/auth/oauth/:provider` (specific). See [OAuth Providers](/docs/oauth) for details. Custom providers must implement `OAuthProvider`.
+
+```ts title="@/auth" lineNumbers
+import { createAuth, type OAuthProvider } from "@aura-stack/auth"
+import { github } from "@aura-stack/auth/oauth/index"
+
+export const auth = createAuth({
+  oauth: [
+    github({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    }),
+  ],
+})
+```
+
+**or**
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [
+    {
+      id: "github",
+      name: "GitHub",
+      authorize: {
+        url: "https://github.com/login/oauth/authorize",
+        params: {
+          scope: "read:user user:email",
+          responseType: "code",
+        },
+      },
+      accessToken: "https://github.com/login/oauth/access_token",
+      userInfo: "https://api.github.com/user",
+    },
+  ],
+})
+```
+
+<Callout>
+  Aura Auth infers the clientId and clientSecret field names from the provider ID. For example, a provider with `id: "github"`
+  looks for `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` environment variables by default. Custom providers should follow this
+  convention or explicitly set the clientId and clientSecret fields to avoid confusion.
+</Callout>
 
 ### `cookies`
 
@@ -49,68 +106,67 @@ export const auth = createAuth({
 })
 ```
 
-### `oauth`
+### `session`
 
-Configures OAuth providers for an auth instance. Aura Auth's built-in providers can be used, or custom providers supplied.
+Defines the session management strategy and options for Aura Auth. The session strategy determines how user sessions are stored and maintained across requests. Supported strategies include `jwt` (JSON Web Tokens). Each strategy has its own configuration options for token expiration, refresh behavior, and storage mechanisms.
 
 ```ts title="@/auth" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: [],
-})
-```
-
-##### Built-in OAuth Providers
-
-Aura Auth ships ready-to-use OAuth providers. The `oauth` option in `createAuth` autocompletes these provider IDs (names are lowercase).
-
-```ts title="@/auth" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: ["github"],
-})
-```
-
-##### Custom OAuth Providers
-
-Provider configs are available via `@aura-stack/auth/oauth/index` (all providers) or `@aura-stack/auth/oauth/:provider` (specific). See [OAuth Providers](/docs/oauth) for details. Custom providers must implement `OAuthProvider`.
-
-```ts title="@/auth" lineNumbers
-import { createAuth, type OAuthProvider } from "@aura-stack/auth"
-import { github } from "@aura-stack/auth/oauth/index"
-
-export const auth = createAuth({
-  oauth: [
-    {
-      ...github,
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    } as OAuthProvider,
-  ],
-})
-```
-
-**or**
-
-```ts title="@/auth" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: [
-    {
-      id: "github",
-      name: "GitHub",
-      authorizeURL: "https://github.com/login/oauth/authorize",
-      accessToken: "https://github.com/login/oauth/access_token",
-      userInfo: "https://api.github.com/user",
-      scope: "read:user user:email",
-      responseType: "code",
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+  session: {
+    strategy: "jwt",
+    jwt: {
+      mode: "sealed",
+      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     },
-  ],
+  },
+})
+```
+
+#### `jwt` Session Strategy
+
+The `jwt` session strategy is the stateless option that uses JSON Web Tokens to manage user session. It includes options for token mode (sealed, signed or encrypted).
+
+- `mode`: determines how the JWT is protected. `sealed` (default) provides confidentiality and integrity by encrypting the token. `signed` provides integrity only by signing the token, but the payload is visible. `encrypted` provides confidentiality by encrypting the token, but does not include a signature for integrity verification.
+- `maxAge`: sets the maximum age of the JWT in seconds. After this period, the token expires and the user must re-authenticate.
+- `issuer`: (optional) sets the `iss` claim in the JWT, which identifies the issuer of the token. This can be used for additional validation on the client or server side.
+- `audience`: (optional) sets the `aud` claim in the JWT, which identifies the intended audience of the token. This can be used to restrict token usage to specific clients or services.
+- `maxExpiration`: (optional) sets the maximum expiration time for the JWT in seconds. This is a hard limit that prevents tokens from being valid indefinitely, even if they are refreshed.
+- `expirationStrategy`: (optional) determines how token expiration is handled. `absolute` (default) means the token expires after a fixed time from issuance. `rolling` means the token expiration is extended on each request, keeping the user logged in as long as they are active.
+
+### `basePath`
+
+Base path prefix where Aura Auth endpoints are mounted and exposed to your routing system. Defaults to `/auth`.
+
+<Callout type="warning">The `basePath` must start with a leading `/`.</Callout>
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  basePath: "/auth",
+})
+```
+
+### `baseURL`
+
+Base URL of the application used to construct absolute URLs for redirects and API calls. It should include the protocol and domain, and optionally a port if not standard (80 for HTTP, 443 for HTTPS). If not set, Aura Auth attempts to infer it from the request headers, which may not always be reliable.
+
+<Callout type="warning">
+  Setting `baseURL` is recommended for production environments to ensure consistent URL generation. Relying on header inference
+  can lead to incorrect URLs, especially behind proxies or load balancers, which may cause authentication failures or security
+  issues.
+</Callout>
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  baseURL: "https://example.com",
 })
 ```
 
@@ -251,3 +307,73 @@ It matches any port on `https://example.com` (e.g., `https://example.com:3000`, 
 | `https://*.example.com:3000` | `https://app.example.com:3000`, `https://www.example.com:3000` | `https://example.com:3000`, `https://app.example.com:4000`                   |
 | `https://example.com:*`      | `https://example.com:3000`, `https://example.com:4000`         | `https://example.com`, `http://example.com:3000`                             |
 | `https://*.example.com:*`    | `https://app.example.com:3001`, `https://www.example.com:4567` | `https://example.com:3000`, `http://app.example.com:3000`                    |
+
+### `identity`
+
+Defines the identity schema used to validate and manage user identities in Aura Auth. The identity schema specifies the required fields, validation rules, and storage mechanisms for user identities. This allows you to customize how user information is structured and validated during authentication and session management.
+
+Uses the `UserIdentity` zod schema to extend the default identity fields (id, name, email and image) with custom fields relevant to your application. It is also provided the `createIdentity` function to generate a complete identity object from the provided fields, ensuring that all required fields are included and properly formatted.
+
+<Callout>
+When it's added a custom identity schema, it's recommeded to pass the shape of the zod schema to `createAuth`'s generic parameter for better type inference and autocompletion across the library. For example, if you add a `role` field to the identity schema, you can define the auth instance as `createAuth<YourIdentityShape>({ ... })` to have the `role` field available in the types of the user object and other related types.
+</Callout>
+
+```ts title="@/auth" lineNumbers
+import { createAuth, UserIdentity, type InferShape } from "@aura-stack/auth"
+
+const schema = UserIdentity.extend({
+  role: z.enum(["user", "admin"]),
+})
+
+type Shape = InferShape<typeof schema>
+
+export const auth = createAuth<Shape>({
+  oauth: [],
+  identity: {
+    schema,
+    unknownKeys: "strip",
+  },
+})
+```
+
+- `schema`: a zod schema that defines the structure and validation rules for user identities. It extends the default `UserIdentity` schema, allowing you to add custom fields while retaining the required fields (id, name, email, image).
+- `unknownKeys`: (Optional) determines how to handle unknown fields in the identity object. It can be set to `strip` (default) to remove any fields not defined in the schema, `passthrough` to allow unknown fields without validation, or `strict` to throw an error if unknown fields are present.
+- `skipValidation`: (optional) if set to `true`, it skips the validation of the identity schema. This can be useful in scenarios where you want to allow any shape of identity object without enforcing the schema rules, but it should be used with caution as it may lead to inconsistent or invalid identity data.
+
+### `logger`
+
+Enables the built-in logger for debugging and monitoring, with configurable log levels and output formats. The logger supports structured syslog metadata for better insights into authentication events and errors.
+
+The built-in logger prints the metadata following the syslog format, which includes fields like `timestamp`, `level`, `message`, and `msgId` for correlation. Log levels can be set to control the verbosity of logs, and the logger can be enabled or disabled as needed.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  logger: true,
+})
+```
+
+#### Custom Logger
+
+Custom logger to replace the default syslog-based logger. The custom logger must implement the `Logger` interface, which includes methods for different log levels (`debug`, `info`, `warn`, `error`) and supports structured logging with metadata.
+
+```ts title="@/auth" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  logger: {
+    level: "info",
+    log(metadata) {
+      console.log(`[${metadata.message}] - ${metadata.timestamp.toISOString()} - ${metadata.level.toUpperCase()} - `${metadata.msgId}`)
+    },
+  },
+})
+```
+
+<Callout type="tip">
+  The logger can be configured using `LEVEL` and `LOG_LEVEL` environment variables, which set the log level for the built-in
+  logger. Custom loggers can implement their own configuration mechanisms as needed.
+</Callout>

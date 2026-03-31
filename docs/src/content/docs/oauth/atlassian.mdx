@@ -19,7 +19,7 @@ Through this quick start guide you are going to learn and understand the basics 
   - [Installation](#installation)
   - [Environment setup](#environment-setup)
   - [Configure the provider](#configure-the-provider)
-  - [Get HTTP handlers](#get-http-handlers)
+  - [Sign In to Atlassian](#sign-in-to-atlassian)
 - [Resources](#resources)
 
 ---
@@ -81,17 +81,21 @@ Now, it's time to create and consume the Atlassian credentials required and used
 Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
 
 ```bash title=".env" lineNumbers
+# Aura Secret
+AURA_AUTH_SECRET="32-bytes-secret"
+AURA_AUTH_SALT="32-bytes-salt"
+
 # Atlassian Credentials
 AURA_AUTH_ATLASSIAN_CLIENT_ID="atlassian_client_id"
 AURA_AUTH_ATLASSIAN_CLIENT_SECRET="atlassian_client_secret"
 
-# Aura Secret
-AURA_AUTH_SECRET="32-bytes-secret"
 ```
 
 <Callout type="warning">
-  The `AURA_AUTH_SECRET` will recommended to be random and high antropy key to avoid attackers decifer the secret used by the Aura
-  Auth application.
+  The `AURA_AUTH_SECRET` and `AURA_AUTH_SALT` will recommended to be random and high antropy key to avoid attackers decifer the
+  secret used by the Aura Auth application. It requires to be at least 32 bytes long and 4.5 bits of entropy per character, which
+  means it should be a string of at least 43 characters (32 bytes * 8 bits/byte / 4.5 bits/character = ~57.78 characters). You can
+  generate a secure random string using tools like `openssl` or online password generators.
 </Callout>
 
 </Step>
@@ -121,32 +125,63 @@ import { atlassian } from "@aura-stack/auth/oauth/atlassian"
 export const auth = createAuth({
   oauth: [
     atlassian({
-      scope: "read:jira-user", // Custom scopes
+      authorize: {
+        // Custom scopes
+        scope: "read:jira-user",
+      },
     }),
   ],
 })
 
-export const { handlers } = auth
+export const { handlers, api } = auth
 ```
 
 </Step>
 
 <Step>
 
-### Get HTTP Handlers
+### Sign In to Atlassian
+
+Aura Auth provides two ways to interact and consume the authentication logic and flow, the first one is using the provided HTTP handlers (recommended) and the second one is using the programmatic API.
+
+#### Client-side
 
 Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
 
 ```ts title="backend.ts" lineNumbers
 import { handlers } from "@/auth"
 
-export const { GET, POST } = handlers
+export const { GET, POST, PATCH } = handlers
 ```
 
 <Callout>
   The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
   and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
 </Callout>
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "/api/auth",
+})
+
+const signIn = await authClient.signIn("atlassian", {
+  redirectTo: "/dashboard",
+})
+```
+
+#### Server-side
+
+Use the programmatic API object.
+
+```ts title="login.ts" lineNumbers
+import { api } from "@/auth"
+
+const signIn = await api.signIn("atlassian", {
+  redirectTo: "/dashboard",
+})
+```
 
 </Step>
 
