@@ -20,8 +20,8 @@ export interface RateLimiterStorage {
     set(key: string, entry: StorageEntry, ttlMs: number): Promise<void>
 
     /**
-     * Atomically increments the counter at `key` and sets its TTL if the key
-     * does not yet exist. Returns the value *after* the increment.
+     * Atomically increments the counter at `key` and resets its TTL.
+     * Returns the value *after* the increment.
      */
     increment(key: string, ttlMs: number): Promise<number>
 
