@@ -130,9 +130,8 @@ export default async function DashboardPage() {
   // Pass the Next.js header stream into the programmatic API!
   const requestHeaders = await headers()
 
-  // Create a placeholder Request natively to pass headers into Aura Auth
-  const nativeRequest = new Request("http://localhost", { headers: requestHeaders })
-  const session = await api.getSession(nativeRequest)
+  // Pass headers directly to the API
+  const { session } = await api.getSession({ headers: requestHeaders })
 
   if (!session) {
     redirect("/login")
@@ -140,8 +139,8 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1>Welcome back, {session.user.name}</h1>
-      <img src={session.user.image} alt="Profile Avatar" />
+      <h1>Welcome back, {session.user?.name}</h1>
+      <img src={session.user?.image} alt="Profile Avatar" />
     </div>
   )
 }

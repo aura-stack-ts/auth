@@ -27,7 +27,6 @@
   },
   "devDependencies": {
     "@halvaradop/tailwindcss-utilities": "^1.0.0",
-    "@aura-stack/auth": "workspace:*",
     "@tailwindcss/postcss": "catalog:tailwindcss",
     "@types/mdx": "^2.0.13",
     "@types/node": "catalog:node",

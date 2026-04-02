@@ -1,6 +1,6 @@
 ---
 title: Discord Authorization Provider
-description: Add Discord authorization provider to Aura Auth to authentication and authorize
+description: Add Discord authorization provider to Aura Auth to authenticate and authorize
 ---
 
 ## Discord
@@ -37,7 +37,7 @@ The first step is to create and register an OAuth App on the Discord developer c
 2. Click **New Application** and give it a name.
 3. In the sidebar, navigate to the **OAuth2** tab.
 4. Add a redirect URI by clicking **Add Redirect** and inputting `http://localhost:3000/auth/callback/discord`.
-    - *(Make sure to replace `localhost:3000` with your production domain when deploying)*
+   - _(Make sure to replace `localhost:3000` with your production domain when deploying)_
 5. Under the **Client information** section, copy your **Client ID** and click **Reset Secret** or **Generate Secret** to obtain your **Client Secret**.
 
 </Step>

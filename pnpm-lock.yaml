@@ -607,9 +607,6 @@ importers:
         specifier: ^3.4.0
         version: 3.5.0
     devDependencies:
-      '@aura-stack/auth':
-        specifier: workspace:*
-        version: link:../packages/core
       '@halvaradop/tailwindcss-utilities':
         specifier: ^1.0.0
         version: 1.0.1
