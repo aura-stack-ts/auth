@@ -117,7 +117,9 @@ export const auth = createAuth({
     builtInOAuthProviders.github({
       authorize: {
         url: "https://github.com/login/oauth/authorize",
-        scope: "read:user user:email repo",
+        params: {
+          scope: "read:user user:email repo",
+        },
       },
     }),
   ],
@@ -137,7 +139,9 @@ export const auth = createAuth({
     github({
       authorize: {
         url: "https://github.com/login/oauth/authorize",
-        scope: "read:user user:email repo",
+        params: {
+          scope: "read:user user:email repo",
+        },
       },
     }),
   ],

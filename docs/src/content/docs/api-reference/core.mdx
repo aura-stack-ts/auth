@@ -386,17 +386,18 @@ export const auth = createAuth({
 | Return     | Type                               | Description                                                                                                                                                                               |
 | ---------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `handlers` | HTTP handlers (from`createRouter`) | Route handlers you can mount in your app to expose authentication endpoints (`/signIn/:oauth`, `/callback/:oauth`, `/session`, etc.). Mount at your desired base path (default: `/auth`). |
-| `api`      | `AuthAPI`                          | API methods for programmatic interaction with authentication workflows (`getSession`, `signIn`, `signOut`, `updateSession`).                                                                        |
+| `api`      | `AuthAPI`                          | API methods for programmatic interaction with authentication workflows (`getSession`, `signIn`, `signOut`, `updateSession`).                                                              |
 | `jose`     | `JoseInstance`                     | Object that exports JOSE utilities for signing and encrypting JWTs and CSRF tokens.                                                                                                       |
 
 ##### `handlers`
 
-The HTTP handlers are functions that control the logic and flow of the OAuth 2.0 authorization process. Currently, the `GET`, `POST`, and `ALL` methods are exported. `ALL` is a unified handler that consolidates GET and POST into a single entry point. By default, Aura Auth sets the base path to `/auth`. For configuration details, refer to [basePath](/docs/api-reference/core#basepath).
+The HTTP handlers are functions that control the logic and flow of the OAuth 2.0 authorization process. Currently, the `GET`, `POST`, `PATCH`, and `ALL` methods are exported. `ALL` is a unified handler that consolidates the method handlers into a single entry point. By default, Aura Auth sets the base path to `/auth`. For configuration details, refer to [basePath](/docs/api-reference/core#basepath).
 
 ```ts lineNumbers
 type Handlers = {
   GET: (req: Request) => Response | Promise<Response>
   POST: (req: Request) => Response | Promise<Response>
+  PATCH: (req: Request) => Response | Promise<Response>
   ALL: (req: Request) => Response | Promise<Response>
 }
 ```
@@ -565,6 +566,7 @@ export const authClient = createAuthClient({
 ```
 
 It exposes typing for built-in client functions to handle authentication seamlessly:
+
 - `getSession`: fetches the current session asynchronously.
 - `signIn`: triggers the OAuth flow by redirecting the user to `signIn/:provider`.
 - `signOut`: hits the `/signOut` route appending the required CSRF tokens.

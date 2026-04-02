@@ -1,0 +1,111 @@
+---
+title: TypeScript
+description: Learn how to configure Aura Auth with TypeScript.
+---
+
+Aura Auth is built with TypeScript, providing type safety and autocompletion for a better development experience. This guide walks you through configuring Aura Auth with TypeScript, ensuring you can leverage its full potential in your projects.
+
+## Overview
+
+Aura Auth uses TypeScript generics to let you define the shape of the data it shares and manages. The library is designed to preserve type inference across its data, functions, and methods, but you can also provide your own types to improve type safety and autocompletion in your TypeScript applications.
+
+## TypeScript Configuration
+
+### Strict Mode
+
+Enable strict mode in your `tsconfig.json` file so TypeScript checks types more strictly and gives you stronger type safety and autocompletion.
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "strict": true,
+    "alwaysStrict": true
+  }
+}
+```
+
+### Aliases
+
+Define path aliases in your `tsconfig.json` to simplify imports and improve code readability.
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+```
+
+### Type and Linter Checking
+
+Enable type and lint checking to enforce clean code and catch potential issues early.
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true
+  }
+}
+```
+
+## User Schema
+
+The `identity.schema` configuration option lets you define the validation schema for user identity data. By default, Aura Auth accepts a flexible identity shape, but you can provide your own schema to enforce a specific structure and set of fields.
+
+```ts title="lib/auth.ts" lineNumbers
+import { createAuth, UserIdentity, type InferAuthIdentity, type InferShape } from "@aura-stack/auth"
+import { z } from "zod"
+
+const schema = UserIdentity.extend({
+  role: z.enum(["admin", "user"]),
+  permissions: z.array(z.string()),
+})
+
+export const auth = createAuth<InferShape<typeof schema>>({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+
+export type UserSession = InferAuthIdentity<typeof auth>
+```
+
+- `InferShape<typeof schema>`: Extracts the shape of the identity schema so the custom fields are inferred correctly.
+- `InferAuthIdentity<typeof auth>`: Infers the user identity type from the configured `createAuth` instance.
+
+Aura Auth infers the type of `identity.schema` and uses it internally. The inferred type is also exposed through the `jose` and `api` utilities.
+
+```ts title="lib/utils.ts" lineNumbers
+import { auth } from "@/lib/auth"
+
+const jws = await auth.jose.signJWS({
+  sub: "1234567890",
+  name: "John Doe",
+  email: "johndoe@example.com",
+  role: "admin",
+  permissions: ["read", "write"],
+})
+
+/**
+ * Infer the type of the user session.
+ * - role is inferred as "admin" | "user"
+ * - permissions is inferred as string[]
+ */
+const session = await auth.api.getSession({
+  headers: {},
+})
+
+if (session.authenticated) {
+  const { role, permissions } = session.session
+}
+```

@@ -5,21 +5,20 @@ description: Add Strava authorization provider to Aura Auth to authentication an
 
 ## Strava
 
-Set up `Strava` authorization provider to the authentication instance to Aura Auth.
+Set up the `Strava` authorization provider in your Aura Auth instance.
 
 ---
 
-## What you'll learn
+## What you'll build
 
-Through this quick start guide you are going to learn and understand the basics and how to set up `Strava` provider to Aura Auth.
+Through this quick start guide you are going to learn and understand the basics and how to set up the `Strava` provider for Aura Auth.
 
-- [strava OAuth App](#strava-oauth-app)
-  - [Creating an OAuth App](#creating-an-oauth-app)
-- [strava Aura Auth](#strava-aura-auth)
-  - [Installation](#installation)
-  - [Environment setup](#environment-setup)
-  - [Configure the provider](#configure-the-provider)
-  - [Sign In to Atlassian](#sign-in-to-atlassian)
+- [Strava OAuth App](#strava-oauth-app)
+- [Installation](#installation)
+- [Environment setup](#environment-setup)
+- [Configure the Auth Instance](#configure-the-auth-instance)
+- [Customizing the OAuth Provider](#customizing-the-oauth-provider)
+- [Sign In to Strava (Client & Server)](#sign-in-to-strava-client--server)
 - [Resources](#resources)
 
 ---
@@ -30,30 +29,26 @@ Through this quick start guide you are going to learn and understand the basics 
 
 ## Strava OAuth App
 
-### Creating an OAuth app
+### Register the Application
 
-The first step is create and register a [`Strava App`](https://www.strava.com/settings/api) to grant to have access to the user's accessible resources like `Get Authenticated Athlete` (Used by Aura Auth), `Activities`, `Clubs`, `Routes`, `Segments` etc. For more detailed information read [Getting Started with the Strava API](https://developers.strava.com/docs/getting-started/#account), [Strava Authentication](https://developers.strava.com/docs/authentication/) and [Strava API v3](https://developers.strava.com/docs/reference/).
+The first step is to create and register an OAuth App on the Strava developer console to obtain access to the user's resources.
 
-Registering an Strava OAuth app includes:
-
-- `Application Name`: The name displayed when users authorize the app.
-- `Category`: The application category (Charity, Data Importer, Indoor, Mobile App, Performance Analysis, Prints, Social Motivation, Training, Visualizer, or Wellness).
-- `Club`: The club associated with the application (based on the creating account).
-- `Website`: The application's home URL.
-- `Application Description`: A description of the application.
-- `Authorization Callback Domain`: The domain where Strava redirects after authorization. It should end with `/auth/callback/strava` for both local and production environments.
-  - Local: `http://localhost:3000/auth/callback/strava`
-  - Production: Set to your application's production URL.
+1. Navigate to your Strava profile Settings and go to **My API Application**.
+2. If you don't have an application yet, click **Create Application**.
+3. Fill out the application details (Name, Category, Website).
+4. For the **Authorization Callback Domain**, enter the domain that hosts the callback (e.g., `localhost`).
+    - Note: Strava validates by domain, not a full URI, so `localhost` represents `http://localhost:3000/auth/callback/strava`.
+    - *(Make sure to replace `localhost` with your production domain when deploying)*
+5. Click **Create**.
+6. On the application page, you can now copy your **Client ID** and **Client Secret**.
 
 </Step>
 
 <Step>
 
-## Strava Aura Auth
+## Installation
 
-### Installation
-
-install the package using a package manager like `npm`, `pnpm` or `yarn`
+Install the package using a package manager like `npm`, `pnpm`, or `yarn`:
 
 ```npm
 npm install @aura-stack/auth
@@ -63,81 +58,156 @@ npm install @aura-stack/auth
 
 <Step>
 
-### Environment setup
+## Environment setup
 
-Now, it's time to create and consume the strava credentials required and used by Aura Auth, it include the `client Id` and `client Secret` and write them into a `.env` file.
-
-Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+Now, you must configure the environment variables required by Aura Auth, including the Strava credentials and the encryption secrets.
 
 ```bash title=".env" lineNumbers
-# strava Credentials
-AURA_AUTH_STRAVA_CLIENT_ID="strava_client_id"
-AURA_AUTH_STRAVA_CLIENT_SECRET="strava_client_secret"
+# Aura Secrets
+AURA_AUTH_SECRET="your-32-byte-secret"
+AURA_AUTH_SALT="your-32-byte-salt"
 
-# Aura Secret
-AURA_AUTH_SECRET="32-bytes-secret"
+# Strava Credentials
+AURA_AUTH_STRAVA_CLIENT_ID="your_strava_client_id"
+AURA_AUTH_STRAVA_CLIENT_SECRET="your_strava_client_secret"
 ```
 
-<Callout type="warning">
-  The `AURA_AUTH_SECRET` will recommended to be random and high antropy key to avoid attackers decifer the secret used by the Aura
-  Auth application.
+<Callout type="warn">
+  **CRITICAL SECURITY WARNING:** The `AURA_AUTH_SECRET` and `AURA_AUTH_SALT` variables are used to encrypt and sign user sessions.
+  These MUST be securely generated, highly randomized strings consisting of at least 32 bytes to ensure adequate entropy. Never
+  hardcode these values in your repository. Use a secure generator (like `openssl rand -base64 32`) to create them, and store them
+  exclusively in your secure environment variables manager.
 </Callout>
 
 </Step>
 
 <Step>
 
-### Configure the provider
+## Configure the Auth Instance
 
-Set the `oauth` option of the `createAuth` instance. You can use the provider name as a string to use default settings, or use the `strava` factory function to customize the configuration.
+Configure the `createAuth` instance inside an `auth.ts` file located at the root of your project. Ensure you explicitly export the `handlers`, `api`, and `jose` objects.
 
-#### Default configuration
-
-```ts title="@/auth" lineNumbers
+```ts title="auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["strava"],
 })
 
-export const { handlers } = auth
+// Extract the required utilities
+export const { handlers, api, jose } = auth
 ```
 
-#### Custom configuration
+<Callout type="info">
+  The `handlers` object contains mapping utilities for standard HTTP methods (`GET`, `POST`, `PATCH`) as well as a unified `ALL`
+  handler. This allows you to easily mount the authentication routes across any framework (Next.js, Elysia, Express, etc.).
+</Callout>
 
-```ts title="@/auth" lineNumbers
+</Step>
+
+<Step>
+
+## Customizing the OAuth Provider
+
+If you need to define custom scopes, change the response type, or map profile data differently, you can use the provider's factory function instead of a simple string identifier.
+
+```ts title="auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 import { strava } from "@aura-stack/auth/oauth/strava"
 
 export const auth = createAuth({
   oauth: [
     strava({
-      scope: "read,activity:read_all", // Custom scopes
+      authorize: {
+        params: {
+          // Override default scopes
+          scope: "read,profile:read_all",
+        },
+      },
     }),
   ],
 })
 
-export const { handlers } = auth
+export const { handlers, api, jose } = auth
 ```
 
 </Step>
 
 <Step>
 
-#### Client-side
+## Sign In to Strava (Client & Server)
 
-Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
+There are multiple ways to trigger the sign-in flow depending on your ecosystem.
 
-```ts title="backend.ts" lineNumbers
-import { handlers } from "@/auth"
+### Sign-in Path (Direct Navigation)
 
-export const { GET, POST } = handlers
+The common route to trigger the auth flow natively without needing a client library is simply navigating the browser to:
+`http://localhost:3000/auth/signIn/strava`
+
+---
+
+### Client-Side (React, Vue, etc.)
+
+You can utilize the `createAuthClient` utility to programmatically trigger sign-ins. You can also define a `redirectTo` destination.
+
+<Callout type="warn">
+  **Constraint Rule**: The `baseURL` passed into `createAuthClient` MUST exactly match the root domain and path where the HTTP
+  `handlers` expose their endpoints on the server.
+</Callout>
+
+```ts title="components/Login.tsx" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "http://localhost:3000/auth",
+})
+
+const triggerSignIn = async () => {
+  await authClient.signIn("strava", {
+    redirectTo: "/dashboard",
+  })
+}
 ```
 
-<Callout>
-  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
-  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
-</Callout>
+---
+
+### Server-Side (Next.js Actions, Remix Loaders, etc.)
+
+For environments supporting server-side actions, use the programmatic `api.signIn` method securely.
+
+```ts title="actions.ts" lineNumbers
+import { api } from "./auth"
+
+export const serverSignIn = async () => {
+  const response = await api.signIn("strava", {
+    redirectTo: "http://localhost:3000/dashboard",
+  })
+
+  // Example returning redirect location
+  return response.headers.get("Location")
+}
+```
+
+---
+
+### Session Retrieval
+
+After a user successfully signs in, you can retrieve their session data securely.
+
+**Client-Side:**
+
+```ts
+const session = await authClient.getSession()
+console.log(session?.user) // The authenticated user profile
+```
+
+**Server-Side:**
+
+```ts
+// Note: You must pass the native Web Request object or Headers!
+const session = await api.getSession(request)
+console.log(session?.user) // Safely retrieved backend session
+```
 
 </Step>
 
@@ -148,8 +218,4 @@ export const { GET, POST } = handlers
 ## Resources
 
 - [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
-- [Strava - Getting Started with the Strava API](https://developers.strava.com/docs/getting-started/)
-- [Strava - My Applications](https://www.strava.com/settings/api)
-- [Strava - Authentication](https://developers.strava.com/docs/authentication/)
-- [Strava - API Application](https://www.strava.com/settings/api)
-- [Strava - API Reference](https://developers.strava.com/docs/reference/)
+- [Strava - Authorizing OAuth Apps](https://developers.strava.com/docs/authentication/)
