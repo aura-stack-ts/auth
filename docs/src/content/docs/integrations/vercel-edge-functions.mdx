@@ -1,0 +1,114 @@
+---
+title: Vercel Edge Functions
+description: Build your first authentication flow with Aura Auth and Vercel Edge Functions
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** directly with **Vercel Edge Functions**.
+
+## Overview
+
+Vercel Edge Functions run on the Edge Runtime, which supports web-standard APIs, including the `Request` and `Response` interfaces.
+
+Before continuing, complete the installation and initial setup:
+
+- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
+- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+
+Then use this guide to integrate Aura Auth with a Vercel Edge Function using best practices.
+
+<Steps>
+
+<Step>
+
+### Project Structure
+
+```files
+vercel-app
+├── api
+│   ├── auth
+│   │   └── index.ts
+│   ├── _auth.ts
+│   └── index.ts
+├── package.json
+├── tsconfig.json
+└── vercel.json
+```
+
+</Step>
+
+<Step>
+
+### Create an Auth Instance
+
+Create an `_auth.ts` file in your project to configure authentication.
+
+```ts title="api/_auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers } = auth
+```
+
+<Callout type="warning">`basePath` must match the route you expose in your Vercel app.</Callout>
+
+</Step>
+
+<Step>
+
+### Integrate with Vercel Edge Functions
+
+Route auth traffic to a single edge function and pass the native `Request` directly to Aura Auth.
+
+```ts title="api/auth/index.ts" lineNumbers
+import { handlers } from "@/api/_auth"
+
+export const GET = async (request: Request) => {
+  return await handlers.GET(request)
+}
+
+export const POST = async (request: Request) => {
+  return await handlers.POST(request)
+}
+
+export const PATCH = async (request: Request) => {
+  return await handlers.PATCH(request)
+}
+```
+
+</Step>
+
+<Step>
+
+### Configure Vercel
+
+Create a `vercel.json` file to configure your Vercel deployment. This example rewrites auth routes to your edge function entrypoint.
+
+```json title="vercel.json"
+{
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/auth/:action",
+      "destination": "/api/auth"
+    },
+    {
+      "source": "/api/auth/:action/:provider",
+      "destination": "/api/auth"
+    }
+  ]
+}
+```
+
+</Step>
+
+</Steps>

@@ -1,0 +1,91 @@
+---
+title: Cloudflare Workers
+description: Build your first authentication flow with Aura Auth and Cloudflare Workers
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** with **Cloudflare Workers**.
+
+## Overview
+
+Cloudflare Workers use the Fetch API (`Request` and `Response`), which matches Aura Auth's framework-agnostic design.
+
+Before continuing, complete the installation and initial setup:
+
+- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
+- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+
+Then use this guide to integrate Aura Auth with a Cloudflare Worker using best practices.
+
+<Steps>
+
+<Step>
+
+### Project Structure
+
+```files
+cloudflare-app
+├── src
+│   ├── lib
+│   │   └── auth.ts
+│   └── index.ts
+├── tsconfig.json
+├── package.json
+└── wrangler.jsonc
+```
+
+</Step>
+
+<Step>
+
+### Secret Variables Setup
+
+Using the `wrangler` CLI or the Cloudflare dashboard, add the required secret environment variables. Workers read secrets from the `env` argument rather than `process.env`.
+
+```bash
+npx wrangler secret put AURA_AUTH_SECRET
+npx wrangler secret put AURA_AUTH_SALT
+npx wrangler secret put AURA_AUTH_GITHUB_CLIENT_ID
+npx wrangler secret put AURA_AUTH_GITHUB_CLIENT_SECRET
+```
+
+As a second option, you can define the variables locally in a `.env` file and generate the `Env` type with the `wrangler` CLI:
+
+```bash
+wrangler types
+```
+
+</Step>
+
+<Step>
+
+### Initialize Aura Auth per Request
+
+Because Workers pass environment variables into the `fetch` execution context, keep your auth setup in a separate module and route `/api/auth/*` requests to `handlers.ALL`.
+
+```ts title="src/index.ts" lineNumbers
+import { handlers } from "@/lib/auth"
+
+export default {
+  async fetch(request: Request): Promise<Response> {
+    const pathname = new URL(request.url).pathname
+    if (pathname.startsWith("/api/auth/")) {
+      return await handlers.ALL(request)
+    }
+    return new Response("Not Found", { status: 404 })
+  },
+} satisfies ExportedHandler<Env>
+```
+
+</Step>
+
+<Step>
+
+### Securing the Worker edge cases
+
+Because edge workers execute globally across multiple locations, standard Node.js APIs are not always available.
+
+Aura Auth is runtime-agnostic and uses the Web Crypto API and web standards, so it works without `node:crypto` imports in your Worker deployment.
+
+</Step>
+
+</Steps>

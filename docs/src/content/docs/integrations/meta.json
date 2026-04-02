@@ -1,0 +1,22 @@
+{
+  "title": "Integrations",
+  "pages": [
+    "---Frontend---",
+    "astro",
+    "next",
+    "nuxt",
+    "react-router",
+    "tanstack-start",
+    "---Backend---",
+    "bun",
+    "deno",
+    "elysia",
+    "express",
+    "hono",
+    "oak",
+    "---Edge---",
+    "cloudflare-workers",
+    "supabase-edge-functions",
+    "vercel-edge-functions"
+  ]
+}

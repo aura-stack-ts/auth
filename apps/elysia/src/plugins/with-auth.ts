@@ -7,7 +7,7 @@ export const withAuthPlugin = new Elysia({ name: "with-auth" })
             const session = await api.getSession({
                 headers: ctx.request.headers,
             })
-            if (!session!.authenticated) {
+            if (!session.authenticated) {
                 return { session: null }
             }
             return { session }

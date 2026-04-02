@@ -1,0 +1,99 @@
+---
+title: React Router (Remix)
+description: Build your first authentication flow with Aura Auth and React Router v7
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** in a **React Router v7** (formerly Remix) application.
+
+## Overview
+
+React Router API loaders and actions run on the server and receive the native Web `Request` object. This makes integrating Aura Auth a breeze by exporting loaders and actions directly from the unified handlers.
+
+<Steps>
+
+<Step>
+
+### Install Aura Auth
+
+Install the package in your React Router project:
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Create an Auth Configuration
+
+Create an `app/auth.server.ts` file. Notice the `.server.ts` extension ensures this code is never bundled with client-side code.
+
+```ts title="app/auth.server.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  // Assumes process.env or context access depending on your deployment adapter
+  secret: process.env.AURA_AUTH_SECRET!,
+})
+```
+
+</Step>
+
+<Step>
+
+### Integrate the Handlers
+
+React Router requires a splat route to capture all authentication endpoints (like `/auth/signIn/github`, `/auth/session`, `/auth/callback/...`).
+
+Create `app/routes/auth.$.tsx`.
+
+```ts title="app/routes/auth.$.tsx" lineNumbers
+import { auth } from "../auth.server"
+import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router"
+
+// Handle all GET requests (signIn, callback, session csrfToken)
+export async function loader({ request }: LoaderFunctionArgs) {
+  return auth.handlers.GET(request)
+}
+
+// Handle all POST requests (signOut, callback if configured)
+export async function action({ request }: ActionFunctionArgs) {
+  return auth.handlers.POST(request)
+}
+```
+
+<Callout type="info">Aura Auth will now elegantly handle any Request interacting with the `/auth/*` baseline boundary.</Callout>
+
+</Step>
+
+<Step>
+
+### Accessing secure session data
+
+Within any other loader/action, use the underlying `getSession` programmatically to check authentication dynamically without a fetch cascade.
+
+```ts title="app/routes/dashboard.tsx" lineNumbers
+import { redirect } from "react-router"
+import { auth } from "../auth.server"
+import type { LoaderFunctionArgs } from "react-router"
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const session = await auth.api.getSession(request);
+
+  if (!session) {
+    throw redirect("/login");
+  }
+
+  return { user: session.user };
+}
+
+export default function Dashboard() {
+  return <h1>Dashboard Loaded!</h1>
+}
+```
+
+</Step>
+
+</Steps>

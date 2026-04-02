@@ -1,0 +1,137 @@
+---
+title: Deno
+description: Authenticate users in your TypeScript applications with Aura Auth and Deno's native server
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** directly with **Deno**.
+
+## Overview
+
+Aura Auth and Deno both follow the web-standard `Request` and `Response` interfaces for high-performance HTTP handling. This means Aura Auth works out of the box with `Deno.serve`, with no external adapters or frameworks required.
+
+Before continuing, complete the installation and initial setup:
+
+- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
+- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+
+Then use this guide to integrate Aura Auth with a Deno server using best practices.
+
+<Steps>
+
+<Step>
+
+### Project Structure
+
+```files
+deno-app
+├── src
+│   ├── lib
+│   │   └── auth.ts
+│   └── index.ts
+└── deno.json
+```
+
+</Step>
+
+<Step>
+
+### Create an Auth Instance
+
+Create `auth.ts` in `src/lib/` and configure the OAuth providers and options for your Aura Auth instance.
+
+```ts title="lib/auth.ts"
+import { createAuth } from "npm:@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers } = auth
+```
+
+<Callout type="warning">`basePath` must match the route you expose in Deno.serve.</Callout>
+
+</Step>
+
+<Step>
+
+### Integrate with Deno.serve
+
+Define auth routes directly in `Deno.serve`. Any request matching `/api/auth/*` is handled by `handlers.ALL`.
+
+```ts title="index.ts" lineNumbers
+import { handlers } from "./lib/auth.ts"
+
+Deno.serve({ port: 3000 }, async (request) => {
+  const pathname = new URL(request.url).pathname
+
+  if (pathname.startsWith("/api/auth/")) {
+    return await handlers.ALL(request)
+  }
+
+  return new Response("Not Found", { status: 404 })
+})
+```
+
+</Step>
+
+<Step>
+
+### Protecting Routes
+
+Deno does not include framework-style middleware, but you can protect routes with a small helper-style handler that validates the current session.
+
+```ts title="index.ts" lineNumbers
+import { auth, handlers } from "./lib/auth.ts"
+
+Deno.serve({ port: 3000 }, async (request) => {
+  const pathname = new URL(request.url).pathname
+
+  switch (pathname) {
+    case "/api/protected": {
+      const session = await auth.api.getSession({
+        headers: request.headers,
+      })
+      if (!session.authenticated) {
+        return Response.json(
+          {
+            error: "Unauthorized",
+            message: "Active session required.",
+          },
+          { status: 401 }
+        )
+      }
+
+      return Response.json({
+        message: "You have access to this protected resource.",
+        session,
+      })
+    }
+
+    default: {
+      if (pathname.startsWith("/api/auth/")) {
+        return await handlers.ALL(request)
+      }
+
+      return new Response("Not Found", { status: 404 })
+    }
+  }
+})
+```
+
+</Step>
+
+<Step>
+
+### Run the App
+
+Deno enforces security by default. Make sure you allow reading from the environment and receiving network connections.
+
+```bash
+deno run --allow-net --allow-env src/index.ts
+```
+
+</Step>
+
+</Steps>

@@ -1,0 +1,93 @@
+---
+title: Astro
+description: Build your first authentication flow with Aura Auth and Astro
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** in an **Astro** application.
+
+## Overview
+
+Astro's API endpoints (`pages/api/...`) natively receive and return Web Standard `Request` and `Response` objects, making it a perfect fit for Aura Auth's unified handlers.
+
+<Steps>
+
+<Step>
+
+### Install Aura Auth
+
+Install the package:
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Create an Auth Configuration
+
+Set up your core configuration file anywhere securely accessible to your server endpoints.
+
+```ts title="src/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  secret: import.meta.env.AURA_AUTH_SECRET,
+})
+```
+
+</Step>
+
+<Step>
+
+### Integrate with Astro's API routes
+
+Create a catch-all route under your API directory `src/pages/api/auth/[...auth].ts`. We export the `ALL` handler to automatically take care of GET, POST, and other HTTP methods.
+
+```ts title="src/pages/api/auth/[...auth].ts" lineNumbers
+import { auth } from "../../../auth"
+import type { APIRoute } from "astro"
+
+export const ALL: APIRoute = ({ request }) => {
+  return auth.handlers.ALL(request)
+}
+```
+
+<Callout type="info">
+  Ensure your `basePath` option in `createAuth` matches the actual route (`/api/auth`) if you place it outside the standard root
+  `/auth` path.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Access the Session in Astro Components
+
+You can retrieve the session during Server-Side Rendering (SSR) directly in your Astro component's frontmatter!
+
+```astro title="src/pages/dashboard.astro" lineNumbers
+---
+import { auth } from "../auth";
+
+// Pass Astro.request to interact natively with headers
+const session = await auth.api.getSession(Astro.request);
+
+if (!session) {
+  return Astro.redirect("/login");
+}
+---
+
+<html lang="en">
+  <body>
+    <h1>Welcome, {session.user.name}!</h1>
+    <img src={session.user.image} alt="Avatar" />
+  </body>
+</html>
+```
+
+</Step>
+
+</Steps>

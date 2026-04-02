@@ -1,3 +1,4 @@
+
 import { handlers } from "../_auth.js"
 
 export const GET = async (request: Request) => {

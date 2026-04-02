@@ -1,0 +1,125 @@
+---
+title: TanStack Start
+description: Build your first authentication flow with Aura Auth and TanStack Start
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** in a **TanStack Start** application (integrating with Vinxi).
+
+## Overview
+
+TanStack Start server functions and API routes natively utilize the Web Standard `Request` and `Response` interfaces by wrapping the underlying Vinxi/Nitro engine.
+
+<Steps>
+
+<Step>
+
+### Install Aura Auth
+
+Install the package in your TanStack project:
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Create an Auth Configuration
+
+Create your `auth.ts` instance inside your project server structure.
+
+```ts title="app/server/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  secret: process.env.AURA_AUTH_SECRET!,
+})
+```
+
+</Step>
+
+<Step>
+
+### Exposing Authentication API Routes
+
+TanStack Start generates API routes inside the `app/api` directory using Vinxi. You can create a catch-all route that proxies the standard Web Request into Aura Auth.
+
+```ts title="app/api/auth/[...auth].ts" lineNumbers
+import { eventHandler, toWebRequest } from "@tanstack/start/server"
+import { auth } from "../../server/auth"
+
+// Export the catch-all event handler
+export default eventHandler((event) => {
+  const request = toWebRequest(event)
+
+  // Pass it directly to Aura Auth's ALL handler
+  return auth.handlers.ALL(request)
+})
+```
+
+</Step>
+
+<Step>
+
+### Reading Session Securely
+
+You can verify the session securely via an SSR loader or server function by checking the incoming headers programmatically.
+
+```ts title="app/routes/protected.tsx" lineNumbers
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createServerFn } from "@tanstack/start"
+import { getWebRequest } from "@tanstack/start/server"
+import { auth } from "../server/auth"
+
+const checkAuth = createServerFn("GET", async () => {
+  const request = getWebRequest()
+  const session = await auth.api.getSession(request)
+
+  if (!session) {
+    throw redirect({ to: "/login" })
+  }
+
+  return session.user
+})
+
+export const Route = createFileRoute("/protected")({
+  loader: async () => await checkAuth(),
+  component: ProtectedComponent,
+})
+
+function ProtectedComponent() {
+  const user = Route.useLoaderData()
+  return <h1>Protected Dashboard for {user.name}</h1>
+}
+```
+
+</Step>
+
+<Step>
+
+### Using Client Methods
+
+To perform client-side sign-ins or logouts smoothly, initialize `createAuthClient` inside your frontend layout or components.
+
+```ts title="app/components/LoginButton.tsx" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+const authClient = createAuthClient({
+  baseURL: "http://localhost:3000",
+  basePath: "/api/auth"
+})
+
+export function LoginButton() {
+  return (
+    <button onClick={() => authClient.signIn("github")}>
+      Sign In With GitHub
+    </button>
+  )
+}
+```
+
+</Step>
+
+</Steps>

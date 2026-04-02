@@ -1,0 +1,126 @@
+---
+title: Supabase Edge Functions
+description: Build your first authentication flow with Aura Auth and Supabase Edge Functions
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** in **Supabase Edge Functions** (built on Deno).
+
+## Overview
+
+Supabase Edge Functions run on Deno and use the web-standard Fetch API (`Request` and `Response`). Aura Auth works out of the box with this runtime model.
+
+Before continuing, complete the installation and initial setup:
+
+- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
+- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+
+Then use this guide to integrate Aura Auth with a Supabase Edge Function using best practices.
+
+<Steps>
+
+<Step>
+
+### Project Structure
+
+```files
+supabase-app
+├── functions
+│   ├── _shared
+│   │   └── auth.ts
+│   ├── auth
+│   │   ├── deno.json
+│   │   └── index.ts
+├── config.toml
+└── package.json
+```
+
+</Step>
+
+<Step>
+
+### Set up `config.toml`
+
+This defines the edge function's route and permissions. Ensure the `index.ts` entrypoint is correctly referenced.
+
+```toml title="config.toml"
+[functions.auth]
+enabled = true
+# disable JWT verification for faster local development. DO NOT disable in production.
+verify_jwt = false
+import_map = "./functions/auth/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/auth/index.ts"
+```
+
+</Step>
+
+<Step>
+
+### Create an Auth Instance
+
+Create an `auth.ts` file in your project to configure authentication.
+
+```ts title="supabase-app/functions/_shared/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers, api } = auth
+```
+
+<Callout type="warning">`basePath` must match the route you expose in your Supabase function.</Callout>
+
+</Step>
+
+<Step>
+
+### Integrate with `Deno.serve`
+
+Using Supabase Edge Function execution, define your handler with `Deno.serve`.
+
+```ts title="supabase/functions/auth/index.ts" lineNumbers
+import { handlers, api } from "../_shared/auth.ts"
+
+// Follow this setup guide to integrate the Deno language api with your editor:
+// https://deno.land/manual/getting_started/setup_your_environment
+// This enables autocomplete, go to definition, etc.
+import "@supabase/functions-js/edge-runtime.d.ts"
+
+Deno.serve(async (request) => {
+  const pathname = new URL(request.url).pathname
+  switch (pathname) {
+    case "/api/protected": {
+      const session = await api.getSession({
+        headers: request.headers,
+      })
+      if (!session.authenticated) {
+        return Response.json(
+          {
+            error: "Unauthorized",
+            message: "Active session required.",
+          },
+          { status: 401 }
+        )
+      }
+      return Response.json({
+        message: "You have access to this protected resource.",
+        session: session.session,
+      })
+    }
+    default: {
+      if (pathname.startsWith("/api/auth/")) {
+        return await handlers.ALL(request)
+      }
+      return new Response("Not Found", { status: 404 })
+    }
+  }
+})
+```
+
+</Step>
+
+</Steps>

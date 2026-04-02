@@ -1,0 +1,119 @@
+---
+title: Bun
+description: Authenticate users in your TypeScript applications with Aura Auth and Bun's native server
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** directly with the **Bun native `serve`** API.
+
+## Overview
+
+Aura Auth and Bun both follow the web-standard `Request` and `Response` interfaces for high-performance HTTP handling. This means Aura Auth works out of the box with `Bun.serve`, with no external adapters or frameworks required.
+
+Before continuing, complete the installation and initial setup:
+
+- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
+- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+
+Then use this guide to integrate Aura Auth with a Bun server using best practices.
+
+<Steps>
+
+<Step>
+
+### Project Structure
+
+```files
+bun-app
+├── src
+│   ├── lib
+│   │   └── auth.ts
+│   └── index.ts
+├── tsconfig.json
+└── package.json
+```
+
+</Step>
+
+<Step>
+
+### Create an Auth Instance
+
+Create `auth.ts` in `src/lib/` and configure the OAuth providers and options for your Aura Auth instance.
+
+```ts title="lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers } = auth
+```
+
+<Callout type="warning">`basePath` must match the route you expose in Bun.serve.</Callout>
+
+</Step>
+
+<Step>
+
+### Integrate with Bun.serve
+
+Define auth routes directly in `Bun.serve`. Any request matching `/api/auth/*` is handled by `handlers.ALL`.
+
+```ts title="index.ts" lineNumbers
+import { handlers } from "@/lib/auth"
+
+Bun.serve({
+  port: 3000,
+  routes: {
+    "/api/auth/*": handlers.ALL,
+  },
+})
+
+console.log("Bun server running on http://localhost:3000")
+```
+
+</Step>
+
+<Step>
+
+### Protecting Routes
+
+Bun does not include framework-style middleware, but you can protect routes with a small helper-style handler that validates the current session.
+
+```ts title="index.ts" lineNumbers
+import { auth, handlers } from "@/lib/auth"
+
+Bun.serve({
+  port: 3000,
+  routes: {
+    "/api/auth/*": handlers.ALL,
+    "/api/protected": async (request) => {
+      const session = await auth.api.getSession({
+        headers: request.headers,
+      })
+      if (!session.authenticated) {
+        return Response.json(
+          {
+            error: "Unauthorized",
+            message: "Active session required.",
+          },
+          { status: 401 }
+        )
+      }
+
+      return Response.json({
+        message: "You have access to this protected resource.",
+        session,
+      })
+    },
+  },
+})
+
+console.log("Bun server running on http://localhost:3000")
+```
+
+</Step>
+
+</Steps>
