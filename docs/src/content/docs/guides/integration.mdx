@@ -49,6 +49,7 @@ The Auth Instance exposes two main objects:
 
 - `handlers`: HTTP handlers required for the authentication flow
 - `jose`: cryptographic utilities used internally and by integrations
+- `api`: programmatic API for interact with the authentication flows.
 
 For all configuration options, see [createAuth API Reference](/docs/api-reference/core#create-auth)
 
@@ -66,7 +67,7 @@ export const auth = createAuth({
   basePath: "/auth",
 })
 
-export const { handlers, jose } = auth
+export const { handlers, jose, api } = auth
 ```
 
 These handlers internally provide:
@@ -89,82 +90,38 @@ These handlers internally provide:
 
 The integration must provide support for the server or backend application. Specifically, it is required to mount the HTTP handlers (`handlers`) returned by the Aura Auth instance created via `createAuth`.
 
-These handlers expose the `GET` and `POST` endpoints that implement the Aura Auth protocol and must be registered in a server framework or router capable of dispatching incoming HTTP requests. They handle all interactions between the client application and the Aura Auth authentication flows, including redirects, callbacks, and session-related operations.
+These handlers expose the `GET`, `POST`, `PATCH` and `ALL` (implements the earlier HTTP methods) endpoints that implement the Aura Auth protocol and must be registered in a server framework or router capable of dispatching incoming HTTP requests. They handle all interactions between the client application and the Aura Auth authentication flows, including redirects, callbacks, and session-related operations.
 
 ```ts title="@/server.ts" lineNumbers
 import { handlers } from "@/auth"
 
 export const authRequest = (request: Request) => {
-  const method = request.method
-  if (method === "GET") {
-    return handlers.GET(request)
-  }
-  if (method === "POST") {
-    return handlers.POST(request)
-  }
-  return Response.json(
-    {
-      message: "Bad Request",
-    },
-    { statusCode: 400 }
-  )
+  return handlers.ALL(request)
 }
 ```
 
 #### Sign In (Server) [#sign-in-server]
 
-Signing in is initiated by redirecting the user to the sign-in endpoint. See [Sign In (Client)](#sign-in-client)
+Signing in is initiated by redirecting the user to the sign-in endpoint.
+
+```ts title="@/server.ts" lineNumbers
+import { api } from "@/auth"
+
+const signIn = await api.signIn("github", {
+  redirectTo: "/",
+})
+```
 
 #### Get Session (Server) [#get-session-server]
 
 To retrieve the active session on the server, request the `/session` endpoint. See [Get Session (Client)](#get-session-client)
 
 ```ts title="@/auth/server.ts" lineNumbers
+import { api } from "@/auth"
+
 export const getSession = async () => {
-  const baseURL = getBaseURL()
-  const cookies = getCookies()
-
-  const response = await fetch(`${baseURL}/auth/session`, {
-    method: "GET,
-    cache: "no-store",
-    headers: { "Cookie": cookies }
-  })
-  if (response.ok) {
-    const session = await response.json()
-    return session
-  }
-  return null
-}
-```
-
-<Callout type="warning">
-  On the server side, headers and cookies must be accessed and manipulated explicitly using the built-in APIs provided by the
-  runtime or framework in use. Unlike client-side environments, request headers and cookies are not loaded automatically and must
-  be read directly from the incoming request.
-</Callout>
-
-#### CSRF Token (Server) [#csrf-token-server]
-
-For critical, state-changing actions (such as **Sign Out**), Aura Auth enforces a CSRF protection mechanism to ensure that these operations are initiated by the original user. If a valid CSRF token is not provided, the action will be rejected. For more details, see [CSRF Protection](/docs/concepts/security-model#csrf-protection). and refer also to [CSRF Token in Client](#csrf-token-client).
-
-<Callout>
-  Once the `/csrfToken` endpoint is requested, Aura Auth internally verifies whether a CSRF token has already been generated for
-  the current session. If a token exists, it is validated and reused; otherwise, a new token is generated and stored in the
-  `csrf_token` cookie.
-</Callout>
-
-```ts title="@/auth/server.ts" lineNumbers
-export const getCsrfToken = async () => {
-  const baseURL = getBaseURL()
   const headers = getHeaders()
-
-  const response = await fetch(`${baseURL}/auth/csrfToken`, {
-    method: "GET",
-    cache: "no-store",
-    headers,
-  })
-  const data = await response.json()
-  return data.csrfToken
+  return await api.getSession({ headers })
 }
 ```
 
@@ -177,20 +134,12 @@ export const getCsrfToken = async () => {
 #### Sign Out (Server) [#sign-out-server]
 
 ```ts title="@/auth/server.ts" lineNumbers
-export const signOut = () => {
-  const baseURL = getBaseURL()
-  const cookies = getCookies()
-  const csrfToken = await getCsrfToken()
+import { api } from "@/auth"
 
-  const response = await fetch(`${baseURL}/auth/signOut?token_type_hint=session_token`, {
-    method: "POST",
-    cache: "no-store",
-    headers: {
-      Cookie: cookies,
-      "X-CSRF-Token": csrfToken,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({}),
+export const signOut = () => {
+  const headers = getHeaders()
+  const response = await api.signOut({
+    headers,
   })
   setHeaders(response.headers)
 }
@@ -205,7 +154,15 @@ export const signOut = () => {
 
 ### Client
 
-The client interacts with the endpoints exposed by the mounted HTTP handlers to drive the authentication flow. This includes retrieving the active session, initiating sign-in, signing out the current session, and obtaining the CSRF token required for protected operations.
+Aura Auth provides a Client API that interacts with the endpoints exposed by the mounted HTTP handlers to drive the authentication flow. This includes retrieving the active session, initiating sign-in, signing out the current session, and obtaining the CSRF token required for protected operations.
+
+```ts title="@/lib/auth-client" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "http://localhost:3000",
+})
+```
 
 <Callout>
 
@@ -218,6 +175,16 @@ This behavior differs on the server side, where cookies and headers must be expl
 #### Sign In (Client) [#sign-in-client]
 
 Redirect the user to the sign-in endpoint for the selected provider.
+
+**Client API**
+
+```ts
+import { authClient } from "@/lib/auth-client"
+
+export const signIn = await authClient.signIn("github")
+```
+
+**Form Action**
 
 ```html title="index.html" lineNumbers
 <form action="/auth/signIn/github">
@@ -238,59 +205,19 @@ For more details about the built-in OAuth providers, see [OAuth Providers](/docs
 
 #### Get Session (Client) [#get-session-client]
 
-```ts title="@/auth/client.ts" lineNumbers
-export const getBaseURL = () => {
-  return typeof window !== "undefined" ? window.location.origin : ""
-}
+```ts title="@/lib/auth-client.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
 
-export const getSession = async () => {
-  const baseURL = getBaseURL()
-  const response = await fetch(`${baseURL}/auth/session`)
-  if (response.ok) {
-    const session = await response.json()
-    return session
-  }
-  return null
-}
-```
-
-#### CSRF Token (Client) [#csrf-token-client]
-
-```ts title="@/auth/client.ts" lineNumbers
-export const getCsrfToken = async () => {
-  const baseURL = getBaseURL()
-  const response = await fetch(`${baseURL}/auth/csrfToken`)
-  const data = await response.json()
-  return data.csrfToken
-}
+export const session = await authClient.getSession()
 ```
 
 #### Sign Out (Client) [#sign-out-client]
 
-To sign out the active session, the request must `POST` to `/signOut` endpoint. The request must include the CSRF token, preferably via the `X-CSRF-Token` header.
-
 ```ts title="@/auth/client.ts" lineNumbers
-export const signOut = () => {
-  const baseURL = getBaseURL()
-  const csrfToken = await getCsrfToken()
+import { authClient } from "@/lib/auth-client"
 
-  await fetch(`${baseURL}/auth/signOut?token_type_hint=session_token`, {
-    method: "POST",
-    headers: {
-      "X-CSRF-Token": csrfToken,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({}),
-  })
-
-  window.location.reload()
-}
+export const signOut = await authClient.signOut()
 ```
-
-<Callout type="warning">
-  The `signOut` request must contain the `body` content and `application/json` content-type as a temporary solution to an error
-  caused by `@aura-stack/router` otherwise it will respond with 422 status code (Unprocessable Content).
-</Callout>
 
 ---
 

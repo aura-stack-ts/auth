@@ -1,25 +1,24 @@
 ---
 title: Notion Authorization Provider
-description: Add Notion authorization provider to Aura Auth to authenticate and authorize
+description: Add Notion authorization provider to Aura Auth to authentication and authorize
 ---
 
 ## Notion
 
-Set up `Notion` authorization provider to the authentication instance to Aura Auth.
+Set up the `Notion` authorization provider in your Aura Auth instance.
 
 ---
 
-## What you'll learn
+## What you'll build
 
-Through this quick start guide you are going to learn and understand the basics and how to set up `Notion` provider to Aura Auth.
+Through this quick start guide you are going to learn and understand the basics and how to set up the `Notion` provider for Aura Auth.
 
 - [Notion OAuth App](#notion-oauth-app)
-  - [Creating an OAuth App](#creating-an-oauth-app)
-- [Notion Aura Auth](#notion-aura-auth)
-  - [Installation](#installation)
-  - [Environment setup](#environment-setup)
-  - [Configure the provider](#configure-the-provider)
-  - [Get HTTP handlers](#get-http-handlers)
+- [Installation](#installation)
+- [Environment setup](#environment-setup)
+- [Configure the Auth Instance](#configure-the-auth-instance)
+- [Customizing the OAuth Provider](#customizing-the-oauth-provider)
+- [Sign In to Notion (Client & Server)](#sign-in-to-notion-client--server)
 - [Resources](#resources)
 
 ---
@@ -30,33 +29,26 @@ Through this quick start guide you are going to learn and understand the basics 
 
 ## Notion OAuth App
 
-### Creating an OAuth app
+### Register the Application
 
-The first step is create and register a [`Notion Integration`](https://www.notion.so/profile/integrations/public) to grant to have access to the user's accessible resources like `Retrieve the Bot User` (Used by Aura Auth), `Pages`, `Comments`, `Databases`, etc. For more detailed information read [Get Started Authorization](https://developers.notion.com/guides/get-started/authorization), [Notion Integrations](https://www.notion.so/profile/integrations/public) and [Get Self User](https://developers.notion.com/reference/get-self).
+The first step is to create and register an OAuth App on the Notion developer console to obtain access to the user's resources.
 
-Registering an Notion OAuth app includes:
-
-- `Integration name`: The application name showed when the user tries to grant to the app.
-- `Associated workspace`: The workspace that the app belongs to, it can be changed later.
-- `Company name`: The company name showed when the user tries to grant to the app.
-- `Website`: The URL of the website, it can be changed later.
-- `Tagline`: The tagline of the app, it can be changed later.
-- `Privacy Policy URL`: The URL of the privacy policy, it can be changed later.
-- `Terms of Use URL`: The URL of the terms of use, it can be changed later.
-- `Email`: The email of the developer, it can be changed later.
-- `Authorization URL`: The URL which the Notion will redirect, it should end in `/auth/callback/notion` for local and production environment.
-  - Local environment: `http://localhost:3000/auth/callback/notion`
-  - Production environment: production set the URL of the application.
+1. Navigate to the **Notion My integrations** dashboard.
+2. Click **New integration**.
+3. Give your integration a name, select an associated workspace, and optionally upload a logo.
+4. Scroll down to the **OAuth Domain & URIs** section.
+5. Add your **Redirect URI**: `http://localhost:3000/auth/callback/notion`.
+    - *(Make sure to replace `localhost:3000` with your production domain when deploying)*
+6. Ensure the integration type is set to **Public** to utilize OAuth.
+7. Save changes. Under the **Secrets** tab, you will find your **OAuth client ID** and **OAuth client secret**.
 
 </Step>
 
 <Step>
 
-## Notion Aura Auth
+## Installation
 
-### Installation
-
-install the package using a package manager like `npm`, `pnpm` or `yarn`
+Install the package using a package manager like `npm`, `pnpm`, or `yarn`:
 
 ```npm
 npm install @aura-stack/auth
@@ -66,81 +58,156 @@ npm install @aura-stack/auth
 
 <Step>
 
-### Environment setup
+## Environment setup
 
-Now, it's time to create and consume the Notion credentials required and used by Aura Auth, it include the `client Id` and `client Secret` and write them into a `.env` file.
-
-Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+Now, you must configure the environment variables required by Aura Auth, including the Notion credentials and the encryption secrets.
 
 ```bash title=".env" lineNumbers
-# Notion Credentials
-AURA_AUTH_NOTION_CLIENT_ID="notion_client_id"
-AURA_AUTH_NOTION_CLIENT_SECRET="notion_client_secret"
+# Aura Secrets
+AURA_AUTH_SECRET="your-32-byte-secret"
+AURA_AUTH_SALT="your-32-byte-salt"
 
-# Aura Secret
-AURA_AUTH_SECRET="32-bytes-secret"
+# Notion Credentials
+AURA_AUTH_NOTION_CLIENT_ID="your_notion_client_id"
+AURA_AUTH_NOTION_CLIENT_SECRET="your_notion_client_secret"
 ```
 
-<Callout type="warning">
-  The `AURA_AUTH_SECRET` will recommended to be random and high antropy key to avoid attackers decifer the secret used by the Aura
-  Auth application.
+<Callout type="warn">
+  **CRITICAL SECURITY WARNING:** The `AURA_AUTH_SECRET` and `AURA_AUTH_SALT` variables are used to encrypt and sign user sessions.
+  These MUST be securely generated, highly randomized strings consisting of at least 32 bytes to ensure adequate entropy. Never
+  hardcode these values in your repository. Use a secure generator (like `openssl rand -base64 32`) to create them, and store them
+  exclusively in your secure environment variables manager.
 </Callout>
 
 </Step>
 
 <Step>
 
-### Configure the provider
+## Configure the Auth Instance
 
-Set the `oauth` option of the `createAuth` instance. You can use the provider name as a string to use default settings, or use the `notion` factory function to customize the configuration.
+Configure the `createAuth` instance inside an `auth.ts` file located at the root of your project. Ensure you explicitly export the `handlers`, `api`, and `jose` objects.
 
-#### Default configuration
-
-```ts title="@/auth" lineNumbers
+```ts title="auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["notion"],
 })
 
-export const { handlers } = auth
+// Extract the required utilities
+export const { handlers, api, jose } = auth
 ```
 
-#### Custom configuration
+<Callout type="info">
+  The `handlers` object contains mapping utilities for standard HTTP methods (`GET`, `POST`, `PATCH`) as well as a unified `ALL`
+  handler. This allows you to easily mount the authentication routes across any framework (Next.js, Elysia, Express, etc.).
+</Callout>
 
-```ts title="@/auth" lineNumbers
+</Step>
+
+<Step>
+
+## Customizing the OAuth Provider
+
+If you need to define custom scopes, change the response type, or map profile data differently, you can use the provider's factory function instead of a simple string identifier.
+
+```ts title="auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 import { notion } from "@aura-stack/auth/oauth/notion"
 
 export const auth = createAuth({
   oauth: [
     notion({
-      scope: "read:user user:email repo",
+      authorize: {
+        params: {
+          // Override default scopes
+          scope: "custom_scope_here",
+        },
+      },
     }),
   ],
 })
 
-export const { handlers } = auth
+export const { handlers, api, jose } = auth
 ```
 
 </Step>
 
 <Step>
 
-### Get HTTP Handlers
+## Sign In to Notion (Client & Server)
 
-Use the HTTP handlers to consume the authentication logic and flow the Aura Auth library to be integrated into routers and frameworks.
+There are multiple ways to trigger the sign-in flow depending on your ecosystem.
 
-```ts title="backend.ts" lineNumbers
-import { handlers } from "@/auth"
+### Sign-in Path (Direct Navigation)
 
-export const { GET, POST } = handlers
+The common route to trigger the auth flow natively without needing a client library is simply navigating the browser to:
+`http://localhost:3000/auth/signIn/notion`
+
+---
+
+### Client-Side (React, Vue, etc.)
+
+You can utilize the `createAuthClient` utility to programmatically trigger sign-ins. You can also define a `redirectTo` destination.
+
+<Callout type="warn">
+  **Constraint Rule**: The `baseURL` passed into `createAuthClient` MUST exactly match the root domain and path where the HTTP
+  `handlers` expose their endpoints on the server.
+</Callout>
+
+```ts title="components/Login.tsx" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "http://localhost:3000/auth",
+})
+
+const triggerSignIn = async () => {
+  await authClient.signIn("notion", {
+    redirectTo: "/dashboard",
+  })
+}
 ```
 
-<Callout>
-  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
-  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
-</Callout>
+---
+
+### Server-Side (Next.js Actions, Remix Loaders, etc.)
+
+For environments supporting server-side actions, use the programmatic `api.signIn` method securely.
+
+```ts title="actions.ts" lineNumbers
+import { api } from "./auth"
+
+export const serverSignIn = async () => {
+  const response = await api.signIn("notion", {
+    redirectTo: "http://localhost:3000/dashboard",
+  })
+
+  // Example returning redirect location
+  return response.headers.get("Location")
+}
+```
+
+---
+
+### Session Retrieval
+
+After a user successfully signs in, you can retrieve their session data securely.
+
+**Client-Side:**
+
+```ts
+const session = await authClient.getSession()
+console.log(session?.user) // The authenticated user profile
+```
+
+**Server-Side:**
+
+```ts
+// Note: You must pass the native Web Request object or Headers!
+const session = await api.getSession(request)
+console.log(session?.user) // Safely retrieved backend session
+```
 
 </Step>
 
@@ -151,7 +218,4 @@ export const { GET, POST } = handlers
 ## Resources
 
 - [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
-- [Notion - Developer Documentation](https://developers.notion.com/)
-- [Notion - Authorization](https://developers.notion.com/docs/authorization)
-- [Notion - Authentication](https://developers.notion.com/reference/authentication)
-- [Notion - Retrieve your token's bot user](https://developers.notion.com/reference/get-self)
+- [Notion - Authorizing OAuth Apps](https://developers.notion.com/docs/authorization)

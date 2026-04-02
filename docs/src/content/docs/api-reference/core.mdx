@@ -386,16 +386,19 @@ export const auth = createAuth({
 | Return     | Type                               | Description                                                                                                                                                                               |
 | ---------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `handlers` | HTTP handlers (from`createRouter`) | Route handlers you can mount in your app to expose authentication endpoints (`/signIn/:oauth`, `/callback/:oauth`, `/session`, etc.). Mount at your desired base path (default: `/auth`). |
+| `api`      | `AuthAPI`                          | API methods for programmatic interaction with authentication workflows (`getSession`, `signIn`, `signOut`, `updateSession`).                                                              |
 | `jose`     | `JoseInstance`                     | Object that exports JOSE utilities for signing and encrypting JWTs and CSRF tokens.                                                                                                       |
 
 ##### `handlers`
 
-The HTTP handlers are functions that control the logic and flow of the OAuth 2.0 authorization process. Currently, the `GET` and `POST` methods are exported. By default, Aura Auth sets the base path to `/auth`. For configuration details, refer to [basePath](/docs/api-reference/core#basepath).
+The HTTP handlers are functions that control the logic and flow of the OAuth 2.0 authorization process. Currently, the `GET`, `POST`, `PATCH`, and `ALL` methods are exported. `ALL` is a unified handler that consolidates the method handlers into a single entry point. By default, Aura Auth sets the base path to `/auth`. For configuration details, refer to [basePath](/docs/api-reference/core#basepath).
 
 ```ts lineNumbers
 type Handlers = {
   GET: (req: Request) => Response | Promise<Response>
   POST: (req: Request) => Response | Promise<Response>
+  PATCH: (req: Request) => Response | Promise<Response>
+  ALL: (req: Request) => Response | Promise<Response>
 }
 ```
 
@@ -435,6 +438,10 @@ export interface Session {
 
 The user's session filters out the JWT standard claims (`exp`, `iat`, `jti`, `nbf`) and only returns the user-facing profile data.
 
+###### `POST /auth/session`
+
+Updates default session data from the initial OAuth profile data. Currently supports updates only for the `email`, `name`, and `image` fields, or any fields defined in the `identity.schema`. For broader claim support programmatically, use the `api.updateSession` function.
+
 ###### `GET /auth/csrfToken`
 
 it returns a json which the csrfToken to mitigate CSRF Attacks and used by http methods which could have important operations and logic (`POST`, `PATCH` and `DELETE`). This token is used and required by `/auth/signOut` endpoint to close the active user session. the response follows the next structure:
@@ -464,6 +471,24 @@ new Request("/auth/signOut", {
 <Callout type="info">
   All routes are relative to your configured base path (default: <code>/auth</code>).
 </Callout>
+
+##### `api`
+
+Object that exposes API functions for retrieving sessions and signing out on the server without calling mounted HTTP endpoints, improving resource access in trusted environments like Server Actions or loaders.
+
+```ts lineNumbers
+type AuthAPI = {
+  getSession: (req: Request) => Promise<Session | null>
+  signIn: (providerId: string, options?: SignInOptions) => Promise<Response>
+  signOut: (options?: SignOutOptions) => Promise<Response>
+  updateSession: (req: Request, data: Parital<User>) => Promise<Session | null>
+}
+```
+
+- `getSession`: retrieves the session data securely via headers without hitting the endpoint.
+- `signIn`: initiates an OAuth sign-in flow programmatically on the server.
+- `signOut`: invalidates the active session programmatically on the server.
+- `updateSession`: updates session data fields natively via headers without HTTP calls.
 
 ##### `jose`
 
@@ -522,6 +547,30 @@ import { github, type GitHubProfile } from "@aura-stack/auth/oauth/github"
 import { gitlab, type GitLabProfile } from "@aura-stack/auth/oauth/gitlab"
 import { discord, type DiscordProfile, type Nameplate } from "@aura-stack/auth/oauth/discord"
 ```
+
+---
+
+## Client API
+
+### `createAuthClient(config: ClientConfig)` [#create-auth-client]
+
+Creates an authentication client instance enabling applications to interact with Aura Auth endpoints across the network through a dedicated client interface.
+
+```ts title="@/client" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "http://localhost:3000",
+  basePath: "/api/auth",
+})
+```
+
+It exposes typing for built-in client functions to handle authentication seamlessly:
+
+- `getSession`: fetches the current session asynchronously.
+- `signIn`: triggers the OAuth flow by redirecting the user to `signIn/:provider`.
+- `signOut`: hits the `/signOut` route appending the required CSRF tokens.
+- `updateSession`: sends updated values dynamically to modify the user's active session.
 
 ---
 

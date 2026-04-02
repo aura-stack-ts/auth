@@ -15,6 +15,8 @@ This guide explains the security mechanisms, standards, and defensive strategies
 
 - [Authentication Standards](#authentication-standards)
   - [OAuth 2.0](#oauth-2.0)
+  - [HTTP State Management Mechanism](#http-state-management-mechanism)
+  - [HKDF (Key Derivation)](#hkdf)
 - [Token Management](#token-management)
   - [JWS (JSON Web Signature)](#jws)
   - [JWE (JSON Web Encryption)](#jwe)
@@ -60,6 +62,23 @@ This mechanism prevents authorization code interception attacks. Providers that 
 
 This behavior allows Aura Auth to enforce PKCE universally without reducing provider compatibility.
 
+### HTTP State Management Mechanism
+
+Aura Auth relies on the standard [HTTP State Management Mechanism](https://datatracker.ietf.org/doc/html/rfc6265) for maintaining session state and CSRF tokens. Cookies are configured with strict security attributes to mitigate common web vulnerabilities. so the cookies are configured with strict security flags automatically to provide `secure by default`.
+
+- **HttpOnly**: Prevents JavaScript access (mitigates XSS).
+- **Secure**: Ensures cookies are only sent over HTTPS (except on localhost).
+- **SameSite**: Defaults to `Lax` to balance security (CSRF protection) with usability.
+- **Domain restrictions**: Wildcard domains are never allowed.
+
+Aura Auth validates all cookie configuration options. If an insecure value is provided through `AuthConfig.cookies`, the library emits a warning and applies a secure override.
+
+Detailed configuration options are documented in [AuthConfig.cookies](/docs/configuration/options#cookies).
+
+### HKDF (Key Derivation)
+
+Aura Auth implements **HKDF (HMAC-based Key Derivation Function)** to derive cryptographic keys from the base secret. This approach ensures the original secret is never directly exposed during signing and encryption operations, following security best practices for key management.
+
 ---
 
 ## Token Management (JWT, JWS, JWE) [#token-management]
@@ -91,21 +110,6 @@ The session data stored in `session_token` cookie and CSRF Token in `csrf_token`
 ### JWE (JSON Web Encryption) [#jwe]
 
 By default, session tokens in `session_token` are also encrypted. This ensures confidentiality. Even if a user (or attacker) reads the cookie, they cannot see the session contents (like user ID or email) without the `AURA_AUTH_SECRET`. For more detailed information read [Encryption API (JWE)](/docs/api-reference/jose#encryption-api-jwe).
-
----
-
-## Cookie Security
-
-The secret values in Aura Auth are stateless and stored in cookies, so the cookies are configured with strict security flags automatically to provide `secure by default`.
-
-- **HttpOnly**: Prevents JavaScript access (mitigates XSS).
-- **Secure**: Ensures cookies are only sent over HTTPS (except on localhost).
-- **SameSite**: Defaults to `Lax` to balance security (CSRF protection) with usability.
-- **Domain restrictions**: Wildcard domains are never allowed.
-
-Aura Auth validates all cookie configuration options. If an insecure value is provided through `AuthConfig.cookies`, the library emits a warning and applies a secure override.
-
-Detailed configuration options are documented in [AuthConfig.cookies](/docs/configuration/options#cookies).
 
 ---
 
@@ -144,7 +148,7 @@ curl -G "https://service.api/oauth/authorize" \
 
 ## Redirect Validation
 
-Open Redirect vulnerabilities are a common issue in auth systems. Aura Auth mitigates this by validating the `redirectTo` search parameter and `Referer` and `Origin` headers.
+Open Redirect vulnerabilities are a common issue in auth systems. Aura Auth mitigates this by validating the `redirectTo` search parameter and `Referer` and `Origin` headers with the `trustedOrigins` option, which defines the allowed origins for redirection.
 
 - Validates that the destination URL is relative (starts with `/`) or matches the application's origin.
 - Rejects arbitrary absolute URLs and sets the value to `/`

@@ -1,0 +1,195 @@
+---
+title: Next.js
+description: Build your first authentication flow with Aura Auth and Next.js
+---
+
+This guide walks you through creating a complete authentication flow using `Aura Auth` in a `Next.js App Router` application, demonstrating the newest DX improvements.
+
+## Overview
+
+By the end of this guide, you'll have:
+
+- OAuth authentication with GitHub
+- Unified Next.js Route Handlers
+- Elegant Server Actions with `auth.api`
+- Client-side data fetching
+
+<Steps>
+
+<Step>
+
+### Install Aura Auth
+
+If you haven’t installed the package yet:
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Configure Environment Variables
+
+Create a .env file at the root of your project to store secrets securely.
+
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+
+# OAuth Provider Credentials
+AURA_AUTH_GITHUB_CLIENT_ID=your_github_client_id
+AURA_AUTH_GITHUB_CLIENT_SECRET=your_github_client_secret
+```
+
+<Callout type="warn">Never commit your `.env` file to version control. Use a secret manager in production.</Callout>
+
+</Step>
+
+<Step>
+
+### Create an Auth Configuration
+
+Create an `auth.ts` file in your root folder (or `src/auth.ts`) to configure authentication.
+
+```ts title="auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  secret: process.env.AURA_AUTH_SECRET!,
+})
+
+// Unpack the handler and programmatic APIs
+export const { handlers, api } = auth
+```
+
+</Step>
+
+<Step>
+
+### Integrate Route Handlers
+
+Create a catch-all route to handle all authentication endpoints dynamically. Next.js App Router uses standard Web `Request`/`Response`.
+
+```ts title="app/api/auth/[...auth]/route.ts"
+import { handlers } from "@/auth"
+
+// Utilize the generic ALL handler to simplify code drastically
+export const { ALL: GET, ALL: POST } = handlers
+```
+
+</Step>
+
+<Step>
+
+### Sign-In and Server Actions
+
+Next.js Server Actions are a great way to handle mutations programmatically using `auth.api`. Setup a simple sign-in page.
+
+```tsx title="app/login/page.tsx" lineNumbers
+import { api } from "@/auth"
+import { redirect } from "next/navigation"
+
+export default function LoginPage() {
+  const triggerSignIn = async () => {
+    "use server"
+    // Initiates the GitHub redirect via server logic
+    const response = await api.signIn("github", {
+      redirectTo: "http://localhost:3000/dashboard",
+    })
+
+    // Convert Response to Next.js redirect
+    redirect(response.headers.get("Location") ?? "/")
+  }
+
+  return (
+    <form action={triggerSignIn}>
+      <button type="submit">SignIn with GitHub</button>
+    </form>
+  )
+}
+```
+
+</Step>
+
+<Step>
+
+### Reading Session Data Server-Side
+
+Instead of making cumbersome internal `fetch` API requests to `/api/auth/session`, Aura Auth simplifies this via `api.getSession`. Read headers seamlessly inside Server Components.
+
+```tsx title="app/dashboard/page.tsx" lineNumbers
+import { api } from "@/auth"
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
+
+export default async function DashboardPage() {
+  // Pass the Next.js header stream into the programmatic API!
+  const requestHeaders = await headers()
+
+  // Pass headers directly to the API
+  const { session } = await api.getSession({ headers: requestHeaders })
+
+  if (!session) {
+    redirect("/login")
+  }
+
+  return (
+    <div>
+      <h1>Welcome back, {session.user?.name}</h1>
+      <img src={session.user?.image} alt="Profile Avatar" />
+    </div>
+  )
+}
+```
+
+</Step>
+
+<Step>
+
+### Client-Side Integration
+
+To easily check sessions or log out from client components, use `createAuthClient`!
+
+```tsx title="app/components/LogOutBtn.tsx" lineNumbers
+"use client"
+
+import { createAuthClient } from "@aura-stack/auth/client"
+import { useRouter } from "next/navigation"
+
+const client = createAuthClient({
+  baseURL: "http://localhost:3000",
+  basePath: "/api/auth",
+})
+
+export default function LogOutBtn() {
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await client.signOut()
+    router.push("/login")
+  }
+
+  return <button onClick={handleLogout}>Log Out Securely</button>
+}
+```
+
+</Step>
+
+</Steps>
+
+---
+
+## Available Routes
+
+Aura Auth automatically sets up these routes via the Route Handler:
+
+| Route                     | Method     | Description                                          |
+| ------------------------- | ---------- | ---------------------------------------------------- |
+| `/api/auth/signIn/:oauth` | GET        | Initiates the OAuth sign-in flow                     |
+| `/api/auth/session`       | GET / POST | Returns / updates the current user session           |
+| `/api/auth/csrfToken`     | GET        | Get the CSRF Token to be used in `/api/auth/signOut` |
+| `/api/auth/signOut`       | POST       | Sign out the current session                         |

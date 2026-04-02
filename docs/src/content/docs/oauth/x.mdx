@@ -1,25 +1,24 @@
 ---
 title: X (Twitter) Authorization Provider
-description: Configure the X OAuth 2.0 provider in Aura Auth for authentication and authorization.
+description: Add X authorization provider to Aura Auth to authenticate and authorize
 ---
 
 ## X (Twitter)
 
-Set up the `X` authorization provider for the authentication instance in Aura Auth.
+Set up the `X (Twitter)` authorization provider in your Aura Auth instance.
 
 ---
 
-## What you'll learn
+## What you'll build
 
-Through this quick start guide, you will learn and understand the basics of how to set up the `X` provider for Aura Auth.
+Through this quick start guide you are going to learn and understand the basics and how to set up the `X` provider for Aura Auth.
 
 - [X OAuth App](#x-oauth-app)
-  - [Creating an OAuth App](#creating-a-x-oauth-application)
-- [X Aura Auth](#x-aura-auth)
-  - [Installation](#installation)
-  - [Environment setup](#environment-setup)
-  - [Configure the provider](#configure-the-provider)
-  - [Get HTTP handlers](#get-http-handlers)
+- [Installation](#installation)
+- [Environment setup](#environment-setup)
+- [Configure the Auth Instance](#configure-the-auth-instance)
+- [Customizing the OAuth Provider](#customizing-the-oauth-provider)
+- [Sign In to X (Client & Server)](#sign-in-to-x-client--server)
 - [Resources](#resources)
 
 ---
@@ -30,38 +29,26 @@ Through this quick start guide, you will learn and understand the basics of how 
 
 ## X OAuth App
 
-### Creating an X OAuth Application
+### Register the Application
 
-The first step is to create and register an [`X App`](https://developer.x.com/en/portal/projects-and-apps) to grant access to the user's accessible resources like `Get my User` (used by Aura Auth), `Posts`, `Likes`, `Lists`, etc. For more detailed information, read the [X Developer Portal](https://developer.x.com/en/portal/dashboard), [Get my User](https://docs.x.com/x-api/users/get-my-user), and [OAuth 2.0 Scopes](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code#scopes).
+The first step is to create and register an OAuth App on the X developer console to obtain access to the user's resources.
 
-Creating an X OAuth app includes:
-
-- `App name`: X's app name.
-- `App permissions`: Permissions available to the X app. The options include:
-  - `Read`.
-  - `Read and write` (Recommended).
-  - `Read and write and Direct message`.
-- `Type of App`: Enables the app to work with OAuth 2.0 authentication.
-  - `Native App`: Public client with the OAuth 2.0 authorization code flow that implements PKCE. For more details, read [PKCE](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code). This is the option supported by Aura Auth.
-  - `Web App, Automated App or Bot`: Confidential client, which implements the `client_credentials` grant type in the authorization. For more details, read [Application only](https://docs.x.com/fundamentals/authentication/oauth-2-0/application-only).
-- `Callback URI`: The URL to which X OAuth will redirect. It should end in `/auth/callback/x` for local and production environments.
-  - Local environment: `http://localhost:3000/auth/callback/x`.
-  - Production environment: Set the URL of your production application.
-- `Website URL (Required)`: The URL of the app.
-- `Organization Name (Optional)`: The application name shown when the user tries to grant access to the app.
-- `Organization URL (Optional)`: The link shown when users authorize your app.
-- `Terms of service (Required)`: The link to the terms of service shown to the user.
-- `Privacy policy (Required)`: The link to the privacy policy shown to the user.
+1. Navigate to the **X Developer Portal** (`developer.x.com`).
+2. Go to **Projects & Apps > Apps** and click **Create App**.
+3. Provide an App Name. Once created, navigate to the App's **Settings**.
+4. In the "User authentication settings" section, click **Set up**.
+5. Select **Web App** as the App Type and verify **OAuth 2.0** is toggled on.
+6. Under App info, input the **Callback URI / Redirect URL**: `http://localhost:3000/auth/callback/x`.
+   - _(Make sure to replace `localhost:3000` with your production domain when deploying)_
+7. Save the settings to be provided with your **Client ID** and **Client Secret**.
 
 </Step>
 
 <Step>
 
-## X Aura Auth
+## Installation
 
-### Installation
-
-Install the package using a package manager like `npm`, `pnpm` or `yarn`.
+Install the package using a package manager like `npm`, `pnpm`, or `yarn`:
 
 ```npm
 npm install @aura-stack/auth
@@ -71,81 +58,156 @@ npm install @aura-stack/auth
 
 <Step>
 
-### Environment setup
+## Environment setup
 
-Now, it's time to set up the X credentials required by Aura Auth, which include the `client Id` and `client Secret`, and write them into a `.env` file.
-
-Additionally set the `secret` used by Aura Auth to sign and encrypt the user's session.
+Now, you must configure the environment variables required by Aura Auth, including the X credentials and the encryption secrets.
 
 ```bash title=".env" lineNumbers
-# X Credentials
-AURA_AUTH_X_CLIENT_ID="x_client_id"
-AURA_AUTH_X_CLIENT_SECRET="x_client_secret"
+# Aura Secrets
+AURA_AUTH_SECRET="your-32-byte-secret"
+AURA_AUTH_SALT="your-32-byte-salt"
 
-# Aura Secret
-AURA_AUTH_SECRET="32-bytes-secret"
+# X Credentials
+AURA_AUTH_X_CLIENT_ID="your_x_client_id"
+AURA_AUTH_X_CLIENT_SECRET="your_x_client_secret"
 ```
 
-<Callout type="warning">
-  The `AURA_AUTH_SECRET` is recommended to be a random and high entropy key to avoid attackers deciphering the secret used by the
-  Aura Auth application.
+<Callout type="warn">
+  **CRITICAL SECURITY WARNING:** The `AURA_AUTH_SECRET` and `AURA_AUTH_SALT` variables are used to encrypt and sign user sessions.
+  These MUST be securely generated, highly randomized strings consisting of at least 32 bytes to ensure adequate entropy. Never
+  hardcode these values in your repository. Use a secure generator (like `openssl rand -base64 32`) to create them, and store them
+  exclusively in your secure environment variables manager.
 </Callout>
 
 </Step>
 
 <Step>
 
-### Configure the provider
+## Configure the Auth Instance
 
-Set the `oauth` option of the `createAuth` instance. You can use the provider name as a string to use default settings, or use the `x` factory function to customize the configuration.
+Configure the `createAuth` instance inside an `auth.ts` file located at the root of your project. Ensure you explicitly export the `handlers`, `api`, and `jose` objects.
 
-#### Default configuration
-
-```ts title="@/auth" lineNumbers
+```ts title="auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: ["x"],
 })
 
-export const { handlers } = auth
+// Extract the required utilities
+export const { handlers, api, jose } = auth
 ```
 
-#### Custom configuration
+<Callout type="info">
+  The `handlers` object contains mapping utilities for standard HTTP methods (`GET`, `POST`, `PATCH`) as well as a unified `ALL`
+  handler. This allows you to easily mount the authentication routes across any framework (Next.js, Elysia, Express, etc.).
+</Callout>
 
-```ts title="@/auth" lineNumbers
+</Step>
+
+<Step>
+
+## Customizing the OAuth Provider
+
+If you need to define custom scopes, change the response type, or map profile data differently, you can use the provider's factory function instead of a simple string identifier.
+
+```ts title="auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 import { x } from "@aura-stack/auth/oauth/x"
 
 export const auth = createAuth({
   oauth: [
     x({
-      scope: "tweet.read users.read offline.access", // Custom scopes
+      authorize: {
+        params: {
+          // Override default scopes
+          scope: "tweet.read users.read",
+        },
+      },
     }),
   ],
 })
 
-export const { handlers } = auth
+export const { handlers, api, jose } = auth
 ```
 
 </Step>
 
 <Step>
 
-### Get HTTP Handlers
+## Sign In to X (Client & Server)
 
-Use the HTTP handlers to consume the authentication logic and flow from the Aura Auth library to integrate it into routers and frameworks.
+There are multiple ways to trigger the sign-in flow depending on your ecosystem.
 
-```ts title="backend.ts" lineNumbers
-import { handlers } from "@/auth"
+### Sign-in Path (Direct Navigation)
 
-export const { GET, POST } = handlers
+The common route to trigger the auth flow natively without needing a client library is simply navigating the browser to:
+`http://localhost:3000/auth/signIn/x`
+
+---
+
+### Client-Side (React, Vue, etc.)
+
+You can utilize the `createAuthClient` utility to programmatically trigger sign-ins. You can also define a `redirectTo` destination.
+
+<Callout type="warn">
+  **Constraint Rule**: The `baseURL` passed into `createAuthClient` MUST exactly match the root domain and path where the HTTP
+  `handlers` expose their endpoints on the server.
+</Callout>
+
+```ts title="components/Login.tsx" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "http://localhost:3000/auth",
+})
+
+const triggerSignIn = async () => {
+  await authClient.signIn("x", {
+    redirectTo: "/dashboard",
+  })
+}
 ```
 
-<Callout>
-  The returned handlers include pre-built routes used in OAuth flows (`/signIn/:oauth`, `/callback/:oauth`, `/session`, `/signOut`
-  and `/csrfToken`). You can mount them in Express, Hono, Next.js, or any runtime that supports native Request and Response APIs.
-</Callout>
+---
+
+### Server-Side (Next.js Actions, Remix Loaders, etc.)
+
+For environments supporting server-side actions, use the programmatic `api.signIn` method securely.
+
+```ts title="actions.ts" lineNumbers
+import { api } from "./auth"
+
+export const serverSignIn = async () => {
+  const response = await api.signIn("x", {
+    redirectTo: "http://localhost:3000/dashboard",
+  })
+
+  // Example returning redirect location
+  return response.headers.get("Location")
+}
+```
+
+---
+
+### Session Retrieval
+
+After a user successfully signs in, you can retrieve their session data securely.
+
+**Client-Side:**
+
+```ts
+const session = await authClient.getSession()
+console.log(session?.user) // The authenticated user profile
+```
+
+**Server-Side:**
+
+```ts
+// Note: You must pass the native Web Request object or Headers!
+const session = await api.getSession(request)
+console.log(session?.user) // Safely retrieved backend session
+```
 
 </Step>
 
@@ -156,8 +218,4 @@ export const { GET, POST } = handlers
 ## Resources
 
 - [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
-- [X - Developer Portal](https://developer.x.com/en/portal/projects-and-apps)
-- [X - Get my User](https://docs.x.com/x-api/users/get-my-user)
-- [X - OAuth 2.0 Authorization Code Flow with PKCE](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code)
-- [X - OAuth 2.0 Scopes](https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code#scopes)
-- [X - OAuth 2.0 Bearer Token](https://docs.x.com/fundamentals/authentication/oauth-2-0/application-only)
+- [X - Authorizing OAuth Apps](https://developer.x.com/en/docs/authentication/oauth-2-0)
