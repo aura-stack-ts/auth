@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, use, useState, useEffect } from "react"
-import { authClient } from "@/lib/client"
+import { authClient } from "@/lib/auth-client"
 import type { Session, LiteralUnion, BuiltInOAuthProvider, SignInOptions, SignOutOptions } from "@aura-stack/auth"
 import type { AuthContextValue } from "@/@types/types"
 import type { AuthProviderProps } from "@/@types/props"
@@ -53,7 +53,19 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
     }, [defaultSession])
 
     return (
-        <AuthContext value={{ session, isAuthenticated, isLoading, signIn, signOut } as AuthContextValue}>{children}</AuthContext>
+        <AuthContext
+            value={
+                {
+                    session,
+                    isAuthenticated,
+                    isLoading,
+                    signIn,
+                    signOut,
+                } as AuthContextValue
+            }
+        >
+            {children}
+        </AuthContext>
     )
 }
 

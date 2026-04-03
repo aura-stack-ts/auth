@@ -7,20 +7,34 @@ This guide walks you through creating a complete authentication flow using **Aur
 
 ## Overview
 
-Aura Auth and Elysia, an ergonomic web framework for Bun, both follow the web-standard `Request` and `Response` interfaces for high-performance HTTP handling. This means Aura Auth works out of the box with Elysia, with no external adapters or frameworks required.
+Aura Auth and Elysia, an ergonomic web framework for Bun, both follow the web-standard `Request` and `Response` interfaces for high-performance HTTP handling. That means Aura Auth works out of the box with Elysia, with no external adapters or frameworks required.
 
 Before continuing, complete the installation and initial setup:
 
 - [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
 - [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+- [Elysia Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/elysia) for a fully working example
 
 Then use this guide to integrate Aura Auth with an Elysia server using best practices.
+
+---
+
+## What You'll Build
+
+You will create a small Elysia app with:
+
+- a shared `src/lib/auth.ts` server configuration
+- a `src/index.ts` entry point that mounts the auth handlers
+- a `src/plugins/with-auth.ts` plugin that adds session data to the context
+- a protected route example that validates the session before responding
+
+---
 
 <Steps>
 
 <Step>
 
-### Project Structure
+## Project Structure
 
 ```files
 elysia-app
@@ -30,19 +44,34 @@ elysia-app
 │   ├── plugins
 │   │   └── with-auth.ts
 │   └── index.ts
-├── tsconfig.json
-└── package.json
+└── .env.local
 ```
 
 </Step>
 
 <Step>
 
-### Create an Auth Instance
+## Environment Setup
 
-Create `auth.ts` in `src/lib/` and configure the OAuth providers and options for your Aura Auth instance.
+Create a `.env.local` file at the root of your project to store secrets securely.
 
-```ts title="lib/auth.ts" lineNumbers
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+```
+
+<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
+
+</Step>
+
+<Step>
+
+## Setup Aura Auth
+
+Create `auth.ts` in `src/lib/` to configure Aura Auth and export the shared handlers used by the server and plugins.
+
+```ts title="src/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -50,20 +79,20 @@ export const auth = createAuth({
   basePath: "/api/auth",
 })
 
-export const { handlers } = auth
+export const { handlers, jose, api } = auth
 ```
 
-<Callout type="warning">`basePath` must match the route you expose in Elysia.</Callout>
+`basePath` must match the route you expose in Elysia. If your server changes, update both the route and the auth config together.
 
 </Step>
 
 <Step>
 
-### Integrate with Elysia
+## Mount HTTP Handlers
 
-Mount auth handlers to process all traffic directed to the `/api/auth/*` path in your Elysia app:
+Mount auth handlers to process all traffic directed to the `/api/auth/*` path in your Elysia app. Elysia passes standard Web `Request` objects, so the shared handler can be called directly.
 
-```ts title="index.ts" lineNumbers
+```ts title="src/index.ts" lineNumbers
 import { Elysia } from "elysia"
 import { auth } from "@/lib/auth"
 
@@ -76,13 +105,19 @@ app.all("/api/auth/*", (ctx) => {
 app.listen(3000)
 ```
 
+This keeps all auth endpoints in one place and leaves the rest of your routes free to use the same `auth` instance.
+
 </Step>
 
 <Step>
 
-### Add Elysia Plugin for Session Management
+## Usage
 
-```ts title="plugins/with-auth.ts" lineNumbers
+Use a plugin when you want session data to be available across multiple protected routes. That keeps your auth checks consistent and avoids repeating the same session lookup in every handler.
+
+### Plugin
+
+```ts title="src/plugins/with-auth.ts" lineNumbers
 import { Elysia } from "elysia"
 import { auth } from "@/lib/auth"
 
@@ -103,15 +138,17 @@ export const withAuthPlugin = new Elysia({ name: "with-auth" })
   .get("/api/auth/me", ({ session }) => session)
 ```
 
+The plugin returns `session: null` when the request is unauthenticated, which keeps downstream routes simple and predictable.
+
 </Step>
 
 <Step>
 
-### Protecting Routes
+### Get Session
 
-Use the plugin in your app and protect routes by checking for an active session:
+Use the plugin in your app and protect routes by checking for an active session before returning private data.
 
-```ts title="index.ts" lineNumbers
+```ts title="src/index.ts" lineNumbers
 import { Elysia } from "elysia"
 import { auth } from "@/lib/auth"
 import { withAuthPlugin } from "@/plugins/with-auth"
@@ -142,6 +179,28 @@ app.use(withAuthPlugin).get("/api/protected", (ctx) => {
 app.listen(3000)
 ```
 
+This pattern works well for dashboard pages, account APIs, and any route that should never return private data without a valid session.
+
 </Step>
 
 </Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with the route you mount**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Use the same auth instance everywhere**. Import `src/lib/auth.ts` from the server entry point and from plugins so there is one source of truth.
+- **Return `session: null` for anonymous requests**. That keeps downstream route handlers simple and avoids repeated null checks.
+- **Protect private routes before sending the response**. Check the session first, then return the private payload only when authentication succeeds.
+
+---
+
+## Resources
+
+- [Elysia Documentation](https://elysiajs.com/)
+- [Aura Auth Documentation](/quick-start)
+- [Elysia Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/elysia)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/configuration/options)
+- [TypeScript Guide](/docs/configuration/typescript)

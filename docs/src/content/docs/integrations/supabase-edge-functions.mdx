@@ -7,20 +7,34 @@ This guide walks you through creating a complete authentication flow using **Aur
 
 ## Overview
 
-Supabase Edge Functions run on Deno and use the web-standard Fetch API (`Request` and `Response`). Aura Auth works out of the box with this runtime model.
+Supabase Edge Functions run on Deno and use the web-standard Fetch API (`Request` and `Response`). That makes them a natural fit for Aura Auth's framework-agnostic runtime model.
 
 Before continuing, complete the installation and initial setup:
 
 - [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
 - [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+- [Supabase Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/supabase) for a fully working example
 
 Then use this guide to integrate Aura Auth with a Supabase Edge Function using best practices.
+
+---
+
+## What You'll Build
+
+You will create a small Supabase project with:
+
+- a shared `functions/_shared/auth.ts` server configuration
+- a function route at `functions/auth/index.ts` that mounts the auth handlers
+- a `config.toml` file that points the route to the correct entrypoint
+- a protected route example that checks the active session before responding
+
+---
 
 <Steps>
 
 <Step>
 
-### Project Structure
+## Project Structure
 
 ```files
 supabase-app
@@ -31,16 +45,16 @@ supabase-app
 │   │   ├── deno.json
 │   │   └── index.ts
 ├── config.toml
-└── package.json
+└── .env.local
 ```
 
 </Step>
 
 <Step>
 
-### Set up `config.toml`
+## Set up `config.toml`
 
-This defines the edge function's route and permissions. Ensure the `index.ts` entrypoint is correctly referenced.
+This defines the edge function's route and permissions. Ensure the `index.ts` entrypoint is correctly referenced so Supabase can locate the function.
 
 ```toml title="config.toml"
 [functions.auth]
@@ -57,9 +71,25 @@ entrypoint = "./functions/auth/index.ts"
 
 <Step>
 
-### Create an Auth Instance
+## Environment Setup
 
-Create an `auth.ts` file in your project to configure authentication.
+Create a `.env.local` file at the root of your project to store secrets securely.
+
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+```
+
+<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
+
+</Step>
+
+<Step>
+
+## Setup Aura Auth
+
+Create an `auth.ts` file in `functions/_shared/` to configure authentication and export the shared helpers used by the function route.
 
 ```ts title="supabase-app/functions/_shared/auth.ts"
 import { createAuth } from "@aura-stack/auth"
@@ -69,18 +99,18 @@ export const auth = createAuth({
   basePath: "/api/auth",
 })
 
-export const { handlers, api } = auth
+export const { handlers, jose, api } = auth
 ```
 
-<Callout type="warning">`basePath` must match the route you expose in your Supabase function.</Callout>
+`basePath` must match the route you expose in your Supabase function. If the route changes, update the auth config and function route together.
 
 </Step>
 
 <Step>
 
-### Integrate with `Deno.serve`
+## Mount HTTP Handlers
 
-Using Supabase Edge Function execution, define your handler with `Deno.serve`.
+Using Supabase Edge Function execution, define your handler with `Deno.serve`. The function below routes auth requests to Aura Auth and keeps protected route logic separate from the handler itself.
 
 ```ts title="supabase/functions/auth/index.ts" lineNumbers
 import { handlers, api } from "../_shared/auth.ts"
@@ -121,6 +151,28 @@ Deno.serve(async (request) => {
 })
 ```
 
+This structure keeps all auth endpoints in one place and gives you a clear place to add additional protected routes later.
+
 </Step>
 
 </Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with the function route**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Make sure `config.toml` points at the correct entrypoint**. Supabase needs to know where `functions/auth/index.ts` lives.
+- **Pass the current request headers to `api.getSession()`**. The session lookup needs headers so Aura Auth can read cookies correctly.
+- **Check `session.authenticated` before returning private data**. Use the authenticated flag as your guard for protected responses.
+
+---
+
+## Resources
+
+- [Supabase Edge Functions Documentation](https://supabase.com/docs/guides/functions)
+- [Aura Auth Documentation](/quick-start)
+- [Supabase Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/supabase)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/configuration/options)
+- [TypeScript Guide](/docs/configuration/typescript)

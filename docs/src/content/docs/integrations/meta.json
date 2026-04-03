@@ -3,7 +3,8 @@
   "pages": [
     "---Frontend---",
     "astro",
-    "next",
+    "next-app-router",
+    "next-pages-router",
     "nuxt",
     "react-router",
     "tanstack-start",

@@ -7,20 +7,34 @@ This guide walks you through creating a complete authentication flow using **Aur
 
 ## Overview
 
-Cloudflare Workers use the Fetch API (`Request` and `Response`), which matches Aura Auth's framework-agnostic design.
+Cloudflare Workers use the Fetch API (`Request` and `Response`), which matches Aura Auth's framework-agnostic design. That makes the integration simple: you can mount Aura Auth directly in the worker `fetch` handler and keep your auth logic in one shared module.
 
 Before continuing, complete the installation and initial setup:
 
 - [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
 - [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+- [Cloudflare Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/cloudflare) for a fully working example
 
 Then use this guide to integrate Aura Auth with a Cloudflare Worker using best practices.
+
+---
+
+## What You'll Build
+
+You will create a small Cloudflare Worker app with:
+
+- a shared `src/lib/auth.ts` server configuration
+- a `src/index.ts` worker entry point that mounts the auth handlers
+- Cloudflare secret bindings for auth credentials
+- a worker example that routes auth requests and returns 404 for everything else
+
+---
 
 <Steps>
 
 <Step>
 
-### Project Structure
+## Project Structure
 
 ```files
 cloudflare-app
@@ -28,8 +42,7 @@ cloudflare-app
 │   ├── lib
 │   │   └── auth.ts
 │   └── index.ts
-├── tsconfig.json
-├── package.json
+├── .env.local
 └── wrangler.jsonc
 ```
 
@@ -37,9 +50,21 @@ cloudflare-app
 
 <Step>
 
-### Secret Variables Setup
+## Environment Setup
+
+Create a `.env.local` file at the root of your project to store secrets securely.
+
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+```
+
+<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
 
 Using the `wrangler` CLI or the Cloudflare dashboard, add the required secret environment variables. Workers read secrets from the `env` argument rather than `process.env`.
+
+Cloudflare Workers also support secret bindings in the dashboard, which is the preferred option for production deployments.
 
 ```bash
 npx wrangler secret put AURA_AUTH_SECRET
@@ -58,9 +83,32 @@ wrangler types
 
 <Step>
 
-### Initialize Aura Auth per Request
+## Setup Aura Auth
+
+Set up your `auth.ts` file in `src/lib/` and configure Aura Auth for your Cloudflare Worker.
+
+```ts title="src/lib/auth.ts"
+import { createAuth } from "npm:@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers, jose, api } = auth
+```
+
+`basePath` must match the route you expose in your worker. If the route changes, update the auth config and handler together.
+
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
 
 Because Workers pass environment variables into the `fetch` execution context, keep your auth setup in a separate module and route `/api/auth/*` requests to `handlers.ALL`.
+
+The worker below delegates only auth requests to Aura Auth and returns a 404 for everything else.
 
 ```ts title="src/index.ts" lineNumbers
 import { handlers } from "@/lib/auth"
@@ -76,16 +124,28 @@ export default {
 } satisfies ExportedHandler<Env>
 ```
 
-</Step>
-
-<Step>
-
-### Securing the Worker edge cases
-
-Because edge workers execute globally across multiple locations, standard Node.js APIs are not always available.
-
-Aura Auth is runtime-agnostic and uses the Web Crypto API and web standards, so it works without `node:crypto` imports in your Worker deployment.
+Use this pattern when you want a single worker to handle both auth endpoints and a small number of custom routes.
 
 </Step>
 
 </Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with the worker route**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Use Cloudflare secret bindings in production**. Workers should read credentials from `env`, not from `process.env`.
+- **Keep the auth logic in one module**. Import `src/lib/auth.ts` from your worker entry point so the handlers stay shared and consistent.
+- **Return a 404 for non-auth routes**. That keeps the worker behavior explicit and easier to debug.
+
+---
+
+## Resources
+
+- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
+- [Aura Auth Documentation](/quick-start)
+- [Cloudflare Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/cloudflare)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/configuration/options)
+- [TypeScript Guide](/docs/configuration/typescript)

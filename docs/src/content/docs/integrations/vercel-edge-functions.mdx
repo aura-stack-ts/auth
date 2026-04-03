@@ -7,20 +7,34 @@ This guide walks you through creating a complete authentication flow using **Aur
 
 ## Overview
 
-Vercel Edge Functions run on the Edge Runtime, which supports web-standard APIs, including the `Request` and `Response` interfaces.
+Vercel Edge Functions run on the Edge Runtime, which supports web-standard APIs, including the `Request` and `Response` interfaces. That makes them a strong fit for Aura Auth's framework-agnostic design.
 
 Before continuing, complete the installation and initial setup:
 
 - [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
 - [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+- [Vercel Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/vercel) for a fully working example
 
 Then use this guide to integrate Aura Auth with a Vercel Edge Function using best practices.
+
+---
+
+## What You'll Build
+
+You will create a small Vercel app with:
+
+- a shared `api/_auth.ts` server configuration
+- a `api/auth/index.ts` entry point that mounts the auth handlers
+- a `vercel.json` rewrite configuration for auth routes
+- a request flow that keeps auth logic separate from the rest of the app
+
+---
 
 <Steps>
 
 <Step>
 
-### Project Structure
+## Project Structure
 
 ```files
 vercel-app
@@ -29,8 +43,7 @@ vercel-app
 │   │   └── index.ts
 │   ├── _auth.ts
 │   └── index.ts
-├── package.json
-├── tsconfig.json
+├── .env.local
 └── vercel.json
 ```
 
@@ -38,9 +51,25 @@ vercel-app
 
 <Step>
 
-### Create an Auth Instance
+## Environment Setup
 
-Create an `_auth.ts` file in your project to configure authentication.
+Create a `.env.local` file at the root of your project to store secrets securely.
+
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+```
+
+<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
+
+</Step>
+
+<Step>
+
+## Setup Aura Auth
+
+Create an `_auth.ts` file in `api/` to configure authentication and export the shared helpers used by the edge handlers.
 
 ```ts title="api/_auth.ts"
 import { createAuth } from "@aura-stack/auth"
@@ -50,18 +79,18 @@ export const auth = createAuth({
   basePath: "/api/auth",
 })
 
-export const { handlers } = auth
+export const { handlers, api } = auth
 ```
 
-<Callout type="warning">`basePath` must match the route you expose in your Vercel app.</Callout>
+`basePath` must match the route you expose in your Vercel app. If the route changes, update the auth config and rewrites together.
 
 </Step>
 
 <Step>
 
-### Integrate with Vercel Edge Functions
+## Mount HTTP Handlers
 
-Route auth traffic to a single edge function and pass the native `Request` directly to Aura Auth.
+Route auth traffic to a single edge function and pass the native `Request` directly to Aura Auth. The adapter below keeps the edge function focused on routing while Aura Auth handles the request logic.
 
 ```ts title="api/auth/index.ts" lineNumbers
 import { handlers } from "@/api/_auth"
@@ -79,13 +108,15 @@ export const PATCH = async (request: Request) => {
 }
 ```
 
+This keeps the auth entry point small and makes the request flow easy to reason about.
+
 </Step>
 
 <Step>
 
-### Configure Vercel
+## Configure Vercel
 
-Create a `vercel.json` file to configure your Vercel deployment. This example rewrites auth routes to your edge function entrypoint.
+Create a `vercel.json` file to configure your Vercel deployment. This example rewrites auth routes to your edge function entrypoint so the browser always talks to `/api/auth`.
 
 ```json title="vercel.json"
 {
@@ -109,6 +140,28 @@ Create a `vercel.json` file to configure your Vercel deployment. This example re
 }
 ```
 
+Use these rewrites to keep all auth requests on the same base path while still allowing multiple auth actions and provider callbacks.
+
 </Step>
 
 </Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with the rewritten route**. If your auth endpoint is `/api/auth`, the auth config should use `basePath: "/api/auth"`.
+- **Keep the edge handler small**. Let Aura Auth handle the request logic and use the edge function only as a bridge.
+- **Make sure the rewrites and route files agree**. If you move the auth handler, update `vercel.json` and the corresponding edge entrypoint together.
+- **Use the Edge Runtime exclusively for this route**. Avoid Node-only APIs in the auth path.
+
+---
+
+## Resources
+
+- [Vercel Edge Functions Documentation](https://vercel.com/docs/functions/edge-functions)
+- [Aura Auth Documentation](/quick-start)
+- [Vercel Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/vercel)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/configuration/options)
+- [TypeScript Guide](/docs/configuration/typescript)

@@ -1,6 +1,6 @@
 "use server"
 
-import { api } from "@/auth"
+import { api } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
 import { isRedirectError } from "next/dist/client/components/redirect-error"

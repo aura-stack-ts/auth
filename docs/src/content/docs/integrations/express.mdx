@@ -7,20 +7,34 @@ This guide walks you through creating a complete authentication flow using **Aur
 
 ## Overview
 
-Express is built around Node.js `IncomingMessage` and `ServerResponse` streams rather than modern web-standard `Request` and `Response` objects. It requires a small adapter to bridge Express and Aura Auth's web-standard handlers.
+Express is built around Node.js `IncomingMessage` and `ServerResponse` streams rather than modern web-standard `Request` and `Response` objects. That means it needs a small adapter to bridge Express and Aura Auth's web-standard handlers.
 
 Before continuing, complete the installation and initial setup:
 
 - [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
 - [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+- [Express Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/express) for a fully working example
 
 Then use this guide to integrate Aura Auth with an Express server using best practices.
+
+---
+
+## What You'll Build
+
+You will create a small Express app with:
+
+- a shared `src/lib/auth.ts` server configuration
+- a `src/lib/handler.ts` adapter that bridges Express and Aura Auth
+- a `src/middlewares/verify-session.ts` middleware for protected routes
+- a `src/types.d.ts` augmentation for `res.locals.session`
+
+---
 
 <Steps>
 
 <Step>
 
-### Project Structure
+## Project Structure
 
 ```files
 express-app
@@ -40,11 +54,27 @@ express-app
 
 <Step>
 
-### Create an Auth Instance
+## Environment Setup
 
-Create an `auth.ts` file in your project to configure authentication.
+Create a `.env.local` file at the root of your project to store secrets securely.
 
-```ts title="lib/auth.ts"
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+```
+
+<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
+
+</Step>
+
+<Step>
+
+## Setup Aura Auth
+
+Create an `auth.ts` file in `src/lib/` to configure authentication and export the shared handlers used by the adapter and middleware.
+
+```ts title="src/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -52,20 +82,22 @@ export const auth = createAuth({
   basePath: "/api/auth",
 })
 
-export const { handlers } = auth
+export const { handlers, api } = auth
 ```
 
-<Callout type="warning">`basePath` must match the route you expose in your Express app.</Callout>
+`basePath` must match the route you expose in your Express app. If the route changes, update the auth config and adapter together.
 
 </Step>
 
 <Step>
 
-### Handler Adapter
+## Mount HTTP Handlers
 
 Because Express uses `IncomingMessage` and `ServerResponse`, create an adapter that converts them into the web-standard `Request` and `Response` objects Aura Auth expects.
 
-```ts title="lib/handler.ts" lineNumbers
+The adapter below translates the incoming request into a Web `Request`, then translates the Aura Auth `Response` back into Express.
+
+```ts title="src/lib/handler.ts" lineNumbers
 import { handlers } from "@/lib/auth.js"
 import type { Request, Response } from "express"
 
@@ -77,7 +109,7 @@ const splitSetCookieHeaderValue = (value: string): string[] => {
 }
 
 /**
- * Convert an Express Request to a Web API Request so it can be handled
+ * Convert an Express request to a Web API Request so it can be handled
  * by the framework-agnostic Aura Auth handlers.
  */
 export const toWebRequest = (req: Request): globalThis.Request => {
@@ -110,7 +142,7 @@ export const toWebRequest = (req: Request): globalThis.Request => {
 }
 
 /**
- * Forward the Web API Response back to the Express Response.
+ * Forward the Web API Response back to the Express response.
  * Handles redirects, multiple Set-Cookie headers, and JSON/text bodies.
  */
 export const toExpressResponse = async (webResponse: globalThis.Response, res: Response) => {
@@ -141,7 +173,7 @@ export const toExpressResponse = async (webResponse: globalThis.Response, res: R
 }
 
 /**
- * Express middleware that bridges Aura Auth Web-API handlers to Express.
+ * Express middleware that bridges Aura Auth Web API handlers to Express.
  * Mount this on the `basePath` configured in `createAuth()` (default: `/api/auth`).
  */
 export const toExpressHandler = async (req: Request, res: Response) => {
@@ -150,18 +182,11 @@ export const toExpressHandler = async (req: Request, res: Response) => {
 }
 ```
 
-</Step>
+Mount the Aura Auth handlers inside your Express app using the Web Standard adapter.
 
-<Step>
-
-### Integrate with Express
-
-Mount the Aura Auth handlers inside your Express app using the Web Standard adapter:
-
-```ts title="index.ts" lineNumbers
+```ts title="src/index.ts" lineNumbers
 import express, { type Express } from "express"
 import { toExpressHandler } from "@/lib/handler.js"
-import { verifySession } from "@/middlewares/verify-session.js"
 
 const app: Express = express()
 
@@ -175,15 +200,19 @@ app.listen(3000, () => {
 })
 ```
 
+Use this route for all auth methods, including sign-in, sign-out, session lookups, and provider callbacks.
+
 </Step>
 
 <Step>
+
+## Usage
 
 ### Middleware
 
 Middlewares are a common pattern in Express apps for protecting routes. You can create a middleware that checks for an active session before allowing access to protected routes.
 
-```ts title="middlewares/verify-session.ts" lineNumbers
+```ts title="src/middlewares/verify-session.ts" lineNumbers
 import { auth } from "@/lib/auth.js"
 import { toWebRequest } from "@/lib/handler.js"
 import type { Request, Response, NextFunction } from "express"
@@ -206,8 +235,8 @@ export const verifySession = async (req: Request, res: Response, next: NextFunct
 
 Express doesn't infer the `Locals` type automatically, so extend it to include the session:
 
-```ts title="types.d.ts" lineNumbers
-import { Session } from "@aura-stack/auth"
+```ts title="src/types.d.ts" lineNumbers
+import type { Session } from "@aura-stack/auth"
 
 declare global {
   namespace Express {
@@ -218,15 +247,11 @@ declare global {
 }
 ```
 
-</Step>
+### Get Session
 
-<Step>
+To access the active session in your protected Express routes, use the `verifySession` middleware and read `res.locals.session`.
 
-### Access the Session
-
-To access the active session in your protected Express routes, you can use the `auth.api.getSession` method:
-
-```ts title="index.ts" lineNumbers
+```ts title="src/index.ts" lineNumbers
 import express, { type Express } from "express"
 import { toExpressHandler } from "@/lib/handler.js"
 import { verifySession } from "@/middlewares/verify-session.js"
@@ -251,6 +276,28 @@ app.listen(3000, () => {
 })
 ```
 
+This pattern keeps the session lookup centralized and makes protected route logic easy to reuse across the app.
+
 </Step>
 
 </Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with the mounted auth route**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Always convert Express headers before calling Aura Auth**. The Web API session helper expects standard request headers.
+- **Use `session.authenticated` as the guard**. Check that flag before exposing private data.
+- **Keep the adapter and middleware separate**. The adapter should only translate request and response objects, while the middleware should only enforce access.
+
+---
+
+## Resources
+
+- [Express Documentation](https://expressjs.com/)
+- [Aura Auth Documentation](/quick-start)
+- [Express Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/express)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/configuration/options)
+- [TypeScript Guide](/docs/configuration/typescript)

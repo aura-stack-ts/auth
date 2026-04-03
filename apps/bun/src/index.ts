@@ -11,7 +11,7 @@ Bun.serve({
         },
         "/api/protected": async (request) => {
             const session = await api.getSession({
-                headers: request.headers,                
+                headers: request.headers,
             })
             if (!session.authenticated) {
                 return Response.json(
@@ -27,6 +27,6 @@ Bun.serve({
                 message: "You have access to this protected resource.",
                 session,
             })
-        }, 
+        },
     },
 })
