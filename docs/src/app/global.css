@@ -3,20 +3,16 @@
 @import "fumadocs-ui/css/preset.css";
 
 @theme {
-  --foreground: oklch(0.985 0 0);
-  --color-primary: oklch(0.97 0 0);
-  --color-primary-foreground: oklch(0.6 0.01 286.11);
-  --color-border: color-mix(in oklab, var(--color-white) 20%, transparent);
-  --breakpoint-base: 56.25rem;
-  --color-background: #000000;
-  --color-muted-foreground: color-mix(
-    in oklab,
-    var(--color-white) 60%,
-    transparent
-  );
-  --breakpoint-xs: 540px;
-  --radius-2xl: 0rem;
-  --radius-xl: 0rem;
-  --radius-lg: 0rem;
-  --radius-md: 0rem;
+    --foreground: oklch(0.985 0 0);
+    --color-primary: oklch(0.97 0 0);
+    --color-primary-foreground: oklch(0.6 0.01 286.11);
+    --color-border: color-mix(in oklab, var(--color-white) 20%, transparent);
+    --breakpoint-base: 56.25rem;
+    --color-background: #000000;
+    --color-muted-foreground: color-mix(in oklab, var(--color-white) 60%, transparent);
+    --breakpoint-xs: 540px;
+    --radius-2xl: 0rem;
+    --radius-xl: 0rem;
+    --radius-lg: 0rem;
+    --radius-md: 0rem;
 }

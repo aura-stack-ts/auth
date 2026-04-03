@@ -1,0 +1,255 @@
+---
+title: Astro
+description: Build your first authentication flow with Aura Auth and Astro
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** in an **Astro** application.
+
+## Overview
+
+Astro API routes receive and return Web Standard `Request` and `Response` objects, which makes Astro a natural fit for Aura Auth's unified handlers.
+
+---
+
+## What You'll Build
+
+You will create a small Astro app with:
+
+- a shared `src/lib/auth.ts` server configuration
+- a `src/pages/api/auth/[...auth].ts` route that forwards auth requests
+- an optional `src/lib/auth-client.ts` browser client
+- server and client examples for sign-in, session lookup, and sign-out
+
+---
+
+<Steps>
+
+<Step>
+
+## Environment Setup
+
+Create a `.env.local` file at the root of your project to store secrets securely.
+
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+```
+
+<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
+
+</Step>
+
+<Step>
+
+## Setup Aura Auth
+
+### HTTP Handlers
+
+Set up your core configuration file in `src/lib/` so both server routes and client helpers can reuse it.
+
+```ts title="src/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers, jose, api } = auth
+```
+
+`basePath` must match the route mounted in `src/pages/api/auth/[...auth].ts`. `baseURL` should point to your local development server or deployed application URL.
+
+### Client API
+
+To use Aura Auth's client-side features, create an `auth-client.ts` file to initialize the client.
+
+```ts title="src/lib/auth-client.ts"
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+```
+
+<Callout type="warning">
+  The `baseURL` should point to your server's URL, and `basePath` MUST match the path where your auth routes are mounted.
+</Callout>
+
+Keep the client and server values in sync. If you move the auth route, update both `basePath` values together.
+
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Create a catch-all route under `src/pages/api/auth/[...auth].ts`. The route below forwards each HTTP method to the corresponding Aura Auth handler.
+
+```ts title="src/pages/api/auth/[...auth].ts" lineNumbers
+import { handlers } from "@/lib/auth"
+import type { APIRoute } from "astro"
+
+export const GET: APIRoute = async ({ request }) => {
+  return await handlers.GET(request)
+}
+
+export const POST: APIRoute = async ({ request }) => {
+  return await handlers.POST(request)
+}
+
+export const PATCH: APIRoute = async ({ request }) => {
+  return await handlers.PATCH(request)
+}
+```
+
+<Callout type="info">Ensure your `basePath` option in `createAuth` matches the actual route (`/api/auth`).</Callout>
+
+This route can be extended with additional methods if your auth flow needs them later.
+
+</Step>
+
+<Step>
+
+## Usage
+
+Use server-side code when you want to protect a page before it renders, and use the client helper when you need interactive buttons or session-aware UI.
+
+### Server Side Rendering (SSR)
+
+#### Get Session
+
+```astro title="src/pages/index.astro" lineNumbers
+---
+import { api } from "@/lib/auth"
+
+const result = await api.getSession({
+  headers: Astro.request.headers,
+})
+
+if (!result.authenticated) {
+  return Astro.redirect("/login")
+}
+
+const session = result.session
+---
+
+<h1>Welcome back, {session.user?.name}</h1>
+<p>Email: {session.user?.email}</p>
+```
+
+This is the recommended pattern for protected pages: check authentication on the server and only render private UI when a session is present.
+
+#### Sign-Out
+
+```astro title="src/pages/index.astro" lineNumbers
+---
+import { api } from "@/lib/auth"
+
+const signOutAction = async () => {
+  const response = await api.signOut({
+    headers: Astro.request.headers,
+  })
+
+  return response
+}
+---
+
+<form method="post">
+  <button type="submit">Sign Out</button>
+</form>
+```
+
+If you prefer a client-only interaction, call `authClient.signOut()` from a client component instead.
+
+### Client Side Rendering (CSR)
+
+#### Sign-In
+
+```tsx title="src/components/sign-in-button.tsx" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+export default function SignInButton() {
+  const handleSignIn = () => {
+    void authClient.signIn("github", {
+      redirectTo: "/dashboard",
+    })
+  }
+
+  return <button onClick={handleSignIn}>Sign in with GitHub</button>
+}
+```
+
+Use a client component for one-click auth entry points or custom UI that cannot be expressed as a server action.
+
+#### Get Session
+
+```tsx title="src/components/user-profile.tsx" lineNumbers
+import { useEffect, useState } from "react"
+import { authClient } from "@/lib/auth-client"
+
+export default function UserProfile() {
+  const [session, setSession] = useState(null)
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { session } = await authClient.getSession()
+      setSession(session)
+    }
+    fetchSession()
+  }, [])
+
+  if (!session) return <p>Loading...</p>
+
+  return (
+    <div>
+      <h1>Welcome back, {session.user?.name}</h1>
+      <p>Email: {session.user?.email}</p>
+    </div>
+  )
+}
+```
+
+This approach is useful for nav bars, avatars, and other session-aware UI that updates after hydration.
+
+#### Sign-Out
+
+```tsx title="src/components/sign-out-button.tsx" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+export default function SignOutButton() {
+  const handleSignOut = async () => {
+    await authClient.signOut()
+  }
+
+  return <button onClick={handleSignOut}>Sign Out</button>
+}
+```
+
+Client-side sign-out is best for interactive controls inside menus or profile popovers.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with the route segment**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Keep the shared auth module in one place**. Import `src/lib/auth.ts` from both the API route and the client helper.
+- **Check authentication before rendering private UI**. Use the server-side `authenticated` flag to protect pages.
+- **Use `Astro.request.headers` when calling server helpers**. That gives Aura Auth access to the cookies it needs to read the session.
+
+---
+
+## Resources
+
+- [Astro Documentation](https://docs.astro.build/)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Astro Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/astro)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/configuration/options)
+- [TypeScript Guide](/docs/configuration/typescript)

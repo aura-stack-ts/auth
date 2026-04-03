@@ -1,0 +1,204 @@
+---
+title: Hono
+description: Build your first authentication flow with Aura Auth and Hono
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** in a **Hono** application.
+
+## Overview
+
+Hono is built on web standards (`Request` and `Response`), which makes integrating Aura Auth straightforward. You can use the `ALL` handler to cover all authentication HTTP methods in a single route.
+
+Before continuing, complete the installation and initial setup:
+
+- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
+- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+- [Hono Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/hono) for a fully working example
+
+Then use this guide to integrate Aura Auth with Hono using best practices.
+
+---
+
+## What You'll Build
+
+You will create a small Hono app with:
+
+- a shared `src/lib/auth.ts` server configuration
+- a `src/index.ts` entry point that mounts the auth handlers
+- a `src/middlewares/with-auth.ts` middleware that adds session data to the context
+- a protected route example that validates the session before responding
+
+---
+
+<Steps>
+
+<Step>
+
+## Project Structure
+
+```files
+hono-app
+├── src
+│   ├── lib
+│   │   ├── auth.ts
+│   ├── middlewares
+│   │   └── with-auth.ts
+│   └── index.ts
+└── .env.local
+```
+
+</Step>
+
+<Step>
+
+## Environment Setup
+
+Create a `.env.local` file at the root of your project to store secrets securely.
+
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+```
+
+<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
+
+</Step>
+
+<Step>
+
+## Setup Aura Auth
+
+Create an `auth.ts` file in `src/lib/` to configure authentication and export the shared helpers used by the app and middleware.
+
+```ts title="src/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers, api, jose } = auth
+```
+
+`basePath` must match the route you expose in your Hono app. If the route changes, update the auth config and route handler together.
+
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Mount the Aura Auth handlers using a wildcard route under your `/api/auth` subpath. Hono passes the native Web Standard `Request` object through `c.req.raw`, so the handler can delegate directly.
+
+```ts title="src/index.ts" lineNumbers
+import { Hono } from "hono"
+import { handlers } from "@/lib/auth"
+
+const app = new Hono()
+
+app.all("/api/auth/*", async (ctx) => {
+  return await handlers.ALL(ctx.req.raw)
+})
+
+export default app
+```
+
+This keeps all auth endpoints in one place and leaves the rest of your routes free to use the same auth instance.
+
+</Step>
+
+<Step>
+
+## Usage
+
+### Middleware
+
+Middleware is a powerful way to protect your routes and access session data across your app. Create a `with-auth.ts` file in `src/middlewares`.
+
+```ts title="src/middlewares/with-auth.ts" lineNumbers
+import { api } from "@/lib/auth"
+import { createMiddleware } from "hono/factory"
+import type { Session } from "@aura-stack/auth"
+
+/**
+ * Type definition for Hono's Context Variables to include the session.
+ */
+export type AuthVariables = {
+  session: Session | null
+}
+
+export const withAuth = createMiddleware<{ Variables: AuthVariables }>(async (ctx, next) => {
+  try {
+    const session = await api.getSession({
+      headers: ctx.req.raw.headers,
+    })
+    if (!session.authenticated) {
+      return ctx.json({ error: "Unauthorized", message: "Active session required." }, 401)
+    }
+    ctx.set("session", session.session)
+    return await next()
+  } catch {
+    return ctx.json({ error: "Unauthorized", message: "Active session required." }, 401)
+  }
+})
+```
+
+The plugin returns session data only when the request is authenticated, which keeps downstream routes simple and predictable.
+
+### Get Session
+
+Use the middleware in your app and protect routes by checking for an active session before allowing access.
+
+```ts title="src/index.ts" lineNumbers
+import { Hono } from "hono"
+import { handlers } from "@/lib/auth"
+import { type AuthVariables, withAuth } from "@/middlewares/with-auth"
+
+const app = new Hono<{ Variables: AuthVariables }>()
+
+app.get("/", (ctx) => {
+  return ctx.text("Welcome to the Aura Auth Hono App!")
+})
+
+app.all("/api/auth/*", async (ctx) => {
+  return await handlers.ALL(ctx.req.raw)
+})
+
+app.get("/api/protected", withAuth, (ctx) => {
+  const session = ctx.get("session")
+  return ctx.json({
+    message: "You have access to this protected resource.",
+    session,
+  })
+})
+
+export default app
+```
+
+This pattern works well for dashboards, account endpoints, and any route that should not return private data unless the request is authenticated.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with your auth route**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Import the middleware from the correct folder**. The shared middleware lives in `src/middlewares/with-auth.ts`.
+- **Use `session.authenticated` as the guard**. Check that flag before exposing private data.
+- **Keep the auth handler and route logic separate**. The auth route should only forward requests to Aura Auth.
+
+---
+
+## Resources
+
+- [Hono Documentation](https://hono.dev/)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Hono Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/hono)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/configuration/options)
+- [TypeScript Guide](/docs/configuration/typescript)

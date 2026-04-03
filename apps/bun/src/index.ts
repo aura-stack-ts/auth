@@ -1,4 +1,4 @@
-import { handlers, api } from "./auth"
+import { handlers, api } from "@/lib/auth"
 
 Bun.serve({
     port: 3000,

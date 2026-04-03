@@ -1,0 +1,260 @@
+---
+title: Oak
+description: Build your first authentication flow with Aura Auth and Oak (Deno)
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** inside an Oak application running on Deno.
+
+## Overview
+
+Oak is a popular middleware framework for Deno. Because Oak builds on Deno's native web APIs, you can adapt requests from `ctx.request.source` to a standard `Request` object with minimal glue code.
+
+Before continuing, complete the installation and initial setup:
+
+- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
+- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+- [Oak Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/oak) for a fully working example
+
+Then use this guide to integrate Aura Auth with Oak using best practices.
+
+---
+
+## What You'll Build
+
+You will create a small Oak app with:
+
+- a shared `src/lib/auth.ts` server configuration
+- a `src/lib/handler.ts` adapter that bridges Oak and Aura Auth
+- a `src/middlewares/with-auth.ts` middleware that adds session data to Oak state
+- a protected route example that validates the current session before responding
+
+---
+
+<Steps>
+
+<Step>
+
+## Project Structure
+
+```files
+oak-app
+├── src
+│   ├── lib
+│   │   ├── auth.ts
+│   │   ├── handler.ts
+│   ├── middlewares
+│   │   └── with-auth.ts
+│   └── index.ts
+└── .env.local
+```
+
+</Step>
+
+<Step>
+
+## Environment Setup
+
+Create a `.env.local` file at the root of your project to store secrets securely.
+
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+```
+
+<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
+
+</Step>
+
+<Step>
+
+## Setup Aura Auth
+
+Set up your `auth.ts` file in `src/lib/` and configure Aura Auth for your Oak app.
+
+```ts title="src/lib/auth.ts"
+import { createAuth } from "npm:@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers, api } = auth
+```
+
+`basePath` must match the route you expose in your Oak app. If the route changes, update the auth config and adapter together.
+
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Oak does not call Aura Auth handlers directly, so create a small adapter that forwards Oak requests to the web-standard handlers Aura Auth expects. The adapter below converts Oak's request context into a standard Web `Request` and forwards the result back to Oak's response object.
+
+```ts title="src/lib/handler.ts" lineNumbers
+import { handlers } from "@/lib/auth.ts"
+import type { RouterContext } from "@oak/oak"
+
+export const toSetHeaders = <Route extends string>(ctx: RouterContext<Route>, headers: Headers) => {
+  for (const [key, value] of headers.entries()) {
+    ctx.response.headers.set(key, value)
+  }
+}
+
+const isRedirect = (response: Response) => {
+  const location = response.headers.get("Location")
+  return location !== null && response.status >= 300 && response.status < 400
+}
+
+export const toOakHandler = async (ctx: RouterContext<"/api/auth/(.*)">) => {
+  const handler = handlers[ctx.request.method as keyof typeof handlers]
+  if (!handler) {
+    ctx.response.status = 405
+    ctx.response.body = { error: "Method Not Allowed" }
+    return
+  }
+  const toWebRequest = ctx.request.source
+  if (!toWebRequest) {
+    ctx.response.status = 400
+    ctx.response.body = { error: "Bad Request" }
+    return
+  }
+  const response = await handler(toWebRequest)
+  if (isRedirect(response)) {
+    const location = response.headers.get("Location")!
+    ctx.response.status = 302
+    toSetHeaders(ctx, response.headers)
+    ctx.response.redirect(location)
+    return
+  }
+  const body = await response.json()
+  toSetHeaders(ctx, response.headers)
+  ctx.response.body = body
+}
+```
+
+Set up a catch-all route in Oak that forwards authentication requests to the adapter. The adapter takes care of converting Oak's request context into the web-standard request Aura Auth needs.
+
+```ts title="src/index.ts" lineNumbers
+import { Application, Router } from "@oak/oak"
+import { toOakHandler } from "@/lib/handler.ts"
+import type { GlobalState } from "@/middlewares/with-auth.ts"
+
+const router = new Router<GlobalState>()
+const app = new Application()
+
+router.all("/api/auth/(.*)", toOakHandler)
+
+app.use(router.routes())
+await app.listen({ port: 3000 })
+```
+
+This keeps all auth endpoints in one place and leaves the rest of your app free to use the same auth instance.
+
+</Step>
+
+<Step>
+
+## Usage
+
+### Middleware
+
+Create a middleware that loads the active session into Oak state so protected routes can reuse it.
+
+```ts title="src/middlewares/with-auth.ts" lineNumbers
+import { api } from "@/lib/auth.ts"
+import type { Session } from "@aura-stack/auth"
+import type { Next, RouteParams, RouterContext } from "@oak/oak"
+
+const unauthorizedBody = {
+  error: "Unauthorized",
+  message: "Active session required.",
+}
+
+export interface GlobalState {
+  session: Session | null
+}
+
+export type RouterContextWithState<Route extends string, Params extends RouteParams<Route> = RouteParams<Route>> = RouterContext<
+  Route,
+  Params,
+  GlobalState
+>
+
+export const withAuth = async <Route extends string>(ctx: RouterContextWithState<Route>, next: Next) => {
+  try {
+    const session = await api.getSession({
+      headers: ctx.request.headers,
+    })
+    if (!session.authenticated) {
+      ctx.response.status = 401
+      ctx.response.body = unauthorizedBody
+      return
+    }
+    ctx.state.session = session.session
+    return await next()
+  } catch {
+    ctx.response.status = 401
+    ctx.response.body = unauthorizedBody
+  }
+}
+```
+
+The middleware returns `session: null` for anonymous requests, which keeps downstream route handlers simple and predictable.
+
+### Get Session
+
+Use the middleware in your app and guard protected routes with the session it provides.
+
+```ts title="src/index.ts" lineNumbers
+import { Application, Router } from "@oak/oak"
+import { toOakHandler } from "@/lib/handler.ts"
+import { type GlobalState, withAuth } from "@/middlewares/with-auth.ts"
+
+const router = new Router<GlobalState>()
+const app = new Application()
+
+router.get("/", (ctx) => {
+  ctx.response.body = "Welcome to Aura Auth Oak App!"
+})
+
+router.all("/api/auth/(.*)", toOakHandler)
+
+router.get("/api/protected", withAuth, (ctx) => {
+  ctx.response.body = {
+    message: "You have access to this protected resource.",
+    session: ctx.state.session,
+  }
+})
+
+app.use(router.routes())
+await app.listen({ port: 3000 })
+```
+
+This pattern works well for dashboards, account endpoints, and any route that should not return private data unless the request is authenticated.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with your auth route**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Import the middleware from the correct folder**. The shared middleware lives in `src/middlewares/with-auth.ts`.
+- **Use `session.authenticated` as the guard**. Check that flag before exposing private data.
+- **Keep the auth handler and route logic separate**. The auth route should only forward requests to Aura Auth.
+
+---
+
+## Resources
+
+- [Oak Documentation](https://deno.land/x/oak)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Oak Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/oak)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/configuration/options)
+- [TypeScript Guide](/docs/configuration/typescript)

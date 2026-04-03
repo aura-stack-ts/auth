@@ -1,0 +1,176 @@
+---
+title: Bun
+description: Authenticate users in your TypeScript applications with Aura Auth and Bun's native server
+---
+
+This guide walks you through creating a complete authentication flow using **Aura Auth** directly with the **Bun native `serve`** API.
+
+## Overview
+
+Aura Auth and Bun both follow the web-standard `Request` and `Response` interfaces for high-performance HTTP handling. That means Aura Auth works out of the box with `Bun.serve`, with no external adapters or frameworks required.
+
+Before continuing, complete the installation and initial setup:
+
+- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
+- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
+- [Bun Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/bun) for a fully working example
+
+Then use this guide to integrate Aura Auth with a Bun server using best practices.
+
+---
+
+## What You'll Build
+
+You will create a small Bun app with:
+
+- a shared `src/lib/auth.ts` server configuration
+- a `src/index.ts` entry point that mounts the auth handlers
+- a simple protected route example that validates the session before responding
+
+---
+
+<Steps>
+
+<Step>
+
+## Project Structure
+
+```files
+bun-app
+├── src
+│   ├── lib
+│   │   └── auth.ts
+│   └── index.ts
+└── .env.local
+```
+
+</Step>
+
+<Step>
+
+## Environment Setup
+
+Create a `.env.local` file at the root of your project to store secrets securely.
+
+```bash title=".env.local"
+# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
+AURA_AUTH_SECRET="base64-or-hex-32-bytes"
+AURA_AUTH_SALT="base64-or-hex-32-bytes"
+```
+
+<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
+
+</Step>
+
+<Step>
+
+## Setup Aura Auth
+
+Create `auth.ts` in `src/lib/` to configure Aura Auth and export the handlers. This is your single source of truth for all authentication logic.
+
+```ts title="src/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers, jose, api } = auth
+```
+
+`basePath` must match the route you mount in `Bun.serve`. `baseURL` is optional for local development but should be set to your deployed domain in production.
+
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Define auth routes directly in `Bun.serve`. Any request matching `/api/auth/*` is handled by `handlers.ALL`. Bun passes standard Web `Request` objects, so the route can delegate directly.
+
+```ts title="src/index.ts" lineNumbers
+import { handlers } from "@/lib/auth"
+
+Bun.serve({
+  port: 3000,
+  fetch(request) {
+    const url = new URL(request.url)
+    if (url.pathname.startsWith("/api/auth/")) {
+      return handlers.ALL(request)
+    }
+    return new Response("Not Found", { status: 404 })
+  },
+})
+
+console.log("Bun server running on http://localhost:3000")
+```
+
+</Step>
+
+<Step>
+
+## Usage
+
+### Get Session
+
+Bun does not include framework-style middleware, but you can protect routes with a simple handler that validates the session before responding.
+
+```ts title="src/index.ts" lineNumbers
+import { api, handlers } from "@/lib/auth"
+
+Bun.serve({
+  port: 3000,
+  async fetch(request) {
+    const url = new URL(request.url)
+
+    if (url.pathname.startsWith("/api/auth/")) {
+      return handlers.ALL(request)
+    }
+
+    if (url.pathname === "/api/protected") {
+      const session = await api.getSession({
+        headers: request.headers,
+      })
+
+      if (!session.authenticated) {
+        return Response.json({ error: "Unauthorized", message: "Active session required." }, { status: 401 })
+      }
+
+      return Response.json({
+        message: "You have access to this protected resource.",
+        user: session.session.user,
+      })
+    }
+
+    return new Response("Not Found", { status: 404 })
+  },
+})
+
+console.log("Bun server running on http://localhost:3000")
+```
+
+This pattern works well for small APIs or microservices. For larger applications, consider extracting route handlers into separate files.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with your route segment**. If your handler route is `/api/auth/*`, `basePath` should be `/api/auth`.
+- **Always pass request headers to `api.getSession()`**. The session lookup needs headers so Aura Auth can read cookies.
+- **Validate sessions before rendering private responses**. Check `session.authenticated` before exposing sensitive data.
+- **Use TypeScript for safer session access**. Type-guard your session object to avoid runtime errors when accessing user fields.
+
+---
+
+## Resources
+
+- [Bun Documentation](https://bun.sh/docs)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/configuration/options)
+- [TypeScript Guide](/docs/configuration/typescript)
