@@ -54,15 +54,13 @@ export const AuthProvider = ({ children, session: defaultSession }: AuthProvider
 
     return (
         <AuthContext
-            value={
-                {
-                    session,
-                    isAuthenticated,
-                    isLoading,
-                    signIn,
-                    signOut,
-                } as AuthContextValue
-            }
+            value={{
+                session,
+                isAuthenticated,
+                isLoading,
+                signIn,
+                signOut,
+            }}
         >
             {children}
         </AuthContext>

@@ -8,3 +8,7 @@ export const GET = async (request: Request) => {
 export const POST = async (request: Request) => {
     return await handlers.POST(request)
 }
+
+export const PATCH = async (request: Request) => {
+    return await handlers.PATCH(request)
+}
