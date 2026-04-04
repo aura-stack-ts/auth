@@ -1,0 +1,23 @@
+{
+  "skill_name": "use-createauth-jose",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "In my Express app using Aura Auth, add a helper that creates a JWT for tests using createAuth.jose and show how to set it as a cookie in supertest.",
+      "expected_output": "Uses jose.encodeJWT from the existing auth instance and provides a valid supertest Cookie example.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I need to verify a signed token from createAuth.jose and return 401 when verification fails. Can you add that middleware logic?",
+      "expected_output": "Uses jose.verifyJWS or jose.decodeJWT with safe try/catch, returns unauthorized behavior on failure.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Can you use Aura jose in my React client component to decode a token in the browser?",
+      "expected_output": "Rejects direct browser-only usage and redirects implementation to server-side endpoint or middleware.",
+      "files": []
+    }
+  ]
+}

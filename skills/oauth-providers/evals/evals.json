@@ -1,0 +1,23 @@
+{
+  "skill_name": "setup-aura-oauth-providers",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up GitHub and GitLab providers in my Aura Auth config and show the exact env vars I need in .env.",
+      "expected_output": "Provides createAuth oauth configuration with built-in providers, required provider env vars, and secure variable reminders for secret/salt.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I need to add a custom OAuth provider named Acme SSO to Aura Auth. Please show the provider object, endpoints, and profile mapping.",
+      "expected_output": "Includes a valid custom OAuth provider object with unique id, authorize/accessToken/userInfo endpoints, and a stable sub mapping.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Explain what happens if I configure identity.schema with unknownKeys strict while using GitHub OAuth, and how trustedOrigins should be set for localhost + staging.",
+      "expected_output": "Clearly explains identity.schema validation/unknownKeys behavior and provides safe trustedOrigins examples for localhost and staging.",
+      "files": []
+    }
+  ]
+}

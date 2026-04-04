@@ -1,0 +1,23 @@
+{
+  "skill_name": "create-basic-auth",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I am using Next.js App Router with pnpm. Set up @aura-stack/auth with a basic GitHub login and show every file I need, including env vars and a minimal client helper.",
+      "expected_output": "A complete Next.js App Router setup with createAuth instance, route handler export, env template (AURA_AUTH_SALT, AURA_AUTH_SECRET, GitHub keys), createAuthClient usage, and verification steps.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Can you implement Aura auth in my Express API and mount it under /api/auth? I need protected route verification and the exact env variables for a basic github provider.",
+      "expected_output": "Express-compatible bridge pattern from Express request/response to handlers.ALL plus protected route session check and required env variables.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I use Cloudflare Workers runtime. Give me a basic Aura Auth instance with github oauth, explain basePath, and show what to test after setup.",
+      "expected_output": "Worker fetch routing to handlers.ALL for /api/auth/*, createAuth baseline with github oauth and basePath /api/auth, env setup, and practical validation checklist.",
+      "files": []
+    }
+  ]
+}
