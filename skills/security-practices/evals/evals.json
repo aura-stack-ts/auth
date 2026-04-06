@@ -1,0 +1,23 @@
+{
+  "skill_name": "security-practices",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Harden my Aura Auth config for production: env file setup, prevent git tracking of secrets, safest cookie strategy, and trusted origins for app.example.com + localhost.",
+      "expected_output": "Provides a complete security plan with .env/gitignore guidance, secure cookie choices, and trustedOrigins static policy.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "We are behind Cloudflare and Nginx. Should we enable trustedProxyHeaders? Also give me session jwt best practices with issuer, audience, maxAge, and maxExpiration.",
+      "expected_output": "Gives conditional trustedProxyHeaders decision criteria and a secure JWT session configuration with explicit issuer/audience/expiration guidance.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Explain sealed vs signed vs encrypted jwt modes in Aura Auth and recommend the best option for an admin dashboard handling sensitive claims.",
+      "expected_output": "Accurately compares JWT modes and recommends sealed with risk-based rationale for sensitive admin use case.",
+      "files": []
+    }
+  ]
+}

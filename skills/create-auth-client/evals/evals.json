@@ -1,0 +1,23 @@
+{
+  "skill_name": "create-auth-client",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I use Next.js App Router. Create a minimal @aura-stack/auth client instance and show where the file should live.",
+      "expected_output": "Creates a valid createAuthClient module for a client-capable framework with basePath/baseURL and short usage snippets.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "My project is an Express API only. Please create the Aura auth client API instance in this same app.",
+      "expected_output": "Rejects client instance creation for server-only target and asks for/proposes a separate frontend app.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I have Nuxt for frontend and an auth backend under /api/auth. Set up the Aura client instance and quick signIn/signOut usage.",
+      "expected_output": "Provides Nuxt-compatible createAuthClient setup plus signIn/signOut/getSession snippets and verification steps.",
+      "files": []
+    }
+  ]
+}
