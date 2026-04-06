@@ -1,6 +1,6 @@
 ---
 name: oauth-providers
-description: Set up OAuth providers in @aura-stack/auth, including built-in and custom providers, provider environment variables, trusted origins, and identity schema implications. Use this skill whenever users ask how to configure OAuth providers, add custom OAuth services, troubleshoot provider credentials, or understand identity schema behavior in Aura Auth.
+description: Configure OAuth providers for @aura-stack/auth end-to-end, including built-in and custom providers, provider environment variables, trusted origins, and identity schema implications. Use this skill whenever users ask to add providers, troubleshoot credential/config issues, or validate OAuth profile mapping behavior.
 license: MIT
 ---
 
@@ -8,31 +8,55 @@ license: MIT
 
 Use this skill to configure OAuth providers end-to-end for `@aura-stack/auth`.
 
+Docs home: https://aura-stack-auth.vercel.app/docs/
+
+---
+
+## When to use
+
+Use this skill whenever a user asks about setting up OAuth providers in Aura Auth, including built-in provider configuration, custom provider setup, environment variable requirements, trusted origins configuration, or the impact of `identity.schema` on OAuth profiles.
+
+---
+
+## Output Contract (Strict)
+
+Always return ALL of the following unless explicitly scoped otherwise:
+
+1. Setup plan customized to the provider(s), framework/runtime, and project structure.
+2. Built-in or custom provider configuration snippet using `createAuth`.
+3. Exact env variable requirements for each configured provider.
+4. `trustedOrigins` recommendation tailored to the user's domains.
+5. `identity.schema` impact explanation when identity mapping is in scope.
+6. Verification checklist.
+7. Troubleshooting section for common OAuth setup failures.
+
+---
+
 ## What this skill must cover
 
 1. How to configure built-in providers in `createAuth`.
 2. How to configure custom OAuth providers.
 3. Environment variable requirements and naming patterns.
-4. How to configure `trustedOrigins` safely.
-5. What changes when `identity.schema` is configured.
-6. Where to read official website docs for each topic.
+4. What changes when `identity.schema` is configured.
+5. How to configure `trustedOrigins` safely.
+6. Where to read official docs for each topic.
 
-## Mandatory docs-reading step
+---
 
-Before proposing changes, read the relevant docs pages (website content source or live docs):
+## Mandatory Preflight Discovery (Required)
 
-- OAuth overview: `/docs/oauth`
-- Custom providers guide: `/docs/guides/custom-providers`
-- Config options (`oauth`, `trustedOrigins`, `identity`): `/docs/configuration/options`
-- Environment variables: `/docs/configuration/env`
-- API reference core: `/docs/api-reference/core`
+Before writing files, collect or detect:
 
-If local docs source exists, use these files in this repository:
+1. Runtime/framework and route location of the auth instance.
+2. Existing auth module (`createAuth`) and current `oauth` config.
+3. Provider target list and whether each one is built-in or custom.
+4. Callback/public app URL and expected redirect behavior.
+5. Current env values in `.env*` files for provider credentials and auth secrets.
+6. Whether `identity.schema` is already configured.
 
-- `docs/src/content/docs/oauth/index.mdx`
-- `docs/src/content/docs/guides/custom-providers.mdx`
-- `docs/src/content/docs/configuration/options.mdx`
-- `docs/src/content/docs/configuration/env.mdx`
+If critical inputs are missing, ask concise follow-up questions before editing files.
+
+---
 
 ## Inputs to collect first
 
@@ -44,6 +68,8 @@ Ask for missing details:
 - App callback/base URL.
 - Existing auth file path.
 - Whether user already has provider client credentials.
+
+---
 
 ## Built-in provider setup
 
@@ -62,7 +88,7 @@ export const { handlers, jose, api } = createAuth({
 
 ```ts
 import { createAuth } from "@aura-stack/auth"
-import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
+import { builtInOAuthProviders } from "@aura-stack/auth/oauth"
 
 export const { handlers, jose, api } = createAuth({
   oauth: [
@@ -75,6 +101,10 @@ export const { handlers, jose, api } = createAuth({
   ],
 })
 ```
+
+If the project already imports from `@aura-stack/auth/oauth/index`, preserve that style.
+
+---
 
 ## Supported built-in providers (source-of-truth: code)
 
@@ -92,6 +122,12 @@ export const { handlers, jose, api } = createAuth({
 - notion
 - dropbox
 - atlassian
+
+Validation rule:
+
+- If unsure, verify provider IDs against `builtInOAuthProviders` in source before proposing changes.
+
+---
 
 ## Custom provider setup
 
@@ -132,6 +168,9 @@ When adding custom providers:
 - Require unique `id` values (duplicate IDs are invalid).
 - Ensure `authorize`, `accessToken`, and `userInfo` are valid endpoints.
 - Ensure returned profile has a stable unique `sub`.
+- Ensure `id` is lowercase and maps to env keys consistently.
+
+---
 
 ## Environment variable rules
 
@@ -154,14 +193,18 @@ AURA_AUTH_GITHUB_CLIENT_ID=""
 AURA_AUTH_GITHUB_CLIENT_SECRET=""
 ```
 
-Required secure values for auth runtime:
+If credentials are missing, clearly state which env keys are required for each provider.
+
+When OAuth provider setup is requested, also check baseline auth secrets:
 
 ```env
 AURA_AUTH_SECRET=""
 AURA_AUTH_SALT=""
 ```
 
-If credentials are missing, clearly state which env keys are required for each provider.
+Do not auto-generate secrets without user consent.
+
+---
 
 ## trustedOrigins setup
 
@@ -190,6 +233,8 @@ Wildcard examples (use cautiously):
 - `https://*.example.com:*`
 
 Warn that overly broad patterns can introduce open redirect/CORS risk.
+
+Prefer exact origin allowlists first.
 
 ## identity.schema behavior (must explain)
 
@@ -224,14 +269,16 @@ export const { handlers, jose, api } = createAuth<Shape>({
 })
 ```
 
-## Output format
+---
+
+## Output Template (Use This Structure)
 
 Use this response structure:
 
 ```markdown
 # Aura OAuth Provider Setup
 
-## 1. Docs Checked
+## 1. Summary
 
 ## 2. Provider Plan
 
@@ -244,9 +291,20 @@ Use this response structure:
 ## 6. identity.schema Impact
 
 ## 7. Verification Checklist
+
+## 8. Troubleshooting
 ```
 
-## Verification checklist
+Troubleshooting must include at least:
+
+- Missing provider credentials (`{PROVIDER}_CLIENT_ID`, `{PROVIDER}_CLIENT_SECRET`).
+- Callback URL mismatch between provider dashboard and app.
+- Untrusted origin or invalid redirect target.
+- Duplicate provider IDs.
+
+---
+
+## Verification Checklist
 
 1. Sign-in route redirects to provider.
 2. Callback succeeds without configuration errors.
@@ -254,10 +312,15 @@ Use this response structure:
 4. Missing/invalid env vars produce clear actionable errors.
 5. Custom provider profile mapping returns a stable `sub`.
 6. `trustedOrigins` blocks untrusted redirects/origins.
+7. Provider IDs in config match built-in registry or valid custom definitions.
+
+---
 
 ## Guardrails
 
 - Do not invent provider IDs not present in code unless creating a custom provider.
 - Do not commit real client secrets.
 - Keep provider IDs lowercase.
+- Preserve existing import style when already present (`@aura-stack/auth/oauth` vs `@aura-stack/auth/oauth/index`).
+- Do not broaden `trustedOrigins` without explicit user intent.
 - Preserve existing app conventions and folder structure.

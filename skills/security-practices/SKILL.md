@@ -1,6 +1,6 @@
 ---
 name: security-practices
-description: Apply security best practices for @aura-stack/auth configuration, including .env handling, git-safe secret management, cookie hardening, trusted proxy/origin controls, and secure session/JWT strategy design. Use this skill whenever a user asks about production-safe auth configuration or security-critical options in Aura Auth.
+description: Apply production-grade security guidance for @aura-stack/auth configuration, including .env hygiene, secret management, cookie hardening, trusted proxy and origin controls, and secure JWT/session design. Use this skill whenever users ask for secure Aura Auth setup, production hardening, or security tradeoff decisions.
 license: MIT
 ---
 
@@ -8,7 +8,34 @@ license: MIT
 
 Use this skill to produce secure, production-ready configuration guidance for `@aura-stack/auth`.
 
-## Scope
+## High-Confidence Trigger Guidance
+
+Use this skill when user intent includes any of these:
+
+- "secure my Aura Auth config" or "production harden auth".
+- Secret and environment handling (`AURA_AUTH_SECRET`, `AURA_AUTH_SALT`, `.env`, gitignore).
+- Cookie policy, trusted proxy headers, or trusted origins design.
+- JWT mode selection (`sealed`, `signed`, `encrypted`) and lifetime strategy.
+- Issuer/audience/expiration policy for multi-service verification.
+
+Do not use this skill for generic app security advice that is unrelated to Aura Auth configuration.
+
+## Output Contract (Strict)
+
+Always return ALL of the following unless explicitly scoped otherwise:
+
+1. Threat-sensitive context analysis for the requested configuration topic.
+2. .env handling and git safety requirements.
+3. Critical configuration recommendations with security rationale.
+4. Cookie security profile guidance for production deployments.
+5. trustedProxyHeaders enablement decision framework.
+6. trustedOrigins policy best practices (static, dynamic, wildcard).
+7. Session strategy and JWT mode design guidance.
+8. Final hardened configuration example.
+9. Validation checklist for secure configuration.
+10. Guardrails to prevent common security mistakes.
+
+## What this skill must produce
 
 Cover all critical security topics:
 
@@ -21,33 +48,19 @@ Cover all critical security topics:
 7. JWT mode analysis (`sealed`, `signed`, `encrypted`) and app-fit recommendation.
 8. `issuer`, `audience`, `maxExpiration`, `maxAge`, and `expirationStrategy` guidance.
 
-## Mandatory docs and source check
+## Instructions
 
-Before proposing changes, read:
+### Mandatory Preflight Discovery (Required)
 
-- `docs/src/content/docs/configuration/env.mdx`
-- `docs/src/content/docs/configuration/options.mdx`
-- `docs/src/content/docs/concepts/security-model.mdx`
-- `docs/src/content/docs/guides/cookie-management.mdx`
-- `packages/core/src/@types/config.ts`
-- `packages/core/src/@types/session.ts`
+Before writing files, collect or detect:
 
-If the website docs are used directly, reference equivalent routes:
+1. Runtime/framework and environment split (dev/staging/prod).
+2. Deployment topology (direct server, reverse proxy, CDN, load balancer).
+3. Session security requirements (confidentiality only, integrity only, both).
+4. Token lifetime expectations and compliance constraints.
+5. Whether multi-service verification is required (for issuer/audience planning).
 
-- `/docs/configuration/env`
-- `/docs/configuration/options`
-- `/docs/concepts/security-model`
-- `/docs/guides/cookie-management`
-
-## Inputs to collect first
-
-Ask for:
-
-- Deployment topology (direct server, reverse proxy, CDN, load balancer).
-- Runtime/framework and environment split (dev/staging/prod).
-- Session security requirements (confidentiality only, integrity only, both).
-- Token lifetime expectations and compliance constraints.
-- Whether multi-service verification is required (for issuer/audience planning).
+If one or more critical inputs are missing and cannot be inferred, ask concise follow-up questions before recommending production values.
 
 ## .env and git safety requirements
 
@@ -66,7 +79,7 @@ AURA_AUTH_SECRET=""
 AURA_AUTH_SALT=""
 ```
 
-Generation examples:
+Generate values only with explicit user approval. Example commands:
 
 ```bash
 openssl rand -base64 32
@@ -77,6 +90,10 @@ or
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
+
+If the user asks to auto-fill missing values, use the helper script:
+
+- `skills/create-auth/scripts/update-auth-env.sh`
 
 ## Passing `secret` safely
 
@@ -124,6 +141,8 @@ Do NOT enable when:
 - Proxy chain is unknown or partially trusted.
 - Header rewriting policy is unclear.
 
+If deployment details are unclear, default to `trustedProxyHeaders: false` and explain why.
+
 ## trustedOrigins best practices
 
 ### Static allowlist (preferred)
@@ -159,6 +178,8 @@ Rules:
 - Prefer explicit hosts before wildcards.
 - Restrict by protocol (`https`) and domain scope.
 - Never use broad catch-all semantics.
+
+If a wildcard is required, include a short risk note and compensating controls.
 
 ## Session strategy best practices
 
@@ -212,6 +233,8 @@ Decision rule:
 - `expirationStrategy`:
   - `absolute`: hard stop after max window (security-first default).
   - `rolling`: extends active sessions; use with strict caps and monitoring.
+  - `fixed`: fixed TTL from issuance; no rolling extension.
+  - `sliding`: refreshes validity window with activity, bounded by `maxExpiration`.
 
 Best-practice defaults:
 
@@ -219,7 +242,18 @@ Best-practice defaults:
 - high-risk admin app: `sealed`, shorter maxAge (8-24h), strict audience, absolute expiration.
 - machine-oriented internal service: evaluate signed vs sealed based on confidentiality requirements.
 
-## Output format
+## Troubleshooting Order
+
+When hardening fails or behavior is unexpected, diagnose in this order:
+
+1. Missing or weak `AURA_AUTH_SECRET` / `AURA_AUTH_SALT` setup.
+2. `.env` accidentally committed, wrong environment loaded, or stale runtime config.
+3. Misaligned cookie policy (`secure`, `sameSite`, domain) versus deployment topology.
+4. Incorrect `trustedProxyHeaders` state for the real proxy chain.
+5. Over-broad or incorrect `trustedOrigins` patterns.
+6. JWT mode or expiration policy inconsistent with app requirements.
+
+## Output Template (Use This Structure)
 
 Use this exact structure:
 
@@ -245,7 +279,7 @@ Use this exact structure:
 ## 9. Validation Checklist
 ```
 
-## Validation checklist
+## Validation Checklist
 
 1. `.env` is ignored by git and `.env.example` has placeholders only.
 2. `AURA_AUTH_SECRET` and `AURA_AUTH_SALT` are present and high entropy.
@@ -262,3 +296,4 @@ Use this exact structure:
 - Do not weaken cookie/security settings for convenience in production.
 - Prefer least privilege in origins and token audience.
 - Explain tradeoffs before recommending less-secure alternatives.
+- Keep recommendations minimal, explicit, and reversible where possible.
