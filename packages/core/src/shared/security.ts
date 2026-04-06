@@ -81,3 +81,53 @@ export const verifyCSRF = async <DefaultUser extends User = User>(
         throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
     }
 }
+
+/**
+ * Hashes a password using PBKDF2 with SHA-256.
+ * PBKDF2 is available in standard Web Crypto (SubtleCrypto).
+ *
+ * @param password - The password to hash.
+ * @param salt - Optional salt (base64url encoded). If not provided, a random salt will be generated.
+ * @param iterations - The number of PBKDF2 iterations. Default is 100,000.
+ * @returns The hashed password in the format `iterations:salt:hash` (all segments base64url encoded).
+ */
+export const hashPassword = async (password: string, salt?: string, iterations = 100000) => {
+    const subtle = getSubtleCrypto()
+    const saltBuffer = (salt ? base64url.decode(salt) : getRandomBytes(16)) as any
+    const baseKey = await subtle.importKey("raw", encoder.encode(password) as any, "PBKDF2", false, ["deriveBits"])
+    const derivedKey = await subtle.deriveBits(
+        {
+            name: "PBKDF2",
+            salt: saltBuffer,
+            iterations,
+            hash: "SHA-256",
+        },
+        baseKey,
+        256
+    )
+    const hashValues = new Uint8Array(derivedKey)
+    const hash = base64url.encode(hashValues)
+    const saltStr = base64url.encode(saltBuffer)
+    return `${iterations}:${saltStr}:${hash}`
+}
+
+/**
+ * Verifies a password against a hashed value.
+ *
+ * @param password - The password to verify.
+ * @param hashedPassword - The hashed password to compare against.
+ * @returns A promise that resolves to true if the password matches the hash, false otherwise.
+ */
+export const verifyPassword = async (password: string, hashedPassword: string) => {
+    try {
+        const segments = hashedPassword.split(":")
+        if (segments.length !== 3) return false
+        const [iterationsStr, saltStr] = segments
+        const iterations = parseInt(iterationsStr, 10)
+        if (isNaN(iterations)) return false
+        const newHashed = await hashPassword(password, saltStr, iterations)
+        return timingSafeEqual(newHashed, hashedPassword)
+    } catch {
+        return false
+    }
+}

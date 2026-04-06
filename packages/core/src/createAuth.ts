@@ -5,6 +5,7 @@ import { isSecureConnection } from "@/shared/utils.ts"
 import { createErrorHandler } from "@/router/errorHandler.ts"
 import {
     signInAction,
+    signInCredentialsAction,
     callbackAction,
     sessionAction,
     signOutAction,
@@ -34,6 +35,7 @@ export const createAuthInstance = <Identity extends EditableShape<UserShape>>(au
     const router = createRouter(
         [
             signInAction(config.context.oauth),
+            signInCredentialsAction,
             callbackAction(config.context.oauth),
             sessionAction,
             signOutAction,
