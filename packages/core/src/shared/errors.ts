@@ -17,7 +17,7 @@ export class OAuthProtocolError extends Error {
         this.error = error
         this.errorURI = errorURI
         this.name = new.target.name
-        Error.captureStackTrace(this, new.target)
+        Error?.captureStackTrace(this, new.target)
     }
 }
 
@@ -35,7 +35,7 @@ export class AuthInternalError extends Error {
         super(message, options)
         this.code = code
         this.name = new.target.name
-        Error.captureStackTrace(this, new.target)
+        Error?.captureStackTrace(this, new.target)
     }
 }
 
@@ -53,7 +53,7 @@ export class AuthSecurityError extends Error {
         super(message, options)
         this.code = code
         this.name = new.target.name
-        Error.captureStackTrace(this, new.target)
+        Error?.captureStackTrace(this, new.target)
     }
 }
 
@@ -65,7 +65,7 @@ export class AuthClientError extends Error {
         super(message, options)
         this.code = code
         this.name = new.target.name
-        Error.captureStackTrace(this, new.target)
+        Error?.captureStackTrace(this, new.target)
     }
 }
 

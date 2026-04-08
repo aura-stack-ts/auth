@@ -1,7 +1,14 @@
 import { EditableShape, ShapeToObject } from "./utility.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { UserIdentityType, UserShape } from "@/shared/identity.ts"
-import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance, RouterGlobalContext } from "@/@types/config.ts"
+import type {
+    CookieStoreConfig,
+    CredentialsPayload,
+    IdentityConfig,
+    InternalLogger,
+    JoseInstance,
+    RouterGlobalContext,
+} from "@/@types/config.ts"
 
 export type User = UserIdentityType
 export type { UserShape } from "@/shared/identity.ts"
@@ -279,3 +286,13 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
 export type UpdateSessionReturn<DefaultUser extends User = User> =
     | { session: Session<DefaultUser>; headers: Headers; updated: true }
     | { session: null; headers: Headers; updated: false }
+
+export type SignInCredentialsOptions = FunctionAPIContext<{
+    payload: CredentialsPayload
+    redirectTo?: string
+}>
+
+export interface SignInCredentialsAPIOptions {
+    payload: CredentialsPayload
+    redirectTo?: string
+}
