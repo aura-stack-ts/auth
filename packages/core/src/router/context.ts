@@ -20,6 +20,7 @@ export const createContext = <Identity extends EditableShape<UserShape>>(config?
 
     const ctx = {
         oauth: createBuiltInOAuthProviders(config?.oauth),
+        credentials: config?.credentials,
         cookies: standardCookieStore,
         jose: jose,
         secret: config?.secret,

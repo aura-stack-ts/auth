@@ -1,8 +1,5 @@
-import { signIn } from "@/api/signIn.ts"
-import { signOut } from "@/api/signOut.ts"
-import { getSession } from "@/api/getSession.ts"
-import { updateSession } from "./updateSession.ts"
 import { validateRedirectTo } from "@/shared/utils.ts"
+import { getSession, signIn, signInCredentials, signOut, updateSession } from "@/api/index.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type {
     BuiltInOAuthProvider,
@@ -14,6 +11,7 @@ import type {
     SignOutAPIOptions,
     UpdateSessionAPIOptions,
     User,
+    SignInCredentialsAPIOptions,
 } from "@/@types/index.ts"
 
 export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContext) => {
@@ -32,6 +30,13 @@ export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContex
                 request: options?.request,
                 redirect: options?.redirect,
                 redirectTo: options?.redirectTo,
+            })
+        },
+        signInCredentials: async (options: SignInCredentialsAPIOptions) => {
+            return signInCredentials({
+                ctx,
+                payload: options.payload,
+                redirectTo: options.redirectTo,
             })
         },
         signOut: async (options: SignOutAPIOptions) => {

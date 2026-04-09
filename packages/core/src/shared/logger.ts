@@ -290,6 +290,24 @@ export const logMessages = {
         msgId: "IDENTITY_VALIDATION_FAILED",
         message: "User identity validation against the schema failed",
     },
+    CREDENTIALS_SIGN_IN_SUCCESS: {
+        facility: 4,
+        severity: "info",
+        msgId: "CREDENTIALS_SIGN_IN_SUCCESS",
+        message: "User successfully authenticated with credentials",
+    },
+    INVALID_CREDENTIALS: {
+        facility: 4,
+        severity: "warning",
+        msgId: "INVALID_CREDENTIALS",
+        message: "Authentication failed due to invalid credentials",
+    },
+    CREDENTIALS_SIGN_IN_FAILED: {
+        facility: 4,
+        severity: "error",
+        msgId: "CREDENTIALS_SIGN_IN_FAILED",
+        message: "An error occurred during credentials sign-in",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {
@@ -298,7 +316,6 @@ export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overr
         ...message,
         timestamp: new Date().toISOString(),
         hostname: "aura-auth",
-        procId: typeof process !== "undefined" && process.pid ? process.pid.toString() : "-",
         ...overrides,
     }
 }

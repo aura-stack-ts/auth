@@ -39,6 +39,16 @@ export const sessionPayload: JWTPayload = {
 const auth = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile],
     logger: true,
+    credentials: {
+        authorize: async () => {
+            return {
+                sub: "1234567890",
+                email: "johndoe@example.com",
+                name: "John Doe",
+                image: "https://example.com/image.jpg",
+            }
+        },
+    },
 })
 
 export const {

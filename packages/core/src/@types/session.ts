@@ -1,7 +1,14 @@
-import { EditableShape, ShapeToObject } from "./utility.ts"
+import { EditableShape, Prettify, ShapeToObject } from "./utility.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { UserIdentityType, UserShape } from "@/shared/identity.ts"
-import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance, RouterGlobalContext } from "@/@types/config.ts"
+import type {
+    CookieStoreConfig,
+    CredentialsPayload,
+    IdentityConfig,
+    InternalLogger,
+    JoseInstance,
+    RouterGlobalContext,
+} from "@/@types/config.ts"
 
 export type User = UserIdentityType
 export type { UserShape } from "@/shared/identity.ts"
@@ -205,11 +212,6 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     destroySession(request: Headers, skipCSRFCheck?: boolean): Promise<Headers>
 }
 
-export interface GetSessionReturn<DefaultUser extends User = User> {
-    session: Session<DefaultUser> | null
-    headers: Headers
-}
-
 export interface CreateSessionStrategyOptions<Identity extends EditableShape<UserShape>> {
     config?: SessionConfig
     jose: JoseInstance<ShapeToObject<Identity> & User>
@@ -226,24 +228,21 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
     identity: IdentityConfig
 }
 
+export type JWTManager<DefaultUser extends User = User> = {
+    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
+    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
+}
+
+// #region API Types
+export type FunctionAPIContext<Options extends object> = Prettify<
+    {
+        ctx: RouterGlobalContext
+    } & Options
+>
+
 export interface SignInOptions {
     redirect?: boolean
     redirectTo?: string
-}
-
-export interface SignOutOptions {
-    redirect?: boolean
-    redirectTo?: string
-}
-
-export interface GetSessionAPIOptions {
-    headers: HeadersInit
-}
-
-export interface SignOutAPIOptions {
-    headers: HeadersInit
-    redirectTo?: string
-    skipCSRFCheck?: boolean
 }
 
 export interface SignInAPIOptions<Redirect extends boolean = boolean> {
@@ -253,21 +252,32 @@ export interface SignInAPIOptions<Redirect extends boolean = boolean> {
     request?: Request
 }
 
-export type FunctionAPIContext<Options extends object> = {
-    ctx: RouterGlobalContext
-} & Options
-
 export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
     ? Response
     : { redirect: false; signInURL: string }
+
+export interface GetSessionReturn<DefaultUser extends User = User> {
+    session: Session<DefaultUser> | null
+    headers: Headers
+}
+
+export interface GetSessionAPIOptions {
+    headers: HeadersInit
+}
 
 export type SessionResponse<DefaultUser extends User = User> =
     | { session: Session<DefaultUser>; headers: Headers; authenticated: true }
     | { session: null; headers: Headers; authenticated: false }
 
-export type JWTManager<DefaultUser extends User = User> = {
-    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
-    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
+export interface SignOutOptions {
+    redirect?: boolean
+    redirectTo?: string
+}
+
+export interface SignOutAPIOptions {
+    headers: HeadersInit
+    redirectTo?: string
+    skipCSRFCheck?: boolean
 }
 
 export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
@@ -279,3 +289,22 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
 export type UpdateSessionReturn<DefaultUser extends User = User> =
     | { session: Session<DefaultUser>; headers: Headers; updated: true }
     | { session: null; headers: Headers; updated: false }
+
+export type SignInCredentialsOptions = FunctionAPIContext<{
+    payload: CredentialsPayload
+    request?: Request
+    headers?: HeadersInit
+    redirectTo?: string
+}>
+
+export interface SignInCredentialsAPIOptions {
+    payload: CredentialsPayload
+    request?: Request
+    headers?: HeadersInit
+    redirect?: boolean
+    redirectTo?: string
+}
+
+export type SignInCredentialsReturn =
+    | { success: true; headers: Headers; redirectURL: string }
+    | { success: false; headers: Headers; redirectURL?: null }
