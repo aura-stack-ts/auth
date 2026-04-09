@@ -108,7 +108,7 @@ export const hashPassword = async (password: string, salt?: string, iterations =
     const hashValues = new Uint8Array(derivedKey)
     const hash = base64url.encode(hashValues)
     const saltStr = base64url.encode(saltBuffer)
-    return `${iterations}:${saltStr}:${hash}`
+    return `pbkdf2-sha256:${iterations}:${saltStr}:${hash}`
 }
 
 /**
@@ -121,8 +121,9 @@ export const hashPassword = async (password: string, salt?: string, iterations =
 export const verifyPassword = async (password: string, hashedPassword: string) => {
     try {
         const segments = hashedPassword.split(":")
-        if (segments.length !== 3) return false
-        const [iterationsStr, saltStr] = segments
+        if (segments.length !== 4) return false
+        const [scheme, iterationsStr, saltStr] = segments
+        if (scheme !== "pbkdf2-sha256") return false
         const iterations = parseInt(iterationsStr, 10)
         if (isNaN(iterations)) return false
         const newHashed = await hashPassword(password, saltStr, iterations)

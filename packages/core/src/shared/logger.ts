@@ -302,6 +302,12 @@ export const logMessages = {
         msgId: "INVALID_CREDENTIALS",
         message: "Authentication failed due to invalid credentials",
     },
+    CREDENTIALS_SIGN_IN_FAILED: {
+        facility: 4,
+        severity: "error",
+        msgId: "CREDENTIALS_SIGN_IN_FAILED",
+        message: "An error occurred during credentials sign-in",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

@@ -1,7 +1,15 @@
+import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
+import { POST } from "@test/presets.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
-import { POST } from "@test/presets.ts"
-import { describe, test, expect } from "vitest"
+
+beforeEach(() => {
+    vi.stubEnv("BASE_URL", undefined)
+})
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe("signInCredentials action", () => {
     test("success signIn flow", async () => {

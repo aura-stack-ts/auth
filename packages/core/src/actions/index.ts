@@ -1,5 +1,5 @@
 export { signInAction } from "@/actions/signIn/signIn.ts"
-export { signInCredentialsAction } from "@/actions/signIn/credentials.ts"
+export { signInCredentialsAction } from "@/actions/signInCredentials/signInCredentials.ts"
 export { callbackAction } from "@/actions/callback/callback.ts"
 export { sessionAction } from "@/actions/session/session.ts"
 export { signOutAction } from "@/actions/signOut/signOut.ts"

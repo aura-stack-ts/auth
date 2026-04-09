@@ -29,6 +29,7 @@ export const signInCredentialsAction = createEndpoint(
         const { headers, success } = await signInCredentials({
             ctx: ctx.context,
             payload,
+            request: ctx.request
         })
         return Response.json({ success }, { headers, status: success ? 200 : 401 })
     },
