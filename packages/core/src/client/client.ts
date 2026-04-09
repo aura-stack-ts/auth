@@ -10,6 +10,7 @@ import type {
     SignOutOptions,
     User,
     DeepPartial,
+    CredentialsPayload,
 } from "@/@types/index.ts"
 
 export const createClient = createClientAPI<AuthClient>
@@ -132,9 +133,27 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
+    const signInCredentials = async (credentials: CredentialsPayload, options?: SignInOptions) => {
+        try {
+            const response = await client.post("/signIn/credentials", {
+                body: credentials,
+                searchParams: {},
+            })
+            const json = await response.json()
+            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.signInURL) {
+                window.location.assign(json.signInURL)
+            }
+            return json
+        } catch (error) {
+            console.error("Error during credentials sign-in:", error)
+            return { success: false, redirectURL: null }
+        }
+    }
+
     return {
         getSession,
         signIn,
+        signInCredentials,
         signOut,
         updateSession,
     }

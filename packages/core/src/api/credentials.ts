@@ -5,7 +5,7 @@ import { createCSRF, hashPassword, verifyPassword } from "@/shared/security.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { SignInCredentialsOptions, SignInCredentialsReturn } from "@/@types/session.ts"
 
-export const signInCredentials = async({
+export const signInCredentials = async ({
     ctx,
     payload,
     request: requestInit,
@@ -42,7 +42,7 @@ export const signInCredentials = async({
         return {
             success: true,
             headers,
-            redirectURL
+            redirectURL,
         }
     } catch (error) {
         if (error instanceof AuthValidationError) {
@@ -53,7 +53,7 @@ export const signInCredentials = async({
             return {
                 success: false,
                 headers: new Headers(secureApiHeaders),
-                redirectURL: null
+                redirectURL: null,
             }
         }
         logger?.log("CREDENTIALS_SIGN_IN_FAILED", {
@@ -63,7 +63,7 @@ export const signInCredentials = async({
         return {
             success: false,
             headers: new Headers(secureApiHeaders),
-            redirectURL: null
+            redirectURL: null,
         }
     }
 }
