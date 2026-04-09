@@ -2,7 +2,6 @@
   "extends": "@aura-stack/tsconfig/tanstack.json",
   "compilerOptions": {
     "types": ["vite/client"],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@aura-stack/auth": "workspace:*",
+    "@aura-stack/react": "workspace:*",
     "@radix-ui/react-slot": "^1.2.4",
     "@react-router/node": "7.12.0",
     "@react-router/serve": "7.12.0",
