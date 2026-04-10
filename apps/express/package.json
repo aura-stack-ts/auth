@@ -8,7 +8,6 @@
     "dev": "tsx --env-file=.env --watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test:run": "vitest run",
     "type-check": "tsc --noEmit",
     "format": "oxfmt",
     "format:check": "oxfmt --check"
@@ -22,13 +21,15 @@
     "@aura-stack/tsconfig": "workspace:*",
     "@types/express": "^4.17.21",
     "@types/node": "^20.10.6",
-    "@types/supertest": "^6.0.3",
-    "supertest": "^7.2.2",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues"
+  },
+  "license": "MIT",
   "packageManager": "pnpm@10.15.0"
 }

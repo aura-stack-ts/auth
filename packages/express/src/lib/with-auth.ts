@@ -1,32 +1,34 @@
 import { toWebRequest } from "@/lib/handler.ts"
-import type { AuthAPI, Session, User } from "@aura-stack/auth"
-import type { Request, Response, NextFunction } from "express"
+import type { RequestHandler } from "express"
+import type { AuthInstance, User, Session } from "@aura-stack/auth"
+
+export type LocalsWithSession<DefaultUser extends User = User> = {
+    session: Session<DefaultUser> | null
+}
 
 /**
- * Retrieves the session from the incoming request and attaches it to res.locals.session.
+ * Higher-order middleware that retrieves the session from the incoming request
+ * and attaches it to `res.locals.session`.
  *
  * @example
- * app.get("/api/protected", withAuth, (req, res) => {
+ * const auth = createAuth(...)
+ * app.get("/api/protected", auth.withAuth, (req, res) => {
  *   res.json({ session: res.locals.session })
  * })
  */
-export const withAuth = async <
-    DefaultUser extends User = User,
-    Body = any,
-    ResponseInit extends Response<Body, { session?: Session<DefaultUser> | null }> = Response<
-        Body,
-        { session?: Session<DefaultUser> | null }
-    >,
->(
-    api: AuthAPI<DefaultUser>,
-    req: Request,
-    res: ResponseInit,
-    next: NextFunction
-) => {
-    const webRequest = toWebRequest(req)
-    const session = await api.getSession({
-        headers: webRequest.headers,
-    })
-    res.locals.session = session.session
-    return next()
+export const withAuth = <DefaultUser extends User = User>({
+    api,
+}: AuthInstance<DefaultUser>): RequestHandler<any, any, any, any, LocalsWithSession<DefaultUser>> => {
+    return async (req, res, next) => {
+        try {
+            const webRequest = toWebRequest(req)
+            const { session } = await api.getSession({
+                headers: webRequest.headers,
+            })
+            res.locals.session = session
+            return next()
+        } catch (error) {
+            return next(error)
+        }
+    }
 }

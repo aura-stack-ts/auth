@@ -1,6 +1,5 @@
-import express, { type Express, type Response } from "express"
-import { toHandler } from "@/lib/auth.js"
-import { withAuth } from "@aura-stack/express"
+import express, { type Express } from "express"
+import { toHandler, withAuth } from "@/lib/auth.js"
 
 const app: Express = express()
 
@@ -9,7 +8,10 @@ app.use(express.urlencoded({ extended: true }))
 
 app.all("/api/auth/*", toHandler)
 
-app.get("/api/protected", withAuth, (_: any, res: Response) => {
+app.get("/api/protected", withAuth, (_, res) => {
+    if (!res.locals.session) {
+        res.status(401).json({ message: "Unauthorized" })
+    }
     res.json({
         message: "You have access to this protected resource.",
         session: res.locals.session,
