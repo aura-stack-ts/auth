@@ -1,12 +1,15 @@
-import path from "path"
-import crypto from "crypto"
+import path from "node:path"
+import crypto from "node:crypto"
+import { fileURLToPath } from "node:url"
 import { defineConfig } from "vitest/config"
 
 const SECRET_KEY = crypto.randomBytes(32).toString("base64url")
 const SALT_KEY = crypto.randomBytes(32).toString("base64url")
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
     test: {
+        globals: true,
         include: ["test/**/*.test.ts"],
         coverage: {
             provider: "v8",

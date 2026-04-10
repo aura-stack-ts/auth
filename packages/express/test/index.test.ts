@@ -1,7 +1,6 @@
 import { describe, test, expect } from "vitest"
 import supertest from "supertest"
-import { app } from "@/server.js"
-import { jose } from "@/auth.js"
+import { app, auth } from "./presets.ts"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
@@ -23,7 +22,7 @@ describe("GET /api/auth/session", () => {
     })
 
     test("returns session data when a valid session cookie is present", async () => {
-        const sessionToken = await jose.encodeJWT({
+        const sessionToken = await auth.jose.encodeJWT({
             sub: "johndoe",
             name: "John Doe",
             email: "johndoe@example.com",
@@ -60,12 +59,12 @@ describe("GET /api/protected", () => {
         const response = await supertest(app).get("/api/protected")
         expect(response.status).toBe(401)
         expect(response.body).toMatchObject({
-            error: "Unauthorized",
+            message: "Unauthorized",
         })
     })
 
     test("returns protected data when a valid session cookie is present", async () => {
-        const sessionToken = await jose.encodeJWT({
+        const sessionToken = await auth.jose.encodeJWT({
             sub: "johndoe",
             name: "John Doe",
             email: "johndoe@example.com",
@@ -81,6 +80,43 @@ describe("GET /api/protected", () => {
                     email: "johndoe@example.com",
                 },
             }),
+        })
+    })
+})
+
+describe("POST /api/auth/signIn/credentials", () => {
+    test("returns 401 when invalid credentials are provided", async () => {
+        const response = await supertest(app)
+            .post("/api/auth/signIn/credentials")
+            .send({ username: "invalid", password: "invalid" })
+        expect(response.status).toBe(401)
+        expect(response.body).toMatchObject({
+            success: false,
+            redirectURL: null,
+        })
+    })
+
+    test("returns 200 and a session cookie when valid credentials are provided", async () => {
+        const response = await supertest(app).post("/api/auth/signIn/credentials").send({ username: "valid", password: "valid" })
+        expect(response.status).toBe(200)
+        expect(response.body).toMatchObject({
+            success: true,
+            redirectURL: "/",
+        })
+        expect(response.headers["set-cookie"]).toBeDefined()
+    })
+})
+
+describe("PATCH /api/auth/session", () => {
+    test("returns 401 when no session cookie is present", async () => {
+        const response = await supertest(app)
+            .patch("/api/auth/session")
+            .send({ user: { name: "Jane Doe" } })
+        expect(response.status).toBe(401)
+        expect(response.body).toMatchObject({
+            session: null,
+            headers: {},
+            updated: false,
         })
     })
 })

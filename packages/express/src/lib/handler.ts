@@ -1,5 +1,5 @@
-import { handlers } from "@/auth.js"
 import type { Request, Response } from "express"
+import type { AuthInstance } from "@aura-stack/auth"
 
 const splitSetCookieHeaderValue = (value: string): string[] => {
     return value
@@ -49,7 +49,6 @@ export const toExpressResponse = async (webResponse: globalThis.Response, res: R
     for (const [key, value] of webResponse.headers.entries()) {
         if (key.toLowerCase() === "set-cookie") {
             const cookies = webResponse.headers.getSetCookie?.() ?? splitSetCookieHeaderValue(value)
-
             for (const cookie of cookies) {
                 res.append("Set-Cookie", cookie)
             }
@@ -76,7 +75,7 @@ export const toExpressResponse = async (webResponse: globalThis.Response, res: R
  * Express middleware that bridges Aura Auth Web-API handlers to Express.
  * Mount this on the `basePath` configured in `createAuth()` (default: `/api/auth`).
  */
-export const toExpressHandler = async (req: Request, res: Response) => {
+export const toExpressHandler = async (handlers: AuthInstance["handlers"], req: Request, res: Response) => {
     const webResponse = await handlers.ALL(toWebRequest(req))
     return toExpressResponse(webResponse, res)
 }
