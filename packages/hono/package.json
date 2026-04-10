@@ -1,9 +1,9 @@
 {
-  "name": "@aura-stack/express",
+  "name": "@aura-stack/hono",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "",
+  "description": "Hono adapter for Aura Auth authentication library",
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
@@ -34,9 +34,9 @@
       "require": "./dist/index.cjs"
     },
     "./oauth": {
-      "types": "./dist/oauth.d.ts",
-      "import": "./dist/oauth.js",
-      "require": "./dist/oauth.cjs"
+      "types": "./dist/oauth/index.d.ts",
+      "import": "./dist/oauth/index.js",
+      "require": "./dist/oauth/index.cjs"
     }
   },
   "keywords": [],
@@ -52,14 +52,11 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsup-config": "workspace:*",
-    "@types/supertest": "^6.0.3",
-    "supertest": "^7.2.2",
-    "express": "catalog:express",
-    "@types/express": "catalog:express"
+    "hono": "catalog:hono",
+    "@types/bun": "catalog:bun"
   },
   "peerDependencies": {
-    "@types/express": ">=4.0.0",
-    "express": ">=4.0.0"
+    "hono": ">=4.0.0"
   },
   "packageManager": "pnpm@10.15.0"
 }

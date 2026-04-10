@@ -1,7 +1,10 @@
 {
   "extends": "@aura-stack/tsconfig/bun.json",
   "compilerOptions": {
-    "jsxImportSource": "hono/jsx"
+    "jsxImportSource": "hono/jsx",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src"],
   "exclude": ["dist", "node_modules"]

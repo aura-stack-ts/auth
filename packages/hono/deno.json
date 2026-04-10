@@ -1,0 +1,20 @@
+{
+  "name": "@aura-stack/hono",
+  "version": "0.0.0",
+  "license": "MIT",
+  "tasks": {
+    "dev": "deno run --watch src/index.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./oauth": "./src/oauth/index.ts"
+  },
+  "imports": {
+    "@/": "./src/",
+    "hono": "npm:hono@^4.0.0"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
+  },
+  "exclude": ["dist", "node_modules"]
+}
