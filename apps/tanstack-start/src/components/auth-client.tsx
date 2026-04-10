@@ -1,9 +1,10 @@
 import { LayoutDashboard } from "lucide-react"
-import { useAuth } from "@/contexts/auth"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@aura-stack/react"
 
 export const AuthClient = () => {
-    const { session, isAuthenticated, isLoading, signIn, signOut } = useAuth()
+    const { session, status, isPending, signIn, signOut } = useAuth()
+    const isAuthenticated = status === "authenticated"
 
     return (
         <div className="w-full p-6 pr-3 bg-black md:py-10">
@@ -38,7 +39,7 @@ export const AuthClient = () => {
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                disabled={isLoading}
+                                disabled={isPending}
                                 onClick={() => signOut()}
                             >
                                 Sign Out
@@ -60,7 +61,7 @@ export const AuthClient = () => {
                                             className="w-full rounded-none"
                                             variant="outline"
                                             size="sm"
-                                            disabled={isLoading}
+                                            disabled={isPending}
                                             onClick={() => signIn(provider.toLowerCase())}
                                         >
                                             Sign In with {provider}

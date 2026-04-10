@@ -1,10 +1,12 @@
 import { LayoutDashboard } from "lucide-react"
-import { useAuth, AuthProvider } from "@/contexts/auth"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@aura-stack/react"
+import { AuthProvider } from "@/contexts/auth"
 import type { Session } from "@aura-stack/auth"
 
 const AuthClientContent = () => {
-    const { session, isAuthenticated, isLoading, signIn, signOut } = useAuth()
+    const { session, status, isPending, signIn, signOut } = useAuth()
+    const isAuthenticated = status === "authenticated"
 
     return (
         <div className="w-full p-6 pr-3 bg-black md:py-10">
@@ -34,7 +36,7 @@ const AuthClientContent = () => {
                                     <span className="text-white/60 truncate max-w-37.5">{session?.user?.sub}</span>
                                 </div>
                             </div>
-                            <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={() => signOut()}>
+                            <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={() => signOut()}>
                                 Sign Out
                             </Button>
                         </div>
@@ -54,7 +56,7 @@ const AuthClientContent = () => {
                                             className="w-full rounded-none"
                                             variant="outline"
                                             size="sm"
-                                            disabled={isLoading}
+                                            disabled={isPending}
                                             onClick={() => signIn(provider.toLowerCase())}
                                         >
                                             Sign In with {provider}
@@ -72,7 +74,7 @@ const AuthClientContent = () => {
 
 export const AuthClient = (props: { session?: Session | null }) => {
     return (
-        <AuthProvider session={props.session}>
+        <AuthProvider initialSession={props.session}>
             <AuthClientContent />
         </AuthProvider>
     )

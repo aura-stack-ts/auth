@@ -13,7 +13,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 const AuthLayout = ({ loaderData }: Route.ComponentProps) => {
     const session = loaderData
     return (
-        <AuthProvider session={session}>
+        <AuthProvider initialSession={session}>
             <Header />
             <Outlet />
             <Footer />

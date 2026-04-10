@@ -1,0 +1,21 @@
+{
+  "name": "@aura-stack/react",
+  "version": "0.0.0",
+  "license": "MIT",
+  "tasks": {
+    "dev": "deno run --watch src/index.tsx"
+  },
+  "exports": {
+    ".": "./src/index.tsx",
+    "./hooks": "./src/hooks.ts",
+    "./context": "./src/context.ts",
+    "./types": "./src/types.ts"
+  },
+  "imports": {
+    "@/": "./src/"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "src/**/*.tsx", "README.md", "CHANGELOG.md"]
+  },
+  "exclude": ["dist", "node_modules"]
+}

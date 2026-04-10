@@ -43,6 +43,12 @@ export type {
     SessionStrategy,
     UserIdentityType,
     UserShape,
+    CredentialsPayload,
+    DeepPartial,
+    UpdateSessionAPIOptions,
+    UpdateSessionReturn,
+    SignOutOptions,
+    SignInCredentialsOptions,
 } from "@/@types/index.ts"
 
 export type { Merge, ShapeToObject, EditableShape, InferShape, InferIdentity, InferAuthIdentity } from "@/@types/utility.ts"

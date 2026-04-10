@@ -1,6 +1,7 @@
 import type { User } from "@/@types/session.ts"
 import type { AuthInstance } from "@/@types/config.ts"
-import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer } from "zod/v4"
+import type { ZodObject, ZodRawShape, ZodTypeAny } from "zod/v4"
+import type { z } from "zod/v4"
 
 export type Prettify<T> = { [K in keyof T]: T[K] }
 
@@ -14,7 +15,7 @@ export type Merge<A, B> = Omit<A, keyof B> & B
 
 export type ShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<
     {
-        [K in keyof S]: Infer<S[K]>
+        [K in keyof S]: z.infer<S[K]>
     },
     User
 >

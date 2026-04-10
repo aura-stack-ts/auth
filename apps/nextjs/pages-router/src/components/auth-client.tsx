@@ -1,9 +1,10 @@
-import { useAuth } from "@/contexts/auth"
 import { LayoutDashboard } from "lucide-react"
 import { Button } from "./ui/button"
+import { useAuth } from "@aura-stack/react"
 
 export const AuthClient = () => {
-    const { session, isAuthenticated, isLoading, signIn, signOut } = useAuth()
+    const { session, status, isPending, signIn, signOut } = useAuth()
+    const isAuthenticated = status === "authenticated"
 
     return (
         <div className="w-full p-6 bg-black md:py-10">
@@ -33,7 +34,7 @@ export const AuthClient = () => {
                                     <span className="text-white/60 truncate max-w-37.5">{session?.user?.sub}</span>
                                 </div>
                             </div>
-                            <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={() => signOut()}>
+                            <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={() => signOut()}>
                                 Sign Out
                             </Button>
                         </div>
@@ -53,7 +54,7 @@ export const AuthClient = () => {
                                             className="w-full rounded-none"
                                             variant="outline"
                                             size="sm"
-                                            disabled={isLoading}
+                                            disabled={isPending}
                                             onClick={() => signIn(provider.toLowerCase())}
                                         >
                                             Sign In with {provider}

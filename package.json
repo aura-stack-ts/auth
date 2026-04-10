@@ -9,7 +9,7 @@
     "dev:core": "turbo run @aura-stack/auth#dev",
     "dev:docs": "turbo run docs#dev",
     "build": "turbo run build --filter=./packages/* --filter=./apps/*",
-    "build:prod": "turbo run build --filter=./packages/*",
+    "build:prod": "turbo run build --filter=./packages/* --continue",
     "test": "turbo run test --parallel",
     "format": "turbo run format format:root --parallel",
     "format:root": "oxfmt \"!packages\" \"!apps\" \"!configs\"",

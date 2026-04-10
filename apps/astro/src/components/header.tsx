@@ -1,12 +1,14 @@
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useAuth, AuthProvider } from "@/contexts/auth"
+import { useAuth } from "@aura-stack/react"
+import { AuthProvider } from "@/contexts/auth"
 import type { Session } from "@aura-stack/auth"
 
 const HeaderContent = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { isAuthenticated, isLoading, signOut, signIn } = useAuth()
+    const { status, isPending, signOut, signIn } = useAuth()
+    const isAuthenticated = status === "authenticated"
 
     const handleSignOut = async () => {
         await signOut()
@@ -103,7 +105,7 @@ const HeaderContent = () => {
                             Discord
                         </a>
                         <div className="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
-                            {!isLoading && !isAuthenticated && (
+                            {!isPending && !isAuthenticated && (
                                 <Button type="button" onClick={() => signIn("github")}>
                                     Sign in with GitHub
                                 </Button>
@@ -125,7 +127,7 @@ const HeaderContent = () => {
 
 export const Header = (props: { session?: Session }) => {
     return (
-        <AuthProvider session={props.session}>
+        <AuthProvider initialSession={props.session}>
             <HeaderContent />
         </AuthProvider>
     )

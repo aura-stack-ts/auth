@@ -3,12 +3,13 @@
 import Link from "next/link"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
-import { useAuth } from "@/contexts/auth"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@aura-stack/react"
 
 export const Header = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { isAuthenticated, isLoading, signOut, signIn } = useAuth()
+    const { status, isPending, signOut, signIn } = useAuth()
+    const isAuthenticated = status === "authenticated"
 
     const handleSignOut = async () => {
         await signOut()
@@ -102,7 +103,7 @@ export const Header = () => {
                             Discord
                         </a>
                         <div className="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
-                            {!isLoading && !isAuthenticated && (
+                            {!isPending && !isAuthenticated && (
                                 <Button type="button" onClick={handleSignIn}>
                                     Sign in with GitHub
                                 </Button>
