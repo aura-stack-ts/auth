@@ -194,6 +194,9 @@ importers:
       '@aura-stack/auth':
         specifier: workspace:*
         version: link:../../packages/core
+      '@aura-stack/express':
+        specifier: workspace:*
+        version: link:../../packages/express
       express:
         specifier: ^4.18.2
         version: 4.22.1
@@ -674,6 +677,25 @@ importers:
       typescript:
         specifier: catalog:typescript
         version: 5.9.3
+
+  packages/express:
+    dependencies:
+      '@aura-stack/auth':
+        specifier: workspace:*
+        version: link:../core
+      '@types/express':
+        specifier: '>=4.0.0'
+        version: 4.17.25
+      express:
+        specifier: '>=4.0.0'
+        version: 4.22.1
+    devDependencies:
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsup-config':
+        specifier: workspace:*
+        version: link:../../configs/tsup-config
 
   packages/jose:
     dependencies:

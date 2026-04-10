@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import supertest from "supertest"
 import { app } from "@/server.js"
-import { jose } from "@/auth.js"
+import { jose } from "@/lib/auth.js"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
