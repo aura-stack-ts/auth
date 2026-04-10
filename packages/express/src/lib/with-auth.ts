@@ -3,7 +3,7 @@ import type { RequestHandler } from "express"
 import type { AuthInstance, User, Session } from "@aura-stack/auth"
 
 export type LocalsWithSession<DefaultUser extends User = User> = {
-    session: Session<DefaultUser> | null
+    session?: Session<DefaultUser> | null
 }
 
 /**

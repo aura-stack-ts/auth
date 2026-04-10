@@ -10,9 +10,9 @@ app.all("/api/auth/*", toHandler)
 
 app.get("/api/protected", withAuth, (_, res) => {
     if (!res.locals.session) {
-        res.status(401).json({ message: "Unauthorized" })
+        return res.status(401).json({ message: "Unauthorized" })
     }
-    res.json({
+    return res.json({
         message: "You have access to this protected resource.",
         session: res.locals.session,
     })

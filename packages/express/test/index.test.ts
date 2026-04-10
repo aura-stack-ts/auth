@@ -83,3 +83,40 @@ describe("GET /api/protected", () => {
         })
     })
 })
+
+describe("POST /api/auth/signIn/credentials", () => {
+    test("returns 401 when invalid credentials are provided", async () => {
+        const response = await supertest(app)
+            .post("/api/auth/signIn/credentials")
+            .send({ username: "invalid", password: "invalid" })
+        expect(response.status).toBe(401)
+        expect(response.body).toMatchObject({
+            success: false,
+            redirectURL: null,
+        })
+    })
+
+    test("returns 200 and a session cookie when valid credentials are provided", async () => {
+        const response = await supertest(app).post("/api/auth/signIn/credentials").send({ username: "valid", password: "valid" })
+        expect(response.status).toBe(200)
+        expect(response.body).toMatchObject({
+            success: true,
+            redirectURL: "/",
+        })
+        expect(response.headers["set-cookie"]).toBeDefined()
+    })
+})
+
+describe("PATCH /api/auth/session", () => {
+    test("returns 401 when no session cookie is present", async () => {
+        const response = await supertest(app)
+            .patch("/api/auth/session")
+            .send({ user: { name: "Jane Doe" } })
+        expect(response.status).toBe(401)
+        expect(response.body).toMatchObject({
+            session: null,
+            headers: {},
+            updated: false,
+        })
+    })
+})
