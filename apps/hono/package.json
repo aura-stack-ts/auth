@@ -9,8 +9,7 @@
     "format:check": "oxfmt --check"
   },
   "dependencies": {
-    "@aura-stack/auth": "workspace:*",
-    "@aura-stack/jose": "workspace:*",
+    "@aura-stack/hono": "workspace:*",
     "hono": "^4.12.8"
   },
   "devDependencies": {
