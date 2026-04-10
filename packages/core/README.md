@@ -5,6 +5,7 @@
 **Core authentication library for the Aura Stack ecosystem**
 
 [![npm version](https://img.shields.io/npm/v/@aura-stack/auth.svg)](https://www.npmjs.com/package/@aura-stack/auth)
+[![JSR version](https://jsr.io/badges/@aura-stack/auth)](https://jsr.io/@aura-stack/auth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 [Official Docs](https://aura-stack-auth.vercel.app/docs) · [Core Package Docs](https://aura-stack-auth.vercel.app/docs/packages/core)

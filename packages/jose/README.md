@@ -5,6 +5,7 @@
 **Type-safe JOSE utilities for JWT signing, verification, and encryption**
 
 [![npm version](https://img.shields.io/npm/v/@aura-stack/jose.svg)](https://www.npmjs.com/package/@aura-stack/jose)
+[![JSR version](https://jsr.io/badges/@aura-stack/jose)](https://jsr.io/@aura-stack/jose)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 [Official Docs](https://aura-stack-auth.vercel.app/docs) · [JOSE Package Docs](https://aura-stack-auth.vercel.app/docs/packages/jose)

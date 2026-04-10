@@ -5,6 +5,5 @@ export default defineConfig({
     ...tsupConfig,
     banner: {
         js: `"use client"`,
-        css: undefined,
     },
 })
