@@ -10,7 +10,7 @@ import type {
     SignInOptions,
     SignOutOptions,
     User,
-} from "@aura-stack/auth/types"
+} from "@aura-stack/auth"
 import type { AuthProviderProps, AuthReactContextValue, UpdateSessionCallOptions } from "@/types.ts"
 
 /**

@@ -8,7 +8,7 @@
 [![JSR version](https://jsr.io/badges/@aura-stack/react)](https://jsr.io/@aura-stack/react)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [React Package Docs](https://aura-stack-auth.vercel.app/docs/packages/react)
+[Official Docs](https://aura-stack-auth.vercel.app/docs)
 
 </div>
 
@@ -87,7 +87,7 @@ Visit the [**official documentation website**](https://aura-stack-auth.vercel.ap
 
 ## License
 
-Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
+Licensed under the [MIT License](../../LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
 ---
 

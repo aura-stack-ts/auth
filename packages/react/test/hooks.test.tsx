@@ -82,7 +82,7 @@ describe("@aura-stack/react hooks", () => {
 
     test("useSignOut calls client.signOut and refreshes session when redirect is false", async () => {
         const client = createMockClient()
-        client.getSession = vi.fn().mockResolvedValueOnce(mockSession).mockResolvedValueOnce(null)
+        client.getSession = vi.fn().mockResolvedValueOnce(null)
 
         const { result } = renderHook(() => useSignOut(), {
             wrapper: ({ children }) => wrapper({ children, client, initialSession: mockSession }),

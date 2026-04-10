@@ -8,7 +8,7 @@
 [![JSR version](https://jsr.io/badges/@aura-stack/rate-limiter)](https://jsr.io/@aura-stack/rate-limiter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Rate Limiter Package Docs](https://aura-stack-auth.vercel.app/docs/packages/rate-limiter)
+[Official Docs](https://aura-stack-auth.vercel.app/docs)
 
 </div>
 
@@ -49,11 +49,11 @@ const limiter = createRateLimiter({
 
 async function handleRequest(userId: string) {
   const result = await limiter.consume(userId)
-  
+
   if (!result.success) {
     throw new Error("Too many requests. Try again later.")
   }
-  
+
   // Proceed with request
 }
 ```
@@ -64,7 +64,7 @@ Visit the [**official documentation website**](https://aura-stack-auth.vercel.ap
 
 ## License
 
-Licensed under the [MIT License](LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
+Licensed under the [MIT License](../../LICENSE). © [Aura Stack](https://github.com/aura-stack-ts)
 
 ---
 

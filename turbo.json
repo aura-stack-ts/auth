@@ -23,6 +23,9 @@
         ".vercel/output/**"
       ]
     },
+    "@aura-stack/react#build": {
+      "dependsOn": ["@aura-stack/auth#build"]
+    },
     "test": {
       "dependsOn": ["^test"],
       "cache": false

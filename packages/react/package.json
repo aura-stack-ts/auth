@@ -62,8 +62,8 @@
     "@testing-library/react": "^16.3.2"
   },
   "peerDependencies": {
-    "@types/react": ">=19.0.0",
-    "react": ">=19.0.0"
+    "react": ">=19.0.0",
+    "@types/react": ">=19.0.0"
   },
   "packageManager": "pnpm@10.15.0"
 }
