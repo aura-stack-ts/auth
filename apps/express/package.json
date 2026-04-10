@@ -15,12 +15,12 @@
   "dependencies": {
     "@aura-stack/auth": "workspace:*",
     "@aura-stack/express": "workspace:*",
-    "express": "^4.18.2"
+    "express": "catalog:express"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.10.6",
+    "@types/express": "catalog:express",
+    "@types/node": "catalog:node",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   },

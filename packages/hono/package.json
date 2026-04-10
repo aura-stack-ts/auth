@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "clean:cts": "find dist -type f -name \"*.cts\" -delete",
+    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
     "prepublish": "pnpm clean:cts"
   },
   "repository": {
@@ -52,7 +52,8 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsup-config": "workspace:*",
-    "@types/bun": "^1.3.9"
+    "hono": "catalog:hono",
+    "@types/bun": "catalog:bun"
   },
   "peerDependencies": {
     "hono": ">=4.0.0"

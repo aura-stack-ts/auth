@@ -14,7 +14,7 @@
 
 This project demonstrates **Aura Auth** authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in a [Hono](https://hono.dev/) application.
 
-This integration utilizes the dedicated [`@aura-stack/hono`](../../packages/hono) package, which provides standard middlewares and first-class TypeScript support for Express applications.
+This integration utilizes the dedicated [`@aura-stack/hono`](../../packages/hono) package, which provides standard middlewares and first-class TypeScript support for Hono applications.
 
 ## Features Demo
 

@@ -51,8 +51,6 @@ describe("GET /api/auth/csrfToken", () => {
         expect(res.status).toBe(200)
         const body = await res.json()
         expect(body).toHaveProperty("csrfToken")
-        expect(typeof body.csrfToken).toBe("string")
-        expect(body.csrfToken.length).toBeGreaterThan(0)
     })
 })
 

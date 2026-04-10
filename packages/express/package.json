@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "clean:cts": "find dist -type f -name \"*.cts\" -delete",
+    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
     "prepublish": "pnpm clean:cts"
   },
   "repository": {
@@ -53,7 +53,9 @@
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsup-config": "workspace:*",
     "@types/supertest": "^6.0.3",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "express": "catalog:express",
+    "@types/express": "catalog:express"
   },
   "peerDependencies": {
     "@types/express": ">=4.0.0",

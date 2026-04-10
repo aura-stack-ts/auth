@@ -14,6 +14,7 @@ export const withAuth = <DefaultUser extends User = User>({ api }: AuthInstance<
             ctx.set("session", session.session)
             return await next()
         } catch {
+            ctx.set("session", null)
             return await next()
         }
     })

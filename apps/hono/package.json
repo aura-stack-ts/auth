@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@aura-stack/hono": "workspace:*",
-    "hono": "^4.12.8"
+    "hono": "catalog:hono"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
-    "@types/bun": "^1.3.9"
+    "@types/bun": "catalog:bun"
   }
 }

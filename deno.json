@@ -1,3 +1,13 @@
 {
-  "workspace": ["packages/core", "packages/jose", "packages/rate-limiter", "apps/oak", "apps/deno", "apps/supabase/**"]
+  "workspace": [
+    "packages/core",
+    "packages/jose",
+    "packages/rate-limiter",
+    "packages/hono",
+    "packages/express",
+    "packages/react",
+    "apps/oak",
+    "apps/deno",
+    "apps/supabase/**"
+  ]
 }
