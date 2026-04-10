@@ -22,9 +22,16 @@ export const withAuth = <DefaultUser extends User = User>({
     return async (req, res, next) => {
         try {
             const webRequest = toWebRequest(req)
-            const { session } = await api.getSession({
+            const { session, headers } = await api.getSession({
                 headers: webRequest.headers,
             })
+            for (const [key, value] of headers.entries()) {
+                if (key.toLowerCase() === "set-cookie") {
+                    res.append(key, value)
+                } else {
+                    res.setHeader(key, value)
+                }
+            }
             res.locals.session = session
             return next()
         } catch (error) {
