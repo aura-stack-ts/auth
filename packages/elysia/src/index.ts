@@ -1,6 +1,6 @@
 export { createAuth } from "@/createAuth"
 export { toHandler } from "@/lib/handler"
-export { withAuth } from "@/lib/with-auth"
+export { withAuth, type WithAuthContext } from "@/lib/with-auth"
 export { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 export type {
     User,

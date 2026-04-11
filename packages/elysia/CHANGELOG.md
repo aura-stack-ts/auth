@@ -10,4 +10,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Introduced seamless Elysia integration package that encapsulates the core authentication logic into plugins and handlers for session management and authentication flows. [#139](https://github.com/aura-stack-ts/auth/pull/139)
+- Introduced seamless Elysia integration package that encapsulates the core authentication logic into plugins and handlers for session management and authentication flows. [#140](https://github.com/aura-stack-ts/auth/pull/140)
