@@ -190,9 +190,9 @@ importers:
 
   apps/elysia:
     dependencies:
-      '@aura-stack/auth':
+      '@aura-stack/elysia':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/elysia
       elysia:
         specifier: ^1.4.28
         version: 1.4.28(@sinclair/typebox@0.34.48)(@types/bun@1.3.10)(exact-mirror@0.2.7(@sinclair/typebox@0.34.48))(file-type@21.3.3)(openapi-types@12.1.3)(typescript@5.9.3)
@@ -683,6 +683,22 @@ importers:
       typescript:
         specifier: catalog:typescript
         version: 5.9.3
+
+  packages/elysia:
+    dependencies:
+      '@aura-stack/auth':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsup-config':
+        specifier: workspace:*
+        version: link:../../configs/tsup-config
+      elysia:
+        specifier: ^1.2.22
+        version: 1.4.28(@sinclair/typebox@0.34.48)(@types/bun@1.3.10)(exact-mirror@0.2.7(@sinclair/typebox@0.34.48))(file-type@21.3.3)(openapi-types@12.1.3)(typescript@5.9.3)
 
   packages/express:
     dependencies:

@@ -1,14 +1,13 @@
 import { Elysia } from "elysia"
-import { toElysiaHandler } from "./lib/handler"
-import { withAuthPlugin } from "./plugins/with-auth"
+import { toHandler, withAuth } from "@/lib/auth"
 
 const app = new Elysia()
 
 app.get("/", () => "Welcome to the Aura Auth Elysia App!")
 
-app.all("/api/auth/*", toElysiaHandler)
+app.all("/api/auth/*", toHandler)
 
-app.use(withAuthPlugin).get("/api/protected", (ctx) => {
+app.derive(withAuth).get("/api/protected", (ctx) => {
     if (!ctx.session) {
         return Response.json(
             {

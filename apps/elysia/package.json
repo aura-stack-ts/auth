@@ -11,7 +11,7 @@
     "format:check": "oxfmt --check"
   },
   "dependencies": {
-    "@aura-stack/auth": "workspace:*",
+    "@aura-stack/elysia": "workspace:*",
     "elysia": "^1.4.28"
   },
   "devDependencies": {

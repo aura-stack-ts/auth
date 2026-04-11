@@ -1,0 +1,66 @@
+{
+  "name": "@aura-stack/elysia",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Elysia adapter for Aura Auth authentication library",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "prepublish": "pnpm clean:cts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./oauth": {
+      "types": "./dist/oauth/index.d.ts",
+      "import": "./dist/oauth/index.js",
+      "require": "./dist/oauth/index.cjs"
+    }
+  },
+  "keywords": [
+    "auth",
+    "elysia",
+    "authentication",
+    "aura-stack"
+  ],
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@aura-stack/auth": "workspace:*"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsup-config": "workspace:*",
+    "elysia": "^1.2.22"
+  },
+  "peerDependencies": {
+    "elysia": ">=1.0.0"
+  },
+  "packageManager": "pnpm@10.15.0"
+}
