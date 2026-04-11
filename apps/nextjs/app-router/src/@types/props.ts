@@ -1,9 +1,4 @@
-import type { ComponentProps, PropsWithChildren } from "react"
-import type { Session } from "@aura-stack/auth/types"
-
-export interface AuthProviderProps extends PropsWithChildren {
-    session?: Session | null
-}
+import type { ComponentProps } from "react"
 
 export interface ButtonProps extends ComponentProps<"button"> {
     variant?: "default" | "outline"

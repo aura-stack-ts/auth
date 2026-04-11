@@ -49,6 +49,9 @@ export type {
     UpdateSessionReturn,
     SignOutOptions,
     SignInCredentialsOptions,
+    CredentialsProvider,
+    CookieStoreConfig,
+    CookieStrategyAttributes,
 } from "@/@types/index.ts"
 
 export type { Merge, ShapeToObject, EditableShape, InferShape, InferIdentity, InferAuthIdentity } from "@/@types/utility.ts"

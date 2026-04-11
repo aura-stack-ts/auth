@@ -110,8 +110,7 @@
       "name": "app-router",
       "version": "0.1.0",
       "dependencies": {
-        "@aura-stack/auth": "workspace:*",
-        "@aura-stack/react": "workspace:*",
+        "@aura-stack/next": "workspace:*",
         "@radix-ui/react-slot": "^1.2.4",
         "lucide-react": "catalog:lucide-react",
         "next": "catalog:next",
@@ -377,6 +376,25 @@
         "typescript": "catalog:typescript",
       },
     },
+    "packages/next": {
+      "name": "@aura-stack/next",
+      "version": "0.0.0",
+      "dependencies": {
+        "@aura-stack/react": "workspace:*",
+      },
+      "devDependencies": {
+        "@aura-stack/tsconfig": "workspace:*",
+        "@aura-stack/tsup-config": "workspace:*",
+        "next": "catalog:next",
+        "react": "catalog:react",
+        "react-dom": "catalog:react",
+      },
+      "peerDependencies": {
+        "next": ">=16.0.0",
+        "react": ">=19.0.0",
+        "react-dom": ">=19.0.0",
+      },
+    },
     "packages/rate-limiter": {
       "name": "@aura-stack/rate-limiter",
       "version": "0.0.0",
@@ -502,6 +520,8 @@
     "@aura-stack/hono": ["@aura-stack/hono@workspace:packages/hono"],
 
     "@aura-stack/jose": ["@aura-stack/jose@workspace:packages/jose"],
+
+    "@aura-stack/next": ["@aura-stack/next@workspace:packages/next"],
 
     "@aura-stack/rate-limiter": ["@aura-stack/rate-limiter@workspace:packages/rate-limiter"],
 

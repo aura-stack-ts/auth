@@ -1,8 +1,8 @@
 "use client"
 
 import { LayoutDashboard } from "lucide-react"
-import { Button } from "./ui/button"
-import { useAuth } from "@aura-stack/react/hooks"
+import { Button } from "@/components/ui/button"
+import { useAuth } from "@aura-stack/next"
 
 export const AuthClient = () => {
     const { session, status, isPending, signIn, signOut } = useAuth()
@@ -14,7 +14,7 @@ export const AuthClient = () => {
                 <span className="px-2 text-xs font-mono italic absolute -top-2 left-3 bg-green-600">Client Component</span>
                 {isAuthenticated ? (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="py-3 px-2 border border-muted rounded-md space-y-3">
+                        <div className="py-3 px-2 border border-muted space-y-3">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-mono italic">client session active</span>
                                 <LayoutDashboard className="size-4 text-foreground" />

@@ -1,3 +1,5 @@
-export { AuthProvider } from "@/context.tsx"
+export { createAuthClient, type AuthClientOptions } from "@aura-stack/auth/client"
+export { AuthProvider, type AuthProviderProps } from "@/context.tsx"
 export { useAuth, useSession, useSignIn, useSignInCredentials, useSignOut, useUpdateSession } from "@/hooks.ts"
-export type { AuthProviderProps, AuthClientInstance, AuthReactContextValue, AuthStatus } from "@/types.ts"
+export { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
+export type { User, Session, AuthConfig, AuthInstance } from "@/@types/core.ts"

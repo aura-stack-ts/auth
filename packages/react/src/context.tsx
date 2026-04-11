@@ -11,12 +11,14 @@ import type {
     SignOutOptions,
     User,
 } from "@aura-stack/auth"
-import type { AuthProviderProps, AuthReactContextValue, UpdateSessionCallOptions } from "@/types.ts"
+import type { AuthProviderProps, AuthReactContextValue, UpdateSessionCallOptions } from "@/@types/types.ts"
 
 /**
  * React context for {@link AuthReactContextValue}. Use {@link AuthProvider} to supply a client and {@link useAuth} (or other hooks) to read it.
  */
 export const AuthContext = createContext<AuthReactContextValue<User> | null>(null)
+
+export type { AuthProviderProps }
 
 /**
  * Provides session state and auth actions for the tree, using the {@link AuthProviderProps.client} you pass in.

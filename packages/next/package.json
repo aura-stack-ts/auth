@@ -1,8 +1,7 @@
 {
-  "name": "@aura-stack/react",
+  "name": "@aura-stack/next",
   "version": "0.0.0",
   "private": false,
-  "type": "module",
   "description": "",
   "scripts": {
     "dev": "tsup --watch",
@@ -15,15 +14,15 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "prepublish": "pnpm clean:cts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aura-stack-ts/auth"
   },
-  "publishConfig": {
-    "access": "public"
-  },
+  "sideEffects": false,
   "files": [
     "dist"
   ],
@@ -33,22 +32,17 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./hooks": {
-      "types": "./dist/hooks.d.ts",
-      "import": "./dist/hooks.js",
-      "require": "./dist/hooks.cjs"
-    },
-    "./context": {
-      "types": "./dist/context.d.ts",
-      "import": "./dist/context.js",
-      "require": "./dist/context.cjs"
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.cjs"
     },
     "./oauth": {
       "types": "./dist/oauth/index.d.ts",
       "import": "./dist/oauth/index.js",
       "require": "./dist/oauth/index.cjs"
     },
-    "./types": "./dist/@types/index.d.ts"
+    "./types": "./dist/types.d.ts"
   },
   "keywords": [],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
@@ -58,17 +52,19 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@aura-stack/auth": "workspace:*"
+    "@aura-stack/react": "workspace:*"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsup-config": "workspace:*",
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/react": "^16.3.2"
+    "next": "catalog:next",
+    "react": "catalog:react",
+    "react-dom": "catalog:react"
   },
   "peerDependencies": {
+    "next": ">=16.0.0",
     "react": ">=19.0.0",
-    "@types/react": ">=19.0.0"
+    "react-dom": ">=19.0.0"
   },
   "packageManager": "pnpm@10.15.0"
 }

@@ -250,12 +250,9 @@ importers:
 
   apps/nextjs/app-router:
     dependencies:
-      '@aura-stack/auth':
+      '@aura-stack/next':
         specifier: workspace:*
-        version: link:../../../packages/core
-      '@aura-stack/react':
-        specifier: workspace:*
-        version: link:../../../packages/react
+        version: link:../../../packages/next
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
@@ -760,6 +757,28 @@ importers:
         specifier: catalog:typescript
         version: 5.9.3
 
+  packages/next:
+    dependencies:
+      '@aura-stack/react':
+        specifier: workspace:*
+        version: link:../react
+    devDependencies:
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsup-config':
+        specifier: workspace:*
+        version: link:../../configs/tsup-config
+      next:
+        specifier: catalog:next
+        version: 16.1.7(@babel/core@7.29.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react:
+        specifier: catalog:react
+        version: 19.2.4
+      react-dom:
+        specifier: catalog:react
+        version: 19.2.4(react@19.2.4)
+
   packages/rate-limiter:
     devDependencies:
       '@aura-stack/tsconfig':
@@ -793,6 +812,19 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+
+  packages/template:
+    dependencies:
+      '@aura-stack/auth':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsup-config':
+        specifier: workspace:*
+        version: link:../../configs/tsup-config
 
 packages:
 
