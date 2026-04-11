@@ -14,6 +14,14 @@
 
 This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in a [Elysia](https://elysiajs.com/) application.
 
+This integration utilizes the dedicated [`@aura-stack/elysia`](../../packages/elysia) package, which provides standard middlewares and first-class TypeScript support for Elysia applications.
+
+## Features Demo
+
+- **Type-safe Middleware**: Uses `withAuth` to protect routes and infer session shapes.
+- **Unified Auth Handler**: Reuses framework-agnostic core logic via `toHandler`.
+- **Global Context**: Demonstrates how `session` is automatically populated and typed.
+
 ## Getting Started
 
 You can run the documentation site locally for development or contribution.
