@@ -10,4 +10,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Removed and clean up the types and functions exported from the index `/` entry point to reduce import nose and introduced `/identity`, `/crypto` and `/shared` as direct entry points for specific utilities. [#141](https://github.com/aura-stack-ts/auth/pull/141)
+
 - Introduced seamless React integration package that encapsulates the core authentication logic into a single React context, exposing powerful and easy-to-use hooks for session management and authentication flows. [#137](https://github.com/aura-stack-ts/auth/pull/137)

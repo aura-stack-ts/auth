@@ -1,7 +1,8 @@
 import { describe, expectTypeOf, test } from "vitest"
 import { app, auth } from "./presets.ts"
 import type { Locals } from "express"
-import type { EditableShape, Session, ShapeToObject, UserShape } from "@aura-stack/auth/types"
+import type { Session } from "@aura-stack/auth"
+import type { EditableShape, ShapeToObject, UserShape } from "@aura-stack/auth/identity"
 
 describe("Type definitions", () => {
     test("should correctly type the Express app", () => {
