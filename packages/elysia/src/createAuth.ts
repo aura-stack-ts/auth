@@ -1,12 +1,7 @@
-import {
-    createAuth as createAuthBasic,
-    type ShapeToObject,
-    type AuthConfig,
-    type EditableShape,
-    type UserShape,
-} from "@aura-stack/auth"
+import { createAuth as createAuthBasic, type AuthConfig } from "@aura-stack/auth"
 import { toHandler } from "@/lib/handler"
 import { withAuth } from "@/lib/with-auth"
+import type { ShapeToObject, EditableShape, UserShape } from "@aura-stack/auth/identity"
 
 /**
  * Creates an Aura Auth instance with Elysia-specific utilities.

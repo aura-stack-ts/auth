@@ -1,13 +1,8 @@
-import {
-    createAuth as createBasicAuth,
-    type EditableShape,
-    type ShapeToObject,
-    type UserShape,
-    type AuthConfig,
-} from "@aura-stack/auth"
+import { createAuth as createBasicAuth, type AuthConfig } from "@aura-stack/auth"
 import { withAuth } from "@/lib/with-auth.ts"
 import { toExpressHandler } from "@/lib/handler.ts"
 import type { Request, Response } from "express"
+import type { EditableShape, ShapeToObject, UserShape } from "@aura-stack/auth/identity"
 
 export const createAuth = <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => {
     const auth = createBasicAuth<Identity>(config)

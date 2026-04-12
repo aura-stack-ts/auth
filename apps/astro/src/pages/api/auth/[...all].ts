@@ -1,4 +1,4 @@
-import { handlers } from "@/auth"
+import { handlers } from "@/lib/auth"
 import type { APIRoute } from "astro"
 
 export const GET: APIRoute = async ({ request }) => {

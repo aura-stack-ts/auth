@@ -1,4 +1,4 @@
-import { handlers } from "@/auth"
+import { handlers } from "@/lib/auth"
 import type { NextApiRequest, NextApiResponse } from "next"
 
 const getBaseURL = (request: NextApiRequest) => {

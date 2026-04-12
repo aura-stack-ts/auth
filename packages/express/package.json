@@ -34,9 +34,24 @@
       "require": "./dist/index.cjs"
     },
     "./oauth": {
-      "types": "./dist/oauth.d.ts",
-      "import": "./dist/oauth.js",
-      "require": "./dist/oauth.cjs"
+      "types": "./dist/oauth/index.d.ts",
+      "import": "./dist/oauth/index.js",
+      "require": "./dist/oauth/index.cjs"
+    },
+    "./identity": {
+      "types": "./dist/_core/identity.d.ts",
+      "import": "./dist/_core/identity.js",
+      "require": "./dist/_core/identity.cjs"
+    },
+    "./crypto": {
+      "types": "./dist/_core/crypto.d.ts",
+      "import": "./dist/_core/crypto.js",
+      "require": "./dist/_core/crypto.cjs"
+    },
+    "./shared": {
+      "types": "./dist/_core/shared.d.ts",
+      "import": "./dist/_core/shared.js",
+      "require": "./dist/_core/shared.cjs"
     }
   },
   "keywords": [],
@@ -58,7 +73,6 @@
     "@types/express": "catalog:express"
   },
   "peerDependencies": {
-    "@types/express": ">=4.0.0",
     "express": ">=4.0.0"
   },
   "packageManager": "pnpm@10.15.0"

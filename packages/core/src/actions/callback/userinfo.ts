@@ -1,5 +1,5 @@
 import { fetchAsync } from "@/shared/fetch-async.ts"
-import { createSecretValue } from "@/shared/security.ts"
+import { createSecretValue } from "@/shared/crypto.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/shared/errors.ts"

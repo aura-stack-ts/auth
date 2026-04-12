@@ -28,6 +28,7 @@ export type JWTPayloadWithToken = JWTPayload & { token: string }
 export type OAuthEnv = z.infer<typeof OAuthEnvSchema>
 
 export type AuthClient = ReturnType<typeof createAuthInstance>["handlers"]
+
 export type AuthClientOptions = Prettify<
     Omit<ClientOptions, "baseURL"> & {
         baseURL?: string

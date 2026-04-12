@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from "vitest"
 import { AuthProvider } from "@/context.tsx"
 import { useAuth, useSession, useSignIn, useSignInCredentials, useSignOut, useUpdateSession } from "@/hooks.ts"
 import type { ReactNode } from "react"
-import type { AuthClientInstance } from "@/types.ts"
+import type { AuthClientInstance } from "@/@types/types.ts"
 
 const mockUser = { id: "1", email: "test@example.com", name: "Test User" }
 const mockSession = { user: mockUser, expires: new Date(Date.now() + 3600 * 1000).toISOString() }

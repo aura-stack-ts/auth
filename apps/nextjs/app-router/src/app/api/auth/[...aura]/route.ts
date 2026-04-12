@@ -1,3 +1,3 @@
-import { handlers } from "@/lib/auth"
+import { core } from "@/lib/auth"
 
-export const { GET, POST, PATCH } = handlers
+export const { GET, POST, PATCH } = core.handlers

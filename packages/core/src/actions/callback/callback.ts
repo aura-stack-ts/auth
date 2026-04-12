@@ -1,6 +1,6 @@
 import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
-import { createCSRF } from "@/shared/security.ts"
+import { createCSRF } from "@/shared/crypto.ts"
 import { cacheControl } from "@/shared/headers.ts"
 import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"

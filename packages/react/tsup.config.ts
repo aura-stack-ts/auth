@@ -1,9 +1,4 @@
 import { defineConfig } from "tsup"
 import { tsupConfig } from "@aura-stack/tsup-config"
 
-export default defineConfig({
-    ...tsupConfig,
-    banner: {
-        js: `"use client"`,
-    },
-})
+export default defineConfig(tsupConfig)

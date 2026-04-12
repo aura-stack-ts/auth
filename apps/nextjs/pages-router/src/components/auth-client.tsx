@@ -1,5 +1,5 @@
 import { LayoutDashboard } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button } from "@/components/ui/button"
 import { useAuth } from "@aura-stack/react"
 
 export const AuthClient = () => {

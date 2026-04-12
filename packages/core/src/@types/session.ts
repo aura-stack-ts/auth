@@ -261,9 +261,11 @@ export interface GetSessionReturn<DefaultUser extends User = User> {
     headers: Headers
 }
 
-export interface GetSessionAPIOptions {
+export interface GetSessionOptions {
     headers: HeadersInit
 }
+
+export type GetSessionAPIOptions = GetSessionOptions
 
 export type SessionResponse<DefaultUser extends User = User> =
     | { session: Session<DefaultUser>; headers: Headers; authenticated: true }
@@ -279,6 +281,8 @@ export interface SignOutAPIOptions {
     redirectTo?: string
     skipCSRFCheck?: boolean
 }
+
+export type UpdateSessionOptions<DefaultUser extends User = User> = DeepPartial<Session<DefaultUser>>
 
 export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
     headers: HeadersInit

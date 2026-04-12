@@ -23,7 +23,6 @@
         "@astrojs/check": "^0.9.8",
         "@astrojs/node": "^10.0.2",
         "@astrojs/react": "^5.0.0",
-        "@aura-stack/auth": "workspace:*",
         "@aura-stack/react": "workspace:*",
         "@radix-ui/react-slot": "^1.2.4",
         "astro": "^6.0.5",
@@ -82,7 +81,6 @@
       "name": "express",
       "version": "0.1.0",
       "dependencies": {
-        "@aura-stack/auth": "workspace:*",
         "@aura-stack/express": "workspace:*",
         "express": "catalog:express",
       },
@@ -110,8 +108,7 @@
       "name": "app-router",
       "version": "0.1.0",
       "dependencies": {
-        "@aura-stack/auth": "workspace:*",
-        "@aura-stack/react": "workspace:*",
+        "@aura-stack/next": "workspace:*",
         "@radix-ui/react-slot": "^1.2.4",
         "lucide-react": "catalog:lucide-react",
         "next": "catalog:next",
@@ -133,7 +130,6 @@
       "name": "pages-router",
       "version": "0.1.0",
       "dependencies": {
-        "@aura-stack/auth": "workspace:*",
         "@aura-stack/react": "workspace:*",
         "@radix-ui/react-slot": "^1.2.4",
         "lucide-react": "catalog:lucide-react",
@@ -172,7 +168,6 @@
     "apps/react-router": {
       "name": "react-router",
       "dependencies": {
-        "@aura-stack/auth": "workspace:*",
         "@aura-stack/react": "workspace:*",
         "@radix-ui/react-slot": "^1.2.4",
         "@react-router/node": "7.12.0",
@@ -206,7 +201,6 @@
     "apps/tanstack-start": {
       "name": "tanstack-start",
       "dependencies": {
-        "@aura-stack/auth": "workspace:*",
         "@aura-stack/react": "workspace:*",
         "@hookform/resolvers": "^5.2.2",
         "@radix-ui/react-label": "^2.1.8",
@@ -345,7 +339,6 @@
         "supertest": "^7.2.2",
       },
       "peerDependencies": {
-        "@types/express": ">=4.0.0",
         "express": ">=4.0.0",
       },
     },
@@ -377,6 +370,25 @@
         "typescript": "catalog:typescript",
       },
     },
+    "packages/next": {
+      "name": "@aura-stack/next",
+      "version": "0.0.0",
+      "dependencies": {
+        "@aura-stack/react": "workspace:*",
+      },
+      "devDependencies": {
+        "@aura-stack/tsconfig": "workspace:*",
+        "@aura-stack/tsup-config": "workspace:*",
+        "next": "catalog:next",
+        "react": "catalog:react",
+        "react-dom": "catalog:react",
+      },
+      "peerDependencies": {
+        "next": ">=16.0.0",
+        "react": ">=19.0.0",
+        "react-dom": ">=19.0.0",
+      },
+    },
     "packages/rate-limiter": {
       "name": "@aura-stack/rate-limiter",
       "version": "0.0.0",
@@ -396,6 +408,8 @@
         "@aura-stack/tsup-config": "workspace:*",
         "@testing-library/dom": "^10.4.1",
         "@testing-library/react": "^16.3.2",
+        "@types/react": "catalog:react",
+        "react": "catalog:react",
       },
       "peerDependencies": {
         "@types/react": ">=19.0.0",
@@ -502,6 +516,8 @@
     "@aura-stack/hono": ["@aura-stack/hono@workspace:packages/hono"],
 
     "@aura-stack/jose": ["@aura-stack/jose@workspace:packages/jose"],
+
+    "@aura-stack/next": ["@aura-stack/next@workspace:packages/next"],
 
     "@aura-stack/rate-limiter": ["@aura-stack/rate-limiter@workspace:packages/rate-limiter"],
 

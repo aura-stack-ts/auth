@@ -1,22 +1,21 @@
-"use client"
-
 import { createContext, useCallback, useEffect, useMemo, useState, useTransition } from "react"
+import type { Session, User } from "@aura-stack/auth"
 import type {
-    CredentialsPayload,
     DeepPartial,
     LiteralUnion,
-    BuiltInOAuthProvider,
-    Session,
+    CredentialsPayload,
     SignInOptions,
     SignOutOptions,
-    User,
-} from "@aura-stack/auth"
-import type { AuthProviderProps, AuthReactContextValue, UpdateSessionCallOptions } from "@/types.ts"
+    BuiltInOAuthProvider,
+} from "@aura-stack/auth/types"
+import type { AuthProviderProps, AuthReactContextValue, UpdateSessionCallOptions } from "@/@types/types.ts"
 
 /**
  * React context for {@link AuthReactContextValue}. Use {@link AuthProvider} to supply a client and {@link useAuth} (or other hooks) to read it.
  */
 export const AuthContext = createContext<AuthReactContextValue<User> | null>(null)
+
+export type { AuthProviderProps }
 
 /**
  * Provides session state and auth actions for the tree, using the {@link AuthProviderProps.client} you pass in.

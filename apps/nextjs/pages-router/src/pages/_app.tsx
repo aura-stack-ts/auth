@@ -5,7 +5,7 @@ import "@/styles/globals.css"
 
 export default function App({ Component, pageProps }: AppProps) {
     return (
-        <AuthProvider initialSession={pageProps?.session ?? null}>
+        <AuthProvider>
             <Layout>
                 <Component {...pageProps} />
             </Layout>

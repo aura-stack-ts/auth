@@ -1,5 +1,5 @@
-import { createAuth } from "@aura-stack/auth"
-import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/auth/oauth/index"
+import { createAuth } from "@aura-stack/react/server"
+import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/auth/oauth"
 
 export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[]
 

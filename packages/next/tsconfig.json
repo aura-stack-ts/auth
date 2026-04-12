@@ -1,0 +1,11 @@
+{
+  "extends": "@aura-stack/tsconfig/next.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "incremental": false
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
+}

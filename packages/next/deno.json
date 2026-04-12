@@ -1,0 +1,22 @@
+{
+  "name": "@aura-stack/next",
+  "version": "0.0.0",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./oauth": "./src/oauth/index.ts",
+    "./identity": "./src/_core/identity.ts",
+    "./crypto": "./src/_core/crypto.ts",
+    "./shared": "./src/_core/shared.ts",
+    "./types": "./src/@types/index.ts"
+  },
+  "imports": {
+    "@/": "./src/",
+    "next": "npm:next@^16.0.0"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
+  },
+  "exclude": ["dist", "node_modules"]
+}

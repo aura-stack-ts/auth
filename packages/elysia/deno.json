@@ -7,7 +7,10 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./oauth": "./src/oauth/index.ts"
+    "./oauth": "./src/oauth/index.ts",
+    "./identity": "./src/_core/identity.ts",
+    "./crypto": "./src/_core/crypto.ts",
+    "./shared": "./src/_core/shared.ts"
   },
   "imports": {
     "@/": "./src/",

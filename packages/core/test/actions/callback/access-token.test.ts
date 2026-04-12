@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createPKCE } from "@/shared/security.ts"
+import { createPKCE } from "@/shared/crypto.ts"
 import { oauthCustomService } from "@test/presets.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
 

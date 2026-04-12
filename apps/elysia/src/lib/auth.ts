@@ -5,4 +5,4 @@ export const auth = createAuth({
     basePath: "/api/auth",
 })
 
-export const { api, jose, toHandler, withAuth } = auth
+export const { api, jose, handlers, toHandler, withAuth } = auth

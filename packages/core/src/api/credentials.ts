@@ -1,7 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { AuthValidationError } from "@/shared/errors.ts"
-import { createCSRF, hashPassword, verifyPassword } from "@/shared/security.ts"
+import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { SignInCredentialsOptions, SignInCredentialsReturn } from "@/@types/session.ts"
 

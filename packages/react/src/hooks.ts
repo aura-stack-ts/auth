@@ -1,5 +1,3 @@
-"use client"
-
 import { use, useCallback, useRef } from "react"
 import type {
     CredentialsPayload,
@@ -12,7 +10,7 @@ import type {
     User,
 } from "@aura-stack/auth/types"
 import { AuthContext } from "@/context.tsx"
-import type { AuthReactContextValue, UpdateSessionCallOptions } from "@/types.ts"
+import type { AuthReactContextValue, UpdateSessionCallOptions } from "@/@types/types.ts"
 
 export const useAuth = <DefaultUser extends User = User>(): AuthReactContextValue<DefaultUser> => {
     const ctx = use(AuthContext)
