@@ -109,7 +109,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         try {
             const csrfToken = await getCSRFToken()
             if (!csrfToken) {
-                throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
+                throw new AuthClientError("Failed to fetch CSRF token for session update.")
             }
             const { sub: _sub, ...spread } = (session.user ?? {}) as DefaultUser
             const response = await client.patch("/session", {

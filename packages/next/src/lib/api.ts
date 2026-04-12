@@ -11,6 +11,19 @@ import type {
     BuiltInOAuthProvider,
 } from "@aura-stack/react/types"
 
+/**
+ * Internal helper to sync Set-Cookie headers from Aura Auth to Next.js cookie store.
+ */
+async function applyCookies(responseHeaders: Headers) {
+    const cookieStore = await cookies()
+    const setCookies = responseHeaders.getSetCookie()
+    for (const cookieStr of setCookies) {
+        const [nameValue] = cookieStr.split(";").map((s) => s.trim())
+        const [name, value] = nameValue.split("=")
+        cookieStore.set(name, value, {})
+    }
+}
+
 export const getSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async (options?: GetSessionAPIOptions): Promise<Session<DefaultUser> | null> => {
         try {
@@ -22,8 +35,7 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
                 return null
             }
             return session.session
-        } catch (error) {
-            console.log("error", error)
+        } catch {
             console.error("[error:server] getSession - Failed to retrieve session")
             return null
         }
@@ -43,45 +55,41 @@ export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<De
 
 export const signInCredentials = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async (payload: CredentialsPayload, options: SignInAPIOptions) => {
-        const signIn = await api.signInCredentials({
+        const result = await api.signInCredentials({
             payload,
             headers: await headers(),
             ...options,
             redirect: false,
         })
-        if (options.redirect && signIn.success && signIn.redirectURL) {
-            return redirect(signIn.redirectURL)
+        await applyCookies(result.headers)
+        if (options.redirect && result.success && result.redirectURL) {
+            return redirect(result.redirectURL)
         }
-        return signIn
+        return result
     }
 }
 
 export const updateSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async (session: DeepPartial<Session<DefaultUser>>, options?: GetSessionAPIOptions) => {
-        const updated = await api.updateSession({
+        const result = await api.updateSession({
             session,
             headers: await headers(),
+            skipCSRFCheck: true,
             ...options,
         })
-        return updated
+        await applyCookies(result.headers)
+        return result
     }
 }
 
 export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async (options?: SignOutAPIOptions) => {
-        const cookieStore = await cookies()
         const response = await api.signOut({
             headers: await headers(),
             ...options,
         })
+        await applyCookies(response.headers)
         if (response.status === 202) {
-            const setCookies = response.headers.getSetCookie()
-            for (const cookie of setCookies) {
-                const nameMatch = cookie.match(/^([^=]+)=/)
-                if (nameMatch) {
-                    cookieStore.delete(nameMatch[1])
-                }
-            }
             redirect(options?.redirectTo ?? "/")
         }
         return response.json()
