@@ -1,4 +1,4 @@
-import { handlers } from "@/auth"
+import { handlers } from "@/lib/auth"
 import { createFileRoute } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/api/auth/$")({

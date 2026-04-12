@@ -22,7 +22,8 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
                 return null
             }
             return session.session
-        } catch {
+        } catch (error) {
+            console.log("error", error)
             console.error("[error:server] getSession - Failed to retrieve session")
             return null
         }

@@ -112,9 +112,6 @@ importers:
       '@astrojs/react':
         specifier: ^5.0.0
         version: 5.0.0(@types/node@24.12.0)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)
-      '@aura-stack/auth':
-        specifier: workspace:*
-        version: link:../../packages/core
       '@aura-stack/react':
         specifier: workspace:*
         version: link:../../packages/react
@@ -296,9 +293,6 @@ importers:
 
   apps/nextjs/pages-router:
     dependencies:
-      '@aura-stack/auth':
-        specifier: workspace:*
-        version: link:../../../packages/core
       '@aura-stack/react':
         specifier: workspace:*
         version: link:../../../packages/react
@@ -379,9 +373,6 @@ importers:
 
   apps/react-router:
     dependencies:
-      '@aura-stack/auth':
-        specifier: workspace:*
-        version: link:../../packages/core
       '@aura-stack/react':
         specifier: workspace:*
         version: link:../../packages/react
@@ -449,9 +440,6 @@ importers:
 
   apps/tanstack-start:
     dependencies:
-      '@aura-stack/auth':
-        specifier: workspace:*
-        version: link:../../packages/core
       '@aura-stack/react':
         specifier: workspace:*
         version: link:../../packages/react

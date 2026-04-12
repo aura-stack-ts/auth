@@ -1,4 +1,3 @@
-"use client"
 import { use, useCallback, useRef } from "react"
 import type {
     CredentialsPayload,

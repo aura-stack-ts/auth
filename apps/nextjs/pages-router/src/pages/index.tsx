@@ -1,14 +1,13 @@
-import { api } from "@/auth"
+import { api } from "@/lib/auth"
 import { AuthClient } from "@/components/auth-client"
 import { Fingerprint, LayoutDashboard } from "lucide-react"
-import type { Session } from "@aura-stack/auth"
-import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
+import type { InferGetServerSidePropsType } from "next"
+import type { IncomingMessage } from "http"
 
-export const getServerSideProps: GetServerSideProps<{ session: Session | null }> = async ({ req }) => {
+export const getServerSideProps = async ({ req }: { req: IncomingMessage }) => {
     const session = await api.getSession({
         headers: req.headers as Record<string, string>,
     })
-
     return {
         props: {
             session: session.authenticated ? session.session : null,

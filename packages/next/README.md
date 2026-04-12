@@ -23,8 +23,6 @@ By utilizing a **"Concentrated API"** pattern, it optimizes core authentication 
 - **App Router Optimized** — Full support for React Server Components (RSC) and Server Actions.
 - **Concentrated API** — Dedicated `auth.api` for Next.js that automates session fetching and redirects.
 - **Aggregated Client Entry** — Consolidated `import { ... } from "@aura-stack/next/client"` for all hooks and context.
-- **Middleware-Ready** — Fast and weightless `withAuth` wrapper for standard Next.js Middleware.
-- **Route Handler Bridge** — Simple `toHandler` for mounting Aura Auth on `app/api/auth/[...auth]/route.ts`.
 - **Type-safe by design** — Automatic type inference from your identity schema.
 
 ## Installation
@@ -54,7 +52,7 @@ export const auth = createAuth({
   oauth: ["github"],
 })
 
-export const { core } = auth
+export const { api, core } = auth
 ```
 
 ### 2. Set Up Route Handler

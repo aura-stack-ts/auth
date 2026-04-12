@@ -1,4 +1,4 @@
-import { handlers } from "~/auth"
+import { handlers } from "~/lib/auth"
 import type { Route } from "./+types/api.auth.$"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {

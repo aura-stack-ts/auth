@@ -1,4 +1,3 @@
-//export { createAuth } from "@aura-stack/auth"
 export { createAuthClient, type AuthClientOptions } from "@aura-stack/auth/client"
 export { AuthProvider, type AuthProviderProps } from "@/context.tsx"
 export { useAuth, useSession, useSignIn, useSignInCredentials, useSignOut, useUpdateSession } from "@/hooks.ts"

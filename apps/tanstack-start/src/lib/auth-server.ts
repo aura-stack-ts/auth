@@ -1,4 +1,4 @@
-import { api } from "@/auth"
+import { api } from "@/lib/auth"
 import { redirect } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { getRequest, getRequestHeaders } from "@tanstack/react-start/server"

@@ -1,4 +1,4 @@
-import { createAuthClient } from "@aura-stack/auth/client"
+import { createAuthClient } from "@aura-stack/react"
 
 export const authClient = createAuthClient({
     basePath: "/api/auth",

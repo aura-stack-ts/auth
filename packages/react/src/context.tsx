@@ -1,4 +1,3 @@
-"use client"
 import { createContext, useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import type { BuiltInOAuthProvider, Session, User } from "@aura-stack/auth"
 import type { DeepPartial, LiteralUnion, CredentialsPayload, SignInOptions, SignOutOptions } from "@aura-stack/auth/types"
