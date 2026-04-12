@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/next"
+import { useAuth } from "@aura-stack/next/client"
 
 export const Header = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

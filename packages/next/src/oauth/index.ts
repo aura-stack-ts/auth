@@ -1,1 +1,1 @@
-export * from "@aura-stack/auth/oauth/index"
+export * from "@aura-stack/react/oauth"

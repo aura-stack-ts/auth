@@ -4,7 +4,6 @@ import { createAuth } from "@/createAuth.ts"
 import { UserIdentity } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
 import { JWTHeaderParameters, JWTVerifyOptions, TypedJWTPayload } from "@aura-stack/jose"
-import type { AuthConfig, AuthInstance, OAuthProviderCredentials, User } from "@/index.ts"
 import type {
     GetSessionAPIOptions,
     SessionResponse,
@@ -12,6 +11,8 @@ import type {
     UpdateSessionReturn,
     UserShape,
 } from "@/@types/session.ts"
+import type { AuthConfig, AuthInstance, User } from "@/index.ts"
+import type { OAuthProviderCredentials } from "@/@types/oauth.ts"
 import type { EditableShape, ShapeToObject } from "@/@types/utility.ts"
 
 describe("createAuth", () => {

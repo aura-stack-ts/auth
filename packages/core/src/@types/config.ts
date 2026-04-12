@@ -9,45 +9,6 @@ import type { EditableShape, Prettify, ShapeToObject } from "@/@types/utility.ts
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
 import type { JWTKey, SessionConfig, SessionStrategy, User, UserShape } from "@/@types/session.ts"
 
-export interface CredentialsPayload {
-    username: string
-    password: string
-}
-
-/**
- * Context provided to the credentials provider's authorize function.
- * It includes the credentials sent by the user and hashing utilities.
- */
-export interface CredentialsProviderContext<T> {
-    /**
-     * User-provided credentials (e.g., email, password).
-     */
-    credentials: T
-    /**
-     * Hashes a password using the internal hashing algorithm (PBKDF2).
-     */
-    deriveSecret: (password: string, salt?: string, iterations?: number) => Promise<string>
-    /**
-     * Verifies a password against a hashed value.
-     */
-    verifySecret: (password: string, hashedPassword: string) => Promise<boolean>
-}
-
-/**
- * Interface for the credentials provider.
- */
-export interface CredentialsProvider<Identity extends EditableShape<UserShape> = EditableShape<UserShape>> {
-    hash?: (password: string, salt?: string, iterations?: number) => Promise<string>
-    verify?: (password: string, hashedPassword: string) => Promise<boolean>
-    /**
-     * Authenticates a user using credentials.
-     * Must return a User object or the identity type if the identity schema is provided.
-     */
-    authorize: (
-        ctx: CredentialsProviderContext<CredentialsPayload>
-    ) => Promise<ShapeToObject<Identity> | null> | ShapeToObject<Identity> | null
-}
-
 /**
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
@@ -293,6 +254,45 @@ export interface IdentityConfig<Schema extends ZodObject<any> = typeof UserIdent
     schema?: Schema
     skipValidation?: boolean
     unknownKeys?: "passthrough" | "strict" | "strip"
+}
+
+export interface CredentialsPayload {
+    username: string
+    password: string
+}
+
+/**
+ * Context provided to the credentials provider's authorize function.
+ * It includes the credentials sent by the user and hashing utilities.
+ */
+export interface CredentialsProviderContext<T> {
+    /**
+     * User-provided credentials (e.g., email, password).
+     */
+    credentials: T
+    /**
+     * Hashes a password using the internal hashing algorithm (PBKDF2).
+     */
+    deriveSecret: (password: string, salt?: string, iterations?: number) => Promise<string>
+    /**
+     * Verifies a password against a hashed value.
+     */
+    verifySecret: (password: string, hashedPassword: string) => Promise<boolean>
+}
+
+/**
+ * Interface for the credentials provider.
+ */
+export interface CredentialsProvider<Identity extends EditableShape<UserShape> = EditableShape<UserShape>> {
+    hash?: (password: string, salt?: string, iterations?: number) => Promise<string>
+    verify?: (password: string, hashedPassword: string) => Promise<boolean>
+    /**
+     * Authenticates a user using credentials.
+     * Must return a User object or the identity type if the identity schema is provided.
+     */
+    authorize: (
+        ctx: CredentialsProviderContext<CredentialsPayload>
+    ) => Promise<ShapeToObject<Identity> | null> | ShapeToObject<Identity> | null
 }
 
 export interface RouterGlobalContext<DefaultUser extends User = User> {

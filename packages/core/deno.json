@@ -7,6 +7,11 @@
   },
   "exports": {
     ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./identity": "./src/shared/identity.ts",
+    "./crypto": "./src/shared/crypto.ts",
+    "./shared": "./src/shared/index.ts",
+    "./types": "./src/@types/index.ts",
     "./oauth": "./src/oauth/index.ts",
     "./oauth/atlassian": "./src/oauth/atlassian.ts",
     "./oauth/bitbucket": "./src/oauth/bitbucket.ts",
@@ -21,9 +26,7 @@
     "./oauth/spotify": "./src/oauth/spotify.ts",
     "./oauth/strava": "./src/oauth/strava.ts",
     "./oauth/twitch": "./src/oauth/twitch.ts",
-    "./oauth/x": "./src/oauth/x.ts",
-    "./types": "./src/@types/index.ts",
-    "./client": "./src/client/index.ts"
+    "./oauth/x": "./src/oauth/x.ts"
   },
   "imports": {
     "@/": "./src/",

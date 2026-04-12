@@ -1,5 +1,5 @@
 import { getCookie } from "@/cookie.ts"
-import { verifyCSRF } from "@/shared/security.ts"
+import { verifyCSRF } from "@/shared/crypto.ts"
 import { getErrorName } from "@/shared/utils.ts"
 import { AuthSecurityError } from "@/shared/errors.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"

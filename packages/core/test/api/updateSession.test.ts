@@ -2,7 +2,7 @@ import { describe, test, expect } from "vitest"
 import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/presets.ts"
-import { createCSRF } from "@/shared/security.ts"
+import { createCSRF } from "@/shared/crypto.ts"
 import { UserIdentity } from "@/shared/identity.ts"
 
 describe("updateSession API", () => {

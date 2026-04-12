@@ -1,1 +1,1 @@
-export type * from "@aura-stack/auth"
+export type * from "@aura-stack/auth/types"

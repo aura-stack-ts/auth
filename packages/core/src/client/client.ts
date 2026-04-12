@@ -9,9 +9,11 @@ import type {
     SignInOptions,
     SignOutOptions,
     User,
-    DeepPartial,
     CredentialsPayload,
+    UpdateSessionOptions,
 } from "@/@types/index.ts"
+
+export type { AuthClientOptions }
 
 export const createClient = createClientAPI<AuthClient>
 
@@ -103,7 +105,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
-    const updateSession = async (session: DeepPartial<Session<DefaultUser>>) => {
+    const updateSession = async (session: UpdateSessionOptions<DefaultUser>) => {
         try {
             const csrfToken = await getCSRFToken()
             if (!csrfToken) {

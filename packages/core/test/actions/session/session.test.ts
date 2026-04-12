@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, afterEach, beforeEach } from "vitest"
-import { createPKCE } from "@/shared/security.ts"
+import { createPKCE } from "@/shared/crypto.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { GET, jose, sessionPayload } from "@test/presets.ts"
 import { setCookie, getSetCookie, createCookieStore } from "@/cookie.ts"

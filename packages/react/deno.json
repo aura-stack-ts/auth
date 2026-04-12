@@ -9,6 +9,10 @@
     ".": "./src/index.tsx",
     "./hooks": "./src/hooks.ts",
     "./context": "./src/context.ts",
+    "./oauth": "./src/oauth/index.ts",
+    "./identity": "./src/_core/identity.ts",
+    "./crypto": "./src/_core/crypto.ts",
+    "./shared": "./src/_core/shared.ts",
     "./types": "./src/types.ts"
   },
   "imports": {

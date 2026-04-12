@@ -414,6 +414,8 @@
         "@aura-stack/tsup-config": "workspace:*",
         "@testing-library/dom": "^10.4.1",
         "@testing-library/react": "^16.3.2",
+        "@types/react": "catalog:react",
+        "react": "catalog:react",
       },
       "peerDependencies": {
         "@types/react": ">=19.0.0",

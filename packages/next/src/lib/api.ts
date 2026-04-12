@@ -1,17 +1,25 @@
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
-import type {
-    AuthInstance,
-    BuiltInOAuthProvider,
-    CredentialsPayload,
-    DeepPartial,
+import type { AuthInstance, Session, User } from "@aura-stack/react"
+import {
     GetSessionAPIOptions,
-    LiteralUnion,
-    Session,
     SignInAPIOptions,
     SignOutAPIOptions,
-    User,
-} from "@aura-stack/auth"
+    CredentialsPayload,
+    DeepPartial,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+} from "@aura-stack/react/types"
+export type {
+    Session,
+    GetSessionAPIOptions,
+    SignInAPIOptions,
+    SignOutAPIOptions,
+    CredentialsPayload,
+    DeepPartial,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+} from "@aura-stack/react/types"
 
 export const getSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async (options?: GetSessionAPIOptions): Promise<Session<DefaultUser> | null> => {

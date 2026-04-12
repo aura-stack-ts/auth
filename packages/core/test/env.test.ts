@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { env } from "@/shared/env.ts"
-import { createSecretValue } from "@/shared/security.ts"
+import { createSecretValue } from "@/shared/crypto.ts"
 
 describe("env", () => {
     afterEach(() => {

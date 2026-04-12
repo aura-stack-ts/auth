@@ -42,7 +42,22 @@
       "import": "./dist/oauth/index.js",
       "require": "./dist/oauth/index.cjs"
     },
-    "./types": "./dist/types.d.ts"
+    "./identity": {
+      "types": "./dist/_core/identity.d.ts",
+      "import": "./dist/_core/identity.js",
+      "require": "./dist/_core/identity.cjs"
+    },
+    "./crypto": {
+      "types": "./dist/_core/crypto.d.ts",
+      "import": "./dist/_core/crypto.js",
+      "require": "./dist/_core/crypto.cjs"
+    },
+    "./shared": {
+      "types": "./dist/_core/shared.d.ts",
+      "import": "./dist/_core/shared.js",
+      "require": "./dist/_core/shared.cjs"
+    },
+    "./types": "./dist/@types/index.d.ts"
   },
   "keywords": [],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",

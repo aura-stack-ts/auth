@@ -37,6 +37,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./oauth": {
+      "types": "./dist/oauth/index.d.ts",
+      "import": "./dist/oauth/index.js",
+      "require": "./dist/oauth/index.cjs"
+    },
     "./oauth/*": {
       "types": "./dist/oauth/*.d.ts",
       "import": "./dist/oauth/*.js",
@@ -51,6 +56,21 @@
       "types": "./dist/client/index.d.ts",
       "import": "./dist/client/index.js",
       "require": "./dist/client/index.cjs"
+    },
+    "./identity": {
+      "types": "./dist/shared/identity.d.ts",
+      "import": "./dist/shared/identity.js",
+      "require": "./dist/shared/identity.cjs"
+    },
+    "./crypto": {
+      "types": "./dist/shared/crypto.d.ts",
+      "import": "./dist/shared/crypto.js",
+      "require": "./dist/shared/crypto.cjs"
+    },
+    "./shared": {
+      "types": "./dist/shared/index.d.ts",
+      "import": "./dist/shared/index.js",
+      "require": "./dist/shared/index.cjs"
     }
   },
   "keywords": [

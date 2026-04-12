@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
 import { GET, jose, oauthCustomService } from "@test/presets.ts"
-import { createPKCE } from "@/shared/security.ts"
+import { createPKCE } from "@/shared/crypto.ts"
 import { setCookie, getSetCookie } from "@/cookie.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { createAuth } from "@/createAuth.ts"

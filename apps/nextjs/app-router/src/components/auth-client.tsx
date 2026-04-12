@@ -2,7 +2,7 @@
 
 import { LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/next"
+import { useAuth } from "@aura-stack/next/client"
 
 export const AuthClient = () => {
     const { session, status, isPending, signIn, signOut } = useAuth()

@@ -1,4 +1,4 @@
-import { createCSRF } from "@/shared/security.ts"
+import { createCSRF } from "@/shared/crypto.ts"
 import { jose, PATCH } from "@test/presets.ts"
 import { describe, test, expect } from "vitest"
 

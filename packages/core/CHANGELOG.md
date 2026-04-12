@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Removed and cleaned up the types and functions exported from the main `/` entry point to reduce import noise, and introduced `/identity`, `/shared`, and `/crypto` as direct entry points for specific utilities. Utilities and types previously exposed via `/` are now accessible through these direct entry points. Additionally, removed the `StrippedUserIdentity` Zod schema and added the `UpdateSessionOptions` type. [#141](https://github.com/aura-stack-ts/auth/pull/141)
+
 - Introduced experimental credentials-based authentication via the `/session` endpoint, enabling username/password sign-in on the client side. [#136](https://github.com/aura-stack-ts/auth/pull/136)
 
 - Introduced experimental credentials-based authentication via the `signInCredentials` API, enabling username/password sign-in on the server side. [#136](https://github.com/aura-stack-ts/auth/pull/136)
