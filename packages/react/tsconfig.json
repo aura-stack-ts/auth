@@ -1,14 +1,14 @@
 {
-    "extends": "@aura-stack/tsconfig/tsconfig.base.json",
-    "compilerOptions": {
-        "jsx": "react-jsx",
-        "allowImportingTsExtensions": true,
-        "noEmit": true,
-        "paths": {
-            "@/*": ["./src/*"],
-            "@test/*": ["./test/*"],
-        },
-    },
-    "include": ["src", "test"],
-    "exclude": ["dist", "node_modules"],
+  "extends": "@aura-stack/tsconfig/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@test/*": ["./test/*"]
+    }
+  },
+  "include": ["src", "test"],
+  "exclude": ["dist", "node_modules"]
 }

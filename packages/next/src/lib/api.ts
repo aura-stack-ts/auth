@@ -1,17 +1,7 @@
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
-import {
-    GetSessionAPIOptions,
-    SignInAPIOptions,
-    SignOutAPIOptions,
-    CredentialsPayload,
-    DeepPartial,
-    LiteralUnion,
-    BuiltInOAuthProvider,
-} from "@aura-stack/react/types"
-export type {
-    Session,
+import type {
     GetSessionAPIOptions,
     SignInAPIOptions,
     SignOutAPIOptions,
