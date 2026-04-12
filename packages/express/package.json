@@ -34,9 +34,9 @@
       "require": "./dist/index.cjs"
     },
     "./oauth": {
-      "types": "./dist/oauth.d.ts",
-      "import": "./dist/oauth.js",
-      "require": "./dist/oauth.cjs"
+      "types": "./dist/oauth/index.d.ts",
+      "import": "./dist/oauth/index.js",
+      "require": "./dist/oauth/index.cjs"
     },
     "./identity": {
       "types": "./dist/_core/identity.d.ts",
@@ -73,7 +73,6 @@
     "@types/express": "catalog:express"
   },
   "peerDependencies": {
-    "@types/express": ">=4.0.0",
     "express": ">=4.0.0"
   },
   "packageManager": "pnpm@10.15.0"

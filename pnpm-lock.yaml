@@ -203,9 +203,6 @@ importers:
 
   apps/express:
     dependencies:
-      '@aura-stack/auth':
-        specifier: workspace:*
-        version: link:../../packages/core
       '@aura-stack/express':
         specifier: workspace:*
         version: link:../../packages/express

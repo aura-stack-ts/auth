@@ -13,7 +13,6 @@
     "format:check": "oxfmt --check"
   },
   "dependencies": {
-    "@aura-stack/auth": "workspace:*",
     "@aura-stack/express": "workspace:*",
     "express": "catalog:express"
   },

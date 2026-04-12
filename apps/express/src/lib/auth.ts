@@ -1,4 +1,5 @@
-import { createAuth, builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/express"
+import { createAuth } from "@aura-stack/express"
+import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/express/oauth"
 
 export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[]
 

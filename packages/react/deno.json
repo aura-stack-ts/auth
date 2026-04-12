@@ -10,6 +10,7 @@
     "./hooks": "./src/hooks.ts",
     "./context": "./src/context.ts",
     "./oauth": "./src/oauth/index.ts",
+    "./server": "./src/server.ts",
     "./identity": "./src/_core/identity.ts",
     "./crypto": "./src/_core/crypto.ts",
     "./shared": "./src/_core/shared.ts",
