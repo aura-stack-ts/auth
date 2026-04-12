@@ -1,0 +1,21 @@
+{
+  "name": "@aura-stack/react-router",
+  "version": "0.0.0",
+  "license": "MIT",
+  "tasks": {
+    "dev": "deno run --watch src/index.tsx"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./oauth": "./src/oauth/index.ts",
+    "./identity": "./src/_core/identity.ts",
+    "./crypto": "./src/_core/crypto.ts",
+    "./shared": "./src/_core/shared.ts",
+    "./types": "./src/@types/index.ts"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "src/**/*.tsx", "README.md", "CHANGELOG.md"]
+  },
+  "exclude": ["dist", "node_modules"]
+}

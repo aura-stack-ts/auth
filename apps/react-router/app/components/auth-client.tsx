@@ -1,4 +1,4 @@
-import { useAuth } from "@aura-stack/react"
+import { useAuth } from "@aura-stack/react/hooks"
 import { LayoutDashboard } from "lucide-react"
 import { Button } from "~/components/ui/button"
 

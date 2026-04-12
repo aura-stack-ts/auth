@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Link, useRevalidator } from "react-router"
-import { useAuth } from "@aura-stack/react"
+import { useAuth } from "@aura-stack/react/hooks"
 
 export const Header = () => {
     const revalidator = useRevalidator()

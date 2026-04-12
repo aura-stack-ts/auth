@@ -1,0 +1,77 @@
+{
+  "name": "@aura-stack/react-router",
+  "version": "0.0.0",
+  "private": false,
+  "description": "",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "prepublish": "pnpm clean:cts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./client": {
+      "types": "./dist/to-client.d.ts",
+      "import": "./dist/to-client.js",
+      "require": "./dist/to-client.cjs"
+    },
+    "./oauth": {
+      "types": "./dist/oauth/index.d.ts",
+      "import": "./dist/oauth/index.js",
+      "require": "./dist/oauth/index.cjs"
+    },
+    "./identity": {
+      "types": "./dist/_core/identity.d.ts",
+      "import": "./dist/_core/identity.js",
+      "require": "./dist/_core/identity.cjs"
+    },
+    "./crypto": {
+      "types": "./dist/_core/crypto.d.ts",
+      "import": "./dist/_core/crypto.js",
+      "require": "./dist/_core/crypto.cjs"
+    },
+    "./shared": {
+      "types": "./dist/_core/shared.d.ts",
+      "import": "./dist/_core/shared.js",
+      "require": "./dist/_core/shared.cjs"
+    },
+    "./types": "./dist/@types/index.d.ts"
+  },
+  "keywords": [],
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@aura-stack/react": "workspace:*"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsup-config": "workspace:*"
+  },
+  "peerDependencies": {
+    "react-router": ">=7.0.0"
+  },
+  "packageManager": "pnpm@10.15.0"
+}
