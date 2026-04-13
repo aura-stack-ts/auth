@@ -73,6 +73,7 @@ export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<D
         if (response.ok) {
             return data(json, {
                 headers: response.headers,
+                status: response.status,
             })
         }
         return json
