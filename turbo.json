@@ -26,6 +26,9 @@
     "@aura-stack/react#build": {
       "dependsOn": ["@aura-stack/auth#build"]
     },
+    "@aura-stack/react-router#build": {
+      "dependsOn": ["@aura-stack/react#build"]
+    },
     "test": {
       "dependsOn": ["^test"],
       "cache": false
