@@ -1,11 +1,11 @@
 {
-    "extends": "@aura-stack/tsconfig/react-router.json",
-    "compilerOptions": {
-        "paths": {
-            "@/*": ["./src/*"],
-        },
-        "verbatimModuleSyntax": false,
+  "extends": "@aura-stack/tsconfig/react-router.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
     },
-    "include": ["src"],
-    "exclude": ["dist", "node_modules"],
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
 }

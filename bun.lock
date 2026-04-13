@@ -176,7 +176,7 @@
         "lucide-react": "catalog:lucide-react",
         "react": "catalog:react",
         "react-dom": "catalog:react",
-        "react-router": "7.12.0",
+        "react-router": "catalog:react-router",
       },
       "devDependencies": {
         "@aura-stack/tsconfig": "workspace:*",
@@ -425,7 +425,7 @@
       "devDependencies": {
         "@aura-stack/tsconfig": "workspace:*",
         "@aura-stack/tsup-config": "workspace:*",
-        "react-router": "7.12.0",
+        "react-router": "catalog:react-router",
       },
       "peerDependencies": {
         "react-router": ">=7.0.0",
@@ -471,6 +471,9 @@
       "@types/react-dom": "^19.2.3",
       "react": "^19.2.3",
       "react-dom": "^19.2.3",
+    },
+    "react-router": {
+      "react-router": "7.12.0",
     },
     "tailwindcss": {
       "@tailwindcss/postcss": "^4.1.16",

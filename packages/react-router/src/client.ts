@@ -6,6 +6,5 @@ export {
     useSignIn,
     useSignInCredentials,
     useSignOut,
-    type AuthProviderProps,
-    type AuthClientOptions,
 } from "@aura-stack/react"
+export type { AuthProviderProps, AuthClientOptions } from "@aura-stack/react"
