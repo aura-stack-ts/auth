@@ -53,7 +53,6 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
         const updated = await api.updateSession({
             session,
             headers: options.headers,
-            skipCSRFCheck: true,
         })
         if (updated.updated) {
             return data(updated, {
@@ -69,7 +68,6 @@ export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<D
         const response = await api.signOut({
             headers: options.headers,
             redirectTo: options?.redirectTo,
-            skipCSRFCheck: true,
         })
         const json = await response.json()
         if (response.ok) {
