@@ -1,4 +1,4 @@
-import type { RateLimiterStorage, StorageEntry } from "@/types"
+import type { RateLimiterStorage, StorageEntry } from "@/types.ts"
 
 /**
  * In-process storage backed by a plain `Map`.

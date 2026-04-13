@@ -2,7 +2,8 @@
   "name": "@aura-stack/react-router",
   "version": "0.0.0",
   "private": false,
-  "description": "",
+  "type": "module",
+  "description": "React Router integration for Aura Stack authentication library",
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
@@ -30,9 +31,9 @@
       "require": "./dist/index.cjs"
     },
     "./client": {
-      "types": "./dist/to-client.d.ts",
-      "import": "./dist/to-client.js",
-      "require": "./dist/to-client.cjs"
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.cjs"
     },
     "./oauth": {
       "types": "./dist/oauth/index.d.ts",

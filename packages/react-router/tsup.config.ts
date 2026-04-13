@@ -1,4 +1,7 @@
 import { tsupConfig } from "@aura-stack/tsup-config"
 import { defineConfig } from "tsup"
 
-export default defineConfig(tsupConfig)
+export default defineConfig({
+    ...tsupConfig,
+    external: ["react", "react-dom", "react-router"],
+})

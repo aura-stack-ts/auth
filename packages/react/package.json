@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "",
+  "description": "React integration for Aura Stack authentication library",
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",

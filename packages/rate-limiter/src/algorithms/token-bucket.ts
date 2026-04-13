@@ -1,6 +1,6 @@
-import { toContent } from "@/utils"
-import { createMemoryStorage } from "@/memory"
-import type { RateLimiterAlgorithm, RateLimitResult, StorageEntry, TokenBucketRule } from "@/types"
+import { toContent } from "@/utils.ts"
+import { createMemoryStorage } from "@/memory.ts"
+import type { RateLimiterAlgorithm, RateLimitResult, StorageEntry, TokenBucketRule } from "@/types.ts"
 
 /**
  * Token Bucket

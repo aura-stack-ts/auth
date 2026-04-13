@@ -1,1 +1,1 @@
-export type * from "@/@types/core"
+export type * from "./core"

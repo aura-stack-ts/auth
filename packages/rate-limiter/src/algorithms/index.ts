@@ -1,1 +1,1 @@
-export { createTokenBucketAlgorithm } from "@/algorithms/token-bucket"
+export { createTokenBucketAlgorithm } from "@/algorithms/token-bucket.ts"

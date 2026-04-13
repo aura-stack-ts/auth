@@ -65,10 +65,11 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
 }
 
 export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (options: Prettify<SignOutOptions & { request: Request }>) => {
+    return async (options: Prettify<SignOutOptions & { headers: HeadersInit }>) => {
         const response = await api.signOut({
-            headers: options?.request.headers,
+            headers: options.headers,
             redirectTo: options?.redirectTo,
+            skipCSRFCheck: true,
         })
         const json = await response.json()
         if (response.ok) {

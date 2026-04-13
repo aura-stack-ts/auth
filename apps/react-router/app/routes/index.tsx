@@ -6,8 +6,10 @@ import type { Route } from "./+types/index"
 import { api } from "~/lib/auth"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
-    const session = await api.getSession(request)
-    return { session: session.authenticated ? session.session : null }
+    const session = await api.getSession({
+        headers: request.headers,
+    })
+    return { session: session }
 }
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -19,7 +21,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
         })
     } else if (action === "signIn") {
         return await api.signIn(formData.get("provider") as string, {
-            headers: request.headers,
+            request,
         })
     }
     return null

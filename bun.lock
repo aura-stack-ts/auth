@@ -168,7 +168,7 @@
     "apps/react-router": {
       "name": "react-router",
       "dependencies": {
-        "@aura-stack/react": "workspace:*",
+        "@aura-stack/react-router": "workspace:*",
         "@radix-ui/react-slot": "^1.2.4",
         "@react-router/node": "7.12.0",
         "@react-router/serve": "7.12.0",
@@ -416,6 +416,20 @@
         "react": ">=19.0.0",
       },
     },
+    "packages/react-router": {
+      "name": "@aura-stack/react-router",
+      "version": "0.0.0",
+      "dependencies": {
+        "@aura-stack/react": "workspace:*",
+      },
+      "devDependencies": {
+        "@aura-stack/tsconfig": "workspace:*",
+        "@aura-stack/tsup-config": "workspace:*",
+      },
+      "peerDependencies": {
+        "react-router": ">=7.0.0",
+      },
+    },
   },
   "overrides": {
     "dompurify": "^3.3.2",
@@ -522,6 +536,8 @@
     "@aura-stack/rate-limiter": ["@aura-stack/rate-limiter@workspace:packages/rate-limiter"],
 
     "@aura-stack/react": ["@aura-stack/react@workspace:packages/react"],
+
+    "@aura-stack/react-router": ["@aura-stack/react-router@workspace:packages/react-router"],
 
     "@aura-stack/router": ["@aura-stack/router@0.6.0", "", { "dependencies": { "cookie": "1.1.1" } }, "sha512-mb0iXHGgKeN5myC2PrmXxGydN8Gol3MlVARRoFc7/2+G3OD9/k3LqkQKDDnKnwVvrj6kE7EIwftXDxouEDdAxA=="],
 
