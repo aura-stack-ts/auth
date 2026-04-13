@@ -1,22 +1,26 @@
 import { Fingerprint, LayoutDashboard } from "lucide-react"
 import { AuthClient } from "~/components/auth-client"
-import { getSession, signIn, signOut } from "~/actions/auth-server"
 import { Form } from "react-router"
 import { Button } from "~/components/ui/button"
 import type { Route } from "./+types/index"
+import { api } from "~/lib/auth"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
-    const session = await getSession(request)
-    return { session }
+    const session = await api.getSession({
+        headers: request.headers,
+    })
+    return { session: session }
 }
 
 export const action = async ({ request }: Route.ActionArgs) => {
     const formData = await request.formData()
     const action = formData.get("action")
     if (action === "signOut") {
-        return await signOut(request)
+        return await api.signOut({
+            headers: request.headers,
+        })
     } else if (action === "signIn") {
-        return await signIn(formData.get("provider") as string, {
+        return await api.signIn(formData.get("provider") as string, {
             request,
         })
     }

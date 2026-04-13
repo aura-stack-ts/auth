@@ -1,4 +1,4 @@
-import type { RateLimitResult } from "@/types"
+import type { RateLimitResult } from "@/types.ts"
 
 export const toContent = (raw: Omit<RateLimitResult, "toResponse">) => ({
     ...raw,

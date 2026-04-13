@@ -1,17 +1,14 @@
 {
-  "name": "@aura-stack/hono",
+  "name": "@aura-stack/react-router",
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Hono integration for Aura Stack authentication library",
+  "description": "React Router integration for Aura Stack authentication library",
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "test": "vitest --run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest --run --coverage",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
@@ -33,6 +30,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.cjs"
+    },
     "./oauth": {
       "types": "./dist/oauth/index.d.ts",
       "import": "./dist/oauth/index.js",
@@ -52,7 +54,8 @@
       "types": "./dist/_core/shared.d.ts",
       "import": "./dist/_core/shared.js",
       "require": "./dist/_core/shared.cjs"
-    }
+    },
+    "./types": "./dist/@types/index.d.ts"
   },
   "keywords": [],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
@@ -62,16 +65,15 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@aura-stack/auth": "workspace:*"
+    "@aura-stack/react": "workspace:*"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsup-config": "workspace:*",
-    "hono": "catalog:hono",
-    "@types/bun": "catalog:bun"
+    "react-router": "catalog:react-router"
   },
   "peerDependencies": {
-    "hono": ">=4.0.0"
+    "react-router": ">=7.0.0"
   },
   "packageManager": "pnpm@10.15.0"
 }

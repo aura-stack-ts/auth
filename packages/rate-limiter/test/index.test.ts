@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-import { createMemoryStorage } from "@/memory"
-import { createRateLimiter } from "@/rate-limiter"
-import { createTokenBucketAlgorithm } from "@/algorithms"
+import { createMemoryStorage } from "@/memory.ts"
+import { createRateLimiter } from "@/rate-limiter.ts"
+import { createTokenBucketAlgorithm } from "@/algorithms/index.ts"
 
 interface TestRequest {
     key: string

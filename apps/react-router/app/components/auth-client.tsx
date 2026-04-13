@@ -1,6 +1,6 @@
-import { useAuth } from "@aura-stack/react"
 import { LayoutDashboard } from "lucide-react"
 import { Button } from "~/components/ui/button"
+import { useAuth } from "@aura-stack/react-router/client"
 
 export const AuthClient = () => {
     const { session, status, isPending, signIn, signOut } = useAuth()

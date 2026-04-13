@@ -2,7 +2,8 @@
   "name": "@aura-stack/next",
   "version": "0.0.0",
   "private": false,
-  "description": "",
+  "type": "module",
+  "description": "Next.js integration for Aura Stack authentication library",
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",

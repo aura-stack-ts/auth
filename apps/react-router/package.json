@@ -11,7 +11,7 @@
     "format:check": "oxfmt --check"
   },
   "dependencies": {
-    "@aura-stack/react": "workspace:*",
+    "@aura-stack/react-router": "workspace:*",
     "@radix-ui/react-slot": "^1.2.4",
     "@react-router/node": "7.12.0",
     "@react-router/serve": "7.12.0",
@@ -19,7 +19,7 @@
     "lucide-react": "catalog:lucide-react",
     "react": "catalog:react",
     "react-dom": "catalog:react",
-    "react-router": "7.12.0"
+    "react-router": "catalog:react-router"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",

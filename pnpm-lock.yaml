@@ -49,6 +49,10 @@ catalogs:
     react-dom:
       specifier: ^19.2.3
       version: 19.2.4
+  react-router:
+    react-router:
+      specifier: 7.12.0
+      version: 7.12.0
   tailwindcss:
     '@tailwindcss/postcss':
       specifier: ^4.1.16
@@ -370,9 +374,9 @@ importers:
 
   apps/react-router:
     dependencies:
-      '@aura-stack/react':
+      '@aura-stack/react-router':
         specifier: workspace:*
-        version: link:../../packages/react
+        version: link:../../packages/react-router
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
@@ -395,7 +399,7 @@ importers:
         specifier: catalog:react
         version: 19.2.4(react@19.2.4)
       react-router:
-        specifier: 7.12.0
+        specifier: catalog:react-router
         version: 7.12.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
       '@aura-stack/tsconfig':
@@ -797,6 +801,22 @@ importers:
       react:
         specifier: catalog:react
         version: 19.2.4
+
+  packages/react-router:
+    dependencies:
+      '@aura-stack/react':
+        specifier: workspace:*
+        version: link:../react
+    devDependencies:
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsup-config':
+        specifier: workspace:*
+        version: link:../../configs/tsup-config
+      react-router:
+        specifier: catalog:react-router
+        version: 7.12.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
 
 packages:
 

@@ -1,6 +1,6 @@
-import { createMemoryStorage } from "@/memory"
-import { createTokenBucketAlgorithm } from "@/algorithms/token-bucket"
-import type { InferRules, RateLimiter, RateLimiterAlgorithm, RateLimiterConfig, RateLimiterRule } from "@/types"
+import { createMemoryStorage } from "@/memory.ts"
+import { createTokenBucketAlgorithm } from "@/algorithms/token-bucket.ts"
+import type { InferRules, RateLimiter, RateLimiterAlgorithm, RateLimiterConfig, RateLimiterRule } from "@/types.ts"
 
 /**
  * Builds the algorithm instance for a rule, memoized per endpoint name.

@@ -1,9 +1,12 @@
-import { createAuth } from "@aura-stack/react/server"
-import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/auth/oauth"
+import { createAuth } from "@aura-stack/react-router"
+import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/react-router/oauth"
 
 export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[]
 
-export const { handlers, jose, api } = createAuth({
+export const {
+    api,
+    core: { handlers },
+} = createAuth({
     oauth,
     basePath: "/api/auth",
 })

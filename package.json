@@ -8,8 +8,8 @@
     "dev": "turbo run dev",
     "dev:core": "turbo run @aura-stack/auth#dev",
     "dev:docs": "turbo run docs#dev",
-    "build": "turbo run build --filter=./packages/* --filter=./apps/*",
-    "build:prod": "turbo run build --filter=./packages/* --continue",
+    "build": "turbo run build --filter=./configs/* --filter=./packages/* --filter=./apps/*",
+    "build:prod": "turbo run build --filter=./configs/* --filter=./packages/* --continue=dependencies-successful",
     "test": "turbo run test --parallel",
     "format": "turbo run format format:root --parallel",
     "format:root": "oxfmt \"!packages\" \"!apps\" \"!configs\"",
@@ -99,6 +99,9 @@
       "express": {
         "@types/express": "^4.17.17",
         "express": "^4.18.2"
+      },
+      "react-router": {
+        "react-router": "7.12.0"
       }
     }
   },
