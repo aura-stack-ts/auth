@@ -117,3 +117,12 @@ export const createBasicAuthHeader = (username: string, password: string): strin
     const binaryCredentials = String.fromCharCode.apply(null, Array.from(encoder.encode(credentials)))
     return `Basic ${btoa(binaryCredentials)}`
 }
+
+export const toUnionHeaders = (init: Headers, headers: HeadersInit): Headers => {
+    new Headers(headers).forEach((value, key) => {
+        if (!init.has(key)) {
+            init.set(key, value)
+        }
+    })
+    return init
+}

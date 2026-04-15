@@ -25,14 +25,14 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
         "GET",
         "/signIn/:oauth",
         async (ctx) => {
-            const signInReturn = await signIn(ctx.params.oauth, {
+            const { toResponse } = await signIn(ctx.params.oauth, {
                 ctx: ctx.context,
                 request: ctx.request,
                 headers: ctx.request.headers,
                 redirect: ctx.searchParams.redirect,
                 redirectTo: ctx.searchParams.redirectTo,
             })
-            return signInReturn.toResponse()
+            return toResponse()
         },
         signInConfig(oauth)
     )

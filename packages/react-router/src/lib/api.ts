@@ -2,9 +2,13 @@ import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type {
     BuiltInOAuthProvider,
     CredentialsPayload,
+    GetSessionAPIOptions,
     GetSessionOptions,
     LiteralUnion,
     Prettify,
+    SignInAPIOptions,
+    SignInAPIReturn,
+    SignInCredentialsAPIReturn,
     SignInOptions,
     SignOutOptions,
     UpdateSessionOptions,
@@ -12,7 +16,7 @@ import type {
 import { data, redirect } from "react-router"
 
 export const getSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (options: GetSessionOptions): Promise<Session<DefaultUser> | null> => {
+    return async (options: GetSessionAPIOptions): Promise<Session<DefaultUser> | null> => {
         try {
             const session = await api.getSession(options)
             if (!session.success) {
@@ -27,24 +31,33 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
 }
 
 export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (providerId: LiteralUnion<BuiltInOAuthProvider>, options?: Prettify<SignInOptions & { request: Request }>) => {
+    return async <Redirect extends boolean = true>(
+        providerId: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Prettify<SignInAPIOptions<Redirect> & { request: Request }>
+    ): Promise<SignInAPIReturn<Redirect>> => {
         return await api.signIn(providerId, options)
     }
 }
 
+export type SignInCredentialsReturn<Redirect extends boolean = true> = Redirect extends true
+    ? Response
+    : SignInCredentialsAPIReturn
+
 export const signInCredentials = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (payload: CredentialsPayload, options?: Prettify<SignInOptions & { request: Request }>) => {
+    return async <Redirect extends boolean = true>(
+        payload: CredentialsPayload,
+        options?: Prettify<SignInOptions & { request: Request }>
+    ): Promise<SignInCredentialsReturn<Redirect>> => {
         const signIn = await api.signInCredentials({
             payload,
             ...options,
-            redirect: false,
         })
         if (signIn.success) {
             return redirect(signIn.redirectURL, {
                 headers: signIn.headers,
-            })
+            }) as SignInCredentialsReturn<Redirect>
         }
-        return signIn
+        return signIn as SignInCredentialsReturn<Redirect>
     }
 }
 
@@ -54,29 +67,22 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
             session,
             headers: options.headers,
         })
-        if (updated.updated) {
-            return data(updated, {
-                headers: updated.headers,
-            })
-        }
-        return updated
+
+        return data(updated, {
+            headers: updated.headers,
+        })
     }
 }
 
 export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async (options: Prettify<SignOutOptions & { headers: HeadersInit }>) => {
-        const response = await api.signOut({
+        const out = await api.signOut({
             headers: options.headers,
             redirectTo: options?.redirectTo,
         })
-        const json = await response.json()
-        if (response.ok) {
-            return data(json, {
-                headers: response.headers,
-                status: response.status,
-            })
-        }
-        return json
+        return data(out, {
+            headers: out.headers,
+        })
     }
 }
 

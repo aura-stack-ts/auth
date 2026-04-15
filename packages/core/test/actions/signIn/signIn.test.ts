@@ -21,8 +21,9 @@ describe("signIn action", () => {
         const response = await GET(new Request("https://example.com/auth/signIn/oauth-provider?redirect=true"))
         expect(response.status).toBe(302)
         expect(await response.json()).toEqual({
+            success: true,
             redirect: true,
-            signInURL: expect.any(String),
+            signInURL: null,
         })
     })
 
@@ -30,6 +31,7 @@ describe("signIn action", () => {
         const signIn = await GET(new Request("https://example.com/auth/signIn/oauth-provider?redirect=false"))
         expect(signIn.status).toBe(200)
         expect(await signIn.json()).toEqual({
+            success: true,
             redirect: false,
             signInURL: expect.any(String),
         })

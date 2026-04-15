@@ -8,7 +8,7 @@ import type {
     GetSessionAPIOptions,
     SessionReturn,
     UpdateSessionAPIOptions,
-    UpdateSessionReturn,
+    UpdateSessionAPIReturn,
     UserShape,
 } from "@/@types/session.ts"
 import type { AuthConfig, AuthInstance, User } from "@/index.ts"
@@ -23,7 +23,7 @@ describe("createAuth", () => {
         (options: GetSessionAPIOptions) => Promise<SessionReturn<ShapeToObject<UserShape>>>
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.updateSession).toEqualTypeOf<
-        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionReturn<ShapeToObject<UserShape>>>
+        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionAPIReturn<ShapeToObject<UserShape>>>
     >()
 
     expectTypeOf(createAuth({ oauth: [] }).jose.signJWS).toEqualTypeOf<
@@ -70,7 +70,7 @@ describe("createAuth", () => {
     ).toEqualTypeOf<
         (
             options: UpdateSessionAPIOptions<ShapeToObject<UserShape & { role: ZodString }>>
-        ) => Promise<UpdateSessionReturn<ShapeToObject<UserShape & { role: ZodString }>>>
+        ) => Promise<UpdateSessionAPIReturn<ShapeToObject<UserShape & { role: ZodString }>>>
     >()
 })
 

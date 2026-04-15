@@ -3,7 +3,7 @@ import { secureApiHeaders } from "@/shared/headers.ts"
 import { AuthValidationError } from "@/shared/errors.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
-import type { SignInCredentialsOptions, SignInCredentialsReturn } from "@/@types/session.ts"
+import type { FunctionAPIContext, SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/session.ts"
 
 export const signInCredentials = async ({
     ctx,
@@ -11,7 +11,7 @@ export const signInCredentials = async ({
     request: requestInit,
     headers: headerInit,
     redirectTo,
-}: SignInCredentialsOptions): Promise<SignInCredentialsReturn> => {
+}: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, sessionStrategy, logger } = ctx
     try {
         let request = requestInit
@@ -36,6 +36,7 @@ export const signInCredentials = async ({
         const redirectURL = await createRedirectTo(request, redirectTo, ctx)
 
         const headers = new HeadersBuilder(secureApiHeaders)
+            .setHeader("Location", redirectURL)
             .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
             .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
             .toHeaders()
@@ -43,27 +44,26 @@ export const signInCredentials = async ({
             success: true,
             headers,
             redirectURL,
+            toResponse: () => Response.json({ success: true, redirectURL }, { headers }),
         }
     } catch (error) {
+        const invalidCredentials: SignInCredentialsAPIReturn = {
+            success: false,
+            headers: new Headers(secureApiHeaders),
+            redirectURL: null,
+            toResponse: () => Response.json({ success: false, redirectURL: null }, { headers: secureApiHeaders, status: 401 }),
+        }
         if (error instanceof AuthValidationError) {
             logger?.log("INVALID_CREDENTIALS", {
                 severity: "warning",
                 structuredData: { path: "/signIn/credentials" },
             })
-            return {
-                success: false,
-                headers: new Headers(secureApiHeaders),
-                redirectURL: null,
-            }
+            return invalidCredentials
         }
         logger?.log("CREDENTIALS_SIGN_IN_FAILED", {
             severity: "error",
             structuredData: { path: "/signIn/credentials" },
         })
-        return {
-            success: false,
-            headers: new Headers(secureApiHeaders),
-            redirectURL: null,
-        }
+        return invalidCredentials
     }
 }

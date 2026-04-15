@@ -1,9 +1,9 @@
-import { cacheControl } from "@/shared/headers.ts"
+import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuthInternalError } from "@/shared/errors.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"
-import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInReturn } from "@/@types/index.ts"
+import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
 
 /**
  * Initiates the sign-in flow on the server. Called when the client invokes the `signIn` API route.
@@ -17,14 +17,8 @@ import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIO
  */
 export const signIn = async <Redirect extends boolean = true>(
     oauth: LiteralUnion<BuiltInOAuthProvider>,
-    {
-        ctx,
-        headers: headersInit,
-        redirectTo = "/",
-        redirect,
-        request: requestInit,
-    }: FunctionAPIContext<SignInAPIOptions<Redirect>>
-): Promise<SignInReturn<Redirect>> => {
+    { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions<Redirect>>
+): Promise<SignInAPIReturn<Redirect>> => {
     const headers = new Headers(headersInit)
     const provider = ctx.oauth[oauth]
     if (!provider) {
@@ -49,7 +43,10 @@ export const signIn = async <Redirect extends boolean = true>(
             redirect: false as Redirect,
             signInURL,
             toResponse: () => {
-                return Response.json({ success: true, redirect: false, signInURL }, { status: 200, headers: headersList })
+                return Response.json(
+                    { success: true, redirect: false, signInURL },
+                    { status: 200, headers: new Headers(secureApiHeaders) }
+                )
             },
         }
     }

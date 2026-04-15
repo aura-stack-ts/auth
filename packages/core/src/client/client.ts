@@ -1,4 +1,4 @@
-import { AuthClientError, isNativeError } from "@/shared/errors.ts"
+import { AuthClientError } from "@/shared/errors.ts"
 import { createClient as createClientAPI } from "@aura-stack/router"
 import type {
     Session,
@@ -11,6 +11,10 @@ import type {
     User,
     CredentialsPayload,
     UpdateSessionOptions,
+    SignInReturn,
+    SignOutReturn,
+    UpdateSessionReturn,
+    SignInCredentialsReturn,
 } from "@/@types/index.ts"
 
 export type { AuthClientOptions }
@@ -46,7 +50,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             const response = await client.get("/session")
             if (!response.ok) return null
             const session = await response.json()
-            if (!session?.authenticated) return null
+            if (!session.success) return null
             return session.session
         } catch (error) {
             console.error("Error fetching session:", error)
@@ -54,7 +58,10 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
-    const signIn = async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
+    const signIn = async <Redirect extends boolean = true>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: SignInOptions<Redirect>
+    ): Promise<SignInReturn<Redirect>> => {
         try {
             const response = await client.get("/signIn/:oauth", {
                 params: {
@@ -72,11 +79,13 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             return json
         } catch (error) {
             console.error("Error during sign-in:", error)
-            return { redirect: false, signInURL: "/" }
+            return { success: false, redirect: false, signInURL: "/" } as SignInReturn<Redirect>
         }
     }
 
-    const signOut = async (options?: SignOutOptions) => {
+    const signOut = async <Redirect extends boolean = true>(
+        options?: SignOutOptions<Redirect>
+    ): Promise<SignOutReturn<Redirect>> => {
         try {
             const csrfToken = await getCSRFToken()
             if (!csrfToken) {
@@ -93,19 +102,17 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                 },
             })
             const json = await response.json()
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.url) {
-                window.location.assign(json.url)
+            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
             }
             return json
         } catch (error) {
             console.error("Error during sign-out:", error)
-            throw isNativeError(error)
-                ? error
-                : new AuthClientError("Sign-out failed.", "The sign-out request failed.", { cause: error })
+            return { success: false, redirect: false, redirectURL: "/" } as SignOutReturn<Redirect>
         }
     }
 
-    const updateSession = async (session: UpdateSessionOptions<DefaultUser>) => {
+    const updateSession = async (session: UpdateSessionOptions<DefaultUser>): Promise<UpdateSessionReturn<DefaultUser>> => {
         try {
             const csrfToken = await getCSRFToken()
             if (!csrfToken) {
@@ -123,19 +130,20 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                 },
             })
             if (!response.ok) {
-                return { session: null, updated: false }
+                return { session: null, success: false }
             }
             const json = await response.json()
             return json
         } catch (error) {
             console.error("Error updating session:", error)
-            throw isNativeError(error)
-                ? error
-                : new AuthClientError("Session update failed.", "The session update request failed.", { cause: error })
+            return { success: false, session: null }
         }
     }
 
-    const signInCredentials = async (credentials: CredentialsPayload, options?: SignInOptions) => {
+    const signInCredentials = async (
+        credentials: CredentialsPayload,
+        options?: SignInOptions
+    ): Promise<SignInCredentialsReturn> => {
         try {
             const response = await client.post("/signIn/credentials", {
                 body: credentials,

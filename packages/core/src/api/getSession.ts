@@ -1,8 +1,8 @@
-import { getErrorName } from "@/shared/utils.ts"
-import type { FunctionAPIContext, GetSessionAPIOptions, SessionReturn, User } from "@/@types/index.ts"
+import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { expiredCookieAttributes } from "@/cookie.ts"
+import type { FunctionAPIContext, GetSessionAPIOptions, SessionReturn, User } from "@/@types/index.ts"
 
 export const getSession = async <DefaultUser extends User = User>({
     ctx,
@@ -14,15 +14,14 @@ export const getSession = async <DefaultUser extends User = User>({
         .toHeaders()
     const unauthorized: SessionReturn<DefaultUser> = {
         session: null,
-        headers: new Headers(),
+        headers: new Headers(secureApiHeaders),
         success: false,
         toResponse: () => Response.json({ success: false, session: null }, { status: 401, headers }),
     }
     try {
         const { session, headers } = await ctx.sessionStrategy.getSession(new Headers(headersInit))
         if (!session) return unauthorized
-        const newHeaders = new Headers(secureApiHeaders)
-        headers.forEach((value, key) => newHeaders.set(key, value))
+        const newHeaders = toUnionHeaders(headers, secureApiHeaders)
         return {
             session,
             headers: newHeaders,

@@ -9,6 +9,7 @@ import type {
     DeepPartial,
     LiteralUnion,
     BuiltInOAuthProvider,
+    SignOutReturn,
 } from "@aura-stack/react/types"
 
 /**
@@ -60,7 +61,6 @@ export const signInCredentials = <DefaultUser extends User = User>({ api }: Auth
             payload,
             headers: await headers(),
             ...options,
-            redirect: false,
         })
         await applyCookies(result.headers)
         if (options.redirect && result.success && result.redirectURL) {
@@ -85,15 +85,19 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
 
 export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async (options?: SignOutAPIOptions) => {
-        const response = await api.signOut({
+        const {
+            headers: headersInit,
+            success,
+            redirectURL,
+        } = await api.signOut({
             headers: await headers(),
             ...options,
         })
-        await applyCookies(response.headers)
-        if (response.status === 202) {
-            redirect(options?.redirectTo ?? "/")
+        await applyCookies(headersInit)
+        if (success && redirectURL) {
+            redirect(redirectURL)
         }
-        return response.json()
+        return { success, redirectURL }
     }
 }
 

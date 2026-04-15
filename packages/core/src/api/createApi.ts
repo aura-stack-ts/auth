@@ -1,4 +1,3 @@
-import { validateRedirectTo } from "@/shared/utils.ts"
 import { getSession, signIn, signInCredentials, signOut, updateSession } from "@/api/index.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type {
@@ -7,7 +6,7 @@ import type {
     GetSessionAPIOptions,
     SessionReturn,
     SignInAPIOptions,
-    SignInReturn,
+    SignInAPIReturn,
     SignOutAPIOptions,
     UpdateSessionAPIOptions,
     User,
@@ -23,33 +22,17 @@ export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContex
         signIn: async <Redirect extends boolean = true>(
             oauth: LiteralUnion<BuiltInOAuthProvider>,
             options?: SignInAPIOptions<Redirect>
-        ): Promise<SignInReturn<Redirect>> => {
-            return signIn<Redirect>(oauth, {
-                ctx,
-                headers: options?.headers,
-                request: options?.request,
-                redirect: options?.redirect,
-                redirectTo: options?.redirectTo,
-            })
+        ): Promise<SignInAPIReturn<Redirect>> => {
+            return signIn<Redirect>(oauth, { ctx, ...options })
         },
         signInCredentials: async (options: SignInCredentialsAPIOptions) => {
-            return signInCredentials({
-                ctx,
-                payload: options.payload,
-                redirectTo: options.redirectTo,
-            })
+            return signInCredentials({ ctx, ...options })
         },
         signOut: async (options: SignOutAPIOptions) => {
-            const redirectTo = validateRedirectTo(options?.redirectTo ?? "/")
-            return signOut({ ctx, headers: options.headers, redirectTo, skipCSRFCheck: true })
+            return signOut({ ctx, skipCSRFCheck: true, ...options })
         },
         updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>) => {
-            return updateSession<DefaultUser>({
-                ctx,
-                headers: options.headers,
-                session: options.session,
-                skipCSRFCheck: options.skipCSRFCheck,
-            })
+            return updateSession<DefaultUser>({ ctx, skipCSRFCheck: true, ...options })
         },
     }
 }

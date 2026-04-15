@@ -237,13 +237,13 @@ export type JWTManager<DefaultUser extends User = User> = {
 // #region API Types
 export type AuthActionReturn =
     | {
-          ok: true
+          success: true
           headers: Headers
           redirectURL?: string
           toResponse: () => Response
       }
     | {
-          ok: false
+          success: false
           headers: Headers
           toResponse: () => Response
       }
@@ -264,10 +264,14 @@ export type SessionReturn<DefaultUser extends User = User> =
     | { success: true; session: Session<DefaultUser>; headers: Headers; toResponse: () => Response }
     | { success: false; session: null; headers: Headers; toResponse: () => Response }
 
-export interface SignInOptions {
-    redirect?: boolean
+export interface SignInOptions<Redirect extends boolean = boolean> {
+    redirect?: Redirect
     redirectTo?: string
 }
+
+export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
+    ? void
+    : { success: boolean; redirect: false; signInURL: string }
 
 export interface SignInAPIOptions<Redirect extends boolean = boolean> {
     request?: Request
@@ -276,44 +280,51 @@ export interface SignInAPIOptions<Redirect extends boolean = boolean> {
     redirectTo?: string
 }
 
-export interface SignInReturn<Redirect extends boolean = boolean> {
+export interface SignInAPIReturn<Redirect extends boolean = boolean> {
     redirect: Redirect
     success: boolean
     signInURL: string
     toResponse: () => Response
 }
 
-export type SignInCredentialsOptions = FunctionAPIContext<{
-    payload: CredentialsPayload
-    request?: Request
-    headers?: HeadersInit
-    redirectTo?: string
-}>
-
 export interface SignInCredentialsAPIOptions {
     payload: CredentialsPayload
     request?: Request
     headers?: HeadersInit
-    redirect?: boolean
     redirectTo?: string
 }
 
-export type SignInCredentialsReturn =
-    | { success: true; headers: Headers; redirectURL: string }
-    | { success: false; headers: Headers; redirectURL?: null }
+export type SignInCredentialsReturn = { success: true; redirectURL: string } | { success: false; redirectURL: null }
 
-export interface SignOutOptions {
-    redirect?: boolean
+export type SignInCredentialsAPIReturn =
+    | { success: true; headers: Headers; redirectURL: string; toResponse: () => Response }
+    | { success: false; headers: Headers; redirectURL?: null; toResponse: () => Response }
+
+export interface SignOutOptions<Redirect extends boolean = boolean> {
+    redirect?: Redirect
     redirectTo?: string
 }
+
+export type SignOutReturn<Redirect extends boolean = boolean> = Redirect extends true
+    ? void
+    : { success: boolean; redirect: false; redirectURL: string }
 
 export interface SignOutAPIOptions {
+    request?: Request
     headers: HeadersInit
     redirectTo?: string
     skipCSRFCheck?: boolean
 }
 
+export type SignOutAPIReturn =
+    | { success: true; headers: Headers; redirectURL?: string; toResponse: () => Response }
+    | { success: false; headers: Headers; redirectURL?: null; toResponse: () => Response }
+
 export type UpdateSessionOptions<DefaultUser extends User = User> = DeepPartial<Session<DefaultUser>>
+
+export type UpdateSessionReturn<DefaultUser extends User = User> =
+    | { success: true; session: Session<DefaultUser> }
+    | { success: false; session: null }
 
 export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
     headers: HeadersInit
@@ -321,6 +332,6 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
     skipCSRFCheck?: boolean
 }
 
-export type UpdateSessionReturn<DefaultUser extends User = User> =
-    | { session: Session<DefaultUser>; headers: Headers; updated: true }
-    | { session: null; headers: Headers; updated: false }
+export type UpdateSessionAPIReturn<DefaultUser extends User = User> =
+    | { session: Session<DefaultUser>; headers: Headers; success: true; toResponse: () => Response }
+    | { session: null; headers: Headers; success: false; toResponse: () => Response }
