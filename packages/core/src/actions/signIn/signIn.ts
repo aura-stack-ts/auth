@@ -25,24 +25,14 @@ export const signInAction = (oauth: OAuthProviderRecord) => {
         "GET",
         "/signIn/:oauth",
         async (ctx) => {
-            const {
-                request,
-                params: { oauth },
-                searchParams: { redirectTo, redirect },
-                context,
-            } = ctx
-
-            const signInResult = await signIn(oauth, {
-                ctx: context,
-                headers: request.headers,
-                redirect,
-                redirectTo,
-                request,
+            const signInReturn = await signIn(ctx.params.oauth, {
+                ctx: ctx.context,
+                request: ctx.request,
+                headers: ctx.request.headers,
+                redirect: ctx.searchParams.redirect,
+                redirectTo: ctx.searchParams.redirectTo,
             })
-            if (!redirect) {
-                return Response.json(signInResult, { status: 200 })
-            }
-            return signInResult as Response
+            return signInReturn.toResponse()
         },
         signInConfig(oauth)
     )

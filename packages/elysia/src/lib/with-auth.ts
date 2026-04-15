@@ -14,10 +14,10 @@ export type WithAuthContext<DefaultUser extends User = User> = {
 export const withAuth = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async ({ request }: { request: Request }): Promise<WithAuthContext<DefaultUser>> => {
         try {
-            const { session, authenticated } = await api.getSession({
+            const { session, success } = await api.getSession({
                 headers: request.headers,
             })
-            return { session: authenticated ? session : null }
+            return { session: success ? session : null }
         } catch {
             return { session: null }
         }

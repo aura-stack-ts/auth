@@ -10,7 +10,7 @@ import type {
     User,
     TypedJWTPayload,
     JWTStrategyOptions,
-    GetSessionReturn,
+    GetStatelessSessionReturn,
     DeepPartial,
 } from "@/@types/index.ts"
 import { createSchemaRegistry } from "@/schema-registry.ts"
@@ -108,7 +108,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         }
     }
 
-    const getSession = async (headers: Headers): Promise<GetSessionReturn<DefaultUser>> => {
+    const getSession = async (headers: Headers): Promise<GetStatelessSessionReturn<DefaultUser>> => {
         const newHeaders = new Headers()
         try {
             const { sessionToken } = cookieConfig.getCookie(headers)

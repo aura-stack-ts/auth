@@ -22,7 +22,8 @@ describe("signIn API", () => {
     test("signIn with BASE_URL", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const response = await api.signIn("oauth-provider")
+        const signIn = await api.signIn("oauth-provider")
+        const response = signIn.toResponse()
         expect(response.status).toBe(302)
         const searchParams = new URL(response.headers.get("Location")!).searchParams
         expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
@@ -33,7 +34,8 @@ describe("signIn API", () => {
             oauth: [oauthCustomService],
             baseURL: "https://example.com",
         }).api
-        const response = await api.signIn("oauth-provider")
+        const signIn = await api.signIn("oauth-provider")
+        const response = signIn.toResponse()
         expect(response.status).toBe(302)
         const searchParams = new URL(response.headers.get("Location")!).searchParams
         expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
@@ -44,21 +46,23 @@ describe("signIn API", () => {
             oauth: [oauthCustomService],
             trustedProxyHeaders: true,
         }).api
-        const response = await api.signIn("oauth-provider", {
+        const signIn = await api.signIn("oauth-provider", {
             headers: {
                 "X-Forwarded-Proto": "https",
                 "X-Forwarded-Host": "example.com",
             },
         })
+        const response = signIn.toResponse()
         expect(response.status).toBe(302)
         const searchParams = new URL(response.headers.get("Location")!).searchParams
         expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
     })
 
     test("signIn with Request object", async () => {
-        const response = await api.signIn("oauth-provider", {
+        const signIn = await api.signIn("oauth-provider", {
             request: new Request("https://example.com/auth/signIn/oauth-provider"),
         })
+        const response = signIn.toResponse()
         expect(response.status).toBe(302)
         const searchParams = new URL(response.headers.get("Location")!).searchParams
         expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
@@ -77,23 +81,26 @@ describe("signIn API", () => {
         const response = await api.signIn("oauth-provider", {
             redirect: false,
         })
-        expect(response).toEqual({
+        expect(response).toMatchObject({
+            success: true,
             redirect: false,
             signInURL: expect.any(String),
+            toResponse: expect.any(Function),
         })
     })
 
     test("signIn with asResponse", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-
-        const response = await api.signIn("oauth-provider", {
+        const signIn = await api.signIn("oauth-provider", {
             redirect: true,
         })
+        const response = signIn.toResponse()
         expect(response).toBeInstanceOf(Response)
         expect(response.status).toBe(302)
         expect(await response.json()).toEqual({
+            success: true,
             redirect: true,
-            signInURL: expect.any(String),
+            signInURL: null,
         })
         expect(getSetCookie(response, "aura-auth.state")).toBeDefined()
     })
@@ -101,7 +108,8 @@ describe("signIn API", () => {
     test("signIn with valid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const response = await api.signIn("oauth-provider", { redirectTo: "/dashboard" })
+        const signIn = await api.signIn("oauth-provider", { redirectTo: "/dashboard" })
+        const response = signIn.toResponse()
         expect(response.status).toBe(302)
         expect(getSetCookie(response, "aura-auth.redirect_to")).toBe("/dashboard")
     })
@@ -109,7 +117,8 @@ describe("signIn API", () => {
     test("signIn with invalid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const response = await api.signIn("oauth-provider", { redirectTo: "https://malicious.com" })
+        const signIn = await api.signIn("oauth-provider", { redirectTo: "https://malicious.com" })
+        const response = signIn.toResponse()
         expect(response.status).toBe(302)
         expect(getSetCookie(response, "aura-auth.redirect_to")).toBe("/")
     })

@@ -15,7 +15,7 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
     return async (options: GetSessionOptions): Promise<Session<DefaultUser> | null> => {
         try {
             const session = await api.getSession(options)
-            if (!session.authenticated) {
+            if (!session.success) {
                 return null
             }
             return session.session

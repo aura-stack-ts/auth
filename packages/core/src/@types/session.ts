@@ -1,4 +1,4 @@
-import { EditableShape, Prettify, ShapeToObject } from "./utility.ts"
+import { DeepPartial, EditableShape, Prettify, ShapeToObject } from "./utility.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { UserIdentityType, UserShape } from "@/shared/identity.ts"
 import type {
@@ -165,8 +165,9 @@ export type StatelessStrategyConfig = {
  */
 export type SessionConfig = StatelessStrategyConfig
 
-export type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+export interface GetStatelessSessionReturn<DefaultUser extends User = User> {
+    session: Session<DefaultUser> | null
+    headers: Headers
 }
 
 /**
@@ -177,7 +178,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Read and validate the session from an incoming request.
      * Returns null if absent, invalid, or expired. Never throws on auth failure.
      */
-    getSession(request: Headers): Promise<GetSessionReturn<DefaultUser>>
+    getSession(request: Headers): Promise<GetStatelessSessionReturn<DefaultUser>>
 
     /**
      * Create a session after successful authentication.
@@ -234,32 +235,24 @@ export type JWTManager<DefaultUser extends User = User> = {
 }
 
 // #region API Types
+export type AuthActionReturn =
+    | {
+          ok: true
+          headers: Headers
+          redirectURL?: string
+          toResponse: () => Response
+      }
+    | {
+          ok: false
+          headers: Headers
+          toResponse: () => Response
+      }
+
 export type FunctionAPIContext<Options extends object> = Prettify<
     {
         ctx: RouterGlobalContext
     } & Options
 >
-
-export interface SignInOptions {
-    redirect?: boolean
-    redirectTo?: string
-}
-
-export interface SignInAPIOptions<Redirect extends boolean = boolean> {
-    headers?: HeadersInit
-    redirect?: Redirect
-    redirectTo?: string
-    request?: Request
-}
-
-export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
-    ? Response
-    : { redirect: false; signInURL: string }
-
-export interface GetSessionReturn<DefaultUser extends User = User> {
-    session: Session<DefaultUser> | null
-    headers: Headers
-}
 
 export interface GetSessionOptions {
     headers: HeadersInit
@@ -267,9 +260,47 @@ export interface GetSessionOptions {
 
 export type GetSessionAPIOptions = GetSessionOptions
 
-export type SessionResponse<DefaultUser extends User = User> =
-    | { session: Session<DefaultUser>; headers: Headers; authenticated: true }
-    | { session: null; headers: Headers; authenticated: false }
+export type SessionReturn<DefaultUser extends User = User> =
+    | { success: true; session: Session<DefaultUser>; headers: Headers; toResponse: () => Response }
+    | { success: false; session: null; headers: Headers; toResponse: () => Response }
+
+export interface SignInOptions {
+    redirect?: boolean
+    redirectTo?: string
+}
+
+export interface SignInAPIOptions<Redirect extends boolean = boolean> {
+    request?: Request
+    headers?: HeadersInit
+    redirect?: Redirect
+    redirectTo?: string
+}
+
+export interface SignInReturn<Redirect extends boolean = boolean> {
+    redirect: Redirect
+    success: boolean
+    signInURL: string
+    toResponse: () => Response
+}
+
+export type SignInCredentialsOptions = FunctionAPIContext<{
+    payload: CredentialsPayload
+    request?: Request
+    headers?: HeadersInit
+    redirectTo?: string
+}>
+
+export interface SignInCredentialsAPIOptions {
+    payload: CredentialsPayload
+    request?: Request
+    headers?: HeadersInit
+    redirect?: boolean
+    redirectTo?: string
+}
+
+export type SignInCredentialsReturn =
+    | { success: true; headers: Headers; redirectURL: string }
+    | { success: false; headers: Headers; redirectURL?: null }
 
 export interface SignOutOptions {
     redirect?: boolean
@@ -293,22 +324,3 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
 export type UpdateSessionReturn<DefaultUser extends User = User> =
     | { session: Session<DefaultUser>; headers: Headers; updated: true }
     | { session: null; headers: Headers; updated: false }
-
-export type SignInCredentialsOptions = FunctionAPIContext<{
-    payload: CredentialsPayload
-    request?: Request
-    headers?: HeadersInit
-    redirectTo?: string
-}>
-
-export interface SignInCredentialsAPIOptions {
-    payload: CredentialsPayload
-    request?: Request
-    headers?: HeadersInit
-    redirect?: boolean
-    redirectTo?: string
-}
-
-export type SignInCredentialsReturn =
-    | { success: true; headers: Headers; redirectURL: string }
-    | { success: false; headers: Headers; redirectURL?: null }

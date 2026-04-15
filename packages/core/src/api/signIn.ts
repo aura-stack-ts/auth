@@ -39,8 +39,19 @@ export const signIn = async <Redirect extends boolean = true>(
     }
 
     if (redirect === false) {
+        ctx?.logger?.log("SIGN_IN_INITIATED", {
+            structuredData: { oauth_provider: oauth },
+        })
+
         const signInURL = await createSignInURL({ request, oauth, ctx, redirectTo })
-        return { redirect: false, signInURL } as unknown as SignInReturn<Redirect>
+        return {
+            success: true,
+            redirect: false as Redirect,
+            signInURL,
+            toResponse: () => {
+                return Response.json({ success: true, redirect: false, signInURL }, { status: 200, headers: headersList })
+            },
+        }
     }
 
     const redirectURI = await createRedirectURI(request, oauth, ctx)
@@ -58,12 +69,12 @@ export const signIn = async <Redirect extends boolean = true>(
         .setCookie(ctx.cookies.redirectTo.name, redirectToValue, ctx.cookies.redirectTo.attributes)
         .setCookie(ctx.cookies.codeVerifier.name, codeVerifier, ctx.cookies.codeVerifier.attributes)
         .toHeaders()
-
-    return Response.json(
-        { redirect: redirect ?? true, signInURL: authorization },
-        {
-            status: (redirect ?? true) ? 302 : 200,
-            headers: headersList,
-        }
-    ) as unknown as SignInReturn<Redirect>
+    return {
+        success: true,
+        redirect: true as Redirect,
+        signInURL: authorization,
+        toResponse: () => {
+            return Response.json({ success: true, redirect: true, signInURL: null }, { status: 302, headers: headersList })
+        },
+    }
 }

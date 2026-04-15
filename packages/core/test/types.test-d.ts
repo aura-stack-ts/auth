@@ -6,7 +6,7 @@ import { github, type GitHubProfile } from "@/oauth/github.ts"
 import { JWTHeaderParameters, JWTVerifyOptions, TypedJWTPayload } from "@aura-stack/jose"
 import type {
     GetSessionAPIOptions,
-    SessionResponse,
+    SessionReturn,
     UpdateSessionAPIOptions,
     UpdateSessionReturn,
     UserShape,
@@ -20,7 +20,7 @@ describe("createAuth", () => {
         <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => AuthInstance<ShapeToObject<Identity>>
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.getSession).toEqualTypeOf<
-        (options: GetSessionAPIOptions) => Promise<SessionResponse<ShapeToObject<UserShape>>>
+        (options: GetSessionAPIOptions) => Promise<SessionReturn<ShapeToObject<UserShape>>>
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.updateSession).toEqualTypeOf<
         (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionReturn<ShapeToObject<UserShape>>>
@@ -64,7 +64,7 @@ describe("createAuth", () => {
 
     expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).api.getSession
-    ).toEqualTypeOf<(options: GetSessionAPIOptions) => Promise<SessionResponse<ShapeToObject<UserShape & { role: ZodString }>>>>()
+    ).toEqualTypeOf<(options: GetSessionAPIOptions) => Promise<SessionReturn<ShapeToObject<UserShape & { role: ZodString }>>>>()
     expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).api.updateSession
     ).toEqualTypeOf<

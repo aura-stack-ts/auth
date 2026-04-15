@@ -31,7 +31,8 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
                 headers: await headers(),
                 ...options,
             })
-            if (!session.authenticated) {
+            console.log("getSession - Retrieved session:", session)
+            if (!session.success) {
                 return null
             }
             return session.session

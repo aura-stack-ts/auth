@@ -5,7 +5,7 @@ import type {
     BuiltInOAuthProvider,
     LiteralUnion,
     GetSessionAPIOptions,
-    SessionResponse,
+    SessionReturn,
     SignInAPIOptions,
     SignInReturn,
     SignOutAPIOptions,
@@ -16,7 +16,7 @@ import type {
 
 export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContext) => {
     return {
-        getSession: async (options: GetSessionAPIOptions): Promise<SessionResponse<DefaultUser>> => {
+        getSession: async (options: GetSessionAPIOptions): Promise<SessionReturn<DefaultUser>> => {
             const session = await getSession<DefaultUser>({ ctx, headers: options.headers })
             return session
         },
