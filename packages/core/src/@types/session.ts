@@ -1,4 +1,4 @@
-import { DeepPartial, EditableShape, Prettify, ShapeToObject } from "./utility.ts"
+import { AuthResponse, DeepPartial, EditableShape, Prettify, ShapeToObject } from "./utility.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { UserIdentityType, UserShape } from "@/shared/identity.ts"
 import type {
@@ -234,19 +234,15 @@ export type JWTManager<DefaultUser extends User = User> = {
     verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }
 
-// #region API Types
-export type AuthActionReturn =
-    | {
-          success: true
-          headers: Headers
-          redirectURL?: string
-          toResponse: () => Response
-      }
-    | {
+// #region API/Client API Types
+
+type AuthActionAPIReturn<Body> =
+    | (Extract<Body, { success: true }> & { headers: Headers; toResponse: () => AuthResponse<Exclude<Body, { success: false }>> })
+    | (Extract<Body, { success: false }> & {
           success: false
           headers: Headers
-          toResponse: () => Response
-      }
+          toResponse: () => AuthResponse<Exclude<Body, { success: true }>>
+      })
 
 export type FunctionAPIContext<Options extends object> = Prettify<
     {
@@ -260,9 +256,9 @@ export interface GetSessionOptions {
 
 export type GetSessionAPIOptions = GetSessionOptions
 
-export type SessionReturn<DefaultUser extends User = User> =
-    | { success: true; session: Session<DefaultUser>; headers: Headers; toResponse: () => Response }
-    | { success: false; session: null; headers: Headers; toResponse: () => Response }
+export type GetSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<
+    { success: true; session: Session<DefaultUser> } | { success: false; session: null }
+>
 
 export interface SignInOptions<Redirect extends boolean = boolean> {
     redirect?: Redirect
@@ -271,21 +267,32 @@ export interface SignInOptions<Redirect extends boolean = boolean> {
 
 export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
     ? void
-    : { success: boolean; redirect: false; signInURL: string }
+    : { success: boolean; redirect: false; signInURL: string | null }
 
-export interface SignInAPIOptions<Redirect extends boolean = boolean> {
+export interface SignInAPIOptions {
     request?: Request
     headers?: HeadersInit
-    redirect?: Redirect
+    redirect?: boolean
     redirectTo?: string
 }
 
-export interface SignInAPIReturn<Redirect extends boolean = boolean> {
-    redirect: Redirect
-    success: boolean
-    signInURL: string
-    toResponse: () => Response
-}
+export type SignInAPIReturn =
+    | {
+          success: true
+          redirect: true
+          signInURL: string
+          toResponse: () => AuthResponse<{ success: true; redirect: true; signInURL: string }>
+      }
+    | {
+          success: true
+          redirect: false
+          signInURL: string
+          toResponse: () => AuthResponse<{ success: true; redirect: false; signInURL: string }>
+      }
+
+export type SignInCredentialsReturn<Redirect extends boolean = boolean> = Redirect extends true
+    ? void
+    : { success: true; redirectURL: string } | { success: false; redirectURL: null }
 
 export interface SignInCredentialsAPIOptions {
     payload: CredentialsPayload
@@ -294,11 +301,9 @@ export interface SignInCredentialsAPIOptions {
     redirectTo?: string
 }
 
-export type SignInCredentialsReturn = { success: true; redirectURL: string } | { success: false; redirectURL: null }
-
-export type SignInCredentialsAPIReturn =
-    | { success: true; headers: Headers; redirectURL: string; toResponse: () => Response }
-    | { success: false; headers: Headers; redirectURL?: null; toResponse: () => Response }
+export type SignInCredentialsAPIReturn = AuthActionAPIReturn<
+    { success: true; redirectURL: string } | { success: false; redirectURL: null }
+>
 
 export interface SignOutOptions<Redirect extends boolean = boolean> {
     redirect?: Redirect
@@ -316,9 +321,9 @@ export interface SignOutAPIOptions {
     skipCSRFCheck?: boolean
 }
 
-export type SignOutAPIReturn =
-    | { success: true; headers: Headers; redirectURL?: string; toResponse: () => Response }
-    | { success: false; headers: Headers; redirectURL?: null; toResponse: () => Response }
+export type SignOutAPIReturn = AuthActionAPIReturn<
+    { success: true; redirectURL?: string } | { success: false; redirectURL?: null }
+>
 
 export type UpdateSessionOptions<DefaultUser extends User = User> = DeepPartial<Session<DefaultUser>>
 
@@ -332,6 +337,6 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
     skipCSRFCheck?: boolean
 }
 
-export type UpdateSessionAPIReturn<DefaultUser extends User = User> =
-    | { session: Session<DefaultUser>; headers: Headers; success: true; toResponse: () => Response }
-    | { session: null; headers: Headers; success: false; toResponse: () => Response }
+export type UpdateSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<
+    { success: true; session: Session<DefaultUser> } | { success: false; session: null }
+>

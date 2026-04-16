@@ -4,34 +4,34 @@ import type {
     BuiltInOAuthProvider,
     LiteralUnion,
     GetSessionAPIOptions,
-    SessionReturn,
+    GetSessionAPIReturn,
     SignInAPIOptions,
     SignInAPIReturn,
     SignOutAPIOptions,
     UpdateSessionAPIOptions,
     User,
     SignInCredentialsAPIOptions,
+    SignInCredentialsAPIReturn,
+    SignOutAPIReturn,
+    UpdateSessionAPIReturn,
 } from "@/@types/index.ts"
 
 export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContext) => {
     return {
-        getSession: async (options: GetSessionAPIOptions): Promise<SessionReturn<DefaultUser>> => {
+        getSession: async (options: GetSessionAPIOptions): Promise<GetSessionAPIReturn<DefaultUser>> => {
             const session = await getSession<DefaultUser>({ ctx, headers: options.headers })
             return session
         },
-        signIn: async <Redirect extends boolean = true>(
-            oauth: LiteralUnion<BuiltInOAuthProvider>,
-            options?: SignInAPIOptions<Redirect>
-        ): Promise<SignInAPIReturn<Redirect>> => {
-            return signIn<Redirect>(oauth, { ctx, ...options })
+        signIn: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions): Promise<SignInAPIReturn> => {
+            return signIn(oauth, { ctx, ...options })
         },
-        signInCredentials: async (options: SignInCredentialsAPIOptions) => {
+        signInCredentials: async (options: SignInCredentialsAPIOptions): Promise<SignInCredentialsAPIReturn> => {
             return signInCredentials({ ctx, ...options })
         },
-        signOut: async (options: SignOutAPIOptions) => {
+        signOut: async (options: SignOutAPIOptions): Promise<SignOutAPIReturn> => {
             return signOut({ ctx, skipCSRFCheck: true, ...options })
         },
-        updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>) => {
+        updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
             return updateSession<DefaultUser>({ ctx, skipCSRFCheck: true, ...options })
         },
     }

@@ -9,7 +9,8 @@ import type {
     DeepPartial,
     LiteralUnion,
     BuiltInOAuthProvider,
-    SignOutReturn,
+    SignInCredentialsAPIOptions,
+    SignInAPIReturn,
 } from "@aura-stack/react/types"
 
 /**
@@ -32,7 +33,6 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
                 headers: await headers(),
                 ...options,
             })
-            console.log("getSession - Retrieved session:", session)
             if (!session.success) {
                 return null
             }
@@ -45,41 +45,44 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
 }
 
 export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions) => {
+    return async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions): Promise<SignInAPIReturn> => {
         const signIn = await api.signIn(provider, {
             headers: await headers(),
             ...options,
             redirect: false,
         })
-        return redirect(signIn.signInURL)
+        if (options?.redirect) {
+            return redirect(signIn.signInURL)
+        }
+        return signIn as SignInAPIReturn
     }
 }
 
 export const signInCredentials = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (payload: CredentialsPayload, options: SignInAPIOptions) => {
-        const result = await api.signInCredentials({
-            payload,
+    return async (payload: CredentialsPayload, options: SignInCredentialsAPIOptions) => {
+        const signIn = await api.signInCredentials({
             headers: await headers(),
             ...options,
+            payload,
         })
-        await applyCookies(result.headers)
-        if (options.redirect && result.success && result.redirectURL) {
-            return redirect(result.redirectURL)
+        await applyCookies(signIn.headers)
+        if (signIn.success && options.redirectTo) {
+            redirect(signIn.redirectURL)
         }
-        return result
+        return signIn
     }
 }
 
 export const updateSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async (session: DeepPartial<Session<DefaultUser>>, options?: GetSessionAPIOptions) => {
-        const result = await api.updateSession({
+        const updated = await api.updateSession({
             session,
             headers: await headers(),
             skipCSRFCheck: true,
             ...options,
         })
-        await applyCookies(result.headers)
-        return result
+        await applyCookies(updated.headers)
+        return updated
     }
 }
 

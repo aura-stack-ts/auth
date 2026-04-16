@@ -32,3 +32,9 @@ export type InferAuthIdentity<Config> = Config extends AuthInstance<infer Identi
 
 export type InferShape<T extends ZodObject> = T["shape"]
 export type InferIdentity<T extends ZodObject> = ShapeToObject<InferShape<T>>
+
+export type AuthResponse<Body = any> = Prettify<
+    Omit<Response, "json"> & {
+        json(): Promise<Body>
+    }
+>

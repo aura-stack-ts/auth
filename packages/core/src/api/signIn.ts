@@ -15,10 +15,10 @@ import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIO
  *   headers: await getAuthHeaders(),
  * })
  */
-export const signIn = async <Redirect extends boolean = true>(
+export const signIn = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
-    { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions<Redirect>>
-): Promise<SignInAPIReturn<Redirect>> => {
+    { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions>
+): Promise<SignInAPIReturn> => {
     const headers = new Headers(headersInit)
     const provider = ctx.oauth[oauth]
     if (!provider) {
@@ -40,7 +40,7 @@ export const signIn = async <Redirect extends boolean = true>(
         const signInURL = await createSignInURL({ request, oauth, ctx, redirectTo })
         return {
             success: true,
-            redirect: false as Redirect,
+            redirect: false,
             signInURL,
             toResponse: () => {
                 return Response.json(
@@ -68,7 +68,7 @@ export const signIn = async <Redirect extends boolean = true>(
         .toHeaders()
     return {
         success: true,
-        redirect: true as Redirect,
+        redirect: true,
         signInURL: authorization,
         toResponse: () => {
             return Response.json({ success: true, redirect: true, signInURL: null }, { status: 302, headers: headersList })
