@@ -29,10 +29,10 @@ export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContex
             return signInCredentials({ ctx, ...options })
         },
         signOut: async (options: SignOutAPIOptions): Promise<SignOutAPIReturn> => {
-            return signOut({ ctx, skipCSRFCheck: true, ...options })
+            return signOut({ ctx, ...options, skipCSRFCheck: true })
         },
         updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
-            return updateSession<DefaultUser>({ ctx, skipCSRFCheck: true, ...options })
+            return updateSession<DefaultUser>({ ctx, ...options, skipCSRFCheck: true })
         },
     }
 }

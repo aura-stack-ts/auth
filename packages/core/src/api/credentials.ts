@@ -47,11 +47,12 @@ export const signInCredentials = async ({
             toResponse: () => Response.json({ success: true, redirectURL }, { headers }),
         }
     } catch (error) {
+        const headers = new Headers(secureApiHeaders)
         const invalidCredentials: SignInCredentialsAPIReturn = {
             success: false,
-            headers: new Headers(secureApiHeaders),
+            headers,
             redirectURL: null,
-            toResponse: () => Response.json({ success: false, redirectURL: null }, { headers: secureApiHeaders, status: 401 }),
+            toResponse: () => Response.json({ success: false, redirectURL: null }, { headers, status: 401 }),
         }
         if (error instanceof AuthValidationError) {
             logger?.log("INVALID_CREDENTIALS", {

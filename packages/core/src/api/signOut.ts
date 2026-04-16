@@ -19,7 +19,11 @@ export const signOut = async ({
     }
     const redirectToURL = await createRedirectTo(request, redirectTo, ctx)
 
-    const headersList = new HeadersBuilder(headers).setHeader("Location", redirectToURL).toHeaders()
+    const headersBuilder = new HeadersBuilder(headers)
+    if (redirectTo) headersBuilder.setHeader("Location", redirectToURL)
+
+    const headersList = headersBuilder.toHeaders()
+
     return {
         headers: headersList,
         redirectURL: redirectToURL,

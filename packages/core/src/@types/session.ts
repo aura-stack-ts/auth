@@ -285,7 +285,7 @@ export interface SignInOptions<Redirect extends boolean = boolean> {
 /** Client `signIn` return: `void` when redirecting in-browser, otherwise a small JSON result with `signInURL`. */
 export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
     ? void
-    : { success: boolean; redirect: false; signInURL: string | null }
+    : { success: true; redirect: false; signInURL: string } | { success: false; redirect: false; signInURL: null }
 
 /** Server/programmatic OAuth sign-in: optional `Request`, headers, and redirect behavior for the HTTP handler. */
 export interface SignInAPIOptions {
@@ -340,7 +340,7 @@ export interface SignOutOptions<Redirect extends boolean = boolean> {
 /** Client `signOut` return: `void` when redirecting, otherwise JSON-like `{ success, redirectURL }`. */
 export type SignOutReturn<Redirect extends boolean = boolean> = Redirect extends true
     ? void
-    : { success: boolean; redirect: false; redirectURL: string }
+    : { success: true; redirect: false; redirectURL: string } | { success: false; redirect: false; redirectURL: null }
 
 /** Server sign-out: requires headers (cookies); optional redirect target and CSRF bypass for trusted callers. */
 export interface SignOutAPIOptions {
@@ -351,9 +351,7 @@ export interface SignOutAPIOptions {
 }
 
 /** Result of sign-out: success includes resolved `redirectURL`; failure uses `redirectURL: null`. */
-export type SignOutAPIReturn = AuthActionAPIReturn<
-    { success: true; redirectURL: string } | { success: false; redirectURL: null }
->
+export type SignOutAPIReturn = AuthActionAPIReturn<{ success: true; redirectURL: string } | { success: false; redirectURL: null }>
 
 /** Partial session update accepted by the client (`updateSession`): user fields and/or expiry. */
 export type UpdateSessionOptions<DefaultUser extends User = User> = DeepPartial<Session<DefaultUser>>
