@@ -83,7 +83,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             return json as unknown as SignInReturn<Redirect>
         } catch (error) {
             console.error("Error during sign-in:", error)
-            return { success: false, redirect: false, signInURL: "/" } as SignInReturn<Redirect>
+            return { success: false, redirect: false, signInURL: "/" } as unknown as SignInReturn<Redirect>
         }
     }
 
@@ -112,7 +112,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             return json as unknown as SignOutReturn<Redirect>
         } catch (error) {
             console.error("Error during sign-out:", error)
-            return { success: false, redirect: false, redirectURL: "/" } as SignOutReturn<Redirect>
+            return { success: false, redirect: false, redirectURL: "/" } as unknown as SignOutReturn<Redirect>
         }
     }
 
@@ -161,7 +161,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             return json
         } catch (error) {
             console.error("Error during credentials sign-in:", error)
-            return { success: false, redirectURL: null }
+            return { success: false, redirectURL: null } as unknown as SignInCredentialsReturn
         }
     }
 
