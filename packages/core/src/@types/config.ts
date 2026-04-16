@@ -193,6 +193,7 @@ export type CookieStrategyAttributes = StandardCookie | SecureCookie | HostCooki
  */
 export type CookieName = "sessionToken" | "csrfToken" | "state" | "codeVerifier" | "redirectTo" | "redirectURI"
 
+/** Resolved cookie names and serialization attributes for each logical auth cookie. */
 export type CookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
 
 export interface CookieConfig {
@@ -242,20 +243,32 @@ export interface Logger {
     log?: (args: SyslogOptions) => void
 }
 
+/**
+ * Programmatic auth API returned with the auth instance: `getSession`, `signIn`, `signInCredentials`, `signOut`, `updateSession`.
+ * Each method returns a result object plus `headers` and `toResponse()` for HTTP responses.
+ */
 export type AuthAPI<DefaultUser extends User = User> = ReturnType<typeof createAuthAPI<DefaultUser>>
+
+/** JWT and crypto helpers bound to the configured identity schema (sign, verify, claims). */
 export type JoseInstance<DefaultUser extends User = User> = ReturnType<typeof createJoseInstance<DefaultUser>>
 
+/** Normalized internal logger with resolved level and structured log function. */
 export interface InternalLogger {
     level: LogLevel
     log: typeof createLogEntry
 }
 
+/**
+ * Identity validation settings used when building session strategy and OAuth profile mapping.
+ * Controls the Zod schema and how unknown keys are handled on user objects.
+ */
 export interface IdentityConfig<Schema extends ZodObject<any> = typeof UserIdentity> {
     schema?: Schema
     skipValidation?: boolean
     unknownKeys?: "passthrough" | "strict" | "strip"
 }
 
+/** Payload sent to the credentials sign-in endpoint (username/password flow). */
 export interface CredentialsPayload {
     username: string
     password: string
@@ -295,6 +308,10 @@ export interface CredentialsProvider<Identity extends EditableShape<UserShape> =
     ) => Promise<ShapeToObject<Identity> | null> | ShapeToObject<Identity> | null
 }
 
+/**
+ * Runtime context passed into auth actions and API handlers: OAuth map, cookies, JWT, session strategy, trusted origins, etc.
+ * This is the fully resolved configuration surface after `createAuth` initializes defaults.
+ */
 export interface RouterGlobalContext<DefaultUser extends User = User> {
     oauth: OAuthProviderRecord
     credentials?: CredentialsProvider<any>
@@ -320,6 +337,9 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
  */
 export type AuthRuntimeConfig<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser>
 
+/**
+ * Public auth instance: programmatic {@link AuthAPI}, {@link JoseInstance}, and HTTP {@link AuthClient} handlers.
+ */
 export interface AuthInstance<DefaultUser extends User = User> {
     api: AuthAPI<DefaultUser>
     jose: JoseInstance<DefaultUser>
@@ -331,6 +351,9 @@ export interface AuthInstance<DefaultUser extends User = User> {
     }
 }
 
+/**
+ * Extended context used inside the library with both secure and standard cookie materializations.
+ */
 export type InternalContext<Identity extends EditableShape<UserShape>> = RouterGlobalContext<ShapeToObject<Identity> & User> & {
     cookieConfig: {
         secure: CookieStoreConfig

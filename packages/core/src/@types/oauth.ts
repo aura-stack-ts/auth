@@ -4,10 +4,12 @@ import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 
+/** Known query parameter names supported when building an OAuth authorization URL. */
 export type AuthorizeParams = LiteralUnion<
     "clientId" | "prompt" | "scope" | "responseMode" | "audience" | "loginHint" | "nonce" | "display"
 >
 
+/** OAuth 2.0 `response_type` values used in authorization requests. */
 export type ResponseType = LiteralUnion<"code" | "token" | "refresh_token" | "id_token">
 
 /**
@@ -74,6 +76,10 @@ export type OAuthProvider<
     DefaultUser extends User = User,
 > = OAuthProviderCredentials<Profile, DefaultUser>
 
+/**
+ * Lookup table of configured OAuth providers keyed by built-in id or custom id.
+ * Values are full credential configs used at runtime for authorize/token/userinfo.
+ */
 export type OAuthProviderRecord<DefaultUser extends User = User> = Record<
     LiteralUnion<BuiltInOAuthProvider>,
     OAuthProviderCredentials<any, DefaultUser>

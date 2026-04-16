@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
+import type { NextSignInCredentials, NextSignInReturn, NextSignOutReturn } from "@/@types/api"
 import type {
     GetSessionAPIOptions,
     SignInAPIOptions,
@@ -10,7 +11,7 @@ import type {
     LiteralUnion,
     BuiltInOAuthProvider,
     SignInCredentialsAPIOptions,
-    SignInAPIReturn,
+    UpdateSessionAPIReturn,
 } from "@aura-stack/react/types"
 
 /**
@@ -45,21 +46,27 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
 }
 
 export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (provider: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions): Promise<SignInAPIReturn> => {
+    return async <Options extends SignInAPIOptions>(
+        provider: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ): Promise<NextSignInReturn<Options>> => {
         const signIn = await api.signIn(provider, {
             headers: await headers(),
             ...options,
             redirect: false,
         })
         if (options?.redirect) {
-            return redirect(signIn.signInURL)
+            return redirect(signIn.signInURL) as NextSignInReturn<Options>
         }
-        return signIn as SignInAPIReturn
+        return signIn as NextSignInReturn<Options>
     }
 }
 
 export const signInCredentials = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (payload: CredentialsPayload, options: SignInCredentialsAPIOptions) => {
+    return async <O extends SignInCredentialsAPIOptions>(
+        payload: CredentialsPayload,
+        options: SignInCredentialsAPIOptions
+    ): Promise<NextSignInCredentials<O>> => {
         const signIn = await api.signInCredentials({
             headers: await headers(),
             ...options,
@@ -69,12 +76,15 @@ export const signInCredentials = <DefaultUser extends User = User>({ api }: Auth
         if (signIn.success && options.redirectTo) {
             redirect(signIn.redirectURL)
         }
-        return signIn
+        return signIn as NextSignInCredentials<O>
     }
 }
 
 export const updateSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (session: DeepPartial<Session<DefaultUser>>, options?: GetSessionAPIOptions) => {
+    return async (
+        session: DeepPartial<Session<DefaultUser>>,
+        options?: GetSessionAPIOptions
+    ): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
         const updated = await api.updateSession({
             session,
             headers: await headers(),
@@ -87,20 +97,16 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
 }
 
 export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (options?: SignOutAPIOptions) => {
-        const {
-            headers: headersInit,
-            success,
-            redirectURL,
-        } = await api.signOut({
+    return async <Options extends SignOutAPIOptions>(options?: Options): Promise<NextSignOutReturn<Options>> => {
+        const out = await api.signOut({
             headers: await headers(),
             ...options,
         })
-        await applyCookies(headersInit)
-        if (success && redirectURL) {
-            redirect(redirectURL)
+        await applyCookies(out.headers)
+        if (out.success && out.redirectURL) {
+            redirect(out.redirectURL)
         }
-        return { success, redirectURL }
+        return out as NextSignOutReturn<Options>
     }
 }
 

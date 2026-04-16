@@ -1,6 +1,7 @@
 import { z } from "zod/v4"
 import { OAuthAccessTokenErrorResponse, OAuthAuthorizationErrorResponse } from "@/schemas.ts"
 
+/** Map of field or logical keys to API validation error payloads (code + message). */
 export type APIErrorMap = Record<string, { code: string; message: string }>
 
 /**
@@ -29,8 +30,13 @@ export type AccessTokenError = OAuthError<z.infer<typeof OAuthAccessTokenErrorRe
  */
 export type TokenRevocationError = OAuthError<"invalid_session_token">
 
+/** Union of all OAuth-related `error` string values exposed by this package. */
 export type ErrorType = AuthorizationError["error"] | AccessTokenError["error"] | TokenRevocationError["error"]
 
+/**
+ * Machine-readable codes for internal auth failures (configuration, crypto, environment, etc.).
+ * Used with {@link AuthInternalError} and logging.
+ */
 export type AuthInternalErrorCode =
     | "INVALID_OAUTH_CONFIGURATION"
     | "INVALID_JWT_TOKEN"
@@ -48,6 +54,9 @@ export type AuthInternalErrorCode =
     | "CREDENTIALS_PROVIDER_NOT_CONFIGURED"
     | "IDENTITY_VALIDATION_FAILED"
 
+/**
+ * Machine-readable codes for security-sensitive failures (CSRF, session, open redirect, OAuth state).
+ */
 export type AuthSecurityErrorCode =
     | "INVALID_STATE"
     | "MISMATCHING_STATE"

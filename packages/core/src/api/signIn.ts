@@ -71,7 +71,7 @@ export const signIn = async (
         redirect: true,
         signInURL: authorization,
         toResponse: () => {
-            return Response.json({ success: true, redirect: true, signInURL: null }, { status: 302, headers: headersList })
+            return Response.json({ success: true, redirect: true, signInURL: authorization }, { status: 302, headers: headersList })
         },
     }
 }

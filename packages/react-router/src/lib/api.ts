@@ -1,9 +1,9 @@
 import { redirect } from "react-router"
 import type {
     ReactRouterSignInAPIOptions,
-    ReactRouterSignInAPIReturn,
     ReactRouterSignInCredentialsAPIOptions,
-    ReactRouterSignInCredentialsAPIReturn,
+    ReactRouterSignInCredentialsReturn,
+    ReactRouterSignInReturn,
     ReactRouterSignOutAPIOptions,
 } from "@/@types"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
@@ -33,31 +33,31 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
 }
 
 export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async <Redirect extends boolean = true>(
+    return async <Options extends ReactRouterSignInAPIOptions>(
         providerId: LiteralUnion<BuiltInOAuthProvider>,
-        options?: ReactRouterSignInAPIOptions
-    ): Promise<ReactRouterSignInAPIReturn<Redirect>> => {
+        options?: Options
+    ): Promise<ReactRouterSignInReturn<Options>> => {
         const signIn = await api.signIn(providerId, options)
-        if (options?.redirect ?? true) {
-            return signIn.toResponse() as ReactRouterSignInAPIReturn<Redirect>
+        if (options?.redirect === false) {
+            return signIn as ReactRouterSignInReturn<Options>
         }
-        return signIn as unknown as ReactRouterSignInAPIReturn<Redirect>
+        return signIn.toResponse() as ReactRouterSignInReturn<Options>
     }
 }
 
 export const signInCredentials = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async <Redirect extends boolean = true>(
+    return async <Options extends ReactRouterSignInCredentialsAPIOptions>(
         payload: CredentialsPayload,
-        options?: ReactRouterSignInCredentialsAPIOptions
-    ): Promise<ReactRouterSignInCredentialsAPIReturn<Redirect>> => {
-        const signIn = await api.signInCredentials({
+        options?: Options
+    ): Promise<ReactRouterSignInCredentialsReturn<Options>> => {
+        const result = await api.signInCredentials({
             payload,
             ...options,
         })
-        if (options?.redirect ?? true) {
-            return signIn.toResponse() as ReactRouterSignInCredentialsAPIReturn<Redirect>
+        if (options?.redirect === false) {
+            return result as ReactRouterSignInCredentialsReturn<Options>
         }
-        return signIn as unknown as ReactRouterSignInCredentialsAPIReturn<Redirect>
+        return result.toResponse() as ReactRouterSignInCredentialsReturn<Options>
     }
 }
 

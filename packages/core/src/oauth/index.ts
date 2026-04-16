@@ -118,7 +118,9 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
  * // Using built-in provider with explicit credentials via factory
  * createBuiltInOAuthProviders([github({ clientId: "...", clientSecret: "..." })])
  */
-export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any>)[] = []) => {
+export const createBuiltInOAuthProviders = (
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any>)[] = []
+) => {
     return oauth.reduce((previous, config) => {
         const oauthConfig = defineOAuthProviderConfig(config)
         if (oauthConfig.id in previous) {

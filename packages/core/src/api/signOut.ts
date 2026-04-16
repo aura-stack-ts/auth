@@ -22,7 +22,7 @@ export const signOut = async ({
     const headersList = new HeadersBuilder(headers).setHeader("Location", redirectToURL).toHeaders()
     return {
         headers: headersList,
-        redirectURL: redirectTo,
+        redirectURL: redirectToURL,
         success: true,
         toResponse: () => {
             return Response.json(

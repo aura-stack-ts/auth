@@ -10,6 +10,7 @@ import type {
     RouterGlobalContext,
 } from "@/@types/config.ts"
 
+/** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = UserIdentityType
 export type { UserShape } from "@/shared/identity.ts"
 
@@ -30,6 +31,7 @@ export interface Session<DefaultUser extends User = User> {
  */
 export type SecretKey = string | Uint8Array | CryptoKey
 
+/** Asymmetric key pair for signing or key agreement (Web Crypto `CryptoKey` pair). */
 export interface KeyPair {
     privateKey: CryptoKey
     publicKey: CryptoKey
@@ -106,8 +108,10 @@ export type JWTSealedMode = {
     encryptionAlgorithm?: JWTEncryptionAlgorithm
 }
 
+/** Discriminated union of JWT wire format: signed JWS, encrypted JWE, or nested sealed (JWS in JWE). */
 export type JWTConfigBase = JWTSignedMode | JWTEncryptedMode | JWTSealedMode
 
+/** How session/JWT lifetime is enforced relative to `iat`, absolute caps, and sliding windows. */
 export type JWTExpirationStrategy = "fixed" | "rolling" | "absolute" | "sliding"
 
 export type JWTConfig = {
@@ -132,7 +136,7 @@ export type JWTConfig = {
      */
     maxExpiration?: number
     /**
-     *
+     * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
      */
     expirationStrategy?: JWTExpirationStrategy
 } & JWTConfigBase
@@ -165,6 +169,7 @@ export type StatelessStrategyConfig = {
  */
 export type SessionConfig = StatelessStrategyConfig
 
+/** Result of reading a stateless (JWT) session from a request: session payload and outgoing header mutations. */
 export interface GetStatelessSessionReturn<DefaultUser extends User = User> {
     session: Session<DefaultUser> | null
     headers: Headers
@@ -213,6 +218,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     destroySession(request: Headers, skipCSRFCheck?: boolean): Promise<Headers>
 }
 
+/** Inputs for constructing a session strategy implementation for a given identity schema. */
 export interface CreateSessionStrategyOptions<Identity extends EditableShape<UserShape>> {
     config?: SessionConfig
     jose: JoseInstance<ShapeToObject<Identity> & User>
@@ -221,6 +227,7 @@ export interface CreateSessionStrategyOptions<Identity extends EditableShape<Use
     identity: IdentityConfig
 }
 
+/** Options specialized for the JWT-backed session strategy. */
 export interface JWTStrategyOptions<DefaultUser extends User = User> {
     config?: StatelessStrategyConfig
     jose: JoseInstance<DefaultUser>
@@ -229,6 +236,7 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
     identity: IdentityConfig
 }
 
+/** Minimal token issue/verify surface used by session code paths. */
 export type JWTManager<DefaultUser extends User = User> = {
     createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
     verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
@@ -236,6 +244,10 @@ export type JWTManager<DefaultUser extends User = User> = {
 
 // #region API/Client API Types
 
+/**
+ * Internal shape for auth API actions: success and failure variants include `headers` and `toResponse()`
+ * for building {@link AuthResponse} bodies.
+ */
 type AuthActionAPIReturn<Body> =
     | (Extract<Body, { success: true }> & { headers: Headers; toResponse: () => AuthResponse<Exclude<Body, { success: false }>> })
     | (Extract<Body, { success: false }> & {
@@ -244,31 +256,38 @@ type AuthActionAPIReturn<Body> =
           toResponse: () => AuthResponse<Exclude<Body, { success: true }>>
       })
 
+/** Router context (`ctx`) merged with per-handler options (headers, body, redirect flags, etc.). */
 export type FunctionAPIContext<Options extends object> = Prettify<
     {
         ctx: RouterGlobalContext
     } & Options
 >
 
+/** Options for reading the current session from request headers. */
 export interface GetSessionOptions {
     headers: HeadersInit
 }
 
+/** Alias for {@link GetSessionOptions} when calling the programmatic `getSession` API. */
 export type GetSessionAPIOptions = GetSessionOptions
 
+/** Result of `getSession`: session payload on success, or `null` session with error semantics via `toResponse()`. */
 export type GetSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<
     { success: true; session: Session<DefaultUser> } | { success: false; session: null }
 >
 
+/** Client-side OAuth sign-in options (browser): whether to navigate and optional post-login path. */
 export interface SignInOptions<Redirect extends boolean = boolean> {
     redirect?: Redirect
     redirectTo?: string
 }
 
+/** Client `signIn` return: `void` when redirecting in-browser, otherwise a small JSON result with `signInURL`. */
 export type SignInReturn<Redirect extends boolean = boolean> = Redirect extends true
     ? void
     : { success: boolean; redirect: false; signInURL: string | null }
 
+/** Server/programmatic OAuth sign-in: optional `Request`, headers, and redirect behavior for the HTTP handler. */
 export interface SignInAPIOptions {
     request?: Request
     headers?: HeadersInit
@@ -276,6 +295,10 @@ export interface SignInAPIOptions {
     redirectTo?: string
 }
 
+/**
+ * Server `signIn` result: includes `signInURL` for both redirect and JSON flows, plus `toResponse()` for the route.
+ * When `redirect` is true, the JSON body still carries the authorization URL for consistency.
+ */
 export type SignInAPIReturn =
     | {
           success: true
@@ -290,10 +313,12 @@ export type SignInAPIReturn =
           toResponse: () => AuthResponse<{ success: true; redirect: false; signInURL: string }>
       }
 
+/** Client credentials sign-in return: `void` on redirect, otherwise success with `redirectURL` or failure with `null`. */
 export type SignInCredentialsReturn<Redirect extends boolean = boolean> = Redirect extends true
     ? void
     : { success: true; redirectURL: string } | { success: false; redirectURL: null }
 
+/** Server credentials sign-in: credentials payload plus optional request/headers and post-login redirect target. */
 export interface SignInCredentialsAPIOptions {
     payload: CredentialsPayload
     request?: Request
@@ -301,19 +326,23 @@ export interface SignInCredentialsAPIOptions {
     redirectTo?: string
 }
 
+/** Result of credentials sign-in: success includes `redirectURL`; failure clears redirect with `null`. */
 export type SignInCredentialsAPIReturn = AuthActionAPIReturn<
     { success: true; redirectURL: string } | { success: false; redirectURL: null }
 >
 
+/** Client-side sign-out options: optional redirect and destination path. */
 export interface SignOutOptions<Redirect extends boolean = boolean> {
     redirect?: Redirect
     redirectTo?: string
 }
 
+/** Client `signOut` return: `void` when redirecting, otherwise JSON-like `{ success, redirectURL }`. */
 export type SignOutReturn<Redirect extends boolean = boolean> = Redirect extends true
     ? void
     : { success: boolean; redirect: false; redirectURL: string }
 
+/** Server sign-out: requires headers (cookies); optional redirect target and CSRF bypass for trusted callers. */
 export interface SignOutAPIOptions {
     request?: Request
     headers: HeadersInit
@@ -321,22 +350,27 @@ export interface SignOutAPIOptions {
     skipCSRFCheck?: boolean
 }
 
+/** Result of sign-out: success includes resolved `redirectURL`; failure uses `redirectURL: null`. */
 export type SignOutAPIReturn = AuthActionAPIReturn<
-    { success: true; redirectURL?: string } | { success: false; redirectURL?: null }
+    { success: true; redirectURL: string } | { success: false; redirectURL: null }
 >
 
+/** Partial session update accepted by the client (`updateSession`): user fields and/or expiry. */
 export type UpdateSessionOptions<DefaultUser extends User = User> = DeepPartial<Session<DefaultUser>>
 
+/** Client `updateSession` outcome: updated session or `null` on failure. */
 export type UpdateSessionReturn<DefaultUser extends User = User> =
     | { success: true; session: Session<DefaultUser> }
     | { success: false; session: null }
 
+/** Server `updateSession`: headers, partial session, optional CSRF bypass for same-origin server calls. */
 export interface UpdateSessionAPIOptions<DefaultUser extends User = User> {
     headers: HeadersInit
     session: DeepPartial<Session<DefaultUser>>
     skipCSRFCheck?: boolean
 }
 
+/** Result of programmatic session refresh/update: current session on success, or `null` with failure response. */
 export type UpdateSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<
     { success: true; session: Session<DefaultUser> } | { success: false; session: null }
 >
