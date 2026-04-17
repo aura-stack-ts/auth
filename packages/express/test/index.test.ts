@@ -16,7 +16,7 @@ describe("GET /api/auth/session", () => {
         const response = await supertest(app).get("/api/auth/session")
         expect(response.status).toBe(401)
         expect(response.body).toMatchObject({
-            authenticated: false,
+            success: false,
             session: null,
         })
     })
@@ -115,8 +115,7 @@ describe("PATCH /api/auth/session", () => {
         expect(response.status).toBe(401)
         expect(response.body).toMatchObject({
             session: null,
-            headers: {},
-            updated: false,
+            success: false,
         })
     })
 })

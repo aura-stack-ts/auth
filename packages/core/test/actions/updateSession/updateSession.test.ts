@@ -13,8 +13,7 @@ describe("updateSession action", () => {
         expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             session: null,
-            headers: {},
-            updated: false,
+            success: false,
         })
     })
 
@@ -52,8 +51,7 @@ describe("updateSession action", () => {
                 },
                 expires: expect.any(String),
             },
-            headers: expect.any(Object),
-            updated: true,
+            success: true,
         })
     })
 
@@ -84,8 +82,7 @@ describe("updateSession action", () => {
         expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             session: null,
-            headers: {},
-            updated: false,
+            success: false,
         })
     })
 
@@ -126,8 +123,7 @@ describe("updateSession action", () => {
                     image: "https://example.com/alicesmith-avatar.jpg",
                 },
             }),
-            headers: expect.any(Object),
-            updated: true,
+            success: true,
         })
     })
 })

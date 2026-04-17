@@ -20,7 +20,7 @@ describe("sessionAction", () => {
     test("sessionToken cookie not found", async () => {
         const request = await GET(new Request("https://example.com/auth/session"))
         expect(request.status).toBe(401)
-        expect(await request.json()).toEqual({ authenticated: false, session: null })
+        expect(await request.json()).toEqual({ success: false, session: null })
     })
 
     test("invalid sessionToken cookie", async () => {
@@ -32,7 +32,7 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(401)
-        expect(await request.json()).toEqual({ authenticated: false, session: null })
+        expect(await request.json()).toEqual({ success: false, session: null })
     })
 
     test("valid sessionToken cookie with correct version", async () => {
@@ -47,7 +47,7 @@ describe("sessionAction", () => {
         )
         expect(request.status).toBe(200)
         expect(await request.json()).toEqual({
-            authenticated: true,
+            success: true,
             session: { user: sessionPayload, expires: expect.any(String) },
         })
     })
@@ -64,7 +64,7 @@ describe("sessionAction", () => {
         )
         expect(request.status).toBe(200)
         expect(await request.json()).toEqual({
-            authenticated: true,
+            success: true,
             session: { user: sessionPayload, expires: expect.any(String) },
         })
     })
@@ -79,7 +79,7 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(401)
-        expect(await request.json()).toEqual({ authenticated: false, session: null })
+        expect(await request.json()).toEqual({ success: false, session: null })
     })
 
     test("verify cache control headers are set", async () => {
@@ -215,7 +215,7 @@ describe("sessionAction", () => {
         const session = await requestSession.json()
         const { id, name, image, email } = userInfoMock
         expect(session).toEqual({
-            authenticated: true,
+            success: true,
             session: {
                 user: { sub: id, name, image, email },
                 expires: expect.any(String),

@@ -9,4 +9,5 @@ export const {
 } = createAuth({
     oauth,
     basePath: "/api/auth",
+    baseURL: "http://localhost:5174",
 })

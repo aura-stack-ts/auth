@@ -35,7 +35,7 @@ describe("Stateless Strategy (Integration)", () => {
             const body = await res.json()
 
             expect(res.status).toBe(200)
-            expect(body.authenticated).toBe(true)
+            expect(body.success).toBe(true)
 
             const expectedExp = new Date(new Date("2026-03-24T00:00:00Z").getTime() + 15 * 24 * 60 * 60 * 1000).toISOString()
             expect(body.session.expires).toBe(expectedExp)
@@ -155,7 +155,7 @@ describe("Stateless Strategy (Integration)", () => {
             let body = await res.json()
 
             expect(res.status).toBe(401)
-            expect(body.authenticated).toBe(false)
+            expect(body.success).toBe(false)
             expect(body.session).toBeNull()
         })
     })

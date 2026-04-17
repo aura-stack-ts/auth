@@ -57,7 +57,7 @@ describe("createAuthClient", () => {
     test("getSession returns valid session", async () => {
         const get = vi.fn().mockResolvedValue(
             createJSONResponse({
-                authenticated: true,
+                success: true,
                 session: { user: { id: "user_1" } },
             })
         )
@@ -161,7 +161,7 @@ describe("createAuthClient", () => {
         })
 
         const client = createAuthClient({ baseURL: "https://example.com" })
-        await expect(client.signOut()).rejects.toThrow()
+        expect(await client.signOut()).toMatchObject({ success: false, redirect: false, redirectURL: "/" })
         expect(post).not.toHaveBeenCalled()
     })
 })

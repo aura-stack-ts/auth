@@ -1,3 +1,6 @@
+/**
+ * Public type entry for `@aura-stack/auth` and `@aura-stack/auth/types`: configuration, session, OAuth, API results, and utilities.
+ */
 import { z } from "zod/v4"
 import { OAuthEnvSchema } from "@/schemas.ts"
 import type { JWTPayload } from "@/jose.ts"
@@ -25,10 +28,18 @@ export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" |
  */
 export type JWTPayloadWithToken = JWTPayload & { token: string }
 
+/** Environment variables for OAuth client credentials, inferred from `OAuthEnvSchema`. */
 export type OAuthEnv = z.infer<typeof OAuthEnvSchema>
 
+/**
+ * HTTP route handlers exposed by the auth instance (`GET`, `POST`, `PATCH`, `ALL`) for mounting on your app router.
+ */
 export type AuthClient = ReturnType<typeof createAuthInstance>["handlers"]
 
+/**
+ * Options for {@link createAuthClient} (browser HTTP client). Extends the router client with an optional `baseURL`
+ * when the client runs outside the browser (e.g. server-side fetch to your app origin).
+ */
 export type AuthClientOptions = Prettify<
     Omit<ClientOptions, "baseURL"> & {
         baseURL?: string
