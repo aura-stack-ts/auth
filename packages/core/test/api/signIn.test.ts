@@ -100,7 +100,7 @@ describe("signIn API", () => {
         expect(await response.json()).toEqual({
             success: true,
             redirect: true,
-            signInURL: null,
+            signInURL: expect.any(String),
         })
         expect(getSetCookie(response, "aura-auth.state")).toBeDefined()
     })

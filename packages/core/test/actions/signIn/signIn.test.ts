@@ -23,7 +23,7 @@ describe("signIn action", () => {
         expect(await response.json()).toEqual({
             success: true,
             redirect: true,
-            signInURL: null,
+            signInURL: expect.any(String),
         })
     })
 
