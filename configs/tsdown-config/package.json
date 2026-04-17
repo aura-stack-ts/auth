@@ -1,11 +1,11 @@
 {
-  "name": "@aura-stack/tsup-config",
+  "name": "@aura-stack/tsdown-config",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Tsup configuration for Aura Stack Auth packages.",
+  "description": "Tsdown configuration for Aura Stack Auth packages.",
   "scripts": {
-    "build": "tsup tsup.config.ts --format cjs,esm --dts --clean",
+    "build": "tsdown tsdown.config.ts --format cjs,esm --dts --clean --no-fixed-extension",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
@@ -25,9 +25,9 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/tsup.config.d.ts",
-      "import": "./dist/tsup.config.js",
-      "require": "./dist/tsup.config.cjs"
+      "types": "./dist/tsdown.config.d.ts",
+      "import": "./dist/tsdown.config.js",
+      "require": "./dist/tsdown.config.cjs"
     }
   },
   "devDependencies": {

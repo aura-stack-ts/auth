@@ -5,8 +5,8 @@
   "type": "module",
   "description": "Elysia integration for Aura Stack authentication library",
   "scripts": {
-    "dev": "tsup --watch",
-    "build": "tsup",
+    "dev": "tsdown --watch",
+    "build": "tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "test": "vitest --run",
@@ -71,7 +71,7 @@
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsup-config": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*",
     "elysia": "^1.2.22",
     "vitest": "catalog:vitest"
   },

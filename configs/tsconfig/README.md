@@ -1,1 +1,1 @@
-# `@aura-auth/tsconfig`
+# `@aura-stack/tsconfig`

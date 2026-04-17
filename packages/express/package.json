@@ -5,8 +5,8 @@
   "type": "module",
   "description": "Express integration for Aura Stack authentication library",
   "scripts": {
-    "dev": "tsup --watch",
-    "build": "tsup",
+    "dev": "tsdown --watch",
+    "build": "tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "test": "vitest --run",
@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsup-config": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*",
     "@types/supertest": "^6.0.3",
     "supertest": "^7.2.2",
     "express": "catalog:express",

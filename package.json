@@ -42,7 +42,7 @@
     "eslint": "^9.35.0",
     "oxfmt": "^0.41.0",
     "oxlint": "^1.56.0",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.21.8",
     "turbo": "^2.7.5",
     "typescript": "catalog:typescript",
     "vitest": "catalog:vitest"
