@@ -1,4 +1,7 @@
+import { defineConfig } from "tsdown"
 import { tsdownConfig } from "@aura-stack/tsdown-config"
-import { defineConfig, type UserConfig } from "tsdown"
 
-export default defineConfig(tsdownConfig as UserConfig)
+export default defineConfig({
+    ...tsdownConfig,
+    entry: ["src/index.ts", "src/types.ts", "src/algorithms/index.ts"],
+})
