@@ -1,9 +1,9 @@
-import { cacheControl } from "@/shared/headers.ts"
+import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuthInternalError } from "@/shared/errors.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"
-import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInReturn } from "@/@types/index.ts"
+import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
 
 /**
  * Initiates the sign-in flow on the server. Called when the client invokes the `signIn` API route.
@@ -15,16 +15,10 @@ import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIO
  *   headers: await getAuthHeaders(),
  * })
  */
-export const signIn = async <Redirect extends boolean = true>(
+export const signIn = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
-    {
-        ctx,
-        headers: headersInit,
-        redirectTo = "/",
-        redirect,
-        request: requestInit,
-    }: FunctionAPIContext<SignInAPIOptions<Redirect>>
-): Promise<SignInReturn<Redirect>> => {
+    { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions>
+): Promise<SignInAPIReturn> => {
     const headers = new Headers(headersInit)
     const provider = ctx.oauth[oauth]
     if (!provider) {
@@ -39,8 +33,22 @@ export const signIn = async <Redirect extends boolean = true>(
     }
 
     if (redirect === false) {
+        ctx?.logger?.log("SIGN_IN_INITIATED", {
+            structuredData: { oauth_provider: oauth },
+        })
+
         const signInURL = await createSignInURL({ request, oauth, ctx, redirectTo })
-        return { redirect: false, signInURL } as unknown as SignInReturn<Redirect>
+        return {
+            success: true,
+            redirect: false,
+            signInURL,
+            toResponse: () => {
+                return Response.json(
+                    { success: true, redirect: false, signInURL },
+                    { status: 200, headers: new Headers(secureApiHeaders) }
+                )
+            },
+        }
     }
 
     const redirectURI = await createRedirectURI(request, oauth, ctx)
@@ -58,12 +66,15 @@ export const signIn = async <Redirect extends boolean = true>(
         .setCookie(ctx.cookies.redirectTo.name, redirectToValue, ctx.cookies.redirectTo.attributes)
         .setCookie(ctx.cookies.codeVerifier.name, codeVerifier, ctx.cookies.codeVerifier.attributes)
         .toHeaders()
-
-    return Response.json(
-        { redirect: redirect ?? true, signInURL: authorization },
-        {
-            status: (redirect ?? true) ? 302 : 200,
-            headers: headersList,
-        }
-    ) as unknown as SignInReturn<Redirect>
+    return {
+        success: true,
+        redirect: true,
+        signInURL: authorization,
+        toResponse: () => {
+            return Response.json(
+                { success: true, redirect: true, signInURL: authorization },
+                { status: 302, headers: headersList }
+            )
+        },
+    }
 }

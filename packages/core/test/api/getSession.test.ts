@@ -9,7 +9,7 @@ describe("getSession", () => {
         expect(session).toMatchObject({
             session: null,
             headers: {},
-            authenticated: false,
+            success: false,
         })
     })
 
@@ -20,7 +20,7 @@ describe("getSession", () => {
         expect(session).toMatchObject({
             session: null,
             headers: {},
-            authenticated: false,
+            success: false,
         })
     })
 
@@ -56,7 +56,7 @@ describe("getSession", () => {
         expect(session).toMatchObject({
             session: null,
             headers: {},
-            authenticated: false,
+            success: false,
         })
     })
 
@@ -71,7 +71,7 @@ describe("getSession", () => {
         expect(session).toMatchObject({
             session: null,
             headers: {},
-            authenticated: false,
+            success: false,
         })
     })
 

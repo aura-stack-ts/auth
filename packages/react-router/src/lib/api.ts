@@ -1,21 +1,27 @@
+import { redirect } from "react-router"
+import type {
+    ReactRouterSignInAPIOptions,
+    ReactRouterSignInCredentialsAPIOptions,
+    ReactRouterSignInCredentialsReturn,
+    ReactRouterSignInReturn,
+    ReactRouterSignOutAPIOptions,
+} from "@/@types"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type {
     BuiltInOAuthProvider,
     CredentialsPayload,
+    GetSessionAPIOptions,
     GetSessionOptions,
     LiteralUnion,
-    Prettify,
-    SignInOptions,
-    SignOutOptions,
+    UpdateSessionAPIReturn,
     UpdateSessionOptions,
 } from "@aura-stack/react/types"
-import { data, redirect } from "react-router"
 
 export const getSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (options: GetSessionOptions): Promise<Session<DefaultUser> | null> => {
+    return async (options: GetSessionAPIOptions): Promise<Session<DefaultUser> | null> => {
         try {
             const session = await api.getSession(options)
-            if (!session.authenticated) {
+            if (!session.success) {
                 return null
             }
             return session.session
@@ -27,56 +33,55 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
 }
 
 export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (providerId: LiteralUnion<BuiltInOAuthProvider>, options?: Prettify<SignInOptions & { request: Request }>) => {
-        return await api.signIn(providerId, options)
+    return async <Options extends ReactRouterSignInAPIOptions>(
+        providerId: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ): Promise<ReactRouterSignInReturn<Options>> => {
+        const signIn = await api.signIn(providerId, options)
+        if (options?.redirect === false) {
+            return signIn as ReactRouterSignInReturn<Options>
+        }
+        return signIn.toResponse() as ReactRouterSignInReturn<Options>
     }
 }
 
 export const signInCredentials = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (payload: CredentialsPayload, options?: Prettify<SignInOptions & { request: Request }>) => {
-        const signIn = await api.signInCredentials({
+    return async <Options extends ReactRouterSignInCredentialsAPIOptions>(
+        payload: CredentialsPayload,
+        options?: Options
+    ): Promise<ReactRouterSignInCredentialsReturn<Options>> => {
+        const result = await api.signInCredentials({
             payload,
             ...options,
-            redirect: false,
         })
-        if (signIn.success) {
-            return redirect(signIn.redirectURL, {
-                headers: signIn.headers,
-            })
+        if (options?.redirect === false) {
+            return result as ReactRouterSignInCredentialsReturn<Options>
         }
-        return signIn
+        return result.toResponse() as ReactRouterSignInCredentialsReturn<Options>
     }
 }
 
 export const updateSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (session: UpdateSessionOptions<DefaultUser>, options: GetSessionOptions) => {
-        const updated = await api.updateSession({
+    return async (
+        session: UpdateSessionOptions<DefaultUser>,
+        options: GetSessionOptions
+    ): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
+        return await api.updateSession({
             session,
             headers: options.headers,
         })
-        if (updated.updated) {
-            return data(updated, {
-                headers: updated.headers,
-            })
-        }
-        return updated
     }
 }
 
 export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (options: Prettify<SignOutOptions & { headers: HeadersInit }>) => {
-        const response = await api.signOut({
-            headers: options.headers,
-            redirectTo: options?.redirectTo,
-        })
-        const json = await response.json()
-        if (response.ok) {
-            return data(json, {
-                headers: response.headers,
-                status: response.status,
+    return async (options: ReactRouterSignOutAPIOptions) => {
+        const out = await api.signOut(options)
+        if (out.success && options.redirectTo && out.redirectURL) {
+            return redirect(out.redirectURL!, {
+                headers: out.headers,
             })
         }
-        return json
+        return out.toResponse()
     }
 }
 

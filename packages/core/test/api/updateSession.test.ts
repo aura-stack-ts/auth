@@ -14,7 +14,8 @@ describe("updateSession API", () => {
         expect(updated).toEqual({
             session: null,
             headers: expect.any(Headers),
-            updated: false,
+            success: false,
+            toResponse: expect.any(Function),
         })
     })
 
@@ -51,7 +52,8 @@ describe("updateSession API", () => {
                 expires: expect.any(String),
             },
             headers: expect.any(Headers),
-            updated: true,
+            success: true,
+            toResponse: expect.any(Function),
         })
     })
 
@@ -89,7 +91,8 @@ describe("updateSession API", () => {
                 expires: expect.any(String),
             },
             headers: expect.any(Headers),
-            updated: true,
+            success: true,
+            toResponse: expect.any(Function),
         })
     })
 
@@ -135,8 +138,9 @@ describe("updateSession API", () => {
                 },
                 expires: expect.any(String),
             },
+            success: true,
             headers: expect.any(Headers),
-            updated: true,
+            toResponse: expect.any(Function),
         })
     })
 
@@ -173,7 +177,8 @@ describe("updateSession API", () => {
                 expires: expect.any(String),
             },
             headers: expect.any(Headers),
-            updated: true,
+            success: true,
+            toResponse: expect.any(Function),
         })
     })
 
@@ -203,8 +208,9 @@ describe("updateSession API", () => {
                 },
                 expires: expiresAt,
             },
+            success: true,
             headers: expect.any(Headers),
-            updated: true,
+            toResponse: expect.any(Function),
         })
     })
 })

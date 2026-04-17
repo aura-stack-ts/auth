@@ -15,7 +15,7 @@ describe("GET /api/auth/session", () => {
         expect(res.status).toBe(401)
         const body = await res.json()
         expect(body).toMatchObject({
-            authenticated: false,
+            success: false,
             session: null,
         })
     })

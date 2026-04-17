@@ -20,7 +20,7 @@ export const updateSessionAction = (identity: IdentityConfig) => {
         "PATCH",
         "/session",
         async (ctx) => {
-            const updated = await updateSession({
+            const { toResponse } = await updateSession({
                 ctx: ctx.context,
                 headers: ctx.request.headers,
                 session: {
@@ -28,7 +28,7 @@ export const updateSessionAction = (identity: IdentityConfig) => {
                     expires: ctx.body.expires?.toISOString(),
                 },
             })
-            return Response.json(updated, { status: updated.updated ? 200 : 401 })
+            return toResponse()
         },
         config(identity)
     )

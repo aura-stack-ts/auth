@@ -26,14 +26,14 @@ export const signInCredentialsAction = createEndpoint(
     "/signIn/credentials",
     async (ctx) => {
         const payload = ctx.body
-        const { headers, success, redirectURL } = await signInCredentials({
+        const { toResponse } = await signInCredentials({
             ctx: ctx.context,
             payload,
             request: ctx.request,
             headers: ctx.request.headers,
             redirectTo: ctx.searchParams.redirectTo,
         })
-        return Response.json({ success, redirectURL }, { headers, status: success ? 200 : 401 })
+        return toResponse()
     },
     config
 )

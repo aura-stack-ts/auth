@@ -2,14 +2,12 @@ import crypto from "crypto"
 import path from "path"
 import { defineConfig } from "vitest/config"
 
-const SECRET_KEY = crypto.randomBytes(32).toString("base64url")
-const SALT_KEY = crypto.randomBytes(32).toString("base64url")
+const SECRET_KEY = crypto.randomBytes(34).toString("base64url")
+const SALT_KEY = crypto.randomBytes(34).toString("base64url")
 
 export default defineConfig({
     test: {
         include: ["test/**/*.test.ts"],
-        // @todo: TODO(`#119`): Temporary exclusion - re-enable after fixing Zod v4 compatibility
-        exclude: ["test/actions/signIn/signIn.test.ts"],
         coverage: {
             provider: "v8",
             enabled: true,
