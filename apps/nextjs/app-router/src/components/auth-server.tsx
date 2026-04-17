@@ -1,6 +1,7 @@
 import { api } from "@/lib/auth"
 import { LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { headers } from "next/headers"
 
 export const AuthServer = async () => {
     const session = await api.getSession()
@@ -13,7 +14,7 @@ export const AuthServer = async () => {
 
     const signOutAction = async () => {
         "use server"
-        await api.signOut()
+        await api.signOut({ headers: await headers() })
     }
 
     return (

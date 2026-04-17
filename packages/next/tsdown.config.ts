@@ -3,6 +3,7 @@ import { tsdownConfig } from "@aura-stack/tsdown-config"
 
 export default defineConfig({
     ...tsdownConfig,
+    platform: "node",
     entry: [
         "src/index.ts",
         "src/client.ts",
@@ -12,4 +13,9 @@ export default defineConfig({
         "src/_core/shared.ts",
         "src/@types/index.ts",
     ],
+    fixedExtension: false,
+    deps: {
+        onlyBundle: false,
+        neverBundle: ["next", "next/headers", "next/navigation", "react", "react-dom"],
+    },
 })

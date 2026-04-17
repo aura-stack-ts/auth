@@ -8,7 +8,7 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
         const session = await api.getSession({
             headers: getRequestHeaders(),
         })
-        if (!session.authenticated) return null
+        if (!session.success) return null
         return session.session as any
     } catch (error) {
         console.error("[error:server] getSession", error)

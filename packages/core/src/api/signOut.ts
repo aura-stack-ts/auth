@@ -13,7 +13,7 @@ export const signOut = async ({
 
     let request = requestInit
     if (!request) {
-        const origin = await getBaseURL({ headers })
+        const origin = await getBaseURL({ ctx, headers })
         const url = `${origin}${ctx.basePath}/signOut`
         request = new Request(url, { headers })
     }

@@ -27,7 +27,7 @@ export const signIn = async (
 
     let request = requestInit
     if (!request) {
-        const origin = await getBaseURL({ ctx: ctx, headers })
+        const origin = await getBaseURL({ ctx, headers })
         const url = `${origin}${ctx.basePath}/signIn/${oauth}`
         request = new Request(url, { headers })
     }

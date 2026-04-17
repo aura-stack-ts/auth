@@ -31,8 +31,8 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
     return async (options?: GetSessionAPIOptions): Promise<Session<DefaultUser> | null> => {
         try {
             const session = await api.getSession({
-                headers: await headers(),
                 ...options,
+                headers: await headers(),
             })
             if (!session.success) {
                 return null
@@ -55,10 +55,12 @@ export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<De
             ...options,
             redirect: false,
         })
-        if (options?.redirect) {
-            return redirect(signIn.signInURL) as NextSignInReturn<Options>
+        console.log("Sign in response:", signIn)
+        if (options?.redirect === false) {
+            console.log("redirectTo")
+            return signIn as NextSignInReturn<Options>
         }
-        return signIn as NextSignInReturn<Options>
+        return redirect(signIn.signInURL) as NextSignInReturn<Options>
     }
 }
 
@@ -102,6 +104,7 @@ export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<D
             headers: await headers(),
             ...options,
         })
+        console.log("Sign out response:", out)
         await applyCookies(out.headers)
         if (out.success && out.redirectURL) {
             redirect(out.redirectURL)
