@@ -7,6 +7,6 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src", "tsup.config.ts", "test"],
+  "include": ["src", "tsdown.config.ts", "test"],
   "exclude": ["dist", "node_modules"]
 }
