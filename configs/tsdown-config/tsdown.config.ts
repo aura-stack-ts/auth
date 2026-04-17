@@ -8,6 +8,7 @@ export const tsdownConfig: UserConfig = {
     format: ["esm", "cjs"],
     dts: true,
     clean: true,
+    minify: true,
     fixedExtension: false,
     deps: {
         onlyBundle: false,
