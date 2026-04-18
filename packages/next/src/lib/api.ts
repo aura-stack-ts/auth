@@ -6,7 +6,6 @@ import type {
     GetSessionAPIOptions,
     SignInAPIOptions,
     SignOutAPIOptions,
-    CredentialsPayload,
     DeepPartial,
     LiteralUnion,
     BuiltInOAuthProvider,
@@ -55,9 +54,7 @@ export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<De
             ...options,
             redirect: false,
         })
-        console.log("Sign in response:", signIn)
         if (options?.redirect === false) {
-            console.log("redirectTo")
             return signIn as NextSignInReturn<Options>
         }
         return redirect(signIn.signInURL) as NextSignInReturn<Options>
@@ -66,16 +63,15 @@ export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<De
 
 export const signInCredentials = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async <O extends SignInCredentialsAPIOptions>(
-        payload: CredentialsPayload,
         options: SignInCredentialsAPIOptions
     ): Promise<NextSignInCredentials<O>> => {
         const signIn = await api.signInCredentials({
             headers: await headers(),
             ...options,
-            payload,
+            payload: options.payload,
         })
         await applyCookies(signIn.headers)
-        if (signIn.success && options.redirectTo) {
+        if (signIn.success && options?.redirectTo) {
             redirect(signIn.redirectURL)
         }
         return signIn as NextSignInCredentials<O>
@@ -99,12 +95,11 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
 }
 
 export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async <Options extends SignOutAPIOptions>(options?: Options): Promise<NextSignOutReturn<Options>> => {
+    return async <Options extends SignOutAPIOptions>(options?: Partial<Options>): Promise<NextSignOutReturn<Options>> => {
         const out = await api.signOut({
             headers: await headers(),
             ...options,
         })
-        console.log("Sign out response:", out)
         await applyCookies(out.headers)
         if (out.success && out.redirectURL) {
             redirect(out.redirectURL)
