@@ -39,11 +39,12 @@ const closeMenu = () => {
                     href="https://discord.com/invite/anXExMR5"
                     class="text-sm text-muted-foreground hover:text-white transition-colors"
                     target="_blank"
+                    rel="noopener noreferrer"
                 >
                     Discord
                 </a>
             </ul>
-            <a v-if="!isAuthenticated" class="text-xl font-semibold hidden md:flex" href="https://nuxt.com/">Nuxt</a>
+            <a v-if="!isAuthenticated" class="text-xl font-semibold hidden md:flex" href="https://nuxt.com/" target="_blank" rel="noopener noreferrer">Nuxt</a>
             <Button
                 v-if="isAuthenticated"
                 class="data-[auth='true']:hidden md:data-[auth='true']:flex"
