@@ -49,3 +49,57 @@ export const signInFn = createServerFn({ method: "POST" })
             href: response?.signInURL,
         })
     })
+
+export const signInCredentialsFn = createServerFn({ method: "POST" })
+    .inputValidator((data: { username: string; password: string }) => {
+        if (!data || typeof data.username !== "string" || typeof data.password !== "string") {
+            throw new Error("credentials payload is invalid")
+        }
+        return data
+    })
+    .handler(async ({ data }) => {
+        const response = await api
+            .signInCredentials({
+                payload: {
+                    username: data.username,
+                    password: data.password,
+                },
+                request: getRequest(),
+                headers: getRequestHeaders(),
+                redirectTo: "/server",
+            })
+            .catch((error) => {
+                console.error("[error:server] signInCredentials", error)
+                return null
+            })
+
+        if (response?.redirectURL) {
+            throw redirect({
+                href: response.redirectURL,
+                headers: response.headers,
+            })
+        }
+
+        return null
+    })
+
+export const updateSessionFn = createServerFn({ method: "POST" })
+    .inputValidator((data: { username?: string; email?: string }) => data)
+    .handler(async ({ data }) => {
+        const response = await api
+            .updateSession({
+                session: {
+                    user: {
+                        name: data.username,
+                        email: data.email,
+                    },
+                },
+                headers: getRequestHeaders(),
+            })
+            .catch((error) => {
+                console.error("[error:server] updateSession", error)
+                return null
+            })
+
+        return { success: Boolean(response?.success) }
+    })

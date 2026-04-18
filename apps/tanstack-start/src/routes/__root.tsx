@@ -4,7 +4,6 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
 import { AuthProvider } from "@/contexts/auth"
 import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
 import appCss from "../styles.css?url"
 
 export const Route = createRootRoute({
@@ -38,11 +37,10 @@ function RootDocument({ children }: PropsWithChildren) {
             <head>
                 <HeadContent />
             </head>
-            <body>
+            <body className="bg-[url(/pattern-dot.svg)]">
                 <AuthProvider>
                     <Header />
                     {children}
-                    <Footer />
                 </AuthProvider>
                 <TanStackDevtools
                     config={{
