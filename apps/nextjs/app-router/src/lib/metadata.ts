@@ -2,7 +2,7 @@ import { Metadata } from "next"
 
 export const metadataInfo: Metadata = {
     title: {
-        default: "Aura Auth | Next.js Integration Example",
+        default: "Aura Auth | Next.js Demo",
         template: "%s | Aura Auth",
     },
     description:

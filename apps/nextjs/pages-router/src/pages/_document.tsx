@@ -1,7 +1,6 @@
 import { Html, Head, Main, NextScript } from "next/document"
 
 export default function Document() {
-    const title = "Aura Auth | Next.js Pages Router Integration"
     const description =
         "Comprehensive authentication for TypeScript applications. Built for speed, security, and developer experience. Powered by Aura Auth Core."
     const url = "https://aura-stack-auth.vercel.app/"
@@ -9,7 +8,6 @@ export default function Document() {
     return (
         <Html className="dark" lang="en">
             <Head>
-                <title>{title}</title>
                 <meta name="description" content={description} />
                 <meta
                     name="keywords"

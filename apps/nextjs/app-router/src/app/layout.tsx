@@ -1,6 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google"
 import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
 import { metadataInfo } from "@/lib/metadata"
 import { AuthProvider } from "@/contexts/auth"
 import "@/app/globals.css"
@@ -20,11 +19,11 @@ export const metadata = metadataInfo
 export default function RootLayout({ children }: LayoutProps<"/">) {
     return (
         <html className="dark" lang="en">
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}>
+            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <AuthProvider>
                     <Header />
                     {children}
-                    <Footer />
+                    {/* <Footer /> */}
                 </AuthProvider>
             </body>
         </html>
