@@ -1,142 +1,77 @@
-import { api } from "~/lib/auth"
-import { Form } from "react-router"
+import { Footer } from "~/components/footer"
+import { ArrowRight } from "lucide-react"
 import { Button } from "~/components/ui/button"
-import { AuthClient } from "~/components/auth-client"
-import { Fingerprint, LayoutDashboard } from "lucide-react"
-import type { Route } from "./+types/index"
+import { Link } from "react-router"
 
-export const loader = async ({ request }: Route.LoaderArgs) => {
-    const session = await api.getSession({
-        headers: request.headers,
-    })
-    return { session: session }
-}
+const flow = [
+    {
+        title: "Overview",
+        body: "This demo compares two rendering strategies for the same auth flow in React Router while sharing the same Aura Auth.",
+        href: "https://aura-stack-auth.vercel.app/",
+        external: true,
+    },
+    {
+        title: "Server-Side Rendering",
+        body: "Session is resolved in React Router loaders and auth actions are executed on the server through route actions.",
+        href: "/server",
+        external: false,
+    },
+    {
+        title: "Client-Side Rendering",
+        body: "The same auth operations are driven through useAuth in client-side interactions to demonstrate pending states and browser-driven updates.",
+        href: "/client",
+        external: false,
+    },
+]
 
-export const action = async ({ request }: Route.ActionArgs) => {
-    const formData = await request.formData()
-    const action = formData.get("action")
-    if (action === "signOut") {
-        const out = await api.signOut({
-            request: request,
-            headers: request.headers,
-        })
-        return out
-    } else if (action === "signIn") {
-        const signIn = await api.signIn(formData.get("provider") as string, {
-            request,
-        })
-        return signIn
-    }
-    return null
-}
-
-const IndexPage = ({ loaderData }: Route.ComponentProps) => {
-    const { session } = loaderData
-    const isAuthenticated = Boolean(session && session?.user)
+const IndexPage = () => {
 
     return (
-        <main className="flex-1 bg-black">
-            <section className="border-b border-muted">
-                <div className="w-11/12 max-w-5xl mx-auto py-24 px-6 border-x border-muted space-y-8">
-                    <div className="space-y-4 max-w-3xl">
-                        <div className="px-3 py-1 inline-flex items-center gap-2 text-xs font-mono text-foreground rounded-full border border-muted">
-                            <span className="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                            Integration Example
-                        </div>
-                        <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-7xl">
-                            React Router Powered by
-                            <br />
-                            <span className="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text">
-                                Aura Auth Core
-                            </span>
-                        </h1>
-                        <p className="max-w-xl text-lg text-foreground leading-relaxed">
-                            This example demonstrates how to integrate Aura Auth Core into a React Router application. It
-                            showcases OAuth providers, server-side session management, and seamless client-server state
-                            synchronization.
-                        </p>
-                    </div>
-                </div>
-            </section>
-            <section className="overflow-hidden">
-                <div className="w-11/12 max-w-5xl mx-auto py-10 px-6 border-x border-b border-muted space-y-4">
-                    <div className="flex items-center gap-3 text-foreground">
-                        <Fingerprint className="h-4 w-4" />
-                        <span className="text-white text-xs font-mono uppercase tracking-widest">React Router Integration</span>
-                    </div>
-                    <p className="text-sm text-white/40 leading-relaxed">
-                        This integration example is not representative of a production application. It demonstrates core
-                        authentication flows and session management patterns for showcase purposes.
+        <main className="min-h-container relative flex flex-col overflow-hidden bg-black">
+            <section className="flex-1 w-11/12 max-w-6xl mx-auto p-6 flex items-center relative border-b border-x border-muted">
+                <div className="space-y-7 max-w-4xl">
+                    <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-7xl">
+                        <span className="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text">
+                            React Router Auth
+                        </span>
+                    </h1>
+                    <p className="max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+                        A focused integration showcase for comparing authentication behavior across server-side and client-side
+                        rendering. Explore each implementation and inspect how the same flow is expressed through loaders/actions
+                        and client hooks.
                     </p>
-                </div>
-                <div className="w-11/12 max-w-5xl mx-auto border-x border-muted grid grid-cols-1 md:grid-cols-2">
-                    <AuthClient />
-                    <div className="w-full p-6 pr-3 bg-black md:py-10">
-                        <div className="w-full p-6 relative space-y-6 border border-muted border-dashed">
-                            <span className="px-2 text-xs font-mono italic absolute -top-2 left-3 bg-blue-600">
-                                Server Component
-                            </span>
-                            {isAuthenticated ? (
-                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <div className="py-3 px-2 border border-muted rounded-md space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs font-mono italic">server session active</span>
-                                            <LayoutDashboard className="size-4 text-foreground" />
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="size-14 rounded-full bg-linear-to-b from-white to-white/40 p-px">
-                                                <div className="h-full w-full rounded-full aspect-square bg-black flex items-center justify-center text-xl font-bold">
-                                                    {session?.user?.name?.[0] || "?"}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <p className="text-lg font-medium text-white">{session?.user?.name}</p>
-                                                <p className="text-xs text-white/40 font-mono">{session?.user?.email}</p>
-                                            </div>
-                                        </div>
-                                        <div className="pt-3 border-t border-muted">
-                                            <div className="flex justify-between items-center text-[10px] font-mono">
-                                                <span className="text-white/20 uppercase">ID</span>
-                                                <span className="text-white/60 truncate max-w-37.5">{session?.user?.sub}</span>
-                                            </div>
-                                        </div>
-                                        <Form method="post">
-                                            <Button variant="outline" size="sm" name="action" value="signOut">
-                                                Sign Out
-                                            </Button>
-                                        </Form>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <div className="space-y-4 text-center">
-                                        <h2 className="text-2xl font-semibold text-white">Sign in to continue</h2>
-                                        <p className="text-sm text-white/40">
-                                            Choose a provider below to authenticate and start your session.
-                                        </p>
-                                        <div className="flex flex-col gap-y-2">
-                                            {["Github", "Gitlab", "Bitbucket"].map((provider) => (
-                                                <Form className="w-full" method="post" key={provider}>
-                                                    <input type="hidden" name="provider" value={provider.toLowerCase()} />
-                                                    <Button
-                                                        className="w-full rounded-none"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        name="action"
-                                                        value="signIn"
-                                                    >
-                                                        Sign In with {provider}
-                                                    </Button>
-                                                </Form>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                    <div className="flex flex-wrap gap-3 pt-2">
+                        <Button variant="secondary" asChild>
+                            <Link to="/server">
+                                Open SSR Reference
+                                <ArrowRight className="size-3" />
+                            </Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <Link to="/client">
+                                Open CSR Reference
+                                <ArrowRight className="size-3" />
+                            </Link>
+                        </Button>
                     </div>
                 </div>
             </section>
+            <section className="w-11/12 p-6 max-w-6xl mx-auto border-x border-muted">
+                <div className="grid gap-4 md:grid-cols-3">
+                    {flow.map((item) => (
+                        <article className="p-6 flex flex-col border border-muted" key={item.title}>
+                            <h2 className="text-3xl tracking-tight text-white">{item.title}</h2>
+                            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                            <Button className="w-min mt-6" variant="outline" asChild>
+                                <Link to={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener noreferrer" : undefined}>
+                                    Try Now
+                                </Link>
+                            </Button>
+                        </article>
+                    ))}
+                </div>
+            </section>
+            <Footer />
         </main>
     )
 }
