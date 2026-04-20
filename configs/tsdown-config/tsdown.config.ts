@@ -9,7 +9,6 @@ export const tsdownConfig = {
     dts: true,
     clean: true,
     minify: true,
-    sourcemap: true,
     treeshake: true,
     fixedExtension: false,
     platform: "neutral",
