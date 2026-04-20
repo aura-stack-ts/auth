@@ -30,6 +30,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Standardized API and client option/return contracts across `signIn`, `signInCredentials`, `signOut`, and `updateSession` by introducing dedicated `api` types, unifying redirect behavior, and adding consistent error metadata and `headers`/`toResponse()` response helpers in programmatic API functions. [#146](https://github.com/aura-stack-ts/auth/pull/146)
+
 - The built-in JOSE functions now provide type safety and type inference based on the `User` type. Additionally, `encryptJWE` and `decryptJWE` now accept and return `JWTPayload`. [#123](https://github.com/aura-stack-ts/auth/pull/123)
 
 ---

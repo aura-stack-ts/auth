@@ -21,7 +21,7 @@ export const Header = () => {
 
     return (
         <header className="fixed top-0 w-full z-50 border-b border-muted bg-black/80 backdrop-blur-md">
-            <nav className="w-11/12 max-w-5xl mx-auto py-4">
+            <nav className="w-11/12 max-w-6xl mx-auto py-4">
                 <div className="flex items-center justify-between">
                     <Link href="/" className="text-xl font-semibold text-white">
                         Aura Auth

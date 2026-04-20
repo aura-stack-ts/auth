@@ -13,6 +13,6 @@ export const tsdownConfig = {
     fixedExtension: false,
     platform: "neutral",
     deps: {
-        skipNodeModulesBundle: true,
+        onlyBundle: false,
     },
 } satisfies UserConfig

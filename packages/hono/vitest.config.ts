@@ -1,11 +1,9 @@
-import path from "node:path"
-import crypto from "node:crypto"
-import { fileURLToPath } from "node:url"
+import path from "path"
+import crypto from "crypto"
 import { defineConfig } from "vitest/config"
 
 const SECRET_KEY = crypto.randomBytes(32).toString("base64")
 const SALT_KEY = crypto.randomBytes(32).toString("base64")
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
     test: {

@@ -1,48 +1,80 @@
-import { Fingerprint } from "lucide-react"
-import { AuthClient } from "@/components/auth-client"
-import { AuthServer } from "@/components/auth-server"
+import Link from "next/link"
+import { ArrowRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Footer } from "@/components/footer"
+
+const flow = [
+    {
+        title: "Overview",
+        body: "This demo compares two rendering strategies for the same auth flow in Next.js App Router while sharing the same Aura Auth.",
+        href: "https://aura-stack-auth.vercel.app/",
+        external: true,
+    },
+    {
+        title: "Server-Side Rendering",
+        body: "Session and auth actions are executed in Server Components and Server Actions to leverage server-side capabilities and streaming.",
+        href: "/server",
+        external: false,
+    },
+    {
+        title: "Client-Side Rendering",
+        body: "The same auth operations are driven through useAuth in Client Components to show pending states and browser-driven interactions.",
+        href: "/client",
+        external: false,
+    },
+]
 
 export default async function Home() {
     return (
-        <main className="flex-1 bg-black">
-            <section className="border-b border-muted">
-                <div className="w-11/12 max-w-5xl mx-auto py-24 px-6 border-x border-muted space-y-8">
-                    <div className="space-y-4 max-w-3xl">
-                        <div className="px-3 py-1 inline-flex items-center gap-2 text-xs font-mono text-foreground rounded-full border border-muted">
-                            <span className="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                            Integration Example
-                        </div>
-                        <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-7xl">
-                            Next.js Auth Powered by
-                            <br />
-                            <span className="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text">
-                                Aura Auth Core
-                            </span>
-                        </h1>
-                        <p className="max-w-xl text-lg text-foreground leading-relaxed">
-                            This example demonstrates how to integrate Aura Auth Core into a Next.js application. It showcases
-                            OAuth providers, server-side session management, and seamless client-server state synchronization.
-                        </p>
-                    </div>
-                </div>
-            </section>
-            <section className="overflow-hidden">
-                <div className="w-11/12 max-w-5xl mx-auto py-10 px-6 border-x border-b border-muted space-y-4">
-                    <div className="flex items-center gap-3 text-foreground">
-                        <Fingerprint className="h-4 w-4" />
-                        <span className="text-white text-xs font-mono uppercase tracking-widest">Next.js Auth Integration</span>
-                    </div>
-                    <p className="text-sm text-white/40 leading-relaxed">
-                        This integration example is not representative of a production application. It demonstrates core
-                        authentication flows and session management patterns for showcase purposes for client and server
-                        components.
+        <main className="min-h-container relative flex flex-col overflow-hidden bg-black">
+            <section className="flex-1 w-11/12 max-w-6xl mx-auto p-6 flex items-center relative border-b border-x border-muted">
+                <div className="space-y-7 max-w-4xl">
+                    <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-7xl">
+                        <span className="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text">
+                            Next.js Auth
+                        </span>
+                    </h1>
+                    <p className="max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+                        A focused integration showcase for comparing authentication behavior across server-side and client-side
+                        rendering. Explore each implementation and inspect how the same flow is expressed through Server
+                        Components and Client Components.
                     </p>
-                </div>
-                <div className="w-11/12 max-w-5xl mx-auto border-x border-muted grid grid-cols-1 md:grid-cols-2">
-                    <AuthClient />
-                    <AuthServer />
+                    <div className="flex flex-wrap gap-3 pt-2">
+                        <Button variant="secondary" asChild>
+                            <Link href="/server">
+                                Open SSR Reference
+                                <ArrowRight className="size-3" />
+                            </Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <Link href="/client">
+                                Open CSR Reference
+                                <ArrowRight className="size-3" />
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
             </section>
+            <section className="w-11/12 p-6 max-w-6xl mx-auto border-x border-muted">
+                <div className="grid gap-4 md:grid-cols-3">
+                    {flow.map((item) => (
+                        <article className="p-6 flex flex-col border border-muted" key={item.title}>
+                            <h2 className="text-3xl tracking-tight text-white">{item.title}</h2>
+                            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                            <Button className="w-min mt-6" variant="outline" asChild>
+                                <Link
+                                    href={item.href}
+                                    target={item.external ? "_blank" : undefined}
+                                    rel={item.external ? "noopener noreferrer" : undefined}
+                                >
+                                    Try Now
+                                </Link>
+                            </Button>
+                        </article>
+                    ))}
+                </div>
+            </section>
+            <Footer />
         </main>
     )
 }

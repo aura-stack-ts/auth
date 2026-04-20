@@ -1,9 +1,9 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { AuthValidationError } from "@/shared/errors.ts"
+import { AuthValidationError, isAuthErrorWithCode } from "@/shared/errors.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
-import type { FunctionAPIContext, SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/session.ts"
+import type { FunctionAPIContext, SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
 
 export const signInCredentials = async ({
     ctx,
@@ -47,12 +47,21 @@ export const signInCredentials = async ({
             toResponse: () => Response.json({ success: true, redirectURL }, { headers }),
         }
     } catch (error) {
+        let code = "CREDENTIALS_SIGN_IN_ERROR"
+        let message = "An error occurred during credentials sign-in."
+        if (isAuthErrorWithCode(error)) {
+            code = error.code
+            message = error.message
+        }
         const headers = new Headers(secureApiHeaders)
         const invalidCredentials: SignInCredentialsAPIReturn = {
             success: false,
             headers,
             redirectURL: null,
-            toResponse: () => Response.json({ success: false, redirectURL: null }, { headers, status: 401 }),
+            error: { code, message },
+            toResponse: () => {
+                return Response.json({ success: false, redirectURL: null, error: { code, message } }, { headers, status: 401 })
+            },
         }
         if (error instanceof AuthValidationError) {
             logger?.log("INVALID_CREDENTIALS", {

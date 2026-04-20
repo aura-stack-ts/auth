@@ -1,16 +1,15 @@
 import { use, useCallback, useRef } from "react"
+import { AuthContext } from "@/context.tsx"
 import type {
-    CredentialsPayload,
-    DeepPartial,
     LiteralUnion,
     BuiltInOAuthProvider,
-    Session,
     SignInOptions,
     SignOutOptions,
     User,
+    SignInCredentialsOptions,
+    UpdateSessionOptions,
 } from "@aura-stack/auth/types"
-import { AuthContext } from "@/context.tsx"
-import type { AuthReactContextValue, UpdateSessionCallOptions } from "@/@types/types.ts"
+import type { AuthReactContextValue } from "@/@types/types.ts"
 
 export const useAuth = <DefaultUser extends User = User>(): AuthReactContextValue<DefaultUser> => {
     const ctx = use(AuthContext)
@@ -48,8 +47,7 @@ export const useSignInCredentials = <DefaultUser extends User = User>(defaultOpt
     const defaultsRef = useRef(defaultOptions)
     defaultsRef.current = defaultOptions
     return useCallback(
-        (credentials: CredentialsPayload, signInOptions?: SignInOptions) =>
-            signInCredentials(credentials, { ...defaultsRef.current, ...signInOptions }),
+        (options: SignInCredentialsOptions) => signInCredentials({ ...defaultsRef.current, ...options }),
         [signInCredentials]
     )
 }
@@ -65,16 +63,15 @@ export const useSignOut = <DefaultUser extends User = User>(defaultOptions?: Sig
 }
 
 /**
- * Patch session user/expiry. Default {@link UpdateSessionCallOptions} merge per call
- * (e.g. `skipRefresh` to avoid a follow-up `getSession`).
+ * Patch session user/expiry. Default {`@link` UpdateSessionOptions} are merged with per-invocation options
+ * (e.g. `redirect: false` to avoid a follow-up redirect and trigger a context refresh instead).
  */
-export const useUpdateSession = <DefaultUser extends User = User>(defaultOptions?: UpdateSessionCallOptions) => {
+export const useUpdateSession = <DefaultUser extends User = User>(defaultOptions?: UpdateSessionOptions<DefaultUser>) => {
     const { updateSession } = useAuth<DefaultUser>()
     const defaultsRef = useRef(defaultOptions)
     defaultsRef.current = defaultOptions
     return useCallback(
-        (partial: DeepPartial<Session<DefaultUser>>, callOptions?: UpdateSessionCallOptions) =>
-            updateSession(partial, { ...defaultsRef.current, ...callOptions }),
+        (options: UpdateSessionOptions<DefaultUser>) => updateSession({ ...defaultsRef.current, ...options }),
         [updateSession]
     )
 }

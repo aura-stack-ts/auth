@@ -26,6 +26,80 @@ It bridges the gap between the core authentication engine and React-Router's nav
 - **Type-safe by design** — Full TypeScript support for identity schemas and session data.
 - **Seamless Provider** — Easy-to-use AuthProvider to manage global authentication state.
 
+## Installation
+
+```bash
+pnpm add @aura-stack/react-router
+```
+
+> [!NOTE]
+> Ensure you have `react-router` (>= 7.x) installed.
+
+## Quick Start
+
+### 1. Configure Auth Instance
+
+Configure your auth instance in a shared file (e.g., `lib/auth.ts`).
+
+```tsx
+import { createAuth } from "@aura-stack/react-router"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+
+export const { api, core } = auth
+```
+
+### 2. Use API Functions
+
+```tsx
+import { api } from "@/lib/auth"
+
+export const loader = async ({ request }) => {
+  return await api.getSession({
+    headers: request.headers,
+  })
+}
+```
+
+### 3. Configure Auth Client Instance and Auth Provider
+
+Wrap your application with the `AuthProvider` and pass it a configured Aura Auth client.
+
+```tsx
+import { createAuthClient, AuthProvider } from "@aura-stack/react-router/client"
+import type { PropsWithChildren } from "react"
+
+const client = createAuthClient({
+  /* your config */
+})
+
+export const App = ({ children }: PropsWithChildren) => {
+  return <AuthProvider client={client}>{children}</AuthProvider>
+}
+```
+
+### 4. Use the Hooks
+
+Access the session or authentication methods from any component in the tree.
+
+```tsx
+import { useSession } from "@aura-stack/react-router/client"
+
+export const Profile = () => {
+  const { session, status } = useSession()
+  if (status === "loading") return <div>Loading...</div>
+
+  return (
+    <div>
+      <p>Welcome, {session.user.name}!</p>
+    </div>
+  )
+```
+
 ## Documentation
 
 Visit the [**official documentation website**](https://aura-stack-auth.vercel.app).

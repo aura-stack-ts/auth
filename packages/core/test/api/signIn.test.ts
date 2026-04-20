@@ -13,9 +13,15 @@ afterEach(() => {
 
 describe("signIn API", () => {
     test("throws error when provider is missing", async () => {
-        await expect(api.signIn("unsupported", { headers: new Headers() })).rejects.toMatchObject({
-            type: "AUTH_INTERNAL_ERROR",
-            message: 'The OAuth provider "unsupported" is not configured.',
+        expect(await api.signIn("unsupported", { headers: new Headers() })).toMatchObject({
+            success: false,
+            signInURL: null,
+            redirect: false,
+            error: {
+                code: "INVALID_OAUTH_CONFIGURATION",
+                message: 'The OAuth provider "unsupported" is not configured.',
+            },
+            toResponse: expect.any(Function),
         })
     })
 
@@ -69,9 +75,16 @@ describe("signIn API", () => {
     })
 
     test("signIn without URL configuration", async () => {
-        await expect(api.signIn("oauth-provider")).rejects.toMatchObject({
-            type: "AUTH_INTERNAL_ERROR",
-            message: "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
+        expect(await api.signIn("oauth-provider")).toMatchObject({
+            success: false,
+            signInURL: null,
+            redirect: false,
+            error: {
+                code: "INVALID_OAUTH_CONFIGURATION",
+                message:
+                    "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
+            },
+            toResponse: expect.any(Function),
         })
     })
 

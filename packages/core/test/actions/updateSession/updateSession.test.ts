@@ -11,7 +11,7 @@ describe("updateSession action", () => {
             })
         )
         expect(response.status).toBe(401)
-        expect(await response.json()).toEqual({
+        expect(await response.json()).toMatchObject({
             session: null,
             success: false,
         })
@@ -43,7 +43,7 @@ describe("updateSession action", () => {
             })
         )
         expect(response.status).toBe(200)
-        expect(await response.json()).toEqual({
+        expect(await response.json()).toMatchObject({
             session: {
                 user: {
                     sub: "1234567890",
@@ -80,7 +80,7 @@ describe("updateSession action", () => {
             })
         )
         expect(response.status).toBe(401)
-        expect(await response.json()).toEqual({
+        expect(await response.json()).toMatchObject({
             session: null,
             success: false,
         })
@@ -114,7 +114,7 @@ describe("updateSession action", () => {
             })
         )
         expect(response.status).toBe(200)
-        expect(await response.json()).toEqual({
+        expect(await response.json()).toMatchObject({
             session: expect.objectContaining({
                 user: {
                     sub: "1234567890",

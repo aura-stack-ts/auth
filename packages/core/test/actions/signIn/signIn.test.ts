@@ -162,9 +162,14 @@ describe("signIn action", () => {
                 },
             })
         )
-        expect(await request.json()).toEqual({
-            type: "AUTH_INTERNAL_ERROR",
-            message: "The constructed origin URL is not trusted.",
+        expect(await request.json()).toMatchObject({
+            success: false,
+            signInURL: null,
+            redirect: false,
+            error: {
+                code: "UNTRUSTED_ORIGIN",
+                message: "The constructed origin URL is not trusted.",
+            },
         })
     })
 
@@ -237,9 +242,14 @@ describe("signIn action", () => {
                 },
             })
         )
-        expect(await request.json()).toEqual({
-            type: "AUTH_INTERNAL_ERROR",
-            message: "The constructed origin URL is not trusted.",
+        expect(await request.json()).toMatchObject({
+            success: false,
+            signInURL: null,
+            redirect: false,
+            error: {
+                code: "UNTRUSTED_ORIGIN",
+                message: "The constructed origin URL is not trusted.",
+            },
         })
     })
 
@@ -260,9 +270,14 @@ describe("signIn action", () => {
                 },
             })
         )
-        expect(await request.json()).toEqual({
-            type: "AUTH_INTERNAL_ERROR",
-            message: "The constructed origin URL is not trusted.",
+        expect(await request.json()).toMatchObject({
+            success: false,
+            signInURL: null,
+            redirect: false,
+            error: {
+                code: "UNTRUSTED_ORIGIN",
+                message: "The constructed origin URL is not trusted.",
+            },
         })
     })
 
@@ -349,9 +364,14 @@ describe("signIn action", () => {
                 },
             })
         )
-        expect(await request.json()).toEqual({
-            type: "AUTH_INTERNAL_ERROR",
-            message: "The constructed origin URL is not trusted.",
+        expect(await request.json()).toMatchObject({
+            success: false,
+            signInURL: null,
+            redirect: false,
+            error: {
+                code: "UNTRUSTED_ORIGIN",
+                message: "The constructed origin URL is not trusted.",
+            },
         })
     })
 

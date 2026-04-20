@@ -24,8 +24,7 @@
       ]
     },
     "test": {
-      "dependsOn": ["^test"],
-      "cache": false
+      "dependsOn": ["^test"]
     },
     "format": {
       "dependsOn": ["^format"],

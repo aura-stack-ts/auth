@@ -9,7 +9,6 @@ import type {
     SignInOptions,
     SignOutOptions,
     User,
-    CredentialsPayload,
     UpdateSessionOptions,
     SignInReturn,
     SignOutReturn,
@@ -19,6 +18,7 @@ import type {
     SignOutAPIReturn,
     SignInCredentialsAPIReturn,
     UpdateSessionAPIReturn,
+    SignInCredentialsOptions,
 } from "@/@types/index.ts"
 
 export type { AuthClientOptions }
@@ -62,10 +62,10 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
-    const signIn = async <Redirect extends boolean = true>(
+    const signIn = async <Options extends SignInOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: SignInOptions<Redirect>
-    ): Promise<SignInReturn<Redirect>> => {
+        options?: Options
+    ): Promise<SignInReturn<Options>> => {
         try {
             const response = await client.get("/signIn/:oauth", {
                 params: {
@@ -80,47 +80,45 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.signInURL) {
                 window.location.assign(json.signInURL)
             }
-            return json as unknown as SignInReturn<Redirect>
+            return json as unknown as SignInReturn<Options>
         } catch (error) {
             console.error("Error during sign-in:", error)
-            return { success: false, redirect: false, signInURL: "/" } as unknown as SignInReturn<Redirect>
+            return { success: false, redirect: false, signInURL: "/" } as unknown as SignInReturn<Options>
         }
     }
 
-    const signOut = async <Redirect extends boolean = true>(
-        options?: SignOutOptions<Redirect>
-    ): Promise<SignOutReturn<Redirect>> => {
+    const signInCredentials = async <Options extends SignInCredentialsOptions>(
+        options: Options
+    ): Promise<SignInCredentialsReturn<Options>> => {
         try {
-            const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
-            }
-
-            const response = await client.post("/signOut", {
+            const response = await client.post("/signIn/credentials", {
+                body: options.payload,
                 searchParams: {
-                    redirectTo: options?.redirectTo ?? "/",
-                    token_type_hint: "session_token",
-                },
-                headers: {
-                    "X-CSRF-Token": csrfToken,
+                    redirectTo: options?.redirectTo,
                 },
             })
-            const json: SignOutAPIReturn = await response.json()
+            const json: SignInCredentialsAPIReturn = await response.json()
             if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
-            return json as unknown as SignOutReturn<Redirect>
+            return json as unknown as SignInCredentialsReturn<Options>
         } catch (error) {
-            console.error("Error during sign-out:", error)
-            return { success: false, redirect: false, redirectURL: "/" } as unknown as SignOutReturn<Redirect>
+            console.error("Error during credentials sign-in:", error)
+            return { success: false, redirectURL: null } as unknown as SignInCredentialsReturn<Options>
         }
     }
 
-    const updateSession = async (session: UpdateSessionOptions<DefaultUser>): Promise<UpdateSessionReturn<DefaultUser>> => {
+    const updateSession = async <Options extends UpdateSessionOptions<DefaultUser>>(
+        options: Options
+    ): Promise<UpdateSessionReturn<Options, DefaultUser>> => {
         try {
             const csrfToken = await getCSRFToken()
             if (!csrfToken) {
                 throw new AuthClientError("Failed to fetch CSRF token for session update.")
+            }
+            const { session } = options ?? {}
+            if (!session) {
+                return { success: false, session: null } as UpdateSessionReturn<Options, DefaultUser>
             }
             const user = session.user ?? {}
             const response = await client.patch("/session", {
@@ -132,36 +130,41 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            if (!response.ok) {
-                return { session: null, success: false }
-            }
             const json: UpdateSessionAPIReturn<DefaultUser> = await response.json()
-            return json
+            if ((options.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as UpdateSessionReturn<Options, DefaultUser>
         } catch (error) {
             console.error("Error updating session:", error)
-            return { success: false, session: null }
+            return { success: false, session: null } as UpdateSessionReturn<Options, DefaultUser>
         }
     }
 
-    const signInCredentials = async (
-        credentials: CredentialsPayload,
-        options?: SignInOptions
-    ): Promise<SignInCredentialsReturn> => {
+    const signOut = async <Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>> => {
         try {
-            const response = await client.post("/signIn/credentials", {
-                body: credentials,
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
+            }
+
+            const response = await client.post("/signOut", {
                 searchParams: {
                     redirectTo: options?.redirectTo,
+                    token_type_hint: "session_token",
+                },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
                 },
             })
-            const json: SignInCredentialsAPIReturn = await response.json()
+            const json: SignOutAPIReturn = await response.json()
             if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
-            return json
+            return json as unknown as SignOutReturn<Options>
         } catch (error) {
-            console.error("Error during credentials sign-in:", error)
-            return { success: false, redirectURL: null } as unknown as SignInCredentialsReturn
+            console.error("Error during sign-out:", error)
+            return { success: false, redirect: false, redirectURL: "/" } as unknown as SignOutReturn<Options>
         }
     }
 
@@ -169,7 +172,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         getSession,
         signIn,
         signInCredentials,
-        signOut,
         updateSession,
+        signOut,
     }
 }

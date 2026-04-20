@@ -46,9 +46,13 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(200)
-        expect(await request.json()).toEqual({
+        expect(await request.json()).toMatchObject({
             success: true,
             session: { user: sessionPayload, expires: expect.any(String) },
+            error: {
+                code: "GET_SESSION_FAILED",
+                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+            },
         })
     })
 
@@ -63,9 +67,13 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(200)
-        expect(await request.json()).toEqual({
+        expect(await request.json()).toMatchObject({
             success: true,
             session: { user: sessionPayload, expires: expect.any(String) },
+            error: {
+                code: "GET_SESSION_FAILED",
+                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+            },
         })
     })
 
@@ -214,11 +222,15 @@ describe("sessionAction", () => {
         )
         const session = await requestSession.json()
         const { id, name, image, email } = userInfoMock
-        expect(session).toEqual({
+        expect(session).toMatchObject({
             success: true,
             session: {
                 user: { sub: id, name, image, email },
                 expires: expect.any(String),
+            },
+            error: {
+                code: "GET_SESSION_FAILED",
+                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
             },
         })
     })

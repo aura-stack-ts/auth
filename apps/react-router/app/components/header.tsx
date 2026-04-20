@@ -17,7 +17,7 @@ export const Header = () => {
 
     return (
         <header className="fixed top-0 w-full z-50 border-b border-muted bg-black/80 backdrop-blur-md">
-            <nav className="w-11/12 max-w-5xl mx-auto py-4">
+            <nav className="w-11/12 max-w-6xl mx-auto py-4">
                 <div className="flex items-center justify-between">
                     <Link to="/" className="text-xl font-semibold text-white">
                         Aura Auth
@@ -100,11 +100,9 @@ export const Header = () => {
                         </a>
                         <div className="flex flex-col gap-2 pt-4 border-t border-gray-800/50">
                             {!isPending && !isAuthenticated && (
-                                <>
-                                    <Button type="button" asChild onClick={() => signIn("github")}>
-                                        <Link to="/">Sign in with GitHub</Link>
-                                    </Button>
-                                </>
+                                <Button type="button" onClick={() => signIn("github")}>
+                                    Sign in with GitHub
+                                </Button>
                             )}
                             {isAuthenticated && (
                                 <div className="flex flex-col items-center gap-y-3 md:hidden">

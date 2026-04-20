@@ -31,21 +31,16 @@ By utilizing a **"Concentrated API"** pattern, it optimizes core authentication 
 pnpm add @aura-stack/next
 ```
 
-## Structure
-
-The package follows a clear environment-based separation:
-
-- **`@aura-stack/next`**: All server-side logic (Factory, Server API, Middleware).
-- **`@aura-stack/next/client`**: All client-side logic (Provider, Hooks, UI Components).
-- **`@aura-stack/next/types`**: Universal Type definitions.
+> [!NOTE]
+> Ensure you have `react` (>= 19.x) installed.
 
 ## Quick Start
 
-### 1. Initialize Auth
+### 1. Create Auth Instance
 
 Configure your auth instance in a shared file (e.g., `lib/auth.ts`).
 
-```tsx
+```ts
 import { createAuth } from "@aura-stack/next"
 
 export const auth = createAuth({
@@ -81,7 +76,24 @@ export default async function Page() {
 }
 ```
 
-### 4. Client-side Implementation
+### 4. Configure Auth Client Instance and Auth Provider
+
+Wrap your application with the `AuthProvider` and pass it a configured Aura Auth client.
+
+```tsx
+import { createAuthClient, AuthProvider } from "@aura-stack/next/client"
+import type { PropsWithChildren } from "react"
+
+const client = createAuthClient({
+  /* your config */
+})
+
+export const App = ({ children }: PropsWithChildren) => {
+  return <AuthProvider client={client}>{children}</AuthProvider>
+}
+```
+
+### 5. Client-side Implementation
 
 Use the consolidated client entry for hooks and context.
 
@@ -91,11 +103,13 @@ import { useSession } from "@aura-stack/next/client"
 
 export function Profile() {
   const { session, status } = useSession()
-
   if (status === "loading") return <p>Loading...</p>
-  if (!session) return <SignInButton />
 
-  return <div>Signed in as {session.user.email}</div>
+  return (
+    <div>
+      <p>Welcome, {session.user.name}!</p>
+    </div>
+  )
 }
 ```
 

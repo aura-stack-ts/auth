@@ -33,7 +33,7 @@ export const Footer = () => {
     ]
     return (
         <footer className="relative border-t bg-black">
-            <div className="w-11/12 mx-auto max-w-5xl border-x border-muted">
+            <div className="w-11/12 mx-auto max-w-6xl border-x border-muted">
                 <div className="py-10 px-6 max-w-5xl grid grid-cols-6 gap-6">
                     <div className="col-span-6 flex flex-col gap-5 md:col-span-4">
                         <a href="https://github.com/aura-stack-ts/auth" className="w-max opacity-25">
@@ -81,7 +81,7 @@ export const Footer = () => {
                     </div>
                 </div>
                 <div className="w-full h-px absolute inset-x-0 bg-border" />
-                <div className="max-w-5xl py-4 flex flex-col justify-between gap-2">
+                <div className="max-w-6xl py-4 flex flex-col justify-between gap-2">
                     <p className="text-sm text-muted-foreground text-center font-thin">
                         © <a href="https://github.com/aura-stack-ts">Aura Stack Labs</a>. All rights reserved {year}
                     </p>

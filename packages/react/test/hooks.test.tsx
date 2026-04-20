@@ -71,12 +71,15 @@ describe("@aura-stack/react hooks", () => {
             wrapper: ({ children }) => wrapper({ children, client, initialSession: null }),
         })
 
-        const credentials = { username: "test@example.com", password: "password" }
+        const payload = { username: "test@example.com", password: "password" }
         await act(async () => {
-            await result.current(credentials, { redirect: false })
+            await result.current({
+                payload,
+                redirect: false,
+            })
         })
 
-        expect(client.signInCredentials).toHaveBeenCalledWith(credentials, { redirect: false })
+        expect(client.signInCredentials).toHaveBeenCalledWith({ payload, redirect: false })
         await waitFor(() => expect(client.getSession).toHaveBeenCalledTimes(1))
     })
 
@@ -102,28 +105,13 @@ describe("@aura-stack/react hooks", () => {
             wrapper: ({ children }) => wrapper({ children, client, initialSession: mockSession }),
         })
 
-        const partial = { user: { name: "New Name" } }
+        const partial = { session: { user: { name: "New Name" } }, redirect: false }
         await act(async () => {
             await result.current(partial)
         })
 
         expect(client.updateSession).toHaveBeenCalledWith(partial)
         await waitFor(() => expect(client.getSession).toHaveBeenCalledTimes(1))
-    })
-
-    test("useUpdateSession with skipRefresh", async () => {
-        const client = createMockClient()
-        const { result } = renderHook(() => useUpdateSession(), {
-            wrapper: ({ children }) => wrapper({ children, client, initialSession: mockSession }),
-        })
-
-        const partial = { user: { name: "New Name" } }
-        await act(async () => {
-            await result.current(partial, { skipRefresh: true })
-        })
-
-        expect(client.updateSession).toHaveBeenCalledWith(partial)
-        expect(client.getSession).not.toHaveBeenCalled()
     })
 
     test("useAuth returns full context value", async () => {

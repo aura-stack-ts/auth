@@ -8,7 +8,7 @@ export const getSession = async (request: Request, options?: GetSessionAPIOption
             headers: request.headers,
             ...options,
         })
-        if (!session.authenticated) return null
+        if (!session.success) return null
         return session.session
     } catch (error) {
         console.error("[error:server] getSession", error)
@@ -22,11 +22,7 @@ export const signOut = async (request: Request, options?: SignOutAPIOptions) => 
             headers: request.headers,
             ...options,
         })
-        if (response.status === 202) {
-            return response
-        }
-        const json = await response.json()
-        return json
+        return response
     } catch (error) {
         console.error("[error:server] signOut", error)
         return null

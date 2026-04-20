@@ -33,10 +33,10 @@ const socialLinks = [
 
 <template>
     <footer class="relative border-t bg-black">
-        <div class="w-11/12 mx-auto max-w-5xl border-x">
+        <div class="w-11/12 mx-auto max-w-6xl border-x border-muted">
             <div class="max-w-5xl py-10 px-6 grid grid-cols-6 gap-6">
                 <div class="col-span-6 flex flex-col gap-5 md:col-span-4">
-                    <a href="" class="w-max opacity-25">Aura Auth</a>
+                    <a href="https://aura-stack-auth.vercel.app/" class="w-max opacity-25">Aura Auth</a>
                     <p class="max-w-sm text-muted-foreground font-mono text-sm text-balance">
                         Built for speed, security, and developer experience. The complete authentication library for TypeScript
                         applications.
@@ -47,6 +47,7 @@ const socialLinks = [
                             :key="item.href"
                             :href="item.href"
                             target="_blank"
+                            rel="noopener noreferrer"
                             class="p-1.5 border rounded-md hover:bg-accent"
                         >
                             <component :is="item.icon" class="h-4 w-4" />
@@ -57,7 +58,12 @@ const socialLinks = [
                     <span class="mb-1 text-sm">Resources</span>
                     <ul class="flex flex-col gap-1">
                         <li v-for="item in resources" :key="item.href">
-                            <a :href="item.href" class="w-max py-1 text-xs text-muted-foreground duration-200 hover:underline">
+                            <a
+                                :href="item.href"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="w-max py-1 text-xs text-muted-foreground duration-200 hover:underline"
+                            >
                                 {{ item.title }}
                             </a>
                         </li>
@@ -67,7 +73,12 @@ const socialLinks = [
                     <span class="mb-1 text-sm">Community</span>
                     <ul class="flex flex-col gap-1">
                         <li v-for="item in community" :key="item.href">
-                            <a :href="item.href" class="w-max py-1 text-xs text-muted-foreground duration-200 hover:underline">
+                            <a
+                                :href="item.href"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="w-max py-1 text-xs text-muted-foreground duration-200 hover:underline"
+                            >
                                 {{ item.title }}
                             </a>
                         </li>
@@ -75,9 +86,10 @@ const socialLinks = [
                 </div>
             </div>
             <div class="w-full h-px absolute inset-x-0 bg-border" />
-            <div class="max-w-5xl py-4 flex flex-col justify-between gap-2">
+            <div class="max-w-6xl py-4 flex flex-col justify-between gap-2">
                 <p class="text-sm text-muted-foreground text-center font-thin">
-                    © <a href="https://github.com/aura-stack-ts">Aura Stack Labs</a>. All rights reserved {year}
+                    © <a href="https://github.com/aura-stack-ts">Aura Stack Labs</a>. All rights reserved
+                    {{ new Date().getFullYear() }}
                 </p>
             </div>
         </div>

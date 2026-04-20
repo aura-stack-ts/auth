@@ -9,9 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root"
+import { Route as ServerRouteImport } from "./routes/server"
+import { Route as ClientRouteImport } from "./routes/client"
 import { Route as IndexRouteImport } from "./routes/index"
 import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth.$"
 
+const ServerRoute = ServerRouteImport.update({
+    id: "/server",
+    path: "/server",
+    getParentRoute: () => rootRouteImport,
+} as any)
+const ClientRoute = ClientRouteImport.update({
+    id: "/client",
+    path: "/client",
+    getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
     id: "/",
     path: "/",
@@ -25,32 +37,54 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
     "/": typeof IndexRoute
+    "/client": typeof ClientRoute
+    "/server": typeof ServerRoute
     "/api/auth/$": typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
     "/": typeof IndexRoute
+    "/client": typeof ClientRoute
+    "/server": typeof ServerRoute
     "/api/auth/$": typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
     __root__: typeof rootRouteImport
     "/": typeof IndexRoute
+    "/client": typeof ClientRoute
+    "/server": typeof ServerRoute
     "/api/auth/$": typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
     fileRoutesByFullPath: FileRoutesByFullPath
-    fullPaths: "/" | "/api/auth/$"
+    fullPaths: "/" | "/client" | "/server" | "/api/auth/$"
     fileRoutesByTo: FileRoutesByTo
-    to: "/" | "/api/auth/$"
-    id: "__root__" | "/" | "/api/auth/$"
+    to: "/" | "/client" | "/server" | "/api/auth/$"
+    id: "__root__" | "/" | "/client" | "/server" | "/api/auth/$"
     fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
     IndexRoute: typeof IndexRoute
+    ClientRoute: typeof ClientRoute
+    ServerRoute: typeof ServerRoute
     ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module "@tanstack/react-router" {
     interface FileRoutesByPath {
+        "/server": {
+            id: "/server"
+            path: "/server"
+            fullPath: "/server"
+            preLoaderRoute: typeof ServerRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        "/client": {
+            id: "/client"
+            path: "/client"
+            fullPath: "/client"
+            preLoaderRoute: typeof ClientRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         "/": {
             id: "/"
             path: "/"
@@ -70,6 +104,8 @@ declare module "@tanstack/react-router" {
 
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
+    ClientRoute: ClientRoute,
+    ServerRoute: ServerRoute,
     ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()

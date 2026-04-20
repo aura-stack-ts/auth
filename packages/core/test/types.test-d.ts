@@ -9,7 +9,7 @@ import type {
     UpdateSessionAPIOptions,
     UpdateSessionAPIReturn,
     UserShape,
-} from "@/@types/session.ts"
+} from "@/@types/index.ts"
 import type { AuthConfig, AuthInstance, User } from "@/index.ts"
 import type { OAuthProviderCredentials } from "@/@types/oauth.ts"
 import type { EditableShape, ShapeToObject } from "@/@types/utility.ts"

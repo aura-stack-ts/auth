@@ -1,5 +1,5 @@
-import crypto from "crypto"
 import path from "path"
+import crypto from "crypto"
 import { defineConfig } from "vitest/config"
 
 const SECRET_KEY = crypto.randomBytes(34).toString("base64url")

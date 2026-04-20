@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Removed and cleaned up types and functions exported from the index `/` entry point to reduce import noise, and introduced `/identity`, `/crypto`, and `/shared` as direct entry points for specific utilities. [`#141`](https://github.com/aura-stack-ts/auth/pull/141)
+- Updated React context and hooks (`useSignInCredentials`, `useUpdateSession`, and related context actions) to align with the standardized core client API contracts, including the new object-based credentials/session payload shapes and redirect-driven refresh behavior, while simplifying React-side auth type definitions. [#146](https://github.com/aura-stack-ts/auth/pull/146)
+
+- Removed and cleaned up types and functions exported from the index `/` entry point to reduce import noise, and introduced `/identity`, `/crypto`, and `/shared` as direct entry points for specific utilities. [#141](https://github.com/aura-stack-ts/auth/pull/141)
 
 - Introduced seamless React integration package that encapsulates the core authentication logic into a single React context, exposing powerful and easy-to-use hooks for session management and authentication flows. [#137](https://github.com/aura-stack-ts/auth/pull/137)

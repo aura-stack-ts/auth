@@ -136,4 +136,8 @@ code {
     body {
         @apply bg-background text-foreground;
     }
+
+    .min-h-container {
+        @apply min-h-[calc(100vh-3.8rem)] mt-[3.8rem];
+    }
 }

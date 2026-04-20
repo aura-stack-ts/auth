@@ -8,7 +8,7 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
         const session = await api.getSession({
             headers: getRequestHeaders(),
         })
-        if (!session.authenticated) return null
+        if (!session.success) return null
         return session.session as any
     } catch (error) {
         console.error("[error:server] getSession", error)
@@ -46,6 +46,71 @@ export const signInFn = createServerFn({ method: "POST" })
                 return null
             })
         throw redirect({
-            href: response?.signInURL,
+            href: response?.signInURL ?? "/",
         })
+    })
+
+export const signInCredentialsFn = createServerFn({ method: "POST" })
+    .inputValidator((data: { username: string; password: string }) => {
+        if (!data || typeof data.username !== "string" || typeof data.password !== "string") {
+            throw new Error("credentials payload is invalid")
+        }
+        return data
+    })
+    .handler(async ({ data }) => {
+        const response = await api
+            .signInCredentials({
+                payload: {
+                    username: data.username,
+                    password: data.password,
+                },
+                request: getRequest(),
+                headers: getRequestHeaders(),
+                redirectTo: "/server",
+            })
+            .catch((error) => {
+                console.error("[error:server] signInCredentials", error)
+                return null
+            })
+
+        if (response?.redirectURL) {
+            throw redirect({
+                href: response.redirectURL,
+                headers: response.headers,
+            })
+        }
+
+        return null
+    })
+
+export const updateSessionFn = createServerFn({ method: "POST" })
+    .inputValidator((data: { username?: string; email?: string }) => {
+        if (!data || typeof data !== "object") {
+            throw new Error("update session payload is invalid")
+        }
+        if (data.username !== undefined && typeof data.username !== "string") {
+            throw new Error("username must be a string")
+        }
+        if (data.email !== undefined && typeof data.email !== "string") {
+            throw new Error("email must be a string")
+        }
+        return data
+    })
+    .handler(async ({ data }) => {
+        const response = await api
+            .updateSession({
+                session: {
+                    user: {
+                        name: data.username,
+                        email: data.email,
+                    },
+                },
+                headers: getRequestHeaders(),
+            })
+            .catch((error) => {
+                console.error("[error:server] updateSession", error)
+                return null
+            })
+
+        return { success: Boolean(response?.success) }
     })
