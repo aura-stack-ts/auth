@@ -188,3 +188,7 @@ logs
 # Cloudflare Workers
 worker-configuration.d.ts
 .wrangler/*
+
+# Packages
+packages/**/_core
+packages/**/oauth
