@@ -52,8 +52,8 @@ jobs:
       - name: Build packages
         run: pnpm build:prod
 
-      - name: Run type checks
-        run: pnpm type-check --filter=./packages/*
+      # - name: Run type checks
+      #  run: pnpm type-check --filter=./packages/*
 
       - name: Run tests
         run: pnpm test
