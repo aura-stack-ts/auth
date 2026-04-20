@@ -21,7 +21,6 @@ export type { UserIdentityType, UserShape } from "@/shared/identity.ts"
 /**
  * Standard JWT claims that are managed internally by the token system.
  * These fields are typically filtered out before returning user data.
- * @deprecated
  */
 export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" | "sub" | "aud" | "iss">
 
