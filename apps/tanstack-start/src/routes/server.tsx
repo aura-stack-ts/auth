@@ -51,7 +51,7 @@ function AuthServerPage() {
     const handleUpdateSession = async (formData: FormData) => {
         await updateSession({
             data: {
-                name: formData.get("username") ? (formData.get("username") as string) : undefined,
+                username: formData.get("username") ? (formData.get("username") as string) : undefined,
                 email: formData.get("email") ? (formData.get("email") as string) : undefined,
             },
         })
@@ -79,7 +79,7 @@ function AuthServerPage() {
                             <img
                                 className="rounded-full"
                                 src={session.user.image}
-                                alt={session.user?.name}
+                                alt={session.user?.name ?? "User avatar"}
                                 width={56}
                                 height={56}
                             />
@@ -97,17 +97,15 @@ function AuthServerPage() {
                             </div>
                         </div>
                         <EditProfile action={handleUpdateSession} />
-                        <form className="my-4 pt-4 flex items-center justify-between gap-x-4 border-t">
+                        <div className="my-4 pt-4 flex items-center justify-between gap-x-4 border-t">
                             <div>
-                                <label className="font-medium block" htmlFor="signout">
-                                    Sign Out of the device
-                                </label>
+                                <p className="font-medium">Sign Out of the device</p>
                                 <span className="text-sm">Sign out of the device with active session</span>
                             </div>
                             <Button className="w-20" variant="default" type="button" onClick={handleSignOut}>
                                 Sign Out
                             </Button>
-                        </form>
+                        </div>
                         <span className="w-full h-px block bg-white/40" />
                         <span className="mt-4 block text-center text-white/40">
                             Built with{" "}

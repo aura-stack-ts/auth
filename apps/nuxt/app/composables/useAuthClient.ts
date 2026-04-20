@@ -7,6 +7,7 @@ import type {
     SignInOptions,
     SignOutOptions,
     UpdateSessionOptions,
+    SignInCredentialsOptions,
 } from "@aura-stack/auth/types"
 
 export const useAuthClient = (initialSession?: Session | null) => {
@@ -42,13 +43,10 @@ export const useAuthClient = (initialSession?: Session | null) => {
         }
     }
 
-    const signInCredentials = async (credentials: { username: string; password: string }, options?: SignInOptions) => {
+    const signInCredentials = async (options: SignInCredentialsOptions) => {
         isLoading.value = true
         try {
-            await authClient.signInCredentials({
-                payload: credentials,
-                ...options,
-            })
+            await authClient.signInCredentials(options)
             if (options?.redirect === false) {
                 await refresh()
             }

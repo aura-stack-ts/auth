@@ -13,9 +13,7 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
         <section>
             <div className="mt-4 pt-4 flex items-center justify-between gap-x-4 border-t">
                 <div>
-                    <label className="font-medium block" htmlFor="signout">
-                        Edit Profile
-                    </label>
+                    <p className="font-medium">Edit Profile</p>
                     <span className="text-sm">Edit your profile information</span>
                 </div>
                 <Button

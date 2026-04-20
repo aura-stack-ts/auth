@@ -11,22 +11,23 @@ const handleSignInCredentials = async (event: SubmitEvent) => {
     const username = formData.get("username") as string
     const password = formData.get("password") as string
 
-    await signInCredentials(
-        {
+    await signInCredentials({
+        payload: {
             username,
             password,
         },
-        { redirectTo: "/client" }
-    )
+    })
 }
 
 const handleUpdateSession = async (formData: FormData) => {
-    //await updateSession({
-    //    user: {
-    //        name: formData.get("username") ? (formData.get("username") as string) : undefined,
-    //        email: formData.get("email") ? (formData.get("email") as string) : undefined,
-    //    },
-    //})
+    await updateSession({
+        session: {
+            user: {
+                name: (formData.get("username") as string) || undefined,
+                email: (formData.get("email") as string) || undefined,
+            },
+        },
+    })
 }
 </script>
 
