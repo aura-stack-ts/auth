@@ -23,7 +23,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <AuthProvider>
                     <Header />
                     {children}
-                    {/* <Footer /> */}
                 </AuthProvider>
             </body>
         </html>

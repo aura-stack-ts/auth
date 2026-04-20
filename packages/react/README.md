@@ -43,12 +43,13 @@ Wrap your application with the `AuthProvider` and pass it a configured Aura Auth
 
 ```tsx
 import { createAuthClient, AuthProvider } from "@aura-stack/react"
+import type { PropsWithChildren } from "react"
 
 const client = createAuthClient({
   /* your config */
 })
 
-export const App = ({ children }) => {
+export const App = ({ children }: PropsWithChildren) => {
   return <AuthProvider client={client}>{children}</AuthProvider>
 }
 ```

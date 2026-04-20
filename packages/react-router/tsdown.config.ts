@@ -14,6 +14,7 @@ export default defineConfig({
     ],
     fixedExtension: false,
     deps: {
+        ...tsdownConfig.deps,
         onlyBundle: false,
         neverBundle: ["react", "react-dom", "react-router"],
     },

@@ -1,6 +1,6 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { isAuthInternalError } from "@/shared/errors.ts"
+import { isAuthErrorWithCode } from "@/shared/errors.ts"
 import { createRedirectTo, getBaseURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
@@ -47,7 +47,7 @@ export const updateSession = async <DefaultUser extends User = User>({
     } catch (error) {
         let code = "UPDATE_SESSION_INVALID"
         let message = "Failed to update session."
-        if (isAuthInternalError(error)) {
+        if (isAuthErrorWithCode(error)) {
             code = error.code
             message = error.message
         }
@@ -60,7 +60,10 @@ export const updateSession = async <DefaultUser extends User = User>({
             redirectURL: null,
             error: { code, message },
             toResponse: () => {
-                return Response.json({}, { status: 400, headers })
+                return Response.json(
+                    { success: false, session: null, redirectURL: null, error: { code, message } },
+                    { status: 400, headers }
+                )
             },
         }
     }

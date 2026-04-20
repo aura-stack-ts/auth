@@ -1,6 +1,13 @@
 import { computed } from "vue"
 import { authClient } from "~/lib/client"
-import type { Session, LiteralUnion, BuiltInOAuthProvider, SignInOptions, SignOutOptions } from "@aura-stack/auth"
+import type {
+    Session,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+    SignInOptions,
+    SignOutOptions,
+    UpdateSessionOptions,
+} from "@aura-stack/auth/types"
 
 export const useAuthClient = (initialSession?: Session | null) => {
     const session = useState<Session | null>("aura-session", () => null)
@@ -11,15 +18,18 @@ export const useAuthClient = (initialSession?: Session | null) => {
         return isAuthenticated.value ? "authenticated" : "unauthenticated"
     })
 
-    if (initialSession !== undefined && session.value === null) {
+    if (initialSession !== undefined) {
         session.value = initialSession
     }
 
     const refresh = async () => {
+        isLoading.value = true
         try {
             session.value = await authClient.getSession()
         } catch {
             session.value = null
+        } finally {
+            isLoading.value = false
         }
     }
 
@@ -35,9 +45,9 @@ export const useAuthClient = (initialSession?: Session | null) => {
     const signInCredentials = async (credentials: { username: string; password: string }, options?: SignInOptions) => {
         isLoading.value = true
         try {
-            await authClient.signInCredentials(credentials, {
+            await authClient.signInCredentials({
+                payload: credentials,
                 ...options,
-                redirect: options?.redirect ?? true,
             })
             if (options?.redirect === false) {
                 await refresh()
@@ -47,10 +57,10 @@ export const useAuthClient = (initialSession?: Session | null) => {
         }
     }
 
-    const updateSession = async (payload: Partial<Session>) => {
+    const updateSession = async (options: UpdateSessionOptions) => {
         isLoading.value = true
         try {
-            await authClient.updateSession(payload)
+            await authClient.updateSession(options)
             await refresh()
         } finally {
             isLoading.value = false
@@ -71,7 +81,7 @@ export const useAuthClient = (initialSession?: Session | null) => {
     }
 
     onMounted(async () => {
-        if (!session.value) {
+        if (initialSession === undefined && !session.value) {
             await refresh()
         }
     })

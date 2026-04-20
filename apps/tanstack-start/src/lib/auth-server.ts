@@ -46,7 +46,7 @@ export const signInFn = createServerFn({ method: "POST" })
                 return null
             })
         throw redirect({
-            href: response?.signInURL,
+            href: response?.signInURL ?? "/",
         })
     })
 
@@ -84,7 +84,18 @@ export const signInCredentialsFn = createServerFn({ method: "POST" })
     })
 
 export const updateSessionFn = createServerFn({ method: "POST" })
-    .inputValidator((data: { username?: string; email?: string }) => data)
+    .inputValidator((data: { username?: string; email?: string }) => {
+        if (!data || typeof data !== "object") {
+            throw new Error("update session payload is invalid")
+        }
+        if (data.username !== undefined && typeof data.username !== "string") {
+            throw new Error("username must be a string")
+        }
+        if (data.email !== undefined && typeof data.email !== "string") {
+            throw new Error("email must be a string")
+        }
+        return data
+    })
     .handler(async ({ data }) => {
         const response = await api
             .updateSession({

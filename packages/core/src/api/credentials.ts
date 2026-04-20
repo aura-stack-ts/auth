@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { AuthValidationError, isAuthInternalError } from "@/shared/errors.ts"
+import { AuthValidationError, isAuthErrorWithCode } from "@/shared/errors.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
@@ -49,7 +49,7 @@ export const signInCredentials = async ({
     } catch (error) {
         let code = "CREDENTIALS_SIGN_IN_ERROR"
         let message = "An error occurred during credentials sign-in."
-        if (isAuthInternalError(error)) {
+        if (isAuthErrorWithCode(error)) {
             code = error.code
             message = error.message
         }

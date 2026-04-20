@@ -43,10 +43,7 @@ export const signInCredentials = <DefaultUser extends User = User>({ api }: Auth
     return async <Options extends ReactRouterSignInCredentialsAPIOptions>(
         options: Options
     ): Promise<ReactRouterSignInCredentialsReturn<Options>> => {
-        const signIn = await api.signInCredentials({
-            ...options,
-            payload: options.payload,
-        })
+        const signIn = await api.signInCredentials(options)
         if (options?.redirect === false) {
             return signIn as ReactRouterSignInCredentialsReturn<Options>
         }

@@ -53,10 +53,10 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-x-4">
-                        <Button className="w-full mt-6" variant="default">
+                        <Button className="w-full mt-6" variant="default" type="submit">
                             Edit
                         </Button>
-                        <Button className="w-full mt-6" variant="secondary" onClick={() => setIsOpen(false)}>
+                        <Button className="w-full mt-6" variant="secondary" type="button" onClick={() => setIsOpen(false)}>
                             Cancel
                         </Button>
                     </div>

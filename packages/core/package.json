@@ -27,7 +27,7 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/@aura-stack/auth"
   },
-  "sideEffects": true,
+  "sideEffects": false,
   "files": [
     "dist"
   ],

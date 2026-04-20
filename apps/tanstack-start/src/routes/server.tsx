@@ -30,6 +30,7 @@ function AuthServerPage() {
 
     const handleSignOut = async () => {
         await signOut()
+        await router.invalidate()
     }
 
     const handleSignInCredentials = async (event: FormEvent<HTMLFormElement>) => {
@@ -44,12 +45,13 @@ function AuthServerPage() {
                 password,
             },
         })
+        await router.invalidate()
     }
 
     const handleUpdateSession = async (formData: FormData) => {
         await updateSession({
             data: {
-                username: formData.get("username") ? (formData.get("username") as string) : undefined,
+                name: formData.get("username") ? (formData.get("username") as string) : undefined,
                 email: formData.get("email") ? (formData.get("email") as string) : undefined,
             },
         })
@@ -77,7 +79,7 @@ function AuthServerPage() {
                             <img
                                 className="rounded-full"
                                 src={session.user.image}
-                                alt={`User image ${session.user?.name}`}
+                                alt={session.user?.name}
                                 width={56}
                                 height={56}
                             />

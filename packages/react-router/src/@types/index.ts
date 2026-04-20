@@ -62,7 +62,7 @@ export type ReactRouterSignInCredentialsReturn<Options extends ReactRouterSignIn
     : Response
 
 export type ReactRouterUpdateSessionAPIOptions<DefaultUser extends User = User> = Prettify<
-    Partial<UpdateSessionAPIOptions<DefaultUser>> & { request: Request; session: UpdateSessionOptions<DefaultUser> }
+    Partial<UpdateSessionAPIOptions<DefaultUser>> & { request: Request; session: UpdateSessionOptions<DefaultUser>["session"] }
 >
 
 export type ReactRouterUpdateSessionReturn<

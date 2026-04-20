@@ -7,6 +7,7 @@ import type {
     Prettify,
     SignInAPIOptions,
     SignInAPIReturn,
+    SignInCredentialsAPIOptions,
     SignInCredentialsAPIReturn,
     SignOutAPIOptions,
     SignOutAPIReturn,
@@ -29,10 +30,10 @@ export type NextSignInReturn<Options extends SignInAPIOptions> = Options extends
  * Return type for the Next.js server `api.signInCredentials` helper.
  * Same `never` rule as {@link NextSignInReturn} when a server redirect is triggered via options.
  */
-export type NextSignInCredentials<Options extends SignInAPIOptions> = Options extends { redirect: true }
+export type NextSignInCredentials<Options extends SignInCredentialsAPIOptions> = Options extends { redirect: true }
     ? never
     : Options extends { redirectTo: string }
-      ? false
+      ? never
       : SignInCredentialsAPIReturn
 
 export type NextUpdateSessionOptions<DefaultUser extends User = User> = Prettify<

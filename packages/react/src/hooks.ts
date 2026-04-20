@@ -63,8 +63,8 @@ export const useSignOut = <DefaultUser extends User = User>(defaultOptions?: Sig
 }
 
 /**
- * Patch session user/expiry. Default  merge per call
- * (e.g. `skipRefresh` to avoid a follow-up `getSession`).
+ * Patch session user/expiry. Default {`@link` UpdateSessionOptions} are merged with per-invocation options
+ * (e.g. `redirect: false` to avoid a follow-up redirect and trigger a context refresh instead).
  */
 export const useUpdateSession = <DefaultUser extends User = User>(defaultOptions?: UpdateSessionOptions<DefaultUser>) => {
     const { updateSession } = useAuth<DefaultUser>()

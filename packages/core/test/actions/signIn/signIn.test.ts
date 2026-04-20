@@ -368,6 +368,10 @@ describe("signIn action", () => {
             success: false,
             signInURL: null,
             redirect: false,
+            error: {
+                code: "UNTRUSTED_ORIGIN",
+                message: "The constructed origin URL is not trusted.",
+            },
         })
     })
 

@@ -1,6 +1,6 @@
 import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
 import { HeadersBuilder } from "@aura-stack/router"
-import { AuthInternalError, isAuthInternalError } from "@/shared/errors.ts"
+import { AuthInternalError, isAuthErrorWithCode } from "@/shared/errors.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"
 import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
@@ -74,7 +74,7 @@ export const signIn = async (
     } catch (error) {
         let code = "AUTH_SIGN_IN_FAILED"
         let message = "An error occurred during the sign-in process."
-        if (isAuthInternalError(error)) {
+        if (isAuthErrorWithCode(error)) {
             code = error.code
             message = error.message
         }

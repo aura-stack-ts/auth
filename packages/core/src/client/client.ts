@@ -116,7 +116,10 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             if (!csrfToken) {
                 throw new AuthClientError("Failed to fetch CSRF token for session update.")
             }
-            const { session } = options
+            const { session } = options ?? {}
+            if (!session) {
+                return { success: false, session: null } as UpdateSessionReturn<Options, DefaultUser>
+            }
             const user = session.user ?? {}
             const response = await client.patch("/session", {
                 body: {
@@ -134,7 +137,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             return json as unknown as UpdateSessionReturn<Options, DefaultUser>
         } catch (error) {
             console.error("Error updating session:", error)
-            return { success: false, session: null } as unknown as UpdateSessionReturn<Options, DefaultUser>
+            return { success: false, session: null } as UpdateSessionReturn<Options, DefaultUser>
         }
     }
 
@@ -147,7 +150,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
 
             const response = await client.post("/signOut", {
                 searchParams: {
-                    redirectTo: options?.redirectTo ?? "/",
+                    redirectTo: options?.redirectTo,
                     token_type_hint: "session_token",
                 },
                 headers: {

@@ -1,9 +1,9 @@
 import Link from "next/link"
 import Image from "next/image"
-import { SubmitEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@aura-stack/react"
 import { EditProfile } from "@/components/edit-profile"
+import type { SubmitEvent } from "react"
 
 export default function AuthClientPage() {
     const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
@@ -15,26 +15,29 @@ export default function AuthClientPage() {
         const username = formData.get("username") as string
         const password = formData.get("password") as string
 
-        const value = await signInCredentials(
-            {
+        await signInCredentials({
+            payload: {
                 username,
                 password,
             },
-            { redirectTo: "/client" }
-        )
+            redirectTo: "/client",
+        })
     }
 
     const handleUpdateSession = async (formData: FormData) => {
         await updateSession({
-            user: {
-                name: formData.get("username") ? (formData.get("username") as string) : undefined,
-                email: formData.get("email") ? (formData.get("email") as string) : undefined,
+            session: {
+                user: {
+                    name: formData.get("username") ? (formData.get("username") as string) : undefined,
+                    email: formData.get("email") ? (formData.get("email") as string) : undefined,
+                },
             },
+            redirectTo: "/client",
         })
     }
 
     const handleSignOut = async () => {
-        await signOut()
+        await signOut({ redirectTo: "/client" })
     }
 
     return (
@@ -83,7 +86,7 @@ export default function AuthClientPage() {
                                 </label>
                                 <span className="text-sm">Sign out of the device with active session</span>
                             </div>
-                            <Button className="w-20" variant="default" onClick={handleSignOut}>
+                            <Button className="w-20" variant="default" type="button" onClick={handleSignOut}>
                                 Sign Out
                             </Button>
                         </form>

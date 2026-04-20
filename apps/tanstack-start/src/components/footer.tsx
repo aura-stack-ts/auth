@@ -46,15 +46,16 @@ export const Footer = () => {
                         </p>
                         <div className="flex gap-2">
                             {socialLinks.map((item, i) => (
-                                <a
-                                    key={i}
-                                    className="p-1.5 border rounded-md hover:bg-accent"
-                                    target="_blank"
-                                    href={item.link}
-                                    rel="noopener noreferrer"
-                                >
-                                    {item.icon}
-                                </a>
+                                <li key={i}>
+                                    <a
+                                        className="p-1.5 border rounded-md hover:bg-accent"
+                                        target="_blank"
+                                        href={item.link}
+                                        rel="noopener noreferrer"
+                                    >
+                                        {item.icon}
+                                    </a>
+                                </li>
                             ))}
                         </div>
                     </div>
@@ -62,15 +63,16 @@ export const Footer = () => {
                         <span className="mb-1 text-sm">Resources</span>
                         <ul className="flex flex-col gap-1">
                             {resources.map(({ href, title }, i) => (
-                                <a
-                                    key={i}
-                                    className="w-max py-1 text-xs text-muted-foreground duration-200 hover:underline"
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {title}
-                                </a>
+                                <li key={i}>
+                                    <a
+                                        className="w-max py-1 text-xs text-muted-foreground duration-200 hover:underline"
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {title}
+                                    </a>
+                                </li>
                             ))}
                         </ul>
                     </div>
@@ -78,15 +80,16 @@ export const Footer = () => {
                         <span className="mb-1 text-sm">Community</span>
                         <ul className="flex flex-col gap-1">
                             {community.map(({ href, title }, i) => (
-                                <a
-                                    key={i}
-                                    className="w-max py-1 text-xs text-muted-foreground duration-200 hover:underline"
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {title}
-                                </a>
+                                <li key={i}>
+                                    <a
+                                        className="w-max py-1 text-xs text-muted-foreground duration-200 hover:underline"
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {title}
+                                    </a>
+                                </li>
                             ))}
                         </ul>
                     </div>
@@ -94,7 +97,11 @@ export const Footer = () => {
                 <div className="w-full h-px absolute inset-x-0 bg-border" />
                 <div className="max-w-6xl py-4 flex flex-col justify-between gap-2">
                     <p className="text-sm text-muted-foreground text-center font-thin">
-                        © <a href="https://github.com/aura-stack-ts">Aura Stack Labs</a>. All rights reserved {year}
+                        ©{" "}
+                        <a href="https://github.com/aura-stack-ts" target="_blank" rel="noopener noreferrer">
+                            Aura Stack Labs
+                        </a>
+                        . All rights reserved {year}
                     </p>
                 </div>
             </div>

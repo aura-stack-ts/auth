@@ -25,6 +25,7 @@ const closeMenu = () => {
                     href="https://aura-stack-auth.vercel.app/docs"
                     class="text-sm text-muted-foreground hover:text-white transition-colors"
                     target="_blank"
+                    rel="noopener noreferrer"
                 >
                     Documentation
                 </a>
@@ -32,6 +33,7 @@ const closeMenu = () => {
                     href="https://github.com/aura-stack-ts/auth"
                     class="text-sm text-muted-foreground hover:text-white transition-colors"
                     target="_blank"
+                    rel="noopener noreferrer"
                 >
                     Repository
                 </a>
@@ -71,17 +73,20 @@ const closeMenu = () => {
             v-if="isOpen"
         >
             <div class="px-6 py-4 flex flex-col gap-4">
-                <NuxtLink
-                    to="https://aura-stack-auth.vercel.app/docs"
+                <a
+                    href="https://aura-stack-auth.vercel.app/docs"
                     class="text-sm text-muted-foreground hover:text-white transition-colors py-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     @click="closeMenu"
                 >
                     Documentation
-                </NuxtLink>
+                </a>
                 <a
                     href="https://github.com/aura-stack-ts/auth"
                     class="text-sm text-muted-foreground hover:text-white transition-colors py-2"
                     target="_blank"
+                    rel="noopener noreferrer"
                     @click="closeMenu"
                 >
                     Repository
@@ -90,6 +95,7 @@ const closeMenu = () => {
                     href="https://discord.com/invite/anXExMR5"
                     class="text-sm text-muted-foreground hover:text-white transition-colors py-2"
                     target="_blank"
+                    rel="noopener noreferrer"
                     @click="closeMenu"
                 >
                     Discord

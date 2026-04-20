@@ -30,7 +30,9 @@ const flow = [
         <section class="flex-1 w-11/12 max-w-6xl mx-auto p-6 flex items-center relative border-b border-x border-muted">
             <div class="space-y-7 max-w-4xl">
                 <h1 class="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-7xl">
-                    <span class="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text">
+                    <span
+                        class="text-transparent italic font-serif bg-linear-to-r from-white via-white/80 to-white/40 bg-clip-text"
+                    >
                         Nuxt Auth
                     </span>
                 </h1>
@@ -61,11 +63,15 @@ const flow = [
                     <h2 class="text-3xl tracking-tight text-white">{{ item.title }}</h2>
                     <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{{ item.body }}</p>
                     <Button class="w-min mt-6" variant="outline" as-child>
-                        <a :href="item.href" :target="item.external ? '_blank' : undefined" :rel="item.external ? 'noopener noreferrer' : undefined">
+                        <a
+                            :href="item.href"
+                            :target="item.external ? '_blank' : undefined"
+                            :rel="item.external ? 'noopener noreferrer' : undefined"
+                        >
                             Try Now
                         </a>
                     </Button>
-                </div>
+                </article>
             </div>
         </section>
         <Footer />

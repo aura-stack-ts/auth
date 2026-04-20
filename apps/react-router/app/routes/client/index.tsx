@@ -1,10 +1,11 @@
-import { Link } from "react-router"
+import { Link, useRevalidator } from "react-router"
 import { Button } from "~/components/ui/button"
 import { useAuth } from "@aura-stack/react-router/client"
 import { EditProfile } from "~/components/edit-profile"
 import type { SubmitEvent } from "react"
 
 export const AuthClientPage = () => {
+    const revalidator = useRevalidator()
     const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
     const isAuthenticated = status === "authenticated"
 
@@ -13,27 +14,29 @@ export const AuthClientPage = () => {
         const formData = new FormData(event.currentTarget)
         const username = formData.get("username") as string
         const password = formData.get("password") as string
-        const value = await signInCredentials(
-            {
+        await signInCredentials({
+            payload: {
                 username,
                 password,
             },
-            { redirectTo: "/client" }
-        )
-        console.log("Credentials Sign In Result:", value)
+            redirectTo: "/client",
+        })
     }
 
     const handleUpdateSession = async (formData: FormData) => {
         await updateSession({
-            user: {
-                name: formData.get("username") ? (formData.get("username") as string) : undefined,
-                email: formData.get("email") ? (formData.get("email") as string) : undefined,
+            session: {
+                user: {
+                    name: formData.get("username") ? (formData.get("username") as string) : undefined,
+                    email: formData.get("email") ? (formData.get("email") as string) : undefined,
+                },
             },
         })
+        revalidator.revalidate()
     }
 
     const handleSignOut = async () => {
-        await signOut()
+        await signOut({ redirectTo: "/client" })
     }
 
     return (
@@ -76,7 +79,7 @@ export const AuthClientPage = () => {
                                 </label>
                                 <span className="text-sm">Sign out of the device with active session</span>
                             </div>
-                            <Button className="w-20" variant="default" onClick={handleSignOut}>
+                            <Button className="w-20" variant="default" type="button" onClick={handleSignOut}>
                                 Sign Out
                             </Button>
                         </form>

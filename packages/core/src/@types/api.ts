@@ -60,9 +60,10 @@ export interface APIOptionsWithRedirectTo {
     /**
      * Optional redirect strategy for server/programmatic API functions.
      *
-     * - `true` (default): the generated response is a redirect response.
+     * - `true`: the generated response is a redirect response.
      * - `false`: the API returns redirect data (`signInURL` or `redirectURL`) for custom handling.
-     * @default `true`
+     *
+     * Defaults are action-specific; see each API option type.
      * @experimental
      */
     redirect?: boolean
@@ -142,9 +143,9 @@ export interface SignInOptions extends OptionsWithRedirectTo {}
  * - Redirect mode (`redirect: true`): returns `void` because navigation is handled by the client.
  * - Manual mode (`redirect: false`): returns `signInURL` for caller-controlled navigation.
  */
-export type SignInReturn<Options extends SignInOptions> = Options extends { redirect: true }
-    ? void
-    : { success: true; redirect: false; signInURL: string } | { success: false; redirect: false; signInURL: null }
+export type SignInReturn<Options extends SignInOptions> = Options extends { redirect: false }
+    ? { success: true; redirect: false; signInURL: string } | { success: false; redirect: false; signInURL: null }
+    : void
 
 /**
  * Server/programmatic options for `signIn` API.
@@ -183,9 +184,9 @@ export interface SignInCredentialsOptions extends OptionsWithRedirectTo {
 }
 
 /** Client-side credentials sign-in return type (redirect mode or manual redirect data). */
-export type SignInCredentialsReturn<Options extends SignInCredentialsOptions> = Options extends { redirect: true }
-    ? void
-    : { success: true; redirectURL: string } | { success: false; redirectURL: null }
+export type SignInCredentialsReturn<Options extends SignInCredentialsOptions> = Options extends { redirect: false }
+    ? { success: true; redirectURL: string } | { success: false; redirectURL: null }
+    : void
 
 /** Server/programmatic credentials sign-in options. */
 export interface SignInCredentialsAPIOptions extends APIOptionsWithRedirectTo, APIOptionsWithRequest {
@@ -209,9 +210,9 @@ export type SignInCredentialsAPIReturn = AuthActionAPIReturn<
 export interface SignOutOptions extends OptionsWithRedirectTo {}
 
 /** Client-side sign-out return type (redirect mode or manual redirect data). */
-export type SignOutReturn<Options extends SignOutOptions> = Options extends { redirect: true }
-    ? void
-    : { success: true; redirect: false; redirectURL: string } | { success: false; redirect: false; redirectURL: null }
+export type SignOutReturn<Options extends SignOutOptions> = Options extends { redirect: false }
+    ? { success: true; redirect: false; redirectURL: string } | { success: false; redirect: false; redirectURL: null }
+    : void
 
 /** Server/programmatic options for `signOut` API. */
 export interface SignOutAPIOptions extends APIOptionsWithRedirectTo, APIOptionsWithSkipCSRFCheck {
@@ -243,10 +244,10 @@ export interface UpdateSessionOptions<DefaultUser extends User = User> extends O
 
 /** Client-side `updateSession` return type. */
 export type UpdateSessionReturn<Options extends UpdateSessionOptions, DefaultUser extends User = User> = Options extends {
-    redirect: true
+    redirect: false
 }
-    ? void
-    : { success: true; session: Session<DefaultUser> } | { success: false; session: null }
+    ? { success: true; session: Session<DefaultUser> } | { success: false; session: null }
+    : void
 
 /** Server/programmatic options for `updateSession` API. */
 export interface UpdateSessionAPIOptions<DefaultUser extends User = User>

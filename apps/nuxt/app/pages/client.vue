@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { SubmitEvent } from "@vue/runtime-dom"
 import Button from "~/components/ui/button/Button.vue"
 import EditProfile from "~/components/edit-profile.vue"
 
@@ -8,7 +7,7 @@ const isAuthenticated = computed(() => status.value === "authenticated")
 
 const handleSignInCredentials = async (event: SubmitEvent) => {
     event.preventDefault()
-    const formData = new FormData(event.target as HTMLFormElement)
+    const formData = new FormData(event.currentTarget as HTMLFormElement)
     const username = formData.get("username") as string
     const password = formData.get("password") as string
 
@@ -22,12 +21,12 @@ const handleSignInCredentials = async (event: SubmitEvent) => {
 }
 
 const handleUpdateSession = async (formData: FormData) => {
-    await updateSession({
-        user: {
-            name: formData.get("username") ? (formData.get("username") as string) : undefined,
-            email: formData.get("email") ? (formData.get("email") as string) : undefined,
-        },
-    })
+    //await updateSession({
+    //    user: {
+    //        name: formData.get("username") ? (formData.get("username") as string) : undefined,
+    //        email: formData.get("email") ? (formData.get("email") as string) : undefined,
+    //    },
+    //})
 }
 </script>
 

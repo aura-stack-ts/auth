@@ -13,14 +13,15 @@ export const getSession = async <DefaultUser extends User = User>({
         .setCookie(ctx.cookies.sessionToken.name, "", { ...ctx.cookies.sessionToken.attributes, ...expiredCookieAttributes })
         .setCookie(ctx.cookies.csrfToken.name, "", { ...ctx.cookies.csrfToken.attributes, ...expiredCookieAttributes })
         .toHeaders()
+    const unauthorizedError = {
+        code: "GET_SESSION_FAILED",
+        message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+    } as const
     const unauthorized: GetSessionAPIReturn<DefaultUser> = {
         session: null,
         headers,
         success: false,
-        error: {
-            code: "GET_SESSION_FAILED",
-            message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
-        },
+        error: unauthorizedError,
         toResponse: () => Response.json({ success: false, session: null }, { status: 401, headers }),
     }
     try {
@@ -31,7 +32,7 @@ export const getSession = async <DefaultUser extends User = User>({
             session,
             headers: newHeaders,
             success: true,
-            toResponse: () => Response.json({ success: true, session }, { headers: newHeaders }),
+            toResponse: () => Response.json({ success: true, session, error: unauthorizedError }, { headers: newHeaders }),
         } as GetSessionAPIReturn<DefaultUser>
     } catch (error) {
         ctx?.logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })

@@ -34,23 +34,28 @@ export const action = async ({ request }: Route.ActionArgs) => {
         const username = formData.get("username") as string
         const password = formData.get("password") as string
 
-        await api.signInCredentials({
+        return await api.signInCredentials({
             payload: {
                 username,
                 password,
             },
             request,
+            redirectTo: "/server",
         })
     }
 
     if (actionType === "updateSession") {
         const value = await api.updateSession({
-            user: {
-                name: formData.get("username") ? (formData.get("username") as string) : undefined,
-                email: formData.get("email") ? (formData.get("email") as string) : undefined,
+            session: {
+                user: {
+                    name: (formData.get("username") as string) || undefined,
+                    email: (formData.get("email") as string) || undefined,
+                },
             },
+            request,
+            redirectTo: "/server",
         })
-        return value.toResponse()
+        return value
     }
 
     return null

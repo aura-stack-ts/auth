@@ -1,9 +1,8 @@
-import { EditProfile } from "@/components/edit-profile"
-import { Button } from "@/components/ui/button"
-import { api } from "@/lib/auth"
-import Image from "next/image"
 import Link from "next/link"
-import { redirect } from "next/navigation"
+import Image from "next/image"
+import { api } from "@/lib/auth"
+import { Button } from "@/components/ui/button"
+import { EditProfile } from "@/components/edit-profile"
 
 export const AuthServerPage = async () => {
     const session = await api.getSession()
@@ -17,7 +16,7 @@ export const AuthServerPage = async () => {
     const signOutAction = async () => {
         "use server"
         await api.signOut({
-            redirectTo: "/ssr",
+            redirectTo: "/server",
         })
     }
 
@@ -30,19 +29,21 @@ export const AuthServerPage = async () => {
                 username,
                 password,
             },
-            redirectTo: "/ssr",
+            redirectTo: "/server",
         })
     }
 
     const updateSessionAction = async (formData: FormData) => {
         "use server"
         await api.updateSession({
-            user: {
-                name: formData.get("username") ? (formData.get("username") as string) : undefined,
-                email: formData.get("email") ? (formData.get("email") as string) : undefined,
+            session: {
+                user: {
+                    name: formData.get("username") ? (formData.get("username") as string) : undefined,
+                    email: formData.get("email") ? (formData.get("email") as string) : undefined,
+                },
             },
+            redirectTo: "/server",
         })
-        redirect("/ssr")
     }
 
     return (

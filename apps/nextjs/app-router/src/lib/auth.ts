@@ -17,7 +17,7 @@ export const { api, core } = createAuth({
             return {
                 sub,
                 name: username,
-                email: `${username.toLocaleLowerCase()}@example.com`,
+                email: `${username.toLowerCase()}@example.com`,
             }
         },
     },

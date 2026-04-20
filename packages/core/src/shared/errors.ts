@@ -118,3 +118,7 @@ export const isAuthInvalidConfigurationError = (error: unknown): error is AuthIn
 export const isAuthValidationError = (error: unknown): error is AuthValidationError => {
     return error instanceof AuthValidationError
 }
+
+export const isAuthErrorWithCode = (error: unknown): error is { code: string; message: string } => {
+    return isAuthInternalError(error) || isAuthSecurityError(error) || isAuthClientError(error) || isAuthValidationError(error)
+}

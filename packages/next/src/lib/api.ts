@@ -69,9 +69,7 @@ export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<De
 }
 
 export const signInCredentials = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async <Options extends SignInCredentialsAPIOptions>(
-        options: SignInCredentialsAPIOptions
-    ): Promise<NextSignInCredentials<Options>> => {
+    return async <Options extends SignInCredentialsAPIOptions>(options: Options): Promise<NextSignInCredentials<Options>> => {
         const signIn = await api.signInCredentials({
             headers: await headers(),
             ...options,
@@ -110,7 +108,7 @@ export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<D
         })
         await applyCookies(out.headers)
         if (out.success && out.redirectURL) {
-            redirect(out.redirectURL)
+            return redirect(out.redirectURL)
         }
         return out as NextSignOutReturn<Options>
     }

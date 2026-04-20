@@ -71,12 +71,13 @@ Wrap your application with the `AuthProvider` and pass it a configured Aura Auth
 
 ```tsx
 import { createAuthClient, AuthProvider } from "@aura-stack/react-router/client"
+import type { PropsWithChildren } from "react"
 
 const client = createAuthClient({
   /* your config */
 })
 
-export const App = ({ children }) => {
+export const App = ({ children }: PropsWithChildren) => {
   return <AuthProvider client={client}>{children}</AuthProvider>
 }
 ```
@@ -97,7 +98,6 @@ export const Profile = () => {
       <p>Welcome, {session.user.name}!</p>
     </div>
   )
-}
 ```
 
 ## Documentation
@@ -113,4 +113,3 @@ Licensed under the [MIT License](../../LICENSE). © [Aura Stack](https://github.
 <p align="center">
   Made with ❤️ by <a href="https://github.com/aura-stack-ts">Aura Stack team</a>
 </p>
-```

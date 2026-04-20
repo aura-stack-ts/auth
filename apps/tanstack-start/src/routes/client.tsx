@@ -1,9 +1,9 @@
-import type { FormEvent } from "react"
 import { Link } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 import { useAuth } from "@aura-stack/react"
 import { Button } from "@/components/ui/button"
 import { EditProfile } from "@/components/edit-profile"
+import type { SyntheticEvent } from "react"
 
 export const Route = createFileRoute("/client")({
     component: AuthClientPage,
@@ -13,32 +13,35 @@ function AuthClientPage() {
     const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
     const isAuthenticated = status === "authenticated"
 
-    const handleSignInCredentials = async (event: FormEvent<HTMLFormElement>) => {
+    const handleSignInCredentials = async (event: SyntheticEvent<HTMLFormElement>) => {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
         const username = formData.get("username") as string
         const password = formData.get("password") as string
 
-        await signInCredentials(
-            {
+        await signInCredentials({
+            payload: {
                 username,
                 password,
             },
-            { redirectTo: "/client" }
-        )
+            redirectTo: "/client",
+        })
     }
 
     const handleUpdateSession = async (formData: FormData) => {
         await updateSession({
-            user: {
-                name: formData.get("username") ? (formData.get("username") as string) : undefined,
-                email: formData.get("email") ? (formData.get("email") as string) : undefined,
+            session: {
+                user: {
+                    name: formData.get("username") ? (formData.get("username") as string) : undefined,
+                    email: formData.get("email") ? (formData.get("email") as string) : undefined,
+                },
             },
+            redirectTo: "/client",
         })
     }
 
     const handleSignOut = async () => {
-        await signOut()
+        await signOut({ redirectTo: "/client" })
     }
 
     return (
@@ -62,7 +65,7 @@ function AuthClientPage() {
                             <img
                                 className="rounded-full"
                                 src={session.user.image}
-                                alt={`User image ${session.user?.name}`}
+                                alt={session?.user?.name ?? "User image"}
                                 width={56}
                                 height={56}
                             />
