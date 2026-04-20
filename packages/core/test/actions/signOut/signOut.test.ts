@@ -83,7 +83,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(202)
-        expect(await request.json()).toEqual({ success: true, redirectURL: "/" })
+        expect(await request.json()).toMatchObject({ success: true, redirect: false, redirectURL: "/" })
         expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
         expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
     })
@@ -101,7 +101,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(202)
-        expect(await request.json()).toEqual({ success: true, redirectURL: "/auth/form" })
+        expect(await request.json()).toMatchObject({ success: true, redirect: false, redirectURL: "/auth/form" })
         expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
         expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
         expect(request.headers.get("Location")).toContain("/auth/form")
@@ -119,7 +119,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(202)
-        expect(await request.json()).toEqual({ success: true, redirectURL: "/" })
+        expect(await request.json()).toMatchObject({ success: true, redirect: false, redirectURL: "/" })
         expect(request.headers.get("Set-Cookie")).toContain("aura-auth.session_token=;")
         expect(request.headers.get("Set-Cookie")).toContain("aura-auth.csrf_token=;")
     })
@@ -154,7 +154,11 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(302)
-        expect(await request.json()).toEqual({ success: true, redirectURL: "/custom-logout-page" })
+        expect(await request.json()).toMatchObject({
+            success: true,
+            redirect: false,
+            redirectURL: "/custom-logout-page",
+        })
         expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
         expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
         expect(request.headers.get("Location")).toBe("/custom-logout-page")
@@ -172,7 +176,8 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(302)
-        expect(await request.json()).toEqual({
+        expect(await request.json()).toMatchObject({
+            redirect: false,
             success: true,
             redirectURL: "/",
         })

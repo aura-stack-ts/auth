@@ -1,16 +1,17 @@
-import { Form, Link, redirect, useSubmit } from "react-router"
-import type { SubmitEvent } from "react"
-import type { Route } from "./+types/server"
+import { Form, Link, useSubmit } from "react-router"
 import { api } from "~/lib/auth"
 import { Button } from "~/components/ui/button"
 import { EditProfile } from "~/components/edit-profile"
+import type { SubmitEvent } from "react"
+import type { Route } from "./+types/index"
+import type { Session } from "@aura-stack/react-router"
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
     const session = await api.getSession({
         headers: request.headers,
     })
 
-    return { session } as any
+    return { session: session as Session | null }
 }
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -18,42 +19,38 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const actionType = formData.get("action")
 
     if (actionType === "signOut") {
-        return api.signOut({
+        return await api.signOut({
             request,
-            headers: request.headers,
             redirectTo: "/server",
         })
     }
 
     if (actionType === "signIn") {
         const provider = formData.get("provider") as string
-        return api.signIn(provider, { request })
+        return await api.signIn(provider, { request })
     }
 
     if (actionType === "signInCredentials") {
         const username = formData.get("username") as string
         const password = formData.get("password") as string
 
-        return api.signInCredentials({
-            password,
-            username,
+        await api.signInCredentials({
+            payload: {
+                username,
+                password,
+            },
+            request,
         })
     }
 
     if (actionType === "updateSession") {
-        await api.updateSession(
-            {
-                user: {
-                    name: formData.get("username") ? (formData.get("username") as string) : undefined,
-                    email: formData.get("email") ? (formData.get("email") as string) : undefined,
-                },
+        const value = await api.updateSession({
+            user: {
+                name: formData.get("username") ? (formData.get("username") as string) : undefined,
+                email: formData.get("email") ? (formData.get("email") as string) : undefined,
             },
-            {
-                headers: request.headers,
-            }
-        )
-
-        return redirect("/server")
+        })
+        return value.toResponse()
     }
 
     return null
@@ -95,7 +92,7 @@ const AuthServerPage = ({ loaderData }: Route.ComponentProps) => {
                             <img
                                 className="rounded-full"
                                 src={session.user.image}
-                                alt={`User image ${session.user?.name}`}
+                                alt={session.user?.name ?? "User Avatar"}
                                 width={56}
                                 height={56}
                             />

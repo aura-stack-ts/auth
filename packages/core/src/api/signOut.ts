@@ -6,6 +6,7 @@ export const signOut = async ({
     ctx,
     request: requestInit,
     headers: headersInit,
+    redirect,
     redirectTo,
     skipCSRFCheck = false,
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
@@ -17,20 +18,21 @@ export const signOut = async ({
         const url = `${origin}${ctx.basePath}/signOut`
         request = new Request(url, { headers })
     }
-    const redirectToURL = await createRedirectTo(request, redirectTo, ctx)
 
     const headersBuilder = new HeadersBuilder(headers)
-    if (redirectToURL) headersBuilder.setHeader("Location", redirectToURL)
+    const redirectToURL = await createRedirectTo(request, redirectTo, ctx)
 
+    if (redirectToURL) headersBuilder.setHeader("Location", redirectToURL)
     const headersList = headersBuilder.toHeaders()
 
     return {
         headers: headersList,
+        redirect: redirect ?? false,
         redirectURL: redirectToURL,
         success: true,
         toResponse: () => {
             return Response.json(
-                { success: true, redirectURL: redirectToURL },
+                { success: true, redirect: redirect ?? false, redirectURL: redirectToURL },
                 { headers: headersList, status: redirectTo ? 302 : 202 }
             )
         },

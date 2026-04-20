@@ -13,13 +13,14 @@ export const AuthClientPage = () => {
         const formData = new FormData(event.currentTarget)
         const username = formData.get("username") as string
         const password = formData.get("password") as string
-        await signInCredentials(
+        const value = await signInCredentials(
             {
                 username,
                 password,
             },
             { redirectTo: "/client" }
         )
+        console.log("Credentials Sign In Result:", value)
     }
 
     const handleUpdateSession = async (formData: FormData) => {
@@ -53,13 +54,7 @@ export const AuthClientPage = () => {
                 {isAuthenticated ? (
                     <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {session?.user?.image ? (
-                            <img
-                                className="rounded-full"
-                                src={session.user.image}
-                                alt={`User image ${session.user?.name}`}
-                                width={56}
-                                height={56}
-                            />
+                            <img className="rounded-full" src={session.user.image} alt={session?.user?.name ?? "User"} />
                         ) : (
                             <span className="size-14 block rounded-full ring-2 ring-white/40">
                                 <span className="h-full w-full p-0.5 aspect-square text-xl font-bold flex items-center justify-center rounded-full bg-black">

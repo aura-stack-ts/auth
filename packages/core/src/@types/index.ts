@@ -15,6 +15,8 @@ export type * from "@/@types/errors.ts"
 export type * from "@/@types/oauth.ts"
 export type * from "@/@types/session.ts"
 export type * from "@/@types/utility.ts"
+export type * from "@/@types/api.ts"
+
 export type { UserIdentityType, UserShape } from "@/shared/identity.ts"
 /**
  * Standard JWT claims that are managed internally by the token system.

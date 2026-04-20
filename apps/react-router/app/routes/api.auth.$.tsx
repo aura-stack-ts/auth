@@ -6,5 +6,9 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 }
 
 export const action = async ({ request }: Route.ActionArgs) => {
+    const method = request.method.toUpperCase()
+    if (method === "PATCH") {
+        return handlers.PATCH(request)
+    }
     return handlers.POST(request)
 }

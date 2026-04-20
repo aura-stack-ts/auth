@@ -1,14 +1,14 @@
 import { createContext, useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import type { Session, User } from "@aura-stack/auth"
 import type {
-    DeepPartial,
     LiteralUnion,
-    CredentialsPayload,
     SignInOptions,
     SignOutOptions,
     BuiltInOAuthProvider,
+    SignInCredentialsOptions,
+    UpdateSessionOptions,
 } from "@aura-stack/auth/types"
-import type { AuthProviderProps, AuthReactContextValue, UpdateSessionCallOptions } from "@/@types/types.ts"
+import type { AuthProviderProps, AuthReactContextValue } from "@/@types/types.ts"
 
 /**
  * React context for {@link AuthReactContextValue}. Use {@link AuthProvider} to supply a client and {@link useAuth} (or other hooks) to read it.
@@ -42,9 +42,9 @@ export const AuthProvider = <DefaultUser extends User = User>({
     }, [client])
 
     const signIn = useCallback(
-        async (oauth: LiteralUnion<BuiltInOAuthProvider>, signInOptions?: SignInOptions) => {
-            const result = await client.signIn(oauth, signInOptions)
-            if (!(signInOptions?.redirect ?? true)) {
+        async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
+            const result = await client.signIn(oauth, options)
+            if (!(options?.redirect ?? true)) {
                 await refresh()
             }
             return result
@@ -53,9 +53,9 @@ export const AuthProvider = <DefaultUser extends User = User>({
     )
 
     const signInCredentials = useCallback(
-        async (credentials: CredentialsPayload, signInOptions?: SignInOptions) => {
-            const result = await client.signInCredentials(credentials, signInOptions)
-            if (!(signInOptions?.redirect ?? true)) {
+        async (options: SignInCredentialsOptions) => {
+            const result = await client.signInCredentials(options)
+            if (!(options?.redirect ?? true)) {
                 await refresh()
             }
             return result
@@ -75,9 +75,9 @@ export const AuthProvider = <DefaultUser extends User = User>({
     )
 
     const updateSession = useCallback(
-        async (partial: DeepPartial<Session<DefaultUser>>, callOptions?: UpdateSessionCallOptions) => {
-            const result = await client.updateSession(partial)
-            if (!callOptions?.skipRefresh) {
+        async (options: UpdateSessionOptions<DefaultUser>) => {
+            const result = await client.updateSession(options)
+            if (!(options?.redirect ?? true)) {
                 await refresh()
             }
             return result
@@ -109,17 +109,18 @@ export const AuthProvider = <DefaultUser extends User = User>({
     }, [initialSession, client])
 
     const value = useMemo(
-        (): AuthReactContextValue<DefaultUser> => ({
-            session,
-            status,
-            isPending,
-            client,
-            refresh,
-            signIn,
-            signInCredentials,
-            signOut,
-            updateSession,
-        }),
+        (): AuthReactContextValue<DefaultUser> =>
+            ({
+                session,
+                status,
+                isPending,
+                client,
+                refresh,
+                signIn,
+                signInCredentials,
+                signOut,
+                updateSession,
+            }) as AuthReactContextValue<DefaultUser>,
         [session, status, isPending, client, refresh, signIn, signInCredentials, signOut, updateSession]
     )
 
