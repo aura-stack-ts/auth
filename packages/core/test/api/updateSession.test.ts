@@ -1,9 +1,17 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
 import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { UserIdentity } from "@/shared/identity.ts"
+
+beforeEach(() => {
+    vi.stubEnv("BASE_URL", undefined)
+})
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
@@ -15,6 +23,7 @@ describe("updateSession API", () => {
             session: null,
             headers: expect.any(Headers),
             success: false,
+            redirectURL: null,
             toResponse: expect.any(Function),
         })
     })
@@ -51,8 +60,9 @@ describe("updateSession API", () => {
                 },
                 expires: expect.any(String),
             },
-            headers: expect.any(Headers),
             success: true,
+            redirectURL: null,
+            headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
     })
@@ -91,12 +101,15 @@ describe("updateSession API", () => {
                 expires: expect.any(String),
             },
             headers: expect.any(Headers),
+            redirectURL: null,
             success: true,
             toResponse: expect.any(Function),
         })
     })
 
     test("updates user session with generic user type", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
         const { jose, api } = createAuth({
             oauth: [],
             identity: {
@@ -139,6 +152,7 @@ describe("updateSession API", () => {
                 expires: expect.any(String),
             },
             success: true,
+            redirectURL: null,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -176,8 +190,9 @@ describe("updateSession API", () => {
                 },
                 expires: expect.any(String),
             },
-            headers: expect.any(Headers),
             success: true,
+            redirectURL: null,
+            headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
     })
@@ -209,6 +224,41 @@ describe("updateSession API", () => {
                 expires: expiresAt,
             },
             success: true,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("updateSession with redirectTo", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+        })
+
+        const csrfToken = await createCSRF(jose)
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: { user: { name: "Alice" } },
+            redirectTo: "/dashboard",
+            skipCSRFCheck: true,
+        })
+        expect(updated).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    name: "Alice",
+                    email: "johndoe@example.com",
+                },
+                expires: expect.any(String),
+            },
+            success: true,
+            redirectURL: "/dashboard",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })

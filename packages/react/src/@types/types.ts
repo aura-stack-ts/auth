@@ -4,32 +4,16 @@
  * Re-exports of core session/user types come from `@aura-stack/auth/types` via `@aura-stack/react/types`.
  */
 import type { ReactNode } from "react"
-import type {
-    CredentialsPayload,
-    DeepPartial,
-    LiteralUnion,
-    BuiltInOAuthProvider,
-    Session,
-    SignInOptions,
-    SignOutOptions,
-    User,
-} from "@aura-stack/auth/types"
+import type { Session, User } from "@aura-stack/auth/types"
+import type { createAuthClient } from "@aura-stack/auth/client"
 
 /**
  * The object returned by {@link createAuthClient} for a given user type, including `getSession`, `signIn`, `signOut`, etc.
  */
-export type AuthClientInstance<DefaultUser extends User = User> = ReturnType<
-    typeof import("@aura-stack/auth/client").createAuthClient<DefaultUser>
->
+export type AuthClientInstance<DefaultUser extends User = User> = ReturnType<typeof createAuthClient<DefaultUser>>
 
 /** High-level UI state for whether a session is present, absent, or still being resolved. */
 export type AuthStatus = "authenticated" | "unauthenticated" | "loading"
-
-/** Options for {@link AuthReactContextValue.updateSession} (React layer; not sent to the HTTP API). */
-export type UpdateSessionCallOptions = {
-    /** When true, skip syncing session state via {@link AuthReactContextValue.refresh} after the update. */
-    skipRefresh?: boolean
-}
 
 /**
  * Full auth surface exposed through a single React context so session state and
@@ -45,19 +29,10 @@ export type AuthReactContextValue<DefaultUser extends User = User> = {
     client: AuthClientInstance<DefaultUser>
     /** Re-fetches session from the server and updates context state. */
     refresh: () => Promise<void>
-    signIn: (
-        oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: SignInOptions
-    ) => ReturnType<AuthClientInstance<DefaultUser>["signIn"]>
-    signInCredentials: (
-        credentials: CredentialsPayload,
-        options?: SignInOptions
-    ) => ReturnType<AuthClientInstance<DefaultUser>["signInCredentials"]>
-    signOut: (options?: SignOutOptions) => ReturnType<AuthClientInstance<DefaultUser>["signOut"]>
-    updateSession: (
-        partial: DeepPartial<Session<DefaultUser>>,
-        options?: UpdateSessionCallOptions
-    ) => ReturnType<AuthClientInstance<DefaultUser>["updateSession"]>
+    signIn: AuthClientInstance<DefaultUser>["signIn"]
+    signInCredentials: AuthClientInstance<DefaultUser>["signInCredentials"]
+    signOut: AuthClientInstance<DefaultUser>["signOut"]
+    updateSession: AuthClientInstance<DefaultUser>["updateSession"]
 }
 
 /** Props for {@link AuthProvider}: supply the client and optional SSR session to avoid a flash of loading state. */

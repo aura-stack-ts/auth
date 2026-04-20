@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+-
+
 - Removed and cleaned up the types and functions exported from the main `/` entry point to reduce import noise, and introduced `/identity`, `/shared`, and `/crypto` as direct entry points for specific utilities. Utilities and types previously exposed via `/` are now accessible through these direct entry points. Additionally, removed the `StrippedUserIdentity` Zod schema and added the `UpdateSessionOptions` type. [#141](https://github.com/aura-stack-ts/auth/pull/141)
 
 - Introduced experimental credentials-based authentication via the `/session` endpoint, enabling username/password sign-in on the client side. [#136](https://github.com/aura-stack-ts/auth/pull/136)
@@ -29,6 +31,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Introduced the `session` configuration option in `createAuth` to manage session strategies (currently JWT only), with support for multiple JWT modes: `signed`, `encrypted`, and `sealed` (secure by default). It also supports custom signing and encryption algorithms, plus customization of `audience`, `issuer`, and `maxAge` claims. [#125](https://github.com/aura-stack-ts/auth/pull/125)
 
 ### Changed
+
+- Standardized API and client option/return contracts across `signIn`, `signInCredentials`, `signOut`, and `updateSession` by introducing dedicated `api` types, unifying redirect behavior, and adding consistent error metadata and `headers`/`toResponse()` response helpers in programmatic API functions. [#146](https://github.com/aura-stack-ts/auth/pull/146)
 
 - The built-in JOSE functions now provide type safety and type inference based on the `User` type. Additionally, `encryptJWE` and `decryptJWE` now accept and return `JWTPayload`. [#123](https://github.com/aura-stack-ts/auth/pull/123)
 

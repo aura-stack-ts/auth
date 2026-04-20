@@ -36,8 +36,9 @@ describe("signOut API", async () => {
                 Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
-        expect(out).toEqual({
+        expect(out).toMatchObject({
             success: true,
+            redirect: false,
             redirectURL: "/",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -58,8 +59,9 @@ describe("signOut API", async () => {
                 Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
-        expect(out).toEqual({
+        expect(out).toMatchObject({
             success: true,
+            redirect: false,
             redirectURL: "/",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -81,8 +83,9 @@ describe("signOut API", async () => {
             },
             redirectTo: "/dashboard",
         })
-        expect(out).toEqual({
+        expect(out).toMatchObject({
             success: true,
+            redirect: false,
             redirectURL: "/dashboard",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

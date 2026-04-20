@@ -12,8 +12,9 @@ export default defineConfig({
         "src/_core/shared.ts",
         "src/@types/index.ts",
     ],
+    fixedExtension: false,
     deps: {
-        ...tsdownConfig.deps,
+        onlyBundle: false,
         neverBundle: ["react", "react-dom", "react-router"],
     },
 })

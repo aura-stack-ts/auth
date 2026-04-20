@@ -29,7 +29,7 @@ It ensures that session state is synchronized across your entire component tree,
 ## Installation
 
 ```bash
-pnpm add @aura-stack/react @aura-stack/auth
+pnpm add @aura-stack/react
 ```
 
 > [!NOTE]
@@ -37,13 +37,12 @@ pnpm add @aura-stack/react @aura-stack/auth
 
 ## Quick Start
 
-### 1. Configure the Provider
+### 1. Configure Auth Client Instance and Auth Provider
 
 Wrap your application with the `AuthProvider` and pass it a configured Aura Auth client.
 
 ```tsx
-import { createAuthClient } from "@aura-stack/auth/client"
-import { AuthProvider } from "@aura-stack/react"
+import { createAuthClient, AuthProvider } from "@aura-stack/react"
 
 const client = createAuthClient({
   /* your config */
@@ -59,26 +58,33 @@ export const App = ({ children }) => {
 Access the session or authentication methods from any component in the tree.
 
 ```tsx
-import { useSession, useSignIn, useSignOut } from "@aura-stack/react"
+import { useSession } from "@aura-stack/react"
 
-export const UserProfile = () => {
+export const Profile = () => {
   const { session, status } = useSession()
-  const signIn = useSignIn()
-  const signOut = useSignOut()
 
   if (status === "loading") return <div>Loading...</div>
-
-  if (!session) {
-    return <button onClick={() => signIn("github")}>Sign in with GitHub</button>
-  }
 
   return (
     <div>
       <p>Welcome, {session.user.name}!</p>
-      <button onClick={() => signOut()}>Sign out</button>
     </div>
   )
 }
+```
+
+### 3. Create Auth Instance
+
+Configure your auth instance in a shared file (e.g., `lib/auth.ts`).
+
+```ts
+import { createAuth } from "@aura-stack/react/server"
+
+export const auth = createAuth({
+  oauth: ["github"],
+})
+
+export const { api, jose, handlers } = auth
 ```
 
 ## Documentation

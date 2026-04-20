@@ -28,6 +28,40 @@ Inspired by [Auth.js](https://authjs.dev/), Aura Auth focuses on simplicity, dev
 - **Extensible architecture** — Easily integrate with `@aura-stack/router` or custom routing layers.
 - **Framework-agnostic** — Works seamlessly in any environment that supports the Web Request/Response APIs.
 
+## Installation
+
+```bash
+pnpm add @aura-stack/auth
+```
+
+## Quick Start
+
+### 1. Create Auth Instance
+
+Configure your auth instance in a shared file (e.g., `lib/auth.ts`).
+
+```ts
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+})
+
+export const { api, jose handlers } = auth
+```
+
+### 2. Creat Auth Client Instance
+
+Configure your auth client instance in a shared file (e.g., `lib/auth-client.ts`).
+
+```ts
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuth({
+  baseURL: "http://localhost:3000",
+})
+```
+
 ## Documentation
 
 Visit the [**official documentation website**](https://aura-stack-auth.vercel.app).

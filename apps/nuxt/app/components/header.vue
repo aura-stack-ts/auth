@@ -44,7 +44,14 @@ const closeMenu = () => {
                     Discord
                 </a>
             </ul>
-            <a v-if="!isAuthenticated" class="text-xl font-semibold hidden md:flex" href="https://nuxt.com/" target="_blank" rel="noopener noreferrer">Nuxt</a>
+            <a
+                v-if="!isAuthenticated"
+                class="text-xl font-semibold hidden md:flex"
+                href="https://nuxt.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Nuxt</a
+            >
             <Button
                 v-if="isAuthenticated"
                 class="data-[auth='true']:hidden md:data-[auth='true']:flex"
