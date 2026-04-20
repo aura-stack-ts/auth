@@ -25,7 +25,6 @@ const flow = [
 ]
 
 const IndexPage = () => {
-
     return (
         <main className="min-h-container relative flex flex-col overflow-hidden bg-black">
             <section className="flex-1 w-11/12 max-w-6xl mx-auto p-6 flex items-center relative border-b border-x border-muted">
@@ -63,7 +62,11 @@ const IndexPage = () => {
                             <h2 className="text-3xl tracking-tight text-white">{item.title}</h2>
                             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
                             <Button className="w-min mt-6" variant="outline" asChild>
-                                <Link to={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener noreferrer" : undefined}>
+                                <Link
+                                    to={item.href}
+                                    target={item.external ? "_blank" : undefined}
+                                    rel={item.external ? "noopener noreferrer" : undefined}
+                                >
                                     Try Now
                                 </Link>
                             </Button>

@@ -8,115 +8,113 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as ServerRouteImport } from './routes/server'
-import { Route as ClientRouteImport } from './routes/client'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as rootRouteImport } from "./routes/__root"
+import { Route as ServerRouteImport } from "./routes/server"
+import { Route as ClientRouteImport } from "./routes/client"
+import { Route as IndexRouteImport } from "./routes/index"
+import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth.$"
 
 const ServerRoute = ServerRouteImport.update({
-  id: '/server',
-  path: '/server',
-  getParentRoute: () => rootRouteImport,
+    id: "/server",
+    path: "/server",
+    getParentRoute: () => rootRouteImport,
 } as any)
 const ClientRoute = ClientRouteImport.update({
-  id: '/client',
-  path: '/client',
-  getParentRoute: () => rootRouteImport,
+    id: "/client",
+    path: "/client",
+    getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
+    id: "/",
+    path: "/",
+    getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
+    id: "/api/auth/$",
+    path: "/api/auth/$",
+    getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/client': typeof ClientRoute
-  '/server': typeof ServerRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
+    "/": typeof IndexRoute
+    "/client": typeof ClientRoute
+    "/server": typeof ServerRoute
+    "/api/auth/$": typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/client': typeof ClientRoute
-  '/server': typeof ServerRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
+    "/": typeof IndexRoute
+    "/client": typeof ClientRoute
+    "/server": typeof ServerRoute
+    "/api/auth/$": typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/client': typeof ClientRoute
-  '/server': typeof ServerRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
+    __root__: typeof rootRouteImport
+    "/": typeof IndexRoute
+    "/client": typeof ClientRoute
+    "/server": typeof ServerRoute
+    "/api/auth/$": typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/client' | '/server' | '/api/auth/$'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/client' | '/server' | '/api/auth/$'
-  id: '__root__' | '/' | '/client' | '/server' | '/api/auth/$'
-  fileRoutesById: FileRoutesById
+    fileRoutesByFullPath: FileRoutesByFullPath
+    fullPaths: "/" | "/client" | "/server" | "/api/auth/$"
+    fileRoutesByTo: FileRoutesByTo
+    to: "/" | "/client" | "/server" | "/api/auth/$"
+    id: "__root__" | "/" | "/client" | "/server" | "/api/auth/$"
+    fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ClientRoute: typeof ClientRoute
-  ServerRoute: typeof ServerRoute
-  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+    IndexRoute: typeof IndexRoute
+    ClientRoute: typeof ClientRoute
+    ServerRoute: typeof ServerRoute
+    ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/server': {
-      id: '/server'
-      path: '/server'
-      fullPath: '/server'
-      preLoaderRoute: typeof ServerRouteImport
-      parentRoute: typeof rootRouteImport
+declare module "@tanstack/react-router" {
+    interface FileRoutesByPath {
+        "/server": {
+            id: "/server"
+            path: "/server"
+            fullPath: "/server"
+            preLoaderRoute: typeof ServerRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        "/client": {
+            id: "/client"
+            path: "/client"
+            fullPath: "/client"
+            preLoaderRoute: typeof ClientRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        "/": {
+            id: "/"
+            path: "/"
+            fullPath: "/"
+            preLoaderRoute: typeof IndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        "/api/auth/$": {
+            id: "/api/auth/$"
+            path: "/api/auth/$"
+            fullPath: "/api/auth/$"
+            preLoaderRoute: typeof ApiAuthSplatRouteImport
+            parentRoute: typeof rootRouteImport
+        }
     }
-    '/client': {
-      id: '/client'
-      path: '/client'
-      fullPath: '/client'
-      preLoaderRoute: typeof ClientRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  ClientRoute: ClientRoute,
-  ServerRoute: ServerRoute,
-  ApiAuthSplatRoute: ApiAuthSplatRoute,
+    IndexRoute: IndexRoute,
+    ClientRoute: ClientRoute,
+    ServerRoute: ServerRoute,
+    ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
+import type { getRouter } from "./router.tsx"
+import type { createStart } from "@tanstack/react-start"
+declare module "@tanstack/react-start" {
+    interface Register {
+        ssr: true
+        router: Awaited<ReturnType<typeof getRouter>>
+    }
 }
