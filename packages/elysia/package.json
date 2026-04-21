@@ -6,7 +6,7 @@
   "description": "Elysia integration for Aura Stack authentication library",
   "scripts": {
     "dev": "tsdown --watch",
-    "build": "tsdown",
+    "build": "pnpm sync:modules && tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "test": "vitest --run",
@@ -15,9 +15,10 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist src/_core src/oauth",
     "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
-    "prepublish": "pnpm clean:cts"
+    "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
+    "sync:modules": "node ../shared/scripts/modules.js"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,11 @@
       "types": "./dist/oauth/index.d.ts",
       "import": "./dist/oauth/index.js",
       "require": "./dist/oauth/index.cjs"
+    },
+    "./oauth/*": {
+      "types": "./dist/oauth/*.d.ts",
+      "import": "./dist/oauth/*.js",
+      "require": "./dist/oauth/*.cjs"
     },
     "./identity": {
       "types": "./dist/_core/identity.d.ts",

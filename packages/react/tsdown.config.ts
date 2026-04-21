@@ -9,6 +9,7 @@ export default defineConfig({
         "src/hooks.ts",
         "src/context.tsx",
         "src/oauth/index.ts",
+        "src/oauth/*.ts",
         "src/_core/identity.ts",
         "src/_core/crypto.ts",
         "src/_core/shared.ts",
