@@ -64,7 +64,7 @@ try {
     const outDir = resolve(process.cwd(), join(out, "oauth"))
     console.log("From:", resolve(process.cwd(), join("..", from)), "\nOut:", resolve(process.cwd(), out))
     await mkdir(outDir, { recursive: true })
-    for await (const file of glob(`../${from}/src/oauth/*.ts`)) {
+    for await (const file of glob(`../core/src/oauth/*.ts`)) {
         const oauthName = parse(file).name
         const outPath = resolve(outDir, `${oauthName}.ts`)
         await writeFile(outPath, `export * from "@aura-stack/${resolvePackageName(from)}/oauth/${oauthName}"\n`, "utf-8")

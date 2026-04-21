@@ -14,7 +14,7 @@
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist src/_core src/oauth",
     "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
-    "prepublish": "pnpm clean:cts",
+    "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js --from react"
   },
   "repository": {
