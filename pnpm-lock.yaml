@@ -749,6 +749,19 @@ importers:
         specifier: catalog:vitest
         version: 4.1.4(@types/node@24.12.0)(@vitest/coverage-v8@4.1.4)(jsdom@27.4.0(@noble/hashes@1.8.0))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
 
+  packages/integration:
+    dependencies:
+      '@aura-stack/auth':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsdown-config':
+        specifier: workspace:*
+        version: link:../../configs/tsdown-config
+
   packages/jose:
     dependencies:
       jose:
@@ -845,6 +858,8 @@ importers:
       react-router:
         specifier: catalog:react-router
         version: 7.12.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+
+  packages/shared: {}
 
 packages:
 

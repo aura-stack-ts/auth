@@ -1,0 +1,79 @@
+{
+  "name": "@aura-stack/integration",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Integration for Aura Stack authentication library",
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "pnpm sync:modules && tsdown",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist src/_core src/oauth",
+    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "prepublishOnly": "pnpm clean:cts && pnpm build && pnpm clean:cts",
+    "sync:modules": "node ../shared/scripts/modules.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./oauth": {
+      "types": "./dist/oauth/index.d.ts",
+      "import": "./dist/oauth/index.js",
+      "require": "./dist/oauth/index.cjs"
+    },
+    "./oauth/*": {
+      "types": "./dist/oauth/*.d.ts",
+      "import": "./dist/oauth/*.js",
+      "require": "./dist/oauth/*.cjs"
+    },
+    "./identity": {
+      "types": "./dist/_core/identity.d.ts",
+      "import": "./dist/_core/identity.js",
+      "require": "./dist/_core/identity.cjs"
+    },
+    "./crypto": {
+      "types": "./dist/_core/crypto.d.ts",
+      "import": "./dist/_core/crypto.js",
+      "require": "./dist/_core/crypto.cjs"
+    },
+    "./shared": {
+      "types": "./dist/_core/shared.d.ts",
+      "import": "./dist/_core/shared.js",
+      "require": "./dist/_core/shared.cjs"
+    }
+  },
+  "keywords": [],
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@aura-stack/auth": "workspace:*"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*"
+  },
+  "peerDependencies": {},
+  "packageManager": "pnpm@10.15.0"
+}
