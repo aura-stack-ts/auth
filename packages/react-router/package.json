@@ -6,7 +6,7 @@
   "description": "React Router integration for Aura Stack authentication library",
   "scripts": {
     "dev": "tsdown --watch",
-    "build": "tsdown",
+    "build": "pnpm sync:modules && tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",

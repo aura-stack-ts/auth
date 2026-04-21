@@ -6,7 +6,7 @@
   "description": "React integration for Aura Stack authentication library",
   "scripts": {
     "dev": "tsdown --watch",
-    "build": "tsdown",
+    "build": "pnpm sync:modules && tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "test": "vitest --run",
@@ -17,7 +17,7 @@
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist src/_core src/oauth",
     "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
-    "prepublish": "clean:cts",
+    "prepublish": "pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js"
   },
   "repository": {

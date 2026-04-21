@@ -56,6 +56,10 @@ const args = parseArgs({
 
 const { out, from, core, json } = args.values
 
+const resolvePackageName = (from) => {
+    return from === "core" ? "auth" : from
+}
+
 try {
     const outDir = resolve(process.cwd(), join(out, "oauth"))
     console.log("From:", resolve(process.cwd(), join("..", from)), "\nOut:", resolve(process.cwd(), out))
@@ -63,7 +67,7 @@ try {
     for await (const file of glob(`../${from}/src/oauth/*.ts`)) {
         const oauthName = parse(file).name
         const outPath = resolve(outDir, `${oauthName}.ts`)
-        await writeFile(outPath, `export * from "@aura-stack/${from === "core" ? "auth" : from}/oauth/${oauthName}"\n`, "utf-8")
+        await writeFile(outPath, `export * from "@aura-stack/${resolvePackageName(from)}/oauth/${oauthName}"\n`, "utf-8")
     }
     console.log("\x1b[32mOAuth modules were exported successfully!\x1b[0m")
 
@@ -72,11 +76,7 @@ try {
         await mkdir(outDirCore, { recursive: true })
         for (const moduleName of coreModules) {
             const outPathCore = resolve(outDirCore, `${moduleName}.ts`)
-            await writeFile(
-                outPathCore,
-                `export * from "@aura-stack/${from === "core" ? "auth" : from}/${moduleName}"\n`,
-                "utf-8"
-            )
+            await writeFile(outPathCore, `export * from "@aura-stack/${resolvePackageName(from)}/${moduleName}"\n`, "utf-8")
         }
         console.log("\x1b[32mCore modules were exported successfully!\x1b[0m")
     }
@@ -88,7 +88,7 @@ try {
             readJson.exports = {}
         }
         for (const { name, entry, out } of jsonExports) {
-            if (!readJson?.exports?.[entry]) {
+            if (!readJson.exports[name]) {
                 Object.assign(readJson.exports, {
                     [name]: {
                         types: `./dist${out}${entry}.d.ts`,
@@ -103,4 +103,5 @@ try {
     }
 } catch (error) {
     console.error("\x1b[31m[error]: Failed to export modules:\x1b[0m", error)
+    process.exit(1)
 }
