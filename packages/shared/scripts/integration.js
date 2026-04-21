@@ -19,6 +19,10 @@ if (!name) {
     console.error("\x1b[31m[error]: Integration name is required\x1b[0m")
     process.exit(1)
 }
+if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
+    console.error("\x1b[31m[error]: Integration name must be lowercase alphanumeric with dashes\x1b[0m")
+    process.exit(1)
+}
 
 if (existsSync(resolve(process.cwd(), "packages", name))) {
     console.error("\x1b[31m[error]: Integration with the same name already exists\x1b[0m")

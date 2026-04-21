@@ -3,10 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "tasks": {
-    "dev": "deno run --watch src/index.tsx"
+    "dev": "deno run --watch src/index.ts"
   },
   "imports": {
-    "@/": "./src/"
+    "@/": "./src/",
+    "./oauth": "./src/oauth/index.ts",
+    "./identity": "./src/_core/identity.ts",
+    "./crypto": "./src/_core/crypto.ts",
+    "./shared": "./src/_core/shared.ts"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/**/*.tsx", "README.md", "CHANGELOG.md"]

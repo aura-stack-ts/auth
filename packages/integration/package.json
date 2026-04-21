@@ -1,12 +1,12 @@
 {
   "name": "@aura-stack/integration",
   "version": "0.0.0",
-  "private": false,
+  "private": true,
   "type": "module",
   "description": "Integration for Aura Stack authentication library",
   "scripts": {
     "dev": "tsdown --watch",
-    "build": "tsdown",
+    "build": "pnpm sync:modules && tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "test": "vitest --run",

@@ -4,8 +4,8 @@
 
 **Integration authentication library for the Aura Stack ecosystem**
 
-[![npm version](https://img.shields.io/npm/v/@aura-stack/integration.svg)](https://www.npmjs.com/package/@aura-stack/auth)
-[![JSR version](https://jsr.io/badges/@aura-stack/integration)](https://jsr.io/@aura-stack/auth)
+[![npm version](https://img.shields.io/npm/v/@aura-stack/integration.svg)](https://www.npmjs.com/package/@aura-stack/integration)
+[![JSR version](https://jsr.io/badges/@aura-stack/integration)](https://jsr.io/@aura-stack/integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 [Official Docs](https://aura-stack-auth.vercel.app/docs) · [Core Package Docs](https://aura-stack-auth.vercel.app/docs/packages/core)
