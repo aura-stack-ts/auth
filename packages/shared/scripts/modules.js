@@ -1,6 +1,6 @@
-import { glob, mkdir, readFile, writeFile } from "node:fs/promises"
-import { join, parse, resolve } from "node:path"
 import { parseArgs } from "node:util"
+import { join, parse, resolve } from "node:path"
+import { glob, mkdir, readFile, writeFile } from "node:fs/promises"
 
 const coreModules = ["crypto", "identity", "shared"]
 const jsonExports = [

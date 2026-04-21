@@ -1,0 +1,15 @@
+{
+  "name": "@aura-stack/integration",
+  "version": "0.0.0",
+  "license": "MIT",
+  "tasks": {
+    "dev": "deno run --watch src/index.tsx"
+  },
+  "imports": {
+    "@/": "./src/"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "src/**/*.tsx", "README.md", "CHANGELOG.md"]
+  },
+  "exclude": ["dist", "node_modules"]
+}

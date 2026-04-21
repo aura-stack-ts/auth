@@ -16,7 +16,8 @@
     "format:check": "oxfmt --check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "type-check": "turbo run type-check --parallel"
+    "type-check": "turbo run type-check --parallel",
+    "create:integration": "node packages/shared/scripts/integration.js --name "
   },
   "repository": {
     "type": "git",
