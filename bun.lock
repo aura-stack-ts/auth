@@ -297,7 +297,7 @@
     },
     "packages/core": {
       "name": "@aura-stack/auth",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "dependencies": {
         "@aura-stack/jose": "workspace:*",
         "@aura-stack/router": "^0.6.0",
@@ -375,7 +375,7 @@
     },
     "packages/jose": {
       "name": "@aura-stack/jose",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "dependencies": {
         "jose": "^6.1.2",
       },
