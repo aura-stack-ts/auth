@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.6.0] - 2026-04-26
+
 ### Added
 
 - Removed and cleaned up the types and functions exported from the main `/` entry point to reduce import noise, and introduced `/identity`, `/shared`, and `/crypto` as direct entry points for specific utilities. Utilities and types previously exposed via `/` are now accessible through these direct entry points. Additionally, removed the `StrippedUserIdentity` Zod schema and added the `UpdateSessionOptions` type. [#141](https://github.com/aura-stack-ts/auth/pull/141)

@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.5.0] - 2026-04-26
+
 ### Added
 
 - Added `compactEncryptJWE`, `decryptCompactJWE`, and `createCompactJWE` to handle compact JWE (JSON Web Encryption) serialization, and introduced `EncodeJWTOptions` and `DecodeJWTOptions` to configure additional payload headers and verification options for signing and encryption flows. [#123](https://github.com/aura-stack-ts/auth/pull/123)

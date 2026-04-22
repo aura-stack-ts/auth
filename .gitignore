@@ -190,6 +190,8 @@ worker-configuration.d.ts
 .wrangler/*
 
 # Packages
-!packages/core/src/oauth
 packages/**/_core
 packages/**/oauth
+
+!packages/core/src/oauth/
+!packages/core/src/oauth/**
