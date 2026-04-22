@@ -2,12 +2,13 @@ import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
 import { UserIdentity } from "@/shared/identity.ts"
-import type { ZodObject } from "zod/v4"
+import type { z, ZodObject, ZodRawShape, ZodType } from "zod/v4"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { EditableShape, Prettify, ShapeToObject } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
 import type { JWTKey, SessionConfig, SessionStrategy, User, UserShape } from "@/@types/session.ts"
+import { ZodTypeAny } from "zod/v3"
 
 /**
  * Main configuration interface for Aura Auth.
