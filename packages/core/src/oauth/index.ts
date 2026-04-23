@@ -20,6 +20,7 @@ import { notion } from "./notion.ts"
 import { dropbox } from "./dropbox.ts"
 import { atlassian } from "./atlassian.ts"
 import { clickUp } from "./click-up.ts"
+import { coinbase } from "./coinbase.ts"
 import { formatZodError } from "@/shared/utils.ts"
 import { AuthInternalError } from "@/shared/errors.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
@@ -39,6 +40,7 @@ export * from "./notion.ts"
 export * from "./dropbox.ts"
 export * from "./atlassian.ts"
 export * from "./click-up.ts"
+export * from "./coinbase.ts"
 
 export const builtInOAuthProviders = {
     github,
@@ -56,6 +58,7 @@ export const builtInOAuthProviders = {
     dropbox,
     atlassian,
     clickUp,
+    coinbase,
 } as const
 
 /**
