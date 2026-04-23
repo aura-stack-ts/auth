@@ -1,10 +1,12 @@
-import { DeepPartial, EditableShape, ShapeToObject } from "./utility.ts"
+import type { infer as Infer } from "zod/v4/core"
 import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { UserIdentityType, UserShape } from "@/shared/identity.ts"
+import type { UserIdentity, UserShape } from "@/shared/identity.ts"
+import type { DeepPartial, EditableShape, ZodShapeToObject } from "@/@types/utility.ts"
 import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
-export type User = UserIdentityType
+export type User = Infer<typeof UserIdentity>
+
 export type { UserShape } from "@/shared/identity.ts"
 
 /**
@@ -214,7 +216,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
 /** Inputs for constructing a session strategy implementation for a given identity schema. */
 export interface CreateSessionStrategyOptions<Identity extends EditableShape<UserShape>> {
     config?: SessionConfig
-    jose: JoseInstance<ShapeToObject<Identity> & User>
+    jose: JoseInstance<ZodShapeToObject<Identity> & User>
     cookies: () => CookieStoreConfig
     logger?: InternalLogger
     identity: IdentityConfig

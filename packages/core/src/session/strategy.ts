@@ -1,7 +1,7 @@
 import { AuthInvalidConfigurationError } from "@/shared/errors.ts"
 import { createStatelessStrategy } from "@/session/stateless.ts"
 import type { CreateSessionStrategyOptions, SessionStrategy, User, UserShape } from "@/@types/session.ts"
-import { EditableShape, ShapeToObject } from "@/@types/utility.ts"
+import { EditableShape, ZodShapeToObject } from "@/@types/utility.ts"
 
 export const createSessionStrategy = <Identity extends EditableShape<UserShape>>({
     config,
@@ -9,7 +9,7 @@ export const createSessionStrategy = <Identity extends EditableShape<UserShape>>
     cookies,
     logger,
     identity,
-}: CreateSessionStrategyOptions<Identity>): SessionStrategy<ShapeToObject<Identity> & User> => {
+}: CreateSessionStrategyOptions<Identity>): SessionStrategy<ZodShapeToObject<Identity> & User> => {
     const strategy = config?.strategy ?? "jwt"
 
     switch (strategy) {

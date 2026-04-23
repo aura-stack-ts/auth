@@ -1,7 +1,15 @@
 import { email, string, z } from "zod/v4"
 import type { EditableShape } from "@/@types/utility.ts"
 
-export type { InferAuthIdentity, InferIdentity, InferShape, ShapeToObject, EditableShape } from "@/@types/utility.ts"
+export type {
+    InferUser,
+    InferSession,
+    UserFrom,
+    SessionFrom,
+    InferZodShape,
+    ZodShapeToObject,
+    EditableShape,
+} from "@/@types/utility.ts"
 
 export const UserIdentity = z.object({
     sub: string(),
@@ -11,6 +19,5 @@ export const UserIdentity = z.object({
 })
 
 export type UserShape = (typeof UserIdentity)["shape"]
-export type UserIdentityType = z.infer<typeof UserIdentity>
 
 export const createIdentity = <S extends EditableShape<UserShape>>(shape: S) => z.object(shape)

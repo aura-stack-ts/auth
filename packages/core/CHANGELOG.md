@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added `InferSession` and `SessionFrom` types to infer the session type from either an auth instance or a Zod schema. [#150](https://github.com/aura-stack-ts/auth/pull/150)
+
+### Changed
+
+- Renamed identity types for clearer naming: `ShapeToObject` to `ZodShapeToObject`, `InferAuthIdentity` to `InferUser`, `InferShape` to `InferZodShape`, and `InferIdentity` to `UserFrom`. [#150](https://github.com/aura-stack-ts/auth/pull/150)
+
+### Removed
+
+- Removed the `UserIdentityType` type; use `User` instead. [#150](https://github.com/aura-stack-ts/auth/pull/150)
+
 ---
 
 ## [0.6.0] - 2026-04-21

@@ -5,7 +5,7 @@ import { createProxyLogger } from "@/shared/logger.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
-import type { AuthConfig, EditableShape, InternalContext, ShapeToObject, UserShape } from "@/@types/index.ts"
+import type { AuthConfig, EditableShape, InternalContext, ZodShapeToObject, UserShape } from "@/@types/index.ts"
 
 export const createContext = <Identity extends EditableShape<UserShape>>(config?: AuthConfig<Identity>) => {
     const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
@@ -16,7 +16,7 @@ export const createContext = <Identity extends EditableShape<UserShape>>(config?
     const cookieOverrides = config?.cookies?.overrides ?? {}
     const secureCookieStore = createCookieStore(true, cookiePrefix, cookieOverrides, logger)
     const standardCookieStore = createCookieStore(false, cookiePrefix, cookieOverrides, logger)
-    const jose = createJoseInstance<ShapeToObject<Identity>>(config?.secret, config?.session)
+    const jose = createJoseInstance<ZodShapeToObject<Identity>>(config?.secret, config?.session)
 
     const ctx = {
         oauth: createBuiltInOAuthProviders(config?.oauth),
