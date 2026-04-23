@@ -63,12 +63,10 @@ export const createAccessToken = async (
                 code_verifier: codeVerifier,
             }).toString(),
         })
-
         if (!response.ok) {
             logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
             throw new OAuthProtocolError("invalid_request", "Invalid access token response")
         }
-
         const json = await response.json()
         const token = OAuthAccessTokenResponse.safeParse(json)
         if (!token.success) {
