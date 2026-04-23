@@ -36,7 +36,6 @@ export const coinbase = <DefaultUser extends User = User>(
         accessToken: "https://login.coinbase.com/oauth2/token",
         userInfo: "https://api.coinbase.com/v2/user",
         profile: (profile) => {
-            console.log("Coinbase profile", profile)
             return {
                 sub: String(profile.data.id),
                 name: profile.data.name,

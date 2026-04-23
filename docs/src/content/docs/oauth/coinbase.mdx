@@ -62,7 +62,7 @@ npm install @aura-stack/auth
 
 ## Environment setup
 
-Now, you must configure the environment variables required by Aura Auth, including the GitHub credentials and the encryption secrets.
+Now, you must configure the environment variables required by Aura Auth, including the Coinbase credentials and the encryption secrets.
 
 ```bash title=".env" lineNumbers
 # Aura Secrets
@@ -123,7 +123,7 @@ export const auth = createAuth({
       authorize: {
         params: {
           // Override default scopes
-          scope: "read:user user:email",
+          scope: "wallet:user:read wallet:user:email",
         },
       },
     }),
@@ -181,7 +181,7 @@ For environments supporting server-side actions, use the programmatic `api.signI
 import { api } from "./auth"
 
 export const serverSignIn = async () => {
-  const response = await api.signIn("github", {
+  const response = await api.signIn("coinbase", {
     redirectTo: "http://localhost:3000/dashboard",
   })
 
@@ -200,7 +200,7 @@ After a user successfully signs in, you can retrieve their session data securely
 
 ```ts
 const session = await authClient.getSession()
-console.log(session?.user) // The authenticated GitHub user profile
+console.log(session?.user) // The authenticated Coinbase user profile
 ```
 
 **Server-Side:**
