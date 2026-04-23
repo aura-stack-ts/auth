@@ -1,7 +1,7 @@
 import { createAuth as createAuthBasic, type AuthConfig } from "@aura-stack/auth"
 import { toHandler } from "@/lib/handler"
 import { withAuth } from "@/lib/with-auth"
-import type { ShapeToObject, EditableShape, UserShape } from "@aura-stack/auth/identity"
+import type { ZodShapeToObject, EditableShape, UserShape } from "@aura-stack/auth/identity"
 
 /**
  * Creates an Aura Auth instance with Elysia-specific utilities.
@@ -25,6 +25,6 @@ export const createAuth = <Identity extends EditableShape<UserShape>>(config: Au
          * @example
          * app.derive(auth.withAuth).get("/me", ({ session }) => session)
          */
-        withAuth: withAuth<ShapeToObject<Identity>>(auth),
+        withAuth: withAuth<ZodShapeToObject<Identity>>(auth),
     }
 }

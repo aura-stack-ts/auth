@@ -1,7 +1,7 @@
 import { api } from "@/lib/api"
 import { createAuth as createAuthInstance } from "@aura-stack/react/server"
 import type { AuthConfig } from "@aura-stack/react"
-import type { EditableShape, ShapeToObject, UserShape } from "@aura-stack/react/types"
+import type { EditableShape, ZodShapeToObject, UserShape } from "@aura-stack/react/types"
 
 export const createAuth = <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => {
     const auth = createAuthInstance<Identity>(config)
@@ -12,6 +12,6 @@ export const createAuth = <Identity extends EditableShape<UserShape>>(config: Au
          * For most use cases, the `api` property should be sufficient, as it provides a higher-level API for common authentication tasks.
          */
         core: auth,
-        api: api<ShapeToObject<Identity>>(auth),
+        api: api<ZodShapeToObject<Identity>>(auth),
     }
 }

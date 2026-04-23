@@ -57,55 +57,49 @@ Enable type and lint checking to enforce clean code and catch potential issues e
 }
 ```
 
-## User Schema
+## Type Extension
 
-The `identity.schema` configuration option lets you define the validation schema for user identity data. By default, Aura Auth accepts a flexible identity shape, but you can provide your own schema to enforce a specific structure and set of fields.
+For the type extension, Aura Auth provides the `identity.schema` configuration option. This allows you to define a custom validation schema for user identity data, ensuring that the data conforms to a specific structure and set of fields and this schema is used as `User` and `Session` types across the library. By default, Aura Auth accepts a flexible identity shape, but you can provide your own schema to enforce a specific structure and set of fields.
 
 ```ts title="lib/auth.ts" lineNumbers
-import { createAuth, UserIdentity, type InferAuthIdentity, type InferShape } from "@aura-stack/auth"
 import { z } from "zod"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentity, type InferUser, InferSession } from "@aura-stack/auth/identity"
 
 const schema = UserIdentity.extend({
   role: z.enum(["admin", "user"]),
   permissions: z.array(z.string()),
 })
 
-export const auth = createAuth<InferShape<typeof schema>>({
+export const auth = createAuth({
   oauth: [],
   identity: {
     schema,
   },
 })
 
-export type UserSession = InferAuthIdentity<typeof auth>
+export type User = InferUser<typeof auth>
+export type Session = InferSession<typeof auth>
 ```
 
-- `InferShape<typeof schema>`: Extracts the shape of the identity schema so the custom fields are inferred correctly.
-- `InferAuthIdentity<typeof auth>`: Infers the user identity type from the configured `createAuth` instance.
+**Or, if you prefer to infer the types from the schema:**
 
-Aura Auth infers the type of `identity.schema` and uses it internally. The inferred type is also exposed through the `jose` and `api` utilities.
+```ts title="lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import type { UserIdentity, UserFrom, SessionFrom } from "@aura-stack/auth/identity"
 
-```ts title="lib/utils.ts" lineNumbers
-import { auth } from "@/lib/auth"
-
-const jws = await auth.jose.signJWS({
-  sub: "1234567890",
-  name: "John Doe",
-  email: "johndoe@example.com",
-  role: "admin",
-  permissions: ["read", "write"],
+const schema = UserIdentity.extend({
+  role: z.enum(["admin", "user"]),
+  permissions: z.array(z.string()),
 })
 
-/**
- * Infer the type of the user session.
- * - role is inferred as "admin" | "user"
- * - permissions is inferred as string[]
- */
-const session = await auth.api.getSession({
-  headers: {},
-})
+type User = UserFrom<typeof schema>
+type Session = SessionFrom<typeof schema>
 
-if (session.authenticated) {
-  const { role, permissions } = session.session
-}
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
 ```

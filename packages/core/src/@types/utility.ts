@@ -1,7 +1,6 @@
-import type { Session, User } from "@/@types/session.ts"
 import type { AuthInstance } from "@/@types/config.ts"
-import type { ZodObject, ZodRawShape, ZodTypeAny } from "zod/v4"
-import type { z } from "zod/v4"
+import type { Session, User } from "@/@types/session.ts"
+import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer } from "zod/v4"
 
 /** Expands intersection types into a single flat object type for readable editor hints. */
 export type Prettify<T> = { [K in keyof T]: T[K] }
@@ -27,9 +26,9 @@ export type Merge<A, B> = Omit<A, keyof B> & B
  * so identity fields always include the base user contract.
  * @todo: fix optional properties from the schema being incorrectly marked as required in the inferred type
  */
-export type ShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<
+export type ZodShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<
     {
-        [K in keyof S]: z.infer<S[K]>
+        [K in keyof S]: Infer<S[K]>
     },
     User
 >
@@ -62,7 +61,7 @@ export type Wrap<T> = T extends any ? { [K in keyof T]: T[K] } : never
 export type InferUser<Config extends AuthInstance> = Config extends AuthInstance<infer Identity> ? Prettify<Identity> : User
 
 /**
- * Infers the user type from an {@link AuthInstance} config, or falls back to {@link User}.
+ * Infers the session type from an {@link AuthInstance} config.
  * @example
  * const auth = createAuth({
  *   oauth: [],
@@ -78,25 +77,34 @@ export type InferSession<Config extends AuthInstance> = Prettify<Session<Wrap<In
 
 /**
  * Shorthand for a Zod object’s `.shape` property.
- * @deprecated Use `InferIdentity` instead.
  */
-export type InferShape<T extends ZodObject> = T["shape"]
-
-/** Runtime user object type inferred from a Zod identity schema. */
-export type InferIdentity<T extends ZodObject> = Prettify<ShapeToObject<InferShape<T>>>
+export type InferZodShape<T extends ZodObject> = T["shape"]
 
 /**
  * Infers the user type from a Zod identity schema, or falls back to {@link User}.
  * @example
- * const IdentitySchema = z.object({
+ * const schema = z.object({
  *   sub: z.string(),
  *   role: z.string().nullable().optional(),
  *   username: z.string().optional(),
  * })
  *
- * type User = InferUserFromSchema<typeof IdentitySchema>
+ * type User = UserFrom<typeof schema>
  */
-export type InferUserFromSchema<T extends ZodObject> = InferIdentity<T>
+export type UserFrom<T extends ZodObject> = Prettify<ZodShapeToObject<InferZodShape<T>>>
+
+/**
+ * Infers the session type from a Zod identity schema.
+ * @example
+ * const schema = z.object({
+ *   sub: z.string(),
+ *   role: z.string().nullable().optional(),
+ *   username: z.string().optional(),
+ * })
+ *
+ * type Session = SessionFrom<typeof schema>
+ */
+export type SessionFrom<T extends ZodObject> = Wrap<Session<Wrap<UserFrom<T>>>>
 
 /**
  * HTTP `Response` with `json()` typed to resolve to `Body` (defaults to `unknown`).

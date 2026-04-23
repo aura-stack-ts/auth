@@ -2,13 +2,12 @@ import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
 import { UserIdentity } from "@/shared/identity.ts"
-import type { z, ZodObject, ZodRawShape, ZodType } from "zod/v4"
+import type { ZodObject } from "zod/v4"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { EditableShape, Prettify, ShapeToObject } from "@/@types/utility.ts"
+import type { EditableShape, Prettify, ZodShapeToObject } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
 import type { JWTKey, SessionConfig, SessionStrategy, User, UserShape } from "@/@types/session.ts"
-import { ZodTypeAny } from "zod/v3"
 
 /**
  * Main configuration interface for Aura Auth.
@@ -46,7 +45,7 @@ export interface AuthConfig<Identity extends EditableShape<UserShape> = Editable
      * ```
      */
     // @todo: add type inference for built-in providers
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, ShapeToObject<Identity>>)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, ZodShapeToObject<Identity>>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -306,7 +305,7 @@ export interface CredentialsProvider<Identity extends EditableShape<UserShape> =
      */
     authorize: (
         ctx: CredentialsProviderContext<CredentialsPayload>
-    ) => Promise<ShapeToObject<Identity> | null> | ShapeToObject<Identity> | null
+    ) => Promise<ZodShapeToObject<Identity> | null> | ZodShapeToObject<Identity> | null
 }
 
 /**
@@ -355,7 +354,9 @@ export interface AuthInstance<DefaultUser extends User = User> {
 /**
  * Extended context used inside the library with both secure and standard cookie materializations.
  */
-export type InternalContext<Identity extends EditableShape<UserShape>> = RouterGlobalContext<ShapeToObject<Identity> & User> & {
+export type InternalContext<Identity extends EditableShape<UserShape>> = RouterGlobalContext<
+    ZodShapeToObject<Identity> & User
+> & {
     cookieConfig: {
         secure: CookieStoreConfig
         standard: CookieStoreConfig

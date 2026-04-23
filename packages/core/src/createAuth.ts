@@ -12,7 +12,7 @@ import {
     csrfTokenAction,
     updateSessionAction,
 } from "@/actions/index.ts"
-import type { AuthConfig, AuthInstance, EditableShape, ShapeToObject, UserShape } from "@/@types/index.ts"
+import type { AuthConfig, AuthInstance, EditableShape, ZodShapeToObject, UserShape } from "@/@types/index.ts"
 
 const createInternalConfig = <Identity extends EditableShape<UserShape>>(config?: AuthConfig<Identity>): RouterConfig => {
     const context = createContext<Identity>(config)
@@ -76,7 +76,7 @@ export const createAuthInstance = <Identity extends EditableShape<UserShape>>(au
  * })
  */
 export const createAuth = <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => {
-    const authInstance = createAuthInstance<Identity>(config) as AuthInstance<ShapeToObject<Identity>>
+    const authInstance = createAuthInstance<Identity>(config) as AuthInstance<ZodShapeToObject<Identity>>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()
         const methodHandlers = {
