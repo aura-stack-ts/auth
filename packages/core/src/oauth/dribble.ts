@@ -3,7 +3,7 @@ import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 /**
  * @see [Dribble - User](https://developer.dribbble.com/v2/user/)
  */
-export interface DribbleDefault {
+export interface DribbbleDefault {
     id: number
     name: string
     login: string
@@ -18,34 +18,34 @@ export interface DribbleDefault {
     created_at: string
 }
 
-export interface DribbleTeams extends DribbleDefault {
+export interface DribbbleTeams extends DribbbleDefault {
     type: "Team"
     updated_at: string
 }
 
-export interface DribbleProfile extends DribbleDefault {
+export interface DribbbleProfile extends DribbbleDefault {
     type: "User"
     /** Not documented but available in the API response */
     email: string | null
     can_upload_shot: boolean
     pro: boolean
     followers_count: number
-    teams: DribbleTeams[]
+    teams: DribbbleTeams[]
 }
 
 /**
- * Dribble OAuth provider
+ * Dribbble OAuth provider
  *
- * @see [Dribble - Register Application](https://dribbble.com/account/applications/new)
- * @see [Dribble - OAuth](https://developer.dribbble.com/v2/oauth/)
- * @see [Dribble - User](https://developer.dribbble.com/v2/user/)
+ * @see [Dribbble - Register Application](https://dribbble.com/account/applications/new)
+ * @see [Dribbble - OAuth](https://developer.dribbble.com/v2/oauth/)
+ * @see [Dribbble - User](https://developer.dribbble.com/v2/user/)
  */
-export const dribble = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<DribbleProfile, DefaultUser>>
-): OAuthProviderCredentials<DribbleProfile, DefaultUser> => {
+export const dribbble = <DefaultUser extends User = User>(
+    options?: Partial<OAuthProviderCredentials<DribbbleProfile, DefaultUser>>
+): OAuthProviderCredentials<DribbbleProfile, DefaultUser> => {
     return {
-        id: "dribble",
-        name: "Dribble",
+        id: "dribbble",
+        name: "Dribbble",
         authorize: {
             url: "https://dribbble.com/oauth/authorize",
             params: {
@@ -55,7 +55,6 @@ export const dribble = <DefaultUser extends User = User>(
         accessToken: "https://dribbble.com/oauth/token",
         userInfo: "https://api.dribbble.com/v2/user",
         profile: (profile) => {
-            console.log("Dribble profile", profile)
             return {
                 sub: String(profile.id),
                 name: profile.name,

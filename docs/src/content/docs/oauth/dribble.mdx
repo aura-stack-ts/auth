@@ -1,11 +1,11 @@
 ---
-title: Dribble Authorization Provider
-description: Add Dribble authorization provider to Aura Auth to authentication and authorize
+title: Dribbble Authorization Provider
+description: description: Add the Dribbble authorization provider to Aura Auth to authenticate and authorize users.
 ---
 
-## Dribble
+## Dribbble
 
-Set up the `Dribble` authorization provider in your Aura Auth instance.
+Set up the `Dribbble` authorization provider in your Aura Auth instance.
 
 ---
 
@@ -13,12 +13,12 @@ Set up the `Dribble` authorization provider in your Aura Auth instance.
 
 Through this quick start guide you are going to learn and understand the basics and how to set up the `Dribble` provider for Aura Auth.
 
-- [Dribble OAuth App](#dribble-oauth-app)
+- [Dribbble OAuth App](#dribbble-oauth-app)
 - [Installation](#installation)
 - [Environment setup](#environment-setup)
 - [Configure the Auth Instance](#configure-the-auth-instance)
 - [Customizing the OAuth Provider](#customizing-the-oauth-provider)
-- [Sign In to Dribble (Client & Server)](#sign-in-to-dribble-client--server)
+- [Sign In to Dribbble (Client & Server)](#sign-in-to-dribbble-client--server)
 - [Resources](#resources)
 
 ---
@@ -27,16 +27,16 @@ Through this quick start guide you are going to learn and understand the basics 
 
 <Step>
 
-## Dribble OAuth App
+## Dribbble OAuth App
 
 ### Register the Application
 
-The first step is to create and register an OAuth App on the Dribble Applications page to obtain access to the user's resources.
+The first step is to create and register an OAuth App on the Dribbble Applications page to obtain access to the user's resources.
 
-1. Navigate to your Dribble profile and go to **Settings > Applications**.
+1. Navigate to your Dribbble profile and go to **Settings > Applications**.
 2. Click **Register a new application**.
 3. Fill in the "Application name", "Description", and "Website URL".
-4. Set the **Callback URL** to `http://localhost:3000/auth/callback/dribble`.
+4. Set the **Callback URL** to `http://localhost:3000/auth/callback/dribbble`.
    - _(Make sure to replace `localhost:3000` with your production domain when deploying)_
 5. Click **Register application**.
 6. Ensure you copy the **Client ID** and click **Generate a new client secret**.
@@ -59,16 +59,16 @@ npm install @aura-stack/auth
 
 ## Environment setup
 
-Now, you must configure the environment variables required by Aura Auth, including the Dribble credentials and the encryption secrets.
+Now, you must configure the environment variables required by Aura Auth, including the Dribbble credentials and the encryption secrets.
 
 ```bash title=".env" lineNumbers
 # Aura Secrets
 AURA_AUTH_SECRET="your-32-byte-secret"
 AURA_AUTH_SALT="your-32-byte-salt"
 
-# Dribble Credentials
-AURA_AUTH_DRIBBLE_CLIENT_ID="your_dribble_client_id"
-AURA_AUTH_DRIBBLE_CLIENT_SECRET="your_dribble_client_secret"
+# Dribbble Credentials
+AURA_AUTH_DRIBBBLE_CLIENT_ID="your_dribbble_client_id"
+AURA_AUTH_DRIBBBLE_CLIENT_SECRET="your_dribbble_client_secret"
 ```
 
 <Callout type="warn">
@@ -90,7 +90,7 @@ Configure the `createAuth` instance inside an `auth.ts` file located at the root
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: ["dribble"],
+  oauth: ["dribbble"],
 })
 
 // Extract the required utilities
@@ -112,11 +112,11 @@ If you need to define custom scopes, change the response type, or map profile da
 
 ```ts title="auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
-import { dribble } from "@aura-stack/auth/oauth/dribble"
+import { dribbble } from "@aura-stack/auth/oauth/dribbble"
 
 export const auth = createAuth({
   oauth: [
-    dribble({
+    dribbble({
       authorize: {
         params: {
           // Override default scopes
@@ -134,14 +134,14 @@ export const { handlers, api, jose } = auth
 
 <Step>
 
-## Sign In to Dribble (Client & Server)
+## Sign In to Dribbble (Client & Server)
 
 There are multiple ways to trigger the sign-in flow depending on your ecosystem.
 
 ### Sign-in Path (Direct Navigation)
 
 The common route to trigger the auth flow natively without needing a client library is simply navigating the browser to:
-`http://localhost:3000/auth/signIn/dribble`
+`http://localhost:3000/auth/signIn/dribbble`
 
 ---
 
@@ -162,7 +162,7 @@ export const authClient = createAuthClient({
 })
 
 const triggerSignIn = async () => {
-  await authClient.signIn("dribble", {
+  await authClient.signIn("dribbble", {
     redirectTo: "/dashboard",
   })
 }
@@ -178,7 +178,7 @@ For environments supporting server-side actions, use the programmatic `api.signI
 import { api } from "./auth"
 
 export const serverSignIn = async () => {
-  const response = await api.signIn("dribble", {
+  const response = await api.signIn("dribbble", {
     redirectTo: "http://localhost:3000/dashboard",
   })
 
@@ -197,7 +197,7 @@ After a user successfully signs in, you can retrieve their session data securely
 
 ```ts
 const session = await authClient.getSession()
-console.log(session?.user) // The authenticated Dribble user profile
+console.log(session?.user) // The authenticated Dribbble user profile
 ```
 
 **Server-Side:**
