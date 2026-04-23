@@ -20,7 +20,8 @@ import { notion } from "./notion.ts"
 import { dropbox } from "./dropbox.ts"
 import { atlassian } from "./atlassian.ts"
 import { clickUp } from "./click-up.ts"
-import { dribble } from "./dribble.ts"
+import { dribbble } from "./dribbble.ts"
+import { hubspot } from "./hubspot.ts"
 import { formatZodError } from "@/shared/utils.ts"
 import { AuthInternalError } from "@/shared/errors.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
@@ -40,7 +41,8 @@ export * from "./notion.ts"
 export * from "./dropbox.ts"
 export * from "./atlassian.ts"
 export * from "./click-up.ts"
-export * from "./dribble.ts"
+export * from "./dribbble.ts"
+export * from "./hubspot.ts"
 
 export const builtInOAuthProviders = {
     github,
@@ -58,7 +60,8 @@ export const builtInOAuthProviders = {
     dropbox,
     atlassian,
     clickUp,
-    dribble,
+    dribbble,
+    hubspot,
 } as const
 
 /**
