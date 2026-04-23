@@ -19,6 +19,7 @@ import { twitch } from "./twitch.ts"
 import { notion } from "./notion.ts"
 import { dropbox } from "./dropbox.ts"
 import { atlassian } from "./atlassian.ts"
+import { clickUp } from "./click-up.ts"
 import { formatZodError } from "@/shared/utils.ts"
 import { AuthInternalError } from "@/shared/errors.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
@@ -37,6 +38,7 @@ export * from "./twitch.ts"
 export * from "./notion.ts"
 export * from "./dropbox.ts"
 export * from "./atlassian.ts"
+export * from "./click-up.ts"
 
 export const builtInOAuthProviders = {
     github,
@@ -53,6 +55,7 @@ export const builtInOAuthProviders = {
     notion,
     dropbox,
     atlassian,
+    clickUp,
 } as const
 
 /**
@@ -68,8 +71,8 @@ export const builtInOAuthProviders = {
  */
 const defineOAuthEnvironment = (oauth: string) => {
     const loadEnvs = OAuthEnvSchema.safeParse({
-        clientId: getEnv(`${oauth.toUpperCase()}_CLIENT_ID`),
-        clientSecret: getEnv(`${oauth.toUpperCase()}_CLIENT_SECRET`),
+        clientId: getEnv(`${oauth.replace("-", "_").toUpperCase()}_CLIENT_ID`),
+        clientSecret: getEnv(`${oauth.replace("-", "_").toUpperCase()}_CLIENT_SECRET`),
     })
     if (!loadEnvs.success) {
         const msg = JSON.stringify({ [oauth]: formatZodError(loadEnvs.error) }, null, 2)

@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `ClickUp` OAuth provider to the supported integrations in Aura Auth. [#151](https://github.com/aura-stack-ts/auth/pull/151)
+
 - Added `InferSession` and `SessionFrom` types to infer the session type from either an auth instance or a Zod schema. [#150](https://github.com/aura-stack-ts/auth/pull/150)
 
 ### Changed
