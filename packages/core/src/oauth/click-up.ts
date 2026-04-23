@@ -5,7 +5,7 @@ import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
  */
 export interface ClickUpProfile {
     user: {
-        id: string
+        id: number
         username: string
         email: string
         color: string
@@ -36,7 +36,7 @@ export const clickUp = <DefaultUser extends User = User>(
         userInfo: "https://api.clickup.com/api/v2/user",
         profile: (profile) => {
             return {
-                sub: profile.user.id,
+                sub: String(profile.user.id),
                 name: profile.user.username,
                 email: profile.user.email,
                 image: profile.user.profilePicture,

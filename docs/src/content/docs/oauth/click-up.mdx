@@ -36,8 +36,8 @@ The first step is to create and register an OAuth App on the ClickUp Workspace t
 1. Navigate to your Clickup Avatar and go to **Settings > Integrations & ClickApps > ClickUp API > ClickUp API Settings**.
 2. Click **Create an App**.
 3. Fill in the "App name".
-4. Set the **Redirect URL(s)** to `localhost:3000`.
-   - _(Make sure to replace `localhost:3000` with your production domain when deploying)_
+4. Set the **Redirect URL(s)** to `http://localhost:3000/auth/callback/click-up`.
+   - _(Make sure to replace `http://localhost:3000` with your production domain when deploying)_
 5. Click **Create App**.
 6. Ensure you copy the **Client ID** and click **Generate a new client secret**.
 
@@ -119,7 +119,7 @@ export const auth = createAuth({
     clickUp({
       authorize: {
         params: {
-          scope: "read:user user:email",
+          clientId: process.env.AURA_AUTH_CLICK_UP_CLIENT_ID!,
         },
       },
     }),
