@@ -1,19 +1,20 @@
 import { describe, expectTypeOf } from "vitest"
-import { z, ZodString } from "zod/v4"
+import { z, ZodOptional, ZodString } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { UserIdentity } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
 import type {
     GetSessionAPIOptions,
     GetSessionAPIReturn,
+    Session,
     UpdateSessionAPIOptions,
     UpdateSessionAPIReturn,
     UserShape,
 } from "@/@types/index.ts"
 import type { AuthConfig, AuthInstance, User } from "@/index.ts"
 import type { OAuthProviderCredentials } from "@/@types/oauth.ts"
-import type { EditableShape, ZodShapeToObject } from "@/@types/utility.ts"
-import type { JWTHeaderParameters, JWTVerifyOptions, TypedJWTPayload } from "@aura-stack/jose"
+import type { EditableShape, InferSession, InferUser, ZodShapeToObject } from "@/@types/utility.ts"
+import type { JWTHeaderParameters, JWTVerifyOptions, Prettify, TypedJWTPayload } from "@aura-stack/jose"
 
 describe("createAuth", () => {
     expectTypeOf(createAuth).toEqualTypeOf<
@@ -73,6 +74,14 @@ describe("createAuth", () => {
         (
             options: UpdateSessionAPIOptions<ZodShapeToObject<UserShape & { role: ZodString }>>
         ) => Promise<UpdateSessionAPIReturn<ZodShapeToObject<UserShape & { role: ZodString }>>>
+    >()
+    expectTypeOf<InferUser<ReturnType<typeof createAuth>>>().toEqualTypeOf<User>()
+    expectTypeOf<InferSession<ReturnType<typeof createAuth>>>().toEqualTypeOf<Session<User>>()
+    expectTypeOf<InferUser<ReturnType<typeof createAuth<UserShape & { role: ZodOptional<ZodString> }>>>>().toEqualTypeOf<
+        Prettify<User & { role?: string | undefined }>
+    >()
+    expectTypeOf<InferSession<ReturnType<typeof createAuth<UserShape & { role: ZodOptional<ZodString> }>>>>().toEqualTypeOf<
+        Session<Prettify<User & { role?: string | undefined }>>
     >()
 })
 

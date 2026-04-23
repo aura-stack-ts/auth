@@ -24,14 +24,8 @@ export type Merge<A, B> = Omit<A, keyof B> & B
 /**
  * Infers the runtime object type from a Zod `shape` and intersects it with {@link User}
  * so identity fields always include the base user contract.
- * @todo: fix optional properties from the schema being incorrectly marked as required in the inferred type
  */
-export type ZodShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<
-    {
-        [K in keyof S]: Infer<S[K]>
-    },
-    User
->
+export type ZodShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<Infer<ZodObject<S>>, User>
 
 /** Recursively makes every property required. */
 export type DeepRequired<T> = {

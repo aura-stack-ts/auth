@@ -76,7 +76,7 @@ export const createAuthInstance = <Identity extends EditableShape<UserShape>>(au
  * })
  */
 export const createAuth = <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => {
-    const authInstance = createAuthInstance<Identity>(config) as AuthInstance<ZodShapeToObject<Identity>>
+    const authInstance = createAuthInstance<Identity>(config) as unknown as AuthInstance<ZodShapeToObject<Identity>>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()
         const methodHandlers = {

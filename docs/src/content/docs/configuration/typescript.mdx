@@ -64,7 +64,7 @@ For the type extension, Aura Auth provides the `identity.schema` configuration o
 ```ts title="lib/auth.ts" lineNumbers
 import { z } from "zod"
 import { createAuth } from "@aura-stack/auth"
-import { UserIdentity, type InferUser, InferSession } from "@aura-stack/auth/identity"
+import { UserIdentity, type InferUser, type InferSession } from "@aura-stack/auth/identity"
 
 const schema = UserIdentity.extend({
   role: z.enum(["admin", "user"]),
@@ -85,8 +85,9 @@ export type Session = InferSession<typeof auth>
 **Or, if you prefer to infer the types from the schema:**
 
 ```ts title="lib/auth.ts" lineNumbers
+import { z } from "zod"
 import { createAuth } from "@aura-stack/auth"
-import type { UserIdentity, UserFrom, SessionFrom } from "@aura-stack/auth/identity"
+import { UserIdentity, type UserFrom, type SessionFrom } from "@aura-stack/auth/identity"
 
 const schema = UserIdentity.extend({
   role: z.enum(["admin", "user"]),
