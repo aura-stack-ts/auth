@@ -4,8 +4,8 @@ import { encoder, getRandomBytes } from "@/crypto.ts"
 import { createJWS, signJWS, verifyJWS } from "@/sign.ts"
 import { deriveKey, createDeriveKey } from "@/deriveKey.ts"
 import { createCompactJWE, createJWE, decryptCompactJWE, decryptJWE, encryptJWE, compactEncryptJWE } from "@/encrypt.ts"
-import { createJWT, MIN_SECRET_ENTROPY_BITS, type SecretInput } from "@/index.ts"
-import type { JWTPayload } from "jose"
+import { createJWT, decodeJWT, encodeJWT, MIN_SECRET_ENTROPY_BITS, type SecretInput } from "@/index.ts"
+import { generateKeyPair, type JWTPayload } from "jose"
 
 const payload: JWTPayload = {
     sub: "user-123",
@@ -275,6 +275,62 @@ describe("JWTs", () => {
         expect(decodedPayload.sub).toBe(payload.sub)
         expect(decodedPayload.name).toBe(payload.name)
         expect(decodedPayload.email).toBe(payload.email)
+    })
+
+    test("encode and decode JWT with a single CryptoKeyPair", async () => {
+        const { privateKey: signPrivateKey, publicKey: signPublicKey } = await generateKeyPair("RS256")
+        const { privateKey: decryptPrivateKey, publicKey: encryptPublicKey } = await generateKeyPair("RSA-OAEP-256")
+
+        const encoded = await encodeJWT(
+            payload,
+            {
+                sign: { privateKey: signPrivateKey, publicKey: signPublicKey },
+                encrypt: { privateKey: decryptPrivateKey, publicKey: encryptPublicKey },
+            },
+            {
+                sign: { alg: "RS256" },
+                encrypt: { alg: "RSA-OAEP-256", enc: "A256GCM" },
+            }
+        )
+
+        const decoded = await decodeJWT(
+            encoded,
+            {
+                sign: { privateKey: signPrivateKey, publicKey: signPublicKey },
+                encrypt: { privateKey: decryptPrivateKey, publicKey: encryptPublicKey },
+            },
+            {
+                verify: { algorithms: ["RS256"] },
+                decrypt: { keyManagementAlgorithms: ["RSA-OAEP-256"], contentEncryptionAlgorithms: ["A256GCM"] },
+            }
+        )
+
+        expect(decoded.sub).toBe(payload.sub)
+        expect(decoded.name).toBe(payload.name)
+        expect(decoded.email).toBe(payload.email)
+    })
+
+    test("createJWT supports CryptoKeyPair inputs", async () => {
+        const signingKeyPair = await generateKeyPair("RS256")
+        const encryptionKeyPair = await generateKeyPair("RSA-OAEP-256")
+        const jwt = createJWT({
+            sign: signingKeyPair,
+            encrypt: encryptionKeyPair,
+        })
+
+        const token = await jwt.encodeJWT(payload, {
+            sign: { alg: "RS256" },
+            encrypt: { alg: "RSA-OAEP-256", enc: "A256GCM" },
+        })
+
+        const decoded = await jwt.decodeJWT(token, {
+            verify: { algorithms: ["RS256"] },
+            decrypt: { keyManagementAlgorithms: ["RSA-OAEP-256"], contentEncryptionAlgorithms: ["A256GCM"] },
+        })
+
+        expect(decoded.sub).toBe(payload.sub)
+        expect(decoded.name).toBe(payload.name)
+        expect(decoded.email).toBe(payload.email)
     })
 })
 

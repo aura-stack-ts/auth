@@ -11,7 +11,7 @@ import {
 } from "jose"
 import { createSecret } from "@/secret.ts"
 import { decoder, encoder, getRandomBytes } from "@/crypto.ts"
-import { isAuraJoseError, isFalsy } from "@/assert.ts"
+import { isAuraJoseError, isCryptoKeyPair, isFalsy } from "@/assert.ts"
 import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.ts"
 import type { SecretInput, TypedJWTPayload } from "@/index.ts"
 
@@ -148,14 +148,17 @@ export const decryptCompactJWE = async (token: string, secret: SecretInput, opti
  * @param secret - Secret key used for encrypting and decrypting the JWE
  * @returns encryptJWE and decryptJWE functions
  */
-export const createJWE = <Payload extends JWTPayload>(secret: SecretInput) => {
+export const createJWE = <Payload extends JWTPayload>(secret: SecretInput | CryptoKeyPair) => {
+    const encryptSecret = isCryptoKeyPair(secret) ? secret.privateKey : secret
+    const decryptSecret = isCryptoKeyPair(secret) ? secret.publicKey : secret
+
     return {
         encryptJWE: <Encrypted extends JWTPayload = Payload>(
             payload: TypedJWTPayload<Partial<Encrypted>>,
             options?: JWEHeaderParameters
-        ) => encryptJWE<Encrypted>(payload, secret, options),
+        ) => encryptJWE<Encrypted>(payload, encryptSecret, options),
         decryptJWE: <Decrypted extends JWTPayload = Payload>(payload: string, options?: JWTDecryptOptions) =>
-            decryptJWE<Decrypted>(payload, secret, options),
+            decryptJWE<Decrypted>(payload, decryptSecret, options),
     }
 }
 
@@ -165,9 +168,12 @@ export const createJWE = <Payload extends JWTPayload>(secret: SecretInput) => {
  * @param secret - Secret key used for encrypting and decrypting the JWE
  * @returns compactEncryptJWE and decryptCompactJWE functions
  */
-export const createCompactJWE = (secret: SecretInput) => {
+export const createCompactJWE = (secret: SecretInput | CryptoKeyPair) => {
+    const encryptSecret = isCryptoKeyPair(secret) ? secret.privateKey : secret
+    const decryptSecret = isCryptoKeyPair(secret) ? secret.publicKey : secret
+
     return {
-        compactEncryptJWE: (payload: string, options?: JWEHeaderParameters) => compactEncryptJWE(payload, secret, options),
-        decryptCompactJWE: (payload: string, options?: DecryptOptions) => decryptCompactJWE(payload, secret, options),
+        compactEncryptJWE: (payload: string, options?: JWEHeaderParameters) => compactEncryptJWE(payload, encryptSecret, options),
+        decryptCompactJWE: (payload: string, options?: DecryptOptions) => decryptCompactJWE(payload, decryptSecret, options),
     }
 }

@@ -1,7 +1,7 @@
-import { isObject } from "@/assert.ts"
+import { isCryptoKeyPair, isObject } from "@/assert.ts"
 import { InvalidSecretError } from "@/errors.ts"
 import { encoder } from "@/crypto.ts"
-import type { DerivedKeyInput, SecretInput } from "@/index.ts"
+import type { DerivedKeyInput, JWTSecretInput, SecretInput } from "@/index.ts"
 
 export const MIN_SECRET_ENTROPY_BITS = 4.5
 
@@ -54,11 +54,48 @@ export const createSecret = (secret: SecretInput, length: number = 32) => {
     throw new InvalidSecretError("Secret must be a string, Uint8Array, or CryptoKey")
 }
 
-export const getSecrets = (secret: SecretInput | DerivedKeyInput) => {
-    const jwsSecret = isObject(secret) && "sign" in secret ? secret.sign : secret
-    const jweSecret = isObject(secret) && "encrypt" in secret ? secret.encrypt : secret
+const getJWSSecrets = (secret: JWTSecretInput) => {
+    if (!isCryptoKeyPair(secret)) {
+        return {
+            encode: secret,
+            decode: secret,
+        }
+    }
+
     return {
-        jwsSecret,
-        jweSecret,
+        encode: secret.privateKey,
+        decode: secret.publicKey,
+    }
+}
+
+const getJWESecrets = (secret: JWTSecretInput) => {
+    if (!isCryptoKeyPair(secret)) {
+        return {
+            encode: secret,
+            decode: secret,
+        }
+    }
+
+    return {
+        encode: secret.publicKey,
+        decode: secret.privateKey,
+    }
+}
+
+export const getSecrets = (secret: JWTSecretInput | DerivedKeyInput) => {
+    const jwsSource = isObject(secret) && "sign" in secret ? secret.sign : secret
+    const jweSource = isObject(secret) && "encrypt" in secret ? secret.encrypt : secret
+    const jwsSecrets = getJWSSecrets(jwsSource)
+    const jweSecrets = getJWESecrets(jweSource)
+
+    return {
+        encode: {
+            jwsSecret: jwsSecrets.encode,
+            jweSecret: jweSecrets.encode,
+        },
+        decode: {
+            jwsSecret: jwsSecrets.decode,
+            jweSecret: jweSecrets.decode,
+        },
     }
 }

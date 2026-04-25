@@ -1,7 +1,7 @@
 import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions, type JWTHeaderParameters } from "jose"
 import { createSecret } from "@/secret.ts"
 import { getRandomBytes } from "@/crypto.ts"
-import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.ts"
+import { isAuraJoseError, isCryptoKeyPair, isFalsy, isInvalidPayload } from "@/assert.ts"
 import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "@/errors.ts"
 import type { SecretInput, TypedJWTPayload } from "@/index.ts"
 
@@ -90,13 +90,15 @@ export const verifyJWS = async <Payload extends JWTPayload>(
  * @param options - Optional signing options (e.g. algorithm)
  * @returns signJWS and verifyJWS functions
  */
-export const createJWS = <Payload extends JWTPayload>(secret: SecretInput) => {
+export const createJWS = <Payload extends JWTPayload>(secret: SecretInput | CryptoKeyPair) => {
+    const signSecret = isCryptoKeyPair(secret) ? secret.privateKey : secret
+    const verifySecret = isCryptoKeyPair(secret) ? secret.publicKey : secret
     return {
         signJWS: <SignPayload extends JWTPayload = Payload>(
             payload: TypedJWTPayload<Partial<SignPayload>>,
             options?: JWTHeaderParameters
-        ) => signJWS<SignPayload>(payload, secret, options),
+        ) => signJWS<SignPayload>(payload, signSecret, options),
         verifyJWS: <VerifyPayload extends JWTPayload = Payload>(payload: string, verifyOptions?: JWTVerifyOptions) =>
-            verifyJWS<VerifyPayload>(payload, secret, verifyOptions),
+            verifyJWS<VerifyPayload>(payload, verifySecret, verifyOptions),
     }
 }
