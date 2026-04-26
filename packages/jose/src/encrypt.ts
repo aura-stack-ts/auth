@@ -149,8 +149,8 @@ export const decryptCompactJWE = async (token: string, secret: SecretInput, opti
  * @returns encryptJWE and decryptJWE functions
  */
 export const createJWE = <Payload extends JWTPayload>(secret: SecretInput | CryptoKeyPair) => {
-    const encryptSecret = isCryptoKeyPair(secret) ? secret.privateKey : secret
-    const decryptSecret = isCryptoKeyPair(secret) ? secret.publicKey : secret
+    const encryptSecret = isCryptoKeyPair(secret) ? secret.publicKey : secret
+    const decryptSecret = isCryptoKeyPair(secret) ? secret.privateKey : secret
 
     return {
         encryptJWE: <Encrypted extends JWTPayload = Payload>(
@@ -169,8 +169,8 @@ export const createJWE = <Payload extends JWTPayload>(secret: SecretInput | Cryp
  * @returns compactEncryptJWE and decryptCompactJWE functions
  */
 export const createCompactJWE = (secret: SecretInput | CryptoKeyPair) => {
-    const encryptSecret = isCryptoKeyPair(secret) ? secret.privateKey : secret
-    const decryptSecret = isCryptoKeyPair(secret) ? secret.publicKey : secret
+    const encryptSecret = isCryptoKeyPair(secret) ? secret.publicKey : secret
+    const decryptSecret = isCryptoKeyPair(secret) ? secret.privateKey : secret
 
     return {
         compactEncryptJWE: (payload: string, options?: JWEHeaderParameters) => compactEncryptJWE(payload, encryptSecret, options),

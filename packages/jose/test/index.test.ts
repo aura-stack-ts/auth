@@ -146,6 +146,34 @@ describe("JWSs", () => {
             "JWS signature verification failed"
         )
     })
+
+    test("verify JWT with RSA algorithm", async () => {
+        const { publicKey, privateKey } = await generateKeyPair("RS256")
+        const jws = await signJWS(payload, privateKey, { alg: "RS256" })
+        const decodedPayload = await verifyJWS(jws, publicKey, { algorithms: ["RS256"] })
+        expect(decodedPayload.sub).toBe(payload.sub)
+        expect(decodedPayload.name).toBe(payload.name)
+        expect(decodedPayload.email).toBe(payload.email)
+    })
+
+    test("fail JWT to verify a JWS with incorrect RSA public key", async () => {
+        const { privateKey } = await generateKeyPair("RS256")
+        const { publicKey: wrongPublicKey } = await generateKeyPair("RS256")
+        const jws = await signJWS(payload, privateKey, { alg: "RS256" })
+        await expect(verifyJWS(jws, wrongPublicKey, { algorithms: ["RS256"] })).rejects.toThrow(
+            "JWS signature verification failed"
+        )
+    })
+
+    test("verify createJWS with RSA algorithm", async () => {
+        const entries = await generateKeyPair("RS256")
+        const { signJWS, verifyJWS } = createJWS(entries)
+        const jws = await signJWS(payload, { alg: "RS256" })
+        const decoded = await verifyJWS(jws, { algorithms: ["RS256"] })
+        expect(decoded.sub).toBe(payload.sub)
+        expect(decoded.name).toBe(payload.name)
+        expect(decoded.email).toBe(payload.email)
+    })
 })
 
 describe("JWEs", () => {
@@ -216,6 +244,38 @@ describe("JWEs", () => {
         const decryptedJWS = await decryptCompactJWE(compactJWE)
         expect(decryptedJWS).toBe(jws)
     })
+
+    test("verify JWE with RSA algorithm", async () => {
+        const { publicKey, privateKey } = await generateKeyPair("RSA-OAEP-256")
+        const jwe = await encryptJWE({ payload }, publicKey, { alg: "RSA-OAEP-256", enc: "A256GCM" })
+        const decryptedPayload = await decryptJWE<{ payload: string }>(jwe, privateKey, {
+            keyManagementAlgorithms: ["RSA-OAEP-256"],
+            contentEncryptionAlgorithms: ["A256GCM"],
+        })
+        expect(decryptedPayload.payload).toMatchObject(payload)
+    })
+
+    test("verify createJWE with RSA algorithm", async () => {
+        const { publicKey, privateKey } = await generateKeyPair("RSA-OAEP-256")
+        const { encryptJWE, decryptJWE } = createJWE({ publicKey, privateKey })
+        const jwe = await encryptJWE({ payload }, { alg: "RSA-OAEP-256", enc: "A256GCM" })
+        const decryptedPayload = await decryptJWE<{ payload: string }>(jwe, {
+            keyManagementAlgorithms: ["RSA-OAEP-256"],
+            contentEncryptionAlgorithms: ["A256GCM"],
+        })
+        expect(decryptedPayload.payload).toMatchObject(payload)
+    })
+
+    test("verify createCompactJWE with RSA algorithm", async () => {
+        const { publicKey, privateKey } = await generateKeyPair("RSA-OAEP-256")
+        const { compactEncryptJWE, decryptCompactJWE } = createCompactJWE({ publicKey, privateKey })
+        const jwe = await compactEncryptJWE(JSON.stringify(payload), { alg: "RSA-OAEP-256", enc: "A256GCM" })
+        const decryptedPayload = await decryptCompactJWE(jwe, {
+            keyManagementAlgorithms: ["RSA-OAEP-256"],
+            contentEncryptionAlgorithms: ["A256GCM"],
+        })
+        expect(JSON.parse(decryptedPayload)).toMatchObject(payload)
+    })
 })
 
 describe("JWTs", () => {
@@ -278,14 +338,14 @@ describe("JWTs", () => {
     })
 
     test("encode and decode JWT with a single CryptoKeyPair", async () => {
-        const { privateKey: signPrivateKey, publicKey: signPublicKey } = await generateKeyPair("RS256")
-        const { privateKey: decryptPrivateKey, publicKey: encryptPublicKey } = await generateKeyPair("RSA-OAEP-256")
+        const signEntries = await generateKeyPair("RS256")
+        const encryptEntries = await generateKeyPair("RSA-OAEP-256")
 
         const encoded = await encodeJWT(
             payload,
             {
-                sign: { privateKey: signPrivateKey, publicKey: signPublicKey },
-                encrypt: { privateKey: decryptPrivateKey, publicKey: encryptPublicKey },
+                sign: signEntries,
+                encrypt: encryptEntries,
             },
             {
                 sign: { alg: "RS256" },
@@ -296,8 +356,8 @@ describe("JWTs", () => {
         const decoded = await decodeJWT(
             encoded,
             {
-                sign: { privateKey: signPrivateKey, publicKey: signPublicKey },
-                encrypt: { privateKey: decryptPrivateKey, publicKey: encryptPublicKey },
+                sign: signEntries,
+                encrypt: encryptEntries,
             },
             {
                 verify: { algorithms: ["RS256"] },

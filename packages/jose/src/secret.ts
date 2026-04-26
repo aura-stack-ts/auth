@@ -83,8 +83,9 @@ const getJWESecrets = (secret: JWTSecretInput) => {
 }
 
 export const getSecrets = (secret: JWTSecretInput | DerivedKeyInput) => {
-    const jwsSource = isObject(secret) && "sign" in secret ? secret.sign : secret
-    const jweSource = isObject(secret) && "encrypt" in secret ? secret.encrypt : secret
+    const isDerived = isObject(secret) && "sign" in secret && "encrypt" in secret
+    const jwsSource = isDerived ? secret.sign : secret
+    const jweSource = isDerived ? secret.encrypt : secret
     const jwsSecrets = getJWSSecrets(jwsSource)
     const jweSecrets = getJWESecrets(jweSource)
 
