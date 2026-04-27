@@ -4,6 +4,8 @@ import { equals, timingSafeEqual } from "@/shared/utils.ts"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import type { AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
 
+export { generateKeyPair as createKeyPair } from "@aura-stack/jose/jose"
+
 export const createSecretValue = (length: number = 32) => {
     return base64url.encode(getRandomBytes(length))
 }

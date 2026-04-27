@@ -69,6 +69,27 @@ export interface AuthConfig<Identity extends EditableShape<UserShape> = Editable
      * Secret used to sign and verify JWT tokens for session and csrf protection.
      * If not provided, it will load from the environment variable `AURA_AUTH_SECRET` or `AUTH_SECRET`, but if it
      * doesn't exist, it will throw an error during the initialization of the Auth module.
+     *
+     * > It can be a string, a Uint8Array, a CryptoKey, a CryptoKeyPair, or an object containing separate keys for
+     * signing and encryption. It depends on the JWT mode and algorithms you choose in the session configuration.
+     * The default mode is "sealed" (signing + encryption), so if the secret is a string or Uint8Array, it will derive
+     * separate keys for signing and encryption using HKDF, but if you provide a CryptoKeyPair, it will required to
+     * pass separate keys for signing and encryption in the `CryptoSecret` format.
+     * @example
+     * import { createSecretValue } from "@aura-stack/auth/crypto"
+     *
+     * secret: createSecretValue(32)
+     *
+     * // For asymmetric keys, generate a key pair and pass the private
+     * import { createKeyPair } from "@aura-stack/auth/crypto"
+     *
+     * const signing = await createKeyPair("RS256", { extractable: true })
+     * const encryption = await createKeyPair("RSA-OAEP-256", { extractable: true })
+     *
+     * secret: {
+     *   sign: signing,
+     *   encrypt: encryption,
+     * }
      */
     secret?: JWTKey
     /**

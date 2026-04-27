@@ -12,11 +12,10 @@ import {
     type JWTHeaderParameters,
     type JWEHeaderParameters,
     type JWTDecryptOptions,
-    type JWTSecretInput,
 } from "@aura-stack/jose"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
 import { AuthInternalError, AuthSecurityError } from "@/shared/errors.ts"
-import { isCryptoKey, isCryptoKeyPair, isEncryptedMode, isSealedMode, isSignedMode } from "@/shared/assert.ts"
+import { isCryptoKey, isCryptoKeyPair, isCryptoSecret, isEncryptedMode, isSealedMode, isSignedMode } from "@/shared/assert.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 import type { User, SessionConfig, JWTKey } from "@/@types/index.ts"
 
@@ -103,22 +102,34 @@ export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => 
     }
 }
 
-const getSecrets = async (secret: JWTSecretInput, salt: string) => {
-    if (isCryptoKeyPair(secret) || isCryptoKey(secret)) {
+const getSecrets = async (secret: JWTKey, salt: string) => {
+    if (isCryptoSecret(secret)) {
+        return {
+            jwsSecret: secret.sign,
+            jweSecret: secret.encrypt,
+            jwtSecret: {
+                sign: secret.sign,
+                encrypt: secret.encrypt,
+            },
+        }
+    }
+    if (isCryptoKey(secret) || isCryptoKeyPair(secret)) {
         return {
             jwsSecret: secret,
             jweSecret: secret,
-            jwtSecret: secret,
+            jwtSecret: {
+                sign: secret,
+                encrypt: secret,
+            },
         }
     }
 
-    const [derivedSigningKey, derivedEncryptionKey, derivedCsrfTokenKey] = await Promise.all([
-        createDeriveKey(secret, salt, "signing"),
-        createDeriveKey(secret, salt, "encryption"),
-        createDeriveKey(secret, salt, "csrfToken"),
+    const [derivedSigningKey, derivedEncryptionKey] = await Promise.all([
+        createDeriveKey(secret, salt, "aura:signing"),
+        createDeriveKey(secret, salt, "aura:encryption"),
     ])
     return {
-        jwsSecret: derivedCsrfTokenKey,
+        jwsSecret: derivedSigningKey,
         jweSecret: derivedEncryptionKey,
         jwtSecret: {
             sign: derivedSigningKey,

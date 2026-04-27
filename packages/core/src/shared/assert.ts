@@ -1,5 +1,5 @@
 import { equals, patternToRegex } from "@/shared/utils.ts"
-import type { JWTConfig, JWTMode, JWTPayloadWithToken, SessionConfig } from "@/@types/index.ts"
+import type { CryptoSecret, JWTConfig, JWTMode, JWTPayloadWithToken, SessionConfig } from "@/@types/index.ts"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -116,4 +116,15 @@ export const isCryptoKeyPair = (value: unknown): value is CryptoKeyPair => {
 
 export const isCryptoKey = (value: unknown): value is CryptoKey => {
     return typeof value === "object" && value !== null && "algorithm" in value && "extractable" in value
+}
+
+export const isCryptoSecret = (value: unknown): value is CryptoSecret => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "sign" in value &&
+        "encrypt" in value &&
+        (isCryptoKey(value.sign) || isCryptoKeyPair(value.sign)) &&
+        (isCryptoKey(value.encrypt) || isCryptoKeyPair(value.encrypt))
+    )
 }

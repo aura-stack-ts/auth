@@ -17,6 +17,11 @@ export interface Session<DefaultUser extends User = User> {
     expires: string
 }
 
+export interface CryptoSecret {
+    sign: CryptoKey | CryptoKeyPair
+    encrypt: CryptoKey | CryptoKeyPair
+}
+
 /**
  * A symmetric secret or asymmetric key pair used for JWT operations.
  *
@@ -24,7 +29,7 @@ export interface Session<DefaultUser extends User = User> {
  * - CryptoKey: Web Crypto API key, for environments that support it
  * - CryptoKeyPair: asymmetric signing/encryption (RS256, ES256, EdDSA, RSA-OAEP, etc.)
  */
-export type SecretKey = string | Uint8Array | CryptoKey | CryptoKeyPair
+export type SecretKey = string | Uint8Array | CryptoKey | CryptoKeyPair | CryptoSecret
 
 /**
  * @todo: add key rotation support for "SecretKey | CryptoKeyPair | [SecretKey | CryptoKeyPair, ...(SecretKey | CryptoKeyPair)[]]"

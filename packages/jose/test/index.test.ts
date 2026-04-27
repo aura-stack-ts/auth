@@ -165,6 +165,41 @@ describe("JWSs", () => {
         )
     })
 
+    test("verify createJWS with crypto.generateKey", async () => {
+        const secret = await crypto.subtle.generateKey(
+            {
+                name: "RSA-PSS",
+                modulusLength: 2048,
+                publicExponent: new Uint8Array([1, 0, 1]),
+                hash: "SHA-256",
+            },
+            true,
+            ["sign", "verify"]
+        )
+        const { signJWS, verifyJWS } = createJWS(secret)
+        const signed = await signJWS(payload, { alg: "PS256" })
+        const verified = await verifyJWS(signed, { algorithms: ["PS256"] })
+        expect(verified).toMatchObject(payload)
+    })
+
+    test("verify createJWS with crypto.importKey", async () => {
+        const secretValue = encoder.encode(getRandomBytes(32).toString())
+        const secret = await crypto.subtle.importKey(
+            "raw",
+            secretValue,
+            {
+                name: "HMAC",
+                hash: "SHA-256",
+            },
+            true,
+            ["sign", "verify"]
+        )
+        const { signJWS, verifyJWS } = createJWS(secret)
+        const signed = await signJWS(payload, { alg: "HS256" })
+        const verified = await verifyJWS(signed, { algorithms: ["HS256"] })
+        expect(verified).toMatchObject(payload)
+    })
+
     test("verify createJWS with RSA algorithm", async () => {
         const entries = await generateKeyPair("RS256")
         const { signJWS, verifyJWS } = createJWS(entries)
