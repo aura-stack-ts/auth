@@ -309,8 +309,38 @@ type HostCookie = {
 Secret value used to sign and encrypt JWTs for session management and for CSRF token protection. This configuration overrides the `AURA_AUTH_SECRET` or `AUTH_SECRET` environment variable which is automatically loaded by Aura Auth. If neither option is configured, Aura Auth will throw an error, as this option is required for session management and CSRF protection.
 
 ```ts lineNumbers
-type Secret = string
+type Secret = string | Uint8Array | CryptoKey | CryptoKeyPair | CryptoSecret
 ```
+
+###### CryptoKey and CryptoKeyPair Support [!toc]
+
+Aura Auth supports using `CryptoKey` and `CryptoKeyPair` objects for signing and encryption operations, providing enhanced security by leveraging the Web Crypto API. This allows for the use of asymmetric keys (e.g., RSA, ECDSA) in addition to symmetric secrets. When using `CryptoKeyPair`, you can specify separate keys for signing and encryption, ensuring that the same key is not used for both operations.
+
+```ts lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { createKeyPair } from "@aura-stack/auth/crypto"
+
+const signKeyPair = await createKeyPair("RS256", { extractable: true })
+const encryptKeyPair = await createKeyPair("RSA-OAEP-256", { extractable: true })
+
+export const auth = createAuth({
+  oauth: [],
+  secret: {
+    sign: signKeyPair,
+    encrypt: encryptKeyPair,
+  },
+})
+```
+
+<Callout type="warning">
+  This configuration option is advanced and is related to the JWT mode set in the Auth Instance configuration. By default the
+  `jwt.mode` is `sealed` (sign + encrypt) and for this mode is required to pass different keys for signing and encryption, so, its
+  needed to pass a `CryptoSecret` object with the `sign` and `encrypt` fields, if its provided the same secret key, it's possible
+  that the JOSE operations throw errors notifying that the secret keys must be different. On the other hand, if the JWT mode is
+  `signed` (sign only) or `encrypted` (encrypt only), its possible to pass the `CryptoKey` or `CryptoKeyPair` objects directly.
+  Ensure you understand the usage of `CryptoKey` and `CryptoKeyPair` in the context of JOSE operations before implementing this
+  option.
+</Callout>
 
 ##### `basePath`
 
