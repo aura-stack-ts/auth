@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added support for asymmetric cryptography using `public/private` key pairs via `CryptoKeyPair` across JOSE functions exposed by `createAuth.jose`, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encodeJWT`, and `decodeJWT` functions. [#157](https://github.com/aura-stack-ts/auth/pull/157)
+
 - Added the `Dribbble` OAuth provider to the supported integrations in Aura Auth. [#153](https://github.com/aura-stack-ts/auth/pull/153)
 
 - Added the `ClickUp` OAuth provider to the supported integrations in Aura Auth. [#151](https://github.com/aura-stack-ts/auth/pull/151)

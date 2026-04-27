@@ -7,7 +7,7 @@ import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { EditableShape, Prettify, ZodShapeToObject } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
-import type { JWTKey, SecretKey, SessionConfig, SessionStrategy, User, UserShape } from "@/@types/session.ts"
+import type { JWTKey, SessionConfig, SessionStrategy, User, UserShape } from "@/@types/session.ts"
 
 /**
  * Main configuration interface for Aura Auth.
@@ -70,7 +70,7 @@ export interface AuthConfig<Identity extends EditableShape<UserShape> = Editable
      * If not provided, it will load from the environment variable `AURA_AUTH_SECRET` or `AUTH_SECRET`, but if it
      * doesn't exist, it will throw an error during the initialization of the Auth module.
      */
-    secret?: SecretKey
+    secret?: JWTKey
     /**
      * Base URL of the application, used to construct the incoming request's origin.
      */

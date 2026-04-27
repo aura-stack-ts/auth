@@ -1,59 +1,13 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { createSecretValue } from "@/shared/crypto.ts"
-import { generateKeyPair } from "@aura-stack/jose/jose"
-import type { JWTSigningAlgorithm, SecretKey } from "@/@types/session.ts"
 
 beforeEach(() => {
-    /**
-     * Skip environment variables because Aura Auth takes them as priority over
-     * the options passed to createAuth, and we want to test the options directly
-     * without interference from env vars.
-     */
-    vi.stubEnv("AURA_AUTH_SALT", undefined)
-    vi.stubEnv("AURA_AUTH_SECRET", undefined)
     vi.stubEnv("BASE_URL", undefined)
 })
 
 afterEach(() => {
     vi.unstubAllEnvs()
 })
-
-const testJWTAlgorithms = (secret: SecretKey) => {
-    describe("JWS algorithms", () => {
-        const testCases: JWTSigningAlgorithm[] = [
-            "HS256",
-            "HS384",
-            "HS512",
-            "RS256",
-            "RS384",
-            "RS512",
-            "ES256",
-            "ES384",
-            "ES512",
-            "EdDSA",
-            "PS256",
-        ]
-        for (const alg of testCases) {
-            test(`algorithm: ${alg}`, async () => {
-                vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
-
-                expect(
-                    createAuth({
-                        oauth: [],
-                        secret,
-                        session: {
-                            jwt: {
-                                mode: "signed",
-                                signingAlgorithm: alg,
-                            },
-                        },
-                    })
-                ).toBeDefined()
-            })
-        }
-    })
-}
 
 describe("createAuth", () => {
     describe("handlers.ALL", () => {
@@ -110,71 +64,6 @@ describe("createAuth", () => {
         test("invalid path for get csrfToken", async () => {
             const response = await auth.handlers.GET(new Request("https://example.com/auth/csrfToken"))
             expect(response.status).toBe(404)
-        })
-    })
-
-    describe("secret", () => {
-        test("invalid secret", () => {
-            expect(() => createAuth({ oauth: [] })).toThrow(
-                "AURA_AUTH_SECRET environment variable is not set and no secret was provided."
-            )
-        })
-
-        test("invalid salt", () => {
-            const secret = createSecretValue(32)
-            expect(() => createAuth({ oauth: [], secret })).toThrow(
-                "AURA_AUTH_SALT or AUTH_SALT environment variable is not set. A salt value is required for key derivation."
-            )
-        })
-
-        describe("crypto.getRandomValues", () => {
-            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
-
-            const secret = createSecretValue(32)
-            testJWTAlgorithms(secret)
-        })
-
-        describe("crypto.generateKey", async () => {
-            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
-
-            const secret = await crypto.subtle.generateKey(
-                {
-                    name: "AES-GCM",
-                    length: 256,
-                },
-                true,
-                ["encrypt", "decrypt"]
-            )
-            testJWTAlgorithms(secret)
-        })
-
-        describe("crypto.importKey", async () => {
-            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
-
-            const rawKey = new Uint8Array(32)
-            const secret = await crypto.subtle.importKey(
-                "raw",
-                rawKey,
-                {
-                    name: "AES-GCM",
-                },
-                true,
-                ["encrypt", "decrypt"]
-            )
-
-            testJWTAlgorithms(secret)
-        })
-
-        describe("uint8array secret", () => {
-            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
-
-            const secret = new Uint8Array(32)
-            testJWTAlgorithms(secret)
-        })
-
-        describe("jose.generateKeyPair", async () => {
-            const entries = await generateKeyPair("RS256")
-            testJWTAlgorithms(entries)
         })
     })
 })

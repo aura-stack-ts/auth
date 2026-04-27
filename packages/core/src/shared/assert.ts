@@ -109,3 +109,11 @@ export const isEncryptedMode = (config?: SessionConfig): config is { jwt: Extrac
 
 export const isSealedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "sealed" }> } =>
     getJWTMode(config) === "sealed"
+
+export const isCryptoKeyPair = (value: unknown): value is CryptoKeyPair => {
+    return typeof value === "object" && value !== null && "publicKey" in value && "privateKey" in value
+}
+
+export const isCryptoKey = (value: unknown): value is CryptoKey => {
+    return typeof value === "object" && value !== null && "algorithm" in value && "extractable" in value
+}

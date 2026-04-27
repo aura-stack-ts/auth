@@ -120,7 +120,7 @@ export const decodeJWT = async <Payload extends JWTPayload>(
  * JWT tokens. The JWTs are signed and verified using JWS and encrypted and decrypted using JWE. It
  * implements the `signJWS`, `verifyJWS`, `encryptJWE` and `decryptJWE` functions of the module.
  *
- * @param secret - Secret key used for signing, verifying, encrypting and decrypting the JWT
+ * @param secret - Secret used for decrypting and verifying the JWT. Accepts a `SecretInput` (string, Uint8Array, CryptoKey), a `CryptoKeyPair` for asymmetric keys, or a `DerivedKeyInput` with separate `sign`/`encrypt` entries
  * @param options - Optional algorithm configuration for signing and encryption
  * @returns JWT handler object with `signJWS/encryptJWE` and `verifyJWS/decryptJWE` methods
  */

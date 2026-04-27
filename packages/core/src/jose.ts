@@ -12,10 +12,11 @@ import {
     type JWTHeaderParameters,
     type JWEHeaderParameters,
     type JWTDecryptOptions,
+    type JWTSecretInput,
 } from "@aura-stack/jose"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
 import { AuthInternalError, AuthSecurityError } from "@/shared/errors.ts"
-import { isEncryptedMode, isSealedMode, isSignedMode } from "@/shared/assert.ts"
+import { isCryptoKey, isCryptoKeyPair, isEncryptedMode, isSealedMode, isSignedMode } from "@/shared/assert.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 import type { User, SessionConfig, JWTKey } from "@/@types/index.ts"
 
@@ -102,6 +103,30 @@ export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => 
     }
 }
 
+const getSecrets = async (secret: JWTSecretInput, salt: string) => {
+    if (isCryptoKeyPair(secret) || isCryptoKey(secret)) {
+        return {
+            jwsSecret: secret,
+            jweSecret: secret,
+            jwtSecret: secret,
+        }
+    }
+
+    const [derivedSigningKey, derivedEncryptionKey, derivedCsrfTokenKey] = await Promise.all([
+        createDeriveKey(secret, salt, "signing"),
+        createDeriveKey(secret, salt, "encryption"),
+        createDeriveKey(secret, salt, "csrfToken"),
+    ])
+    return {
+        jwsSecret: derivedCsrfTokenKey,
+        jweSecret: derivedEncryptionKey,
+        jwtSecret: {
+            sign: derivedSigningKey,
+            encrypt: derivedEncryptionKey,
+        },
+    }
+}
+
 /**
  * Creates the JOSE instance used for signing and verifying tokens. It derives keys
  * for session tokens and CSRF tokens. For security and determinism, it's required
@@ -143,16 +168,12 @@ export const createJoseInstance = <DefaultUser extends User = User>(secret?: JWT
     }
 
     const jose = (async () => {
-        const [derivedSigningKey, derivedEncryptionKey, derivedCsrfTokenKey] = await Promise.all([
-            createDeriveKey(secret, salt, "signing"),
-            createDeriveKey(secret, salt, "encryption"),
-            createDeriveKey(secret, salt, "csrfToken"),
-        ])
+        const { jwsSecret, jweSecret, jwtSecret } = await getSecrets(secret, salt)
 
         return {
-            jwt: createJWT<DefaultUser>({ sign: derivedSigningKey, encrypt: derivedEncryptionKey }),
-            jws: createJWS<DefaultUser>(derivedCsrfTokenKey),
-            jwe: createJWE<DefaultUser>(derivedEncryptionKey),
+            jwt: createJWT<DefaultUser>(jwtSecret),
+            jws: createJWS<DefaultUser>(jwsSecret),
+            jwe: createJWE<DefaultUser>(jweSecret),
         }
     })()
     jose.catch(() => {})

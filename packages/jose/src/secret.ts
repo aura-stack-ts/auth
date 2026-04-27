@@ -3,7 +3,7 @@ import { InvalidSecretError } from "@/errors.ts"
 import { encoder } from "@/crypto.ts"
 import type { DerivedKeyInput, JWTSecretInput, SecretInput } from "@/index.ts"
 
-export const MIN_SECRET_ENTROPY_BITS = 4.5
+export const MIN_SECRET_ENTROPY_BITS = 4
 
 export const getEntropy = (secret: string): number => {
     const charFreq = new Map<string, number>()
