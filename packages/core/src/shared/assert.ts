@@ -1,5 +1,5 @@
 import { equals, patternToRegex } from "@/shared/utils.ts"
-import type { JWTConfig, JWTMode, JWTPayloadWithToken, SessionConfig } from "@/@types/index.ts"
+import type { CryptoSecret, JWTConfig, JWTMode, JWTPayloadWithToken, SessionConfig } from "@/@types/index.ts"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -109,3 +109,22 @@ export const isEncryptedMode = (config?: SessionConfig): config is { jwt: Extrac
 
 export const isSealedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "sealed" }> } =>
     getJWTMode(config) === "sealed"
+
+export const isCryptoKeyPair = (value: unknown): value is CryptoKeyPair => {
+    return typeof value === "object" && value !== null && "publicKey" in value && "privateKey" in value
+}
+
+export const isCryptoKey = (value: unknown): value is CryptoKey => {
+    return typeof value === "object" && value !== null && "algorithm" in value && "extractable" in value
+}
+
+export const isCryptoSecret = (value: unknown): value is CryptoSecret => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "sign" in value &&
+        "encrypt" in value &&
+        (isCryptoKey(value.sign) || isCryptoKeyPair(value.sign)) &&
+        (isCryptoKey(value.encrypt) || isCryptoKeyPair(value.encrypt))
+    )
+}

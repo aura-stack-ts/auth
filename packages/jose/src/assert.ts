@@ -23,3 +23,7 @@ export const isInvalidPayload = (payload: unknown): boolean => {
         (typeof payload === "object" && payload !== null && !Array.isArray(payload) && Object.keys(payload).length === 0)
     )
 }
+
+export const isCryptoKeyPair = (value: unknown): value is CryptoKeyPair => {
+    return typeof value === "object" && value !== null && "publicKey" in value && "privateKey" in value
+}

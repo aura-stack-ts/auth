@@ -1,7 +1,7 @@
 import { createSecret } from "@/secret.ts"
 import { KeyDerivationError } from "@/errors.ts"
 import { encoder, getSubtleCrypto } from "@/crypto.ts"
-import type { SecretInput } from "@/index.ts"
+import { SecretInput } from "./index.ts"
 
 /**
  * Generate a derived key using HKDF (HMAC-based Extract-and-Expand Key Derivation Function)
@@ -21,6 +21,7 @@ export const deriveKey = async (
 ): Promise<Uint8Array> => {
     try {
         const subtle = getSubtleCrypto()
+
         const secretBuffer = secret.buffer.slice(secret.byteOffset, secret.byteOffset + secret.byteLength)
         const baseKey = await subtle.importKey("raw", secretBuffer as BufferSource, "HKDF", false, ["deriveBits"])
 

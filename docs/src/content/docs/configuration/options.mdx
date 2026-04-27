@@ -195,6 +195,16 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 openssl rand -base64 32
 ```
 
+Aura Auth also supports `CryptoKey`, `CryptoKeyPair`, and a `CryptoSecret` object (with separate `sign` and `encrypt` keys) for environments that support the Web Crypto API. This enables more secure key management and the use of asymmetric keys for signing and encryption, depending on the `jwt.mode` option. However, it requires additional setup for correct generation and usage.
+
+<Callout type="warning">
+  If the `jwt.mode` is `signed` or `encrypted`, the secret must be a `CryptoKey` or `CryptoKeyPair` that is compatible with the
+  chosen signing or encryption mode. However, if the `jwt.mode` is `sealed`, the secret must be defined as an object with `sign`
+  and `encrypt` properties, each containing a `CryptoKey` or `CryptoKeyPair` for signing and encryption operations respectively.
+  Using incompatible key types or configurations can lead to authentication failures or security vulnerabilities. Always ensure
+  that the secret is properly configured according to the session strategy and JWT mode you are using.
+</Callout>
+
 ### `trustedProxyHeaders` [#trusted-proxy-headers]
 
 Enables Aura Auth to read proxy headers when an application runs behind reverse proxies, load balancers, or CDNs to detect the original client protocol and IP.
