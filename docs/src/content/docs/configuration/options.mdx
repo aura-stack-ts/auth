@@ -195,7 +195,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 openssl rand -base64 32
 ```
 
-Aura Auth also supports `CryptoKey` and `CryptoKeyPair` objects for environments that support the Web Crypto API. This option allows for more secure key management and usage of asymmetric keys for signing and encryption related to the `jwt.mode` option. But requires additional setup to their correct generation and usage.
+Aura Auth also supports `CryptoKey`, `CryptoKeyPair`, and a `CryptoSecret` object (with separate `sign` and `encrypt` keys) for environments that support the Web Crypto API. This enables more secure key management and the use of asymmetric keys for signing and encryption, depending on the `jwt.mode` option. However, it requires additional setup for correct generation and usage.
 
 <Callout type="warning">
   If the `jwt.mode` is `signed` or `encrypted`, the secret must be a `CryptoKey` or `CryptoKeyPair` that is compatible with the

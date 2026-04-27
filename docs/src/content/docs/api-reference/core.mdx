@@ -309,7 +309,7 @@ type HostCookie = {
 Secret value used to sign and encrypt JWTs for session management and for CSRF token protection. This configuration overrides the `AURA_AUTH_SECRET` or `AUTH_SECRET` environment variable which is automatically loaded by Aura Auth. If neither option is configured, Aura Auth will throw an error, as this option is required for session management and CSRF protection.
 
 ```ts lineNumbers
-type Secret = string | Uint8Array | CryptoKey | CryptoKeyPair | CryptoSecret
+type JWTKey = string | Uint8Array | CryptoKey | CryptoKeyPair | CryptoSecret
 ```
 
 ###### CryptoKey and CryptoKeyPair Support [!toc]

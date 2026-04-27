@@ -156,26 +156,21 @@ describe("createJoseInstance", () => {
         await expect(jose.decodeJWT("invalid-token")).rejects.toThrow()
     })
 
-    test("same cryptoKeyPair secret for JWS and JWE", async () => {
+    test("rejects when a single CryptoKeyPair is reused with incompatible algs", async () => {
         vi.stubEnv("AURA_AUTH_SALT", createSecretValue())
 
-        const secret = await crypto.subtle.generateKey(
-            {
-                name: "RSA-PSS",
-                modulusLength: 2048,
-                publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-                hash: "SHA-256",
-            },
-            true,
-            ["sign", "verify"]
-        )
+        const secret = await generateKeyPair("RS256", { extractable: true })
 
         const jose = createJoseInstance(secret, {
             jwt: {
-                signingAlgorithm: "HS256",
+                mode: "sealed",
+                signingAlgorithm: "RS256",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
             },
         })
-        expect(jose).toBeDefined()
+        // Same RS256 key pair cannot satisfy RSA-OAEP-256 encryption
+        await expect(jose.encodeJWT(payload)).rejects.toThrow()
     })
 
     test("invalid secret", () => {
