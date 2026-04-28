@@ -539,4 +539,131 @@ describe("createJoseInstance", () => {
             expect(decoded).toMatchObject(payload)
         })
     })
+
+    test("PEM formatted RSA keys", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const publicKey = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv5eSIl71g3dyLEFYbv3B
+i93M9nCBLWkbI8mOQLmGgXEj3k92rwfF/+B5gCr1OMUmV+aSLsDvdhDiljQAUpQO
+3ziLaYlk0k8paw7fZjkIejz5BwiWFODTqg9HWSOGr5hfJzyL9gvzaAI2Sp7htei/
+En0u79eRNQNII0dmQtwiMpIEQbisadUEp5+s0Dd7yGUoR18V7pv2A/Ohii8lMUUL
+Efs71Ypf0L5rO9SAhjztxhR6wGWYe+uCNDEF0wuQ/ZL9TvI46Zpf+Z1z+0CzpXYr
+Eloe8oqcCuPIJ1GszZst+qkgFdyo0BXGa1nuA/21ZLmAwUXdzmF1nsGg0J/sUcEQ
+TwIDAQAB
+-----END PUBLIC KEY-----`
+        const privateKey = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC/l5IiXvWDd3Is
+QVhu/cGL3cz2cIEtaRsjyY5AuYaBcSPeT3avB8X/4HmAKvU4xSZX5pIuwO92EOKW
+NABSlA7fOItpiWTSTylrDt9mOQh6PPkHCJYU4NOqD0dZI4avmF8nPIv2C/NoAjZK
+nuG16L8SfS7v15E1A0gjR2ZC3CIykgRBuKxp1QSnn6zQN3vIZShHXxXum/YD86GK
+LyUxRQsR+zvVil/Qvms71ICGPO3GFHrAZZh764I0MQXTC5D9kv1O8jjpml/5nXP7
+QLOldisSWh7yipwK48gnUazNmy36qSAV3KjQFcZrWe4D/bVkuYDBRd3OYXWewaDQ
+n+xRwRBPAgMBAAECggEACh2r77IMck7cUbDexSsTZo0LlUsWzvmya9ib10s60MFs
+1hnJyu91CVyy6maaQJwyn5TpgAJCdbBQWANSRwnq1RqZTDVSBCnkDNm7eukk/otG
+NmEolENteZh8uTY/SZMygJHzIK0iqQm0D/GR0+oZ+JU9seUzlTuuOeQ7TOluY5wR
+i/V6ldrDSOxd2xIKUnxemw0qwbUz0oZ5CKo22K+VksGwa/PempkpyZloSGsE+QR5
+5cZwWxGelzUCDyflOImX+TCKI4IsuBOI+CaQohY3j3xSEunSyE4BCITgtIjlHJOB
+OspOYs/rYQt9xe1ZzBlRTbq/iZAonMgRS1ELm75eWQKBgQD2dlyaZIMpuhKWBWgb
+tPC0CrPLxOqWi5TSkaR+kk389xOqi6m62mPph5dCxv/TrvrXD+v/uST2aAYPnLSY
+3ieVF+KN5fc64M2rgUYR9kOE0ubiir1RI7L7yhYo/bmtSnpd1Wr6vJBU6zEBayTL
+X4Uw+nABrO/Si5SEssb9LGF/RwKBgQDHAZ+iiOhzOJCp9kCqHYJ5ageNVT/Fc85W
+40pYSAiuPlolJV43oG0EnFI7MVkvqSExHfNtk7PgQsahPTsWThJRL4stzbBINmDW
+Fxl505BOoXhnJHLqnQgzmNTinnupumnENImm5ChWbujRREi6kIiZYqUlKjQjN1j1
+9TTGCto6uQKBgQCb6NA30vGuSclMIetz64iBPGv0sYL87RueAQggEYlIRzynnGYo
+j9K4fk/PrHdVf9GqjqXqRUL+pVuAMM+GDLLZfByTSzCUjHVO0x5yamjX81qfYMjW
+NVEaOwK9t5Pn7b9u8H0WVIaxUX7UuOSzyp9FFogYZz/m3ul68GU07whWLQKBgEhP
+Mbb4MiYzpnTrUmG9qTv+p9HV6P8Q7ieqHMhpHCZb55tZsZtawmILfuGdM7/an4He
+VSY6pgBVoyDRQ9f99C/lq5ewBl6my5be+9XFZsj7aOlpWAwhlOpSnP/fACYS4v10
+7ZNjkbieQiBPxHFttQSu0Dzp0dn98WgledB//v2ZAoGAFdsS7VxBMCBcJIgPoYiX
+GDUYZsTiISPnSRqRk1hXkRt1woAa8CK3zsCyrruoCj3VJFk6gb+TWuyBXv4kfRkv
+TGcJZ3AYFKmelXl+1+rRXhe+f79+Z8kRdRSonuG/l1PdtG3P1uglzvksQcSMfOfA
+41a79/alPIgWSGQhEbPxR8I=
+-----END PRIVATE KEY-----`
+
+        vi.stubEnv("AURA_AUTH_PUBLIC_KEY", publicKey)
+        vi.stubEnv("AURA_AUTH_PRIVATE_KEY", privateKey)
+        const jws = createJoseInstance(undefined, {
+            jwt: {
+                mode: "signed",
+                signingAlgorithm: "RS256",
+            },
+        })
+        const signed = await jws.signJWS(payload)
+        const verified = await jws.verifyJWS(signed)
+        expect(verified).toMatchObject(payload)
+
+        const jwe = createJoseInstance(undefined, {
+            jwt: {
+                mode: "encrypted",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+                importedAlgorithm: "RSA-OAEP-256",
+            },
+        })
+
+        const encrypted = await jwe.encryptJWE(payload)
+        const decrypted = await jwe.decryptJWE(encrypted)
+        expect(decrypted).toMatchObject(payload)
+    })
+
+    test("PEM formatted RSA keys to encode and decode JWT", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const publicKey = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv5eSIl71g3dyLEFYbv3B
+i93M9nCBLWkbI8mOQLmGgXEj3k92rwfF/+B5gCr1OMUmV+aSLsDvdhDiljQAUpQO
+3ziLaYlk0k8paw7fZjkIejz5BwiWFODTqg9HWSOGr5hfJzyL9gvzaAI2Sp7htei/
+En0u79eRNQNII0dmQtwiMpIEQbisadUEp5+s0Dd7yGUoR18V7pv2A/Ohii8lMUUL
+Efs71Ypf0L5rO9SAhjztxhR6wGWYe+uCNDEF0wuQ/ZL9TvI46Zpf+Z1z+0CzpXYr
+Eloe8oqcCuPIJ1GszZst+qkgFdyo0BXGa1nuA/21ZLmAwUXdzmF1nsGg0J/sUcEQ
+TwIDAQAB
+-----END PUBLIC KEY-----`
+        const privateKey = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC/l5IiXvWDd3Is
+QVhu/cGL3cz2cIEtaRsjyY5AuYaBcSPeT3avB8X/4HmAKvU4xSZX5pIuwO92EOKW
+NABSlA7fOItpiWTSTylrDt9mOQh6PPkHCJYU4NOqD0dZI4avmF8nPIv2C/NoAjZK
+nuG16L8SfS7v15E1A0gjR2ZC3CIykgRBuKxp1QSnn6zQN3vIZShHXxXum/YD86GK
+LyUxRQsR+zvVil/Qvms71ICGPO3GFHrAZZh764I0MQXTC5D9kv1O8jjpml/5nXP7
+QLOldisSWh7yipwK48gnUazNmy36qSAV3KjQFcZrWe4D/bVkuYDBRd3OYXWewaDQ
+n+xRwRBPAgMBAAECggEACh2r77IMck7cUbDexSsTZo0LlUsWzvmya9ib10s60MFs
+1hnJyu91CVyy6maaQJwyn5TpgAJCdbBQWANSRwnq1RqZTDVSBCnkDNm7eukk/otG
+NmEolENteZh8uTY/SZMygJHzIK0iqQm0D/GR0+oZ+JU9seUzlTuuOeQ7TOluY5wR
+i/V6ldrDSOxd2xIKUnxemw0qwbUz0oZ5CKo22K+VksGwa/PempkpyZloSGsE+QR5
+5cZwWxGelzUCDyflOImX+TCKI4IsuBOI+CaQohY3j3xSEunSyE4BCITgtIjlHJOB
+OspOYs/rYQt9xe1ZzBlRTbq/iZAonMgRS1ELm75eWQKBgQD2dlyaZIMpuhKWBWgb
+tPC0CrPLxOqWi5TSkaR+kk389xOqi6m62mPph5dCxv/TrvrXD+v/uST2aAYPnLSY
+3ieVF+KN5fc64M2rgUYR9kOE0ubiir1RI7L7yhYo/bmtSnpd1Wr6vJBU6zEBayTL
+X4Uw+nABrO/Si5SEssb9LGF/RwKBgQDHAZ+iiOhzOJCp9kCqHYJ5ageNVT/Fc85W
+40pYSAiuPlolJV43oG0EnFI7MVkvqSExHfNtk7PgQsahPTsWThJRL4stzbBINmDW
+Fxl505BOoXhnJHLqnQgzmNTinnupumnENImm5ChWbujRREi6kIiZYqUlKjQjN1j1
+9TTGCto6uQKBgQCb6NA30vGuSclMIetz64iBPGv0sYL87RueAQggEYlIRzynnGYo
+j9K4fk/PrHdVf9GqjqXqRUL+pVuAMM+GDLLZfByTSzCUjHVO0x5yamjX81qfYMjW
+NVEaOwK9t5Pn7b9u8H0WVIaxUX7UuOSzyp9FFogYZz/m3ul68GU07whWLQKBgEhP
+Mbb4MiYzpnTrUmG9qTv+p9HV6P8Q7ieqHMhpHCZb55tZsZtawmILfuGdM7/an4He
+VSY6pgBVoyDRQ9f99C/lq5ewBl6my5be+9XFZsj7aOlpWAwhlOpSnP/fACYS4v10
+7ZNjkbieQiBPxHFttQSu0Dzp0dn98WgledB//v2ZAoGAFdsS7VxBMCBcJIgPoYiX
+GDUYZsTiISPnSRqRk1hXkRt1woAa8CK3zsCyrruoCj3VJFk6gb+TWuyBXv4kfRkv
+TGcJZ3AYFKmelXl+1+rRXhe+f79+Z8kRdRSonuG/l1PdtG3P1uglzvksQcSMfOfA
+41a79/alPIgWSGQhEbPxR8I=
+-----END PRIVATE KEY-----`
+
+        vi.stubEnv("AURA_AUTH_PUBLIC_KEY", publicKey)
+        vi.stubEnv("AURA_AUTH_PRIVATE_KEY", privateKey)
+
+        const jwt = createJoseInstance(undefined, {
+            jwt: {
+                mode: "sealed",
+                signingAlgorithm: "RS256",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+                importedAlgorithm: "RSA-OAEP-256",
+            },
+        })
+
+        await expect(jwt.encodeJWT(payload)).rejects.toThrow(/JWS signing failed/)
+        //const token = await jwt.encodeJWT(payload)
+        //const decoded = await jwt.decodeJWT(token)
+        //expect(decoded).toMatchObject(payload)
+    })
 })

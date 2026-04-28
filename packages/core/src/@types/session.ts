@@ -22,12 +22,18 @@ export interface CryptoSecret {
     encrypt: CryptoKey | CryptoKeyPair
 }
 
+export interface AsymmetricKeyPairFromEnv {
+    publicKey: string
+    privateKey: string
+}
+
 /**
  * A symmetric secret or asymmetric key pair used for JWT operations.
  *
  * - string / Uint8Array: used as-is for HMAC (signed) or AES (encrypted)
  * - CryptoKey: Web Crypto API key, for environments that support it
  * - CryptoKeyPair: asymmetric signing/encryption (RS256, ES256, EdDSA, RSA-OAEP, etc.)
+ * - AsymmetricKeyPairFromEnv: asymmetric key pair formatted as PEM strings
  */
 export type SecretKey = string | Uint8Array | CryptoKey | CryptoKeyPair | CryptoSecret
 
@@ -133,6 +139,17 @@ export type JWTConfig = {
      * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
      */
     expirationStrategy?: JWTExpirationStrategy
+    /**
+     * Optional algorithm override for key import when using PEM-formatted keys from environment variables.
+     *
+     * > Currently only supported for `signed` and `encrypted` JWT modes and not for `sealed` mode.
+     *
+     * @todo Add `AURA_AUTH_SIGNING_PUBLIC|PRIVATE_KEY` and `AURA_AUTH_ENCRYPTION_PUBLIC|PRIVATE_KEY` env var
+     * support for separate signing/encryption keys in sealed mode, which would also require supporting separate
+     * algorithm overrides for each key (e.g. `AURA_AUTH_SIGNING_ALGORITHM` and `AURA_AUTH_ENCRYPTION_ALGORITHM`).
+     * @default "RS256"
+     */
+    importedAlgorithm?: JWTSigningAlgorithm | JWTKeyAlgorithm
 } & JWTConfigBase
 
 /**

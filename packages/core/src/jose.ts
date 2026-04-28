@@ -15,9 +15,25 @@ import {
 } from "@aura-stack/jose"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
 import { AuthInternalError, AuthSecurityError } from "@/shared/errors.ts"
-import { isCryptoKey, isCryptoKeyPair, isCryptoSecret, isEncryptedMode, isSealedMode, isSignedMode } from "@/shared/assert.ts"
+import {
+    isCryptoKey,
+    isCryptoKeyPair,
+    isCryptoSecret,
+    isEncryptedMode,
+    isPemFormattedKeyPairFromEnv,
+    isSealedMode,
+    isSignedMode,
+} from "@/shared/assert.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
-import type { User, SessionConfig, JWTKey } from "@/@types/index.ts"
+import type {
+    User,
+    SessionConfig,
+    JWTKey,
+    AsymmetricKeyPairFromEnv,
+    JWTSigningAlgorithm,
+    JWTKeyAlgorithm,
+} from "@/@types/index.ts"
+import { importPKCS8, importSPKI } from "@aura-stack/jose/jose"
 
 const getJWTConfig = (config?: SessionConfig) => {
     return config?.jwt
@@ -102,7 +118,32 @@ export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => 
     }
 }
 
-const getSecrets = async (secret: JWTKey, salt: string) => {
+const getSecrets = async (
+    secret: JWTKey | AsymmetricKeyPairFromEnv,
+    salt: string,
+    importedAlgorithm?: JWTSigningAlgorithm | JWTKeyAlgorithm
+) => {
+    if (isPemFormattedKeyPairFromEnv(secret)) {
+        const { publicKey, privateKey } = secret
+        const algorithm = getEnv("ALGORITHM") ?? getEnv("ALG") ?? importedAlgorithm ?? "RS256"
+        const importedPrivateKey = await importPKCS8(privateKey, algorithm, { extractable: true })
+        const importedPublicKey = await importSPKI(publicKey, algorithm, { extractable: true })
+        return {
+            jwsSecret: {
+                publicKey: importedPublicKey,
+                privateKey: importedPrivateKey,
+            },
+            jweSecret: {
+                publicKey: importedPublicKey,
+                privateKey: importedPrivateKey,
+            },
+            jwtSecret: {
+                sign: importedPrivateKey,
+                encrypt: importedPublicKey,
+            },
+        }
+    }
+
     if (isCryptoSecret(secret)) {
         return {
             jwsSecret: secret.sign,
@@ -138,6 +179,20 @@ const getSecrets = async (secret: JWTKey, salt: string) => {
     }
 }
 
+const getSecretKey = (secret?: JWTKey) => {
+    secret ??= getEnv("SECRET")
+    if (secret) return secret
+    const publicKey = getEnv("PUBLIC_KEY")
+    const privateKey = getEnv("PRIVATE_KEY")
+    if (publicKey && privateKey) {
+        return { publicKey, privateKey }
+    }
+    throw new AuthInternalError(
+        "JOSE_INITIALIZATION_FAILED",
+        "AURA_AUTH_SECRET environment variable is not set and no secret was provided."
+    )
+}
+
 /**
  * Creates the JOSE instance used for signing and verifying tokens. It derives keys
  * for session tokens and CSRF tokens. For security and determinism, it's required
@@ -153,14 +208,7 @@ const getSecrets = async (secret: JWTKey, salt: string) => {
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
  */
 export const createJoseInstance = <DefaultUser extends User = User>(secret?: JWTKey, session?: SessionConfig) => {
-    secret ??= getEnv("SECRET")
-    if (!secret) {
-        throw new AuthInternalError(
-            "JOSE_INITIALIZATION_FAILED",
-            "AURA_AUTH_SECRET environment variable is not set and no secret was provided."
-        )
-    }
-
+    const secretKey = getSecretKey(secret)
     const salt = getEnv("SALT")
     if (!salt) {
         throw new AuthInternalError(
@@ -179,7 +227,7 @@ export const createJoseInstance = <DefaultUser extends User = User>(secret?: JWT
     }
 
     const jose = (async () => {
-        const { jwsSecret, jweSecret, jwtSecret } = await getSecrets(secret, salt)
+        const { jwsSecret, jweSecret, jwtSecret } = await getSecrets(secretKey, salt, session?.jwt?.importedAlgorithm)
 
         return {
             jwt: createJWT<DefaultUser>(jwtSecret),

@@ -128,3 +128,18 @@ export const isCryptoSecret = (value: unknown): value is CryptoSecret => {
         (isCryptoKey(value.encrypt) || isCryptoKeyPair(value.encrypt))
     )
 }
+
+export const isPemFormattedKey = (value: unknown): value is string => {
+    return typeof value === "string" && /-----BEGIN (PUBLIC|PRIVATE) KEY-----/.test(value)
+}
+
+export const isPemFormattedKeyPairFromEnv = (value: unknown): value is { publicKey: string; privateKey: string } => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "publicKey" in value &&
+        "privateKey" in value &&
+        isPemFormattedKey(value.publicKey) &&
+        isPemFormattedKey(value.privateKey)
+    )
+}
