@@ -3,7 +3,7 @@ import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { UserIdentity, UserShape } from "@/shared/identity.ts"
 import type { DeepPartial, EditableShape, Prettify, ZodShapeToObject } from "@/@types/utility.ts"
 import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
-import { JWK } from "@aura-stack/jose/jose"
+import type { JWK } from "@aura-stack/jose/jose"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof UserIdentity>
@@ -19,8 +19,8 @@ export interface Session<DefaultUser extends User = User> {
 }
 
 export interface CryptoSecret {
-    sign: CryptoKey | CryptoKeyPair | JWK | AsymmetricKeyPair
-    encrypt: CryptoKey | CryptoKeyPair | JWK | AsymmetricKeyPair
+    sign: CryptoKey | CryptoKeyPair | JWK | JsonWebKey | AsymmetricKeyPair
+    encrypt: CryptoKey | CryptoKeyPair | JWK | JsonWebKey | AsymmetricKeyPair
 }
 
 export interface AsymmetricKeyPairFromEnv {

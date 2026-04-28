@@ -65,7 +65,7 @@ export const createDeriveKey = async (
 ) => {
     const secretKey = createSecret(secret) as Uint8Array<ArrayBufferLike>
     if (secretKey instanceof CryptoKey || isJWKKey(secretKey)) {
-        throw new KeyDerivationError("Cannot derive key from CryptoKey. Use Uint8Array or string secret instead.")
+        throw new KeyDerivationError("Cannot derive key from CryptoKey or JWK. Use Uint8Array or string secret instead.")
     }
     const key = await deriveKey(secretKey, salt ?? "Aura Jose secret salt", info ?? "Aura Jose secret derivation", length)
     return key

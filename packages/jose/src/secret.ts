@@ -51,7 +51,7 @@ export const createSecret = (secret: SecretInput, length: number = 32) => {
         }
         return secret
     }
-    throw new InvalidSecretError("Secret must be a string, Uint8Array, CryptoKey or AsymmetricKeyPair")
+    throw new InvalidSecretError("Secret must be a string, Uint8Array, CryptoKey or JWK")
 }
 
 const getJWSSecrets = (secret: JWTSecretInput) => {

@@ -8,7 +8,7 @@ import type {
     JWTPayloadWithToken,
     SessionConfig,
 } from "@/@types/index.ts"
-import { JWK } from "@aura-stack/jose/jose"
+import type { JWK } from "@aura-stack/jose/jose"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)

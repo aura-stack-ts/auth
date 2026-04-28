@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Added support to asymmetric cryptography using JWK key pairs across JOSE functions, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encryptCompactJWE`, `decryptCompactJWE`, `encodeJWT`, and `decodeJWT` functions, as well as the factory functions `createJWS`, `createJWE`, and `createJWT`. [#159](https://github.com/aura-stack-ts/auth/pull/159)
+- Extended asymmetric cryptography support to accept JWK (JSON Web Key) format keys in addition to `CryptoKeyPair` across JOSE functions, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encryptCompactJWE`, `decryptCompactJWE`, `encodeJWT`, and `decodeJWT` functions, as well as the factory functions `createJWS`, `createJWE`, and `createJWT`. [#159](https://github.com/aura-stack-ts/auth/pull/159)
 
 - Added support for asymmetric cryptography using `public/private` key pairs via `CryptoKeyPair` across JOSE functions, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encryptCompactJWE`, `decryptCompactJWE`, `encodeJWT`, and `decodeJWT` functions, as well as the factory functions `createJWS`, `createJWE`, and `createJWT`. [#157](https://github.com/aura-stack-ts/auth/pull/157)
 
