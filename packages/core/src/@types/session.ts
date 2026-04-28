@@ -33,7 +33,6 @@ export interface AsymmetricKeyPairFromEnv {
  * - string / Uint8Array: used as-is for HMAC (signed) or AES (encrypted)
  * - CryptoKey: Web Crypto API key, for environments that support it
  * - CryptoKeyPair: asymmetric signing/encryption (RS256, ES256, EdDSA, RSA-OAEP, etc.)
- * - AsymmetricKeyPairFromEnv: asymmetric key pair formatted as PEM strings
  */
 export type SecretKey = string | Uint8Array | CryptoKey | CryptoKeyPair | CryptoSecret
 

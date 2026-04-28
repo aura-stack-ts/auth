@@ -135,11 +135,19 @@ FwWzwouGrZmIlL4flHagvqx94ObCk+aKxR7H2oPdgb0FDIJu7h7XMrZo3T2jOjfp
 B+P4zFojgfEO6TszdVGgCkU=
 -----END PRIVATE KEY-----`
 
+/**
+ * Test-only RSA key pairs for unit testing PEM import functionality.
+ * DO NOT use these keys in production - they are publicly visible.
+ */
 export const RS256PEMFormat = {
     publicKey: RSA256PublicKey,
     privateKey: RSA256PrivateKey,
 }
 
+/**
+ * Test-only RSA key pairs for unit testing PEM import functionality.
+ * DO NOT use these keys in production - they are publicly visible.
+ */
 export const RSAOAEP256PEMFormat = {
     publicKey: RSAOAEP256PublicKey,
     privateKey: RSAOAEP256PrivateKey,

@@ -29,7 +29,7 @@ describe("env", () => {
         expect(env.AURA_AUTH_SECRET).toBe(secret2)
     })
 
-    test("direct PEM formatted RSA keys", async () => {
+    test("direct PEM formatted RSA keys", () => {
         const pem = `-----BEGIN PUBLIC KEY-----
     MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtGbid5pLu9wsGut7Fg26
     SPBGntzZk6i17MIf2eS++01/7uq0a59yxYa1AvPbO9OdQDngRup7zPUc7dKivwQe
