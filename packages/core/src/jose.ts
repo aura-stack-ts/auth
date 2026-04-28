@@ -14,26 +14,20 @@ import {
     type JWTDecryptOptions,
 } from "@aura-stack/jose"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
-import { AuthInternalError, AuthSecurityError } from "@/shared/errors.ts"
+import { AuthInternalError, AuthJoseInitializationError, AuthSecurityError } from "@/shared/errors.ts"
 import {
     isCryptoKey,
     isCryptoKeyPair,
     isCryptoSecret,
     isEncryptedMode,
-    isPemFormattedKeyPairFromEnv,
+    isJWTPEMFormattedKeyPair,
+    isPEMFormattedKeyPairFromEnv,
     isSealedMode,
     isSignedMode,
 } from "@/shared/assert.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
-import type {
-    User,
-    SessionConfig,
-    JWTKey,
-    AsymmetricKeyPairFromEnv,
-    JWTSigningAlgorithm,
-    JWTKeyAlgorithm,
-} from "@/@types/index.ts"
-import { importPKCS8, importSPKI } from "@aura-stack/jose/jose"
+import type { User, SessionConfig, JWTKey, AsymmetricKeyPairFromEnv } from "@/@types/index.ts"
+import { importPEMKeyPair } from "./shared/crypto.ts"
 
 const getJWTConfig = (config?: SessionConfig) => {
     return config?.jwt
@@ -119,27 +113,66 @@ export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => 
 }
 
 const getSecrets = async (
-    secret: JWTKey | AsymmetricKeyPairFromEnv,
+    secret: JWTKey | AsymmetricKeyPairFromEnv | { sign: AsymmetricKeyPairFromEnv; encrypt: AsymmetricKeyPairFromEnv },
     salt: string,
-    importedAlgorithm?: JWTSigningAlgorithm | JWTKeyAlgorithm
+    session?: SessionConfig
 ) => {
-    if (isPemFormattedKeyPairFromEnv(secret)) {
-        const { publicKey, privateKey } = secret
-        const algorithm = getEnv("ALGORITHM") ?? getEnv("ALG") ?? importedAlgorithm ?? "RS256"
-        const importedPrivateKey = await importPKCS8(privateKey, algorithm, { extractable: true })
-        const importedPublicKey = await importSPKI(publicKey, algorithm, { extractable: true })
+    if (isJWTPEMFormattedKeyPair(secret)) {
+        if (!isSealedMode(session)) {
+            throw new AuthJoseInitializationError(
+                "INVALID_PEM_KEY_PAIR",
+                "Multiples PEM Key Pairs from environment variables require 'sealed' JWT mode. For 'signed' or 'encrypted' modes, provide a single PEM key pair or a combined key object."
+            )
+        }
+
+        const { sign, encrypt } = secret
+        const signingAlg = getEnv("SIGNING_ALG") || getEnv("SIGNING_ALGORITHM") || session?.jwt.signingAlgorithm || "RS256"
+        const encryptionAlg =
+            getEnv("ENCRYPTION_ALG") || getEnv("ENCRYPTION_ALGORITHM") || session?.jwt.keyAlgorithm || "RSA-OAEP-256"
+        const importedSign = await importPEMKeyPair(sign, signingAlg)
+        const importedEncrypt = await importPEMKeyPair(encrypt, encryptionAlg)
+
+        return {
+            jwsSecret: importedSign,
+            jweSecret: importedEncrypt,
+            jwtSecret: {
+                sign: importedSign,
+                encrypt: importedEncrypt,
+            },
+        }
+    }
+    if (isPEMFormattedKeyPairFromEnv(secret)) {
+        if (isSealedMode(session)) {
+            throw new AuthJoseInitializationError(
+                "INVALID_PEM_KEY_PAIR",
+                "Single PEM key pairs from environment variables require 'signed' or 'encrypted' JWT mode. For 'sealed' mode, provide separate signing and encryption keys or a combined key object."
+            )
+        }
+        const algorithm =
+            getEnv("ALGORITHM") ||
+            getEnv("ALG") ||
+            (isSignedMode(session) ? session?.jwt?.signingAlgorithm : undefined) ||
+            (isEncryptedMode(session) ? session?.jwt?.keyAlgorithm : undefined) ||
+            "RS256"
+        const { publicKey, privateKey } = await importPEMKeyPair(secret, algorithm)
         return {
             jwsSecret: {
-                publicKey: importedPublicKey,
-                privateKey: importedPrivateKey,
+                publicKey,
+                privateKey,
             },
             jweSecret: {
-                publicKey: importedPublicKey,
-                privateKey: importedPrivateKey,
+                publicKey,
+                privateKey,
             },
             jwtSecret: {
-                sign: importedPrivateKey,
-                encrypt: importedPublicKey,
+                sign: {
+                    publicKey,
+                    privateKey,
+                },
+                encrypt: {
+                    publicKey,
+                    privateKey,
+                },
             },
         }
     }
@@ -179,13 +212,29 @@ const getSecrets = async (
     }
 }
 
+const getPEMKeyFromEnv = (prefix: string): AsymmetricKeyPairFromEnv | null => {
+    const publicKey = getEnv(`${prefix}${prefix && "_"}PUBLIC_KEY`)
+    const privateKey = getEnv(`${prefix}${prefix && "_"}PRIVATE_KEY`)
+    if (publicKey && privateKey) {
+        return { publicKey, privateKey }
+    }
+    return null
+}
+
 const getSecretKey = (secret?: JWTKey) => {
     secret ??= getEnv("SECRET")
     if (secret) return secret
-    const publicKey = getEnv("PUBLIC_KEY")
-    const privateKey = getEnv("PRIVATE_KEY")
-    if (publicKey && privateKey) {
-        return { publicKey, privateKey }
+    const pem = getPEMKeyFromEnv("")
+    if (pem) {
+        return pem
+    }
+    const signing = getPEMKeyFromEnv("SIGNING")
+    const encryption = getPEMKeyFromEnv("ENCRYPTION")
+    if (signing && encryption) {
+        return {
+            sign: signing,
+            encrypt: encryption,
+        }
     }
     throw new AuthInternalError(
         "JOSE_INITIALIZATION_FAILED",
@@ -227,7 +276,7 @@ export const createJoseInstance = <DefaultUser extends User = User>(secret?: JWT
     }
 
     const jose = (async () => {
-        const { jwsSecret, jweSecret, jwtSecret } = await getSecrets(secretKey, salt, session?.jwt?.importedAlgorithm)
+        const { jwsSecret, jweSecret, jwtSecret } = await getSecrets(secretKey, salt, session)
 
         return {
             jwt: createJWT<DefaultUser>(jwtSecret),

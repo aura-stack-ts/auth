@@ -1,8 +1,9 @@
 import { AuthSecurityError } from "@/shared/errors.ts"
 import { isJWTPayloadWithToken } from "@/shared/assert.ts"
 import { equals, timingSafeEqual } from "@/shared/utils.ts"
+import { importPKCS8, importSPKI } from "@aura-stack/jose/jose"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
-import type { AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
+import type { AsymmetricKeyPairFromEnv, AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
 
 export { generateKeyPair as createKeyPair } from "@aura-stack/jose/jose"
 
@@ -132,5 +133,21 @@ export const verifyPassword = async (password: string, hashedPassword: string) =
         return timingSafeEqual(newHashed, hashedPassword)
     } catch {
         return false
+    }
+}
+
+/**
+ * Imports a PEM-formatted asymmetric key pair from strings.
+ *
+ * @param key - An object containing the public and private keys as PEM-formatted strings
+ * @param algorithm - The intended algorithm for the keys (e.g. "RS256" for RSA signing, "RSA-OAEP" for RSA encryption)
+ * @returns A Promise that resolves to a CryptoKeyPair with the imported keys
+ */
+export const importPEMKeyPair = async (key: AsymmetricKeyPairFromEnv, algorithm: string) => {
+    const importedPrivateKey = await importPKCS8(key.privateKey, algorithm, { extractable: true })
+    const importedPublicKey = await importSPKI(key.publicKey, algorithm, { extractable: true })
+    return {
+        publicKey: importedPublicKey,
+        privateKey: importedPrivateKey,
     }
 }

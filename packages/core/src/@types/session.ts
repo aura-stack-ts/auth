@@ -1,7 +1,7 @@
 import type { infer as Infer } from "zod/v4/core"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { UserIdentity, UserShape } from "@/shared/identity.ts"
-import type { DeepPartial, EditableShape, ZodShapeToObject } from "@/@types/utility.ts"
+import type { DeepPartial, EditableShape, Prettify, ZodShapeToObject } from "@/@types/utility.ts"
 import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
@@ -114,43 +114,34 @@ export type JWTConfigBase = JWTSignedMode | JWTEncryptedMode | JWTSealedMode
 /** How session/JWT lifetime is enforced relative to `iat`, absolute caps, and sliding windows. */
 export type JWTExpirationStrategy = "fixed" | "rolling" | "absolute" | "sliding"
 
-export type JWTConfig = {
-    /**
-     * Token lifetime.
-     */
-    maxAge?: number
-    /**
-     * JWT `iss` (issuer) claim. Set this to your app's canonical URL.
-     * @example "https://auth.example.com"
-     */
-    issuer?: string
-    /**
-     * JWT `aud` claim. Single value or array for multi-audience tokens.
-     * @example ["https://api.example.com", "https://app.example.com"]
-     */
-    audience?: string | string[]
-    /**
-     * Maximum absolute session duration in seconds.
-     * Required for "absolute" and "sliding" strategies.
-     * Enforced via jose's maxTokenAge against the iat claim.
-     */
-    maxExpiration?: number
-    /**
-     * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
-     */
-    expirationStrategy?: JWTExpirationStrategy
-    /**
-     * Optional algorithm override for key import when using PEM-formatted keys from environment variables.
-     *
-     * > Currently only supported for `signed` and `encrypted` JWT modes and not for `sealed` mode.
-     *
-     * @todo Add `AURA_AUTH_SIGNING_PUBLIC|PRIVATE_KEY` and `AURA_AUTH_ENCRYPTION_PUBLIC|PRIVATE_KEY` env var
-     * support for separate signing/encryption keys in sealed mode, which would also require supporting separate
-     * algorithm overrides for each key (e.g. `AURA_AUTH_SIGNING_ALGORITHM` and `AURA_AUTH_ENCRYPTION_ALGORITHM`).
-     * @default "RS256"
-     */
-    importedAlgorithm?: JWTSigningAlgorithm | JWTKeyAlgorithm
-} & JWTConfigBase
+export type JWTConfig = Prettify<
+    {
+        /**
+         * Token lifetime.
+         */
+        maxAge?: number
+        /**
+         * JWT `iss` (issuer) claim. Set this to your app's canonical URL.
+         * @example "https://auth.example.com"
+         */
+        issuer?: string
+        /**
+         * JWT `aud` claim. Single value or array for multi-audience tokens.
+         * @example ["https://api.example.com", "https://app.example.com"]
+         */
+        audience?: string | string[]
+        /**
+         * Maximum absolute session duration in seconds.
+         * Required for "absolute" and "sliding" strategies.
+         * Enforced via jose's maxTokenAge against the iat claim.
+         */
+        maxExpiration?: number
+        /**
+         * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
+         */
+        expirationStrategy?: JWTExpirationStrategy
+    } & JWTConfigBase
+>
 
 /**
  * Stateless JWT strategy.
