@@ -91,6 +91,18 @@ export class AuthValidationError extends Error {
     }
 }
 
+export class AuthJoseInitializationError extends Error {
+    readonly type = "JOSE_INITIALIZATION_FAILED"
+    readonly code: string
+
+    constructor(code: string, message?: string, options?: ErrorOptions) {
+        super(message, options)
+        this.code = code
+        this.name = new.target.name
+        Error?.captureStackTrace?.(this, new.target)
+    }
+}
+
 export const isNativeError = (error: unknown): error is Error => {
     return error instanceof Error
 }

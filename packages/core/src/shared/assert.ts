@@ -1,5 +1,12 @@
 import { equals, patternToRegex } from "@/shared/utils.ts"
-import type { CryptoSecret, JWTConfig, JWTMode, JWTPayloadWithToken, SessionConfig } from "@/@types/index.ts"
+import type {
+    AsymmetricKeyPairFromEnv,
+    CryptoSecret,
+    JWTConfig,
+    JWTMode,
+    JWTPayloadWithToken,
+    SessionConfig,
+} from "@/@types/index.ts"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -107,7 +114,7 @@ export const isSignedMode = (config?: SessionConfig): config is { jwt: Extract<J
 export const isEncryptedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "encrypted" }> } =>
     getJWTMode(config) === "encrypted"
 
-export const isSealedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "sealed" }> } =>
+export const isSealedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode?: "sealed" }> } =>
     getJWTMode(config) === "sealed"
 
 export const isCryptoKeyPair = (value: unknown): value is CryptoKeyPair => {
@@ -126,5 +133,33 @@ export const isCryptoSecret = (value: unknown): value is CryptoSecret => {
         "encrypt" in value &&
         (isCryptoKey(value.sign) || isCryptoKeyPair(value.sign)) &&
         (isCryptoKey(value.encrypt) || isCryptoKeyPair(value.encrypt))
+    )
+}
+
+export const isPEMFormattedKey = (value: unknown): value is string => {
+    return typeof value === "string" && /-----BEGIN (PUBLIC|PRIVATE) KEY-----/.test(value)
+}
+
+export const isPEMFormattedKeyPairFromEnv = (value: unknown): value is { publicKey: string; privateKey: string } => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "publicKey" in value &&
+        "privateKey" in value &&
+        isPEMFormattedKey(value.publicKey) &&
+        isPEMFormattedKey(value.privateKey)
+    )
+}
+
+export const isJWTPEMFormattedKeyPair = (
+    value: unknown
+): value is { sign: AsymmetricKeyPairFromEnv; encrypt: AsymmetricKeyPairFromEnv } => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "sign" in value &&
+        "encrypt" in value &&
+        isPEMFormattedKeyPairFromEnv((value as any).sign) &&
+        isPEMFormattedKeyPairFromEnv((value as any).encrypt)
     )
 }

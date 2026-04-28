@@ -3,6 +3,7 @@ import { createJoseInstance, encoder } from "@/jose.ts"
 import { createSecretValue } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 import { generateKeyPair } from "@aura-stack/jose/jose"
+import { RS256PEMFormat, RSAOAEP256PEMFormat } from "./presets.ts"
 
 const payload = {
     sub: "1234567890",
@@ -538,5 +539,83 @@ describe("createJoseInstance", () => {
             const decoded = await jose.decodeJWT(token)
             expect(decoded).toMatchObject(payload)
         })
+    })
+
+    test("PEM formatted RSA keys", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const { publicKey, privateKey } = RS256PEMFormat
+
+        vi.stubEnv("AURA_AUTH_PUBLIC_KEY", publicKey)
+        vi.stubEnv("AURA_AUTH_PRIVATE_KEY", privateKey)
+
+        const jws = createJoseInstance(undefined, {
+            jwt: {
+                mode: "signed",
+                signingAlgorithm: "RS256",
+            },
+        })
+        const signed = await jws.signJWS(payload)
+        const verified = await jws.verifyJWS(signed)
+        expect(verified).toMatchObject(payload)
+
+        const jwe = createJoseInstance(undefined, {
+            jwt: {
+                mode: "encrypted",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+            },
+        })
+
+        const encrypted = await jwe.encryptJWE(payload)
+        const decrypted = await jwe.decryptJWE(encrypted)
+        expect(decrypted).toMatchObject(payload)
+
+        const jwt = createJoseInstance(undefined, {
+            jwt: {
+                mode: "sealed",
+                signingAlgorithm: "RS256",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+            },
+        })
+        await expect(jwt.encodeJWT(payload)).rejects.toThrow(
+            /Single PEM key pairs from environment variables require 'signed' or 'encrypted' JWT mode. For 'sealed' mode, provide separate signing and encryption keys or a combined key object./
+        )
+    })
+
+    test("PEM formatted RSA keys for sealed mode", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const { publicKey: jwsPublicKey, privateKey: jwsPrivateKey } = RS256PEMFormat
+        const { publicKey: jwePublicKey, privateKey: jwePrivateKey } = RSAOAEP256PEMFormat
+
+        vi.stubEnv("AURA_AUTH_SIGNING_PUBLIC_KEY", jwsPublicKey)
+        vi.stubEnv("AURA_AUTH_SIGNING_PRIVATE_KEY", jwsPrivateKey)
+        vi.stubEnv("AURA_AUTH_ENCRYPTION_PUBLIC_KEY", jwePublicKey)
+        vi.stubEnv("AURA_AUTH_ENCRYPTION_PRIVATE_KEY", jwePrivateKey)
+
+        const jwt = createJoseInstance(undefined, {
+            jwt: {
+                mode: "sealed",
+                signingAlgorithm: "RS256",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+            },
+        })
+
+        const token = await jwt.encodeJWT(payload)
+        const decoded = await jwt.decodeJWT(token)
+        expect(decoded).toMatchObject(payload)
+
+        const jws = createJoseInstance(undefined, {
+            jwt: {
+                mode: "signed",
+                signingAlgorithm: "RS256",
+            },
+        })
+        await expect(jws.signJWS(payload)).rejects.toThrow(
+            /Multiples PEM Key Pairs from environment variables require 'sealed' JWT mode. For 'signed' or 'encrypted' modes, provide a single PEM key pair or a combined key object./
+        )
     })
 })

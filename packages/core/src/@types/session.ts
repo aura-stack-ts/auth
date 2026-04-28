@@ -1,7 +1,7 @@
 import type { infer as Infer } from "zod/v4/core"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { UserIdentity, UserShape } from "@/shared/identity.ts"
-import type { DeepPartial, EditableShape, ZodShapeToObject } from "@/@types/utility.ts"
+import type { DeepPartial, EditableShape, Prettify, ZodShapeToObject } from "@/@types/utility.ts"
 import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
@@ -20,6 +20,11 @@ export interface Session<DefaultUser extends User = User> {
 export interface CryptoSecret {
     sign: CryptoKey | CryptoKeyPair
     encrypt: CryptoKey | CryptoKeyPair
+}
+
+export interface AsymmetricKeyPairFromEnv {
+    publicKey: string
+    privateKey: string
 }
 
 /**
@@ -108,32 +113,34 @@ export type JWTConfigBase = JWTSignedMode | JWTEncryptedMode | JWTSealedMode
 /** How session/JWT lifetime is enforced relative to `iat`, absolute caps, and sliding windows. */
 export type JWTExpirationStrategy = "fixed" | "rolling" | "absolute" | "sliding"
 
-export type JWTConfig = {
-    /**
-     * Token lifetime.
-     */
-    maxAge?: number
-    /**
-     * JWT `iss` (issuer) claim. Set this to your app's canonical URL.
-     * @example "https://auth.example.com"
-     */
-    issuer?: string
-    /**
-     * JWT `aud` claim. Single value or array for multi-audience tokens.
-     * @example ["https://api.example.com", "https://app.example.com"]
-     */
-    audience?: string | string[]
-    /**
-     * Maximum absolute session duration in seconds.
-     * Required for "absolute" and "sliding" strategies.
-     * Enforced via jose's maxTokenAge against the iat claim.
-     */
-    maxExpiration?: number
-    /**
-     * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
-     */
-    expirationStrategy?: JWTExpirationStrategy
-} & JWTConfigBase
+export type JWTConfig = Prettify<
+    {
+        /**
+         * Token lifetime.
+         */
+        maxAge?: number
+        /**
+         * JWT `iss` (issuer) claim. Set this to your app's canonical URL.
+         * @example "https://auth.example.com"
+         */
+        issuer?: string
+        /**
+         * JWT `aud` claim. Single value or array for multi-audience tokens.
+         * @example ["https://api.example.com", "https://app.example.com"]
+         */
+        audience?: string | string[]
+        /**
+         * Maximum absolute session duration in seconds.
+         * Required for "absolute" and "sliding" strategies.
+         * Enforced via jose's maxTokenAge against the iat claim.
+         */
+        maxExpiration?: number
+        /**
+         * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
+         */
+        expirationStrategy?: JWTExpirationStrategy
+    } & JWTConfigBase
+>
 
 /**
  * Stateless JWT strategy.
