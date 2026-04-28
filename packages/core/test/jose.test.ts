@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { createJoseInstance, encoder } from "@/jose.ts"
-import { createSecretValue } from "@/shared/crypto.ts"
+import { createSecretValue, exportJWKKeyPair } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 import { generateKeyPair } from "@aura-stack/jose/jose"
 import { RS256PEMFormat, RSAOAEP256PEMFormat } from "./presets.ts"
@@ -617,5 +617,68 @@ describe("createJoseInstance", () => {
         await expect(jws.signJWS(payload)).rejects.toThrow(
             /Multiples PEM Key Pairs from environment variables require 'sealed' JWT mode. For 'signed' or 'encrypted' modes, provide a single PEM key pair or a combined key object./
         )
+    })
+
+    test("JWS (signed) with JWK formatted keys", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const secret = await exportJWKKeyPair("RS256", { extractable: true })
+        const jose = createJoseInstance(secret, {
+            jwt: {
+                signingAlgorithm: "RS256",
+            },
+        })
+
+        const signed = await jose.signJWS(payload)
+        const verified = await jose.verifyJWS(signed)
+        expect(verified).toMatchObject(payload)
+    })
+
+    test("JWE (encrypted) with JWK formatted keys", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const secret = await exportJWKKeyPair("RSA-OAEP-256", { extractable: true })
+        const jose = createJoseInstance(secret, {
+            jwt: {
+                mode: "encrypted",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+            },
+        })
+        const encrypted = await jose.encryptJWE(payload)
+        const decrypted = await jose.decryptJWE(encrypted)
+        expect(decrypted).toMatchObject(payload)
+    })
+
+    test("JWT (sealed) with JWK formatted keys", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const signingKeyPair = await exportJWKKeyPair("RS256", { extractable: true })
+        const encryptionKeyPair = await exportJWKKeyPair("RSA-OAEP-256", { extractable: true })
+        const jose = createJoseInstance(
+            {
+                sign: signingKeyPair,
+                encrypt: encryptionKeyPair,
+            },
+            {
+                jwt: {
+                    signingAlgorithm: "RS256",
+                    keyAlgorithm: "RSA-OAEP-256",
+                    encryptionAlgorithm: "A256GCM",
+                },
+            }
+        )
+
+        const encoded = await jose.encodeJWT(payload)
+        const decoded = await jose.decodeJWT(encoded)
+        expect(decoded).toMatchObject(payload)
+
+        const signed = await jose.signJWS(payload)
+        const verified = await jose.verifyJWS(signed)
+        expect(verified).toMatchObject(payload)
+
+        const encrypted = await jose.encryptJWE(payload)
+        const decrypted = await jose.decryptJWE(encrypted)
+        expect(decrypted).toMatchObject(payload)
     })
 })

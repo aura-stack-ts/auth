@@ -1,4 +1,4 @@
-import { isCryptoKeyPair, isObject } from "@/assert.ts"
+import { isAsymmetricKeyPair, isJWKKey, isObject } from "@/assert.ts"
 import { InvalidSecretError } from "@/errors.ts"
 import { encoder } from "@/crypto.ts"
 import type { DerivedKeyInput, JWTSecretInput, SecretInput } from "@/index.ts"
@@ -45,17 +45,17 @@ export const createSecret = (secret: SecretInput, length: number = 32) => {
         }
         return encoded
     }
-    if (secret instanceof CryptoKey || secret instanceof Uint8Array) {
+    if (secret instanceof CryptoKey || secret instanceof Uint8Array || isJWKKey(secret)) {
         if (secret instanceof Uint8Array && secret.byteLength < length) {
             throw new InvalidSecretError(`Secret must be at least ${length} bytes long`)
         }
         return secret
     }
-    throw new InvalidSecretError("Secret must be a string, Uint8Array, or CryptoKey")
+    throw new InvalidSecretError("Secret must be a string, Uint8Array, CryptoKey or JWK")
 }
 
 const getJWSSecrets = (secret: JWTSecretInput) => {
-    if (!isCryptoKeyPair(secret)) {
+    if (!isAsymmetricKeyPair(secret)) {
         return {
             encode: secret,
             decode: secret,
@@ -69,7 +69,7 @@ const getJWSSecrets = (secret: JWTSecretInput) => {
 }
 
 const getJWESecrets = (secret: JWTSecretInput) => {
-    if (!isCryptoKeyPair(secret)) {
+    if (!isAsymmetricKeyPair(secret)) {
         return {
             encode: secret,
             decode: secret,

@@ -1,7 +1,7 @@
 /**
  * @module @aura-stack/jose
  */
-import type { DecryptOptions, JWEHeaderParameters, JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose"
+import type { DecryptOptions, JWEHeaderParameters, JWK, JWTHeaderParameters, JWTPayload, JWTVerifyOptions } from "jose"
 import { getSecrets } from "@/secret.ts"
 import { signJWS, verifyJWS } from "@/sign.ts"
 import { isAuraJoseError } from "@/assert.ts"
@@ -19,14 +19,19 @@ export type * from "@/secret.ts"
 export * from "@/crypto.ts"
 export type * from "@/crypto.ts"
 
+export interface AsymmetricKeyPair {
+    publicKey: CryptoKey | JWK | JsonWebKey
+    privateKey: CryptoKey | JWK | JsonWebKey
+}
+
 /**
  * Secret input can be:
  * - CryptoKey: W3C standard key object (works across all runtimes)
  * - Uint8Array: Raw bytes
  * - string: String that will be encoded to UTF-8
  */
-export type SecretInput = Uint8Array | string | CryptoKey
-export type JWTSecretInput = SecretInput | CryptoKeyPair
+export type SecretInput = Uint8Array | string | CryptoKey | JWK
+export type JWTSecretInput = SecretInput | AsymmetricKeyPair
 export type DerivedKeyInput = { sign: JWTSecretInput; encrypt: JWTSecretInput }
 export type Prettify<T> = { [K in keyof T]: T[K] } & {}
 export type TypedJWTPayload<Payload extends JWTPayload> = JWTPayload & Payload

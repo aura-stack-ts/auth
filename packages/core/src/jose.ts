@@ -21,6 +21,7 @@ import {
     isCryptoSecret,
     isEncryptedMode,
     isJWTPEMFormattedKeyPair,
+    isKeyPair,
     isPEMFormattedKeyPairFromEnv,
     isSealedMode,
     isSignedMode,
@@ -187,7 +188,7 @@ const getSecrets = async (
             },
         }
     }
-    if (isCryptoKey(secret) || isCryptoKeyPair(secret)) {
+    if (isCryptoKey(secret) || isCryptoKeyPair(secret) || isKeyPair(secret)) {
         return {
             jwsSecret: secret,
             jweSecret: secret,
