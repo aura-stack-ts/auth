@@ -1,5 +1,6 @@
 import { equals, patternToRegex } from "@/shared/utils.ts"
 import type {
+    AsymmetricKeyPair,
     AsymmetricKeyPairFromEnv,
     CryptoSecret,
     JWTConfig,
@@ -7,6 +8,7 @@ import type {
     JWTPayloadWithToken,
     SessionConfig,
 } from "@/@types/index.ts"
+import { JWK } from "@aura-stack/jose/jose"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -125,6 +127,10 @@ export const isCryptoKey = (value: unknown): value is CryptoKey => {
     return typeof value === "object" && value !== null && "algorithm" in value && "extractable" in value
 }
 
+export const isKeyPair = (value: unknown): value is AsymmetricKeyPair => {
+    return typeof value === "object" && value !== null && "publicKey" in value && "privateKey" in value
+}
+
 export const isCryptoSecret = (value: unknown): value is CryptoSecret => {
     return (
         typeof value === "object" &&
@@ -162,4 +168,8 @@ export const isJWTPEMFormattedKeyPair = (
         isPEMFormattedKeyPairFromEnv((value as any).sign) &&
         isPEMFormattedKeyPairFromEnv((value as any).encrypt)
     )
+}
+
+export const isJWKFormattedKey = (value: unknown): value is JWK => {
+    return typeof value === "object" && value !== null && "kty" in value && typeof (value as any).kty === "string"
 }

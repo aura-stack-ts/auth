@@ -1,4 +1,5 @@
 import { AuraJoseError, InvalidSecretError } from "@/errors.ts"
+import type { AsymmetricKeyPair } from "@/index.ts"
 
 export const isAuraJoseError = (error: unknown): error is AuraJoseError => {
     return error instanceof AuraJoseError
@@ -24,6 +25,10 @@ export const isInvalidPayload = (payload: unknown): boolean => {
     )
 }
 
-export const isCryptoKeyPair = (value: unknown): value is CryptoKeyPair => {
+export const isAsymmetricKeyPair = (value: unknown): value is AsymmetricKeyPair => {
     return typeof value === "object" && value !== null && "publicKey" in value && "privateKey" in value
+}
+
+export const isJWKKey = (value: unknown): value is JsonWebKey => {
+    return typeof value === "object" && value !== null && "kty" in value
 }

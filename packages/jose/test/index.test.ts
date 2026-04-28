@@ -209,6 +209,19 @@ describe("JWSs", () => {
         expect(decoded.name).toBe(payload.name)
         expect(decoded.email).toBe(payload.email)
     })
+
+    test("verify JWK with RSA algorithm", async () => {
+        const { publicKey, privateKey } = await generateKeyPair("RS256", { extractable: true })
+        const publicJWK = await crypto.subtle.exportKey("jwk", publicKey)
+        const privateJWK = await crypto.subtle.exportKey("jwk", privateKey)
+        const { signJWS, verifyJWS } = createJWS({
+            publicKey: publicJWK,
+            privateKey: privateJWK,
+        })
+        const signed = await signJWS(payload, { alg: "RS256" })
+        const verified = await verifyJWS(signed, { algorithms: ["RS256"] })
+        expect(verified).toMatchObject(payload)
+    })
 })
 
 describe("JWEs", () => {
@@ -310,6 +323,19 @@ describe("JWEs", () => {
             contentEncryptionAlgorithms: ["A256GCM"],
         })
         expect(JSON.parse(decryptedPayload)).toMatchObject(payload)
+    })
+
+    test("verify JWK with RSA algorithm", async () => {
+        const { publicKey, privateKey } = await generateKeyPair("RSA-OAEP-256", { extractable: true })
+        const publicJWK = await crypto.subtle.exportKey("jwk", publicKey)
+        const privateJWK = await crypto.subtle.exportKey("jwk", privateKey)
+        const { encryptJWE, decryptJWE } = createJWE({
+            publicKey: publicJWK,
+            privateKey: privateJWK,
+        })
+        const signed = await encryptJWE(payload, { alg: "RSA-OAEP-256" })
+        const verified = await decryptJWE(signed, { keyManagementAlgorithms: ["RSA-OAEP-256"] })
+        expect(verified).toMatchObject(payload)
     })
 })
 
@@ -426,6 +452,31 @@ describe("JWTs", () => {
         expect(decoded.sub).toBe(payload.sub)
         expect(decoded.name).toBe(payload.name)
         expect(decoded.email).toBe(payload.email)
+    })
+
+    test("createJWT with JWK keys", async () => {
+        const { publicKey: signPublicKey, privateKey: signPrivateKey } = await generateKeyPair("RS256", { extractable: true })
+        const { publicKey: encryptPublicKey, privateKey: encryptPrivateKey } = await generateKeyPair("RSA-OAEP-256", {
+            extractable: true,
+        })
+        const signPublicJWK = await crypto.subtle.exportKey("jwk", signPublicKey)
+        const signPrivateJWK = await crypto.subtle.exportKey("jwk", signPrivateKey)
+        const encryptPublicJWK = await crypto.subtle.exportKey("jwk", encryptPublicKey)
+        const encryptPrivateJWK = await crypto.subtle.exportKey("jwk", encryptPrivateKey)
+        const jwt = createJWT({
+            sign: { publicKey: signPublicJWK, privateKey: signPrivateJWK },
+            encrypt: { publicKey: encryptPublicJWK, privateKey: encryptPrivateJWK },
+        })
+
+        const encoded = await jwt.encodeJWT(payload, {
+            sign: { alg: "RS256" },
+            encrypt: { alg: "RSA-OAEP-256", enc: "A256GCM" },
+        })
+        const decoded = await jwt.decodeJWT(encoded, {
+            verify: { algorithms: ["RS256"] },
+            decrypt: { keyManagementAlgorithms: ["RSA-OAEP-256"], contentEncryptionAlgorithms: ["A256GCM"] },
+        })
+        expect(decoded).toMatchObject(payload)
     })
 })
 

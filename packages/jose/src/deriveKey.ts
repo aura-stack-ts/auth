@@ -2,6 +2,7 @@ import { createSecret } from "@/secret.ts"
 import { KeyDerivationError } from "@/errors.ts"
 import { encoder, getSubtleCrypto } from "@/crypto.ts"
 import { SecretInput } from "./index.ts"
+import { isJWKKey } from "./assert.ts"
 
 /**
  * Generate a derived key using HKDF (HMAC-based Extract-and-Expand Key Derivation Function)
@@ -62,8 +63,8 @@ export const createDeriveKey = async (
     info?: string | Uint8Array,
     length: number = 32
 ) => {
-    const secretKey = createSecret(secret)
-    if (secretKey instanceof CryptoKey) {
+    const secretKey = createSecret(secret) as Uint8Array<ArrayBufferLike>
+    if (secretKey instanceof CryptoKey || isJWKKey(secretKey)) {
         throw new KeyDerivationError("Cannot derive key from CryptoKey. Use Uint8Array or string secret instead.")
     }
     const key = await deriveKey(secretKey, salt ?? "Aura Jose secret salt", info ?? "Aura Jose secret derivation", length)

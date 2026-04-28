@@ -1,7 +1,7 @@
 import { AuthSecurityError } from "@/shared/errors.ts"
 import { isJWTPayloadWithToken } from "@/shared/assert.ts"
 import { equals, timingSafeEqual } from "@/shared/utils.ts"
-import { importPKCS8, importSPKI } from "@aura-stack/jose/jose"
+import { exportJWK, generateKeyPair, GenerateKeyPairOptions, importPKCS8, importSPKI } from "@aura-stack/jose/jose"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import type { AsymmetricKeyPairFromEnv, AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
 
@@ -149,5 +149,22 @@ export const importPEMKeyPair = async (key: AsymmetricKeyPairFromEnv, algorithm:
     return {
         publicKey: importedPublicKey,
         privateKey: importedPrivateKey,
+    }
+}
+
+/**
+ * Generates a new asymmetric key pair and exports it in JWK format.
+ *
+ * @param alg - The intended algorithm for the keys (e.g. "RS256" for RSA signing, "RSA-OAEP" for RSA encryption)
+ * @param options - Optional parameters for key generation (e.g. modulusLength for RSA)
+ * @returns A Promise that resolves to an object containing the public and private keys in JWK format
+ */
+export const exportJWKKeyPair = async (alg: string, options?: GenerateKeyPairOptions) => {
+    const { publicKey, privateKey } = await generateKeyPair(alg, options)
+    const jwkPublicKey = await exportJWK(publicKey)
+    const jwkPrivateKey = await exportJWK(privateKey)
+    return {
+        publicKey: jwkPublicKey,
+        privateKey: jwkPrivateKey,
     }
 }

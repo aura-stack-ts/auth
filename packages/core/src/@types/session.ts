@@ -3,6 +3,7 @@ import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { UserIdentity, UserShape } from "@/shared/identity.ts"
 import type { DeepPartial, EditableShape, Prettify, ZodShapeToObject } from "@/@types/utility.ts"
 import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
+import { JWK } from "@aura-stack/jose/jose"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof UserIdentity>
@@ -18,13 +19,18 @@ export interface Session<DefaultUser extends User = User> {
 }
 
 export interface CryptoSecret {
-    sign: CryptoKey | CryptoKeyPair
-    encrypt: CryptoKey | CryptoKeyPair
+    sign: CryptoKey | CryptoKeyPair | JWK | AsymmetricKeyPair
+    encrypt: CryptoKey | CryptoKeyPair | JWK | AsymmetricKeyPair
 }
 
 export interface AsymmetricKeyPairFromEnv {
     publicKey: string
     privateKey: string
+}
+
+export interface AsymmetricKeyPair {
+    publicKey: CryptoKey | JWK
+    privateKey: CryptoKey | JWK
 }
 
 /**
@@ -34,7 +40,7 @@ export interface AsymmetricKeyPairFromEnv {
  * - CryptoKey: Web Crypto API key, for environments that support it
  * - CryptoKeyPair: asymmetric signing/encryption (RS256, ES256, EdDSA, RSA-OAEP, etc.)
  */
-export type SecretKey = string | Uint8Array | CryptoKey | CryptoKeyPair | CryptoSecret
+export type SecretKey = string | Uint8Array | CryptoKey | CryptoKeyPair | CryptoSecret | JWK | AsymmetricKeyPair
 
 /**
  * @todo: add key rotation support for "SecretKey | CryptoKeyPair | [SecretKey | CryptoKeyPair, ...(SecretKey | CryptoKeyPair)[]]"
