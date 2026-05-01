@@ -1,19 +1,19 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
-import { UserIdentity } from "@/shared/identity.ts"
+import { Identities, UserIdentity } from "@/shared/identity.ts"
 import type { ZodObject } from "zod/v4"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { EditableShape, Prettify, ZodShapeToObject } from "@/@types/utility.ts"
+import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
-import type { JWTKey, SessionConfig, SessionStrategy, User, UserShape } from "@/@types/session.ts"
+import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
 
 /**
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export interface AuthConfig<Identity extends EditableShape<UserShape> = EditableShape<UserShape>> {
+export interface AuthConfig<Identity extends Identities> {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
@@ -45,7 +45,7 @@ export interface AuthConfig<Identity extends EditableShape<UserShape> = Editable
      * ```
      */
     // @todo: add type inference for built-in providers
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, ZodShapeToObject<Identity>>)[]
+    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, FromShapeToObject<Identity>>)[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -167,7 +167,7 @@ export interface AuthConfig<Identity extends EditableShape<UserShape> = Editable
      */
     identity?: Partial<{
         skipValidation: boolean
-        schema: ZodObject<Identity>
+        schema: ConfigSchema<Identity>
         unknownKeys: "passthrough" | "strict" | "strip"
     }>
     /**
@@ -317,7 +317,7 @@ export interface CredentialsProviderContext<T> {
 /**
  * Interface for the credentials provider.
  */
-export interface CredentialsProvider<Identity extends EditableShape<UserShape> = EditableShape<UserShape>> {
+export interface CredentialsProvider<Identity extends Identities> {
     hash?: (password: string, salt?: string, iterations?: number) => Promise<string>
     verify?: (password: string, hashedPassword: string) => Promise<boolean>
     /**
@@ -326,7 +326,7 @@ export interface CredentialsProvider<Identity extends EditableShape<UserShape> =
      */
     authorize: (
         ctx: CredentialsProviderContext<CredentialsPayload>
-    ) => Promise<ZodShapeToObject<Identity> | null> | ZodShapeToObject<Identity> | null
+    ) => Promise<FromShapeToObject<Identity> | null> | FromShapeToObject<Identity> | null
 }
 
 /**
@@ -375,9 +375,7 @@ export interface AuthInstance<DefaultUser extends User = User> {
 /**
  * Extended context used inside the library with both secure and standard cookie materializations.
  */
-export type InternalContext<Identity extends EditableShape<UserShape>> = RouterGlobalContext<
-    ZodShapeToObject<Identity> & User
-> & {
+export type InternalContext<Identity extends Identities> = RouterGlobalContext<FromShapeToObject<Identity> & User> & {
     cookieConfig: {
         secure: CookieStoreConfig
         standard: CookieStoreConfig

@@ -1,5 +1,6 @@
 import { email, string, z } from "zod/v4"
-import type { EditableShape } from "@/@types/utility.ts"
+import type { EditableShape, EditableShapeValibot } from "@/@types/utility.ts"
+import * as valibot from "valibot"
 
 export type {
     InferUser,
@@ -18,6 +19,21 @@ export const UserIdentity = z.object({
     email: email().nullable().optional(),
 })
 
-export type UserShape = (typeof UserIdentity)["shape"]
+export const UserIdentityValibot = valibot.object({
+    sub: valibot.string(),
+    name: valibot.optional(valibot.nullable(valibot.string())),
+    image: valibot.optional(valibot.nullable(valibot.string())),
+    email: valibot.optional(valibot.nullable(valibot.pipe(valibot.string(), valibot.email()))),
+})
 
-export const createIdentity = <S extends EditableShape<UserShape>>(shape: S) => z.object(shape)
+export type UserShape = (typeof UserIdentity)["shape"]
+export type UserShapeValibot = typeof UserIdentityValibot.entries
+
+export type Identities = EditableShape<UserShape> | EditableShapeValibot<UserShapeValibot>
+
+export const createIdentity = <S extends EditableShape<UserShape> | EditableShapeValibot<UserShapeValibot>>(shape: S) => {
+    if (typeof shape === "object" && shape !== null && Symbol.for("valibot") in shape) {
+        return shape
+    }
+    return z.object(shape)
+}

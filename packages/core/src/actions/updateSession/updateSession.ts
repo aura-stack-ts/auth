@@ -24,7 +24,7 @@ export const updateSessionAction = (identity: IdentityConfig) => {
                 ctx: ctx.context,
                 headers: ctx.request.headers,
                 session: {
-                    user: ctx.body.user as User,
+                    user: ctx.body?.user as User,
                     expires: ctx.body.expires?.toISOString(),
                 },
             })

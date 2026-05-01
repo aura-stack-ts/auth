@@ -1,6 +1,8 @@
 import type { AuthInstance } from "@/@types/config.ts"
-import type { Session, User } from "@/@types/session.ts"
+import type { Session, User, UserShape } from "@/@types/session.ts"
 import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer } from "zod/v4"
+import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
+import { UserShapeValibot } from "@/shared/identity.ts"
 
 /** Expands intersection types into a single flat object type for readable editor hints. */
 export type Prettify<T> = { [K in keyof T]: T[K] }
@@ -18,6 +20,25 @@ export type EditableShape<T extends ZodRawShape> = {
     [K in keyof T]: T[K] extends ZodObject<infer Inner extends ZodRawShape> ? ZodObject<EditableShape<Inner>> : ZodTypeAny
 }
 
+export type EditableShapeZod<T extends ZodRawShape> = EditableShape<T>
+
+type AnyShape = Record<string, AnyValibotSchema>
+
+export type EditableShapeValibot<T extends ObjectEntries> = {
+    [K in keyof T]: T[K] extends ObjectSchema<infer Inner extends AnyShape, undefined>
+        ? ObjectSchema<EditableShapeValibot<Inner>, undefined>
+        : BaseSchema<any, any, any>
+}
+
+export type ConfigSchema<T extends EditableShape<UserShape> | EditableShapeValibot<UserShapeValibot>> =
+    T extends EditableShape<UserShape>
+        ? ZodObject<T & ZodRawShape>
+        : T extends EditableShapeValibot<UserShapeValibot>
+          ? ObjectSchema<T & ObjectEntries, undefined>
+          : never
+
+export type ValibotShapeToObject<S extends ObjectEntries> = Merge<InferOutput<ObjectSchema<S, undefined>>, User>
+
 /** Merges type `B` over `A`, replacing overlapping keys with `B`. */
 export type Merge<A, B> = Omit<A, keyof B> & B
 
@@ -26,6 +47,12 @@ export type Merge<A, B> = Omit<A, keyof B> & B
  * so identity fields always include the base user contract.
  */
 export type ZodShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<Infer<ZodObject<S>>, User>
+
+export type FromShapeToObject<S> = S extends ZodRawShape
+    ? ZodShapeToObject<S>
+    : S extends ObjectEntries
+      ? ValibotShapeToObject<S>
+      : never
 
 /** Recursively makes every property required. */
 export type DeepRequired<T> = {
