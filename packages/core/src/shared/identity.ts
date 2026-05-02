@@ -1,6 +1,7 @@
-import { email, string, z } from "zod/v4"
+import { email, string, z, ZodObject } from "zod/v4"
 import type { EditableShape, EditableShapeValibot } from "@/@types/utility.ts"
 import * as valibot from "valibot"
+import { isValibotEntries, isValibotSchema } from "./assert.ts"
 
 export type {
     InferUser,
@@ -31,9 +32,18 @@ export type UserShapeValibot = typeof UserIdentityValibot.entries
 
 export type Identities = EditableShape<UserShape> | EditableShapeValibot<UserShapeValibot>
 
-export const createIdentity = <S extends EditableShape<UserShape> | EditableShapeValibot<UserShapeValibot>>(shape: S) => {
-    if (typeof shape === "object" && shape !== null && Symbol.for("valibot") in shape) {
-        return shape
+type ReturnShapeType<S> =
+    S extends EditableShape<UserShape>
+        ? z.ZodObject<S>
+        : S extends EditableShapeValibot<UserShapeValibot>
+          ? valibot.ObjectSchema<S, undefined>
+          : never
+
+export const createIdentity = <S extends EditableShape<UserShape> | EditableShapeValibot<UserShapeValibot>>(
+    shape: S
+): ReturnShapeType<S> => {
+    if (isValibotEntries(shape)) {
+        return valibot.object(shape) as unknown as ReturnShapeType<S>
     }
-    return z.object(shape)
+    return z.object(shape) as unknown as ReturnShapeType<S>
 }

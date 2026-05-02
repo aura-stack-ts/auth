@@ -1,7 +1,8 @@
 import { describe, expectTypeOf } from "vitest"
-import { z, ZodOptional, ZodString } from "zod/v4"
+import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"
-import { Identities, UserIdentity, UserShapeValibot } from "@/shared/identity.ts"
+import { z, ZodOptional, ZodString } from "zod/v4"
+import { Identities, UserIdentity, UserIdentityValibot, UserShapeValibot } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
 import type {
     GetSessionAPIOptions,
@@ -60,15 +61,76 @@ describe("createAuth", () => {
         ) => Promise<string>
     >()
     expectTypeOf(
+        createAuth({
+            oauth: [],
+            identity: { schema: valibot.object({ ...UserIdentityValibot.entries, role: valibot.string() }) },
+        }).jose.signJWS
+    ).toEqualTypeOf<
+        (
+            payload: TypedJWTPayload<
+                Partial<
+                    {
+                        sub: string
+                        role: string
+                        name?: string | null | undefined
+                        image?: string | null | undefined
+                        email?: string | null | undefined
+                    } & {
+                        sub: string
+                        name?: string | null | undefined
+                        image?: string | null | undefined
+                        email?: string | null | undefined
+                    }
+                >
+            >,
+            options?: JWTHeaderParameters
+        ) => Promise<string>
+    >()
+    expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).jose.verifyJWS
     ).toEqualTypeOf<
         (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<ZodShapeToObject<UserShape & { role: ZodString }>>>
     >()
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            identity: { schema: valibot.object({ ...UserIdentityValibot.entries, role: valibot.string() }) },
+        }).jose.verifyJWS
+    ).toEqualTypeOf<
+        (
+            token: string,
+            options?: JWTVerifyOptions
+        ) => Promise<TypedJWTPayload<ValibotShapeToObject<UserShapeValibot & { role: valibot.StringSchema<undefined> }>>>
+    >()
+    expectTypeOf(createAuth({ oauth: [], identity: { schema: UserIdentityValibot } })).toEqualTypeOf<
+        AuthInstance<ValibotShapeToObject<UserShapeValibot>>
+    >()
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            identity: {
+                schema: valibot.object({
+                    ...UserIdentityValibot.entries,
+                    role: valibot.string(),
+                }),
+            },
+        })
+    ).toEqualTypeOf<AuthInstance<User & { role: string }>>()
 
     expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).api.getSession
     ).toEqualTypeOf<
         (options: GetSessionAPIOptions) => Promise<GetSessionAPIReturn<ZodShapeToObject<UserShape & { role: ZodString }>>>
+    >()
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            identity: { schema: valibot.object({ ...UserIdentityValibot.entries, role: valibot.string() }) },
+        }).api.getSession
+    ).toEqualTypeOf<
+        (
+            options: GetSessionAPIOptions
+        ) => Promise<GetSessionAPIReturn<ValibotShapeToObject<UserShapeValibot & { role: valibot.StringSchema<undefined> }>>>
     >()
     expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).api.updateSession
@@ -77,13 +139,39 @@ describe("createAuth", () => {
             options: UpdateSessionAPIOptions<ZodShapeToObject<UserShape & { role: ZodString }>>
         ) => Promise<UpdateSessionAPIReturn<ZodShapeToObject<UserShape & { role: ZodString }>>>
     >()
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            identity: { schema: valibot.object({ ...UserIdentityValibot.entries, role: valibot.string() }) },
+        }).api.updateSession
+    ).toEqualTypeOf<
+        (
+            options: UpdateSessionAPIOptions<ValibotShapeToObject<UserShapeValibot & { role: valibot.StringSchema<undefined> }>>
+        ) => Promise<UpdateSessionAPIReturn<ValibotShapeToObject<UserShapeValibot & { role: valibot.StringSchema<undefined> }>>>
+    >()
+
     expectTypeOf<InferUser<ReturnType<typeof createAuth>>>().toEqualTypeOf<User>()
     expectTypeOf<InferUser<ReturnType<typeof createAuth<UserShape & { role: ZodOptional<ZodString> }>>>>().toEqualTypeOf<
         Prettify<User & { role?: string | undefined }>
     >()
+    expectTypeOf<
+        InferUser<
+            ReturnType<
+                typeof createAuth<UserShapeValibot & { role: valibot.OptionalSchema<valibot.StringSchema<undefined>, undefined> }>
+            >
+        >
+    >().toEqualTypeOf<Prettify<User & { role?: string | undefined }>>()
+
     expectTypeOf<InferSession<ReturnType<typeof createAuth<UserShape & { role: ZodOptional<ZodString> }>>>>().toEqualTypeOf<
         Session<Prettify<User & { role?: string | undefined }>>
     >()
+    expectTypeOf<
+        InferSession<
+            ReturnType<
+                typeof createAuth<UserShapeValibot & { role: valibot.OptionalSchema<valibot.StringSchema<undefined>, undefined> }>
+            >
+        >
+    >().toEqualTypeOf<Session<Prettify<User & { role?: string | undefined }>>>()
 })
 
 describe("OAuth providers", () => {

@@ -13,7 +13,7 @@ import {
     updateSessionAction,
 } from "@/actions/index.ts"
 import { Identities } from "@/shared/identity.ts"
-import type { AuthConfig, AuthInstance, FromShapeToObject } from "@/@types/index.ts"
+import type { AuthConfig, AuthInstance, EditableShape, FromShapeToObject, UserShape } from "@/@types/index.ts"
 
 const createInternalConfig = <Identity extends Identities>(config?: AuthConfig<Identity>): RouterConfig => {
     const context = createContext<Identity>(config)
@@ -76,7 +76,7 @@ export const createAuthInstance = <Identity extends Identities>(authConfig: Auth
  *   }]
  * })
  */
-export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>) => {
+export const createAuth = <Identity extends Identities = EditableShape<UserShape>>(config: AuthConfig<Identity>) => {
     const authInstance = createAuthInstance<Identity>(config) as unknown as AuthInstance<FromShapeToObject<Identity>>
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()
