@@ -9,6 +9,8 @@ import type {
     SessionConfig,
 } from "@/@types/index.ts"
 import type { JWK } from "@aura-stack/jose/jose"
+import { BaseSchema } from "valibot"
+import { ZodObject, ZodTypeAny } from "zod"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -172,4 +174,26 @@ export const isJWTPEMFormattedKeyPair = (
 
 export const isJWKFormattedKey = (value: unknown): value is JWK => {
     return typeof value === "object" && value !== null && "kty" in value && typeof (value as any).kty === "string"
+}
+
+export const isValibotSchema = (value: unknown): value is BaseSchema<any, any, any> => {
+    return typeof value === "object" && value !== null && "~run" in value && typeof (value as any)["~run"] === "function"
+}
+
+export const isValibotEntries = (value: unknown): value is Record<string, BaseSchema<any, any, any>> => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value) &&
+        Object.values(value).length > 0 && // optional but useful
+        Object.values(value).every(isValibotSchema)
+    )
+}
+
+export const isZodSchema = (value: unknown): value is ZodObject<any> => {
+    return typeof value === "object" && value !== null && "_def" in value
+}
+
+export const isZodEntries = (value: unknown): value is Record<string, ZodTypeAny> => {
+    return typeof value === "object" && value !== null && !Array.isArray(value) && Object.values(value).every(isZodSchema)
 }
