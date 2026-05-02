@@ -135,13 +135,13 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             if (!expiresAt) {
                 const userSession = identity.skipValidation
                     ? session.user
-                    : await schema.parse<TypedJWTPayload<DefaultUser>>(session.user)
+                    : await schema.parse(session.user)
                 return { session: { expires: session.expires, user: userSession }, headers }
             }
 
             const newSessionPayload = identity.skipValidation
                 ? session.user
-                : await schema.parse<TypedJWTPayload<DefaultUser>>(session.user)
+                : await schema.parse(session.user)
             const newSession = { user: newSessionPayload, expires: expiresAt.toISOString() }
 
             const issuedAt = strategy === "absolute" ? _iat : Math.floor(Date.now() / 1000)
@@ -170,7 +170,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 },
             })
         }
-        const payload = identity.skipValidation ? session : await schema.parse<TypedJWTPayload<DefaultUser>>(session)
+        const payload = identity.skipValidation ? session : await schema.parse(session)
         return jwt.createToken(payload)
     }
 

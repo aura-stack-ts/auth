@@ -5,7 +5,7 @@ import type { User } from "@/@types/session.ts"
 import type { IdentityConfig } from "@/@types/config.ts"
 import { UserIdentity } from "@/shared/identity.ts"
 
-export const config = (identity: IdentityConfig) => {
+export const config = (_identity: IdentityConfig) => {
     return createEndpointConfig({
         schemas: {
             body: z.object({

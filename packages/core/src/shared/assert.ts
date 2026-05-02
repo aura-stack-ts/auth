@@ -190,7 +190,7 @@ export const isValibotEntries = (value: unknown): value is Record<string, BaseSc
     )
 }
 
-export const isZodSchema = (value: unknown): value is ZodObject => {
+export const isZodSchema = (value: unknown): value is ZodObject<any> => {
     return typeof value === "object" && value !== null && "_def" in value
 }
 

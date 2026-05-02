@@ -14,27 +14,25 @@ import type {
 } from "@/@types/index.ts"
 import type { AuthConfig, AuthInstance, User } from "@/index.ts"
 import type { OAuthProviderCredentials } from "@/@types/oauth.ts"
-import type { FromShapeToObject, InferSession, InferUser, ValibotShapeToObject, ZodShapeToObject } from "@/@types/utility.ts"
+import type { EditableShape, FromShapeToObject, InferSession, InferUser, ValibotShapeToObject, ZodShapeToObject } from "@/@types/utility.ts"
 import type { JWTHeaderParameters, JWTVerifyOptions, Prettify, TypedJWTPayload } from "@aura-stack/jose"
-
-type Shapes = ZodShapeToObject<UserShape> | ValibotShapeToObject<UserShapeValibot>
 
 describe("createAuth", () => {
     expectTypeOf(createAuth).toEqualTypeOf<
-        <Identity extends Identities>(config: AuthConfig<Identity>) => AuthInstance<FromShapeToObject<Identity>>
+        <Identity extends Identities = EditableShape<UserShape>>(config: AuthConfig<Identity>) => AuthInstance<FromShapeToObject<Identity>>
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.getSession).toEqualTypeOf<
-        (options: GetSessionAPIOptions) => Promise<GetSessionAPIReturn<Shapes>>
+        (options: GetSessionAPIOptions) => Promise<GetSessionAPIReturn<ZodShapeToObject<UserShape>>>
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.updateSession).toEqualTypeOf<
-        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionAPIReturn<Shapes>>
+        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionAPIReturn<ZodShapeToObject<UserShape>>>
     >()
 
     expectTypeOf(createAuth({ oauth: [] }).jose.signJWS).toEqualTypeOf<
-        (payload: TypedJWTPayload<Partial<Shapes>>, options?: JWTHeaderParameters) => Promise<string>
+        (payload: TypedJWTPayload<Partial<ZodShapeToObject<UserShape>>>, options?: JWTHeaderParameters) => Promise<string>
     >()
     expectTypeOf(createAuth({ oauth: [] }).jose.verifyJWS).toEqualTypeOf<
-        (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<Shapes>>
+        (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<ZodShapeToObject<UserShape>>>
     >()
 
     expectTypeOf(

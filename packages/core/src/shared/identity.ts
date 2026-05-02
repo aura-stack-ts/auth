@@ -1,7 +1,7 @@
-import { email, string, z, ZodObject } from "zod/v4"
+import { z } from "zod/v4"
 import type { EditableShape, EditableShapeValibot } from "@/@types/utility.ts"
 import * as valibot from "valibot"
-import { isValibotEntries, isValibotSchema } from "./assert.ts"
+import { isValibotEntries } from "./assert.ts"
 
 export type {
     InferUser,
@@ -14,10 +14,10 @@ export type {
 } from "@/@types/utility.ts"
 
 export const UserIdentity = z.object({
-    sub: string(),
-    name: string().nullable().optional(),
-    image: string().nullable().optional(),
-    email: email().nullable().optional(),
+    sub: z.string(),
+    name: z.string().nullable().optional(),
+    image: z.string().nullable().optional(),
+    email: z.string().email().nullable().optional(),
 })
 
 export const UserIdentityValibot = valibot.object({
