@@ -12,8 +12,8 @@ import {
     csrfTokenAction,
     updateSessionAction,
 } from "@/actions/index.ts"
-import { Identities } from "@/shared/identity.ts"
-import type { AuthConfig, AuthInstance, EditableShape, FromShapeToObject, UserShape } from "@/@types/index.ts"
+import type { EditableShape, Identities, UserShape } from "@/shared/identity.ts"
+import type { AuthConfig, AuthInstance, FromShapeToObject } from "@/@types/index.ts"
 
 const createInternalConfig = <Identity extends Identities>(config?: AuthConfig<Identity>): RouterConfig => {
     const context = createContext<Identity>(config)

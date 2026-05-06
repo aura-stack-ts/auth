@@ -11,6 +11,7 @@ import type {
 import type { JWK } from "@aura-stack/jose/jose"
 import { BaseSchema } from "valibot"
 import { ZodObject, ZodTypeAny } from "zod"
+import { Type } from "arktype"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -196,4 +197,8 @@ export const isZodSchema = (value: unknown): value is ZodObject<any> => {
 
 export const isZodEntries = (value: unknown): value is Record<string, ZodTypeAny> => {
     return typeof value === "object" && value !== null && !Array.isArray(value) && Object.values(value).every(isZodSchema)
+}
+
+export const isArkType = (value: unknown): value is Type<{}, {}> => {
+    return typeof value === "function" && value !== null && "allows" in value && "assert" in value
 }

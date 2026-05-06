@@ -1,8 +1,9 @@
+import type { Type } from "arktype"
 import type { AuthInstance } from "@/@types/config.ts"
-import type { Session, User, UserShape } from "@/@types/session.ts"
+import type { Session, User } from "@/@types/session.ts"
 import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer } from "zod/v4"
+import type { Identities, IsArkType, IsZod, UserShapeValibot } from "@/shared/identity.ts"
 import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
-import { UserShapeValibot } from "@/shared/identity.ts"
 
 /** Expands intersection types into a single flat object type for readable editor hints. */
 export type Prettify<T> = { [K in keyof T]: T[K] }
@@ -30,14 +31,20 @@ export type EditableShapeValibot<T extends ObjectEntries> = {
         : BaseSchema<any, any, any>
 }
 
-export type ConfigSchema<T extends EditableShape<UserShape> | EditableShapeValibot<UserShapeValibot>> =
-    T extends EditableShape<UserShape>
+export type ConfigSchema<T extends Identities> =
+    IsZod<T> extends true
         ? ZodObject<T & ZodRawShape>
         : T extends EditableShapeValibot<UserShapeValibot>
           ? ObjectSchema<T & ObjectEntries, undefined>
-          : never
+          : IsArkType<T> extends true
+            ? T
+            : never
 
 export type ValibotShapeToObject<S extends ObjectEntries> = Merge<InferOutput<ObjectSchema<S, undefined>>, User>
+
+export type ArktypeShapeToObject<S extends Type> = S extends Type<infer Shape> ? Wrap<Merge<Shape, User>> : never
+
+export type EditableShapeArkType<T extends Type> = T extends Type<infer Shape> ? Type<{ [K in keyof Shape]: any }> : never
 
 /** Merges type `B` over `A`, replacing overlapping keys with `B`. */
 export type Merge<A, B> = Omit<A, keyof B> & B
@@ -52,7 +59,9 @@ export type FromShapeToObject<S> = S extends ZodRawShape
     ? ZodShapeToObject<S>
     : S extends ObjectEntries
       ? ValibotShapeToObject<S>
-      : never
+      : S extends Type
+        ? ArktypeShapeToObject<S>
+        : never
 
 /** Recursively makes every property required. */
 export type DeepRequired<T> = {

@@ -133,15 +133,11 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
 
             const expiresAt = updateExpires({ exp })
             if (!expiresAt) {
-                const userSession = identity.skipValidation
-                    ? session.user
-                    : await schema.parse(session.user)
+                const userSession = identity.skipValidation ? session.user : await schema.parse(session.user)
                 return { session: { expires: session.expires, user: userSession }, headers }
             }
 
-            const newSessionPayload = identity.skipValidation
-                ? session.user
-                : await schema.parse(session.user)
+            const newSessionPayload = identity.skipValidation ? session.user : await schema.parse(session.user)
             const newSession = { user: newSessionPayload, expires: expiresAt.toISOString() }
 
             const issuedAt = strategy === "absolute" ? _iat : Math.floor(Date.now() / 1000)

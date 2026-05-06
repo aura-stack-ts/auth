@@ -9,7 +9,10 @@ import { Identities } from "@/shared/identity.ts"
 /**
  * Resolves trusted origins from config (array or function).
  */
-export const getTrustedOrigins = async (request: Request, trustedOrigins: AuthConfig<Identities>["trustedOrigins"]): Promise<string[]> => {
+export const getTrustedOrigins = async (
+    request: Request,
+    trustedOrigins: AuthConfig<Identities>["trustedOrigins"]
+): Promise<string[]> => {
     if (!trustedOrigins) return []
     const raw = typeof trustedOrigins === "function" ? await trustedOrigins(request) : trustedOrigins
     return Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : []

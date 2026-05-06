@@ -87,6 +87,7 @@
   "dependencies": {
     "@aura-stack/jose": "workspace:*",
     "@aura-stack/router": "^0.6.0",
+    "arktype": "^2.2.0",
     "valibot": "^1.3.1",
     "zod": "catalog:zod-v4"
   },
