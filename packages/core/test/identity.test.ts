@@ -1,9 +1,10 @@
 import { describe, test, expect, expectTypeOf } from "vitest"
-import { createIdentity, InferUser } from "@/shared/identity.ts"
+import { createIdentity, InferUser, UserIdentity, UserIdentityArkType, UserIdentityValibot } from "@/shared/identity.ts"
 import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"
 import { createSchemaRegistry, stripUnknownKeys } from "@/schema-registry.ts"
+import { type } from "arktype"
 
 describe("createIdentity", () => {
     test("should create a Zod schema when passed a Zod shape", () => {
@@ -69,6 +70,36 @@ describe("createIdentity", () => {
         })
     })
 
+    test("should create an Arktype schema when passed an Arktype shape", () => {
+        const Schema = createIdentity(
+            type({
+                sub: "string",
+                name: "string | null?",
+                email: "string | null?",
+                image: "string | null?",
+                role: "string",
+            })
+        )
+
+        type User = typeof Schema.infer
+
+        const out = Schema({
+            sub: "user123",
+            name: "John Doe",
+            role: "admin",
+        }) as User
+
+        expect({
+            sub: out.sub,
+            name: out.name,
+            role: out.role,
+        }).toEqual({
+            sub: "user123",
+            name: "John Doe",
+            role: "admin",
+        })
+    })
+
     test("auth instance with Valibot schema", () => {
         const schema = createIdentity({
             sub: valibot.string(),
@@ -90,20 +121,17 @@ describe("createIdentity", () => {
 })
 
 describe("stripUnknownKeys", () => {
-    const zodSchema = z.object({
-        sub: z.string(),
-        name: z.string().nullable().optional(),
-        email: z.string().nullable().optional(),
-        image: z.string().nullable().optional(),
+    const zodSchema = UserIdentity.extend({
         role: z.string(),
     })
 
     const valibotSchema = valibot.object({
-        sub: valibot.string(),
-        name: valibot.optional(valibot.nullable(valibot.string())),
-        email: valibot.optional(valibot.nullable(valibot.pipe(valibot.string(), valibot.email()))),
-        image: valibot.optional(valibot.nullable(valibot.string())),
+        ...UserIdentityValibot.entries,
         role: valibot.string(),
+    })
+
+    const arktypeSchema = UserIdentityArkType.and({
+        role: "string",
     })
 
     const payload = {
@@ -113,86 +141,111 @@ describe("stripUnknownKeys", () => {
         extraKey: "should be stripped",
     }
 
-    test("zod schema with 'strip' unknownKeys", () => {
-        const schema = stripUnknownKeys(zodSchema, "strip")
-        expect(schema.safeParse(payload)).toMatchObject({
-            success: true,
-            data: {
-                sub: "user123",
-                name: "John Doe",
-                role: "admin",
-            },
+    describe("zod schemas", () => {
+        test("zod schema with 'strip' unknownKeys", () => {
+            const schema = stripUnknownKeys(zodSchema, "strip")
+            expect(schema.safeParse(payload)).toMatchObject({
+                success: true,
+                data: {
+                    sub: "user123",
+                    name: "John Doe",
+                    role: "admin",
+                },
+            })
+        })
+
+        test("zod schema with 'passthrough' unknownKeys", () => {
+            const schema = stripUnknownKeys(zodSchema, "passthrough")
+            expect(schema.safeParse(payload)).toMatchObject({
+                success: true,
+                data: {
+                    sub: "user123",
+                    name: "John Doe",
+                    role: "admin",
+                    extraKey: "should be stripped",
+                },
+            })
+        })
+
+        test("zod schema with 'strict' unknownKeys", () => {
+            const schema = stripUnknownKeys(zodSchema, "strict")
+            expect(schema.safeParse(payload)).toMatchObject({
+                success: false,
+            })
         })
     })
 
-    test("zod schema with 'passthrough' unknownKeys", () => {
-        const schema = stripUnknownKeys(zodSchema, "passthrough")
-        expect(schema.safeParse(payload)).toMatchObject({
-            success: true,
-            data: {
+    describe("valibot schemas", () => {
+        test("valibot schema with 'strip' unknownKeys", () => {
+            const schema = stripUnknownKeys(valibotSchema, "strip")
+            expect(valibot.safeParse(schema, payload)).toMatchObject({
+                success: true,
+                output: {
+                    sub: "user123",
+                    name: "John Doe",
+                    role: "admin",
+                },
+            })
+        })
+
+        test("valibot schema with 'passthrough' unknownKeys", () => {
+            const schema = stripUnknownKeys(valibotSchema, "passthrough")
+            expect(valibot.safeParse(schema, payload)).toMatchObject({
+                success: true,
+                output: {
+                    sub: "user123",
+                    name: "John Doe",
+                    role: "admin",
+                    extraKey: "should be stripped",
+                },
+            })
+        })
+
+        test("valibot schema with 'strict' unknownKeys", () => {
+            const schema = stripUnknownKeys(valibotSchema, "strict")
+            expect(valibot.safeParse(schema, payload)).toMatchObject({
+                success: false,
+            })
+        })
+    })
+
+    describe("arktype schemas", () => {
+        test("arktype schema with 'strip' unknownKeys", () => {
+            const Schema = stripUnknownKeys(arktypeSchema, "strip")
+
+            const out = Schema(payload)
+            expect(out).toMatchObject({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+            })
+        })
+
+        test("arktype schema with 'passthrough' unknownKeys", () => {
+            const Schema = stripUnknownKeys(arktypeSchema, "passthrough")
+            const out = Schema(payload)
+            expect(out).toMatchObject({
                 sub: "user123",
                 name: "John Doe",
                 role: "admin",
                 extraKey: "should be stripped",
-            },
-        })
-    })
-
-    test("zod schema with 'strict' unknownKeys", () => {
-        const schema = stripUnknownKeys(zodSchema, "strict")
-        expect(schema.safeParse(payload)).toMatchObject({
-            success: false,
-        })
-    })
-
-    test("valibot schema with 'strip' unknownKeys", () => {
-        const schema = stripUnknownKeys(valibotSchema, "strip")
-        expect(valibot.safeParse(schema, payload)).toMatchObject({
-            success: true,
-            output: {
-                sub: "user123",
-                name: "John Doe",
-                role: "admin",
-            },
-        })
-    })
-
-    test("valibot schema with 'passthrough' unknownKeys", () => {
-        const schema = stripUnknownKeys(valibotSchema, "passthrough")
-        expect(valibot.safeParse(schema, payload)).toMatchObject({
-            success: true,
-            output: {
-                sub: "user123",
-                name: "John Doe",
-                role: "admin",
-                extraKey: "should be stripped",
-            },
-        })
-    })
-
-    test("valibot schema with 'strict' unknownKeys", () => {
-        const schema = stripUnknownKeys(valibotSchema, "strict")
-        expect(valibot.safeParse(schema, payload)).toMatchObject({
-            success: false,
+            })
         })
     })
 })
 
 describe("createSchemaRegistry", () => {
-    const zodSchema = z.object({
-        sub: z.string(),
-        name: z.string().nullable().optional(),
-        email: z.string().nullable().optional(),
-        image: z.string().nullable().optional(),
+    const zodSchema = UserIdentity.extend({
         role: z.string(),
     })
 
     const valibotSchema = valibot.object({
-        sub: valibot.string(),
-        name: valibot.optional(valibot.nullable(valibot.string())),
-        email: valibot.optional(valibot.nullable(valibot.pipe(valibot.string(), valibot.email()))),
-        image: valibot.optional(valibot.nullable(valibot.string())),
+        ...UserIdentityValibot.entries,
         role: valibot.string(),
+    })
+
+    const arktypeSchema = UserIdentityArkType.and({
+        role: "string",
     })
 
     const payload = {
@@ -202,73 +255,114 @@ describe("createSchemaRegistry", () => {
         extraKey: "should be stripped",
     }
 
-    test("zod schema with 'strip' unknownKeys", async () => {
-        const { parse } = createSchemaRegistry({
-            schema: zodSchema,
-            unknownKeys: "strip",
+    describe("zod schemas", () => {
+        test("zod schema with 'strip' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: zodSchema,
+                unknownKeys: "strip",
+            })
+            const out = await parse(payload)
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+            })
         })
-        const out = await parse(payload)
-        expect(out).toEqual({
-            sub: "user123",
-            name: "John Doe",
-            role: "admin",
+
+        test("zod schema with 'passthrough' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: zodSchema,
+                unknownKeys: "passthrough",
+            })
+            const out = await parse(payload)
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+                extraKey: "should be stripped",
+            })
+        })
+
+        test("zod schema with 'strict' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: zodSchema,
+                unknownKeys: "strict",
+            })
+            await expect(parse(payload)).rejects.toThrow()
         })
     })
 
-    test("zod schema with 'passthrough' unknownKeys", async () => {
-        const { parse } = createSchemaRegistry({
-            schema: zodSchema,
-            unknownKeys: "passthrough",
+    describe("valibot schemas", () => {
+        test("valibot schema with 'strip' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: valibotSchema,
+                unknownKeys: "strip",
+            })
+            const out = await parse(payload)
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+            })
         })
-        const out = await parse(payload)
-        expect(out).toEqual({
-            sub: "user123",
-            name: "John Doe",
-            role: "admin",
-            extraKey: "should be stripped",
+
+        test("valibot schema with 'passthrough' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: valibotSchema,
+                unknownKeys: "passthrough",
+            })
+            const out = await parse(payload)
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+                extraKey: "should be stripped",
+            })
+        })
+
+        test("valibot schema with 'strict' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: valibotSchema,
+                unknownKeys: "strict",
+            })
+            await expect(parse(payload)).rejects.toThrow()
         })
     })
 
-    test("zod schema with 'strict' unknownKeys", async () => {
-        const { parse } = createSchemaRegistry({
-            schema: zodSchema,
-            unknownKeys: "strict",
+    describe("arktype schemas", () => {
+        test("arktype schema with 'strip' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: arktypeSchema,
+                unknownKeys: "strip",
+            })
+            const out = await parse(payload)
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+            })
         })
-        await expect(parse(payload)).rejects.toThrow()
-    })
 
-    test("valibot schema with 'strip' unknownKeys", async () => {
-        const { parse } = createSchemaRegistry({
-            schema: valibotSchema,
-            unknownKeys: "strip",
+        test("arktype schema with 'passthrough' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: arktypeSchema,
+                unknownKeys: "passthrough",
+            })
+            const out = await parse(payload)
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+                extraKey: "should be stripped",
+            })
         })
-        const out = await parse(payload)
-        expect(out).toEqual({
-            sub: "user123",
-            name: "John Doe",
-            role: "admin",
-        })
-    })
 
-    test("valibot schema with 'passthrough' unknownKeys", async () => {
-        const { parse } = createSchemaRegistry({
-            schema: valibotSchema,
-            unknownKeys: "passthrough",
+        test("arktype schema with 'strict' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: arktypeSchema,
+                unknownKeys: "strict",
+            })
+            await expect(parse(payload)).rejects.toThrow()
         })
-        const out = await parse(payload)
-        expect(out).toEqual({
-            sub: "user123",
-            name: "John Doe",
-            role: "admin",
-            extraKey: "should be stripped",
-        })
-    })
-
-    test("valibot schema with 'strict' unknownKeys", async () => {
-        const { parse } = createSchemaRegistry({
-            schema: valibotSchema,
-            unknownKeys: "strict",
-        })
-        await expect(parse(payload)).rejects.toThrow()
     })
 })

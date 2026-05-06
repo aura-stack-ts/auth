@@ -2,7 +2,7 @@ import { describe, expectTypeOf } from "vitest"
 import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"
 import { z, ZodOptional, ZodString } from "zod/v4"
-import { Identities, UserIdentity, UserIdentityValibot, UserShapeValibot } from "@/shared/identity.ts"
+import { Identities, UserIdentity, UserIdentityArkType, UserIdentityValibot, UserShapeValibot } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
 import type {
     GetSessionAPIOptions,
@@ -14,12 +14,21 @@ import type {
 } from "@/@types/index.ts"
 import type { AuthConfig, AuthInstance, User } from "@/index.ts"
 import type { OAuthProviderCredentials } from "@/@types/oauth.ts"
-import type { EditableShape, FromShapeToObject, InferSession, InferUser, ValibotShapeToObject, ZodShapeToObject } from "@/@types/utility.ts"
+import type {
+    EditableShape,
+    FromShapeToObject,
+    InferSession,
+    InferUser,
+    ValibotShapeToObject,
+    ZodShapeToObject,
+} from "@/@types/utility.ts"
 import type { JWTHeaderParameters, JWTVerifyOptions, Prettify, TypedJWTPayload } from "@aura-stack/jose"
 
 describe("createAuth", () => {
     expectTypeOf(createAuth).toEqualTypeOf<
-        <Identity extends Identities = EditableShape<UserShape>>(config: AuthConfig<Identity>) => AuthInstance<FromShapeToObject<Identity>>
+        <Identity extends Identities = EditableShape<UserShape>>(
+            config: AuthConfig<Identity>
+        ) => AuthInstance<FromShapeToObject<Identity>>
     >()
     expectTypeOf(createAuth({ oauth: [] }).api.getSession).toEqualTypeOf<
         (options: GetSessionAPIOptions) => Promise<GetSessionAPIReturn<ZodShapeToObject<UserShape>>>
@@ -70,6 +79,32 @@ describe("createAuth", () => {
                     {
                         sub: string
                         role: string
+                        name?: string | null | undefined
+                        image?: string | null | undefined
+                        email?: string | null | undefined
+                    } & {
+                        sub: string
+                        name?: string | null | undefined
+                        image?: string | null | undefined
+                        email?: string | null | undefined
+                    }
+                >
+            >,
+            options?: JWTHeaderParameters
+        ) => Promise<string>
+    >()
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            identity: { schema: UserIdentityArkType.and({ role: "string?" }) },
+        }).jose.signJWS
+    ).toEqualTypeOf<
+        (
+            payload: TypedJWTPayload<
+                Partial<
+                    {
+                        sub: string
+                        role?: string | undefined
                         name?: string | null | undefined
                         image?: string | null | undefined
                         email?: string | null | undefined
