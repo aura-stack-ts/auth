@@ -1,3 +1,5 @@
+import { Type } from "arktype"
+import { ObjectSchema } from "valibot"
 import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
@@ -8,8 +10,6 @@ import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
 import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
-import { ObjectSchema } from "valibot"
-import { Type } from "arktype"
 
 /**
  * Main configuration interface for Aura Auth.
@@ -285,7 +285,7 @@ export interface InternalLogger {
  * Identity validation settings used when building session strategy and OAuth profile mapping.
  * Controls the Zod schema and how unknown keys are handled on user objects.
  */
-export interface IdentityConfig<Schema extends ZodObject<any> | ObjectSchema<any, undefined | Type<any>> = typeof UserIdentity> {
+export interface IdentityConfig<Schema extends ZodObject<any> | ObjectSchema<any, undefined> | Type<{}> = typeof UserIdentity> {
     schema?: Schema
     skipValidation?: boolean
     unknownKeys?: "passthrough" | "strict" | "strip"

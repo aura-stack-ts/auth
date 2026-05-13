@@ -41,8 +41,6 @@
     "@types/node": "catalog:node",
     "@vitest/coverage-v8": "catalog:vitest",
     "eslint": "^9.35.0",
-    "oxfmt": "^0.41.0",
-    "oxlint": "^1.56.0",
     "tsdown": "^0.21.8",
     "turbo": "^2.7.5",
     "typescript": "catalog:typescript",

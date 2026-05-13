@@ -10,7 +10,7 @@ describe("updateSession action", () => {
                 body: JSON.stringify({}),
             })
         )
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(422)
         expect(await response.json()).toMatchObject({
             session: null,
             success: false,

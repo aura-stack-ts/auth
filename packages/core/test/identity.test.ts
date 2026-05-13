@@ -3,7 +3,7 @@ import { createIdentity, InferUser, UserIdentity, UserIdentityArkType, UserIdent
 import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"
-import { createSchemaRegistry, stripUnknownKeys } from "@/schema-registry.ts"
+import { createSchemaRegistry, deriveSchema } from "@/validator/registry.ts"
 import { type } from "arktype"
 
 describe("createIdentity", () => {
@@ -143,7 +143,7 @@ describe("stripUnknownKeys", () => {
 
     describe("zod schemas", () => {
         test("zod schema with 'strip' unknownKeys", () => {
-            const schema = stripUnknownKeys(zodSchema, "strip")
+            const schema = deriveSchema(zodSchema, "strip")
             expect(schema.safeParse(payload)).toMatchObject({
                 success: true,
                 data: {
@@ -155,7 +155,7 @@ describe("stripUnknownKeys", () => {
         })
 
         test("zod schema with 'passthrough' unknownKeys", () => {
-            const schema = stripUnknownKeys(zodSchema, "passthrough")
+            const schema = deriveSchema(zodSchema, "passthrough")
             expect(schema.safeParse(payload)).toMatchObject({
                 success: true,
                 data: {
@@ -168,7 +168,7 @@ describe("stripUnknownKeys", () => {
         })
 
         test("zod schema with 'strict' unknownKeys", () => {
-            const schema = stripUnknownKeys(zodSchema, "strict")
+            const schema = deriveSchema(zodSchema, "strict")
             expect(schema.safeParse(payload)).toMatchObject({
                 success: false,
             })
@@ -177,7 +177,7 @@ describe("stripUnknownKeys", () => {
 
     describe("valibot schemas", () => {
         test("valibot schema with 'strip' unknownKeys", () => {
-            const schema = stripUnknownKeys(valibotSchema, "strip")
+            const schema = deriveSchema(valibotSchema, "strip")
             expect(valibot.safeParse(schema, payload)).toMatchObject({
                 success: true,
                 output: {
@@ -189,7 +189,7 @@ describe("stripUnknownKeys", () => {
         })
 
         test("valibot schema with 'passthrough' unknownKeys", () => {
-            const schema = stripUnknownKeys(valibotSchema, "passthrough")
+            const schema = deriveSchema(valibotSchema, "passthrough")
             expect(valibot.safeParse(schema, payload)).toMatchObject({
                 success: true,
                 output: {
@@ -202,7 +202,7 @@ describe("stripUnknownKeys", () => {
         })
 
         test("valibot schema with 'strict' unknownKeys", () => {
-            const schema = stripUnknownKeys(valibotSchema, "strict")
+            const schema = deriveSchema(valibotSchema, "strict")
             expect(valibot.safeParse(schema, payload)).toMatchObject({
                 success: false,
             })
@@ -211,7 +211,7 @@ describe("stripUnknownKeys", () => {
 
     describe("arktype schemas", () => {
         test("arktype schema with 'strip' unknownKeys", () => {
-            const Schema = stripUnknownKeys(arktypeSchema, "strip")
+            const Schema = deriveSchema(arktypeSchema, "strip")
 
             const out = Schema(payload)
             expect(out).toMatchObject({
@@ -222,7 +222,7 @@ describe("stripUnknownKeys", () => {
         })
 
         test("arktype schema with 'passthrough' unknownKeys", () => {
-            const Schema = stripUnknownKeys(arktypeSchema, "passthrough")
+            const Schema = deriveSchema(arktypeSchema, "passthrough")
             const out = Schema(payload)
             expect(out).toMatchObject({
                 sub: "user123",
