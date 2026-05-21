@@ -1,8 +1,9 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createCookieStore } from "@/cookie.ts"
-import { Identities, UserIdentity } from "@/shared/identity.ts"
+import { Identities } from "@/shared/identity.ts"
 import { createProxyLogger } from "@/shared/logger.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
+import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
@@ -18,6 +19,12 @@ export const createContext = <Identity extends Identities>(config?: AuthConfig<I
     const standardCookieStore = createCookieStore(false, cookiePrefix, cookieOverrides, logger)
     const jose = createJoseInstance<FromShapeToObject<Identity>>(config?.secret, config?.session)
 
+    const schemaRegistry = createSchemaRegistry({
+        schema: config?.identity?.schema,
+        skipValidation: config?.identity?.skipValidation,
+        unknownKeys: config?.identity?.unknownKeys,
+    })
+
     const ctx = {
         oauth: createBuiltInOAuthProviders(config?.oauth),
         credentials: config?.credentials,
@@ -31,7 +38,7 @@ export const createContext = <Identity extends Identities>(config?: AuthConfig<I
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
         baseURL: config?.baseURL,
         identity: {
-            schema: config?.identity?.schema ?? UserIdentity,
+            schemaRegistry,
             unknownKeys: config?.identity?.unknownKeys ?? "strip",
             skipValidation: config?.identity?.skipValidation ?? false,
         },

@@ -13,7 +13,11 @@ import type { OAuthProviderRecord } from "@/@types/index.ts"
 import { timingSafeEqual } from "@/shared/utils.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
+    // @ts-ignore
     return createEndpointConfig("/callback/:oauth", {
+        /**
+         * @todo Add support to any schema (zod, arktype and valibot)
+         */
         schemas: {
             params: z.object({
                 oauth: z.enum(

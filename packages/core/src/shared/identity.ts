@@ -1,6 +1,6 @@
-import { z } from "zod/v4"
+import { z, type ZodObject } from "zod/v4"
 import * as valibot from "valibot"
-import { type } from "arktype"
+import { type, type Type } from "arktype"
 import { isArkType, isValibotEntries, isZodEntries } from "@/shared/assert.ts"
 import type { EditableShape, EditableShapeArkType, EditableShapeValibot } from "@/@types/utility.ts"
 
@@ -42,6 +42,8 @@ export type UserShapeArkType = typeof UserIdentityArkType
 export type IsArkType<T extends Identities> = T extends EditableShapeArkType<UserShapeArkType> ? true : false
 export type IsZod<T extends Identities> = T extends EditableShape<UserShape> ? true : false
 export type IsValibot<T extends Identities> = T extends EditableShapeValibot<UserShapeValibot> ? true : false
+
+export type SchemaTypes = ZodObject<any> | valibot.ObjectSchema<any, undefined> | Type<{}>
 
 export type Identities =
     | EditableShape<UserShape>
