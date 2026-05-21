@@ -8,14 +8,14 @@ import type { Prettify } from "@/@types/utility.ts"
 import type { ClientOptions } from "@aura-stack/router"
 import type { createAuthInstance } from "@/createAuth.ts"
 
-export type { TypedJWTPayload } from "@aura-stack/jose"
-
 export type * from "@/@types/config.ts"
 export type * from "@/@types/errors.ts"
 export type * from "@/@types/oauth.ts"
 export type * from "@/@types/session.ts"
 export type * from "@/@types/utility.ts"
 export type * from "@/@types/api.ts"
+
+export type { TypedJWTPayload } from "@aura-stack/jose"
 
 export type { UserShape } from "@/shared/identity.ts"
 /**

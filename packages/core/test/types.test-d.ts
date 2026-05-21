@@ -2,7 +2,15 @@ import { describe, expectTypeOf } from "vitest"
 import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"
 import { z, ZodOptional, ZodString } from "zod/v4"
-import { Identities, UserIdentity, UserIdentityArkType, UserIdentityValibot, UserShapeValibot } from "@/shared/identity.ts"
+import { Type as Typebox } from "typebox"
+import {
+    Identities,
+    UserIdentity,
+    UserIdentityArkType,
+    UserIdentityTypeBox,
+    UserIdentityValibot,
+    UserShapeValibot,
+} from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
 import type {
     GetSessionAPIOptions,
@@ -120,6 +128,38 @@ describe("createAuth", () => {
         ) => Promise<string>
     >()
     expectTypeOf(
+        createAuth({
+            oauth: [],
+            identity: {
+                schema: Typebox.Object({
+                    ...UserIdentityTypeBox.properties,
+                    role: Typebox.Optional(Typebox.String()),
+                }),
+            },
+        }).jose.signJWS
+    ).toEqualTypeOf<
+        (
+            payload: TypedJWTPayload<
+                Partial<
+                    {
+                        sub: string
+                        role?: string | undefined
+                        name?: string | null | undefined
+                        image?: string | null | undefined
+                        email?: string | null | undefined
+                    } & {
+                        sub: string
+                        name?: string | null | undefined
+                        image?: string | null | undefined
+                        email?: string | null | undefined
+                    }
+                >
+            >,
+            options?: JWTHeaderParameters
+        ) => Promise<string>
+    >()
+
+    expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).jose.verifyJWS
     ).toEqualTypeOf<
         (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<ZodShapeToObject<UserShape & { role: ZodString }>>>
@@ -165,6 +205,36 @@ describe("createAuth", () => {
             options: GetSessionAPIOptions
         ) => Promise<GetSessionAPIReturn<ValibotShapeToObject<UserShapeValibot & { role: valibot.StringSchema<undefined> }>>>
     >()
+    expectTypeOf(
+        createAuth({ oauth: [], identity: { schema: UserIdentityArkType.and({ role: "string?" }) } }).api.getSession
+    ).toEqualTypeOf<
+        (options: GetSessionAPIOptions) => Promise<
+            GetSessionAPIReturn<{
+                role?: string | undefined
+                sub: string
+                name?: string | null | undefined
+                image?: string | null | undefined
+                email?: string | null | undefined
+            }>
+        >
+    >()
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            identity: { schema: Typebox.Object({ ...UserIdentityTypeBox.properties, role: Typebox.Optional(Typebox.String()) }) },
+        }).api.getSession
+    ).toEqualTypeOf<
+        (options: GetSessionAPIOptions) => Promise<
+            GetSessionAPIReturn<{
+                role?: string | undefined
+                sub: string
+                name?: string | null | undefined
+                image?: string | null | undefined
+                email?: string | null | undefined
+            }>
+        >
+    >()
+
     expectTypeOf(
         createAuth({ oauth: [], identity: { schema: UserIdentity.extend({ role: z.string() }) } }).api.updateSession
     ).toEqualTypeOf<

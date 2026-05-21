@@ -1,5 +1,6 @@
 import { Type } from "arktype"
 import { ZodObject, ZodTypeAny } from "zod"
+import { Type as TypeboxType } from "typebox"
 import { BaseSchema, ObjectSchema } from "valibot"
 import { equals, patternToRegex } from "@/shared/utils.ts"
 import type {
@@ -201,4 +202,13 @@ export const isZodEntries = (value: unknown): value is Record<string, ZodTypeAny
 
 export const isArkType = (value: unknown): value is Type<{}, {}> => {
     return typeof value === "function" && value !== null && "allows" in value && "assert" in value
+}
+
+export const isTypeboxEntries = (value: unknown): value is TypeboxType.TProperties => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value) &&
+        Object.values(value).every((v) => typeof v === "object" && "type" in v)
+    )
 }

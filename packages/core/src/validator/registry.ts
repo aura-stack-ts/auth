@@ -1,12 +1,13 @@
-import { z, type ZodObject } from "zod/v4"
+import { z } from "zod/v4"
+import * as valibot from "valibot"
+import { type } from "arktype"
 import { formatZodError } from "@/shared/utils.ts"
-import { UserIdentity, type SchemaTypes } from "@/shared/identity.ts"
+import { IsObject, Type as Typebox } from "typebox"
 import { IdentityConfig } from "@/@types/config.ts"
 import { AuthValidationError } from "@/shared/errors.ts"
 import { createValidator } from "@/validator/validator.ts"
+import { UserIdentity, type SchemaTypes } from "@/shared/identity.ts"
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
-import * as valibot from "valibot"
-import { type, type Type } from "arktype"
 
 export const deriveSchema = <Schema extends SchemaTypes>(
     schema: Schema,
@@ -39,6 +40,25 @@ export const deriveSchema = <Schema extends SchemaTypes>(
                 ? schema.onUndeclaredKey("reject")
                 : schema.partial()
     }
+    if (IsObject(schema)) {
+        return mode === "strip"
+            ? Typebox.Object(schema.properties, {
+                  ...schema,
+                  additionalProperties: false,
+                  strip: true,
+              })
+            : mode === "passthrough"
+              ? Typebox.Object(schema.properties, {
+                    ...schema,
+                    additionalProperties: true,
+                })
+              : mode === "strict"
+                ? Typebox.Object(schema.properties, {
+                      ...schema,
+                      additionalProperties: false,
+                  })
+                : Typebox.Partial(schema)
+    }
     throw new AuthValidationError(
         "INVALID_IDENTITY_VALIDATION_FAILED",
         `Unsupported schema mode configuration. Valid options are: "strip", "passthrough", "strict" and "partial".`
@@ -69,15 +89,34 @@ export const deriveSchemaWithJWT = <Schema extends SchemaTypes>(schema: Schema):
             mexp: "number?",
         })
     }
-    return schema.extend({
-        exp: z.number(),
-        iat: z.number(),
-        jti: z.string(),
-        nbf: z.number(),
-        aud: z.string().optional(),
-        iss: z.string().optional(),
-        mexp: z.number().optional(),
-    })
+    if (IsObject(schema)) {
+        return Typebox.Object(
+            {
+                ...schema.properties,
+                exp: Typebox.Number(),
+                iat: Typebox.Number(),
+                jti: Typebox.String(),
+                nbf: Typebox.Number(),
+                aud: Typebox.Optional(Typebox.String()),
+                iss: Typebox.Optional(Typebox.String()),
+                mexp: Typebox.Optional(Typebox.Number()),
+            },
+            {
+                ...schema,
+            }
+        )
+    }
+    if (isZodSchema(schema)) {
+        return schema.extend({
+            exp: z.number(),
+            iat: z.number(),
+            jti: z.string(),
+            nbf: z.number(),
+            aud: z.string().optional(),
+            iss: z.string().optional(),
+            mexp: z.number().optional(),
+        })
+    }
 }
 
 export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any => {
@@ -105,6 +144,12 @@ export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any =
                 .optional(),
         })
     }
+    if (IsObject(schema)) {
+        return Typebox.Object({
+            user: schema,
+            expires: Typebox.Optional(Typebox.String()),
+        })
+    }
     return z.object({
         user: schema,
         expires: z.coerce.date().optional(),
@@ -119,15 +164,15 @@ const throwValidationError = (activeSchema: SchemaTypes, error: unknown): never 
         errorDetails = { issues: error }
     } else if (isArkType(activeSchema)) {
         errorDetails = { error }
+    } else if (IsObject(activeSchema)) {
+        errorDetails = { errors: error }
     }
     throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", JSON.stringify(errorDetails, null, 2), {
         cause: isZodSchema(activeSchema) ? error : undefined,
     })
 }
 
-export const createSchemaRegistry = <Identity extends ZodObject<any> | valibot.ObjectSchema<any, undefined> | Type<{}>>(
-    config: IdentityConfig<Identity>
-) => {
+export const createSchemaRegistry = <Identity extends SchemaTypes>(config: IdentityConfig<Identity>) => {
     const schema = deriveSchema(config.schema ?? UserIdentity, config.unknownKeys)
     const schemaAsPartial = deriveSchema(config.schema ?? UserIdentity, "partial")
     const schemaWithJWT = deriveSchemaWithJWT(config.schema ?? UserIdentity)

@@ -1,6 +1,5 @@
-// @todo Add typebox supportñ
-//import { IsObject } from "typebox"
-//import { Check } from "typebox/value"
+import { IsObject } from "typebox"
+import { Value } from "typebox/value"
 import { safeParse } from "valibot"
 import { isValibotSchema, isZodSchema, isArkType } from "@/shared/assert.ts"
 
@@ -14,7 +13,7 @@ export interface SchemaAdapter<T> {
  * Universal wrapper for Zod, Valibot, ArkType, etc.
  */
 export const createValidator = <T>(schema: any): SchemaAdapter<T> => {
-    if (!isZodSchema(schema) && !isValibotSchema(schema) && !isArkType(schema)) {
+    if (!isZodSchema(schema) && !isValibotSchema(schema) && !isArkType(schema) && !IsObject(schema)) {
         throw new Error("Unsupported schema type")
     }
     return {
@@ -39,13 +38,16 @@ export const createValidator = <T>(schema: any): SchemaAdapter<T> => {
                         ? { success: false, data: null, error: parsed }
                         : { success: true, data: parsed as T, error: null }
                 }
-                // @todo Add typebox support
-                //if (IsObject(schema)) {
-                //    const isValid = Check(schema, data)
-                //    return isValid
-                //        ? { success: true, data: data as T, error: null }
-                //        : { success: false, data: null, error: new Error("Validation failed") }
-                //}
+                if (IsObject(schema)) {
+                    let dataToValidate = data
+                    if ((schema as any).strip) {
+                        dataToValidate = Value.Clean(schema, Value.Clone(data))
+                    }
+                    const isValid = Value.Check(schema, dataToValidate)
+                    return isValid
+                        ? { success: true, data: dataToValidate as T, error: null }
+                        : { success: false, data: null, error: [...Value.Errors(schema, dataToValidate)] }
+                }
                 return { success: false, data: null, error: new Error("Unsupported schema type") }
             } catch (e) {
                 return { success: false, data: null, error: e }
