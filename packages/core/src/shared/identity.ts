@@ -1,8 +1,9 @@
 import { z, type ZodObject } from "zod/v4"
 import * as valibot from "valibot"
+import { Type as Typebox } from "typebox"
 import { type, type Type } from "arktype"
-import { isArkType, isValibotEntries, isZodEntries } from "@/shared/assert.ts"
-import type { EditableShape, EditableShapeArkType, EditableShapeValibot } from "@/@types/utility.ts"
+import { isArkType, isTypeboxEntries, isValibotEntries, isZodEntries } from "@/shared/assert.ts"
+import type { EditableShape, EditableShapeArkType, EditableShapeTypebox, EditableShapeValibot } from "@/@types/utility.ts"
 
 export type {
     InferUser,
@@ -11,7 +12,11 @@ export type {
     SessionFrom,
     InferZodShape,
     ZodShapeToObject,
+    ArktypeShapeToObject,
+    TypeboxShapeToObject,
+    ValibotShapeToObject,
     EditableShape,
+    FromShapeToObject,
 } from "@/@types/utility.ts"
 
 export const UserIdentity = z.object({
@@ -35,20 +40,29 @@ export const UserIdentityArkType = type({
     email: "string.email | null?",
 })
 
+export const UserIdentityTypeBox = Typebox.Object({
+    sub: Typebox.String(),
+    name: Typebox.Optional(Typebox.Union([Typebox.String(), Typebox.Null()])),
+    image: Typebox.Optional(Typebox.Union([Typebox.String(), Typebox.Null()])),
+    email: Typebox.Optional(Typebox.Union([Typebox.String({ format: "email" }), Typebox.Null()])),
+})
+
 export type UserShape = typeof UserIdentity.shape
 export type UserShapeValibot = typeof UserIdentityValibot.entries
 export type UserShapeArkType = typeof UserIdentityArkType
+export type UserShapeTypeBox = typeof UserIdentityTypeBox.properties
 
 export type IsArkType<T extends Identities> = T extends EditableShapeArkType<UserShapeArkType> ? true : false
 export type IsZod<T extends Identities> = T extends EditableShape<UserShape> ? true : false
 export type IsValibot<T extends Identities> = T extends EditableShapeValibot<UserShapeValibot> ? true : false
 
-export type SchemaTypes = ZodObject<any> | valibot.ObjectSchema<any, undefined> | Type<{}>
+export type SchemaTypes = ZodObject<any> | valibot.ObjectSchema<any, undefined> | Type<{}> | Typebox.TObject
 
 export type Identities =
     | EditableShape<UserShape>
     | EditableShapeValibot<UserShapeValibot>
     | EditableShapeArkType<UserShapeArkType>
+    | EditableShapeTypebox<UserShapeTypeBox>
 
 type ReturnShapeType<T> =
     T extends EditableShape<UserShape>
@@ -57,7 +71,9 @@ type ReturnShapeType<T> =
           ? valibot.ObjectSchema<T, undefined>
           : T extends EditableShapeArkType<UserShapeArkType>
             ? T
-            : never
+            : T extends EditableShapeTypebox<UserShapeTypeBox>
+              ? Typebox.TObject<T>
+              : never
 
 export const createIdentity = <S extends Identities>(shape: S): ReturnShapeType<S> => {
     if (isArkType(shape)) {
@@ -68,6 +84,9 @@ export const createIdentity = <S extends Identities>(shape: S): ReturnShapeType<
     }
     if (isZodEntries(shape)) {
         return z.object(shape) as unknown as ReturnShapeType<S>
+    }
+    if (isTypeboxEntries(shape)) {
+        return Typebox.Object(shape) as unknown as ReturnShapeType<S>
     }
     return z.object(shape) as unknown as ReturnShapeType<S>
 }

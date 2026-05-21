@@ -2,9 +2,9 @@ import { createAuth as createBasicAuth, type AuthConfig } from "@aura-stack/auth
 import { withAuth } from "@/lib/with-auth.ts"
 import { toExpressHandler } from "@/lib/handler.ts"
 import type { Request, Response } from "express"
-import type { EditableShape, ZodShapeToObject, UserShape } from "@aura-stack/auth/identity"
+import type { Identities, FromShapeToObject } from "@aura-stack/auth/identity"
 
-export const createAuth = <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => {
+export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>) => {
     const auth = createBasicAuth<Identity>(config)
     return {
         ...auth,
@@ -16,6 +16,6 @@ export const createAuth = <Identity extends EditableShape<UserShape>>(config: Au
         /**
          * Middleware that retrieves the session and attaches it to `res.locals.session`.
          */
-        withAuth: withAuth<ZodShapeToObject<Identity>>(auth),
+        withAuth: withAuth<FromShapeToObject<Identity>>(auth),
     }
 }

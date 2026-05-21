@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added experimental support for `Typebox` schema validation in `createAuth`; it now supports both Zod and Typebox schemas to extend the default User fields. [#163](https://github.com/aura-stack-ts/auth/pull/163)
+
 - Added experimental support for `Valibot` schema validation in `createAuth`; it now supports both Zod and Valibot schemas to extend the default User fields. [#160](https://github.com/aura-stack-ts/auth/pull/160)
 
 - Extended asymmetric cryptography support to accept JWK (JSON Web Key) format keys in addition to `CryptoKeyPair` across JOSE functions exposed by `createAuth.jose`, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encodeJWT`, and `decodeJWT` functions. [#159](https://github.com/aura-stack-ts/auth/pull/159)

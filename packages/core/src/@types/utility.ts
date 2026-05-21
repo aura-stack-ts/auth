@@ -1,8 +1,9 @@
-import type { Type } from "arktype"
+import { Type } from "arktype"
+import type { TProperties, TObject, Static, TSchema } from "typebox"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
 import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer } from "zod/v4"
-import type { Identities, IsArkType, IsZod, UserShapeValibot } from "@/shared/identity.ts"
+import type { Identities, IsArkType, IsZod, UserShapeTypeBox, UserShapeValibot } from "@/shared/identity.ts"
 import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
 
 /** Expands intersection types into a single flat object type for readable editor hints. */
@@ -31,6 +32,10 @@ export type EditableShapeValibot<T extends ObjectEntries> = {
         : BaseSchema<any, any, any>
 }
 
+export type EditableShapeTypebox<T extends TProperties> = {
+    [K in keyof T]: T[K] extends TObject ? Wrap<EditableShapeTypebox<T[K]["properties"]>> : TSchema
+}
+
 export type ConfigSchema<T extends Identities> =
     IsZod<T> extends true
         ? ZodObject<T & ZodRawShape>
@@ -38,11 +43,15 @@ export type ConfigSchema<T extends Identities> =
           ? ObjectSchema<T & ObjectEntries, undefined>
           : IsArkType<T> extends true
             ? T
-            : never
+            : T extends EditableShapeTypebox<UserShapeTypeBox>
+              ? TObject<T & TProperties>
+              : never
 
 export type ValibotShapeToObject<S extends ObjectEntries> = Merge<InferOutput<ObjectSchema<S, undefined>>, User>
 
 export type ArktypeShapeToObject<S extends Type> = S extends Type<infer Shape> ? Wrap<Merge<Shape, User>> : never
+
+export type TypeboxShapeToObject<S extends TProperties> = S extends TProperties ? Wrap<Merge<Static<TObject<S>>, User>> : never
 
 export type EditableShapeArkType<T extends Type> = T extends Type<infer Shape> ? Type<{ [K in keyof Shape]: any }> : never
 
@@ -61,7 +70,9 @@ export type FromShapeToObject<S> = S extends ZodRawShape
       ? ValibotShapeToObject<S>
       : S extends Type
         ? ArktypeShapeToObject<S>
-        : never
+        : S extends TProperties
+          ? TypeboxShapeToObject<S>
+          : never
 
 /** Recursively makes every property required. */
 export type DeepRequired<T> = {

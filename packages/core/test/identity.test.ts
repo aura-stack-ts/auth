@@ -1,13 +1,22 @@
 import { describe, test, expect, expectTypeOf } from "vitest"
-import { createIdentity, InferUser, UserIdentity, UserIdentityArkType, UserIdentityValibot } from "@/shared/identity.ts"
+import {
+    createIdentity,
+    InferUser,
+    UserIdentity,
+    UserIdentityArkType,
+    UserIdentityTypeBox,
+    UserIdentityValibot,
+} from "@/shared/identity.ts"
 import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"
 import { createSchemaRegistry, deriveSchema } from "@/validator/registry.ts"
-import { type } from "arktype"
+import { ArkErrors, type } from "arktype"
+import { Static, Type as Typebox } from "typebox"
+import { Value } from "typebox/value"
 
 describe("createIdentity", () => {
-    test("should create a Zod schema when passed a Zod shape", () => {
+    test("createIdentity with Zod schema", () => {
         const schema = createIdentity({
             sub: z.string(),
             name: z.string().nullable().optional(),
@@ -48,7 +57,7 @@ describe("createIdentity", () => {
         expectTypeOf<ExpectedIdentity>().toEqualTypeOf<InferUser<typeof auth>>()
     })
 
-    test("should create a Valibot schema when passed a Valibot shape", () => {
+    test("createIdentity with Valibot schema", () => {
         const schema = createIdentity({
             sub: valibot.string(),
             name: valibot.optional(valibot.nullable(valibot.string())),
@@ -70,7 +79,26 @@ describe("createIdentity", () => {
         })
     })
 
-    test("should create an Arktype schema when passed an Arktype shape", () => {
+    test("auth instance with Valibot schema", () => {
+        const schema = createIdentity({
+            sub: valibot.string(),
+            name: valibot.optional(valibot.nullable(valibot.string())),
+            email: valibot.optional(valibot.nullable(valibot.pipe(valibot.string(), valibot.email()))),
+            image: valibot.optional(valibot.nullable(valibot.string())),
+            role: valibot.string(),
+        })
+
+        const auth = createAuth({
+            oauth: [],
+            identity: {
+                schema,
+            },
+        })
+        type ExpectedIdentity = valibot.InferOutput<typeof schema>
+        expectTypeOf<ExpectedIdentity>().toEqualTypeOf<InferUser<typeof auth>>()
+    })
+
+    test("createIdentity with Arktype schema", () => {
         const Schema = createIdentity(
             type({
                 sub: "string",
@@ -100,22 +128,69 @@ describe("createIdentity", () => {
         })
     })
 
-    test("auth instance with Valibot schema", () => {
-        const schema = createIdentity({
-            sub: valibot.string(),
-            name: valibot.optional(valibot.nullable(valibot.string())),
-            email: valibot.optional(valibot.nullable(valibot.pipe(valibot.string(), valibot.email()))),
-            image: valibot.optional(valibot.nullable(valibot.string())),
-            role: valibot.string(),
+    test("auth instance with Arktype schema", () => {
+        const Schema = createIdentity(
+            type({
+                sub: "string",
+                name: "string | null?",
+                email: "string | null?",
+                image: "string | null?",
+                role: "string",
+            })
+        )
+
+        const auth = createAuth({
+            oauth: [],
+            identity: {
+                schema: Schema,
+            },
+        })
+        type ExpectedIdentity = Exclude<ReturnType<typeof Schema>, ArkErrors>
+        expectTypeOf<ExpectedIdentity>().toEqualTypeOf<InferUser<typeof auth>>()
+    })
+
+    test("createIdentity with TypeBox schema", () => {
+        const Schema = createIdentity({
+            sub: Typebox.String(),
+            name: Typebox.Optional(Typebox.Union([Typebox.String(), Typebox.Null()])),
+            email: Typebox.Optional(Typebox.Union([Typebox.String({ format: "email" }), Typebox.Null()])),
+            image: Typebox.Optional(Typebox.Union([Typebox.String(), Typebox.Null()])),
+            role: Typebox.String(),
+        })
+
+        const out = Value.Parse(Schema, {
+            sub: "user123",
+            name: "John Doe",
+            role: "admin",
+        })
+
+        expect(out).toEqual({
+            sub: "user123",
+            name: "John Doe",
+            role: "admin",
+        })
+    })
+
+    test("auth instance with TypeBox schema", () => {
+        const Schema = createIdentity({
+            sub: Typebox.String(),
+            name: Typebox.Optional(Typebox.Union([Typebox.String(), Typebox.Null()])),
+            email: Typebox.Optional(Typebox.Union([Typebox.String({ format: "email" }), Typebox.Null()])),
+            image: Typebox.Optional(Typebox.Union([Typebox.String(), Typebox.Null()])),
+            role: Typebox.String(),
+            user: Typebox.Object({
+                id: Typebox.String(),
+                name: Typebox.String(),
+            }),
         })
 
         const auth = createAuth({
             oauth: [],
             identity: {
-                schema,
+                schema: Schema,
             },
         })
-        type ExpectedIdentity = valibot.InferOutput<typeof schema>
+        type ExpectedIdentity = Static<typeof Schema>
         expectTypeOf<ExpectedIdentity>().toEqualTypeOf<InferUser<typeof auth>>()
     })
 })
@@ -132,6 +207,11 @@ describe("deriveSchema", () => {
 
     const arktypeSchema = UserIdentityArkType.and({
         role: "string",
+    })
+
+    const typeboxSchema = Typebox.Object({
+        ...UserIdentityTypeBox.properties,
+        role: Typebox.String(),
     })
 
     const payload = {
@@ -258,6 +338,42 @@ describe("deriveSchema", () => {
             expect(out).toMatchObject({})
         })
     })
+
+    describe("typebox schemas", () => {
+        test("typebox schema with 'strip' deriveSchema", () => {
+            const Schema = deriveSchema(typeboxSchema, "strip")
+
+            const out = Value.Parse(Schema, Value.Clean(Schema, { ...payload }))
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+            })
+        })
+
+        test("typebox schema with 'passthrough' deriveSchema", () => {
+            const Schema = deriveSchema(typeboxSchema, "passthrough")
+            const out = Value.Parse(Schema, payload)
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+                extraKey: "should be stripped",
+            })
+        })
+
+        test("typebox schema with 'strict' deriveSchema", () => {
+            const Schema = deriveSchema(typeboxSchema, "strict")
+            const isValid = Value.Check(Schema, payload)
+            expect(isValid).toBe(false)
+        })
+
+        test("typebox schema with 'partial' deriveSchema", () => {
+            const Schema = deriveSchema(typeboxSchema, "partial")
+            const out = Value.Parse(Schema, {})
+            expect(out).toEqual({})
+        })
+    })
 })
 
 describe("createSchemaRegistry", () => {
@@ -272,6 +388,11 @@ describe("createSchemaRegistry", () => {
 
     const arktypeSchema = UserIdentityArkType.and({
         role: "string",
+    })
+
+    const typeboxSchema = Typebox.Object({
+        ...UserIdentityTypeBox.properties,
+        role: Typebox.String(),
     })
 
     const payload = {
@@ -386,6 +507,43 @@ describe("createSchemaRegistry", () => {
         test("arktype schema with 'strict' unknownKeys", async () => {
             const { parse } = createSchemaRegistry({
                 schema: arktypeSchema,
+                unknownKeys: "strict",
+            })
+            await expect(parse(payload)).rejects.toThrow()
+        })
+    })
+
+    describe("typebox schemas", () => {
+        test("typebox schema with 'strip' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: typeboxSchema,
+                unknownKeys: "strip",
+            })
+            const out = await parse(payload)
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+            })
+        })
+
+        test("typebox schema with 'passthrough' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: typeboxSchema,
+                unknownKeys: "passthrough",
+            })
+            const out = await parse(payload)
+            expect(out).toEqual({
+                sub: "user123",
+                name: "John Doe",
+                role: "admin",
+                extraKey: "should be stripped",
+            })
+        })
+
+        test("typebox schema with 'strict' unknownKeys", async () => {
+            const { parse } = createSchemaRegistry({
+                schema: typeboxSchema,
                 unknownKeys: "strict",
             })
             await expect(parse(payload)).rejects.toThrow()
