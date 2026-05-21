@@ -83,6 +83,13 @@ catalogs:
 importers:
 
   .:
+    dependencies:
+      oxfmt:
+        specifier: ^0.51.0
+        version: 0.51.0
+      oxlint:
+        specifier: ^1.66.0
+        version: 1.66.0
     devDependencies:
       '@types/node':
         specifier: catalog:node
@@ -90,12 +97,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: catalog:vitest
         version: 4.1.4(vitest@4.1.4)
-      oxfmt:
-        specifier: ^0.51.0
-        version: 0.51.0
-      oxlint:
-        specifier: ^1.66.0
-        version: 1.66.0
       tsdown:
         specifier: ^0.21.8
         version: 0.21.8(typescript@5.9.3)(vue-tsc@3.2.6(typescript@5.9.3))
