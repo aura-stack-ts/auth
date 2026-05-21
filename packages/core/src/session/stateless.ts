@@ -113,16 +113,17 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             if (!sessionToken) return { session: null, headers: newHeaders }
 
             const claims = await jwt.verifyToken(sessionToken)
-            const parsedClaims = await identity.schemaRegistry.parseWithJWT(claims)
-            const userClaims = await identity.schemaRegistry.parse(parsedClaims)
+            const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
+            const { exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
+            const userClaims = await identity.schemaRegistry.parse(defaultPayload)
             if (!userClaims.sub) return { session: null, headers: newHeaders }
 
             const session: Session<DefaultUser> = {
                 user: userClaims as DefaultUser,
-                expires: parsedClaims.exp ? new Date(parsedClaims.exp * 1000).toISOString() : "",
+                expires: parsedClaims.exp ? new Date(exp * 1000).toISOString() : "",
             }
 
-            const expiresAt = updateExpires({ exp: parsedClaims.exp })
+            const expiresAt = updateExpires({ exp })
             if (!expiresAt) {
                 return { session: { expires: session.expires, user: userClaims }, headers }
             }

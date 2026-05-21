@@ -282,7 +282,7 @@ describe("createSchemaRegistry", () => {
     }
 
     describe("zod schemas", () => {
-        test("zod schema with 'strip' deriveSchema", async () => {
+        test("zod schema with 'strip' unknownKeys", async () => {
             const { parse } = createSchemaRegistry({
                 schema: zodSchema,
                 unknownKeys: "strip",
@@ -295,7 +295,7 @@ describe("createSchemaRegistry", () => {
             })
         })
 
-        test("zod schema with 'passthrough' deriveSchema", async () => {
+        test("zod schema with 'passthrough' unknownKeys", async () => {
             const { parse } = createSchemaRegistry({
                 schema: zodSchema,
                 unknownKeys: "passthrough",
@@ -309,7 +309,7 @@ describe("createSchemaRegistry", () => {
             })
         })
 
-        test("zod schema with 'strict' deriveSchema", async () => {
+        test("zod schema with 'strict' unknownKeys", async () => {
             const { parse } = createSchemaRegistry({
                 schema: zodSchema,
                 unknownKeys: "strict",
@@ -319,7 +319,7 @@ describe("createSchemaRegistry", () => {
     })
 
     describe("valibot schemas", () => {
-        test("valibot schema with 'strip' deriveSchema", async () => {
+        test("valibot schema with 'strip' unknownKeys", async () => {
             const { parse } = createSchemaRegistry({
                 schema: valibotSchema,
                 unknownKeys: "strip",
@@ -332,7 +332,7 @@ describe("createSchemaRegistry", () => {
             })
         })
 
-        test("valibot schema with 'passthrough' deriveSchema", async () => {
+        test("valibot schema with 'passthrough' unknownKeys", async () => {
             const { parse } = createSchemaRegistry({
                 schema: valibotSchema,
                 unknownKeys: "passthrough",
@@ -346,7 +346,7 @@ describe("createSchemaRegistry", () => {
             })
         })
 
-        test("valibot schema with 'strict' deriveSchema", async () => {
+        test("valibot schema with 'strict' unknownKeys", async () => {
             const { parse } = createSchemaRegistry({
                 schema: valibotSchema,
                 unknownKeys: "strict",
@@ -356,7 +356,7 @@ describe("createSchemaRegistry", () => {
     })
 
     describe("arktype schemas", () => {
-        test("arktype schema with 'strip' deriveSchema", async () => {
+        test("arktype schema with 'strip' unknownKeys", async () => {
             const { parse } = createSchemaRegistry({
                 schema: arktypeSchema,
                 unknownKeys: "strip",
@@ -369,7 +369,7 @@ describe("createSchemaRegistry", () => {
             })
         })
 
-        test("arktype schema with 'passthrough' deriveSchema", async () => {
+        test("arktype schema with 'passthrough' unknownKeys", async () => {
             const { parse } = createSchemaRegistry({
                 schema: arktypeSchema,
                 unknownKeys: "passthrough",

@@ -19,10 +19,13 @@ export const createContext = <Identity extends Identities>(config?: AuthConfig<I
     const standardCookieStore = createCookieStore(false, cookiePrefix, cookieOverrides, logger)
     const jose = createJoseInstance<FromShapeToObject<Identity>>(config?.secret, config?.session)
 
+    const unknownKeys = config?.identity?.unknownKeys ?? "strip"
+    const skipValidation = config?.identity?.skipValidation ?? false
+
     const schemaRegistry = createSchemaRegistry({
         schema: config?.identity?.schema,
-        skipValidation: config?.identity?.skipValidation,
-        unknownKeys: config?.identity?.unknownKeys,
+        unknownKeys,
+        skipValidation,
     })
 
     const ctx = {
@@ -39,8 +42,8 @@ export const createContext = <Identity extends Identities>(config?: AuthConfig<I
         baseURL: config?.baseURL,
         identity: {
             schemaRegistry,
-            unknownKeys: config?.identity?.unknownKeys ?? "strip",
-            skipValidation: config?.identity?.skipValidation ?? false,
+            unknownKeys,
+            skipValidation,
         },
     } as InternalContext<Identity>
     ctx.sessionStrategy = createSessionStrategy<Identity>({

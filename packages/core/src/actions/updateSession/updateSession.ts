@@ -5,10 +5,9 @@ import type { User } from "@/@types/session.ts"
 import type { SchemaRegistryContext } from "@/@types/config.ts"
 
 export const config = (identity: SchemaRegistryContext) => {
-    const bodySchema = getFullSchema(identity.schemaRegistry.schemaAsPartial!)
     return createEndpointConfig({
         schemas: {
-            body: bodySchema,
+            body: getFullSchema(identity.schemaRegistry.schemaAsPartial),
         },
     })
 }

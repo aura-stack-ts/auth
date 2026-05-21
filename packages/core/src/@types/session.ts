@@ -1,13 +1,9 @@
+import type { JWK } from "@aura-stack/jose/jose"
 import type { infer as Infer } from "zod/v4/core"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { Identities, UserIdentity } from "@/shared/identity.ts"
 import type { DeepPartial, FromShapeToObject, Prettify } from "@/@types/utility.ts"
-import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
-import type { JWK } from "@aura-stack/jose/jose"
-import { ZodObject } from "zod"
-import { ObjectSchema } from "valibot"
-import { Type } from "arktype"
-import { createSchemaRegistry } from "@/validator/registry.ts"
+import type { CookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof UserIdentity>
@@ -235,11 +231,7 @@ export interface CreateSessionStrategyOptions<Identity extends Identities> {
     jose: JoseInstance<FromShapeToObject<Identity> & User>
     cookies: () => CookieStoreConfig
     logger?: InternalLogger
-    identity: {
-        schemaRegistry: ReturnType<typeof createSchemaRegistry>
-        skipValidation?: boolean
-        unknownKeys: "passthrough" | "strict" | "strip"
-    }
+    identity: SchemaRegistryContext
 }
 
 /** Options specialized for the JWT-backed session strategy. */
@@ -248,11 +240,7 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
     jose: JoseInstance<DefaultUser>
     logger?: InternalLogger
     cookies: () => CookieStoreConfig
-    identity: {
-        schemaRegistry: ReturnType<typeof createSchemaRegistry>
-        skipValidation?: boolean
-        unknownKeys: "passthrough" | "strict" | "strip"
-    }
+    identity: SchemaRegistryContext
 }
 
 /** Minimal token issue/verify surface used by session code paths. */

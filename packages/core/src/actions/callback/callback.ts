@@ -2,15 +2,15 @@ import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/shared/crypto.ts"
 import { cacheControl } from "@/shared/headers.ts"
-import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
+import { timingSafeEqual } from "@/shared/utils.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { OAuthAuthorizationErrorResponse } from "@/schemas.ts"
-import { AuthSecurityError, OAuthProtocolError } from "@/shared/errors.ts"
-import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
-import { createAccessToken } from "@/actions/callback/access-token.ts"
 import { getCookie, expiredCookieAttributes } from "@/cookie.ts"
+import { createAccessToken } from "@/actions/callback/access-token.ts"
+import { AuthSecurityError, OAuthProtocolError } from "@/shared/errors.ts"
+import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
+import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
-import { timingSafeEqual } from "@/shared/utils.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
     // @ts-ignore
@@ -19,12 +19,14 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
          * @todo Add support to any schema (zod, arktype and valibot)
          */
         schemas: {
+            // @ts-ignore
             params: z.object({
                 oauth: z.enum(
                     Object.keys(oauth) as (keyof OAuthProviderRecord)[],
                     "The OAuth provider is not supported or invalid."
                 ),
             }),
+            // @ts-ignore
             searchParams: z.object({
                 code: z.string("Missing code parameter in the OAuth authorization response."),
                 state: z.string("Missing state parameter in the OAuth authorization response."),

@@ -43,9 +43,7 @@
     "tsdown": "^0.21.8",
     "turbo": "^2.7.5",
     "typescript": "catalog:typescript",
-    "vitest": "catalog:vitest",
-    "oxfmt": "^0.49.0",
-    "oxlint": "^1.64.0"
+    "vitest": "catalog:vitest"
   },
   "packageManager": "pnpm@10.15.0",
   "workspaces": {

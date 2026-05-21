@@ -111,6 +111,20 @@ export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any =
     })
 }
 
+const throwValidationError = (activeSchema: SchemaTypes, error: unknown): never => {
+    let errorDetails: unknown = {}
+    if (isZodSchema(activeSchema)) {
+        errorDetails = formatZodError(error as any)
+    } else if (isValibotSchema(activeSchema)) {
+        errorDetails = { issues: error }
+    } else if (isArkType(activeSchema)) {
+        errorDetails = { error }
+    }
+    throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", JSON.stringify(errorDetails, null, 2), {
+        cause: isZodSchema(activeSchema) ? error : undefined,
+    })
+}
+
 export const createSchemaRegistry = <Identity extends ZodObject<any> | valibot.ObjectSchema<any, undefined> | Type<{}>>(
     config: IdentityConfig<Identity>
 ) => {
@@ -125,18 +139,7 @@ export const createSchemaRegistry = <Identity extends ZodObject<any> | valibot.O
     const parse = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = validator.validate(data)
         if (!success) {
-            let errorDetails = {}
-            if (isZodSchema(schema)) {
-                errorDetails = formatZodError(error)
-            } else if (isValibotSchema(schema)) {
-                errorDetails = { issues: error }
-            } else if (isArkType(schema)) {
-                errorDetails = { error }
-            }
-            const details = JSON.stringify(errorDetails, null, 2)
-            throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", details, {
-                cause: isZodSchema(schema) ? error : undefined,
-            })
+            throwValidationError(schema, error)
         }
         return output
     }
@@ -144,18 +147,7 @@ export const createSchemaRegistry = <Identity extends ZodObject<any> | valibot.O
     const parseAsPartial = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = partialValidator.validate(data)
         if (!success) {
-            let errorDetails = {}
-            if (isZodSchema(schema)) {
-                errorDetails = formatZodError(error)
-            } else if (isValibotSchema(schema)) {
-                errorDetails = { issues: error }
-            } else if (isArkType(schema)) {
-                errorDetails = { error }
-            }
-            const details = JSON.stringify(errorDetails, null, 2)
-            throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", details, {
-                cause: isZodSchema(schemaAsPartial) ? error : undefined,
-            })
+            throwValidationError(schemaAsPartial, error)
         }
         return output
     }
@@ -163,18 +155,7 @@ export const createSchemaRegistry = <Identity extends ZodObject<any> | valibot.O
     const parseWithJWT = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = jwtValidator.validate(data)
         if (!success) {
-            let errorDetails = {}
-            if (isZodSchema(schemaWithJWT)) {
-                errorDetails = formatZodError(error)
-            } else if (isValibotSchema(schemaWithJWT)) {
-                errorDetails = { issues: error }
-            } else if (isArkType(schemaWithJWT)) {
-                errorDetails = { error }
-            }
-            const details = JSON.stringify(errorDetails, null, 2)
-            throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", details, {
-                cause: isZodSchema(schemaWithJWT) ? error : undefined,
-            })
+            throwValidationError(schemaWithJWT, error)
         }
         return output
     }
