@@ -3,7 +3,7 @@ import { createIdentity, InferUser, UserIdentity, UserIdentityArkType, UserIdent
 import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"
-import { createSchemaRegistry, stripUnknownKeys } from "@/schema-registry.ts"
+import { createSchemaRegistry, deriveSchema } from "@/validator/registry.ts"
 import { type } from "arktype"
 
 describe("createIdentity", () => {
@@ -120,7 +120,7 @@ describe("createIdentity", () => {
     })
 })
 
-describe("stripUnknownKeys", () => {
+describe("deriveSchema", () => {
     const zodSchema = UserIdentity.extend({
         role: z.string(),
     })
@@ -142,8 +142,8 @@ describe("stripUnknownKeys", () => {
     }
 
     describe("zod schemas", () => {
-        test("zod schema with 'strip' unknownKeys", () => {
-            const schema = stripUnknownKeys(zodSchema, "strip")
+        test("zod schema with 'strip' deriveSchema", () => {
+            const schema = deriveSchema(zodSchema, "strip")
             expect(schema.safeParse(payload)).toMatchObject({
                 success: true,
                 data: {
@@ -154,8 +154,8 @@ describe("stripUnknownKeys", () => {
             })
         })
 
-        test("zod schema with 'passthrough' unknownKeys", () => {
-            const schema = stripUnknownKeys(zodSchema, "passthrough")
+        test("zod schema with 'passthrough' deriveSchema", () => {
+            const schema = deriveSchema(zodSchema, "passthrough")
             expect(schema.safeParse(payload)).toMatchObject({
                 success: true,
                 data: {
@@ -167,17 +167,24 @@ describe("stripUnknownKeys", () => {
             })
         })
 
-        test("zod schema with 'strict' unknownKeys", () => {
-            const schema = stripUnknownKeys(zodSchema, "strict")
+        test("zod schema with 'strict' deriveSchema", () => {
+            const schema = deriveSchema(zodSchema, "strict")
             expect(schema.safeParse(payload)).toMatchObject({
                 success: false,
+            })
+        })
+
+        test("zod schema with 'partial' deriveSchema", () => {
+            const schema = deriveSchema(zodSchema, "partial")
+            expect(schema.safeParse({})).toMatchObject({
+                success: true,
             })
         })
     })
 
     describe("valibot schemas", () => {
-        test("valibot schema with 'strip' unknownKeys", () => {
-            const schema = stripUnknownKeys(valibotSchema, "strip")
+        test("valibot schema with 'strip' deriveSchema", () => {
+            const schema = deriveSchema(valibotSchema, "strip")
             expect(valibot.safeParse(schema, payload)).toMatchObject({
                 success: true,
                 output: {
@@ -188,8 +195,8 @@ describe("stripUnknownKeys", () => {
             })
         })
 
-        test("valibot schema with 'passthrough' unknownKeys", () => {
-            const schema = stripUnknownKeys(valibotSchema, "passthrough")
+        test("valibot schema with 'passthrough' deriveSchema", () => {
+            const schema = deriveSchema(valibotSchema, "passthrough")
             expect(valibot.safeParse(schema, payload)).toMatchObject({
                 success: true,
                 output: {
@@ -201,17 +208,24 @@ describe("stripUnknownKeys", () => {
             })
         })
 
-        test("valibot schema with 'strict' unknownKeys", () => {
-            const schema = stripUnknownKeys(valibotSchema, "strict")
+        test("valibot schema with 'strict' deriveSchema", () => {
+            const schema = deriveSchema(valibotSchema, "strict")
             expect(valibot.safeParse(schema, payload)).toMatchObject({
                 success: false,
+            })
+        })
+
+        test("valibot schema with 'partial' deriveSchema", () => {
+            const schema = deriveSchema(valibotSchema, "partial")
+            expect(valibot.safeParse(schema, {})).toMatchObject({
+                success: true,
             })
         })
     })
 
     describe("arktype schemas", () => {
-        test("arktype schema with 'strip' unknownKeys", () => {
-            const Schema = stripUnknownKeys(arktypeSchema, "strip")
+        test("arktype schema with 'strip' deriveSchema", () => {
+            const Schema = deriveSchema(arktypeSchema, "strip")
 
             const out = Schema(payload)
             expect(out).toMatchObject({
@@ -221,8 +235,8 @@ describe("stripUnknownKeys", () => {
             })
         })
 
-        test("arktype schema with 'passthrough' unknownKeys", () => {
-            const Schema = stripUnknownKeys(arktypeSchema, "passthrough")
+        test("arktype schema with 'passthrough' deriveSchema", () => {
+            const Schema = deriveSchema(arktypeSchema, "passthrough")
             const out = Schema(payload)
             expect(out).toMatchObject({
                 sub: "user123",
@@ -230,6 +244,18 @@ describe("stripUnknownKeys", () => {
                 role: "admin",
                 extraKey: "should be stripped",
             })
+        })
+
+        test("arktype schema with 'strict' deriveSchema", () => {
+            const Schema = deriveSchema(arktypeSchema, "strict")
+            const out = Schema(payload)
+            expect(out).toMatchObject({})
+        })
+
+        test("arktype schema with 'partial' deriveSchema", () => {
+            const Schema = deriveSchema(arktypeSchema, "partial")
+            const out = Schema({})
+            expect(out).toMatchObject({})
         })
     })
 })

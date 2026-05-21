@@ -1,3 +1,7 @@
+/**
+ * This file will be replaced by `validator/registry.ts`
+ *
+ */
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
 import { formatZodError } from "@/shared/utils.ts"
 import { UserIdentity } from "@/shared/identity.ts"

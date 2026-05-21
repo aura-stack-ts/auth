@@ -1,25 +1,18 @@
-import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { updateSession } from "@/api/updateSession.ts"
+import { getFullSchema } from "@/validator/registry.ts"
 import type { User } from "@/@types/session.ts"
-import type { IdentityConfig } from "@/@types/config.ts"
-import { UserIdentity } from "@/shared/identity.ts"
+import type { SchemaRegistryContext } from "@/@types/config.ts"
 
-export const config = (_identity: IdentityConfig) => {
+export const config = (identity: SchemaRegistryContext) => {
     return createEndpointConfig({
         schemas: {
-            body: z.object({
-                /**
-                 * @todo add support for valibot schemas in the body as well, currently only Zod is supported
-                 */
-                user: UserIdentity.partial().optional(),
-                expires: z.coerce.date().optional(),
-            }),
+            body: getFullSchema(identity.schemaRegistry.schemaAsPartial),
         },
     })
 }
 
-export const updateSessionAction = (identity: IdentityConfig) => {
+export const updateSessionAction = (identity: SchemaRegistryContext) => {
     return createEndpoint(
         "PATCH",
         "/session",

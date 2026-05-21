@@ -1,15 +1,13 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
-import { Identities, UserIdentity } from "@/shared/identity.ts"
-import type { ZodObject } from "zod/v4"
+import { createSchemaRegistry } from "@/validator/registry.ts"
+import { UserIdentity, type Identities, type SchemaTypes } from "@/shared/identity.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
 import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
-import { ObjectSchema } from "valibot"
-import { Type } from "arktype"
 
 /**
  * Main configuration interface for Aura Auth.
@@ -285,8 +283,9 @@ export interface InternalLogger {
  * Identity validation settings used when building session strategy and OAuth profile mapping.
  * Controls the Zod schema and how unknown keys are handled on user objects.
  */
-export interface IdentityConfig<Schema extends ZodObject<any> | ObjectSchema<any, undefined | Type<any>> = typeof UserIdentity> {
+export interface IdentityConfig<Schema extends SchemaTypes = typeof UserIdentity> {
     schema?: Schema
+    schemaAsPartial?: Schema
     skipValidation?: boolean
     unknownKeys?: "passthrough" | "strict" | "strip"
 }
@@ -347,11 +346,13 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
     sessionStrategy: SessionStrategy<DefaultUser>
-    identity: {
-        unknownKeys: "passthrough" | "strict" | "strip"
-        schema: ZodObject<any>
-        skipValidation?: boolean
-    }
+    identity: SchemaRegistryContext
+}
+
+export interface SchemaRegistryContext {
+    schemaRegistry: ReturnType<typeof createSchemaRegistry>
+    skipValidation?: boolean
+    unknownKeys: "passthrough" | "strict" | "strip"
 }
 
 /**

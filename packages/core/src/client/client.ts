@@ -15,9 +15,6 @@ import type {
     UpdateSessionReturn,
     SignInCredentialsReturn,
     SignInAPIReturn,
-    SignOutAPIReturn,
-    SignInCredentialsAPIReturn,
-    UpdateSessionAPIReturn,
     SignInCredentialsOptions,
 } from "@/@types/index.ts"
 
@@ -55,7 +52,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             if (!response.ok) return null
             const session = await response.json()
             if (!session.success) return null
-            return session.session
+            return session.session as Session<DefaultUser>
         } catch (error) {
             console.error("Error fetching session:", error)
             return null
@@ -97,7 +94,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                     redirectTo: options?.redirectTo,
                 },
             })
-            const json: SignInCredentialsAPIReturn = await response.json()
+            const json = await response.json()
             if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -122,6 +119,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             }
             const user = session.user ?? {}
             const response = await client.patch("/session", {
+                // @ts-ignore - Fixing the type here - go to @aura-stack/router.
                 body: {
                     user,
                     expires: session.expires ? new Date(session.expires) : undefined,
@@ -130,7 +128,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json: UpdateSessionAPIReturn<DefaultUser> = await response.json()
+            const json = await response.json()
             if ((options.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -157,7 +155,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json: SignOutAPIReturn = await response.json()
+            const json = await response.json()
             if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }

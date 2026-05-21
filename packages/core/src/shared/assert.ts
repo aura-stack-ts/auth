@@ -1,3 +1,6 @@
+import { Type } from "arktype"
+import { ZodObject, ZodTypeAny } from "zod"
+import { BaseSchema, ObjectSchema } from "valibot"
 import { equals, patternToRegex } from "@/shared/utils.ts"
 import type {
     AsymmetricKeyPair,
@@ -9,9 +12,6 @@ import type {
     SessionConfig,
 } from "@/@types/index.ts"
 import type { JWK } from "@aura-stack/jose/jose"
-import { BaseSchema } from "valibot"
-import { ZodObject, ZodTypeAny } from "zod"
-import { Type } from "arktype"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -177,7 +177,7 @@ export const isJWKFormattedKey = (value: unknown): value is JWK => {
     return typeof value === "object" && value !== null && "kty" in value && typeof (value as any).kty === "string"
 }
 
-export const isValibotSchema = (value: unknown): value is BaseSchema<any, any, any> => {
+export const isValibotSchema = (value: unknown): value is ObjectSchema<any, undefined> => {
     return typeof value === "object" && value !== null && "~run" in value && typeof (value as any)["~run"] === "function"
 }
 
@@ -186,7 +186,7 @@ export const isValibotEntries = (value: unknown): value is Record<string, BaseSc
         typeof value === "object" &&
         value !== null &&
         !Array.isArray(value) &&
-        Object.values(value).length > 0 && // optional but useful
+        Object.values(value).length > 0 &&
         Object.values(value).every(isValibotSchema)
     )
 }

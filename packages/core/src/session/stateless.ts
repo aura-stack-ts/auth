@@ -13,7 +13,6 @@ import type {
     GetStatelessSessionReturn,
     DeepPartial,
 } from "@/@types/index.ts"
-import { createSchemaRegistry } from "@/schema-registry.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({
     config,
@@ -26,7 +25,6 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
     const cookieConfig = createCookieManager(cookies)
     const maxAge = config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = config?.jwt?.expirationStrategy ?? "absolute"
-    const schema = createSchemaRegistry(identity)
 
     const updateExpires = ({ exp }: { exp: number | undefined }): Date | null => {
         if (!exp) return null
@@ -114,42 +112,35 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             const { sessionToken } = cookieConfig.getCookie(headers)
             if (!sessionToken) return { session: null, headers: newHeaders }
 
-            const {
-                exp,
-                iat: _iat,
-                jti: _jti,
-                nbf: _nbf,
-                aud: _aud,
-                iss: _iss,
-                mexp,
-                ...user
-            } = await jwt.verifyToken(sessionToken)
-            if (!user.sub) return { session: null, headers: newHeaders }
+            const claims = await jwt.verifyToken(sessionToken)
+            const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
+            const { exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
+            const userClaims = await identity.schemaRegistry.parse(defaultPayload)
+            if (!userClaims.sub) return { session: null, headers: newHeaders }
 
             const session: Session<DefaultUser> = {
-                user: user as DefaultUser,
-                expires: exp ? new Date(exp * 1000).toISOString() : "",
+                user: userClaims as DefaultUser,
+                expires: parsedClaims.exp ? new Date(exp * 1000).toISOString() : "",
             }
 
             const expiresAt = updateExpires({ exp })
             if (!expiresAt) {
-                const userSession = identity.skipValidation ? session.user : await schema.parse(session.user)
-                return { session: { expires: session.expires, user: userSession }, headers }
+                return { session: { expires: session.expires, user: userClaims }, headers }
             }
 
-            const newSessionPayload = identity.skipValidation ? session.user : await schema.parse(session.user)
-            const newSession = { user: newSessionPayload, expires: expiresAt.toISOString() }
-
-            const issuedAt = strategy === "absolute" ? _iat : Math.floor(Date.now() / 1000)
+            const issuedAt = strategy === "absolute" ? parsedClaims.iat : Math.floor(Date.now() / 1000)
             const newSessionToken = await jwt.createToken({
-                ...newSessionPayload,
+                ...userClaims,
                 exp: Math.floor(expiresAt.getTime() / 1000),
                 iat: issuedAt,
-                mexp,
+                mexp: parsedClaims.mexp,
             })
             logger?.log("SESSION_REFRESHED", { structuredData: { strategy: "stateless", expiresAt: expiresAt.toISOString() } })
             return {
-                session: newSession as unknown as Session<DefaultUser>,
+                session: {
+                    user: userClaims,
+                    expires: expiresAt.toISOString(),
+                } as unknown as Session<DefaultUser>,
                 headers: cookieConfig.setCookie({ sessionToken: newSessionToken }),
             }
         } catch (error) {
@@ -166,8 +157,8 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 },
             })
         }
-        const payload = identity.skipValidation ? session : await schema.parse(session)
-        return jwt.createToken(payload)
+        const payload = identity.skipValidation ? session : await identity.schemaRegistry.parse(session)
+        return jwt.createToken(payload as unknown as DefaultUser)
     }
 
     const refreshSession = async (
@@ -187,10 +178,13 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             if (!isValidToken) {
                 return { session: null, headers: cookieConfig.clear() }
             }
-            const verifiedToken = await jwt.verifyToken(sessionToken)
-            const { exp, mexp, sub, iat } = verifiedToken
-            const defaultPayload = identity.skipValidation ? verifiedToken : await schema.parse(verifiedToken)
-            const sessionPayload = identity.skipValidation ? session.user : await schema.parseAsPartial(session.user)
+            const claims = await jwt.verifyToken(sessionToken)
+
+            const defaultPayload = identity.skipValidation ? claims : await identity.schemaRegistry.parse(claims)
+            const { exp, mexp, sub, iat } = defaultPayload
+            const sessionPayload = identity.skipValidation
+                ? session.user
+                : await identity.schemaRegistry.parseAsPartial(session.user)
 
             const expiresAt = session.expires
                 ? new Date(session.expires)
