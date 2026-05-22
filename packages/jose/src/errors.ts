@@ -7,11 +7,7 @@ interface V8ErrorConstructor extends ErrorConstructor {
  * supports Error.captureStackTrace.
  */
 export const hasCaptureStackTrace = (errorConstructor: ErrorConstructor): errorConstructor is V8ErrorConstructor => {
-    return (
-        typeof errorConstructor === "function" &&
-        "captureStackTrace" in errorConstructor &&
-        typeof (errorConstructor as any).captureStackTrace === "function"
-    )
+    return "captureStackTrace" in errorConstructor && typeof (errorConstructor as any).captureStackTrace === "function"
 }
 
 /**
@@ -26,7 +22,7 @@ export class AuraJoseError extends Error {
         this.name = new.target.name
         this.code = new.target.code
         if (hasCaptureStackTrace(Error)) {
-            Error.captureStackTrace?.(this, new.target)
+            Error.captureStackTrace(this, new.target)
         }
     }
 }

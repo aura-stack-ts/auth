@@ -69,7 +69,7 @@ export const getExpiredCookie = (options?: SerializeOptions) => {
         ...options,
         expires: new Date(0),
         maxAge: 0,
-        secure: true,
+        secure: options?.secure ?? true,
     }
 }
 

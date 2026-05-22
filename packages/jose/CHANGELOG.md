@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- Added strict secret verification: require at least 3.5 bits of entropy per character and a minimum total entropy of 254 bits. [#164](https://github.com/aura-stack-ts/auth/pull/164)
+- Added strict secret verification: require at least 4 bits of entropy per character and a minimum total entropy of 254 bits. [`#164`](https://github.com/aura-stack-ts/auth/pull/164)
 
 ## [0.5.0] - 2026-04-21
 

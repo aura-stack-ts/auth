@@ -9,11 +9,7 @@ interface V8ErrorConstructor extends ErrorConstructor {
  * supports Error.captureStackTrace.
  */
 export const hasCaptureStackTrace = (errorConstructor: ErrorConstructor): errorConstructor is V8ErrorConstructor => {
-    return (
-        typeof errorConstructor === "function" &&
-        "captureStackTrace" in errorConstructor &&
-        typeof (errorConstructor as any).captureStackTrace === "function"
-    )
+    return "captureStackTrace" in errorConstructor && typeof (errorConstructor as any).captureStackTrace === "function"
 }
 
 /**
