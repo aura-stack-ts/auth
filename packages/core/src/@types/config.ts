@@ -13,7 +13,7 @@ import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/sess
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export interface AuthConfig<Identity extends Identities> {
+export type AuthConfig<Identity extends Identities> = {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
@@ -101,44 +101,10 @@ export interface AuthConfig<Identity extends Identities> {
      */
     basePath?: `/${string}`
     /**
-     * Enable trusted proxy headers for scenarios where the application is behind a reverse proxy or load balancer.
-     * This setting allows Aura Auth to correctly interpret headers like `X-Forwarded-For` and `X-Forwarded-Proto`
-     * to determine the original client IP address and protocol.
-     *
-     * Default is `false`. Enable this option only if you are certain that your application is behind a trusted proxy.
-     * Misconfiguration can lead to security vulnerabilities, such as incorrect handling of secure cookies or
-     * inaccurate client IP logging.
-     *
-     * This value can also be set via environment variable as `AURA_AUTH_TRUSTED_PROXY_HEADERS`
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
-     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto
-     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
-     * @experimental
-     */
-    trustedProxyHeaders?: boolean
-    /**
      * Logger configuration for handling authentication-related logs and errors. It can be set to `true`,
      * `DEBUG=true`, `LOG_LEVEL=debug`, or a custom logger. It implements the syslog format.
      */
     logger?: boolean | Logger
-    /**
-     * Defines trusted origins for your application to prevent open redirect attacks.
-     * URLs from the Referer header, Origin header, request URL, and redirectTo option
-     * are validated against this list before redirecting.
-     *
-     * - **Exact URL**: `https://example.com` matches only that origin.
-     * - **Subdomain wildcard**: `https://*.example.com` matches `https://app.example.com`, `https://api.example.com`, etc.
-     * @example
-     * trustedOrigins: ["https://example.com", "https://*.example.com", "http://localhost:3000"]
-     *
-     *
-     * trustedOrigins: async (request) => {
-     *   const origin = new URL(request.url).origin
-     *   return [origin, "https://admin.example.com"]
-     * }
-     */
-    trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     /**
      * Defines the session management strategy for Aura Auth. It determines how sessions are created, stored, and validated.
      */
@@ -166,15 +132,106 @@ export interface AuthConfig<Identity extends Identities> {
      * }
      */
     identity?: Partial<{
+        /**
+         * Skip schema validation for session data, JWT payloads, and OAuth profiles.
+         * This can be useful for performance optimization if you are certain that the
+         * data is valid, but it can lead to security vulnerabilities if misused.
+         * > ⚠️ WARNING: Use this option with caution.
+         */
         skipValidation: boolean
+        /**
+         * Custom schema validation for user identity data. It supports any Zod, Arktype,
+         * Valibot or Typebox schema. Use `createIdentity` helper function to create a schema
+         * with the correct shape and inference.
+         */
         schema: ConfigSchema<Identity>
+        /**
+         * Defines how unknown keys are handled during schema validation. It can be set to:
+         * - `passthrough`: Unknown keys are allowed and included in the validated data.
+         * - `strict`: Unknown keys will cause validation to fail with an error.
+         * - `strip`: Unknown keys are removed from the validated data.
+         */
         unknownKeys: "passthrough" | "strict" | "strip"
     }>
     /**
      * Credentials provider for username/password or similar authentication.
      */
     credentials?: CredentialsProvider<Identity>
-}
+} & TrustedProxyHeadersConfig
+
+export type TrustedProxyHeadersConfig =
+    | {
+          /**
+           * Enable trusted proxy headers for scenarios where the application is behind a reverse proxy or load balancer.
+           * This setting allows Aura Auth to correctly interpret headers like `X-Forwarded-For` and `X-Forwarded-Proto`
+           * to determine the original client IP address and protocol.
+           *
+           * Default is `false`. Enable this option only if you are certain that your application is behind a trusted proxy.
+           * Misconfiguration can lead to security vulnerabilities, such as incorrect handling of secure cookies or
+           * inaccurate client IP logging.
+           *
+           * This value can also be set via environment variable as `AURA_AUTH_TRUSTED_PROXY_HEADERS`
+           *
+           * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+           * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto
+           * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
+           * @experimental
+           */
+          trustedProxyHeaders: true
+          /**
+           * Defines trusted origins for your application to prevent open redirect attacks.
+           * URLs from the Referer header, Origin header, request URL, and redirectTo option
+           * are validated against this list before redirecting.
+           *
+           * - **Exact URL**: `https://example.com` matches only that origin.
+           * - **Subdomain wildcard**: `https://*.example.com` matches `https://app.example.com`, `https://api.example.com`, etc.
+           * @example
+           * trustedOrigins: ["https://example.com", "https://*.example.com", "http://localhost:3000"]
+           *
+           *
+           * trustedOrigins: async (request) => {
+           *   const origin = new URL(request.url).origin
+           *   return [origin, "https://admin.example.com"]
+           * }
+           */
+          trustedOrigins: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
+      }
+    | {
+          /**
+           * Enable trusted proxy headers for scenarios where the application is behind a reverse proxy or load balancer.
+           * This setting allows Aura Auth to correctly interpret headers like `X-Forwarded-For` and `X-Forwarded-Proto`
+           * to determine the original client IP address and protocol.
+           *
+           * Default is `false`. Enable this option only if you are certain that your application is behind a trusted proxy.
+           * Misconfiguration can lead to security vulnerabilities, such as incorrect handling of secure cookies or
+           * inaccurate client IP logging.
+           *
+           * This value can also be set via environment variable as `AURA_AUTH_TRUSTED_PROXY_HEADERS`
+           *
+           * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+           * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto
+           * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
+           * @experimental
+           */
+          trustedProxyHeaders?: false
+          /**
+           * Defines trusted origins for your application to prevent open redirect attacks.
+           * URLs from the Referer header, Origin header, request URL, and redirectTo option
+           * are validated against this list before redirecting.
+           *
+           * - **Exact URL**: `https://example.com` matches only that origin.
+           * - **Subdomain wildcard**: `https://*.example.com` matches `https://app.example.com`, `https://api.example.com`, etc.
+           * @example
+           * trustedOrigins: ["https://example.com", "https://*.example.com", "http://localhost:3000"]
+           *
+           *
+           * trustedOrigins: async (request) => {
+           *   const origin = new URL(request.url).origin
+           *   return [origin, "https://admin.example.com"]
+           * }
+           */
+          trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
+      }
 
 /**
  * Cookie type with __Secure- prefix, must be Secure.
@@ -207,10 +264,9 @@ export type CookieStrategyAttributes = StandardCookie | SecureCookie | HostCooki
  * - `sessionToken`: User session JWT
  * - `csrfToken`: CSRF protection token
  * - `state`: OAuth state parameter for CSRF protection
- * - `code_verifier`: PKCE code verifier for authorization code flow
- * - `redirect_uri`: OAuth callback URI
- * - `redirect_to`: Post-authentication redirect path
- * - `nonce`: OpenID Connect nonce parameter
+ * - `codeVerifier`: PKCE code verifier for authorization code flow
+ * - `redirectURI`: OAuth callback URI
+ * - `redirectTo`: Post-authentication redirect path
  */
 export type CookieName = "sessionToken" | "csrfToken" | "state" | "codeVerifier" | "redirectTo" | "redirectURI"
 
@@ -222,6 +278,10 @@ export interface CookieConfig {
      * Prefix to be added to all cookie names. By default "aura-stack".
      */
     prefix?: string
+    /**
+     * Overrides for individual cookie configurations.
+     * @see {@link CookieStoreConfig} for the structure of each cookie configuration.
+     */
     overrides?: Partial<CookieStoreConfig>
 }
 
@@ -365,8 +425,17 @@ export type AuthRuntimeConfig<DefaultUser extends User = User> = RouterGlobalCon
  * Public auth instance: programmatic {@link AuthAPI}, {@link JoseInstance}, and HTTP {@link AuthClient} handlers.
  */
 export interface AuthInstance<DefaultUser extends User = User> {
+    /**
+     * Programmatic API for authentication actions (getSession, signIn, signOut, etc.) that can be used in server-side contexts or API routes.
+     */
     api: AuthAPI<DefaultUser>
+    /**
+     * JOSE helper functions for signin, encryption and verification of JWTs.
+     */
     jose: JoseInstance<DefaultUser>
+    /**
+     * HTTP handlers for mounting on a router or server.
+     */
     handlers: {
         GET: (request: Request) => Response | Promise<Response>
         POST: (request: Request) => Response | Promise<Response>

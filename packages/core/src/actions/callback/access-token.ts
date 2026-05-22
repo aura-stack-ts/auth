@@ -87,10 +87,10 @@ export const createAccessToken = async (
         logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS")
         return token.data
     } catch (error) {
-        logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_FAILED")
-        if (error instanceof Error) {
-            throw new OAuthProtocolError("server_error", "Failed to communicate with OAuth provider", "", { cause: error })
+        if (error instanceof OAuthProtocolError) {
+            throw error
         }
-        throw error
+        logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_FAILED")
+        throw new OAuthProtocolError("server_error", "Failed to communicate with OAuth provider", "", { cause: error })
     }
 }

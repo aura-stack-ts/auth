@@ -83,6 +83,7 @@ export const patternToRegex = (pattern: string): RegExp | null => {
         const [, protocol, host, port] = match
         const hasWildcard = host.includes("*")
         if (hasWildcard && !host.startsWith("*.")) return null
+        if (hasWildcard && !host.startsWith("*.")) return null
         if (hasWildcard && host.slice(2).includes("*")) return null
 
         const domain = hasWildcard ? host.slice(2) : host

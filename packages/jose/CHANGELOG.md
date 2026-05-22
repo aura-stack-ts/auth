@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Added support for asymmetric cryptography using `public/private` key pairs via `CryptoKeyPair` across JOSE functions, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encryptCompactJWE`, `decryptCompactJWE`, `encodeJWT`, and `decodeJWT` functions, as well as the factory functions `createJWS`, `createJWE`, and `createJWT`. [#157](https://github.com/aura-stack-ts/auth/pull/157)
 
+### Changed
+
+- Added strict secret verification: require at least 3.5 bits of entropy per character and a minimum total entropy of 254 bits. [#164](https://github.com/aura-stack-ts/auth/pull/164)
+
 ## [0.5.0] - 2026-04-21
 
 ### Added

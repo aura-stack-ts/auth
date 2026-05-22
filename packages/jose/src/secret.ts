@@ -3,9 +3,10 @@ import { InvalidSecretError } from "@/errors.ts"
 import { encoder } from "@/crypto.ts"
 import type { DerivedKeyInput, JWTSecretInput, SecretInput } from "@/index.ts"
 
-export const MIN_SECRET_ENTROPY_BITS = 4
+export const MIN_SECRET_ENTROPY_PER_CHAR = 4
+export const MIN_SECRET_ENTROPY_BITS = 254
 
-export const getEntropy = (secret: string): number => {
+export const assertSecretEntropy = (secret: string) => {
     const charFreq = new Map<string, number>()
     for (const char of secret) {
         if (!charFreq.has(char)) {
@@ -13,13 +14,18 @@ export const getEntropy = (secret: string): number => {
         }
         charFreq.set(char, charFreq.get(char)! + 1)
     }
-    let entropy = 0
+    let perCharEntropy = 0
     const length = secret.length
     for (const freq of charFreq.values()) {
         const p = freq / length
-        entropy -= p * Math.log2(p)
+        perCharEntropy -= p * Math.log2(p)
     }
-    return entropy
+    const totalEntropy = perCharEntropy * length
+    if (perCharEntropy < MIN_SECRET_ENTROPY_PER_CHAR || totalEntropy < MIN_SECRET_ENTROPY_BITS) {
+        throw new InvalidSecretError(
+            `Secret must have an entropy of at least ${MIN_SECRET_ENTROPY_PER_CHAR} bits per character and a total entropy of at least ${MIN_SECRET_ENTROPY_BITS} bits`
+        )
+    }
 }
 
 /**
@@ -37,12 +43,7 @@ export const createSecret = (secret: SecretInput, length: number = 32) => {
         if (byteLength < length) {
             throw new InvalidSecretError(`Secret string must be at least ${length} bytes long`)
         }
-        const entropy = getEntropy(secret)
-        if (entropy < MIN_SECRET_ENTROPY_BITS) {
-            throw new InvalidSecretError(
-                `Secret string must have an entropy of at least ${MIN_SECRET_ENTROPY_BITS} bits per character`
-            )
-        }
+        assertSecretEntropy(secret)
         return encoded
     }
     if (secret instanceof CryptoKey || secret instanceof Uint8Array || isJWKKey(secret)) {

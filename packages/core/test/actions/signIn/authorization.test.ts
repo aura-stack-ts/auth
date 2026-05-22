@@ -651,6 +651,17 @@ describe("getOriginURL", () => {
                 trustedOrigins: [],
                 trustedProxyHeaders: true,
             },
+            {
+                description: "with trusted proxy headers and without trusted origins",
+                request: new Request("http://localhost:3000/auth/signIn/github", {
+                    headers: {
+                        "X-Forwarded-Proto": "https",
+                        "X-Forwarded-Host": "malicious.com",
+                    },
+                }),
+                trustedOrigins: [],
+                trustedProxyHeaders: true,
+            },
         ]
 
         for (const { description, request, trustedOrigins, trustedProxyHeaders } of testCases) {

@@ -1,10 +1,10 @@
 import { getEnv } from "@/shared/env.ts"
+import { Identities } from "@/shared/identity.ts"
 import { AuthInternalError } from "@/shared/errors.ts"
 import { equals, extractPath, patternToRegex } from "@/shared/utils.ts"
 import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin } from "@/shared/assert.ts"
 import type { AuthConfig } from "@/@types/index.ts"
 import type { GlobalContext } from "@aura-stack/router"
-import { Identities } from "@/shared/identity.ts"
 
 /**
  * Resolves trusted origins from config (array or function).

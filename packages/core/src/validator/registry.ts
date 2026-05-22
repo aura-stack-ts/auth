@@ -117,6 +117,7 @@ export const deriveSchemaWithJWT = <Schema extends SchemaTypes>(schema: Schema):
             mexp: z.number().optional(),
         })
     }
+    throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", "Unsupported schema type for JWT extension.")
 }
 
 export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any => {
@@ -150,10 +151,13 @@ export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any =
             expires: Typebox.Optional(Typebox.String()),
         })
     }
-    return z.object({
-        user: schema,
-        expires: z.coerce.date().optional(),
-    })
+    if (isZodSchema(schema)) {
+        return z.object({
+            user: schema,
+            expires: z.coerce.date().optional(),
+        })
+    }
+    throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", "Unsupported schema type for schema  extension.")
 }
 
 const throwValidationError = (activeSchema: SchemaTypes, error: unknown): never => {
