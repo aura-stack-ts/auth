@@ -159,6 +159,8 @@ export type AuthConfig<Identity extends Identities> = {
     credentials?: CredentialsProvider<Identity>
 } & TrustedProxyHeadersConfig
 
+// @todo Should trustedOrigins support subdomain wildcards like `https://*.example.com`?
+// This option could introduce security risks if misconfigured.
 export type TrustedProxyHeadersConfig =
     | {
           /**
@@ -185,9 +187,12 @@ export type TrustedProxyHeadersConfig =
            *
            * - **Exact URL**: `https://example.com` matches only that origin.
            * - **Subdomain wildcard**: `https://*.example.com` matches `https://app.example.com`, `https://api.example.com`, etc.
+           *
+           * > **⚠️ WARNING:** Ensure that the trusted origins are configured correctly to prevent open redirect vulnerabilities.
+           * Only include origins that you control and trust.
+           *
            * @example
            * trustedOrigins: ["https://example.com", "https://*.example.com", "http://localhost:3000"]
-           *
            *
            * trustedOrigins: async (request) => {
            *   const origin = new URL(request.url).origin
@@ -221,14 +226,18 @@ export type TrustedProxyHeadersConfig =
            *
            * - **Exact URL**: `https://example.com` matches only that origin.
            * - **Subdomain wildcard**: `https://*.example.com` matches `https://app.example.com`, `https://api.example.com`, etc.
+           *
+           * > **⚠️ WARNING:** Ensure that the trusted origins are configured correctly to prevent open redirect vulnerabilities.
+           * Only include origins that you control and trust.
+           *
            * @example
            * trustedOrigins: ["https://example.com", "https://*.example.com", "http://localhost:3000"]
-           *
            *
            * trustedOrigins: async (request) => {
            *   const origin = new URL(request.url).origin
            *   return [origin, "https://admin.example.com"]
            * }
+           *
            */
           trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
       }

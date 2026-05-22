@@ -6,7 +6,7 @@ import { getSecrets } from "@/secret.ts"
 import { signJWS, verifyJWS } from "@/sign.ts"
 import { isAuraJoseError } from "@/assert.ts"
 import { JWTDecodingError, JWTEncodingError } from "@/errors.ts"
-import { compactEncryptJWE, decryptCompactJWE } from "@/encrypt.ts"
+import { encryptCompactJWE, decryptCompactJWE } from "@/encrypt.ts"
 
 export * from "@/sign.ts"
 export type * from "@/sign.ts"
@@ -81,7 +81,7 @@ export const encodeJWT = async <Payload extends JWTPayload>(
         const { encode } = getSecrets(secret)
         const { jweSecret, jwsSecret } = encode
         const signed = await signJWS(token, jwsSecret, options?.sign)
-        return await compactEncryptJWE(signed, jweSecret, options?.encrypt)
+        return await encryptCompactJWE(signed, jweSecret, options?.encrypt)
     } catch (error) {
         if (isAuraJoseError(error)) {
             throw error
