@@ -32,3 +32,11 @@ export const isAsymmetricKeyPair = (value: unknown): value is AsymmetricKeyPair 
 export const isJWKKey = (value: unknown): value is JsonWebKey => {
     return typeof value === "object" && value !== null && "kty" in value && typeof (value as JsonWebKey).kty === "string"
 }
+
+export const isCryptoKey = (value: unknown): value is CryptoKey => {
+    return typeof value === "object" && value !== null && "type" in value && typeof (value as CryptoKey).type === "string"
+}
+
+export const isRSAJwk = (key: unknown): boolean => {
+    return typeof key === "object" && key !== null && "kty" in key && (key as { kty?: unknown }).kty === "RSA"
+}

@@ -1,5 +1,4 @@
 import { fetchAsync } from "@/shared/fetch-async.ts"
-import { createSecretValue } from "@/shared/crypto.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/shared/errors.ts"
@@ -12,10 +11,13 @@ import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/in
  * @returns The standardized OAuth user profile
  */
 const getDefaultUserInfo = (profile: Record<string, string>): User => {
-    const sub = createSecretValue(16)
+    const sub = profile?.id ?? profile?.sub ?? profile?.uid ?? profile?.user_id ?? profile?.account_id
+    if (!sub) {
+        throw new OAuthProtocolError("invalid_userinfo", "OAuth provider did not return a stable user identifier (id/sub/uid).")
+    }
 
     return {
-        sub: profile?.id ?? profile?.sub ?? sub,
+        sub,
         email: profile?.email,
         name: profile?.name ?? profile?.username ?? profile?.nickname,
         image: profile?.image ?? profile?.picture,

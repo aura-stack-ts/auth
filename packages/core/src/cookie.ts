@@ -64,11 +64,13 @@ export const setCookie = (cookieName: string, value: string, options?: Serialize
     return serialize(cookieName, value, options)
 }
 
-export const expiredCookieAttributes: SerializeOptions = {
-    ...defaultCookieOptions,
-    expires: new Date(0),
-    maxAge: 0,
-    secure: true,
+export const getExpiredCookie = (options?: SerializeOptions) => {
+    return {
+        ...options,
+        expires: new Date(0),
+        maxAge: 0,
+        secure: options?.secure ?? true,
+    }
 }
 
 /**

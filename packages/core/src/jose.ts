@@ -26,9 +26,9 @@ import {
     isSealedMode,
     isSignedMode,
 } from "@/shared/assert.ts"
+import { importPEMKeyPair } from "@/shared/crypto.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 import type { User, SessionConfig, JWTKey, AsymmetricKeyPairFromEnv } from "@/@types/index.ts"
-import { importPEMKeyPair } from "./shared/crypto.ts"
 
 const getJWTConfig = (config?: SessionConfig) => {
     return config?.jwt
@@ -285,7 +285,6 @@ export const createJoseInstance = <DefaultUser extends User = User>(secret?: JWT
             jwe: createJWE<DefaultUser>(jweSecret),
         }
     })()
-    jose.catch(() => {})
 
     return {
         signJWS: async (payload: TypedJWTPayload<Partial<DefaultUser>>, options?: JWTHeaderParameters) => {

@@ -89,13 +89,6 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
             }
             logger?.log("CSRF_TOKEN_VERIFIED")
-        } else {
-            try {
-                await jose.verifyJWS(csrfToken)
-            } catch (error) {
-                logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
-                throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
-            }
         }
         try {
             await jose.decodeJWT(session)

@@ -234,7 +234,6 @@ describe("callbackAction", () => {
         const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth")
         const { codeVerifier } = await createPKCE()
         const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier)
-        // @todo: fix oauth types
         const GET = createAuth({
             oauth: [
                 {
@@ -336,7 +335,6 @@ describe("callbackAction", () => {
         const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth")
         const { codeVerifier } = await createPKCE()
         const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier)
-        // @todo: fix oauth types
         const GET = createAuth({
             oauth: [
                 {
