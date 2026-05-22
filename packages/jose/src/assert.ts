@@ -36,3 +36,7 @@ export const isJWKKey = (value: unknown): value is JsonWebKey => {
 export const isCryptoKey = (value: unknown): value is CryptoKey => {
     return typeof value === "object" && value !== null && "type" in value && typeof (value as CryptoKey).type === "string"
 }
+
+export const isRSAJwk = (key: unknown): boolean => {
+    return typeof key === "object" && key !== null && "kty" in key && (key as { kty?: unknown }).kty === "RSA"
+}

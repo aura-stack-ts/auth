@@ -11,7 +11,7 @@ import {
 } from "jose"
 import { createSecret } from "@/secret.ts"
 import { decoder, encoder, getRandomBytes } from "@/crypto.ts"
-import { isAuraJoseError, isAsymmetricKeyPair, isFalsy, isCryptoKey } from "@/assert.ts"
+import { isAuraJoseError, isAsymmetricKeyPair, isFalsy, isCryptoKey, isRSAJwk } from "@/assert.ts"
 import { InvalidPayloadError, JWEDecryptionError, JWEEncryptionError } from "@/errors.ts"
 import type { JWTSecretInput, SecretInput, TypedJWTPayload } from "@/index.ts"
 
@@ -40,7 +40,7 @@ export const encryptJWE = async <Payload extends JWTPayload>(
         }
         const secretKey = createSecret(secret)
         const jti = base64url.encode(getRandomBytes(32))
-        const isAsymmetricCryptoKey = isCryptoKey(secret) && secret.type === "public"
+        const isAsymmetricCryptoKey = (isCryptoKey(secret) && secret.type === "public") || isRSAJwk(secret)
 
         return await new EncryptJWT(payload)
             .setProtectedHeader({
@@ -76,7 +76,7 @@ export const encryptCompactJWE = async (payload: string, secret: SecretInput, op
             throw new InvalidPayloadError("The payload must be a non-empty string")
         }
         const secretKey = createSecret(secret)
-        const isAsymmetricCryptoKey = isCryptoKey(secret) && secret.type === "public"
+        const isAsymmetricCryptoKey = (isCryptoKey(secret) && secret.type === "public") || isRSAJwk(secret)
 
         return await new CompactEncrypt(encoder.encode(payload))
             .setProtectedHeader({
@@ -113,7 +113,7 @@ export const decryptJWE = async <Payload extends JWTPayload>(
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
-        const isAsymmetricCryptoKey = isCryptoKey(secret) && secret.type === "private"
+        const isAsymmetricCryptoKey = (isCryptoKey(secret) && secret.type === "private") || isRSAJwk(secret)
 
         const { payload } = await jwtDecrypt(token, secretKey, {
             keyManagementAlgorithms: [isAsymmetricCryptoKey ? "RSA-OAEP-256" : "dir"],
@@ -143,7 +143,7 @@ export const decryptCompactJWE = async (token: string, secret: SecretInput, opti
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
         const secretKey = createSecret(secret)
-        const isAsymmetricCryptoKey = isCryptoKey(secret) && secret.type === "private"
+        const isAsymmetricCryptoKey = (isCryptoKey(secret) && secret.type === "private") || isRSAJwk(secret)
 
         const { plaintext } = await compactDecrypt(token, secretKey, {
             keyManagementAlgorithms: [isAsymmetricCryptoKey ? "RSA-OAEP-256" : "dir"],

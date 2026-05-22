@@ -132,7 +132,7 @@ describe("JWEs", () => {
         await expect(
             decryptJWE(jwe, {
                 keyManagementAlgorithms: ["dir"],
-                contentEncryptionAlgorithms: ["RSA-OAP-256"],
+                contentEncryptionAlgorithms: ["A128GCM"],
             })
         ).rejects.toThrow("JWE decryption verification failed")
     })
