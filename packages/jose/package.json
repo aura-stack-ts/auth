@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/jose",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": false,
   "type": "module",
   "description": "JOSE utilities for @aura-stack/auth",
@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "find dist -type f -name \"*.cts\" -delete",
     "prepublishOnly": "pnpm build && pnpm clean:cts"
   },
   "repository": {
@@ -25,7 +25,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/@aura-stack/jose"
+    "registry": "https://registry.npmjs.org/"
   },
   "files": [
     "dist"

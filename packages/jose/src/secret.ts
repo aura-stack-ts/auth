@@ -4,7 +4,7 @@ import { encoder } from "@/crypto.ts"
 import type { DerivedKeyInput, JWTSecretInput, SecretInput } from "@/index.ts"
 
 export const MIN_SECRET_ENTROPY_PER_CHAR = 4
-export const MIN_SECRET_ENTROPY_BITS = 254
+export const MIN_SECRET_ENTROPY_BITS = 128
 
 export const assertSecretEntropy = (secret: string) => {
     const charFreq = new Map<string, number>()

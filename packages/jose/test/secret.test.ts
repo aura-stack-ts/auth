@@ -1,5 +1,7 @@
 import { describe, test, expect } from "vitest"
 import { createSecret, MIN_SECRET_ENTROPY_BITS, MIN_SECRET_ENTROPY_PER_CHAR } from "@/secret.ts"
+import { getRandomBytes } from "@/crypto.ts"
+import { base64url } from "jose"
 
 describe("createSecret", () => {
     test("createSecret without secret", () => {
@@ -82,5 +84,18 @@ describe("createSecret", () => {
         expect(() => createSecret(secret)).toThrow(
             `Secret must have an entropy of at least ${MIN_SECRET_ENTROPY_PER_CHAR} bits per character and a total entropy of at least ${MIN_SECRET_ENTROPY_BITS} bits`
         )
+    })
+
+    test("secret from getRandomBytes", () => {
+        const secret = getRandomBytes(32)
+        const createdSecret = createSecret(secret)
+        expect(createdSecret).toBe(secret)
+    })
+
+    test("secret from getRandomBytes to string", () => {
+        const secret = getRandomBytes(32).toString()
+        const encodedSecret = base64url.encode(secret)
+        const createdSecret = createSecret(encodedSecret)
+        expect(createdSecret).toBeInstanceOf(Uint8Array)
     })
 })
