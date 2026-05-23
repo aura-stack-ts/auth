@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.7.0] - 2026-05-23
+
 ### Added
 
 - Added experimental support for `Typebox` schema validation in `createAuth`; it now supports both Zod and Typebox schemas to extend the default User fields. [#163](https://github.com/aura-stack-ts/auth/pull/163)

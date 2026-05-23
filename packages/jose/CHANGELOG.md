@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.6.0] - 2026-05-23
+
 ### Added
 
 - Introduced algorithm inference: signing and encryption algorithms are now inferred from the provided asymmetric keys to reduce configuration mismatches. Defaults: `RS256` (signing) and `RSA-OAEP-256` (encryption) for asymmetric keys; `HS256` (signing) and `dir` (encryption) for symmetric keys. [#165](https://github.com/aura-stack-ts/auth/pull/165)
@@ -18,7 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- Added strict secret verification: require at least 4 bits of entropy per character and a minimum total entropy of 254 bits. [`#165`](https://github.com/aura-stack-ts/auth/pull/165)
+- Added strict secret verification: require at least 4 bits of entropy per character and a minimum total entropy of 128 bits. [`#165`](https://github.com/aura-stack-ts/auth/pull/165)
 
 - Renamed compact JWE helpers from `compactEncryptJWE` to `encryptCompactJWE` to align naming with other JWE APIs. [#165](https://github.com/aura-stack-ts/auth/pull/165)
 

@@ -1,4 +1,4 @@
-import { describe, test, expect, expectTypeOf } from "vitest"
+import { describe, test, expect, expectTypeOf, vi, afterEach } from "vitest"
 import {
     createIdentity,
     InferUser,
@@ -14,6 +14,10 @@ import { createSchemaRegistry, deriveSchema } from "@/validator/registry.ts"
 import { ArkErrors, type } from "arktype"
 import { Static, Type as Typebox } from "typebox"
 import { Value } from "typebox/value"
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe("createIdentity", () => {
     test("createIdentity with Zod schema", () => {

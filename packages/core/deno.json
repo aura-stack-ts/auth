@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/auth",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
@@ -30,8 +30,11 @@
   },
   "imports": {
     "@/": "./src/",
-    "@aura-stack/router": "npm:@aura-stack/router@^0.6.0",
-    "zod": "npm:zod@4.3.5"
+    "@aura-stack/router": "npm:@aura-stack/router@^0.7.0",
+    "zod": "npm:zod@4.3.5",
+    "arktype": "npm:arktype@2.2.0",
+    "valibot": "npm:valibot@1.4.0",
+    "typebox": "npm:typebox@1.1.38"
   },
   "publish": {
     "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
