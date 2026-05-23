@@ -1,0 +1,62 @@
+{
+  "name": "@aura-stack/device",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "OAuth 2.0 Device Authorization Grant for the Aura Stack ecosystem",
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": " tsdown",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "type-check": "tsc --noEmit",
+    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "prepublishOnly": "pnpm clean:cts && pnpm build && pnpm clean:cts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./providers": {
+      "types": "./dist/providers/index.d.ts",
+      "import": "./dist/providers/index.js",
+      "require": "./dist/providers/index.cjs"
+    },
+    "./providers/*": {
+      "types": "./dist/providers/*.d.ts",
+      "import": "./dist/providers/*.js",
+      "require": "./dist/providers/*.cjs"
+    }
+  },
+  "keywords": [],
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "valibot": "catalog:valibot"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*"
+  },
+  "peerDependencies": {},
+  "packageManager": "pnpm@10.15.0"
+}
