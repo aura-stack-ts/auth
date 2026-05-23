@@ -13,6 +13,7 @@ const deviceAuthResponse = {
 }
 
 afterEach(() => {
+    vi.unstubAllEnvs()
     vi.unstubAllGlobals()
 })
 

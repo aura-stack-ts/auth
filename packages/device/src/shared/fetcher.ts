@@ -12,15 +12,22 @@
 export const fetcher = async (url: string | Request, options: RequestInit = {}, timeout: number = 5000) => {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeout)
+    const onExternalAbort = () => controller.abort()
 
     if (options.signal) {
-        options.signal.addEventListener("abort", () => controller.abort())
+        if (options.signal.aborted) {
+            controller.abort()
+        }
+        options.signal.addEventListener("abort", onExternalAbort, { once: true })
     }
 
     const response = await fetch(url, {
         ...options,
         signal: controller.signal,
-    }).finally(() => clearTimeout(timeoutId))
+    }).finally(() => {
+        clearTimeout(timeoutId)
+        options.signal?.removeEventListener("abort", onExternalAbort)
+    })
     return response
 }
 

@@ -112,6 +112,7 @@ export const poll = (context: AppContext) => {
                     typeof json === "object" && json !== null && "error_description" in json
                         ? String((json as { error_description: string }).error_description)
                         : `Token request failed (${response.status}).`
+                cleanUpPending()
                 throw new DeviceOAuthError("server_error", message)
             }
 

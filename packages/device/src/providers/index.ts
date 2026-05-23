@@ -34,7 +34,7 @@ const defineOAuthProviderConfig = (config: BuiltInDeviceProvider | DeviceProvide
         }
         return { ...oauthConfig, ...output } as DeviceProviderCredentials
     }
-    const hasCredentials = config.clientId
+    const hasCredentials = config.clientId !== undefined && config.clientId !== null
     const envConfig = hasCredentials ? {} : { clientId: defineOAuthEnvironment(config.id) }
     const { success, output, issues } = safeParse(DeviceProviderCredentialsSchema, { ...envConfig, ...config })
     if (!success) {

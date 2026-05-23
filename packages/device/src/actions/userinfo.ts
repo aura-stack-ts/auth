@@ -21,7 +21,13 @@ export const getUserInfo = async <DefaultUser extends User = User>(
         throw new DeviceOAuthError("server_error", `Failed to fetch user information (${response.status}).`)
     }
 
-    const profile = await response.json()
+    let profile: Record<string, unknown>
+    try {
+        profile = (await response.json()) as Record<string, unknown>
+    } catch {
+        throw new DeviceOAuthError("server_error", "Failed to parse user information response.")
+    }
+
     if (provider.profile) {
         return provider.profile(profile)
     }
