@@ -4,7 +4,7 @@ import type { BuiltInDeviceProvider } from "@/providers/index.ts"
 import type { DeviceAuthorizationResponse, DeviceProviderCredentials, DeviceSession } from "@/@types/device.ts"
 
 export interface DeviceClientOptions<DefaultUser extends User = User> {
-    providers: (BuiltInDeviceProvider | DeviceProviderCredentials<any, DefaultUser>)[]
+    providers: (BuiltInDeviceProvider | DeviceProviderCredentials<Record<string, unknown>, DefaultUser>)[]
 }
 
 export interface PollOptions {
@@ -29,7 +29,7 @@ export interface PendingDeviceAuth {
 }
 
 export interface AppContext {
-    providers: Record<LiteralUnion<BuiltInDeviceProvider>, DeviceProviderCredentials<any, any>>
+    providers: Record<LiteralUnion<BuiltInDeviceProvider>, DeviceProviderCredentials<Record<string, unknown>>>
     getPending?: () => PendingDeviceAuth | null
     setPending?: (pending: PendingDeviceAuth | null) => void
 }

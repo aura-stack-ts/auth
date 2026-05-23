@@ -1,8 +1,8 @@
-export const resolveUrl = (config: string | { url: string }): string => {
+export const getResolvedURL = (config: string | { url: string }): string => {
     return typeof config === "string" ? config : config.url
 }
 
-export const resolveScope = (
+export const getResolvedScope = (
     deviceAuthorization: string | { url: string; params?: { scope?: string } },
     providerScope?: string
 ): string | undefined => {

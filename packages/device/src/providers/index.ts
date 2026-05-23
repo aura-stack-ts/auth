@@ -54,12 +54,12 @@ const defineOAuthProviderConfig = (config: BuiltInDeviceProvider | DeviceProvide
  * @returns A record of Device provider configurations
  * @example
  * // Using built-in provider with env variables
- * createBuiltInOAuthProviders(["github"])
+ * createBuiltInDeviceProviders(["github"])
  *
  * // Using built-in provider with explicit credentials via factory
- * createBuiltInOAuthProviders([github({ clientId: "...", deviceAuthorization: { ...} })])
+ * createBuiltInDeviceProviders([github({ clientId: "...", deviceAuthorization: { ...} })])
  */
-export const createBuiltInOAuthProviders = (oauth: (BuiltInDeviceProvider | DeviceProviderCredentials<any>)[] = []) => {
+export const createBuiltInDeviceProviders = (oauth: (BuiltInDeviceProvider | DeviceProviderCredentials<any>)[] = []) => {
     return oauth.reduce((previous, config) => {
         const oauthConfig = defineOAuthProviderConfig(config)
         if (oauthConfig.id in previous) {

@@ -1,13 +1,7 @@
 export { createDeviceClient } from "@/device-client.ts"
 export { DEVICE_CODE_GRANT } from "@/shared/constants.ts"
 export { DeviceAuthError, DeviceOAuthError, isDeviceAuthError, isDeviceOAuthError } from "@/shared/errors.ts"
-export type {
-    AuthInstance,
-    DeviceClientOptions,
-    PollOptions,
-    PendingDeviceAuth,
-    AppContext,
-} from "@/@types/config.ts"
+export type { AuthInstance, DeviceClientOptions, PollOptions, PendingDeviceAuth, AppContext } from "@/@types/config.ts"
 export type {
     DeviceAuthorizationResponse,
     DeviceProviderConfig,

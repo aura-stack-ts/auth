@@ -1,25 +1,15 @@
 import { describe, test, expect, vi, afterEach, beforeEach } from "vitest"
 import { poll } from "@/actions/poll.ts"
 import { authorize } from "@/actions/authorize.ts"
-import { DeviceAuthError, DeviceOAuthError } from "@/shared/errors.ts"
-import type { DeviceProviderCredentials } from "@/@types/device.ts"
+import { builtInDeviceProviders } from "@/providers/index.ts"
 import type { PendingDeviceAuth } from "@/@types/config.ts"
+import type { DeviceProviderCredentials } from "@/@types/device.ts"
+import { DeviceAuthError, DeviceOAuthError } from "@/shared/errors.ts"
 
-const githubProvider: DeviceProviderCredentials = {
-    id: "github",
-    name: "GitHub",
+const githubProvider = {
     clientId: "test-client-id",
-    deviceAuthorization: {
-        url: "https://github.com/login/device/code",
-        params: { scope: "read:user" },
-    },
-    accessToken: "https://github.com/login/oauth/access_token",
-    userInfo: "https://api.github.com/user",
-    profile: (profile: Record<string, unknown>) => ({
-        sub: String(profile.id),
-        name: String(profile.login),
-    }),
-}
+    ...builtInDeviceProviders.github(),
+} as DeviceProviderCredentials
 
 const tokenSuccess = {
     access_token: "access-token",
@@ -59,11 +49,9 @@ describe("poll", () => {
     test("polls until token is issued then fetches userinfo", async () => {
         const fetchMock = vi
             .fn()
-            .mockResolvedValueOnce(
-                new Response(JSON.stringify({ error: "authorization_pending" }), { status: 400 })
-            )
-            .mockResolvedValueOnce(new Response(JSON.stringify(tokenSuccess), { status: 200 }))
-            .mockResolvedValueOnce(new Response(JSON.stringify(userProfile), { status: 200 }))
+            .mockResolvedValueOnce(Response.json({ error: "authorization_pending" }, { status: 400 }))
+            .mockResolvedValueOnce(Response.json(tokenSuccess))
+            .mockResolvedValueOnce(Response.json(userProfile))
         vi.stubGlobal("fetch", fetchMock)
 
         const pollFn = poll(context)
@@ -80,29 +68,39 @@ describe("poll", () => {
         })
 
         expect(fetchMock).toHaveBeenCalledTimes(3)
-        const [tokenUrl, tokenInit] = fetchMock.mock.calls[0] as [string, RequestInit]
-        expect(tokenUrl).toBe("https://github.com/login/oauth/access_token")
-        expect(tokenInit?.body?.toString()).toContain("grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code")
-        expect(tokenInit?.body?.toString()).toContain("device_code=device-code-123")
-        expect(tokenInit?.body?.toString()).toContain("client_id=test-client-id")
+        expect(fetchMock).toHaveBeenNthCalledWith(1, "https://github.com/login/oauth/access_token", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+                device_code: "device-code-123",
+                client_id: "test-client-id",
+            }),
+            signal: expect.any(AbortSignal),
+        })
     })
 
     test("accepts explicit providerId and deviceCode", async () => {
-        vi.stubGlobal(
-            "fetch",
-            vi
-                .fn()
-                .mockResolvedValueOnce(new Response(JSON.stringify(tokenSuccess), { status: 200 }))
-                .mockResolvedValueOnce(new Response(JSON.stringify(userProfile), { status: 200 }))
-        )
+        const fetchMock = vi
+            .fn()
+            .mockResolvedValueOnce(Response.json(tokenSuccess))
+            .mockResolvedValueOnce(Response.json(userProfile))
+
+        vi.stubGlobal("fetch", fetchMock)
 
         const pollFn = poll({ providers: { github: githubProvider } })
-        const session = await pollFn({
+        const pollPromise = pollFn({
             providerId: "github",
             deviceCode: "explicit-device-code",
             interval: 5,
-            timeout: 60_000,
+            timeout: 10_000,
         })
+
+        await vi.runAllTimersAsync()
+        const session = await pollPromise
 
         expect(session.user).toEqual({ sub: "42", name: "octocat" })
         const [, tokenInit] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit]
@@ -123,21 +121,27 @@ describe("poll", () => {
     test("throws DeviceOAuthError on expired_token", async () => {
         vi.stubGlobal(
             "fetch",
-            vi.fn().mockResolvedValue(
-                new Response(JSON.stringify({ error: "expired_token", error_description: "Expired" }), { status: 400 })
-            )
+            vi
+                .fn()
+                .mockResolvedValue(
+                    new Response(JSON.stringify({ error: "expired_token", error_description: "Expired" }), { status: 400 })
+                )
         )
 
         const pollFn = poll(context)
-        await expect(pollFn({ interval: 0.001 })).rejects.toThrow(DeviceOAuthError)
+        const pollPromise = pollFn({ interval: 0.001 })
+        const rejection = expect(pollPromise).rejects.toThrow(DeviceOAuthError)
+
+        await vi.runAllTimersAsync()
+        await rejection
     })
 
     test("increases interval on slow_down", async () => {
         const fetchMock = vi
             .fn()
-            .mockResolvedValueOnce(new Response(JSON.stringify({ error: "slow_down" }), { status: 400 }))
-            .mockResolvedValueOnce(new Response(JSON.stringify(tokenSuccess), { status: 200 }))
-            .mockResolvedValueOnce(new Response(JSON.stringify(userProfile), { status: 200 }))
+            .mockResolvedValueOnce(Response.json({ error: "slow_down" }, { status: 400 }))
+            .mockResolvedValueOnce(Response.json(tokenSuccess))
+            .mockResolvedValueOnce(Response.json(userProfile))
         vi.stubGlobal("fetch", fetchMock)
 
         const pollFn = poll(context)

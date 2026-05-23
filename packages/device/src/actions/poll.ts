@@ -1,15 +1,11 @@
 import { safeParse } from "valibot"
 import { fetcher } from "@/shared/fetcher.ts"
-import { formHeaders, toFormBody } from "@/shared/form.ts"
+import { toHeaders, toFormBody } from "@/shared/fetcher.ts"
 import { getUserInfo } from "@/actions/userinfo.ts"
 import { DeviceAuthError, DeviceOAuthError } from "@/shared/errors.ts"
-import { resolveUrl } from "@/shared/url.ts"
+import { getResolvedURL } from "@/shared/url.ts"
 import { sleep } from "@/shared/sleep.ts"
-import {
-    DEFAULT_POLL_INTERVAL_SECONDS,
-    DEVICE_CODE_GRANT,
-    SLOW_DOWN_INTERVAL_INCREMENT_SECONDS,
-} from "@/shared/constants.ts"
+import { DEFAULT_POLL_INTERVAL_SECONDS, DEVICE_CODE_GRANT, SLOW_DOWN_INTERVAL_INCREMENT_SECONDS } from "@/shared/constants.ts"
 import { OAuthDeviceAccessTokenResponse, OAuthDeviceTokenErrorResponse } from "@/schemas.ts"
 import type { BuiltInDeviceProvider } from "@/providers/index.ts"
 import type { AppContext, DeviceSession, LiteralUnion, PollOptions } from "@/@types/index.ts"
@@ -70,13 +66,22 @@ export const poll = (context: AppContext) => {
             throw new DeviceAuthError("INVALID_PROVIDER", `Provider with id ${providerId} not found`)
         }
 
-        const tokenURL = resolveUrl(provider.accessToken)
+        const tokenURL = getResolvedURL(provider.accessToken)
         let intervalMs = initialIntervalMs
+
+        await sleep(intervalMs)
+
+        const cleanUpPending = () => {
+            const pending = context.getPending?.()
+            if (pending && pending.providerId === providerId && pending.deviceCode === deviceCode) {
+                context.setPending?.(null)
+            }
+        }
 
         while (Date.now() < deadline) {
             const response = await fetcher(tokenURL, {
                 method: "POST",
-                headers: formHeaders(),
+                headers: toHeaders(),
                 body: toFormBody({
                     grant_type: DEVICE_CODE_GRANT,
                     device_code: deviceCode,
@@ -84,7 +89,7 @@ export const poll = (context: AppContext) => {
                 }),
             })
 
-            const json = await response.json()
+            const json = await response.json().catch(() => null)
             const errorResult = safeParse(OAuthDeviceTokenErrorResponse, json)
 
             if (errorResult.success) {
@@ -98,6 +103,7 @@ export const poll = (context: AppContext) => {
                     await sleep(intervalMs)
                     continue
                 }
+                cleanUpPending()
                 throw new DeviceOAuthError(error, error_description ?? error)
             }
 
@@ -111,13 +117,13 @@ export const poll = (context: AppContext) => {
 
             const tokenResult = safeParse(OAuthDeviceAccessTokenResponse, json)
             if (!tokenResult.success) {
+                cleanUpPending()
                 throw new DeviceOAuthError("invalid_request", "Failed to parse device token response")
             }
 
             const { access_token, token_type, expires_in, refresh_token, scope } = tokenResult.output
+            cleanUpPending()
             const user = await getUserInfo(provider, access_token)
-
-            context.setPending?.(null)
 
             return {
                 accessToken: access_token,
@@ -129,6 +135,10 @@ export const poll = (context: AppContext) => {
             }
         }
 
-        throw new DeviceAuthError("POLL_TIMEOUT", "Device authorization polling timed out before the user completed authorization.")
+        cleanUpPending()
+        throw new DeviceAuthError(
+            "POLL_TIMEOUT",
+            "Device authorization polling timed out before the user completed authorization."
+        )
     }
 }

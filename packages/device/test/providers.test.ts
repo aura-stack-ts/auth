@@ -1,15 +1,15 @@
 import { describe, test, expect, vi, afterEach } from "vitest"
-import { createBuiltInOAuthProviders } from "@/providers/index.ts"
+import { createBuiltInDeviceProviders } from "@/providers/index.ts"
 import { DeviceProviderCredentials } from "@/@types/device.ts"
 
 afterEach(() => {
     vi.unstubAllEnvs()
 })
 
-describe("createBuiltInOAuthProviders", () => {
+describe("createBuiltInDeviceProviders", () => {
     test("create github provider configuration from environment variables", () => {
         vi.stubEnv("GITHUB_CLIENT_ID", "test-client-id")
-        const providers = createBuiltInOAuthProviders(["github"])
+        const providers = createBuiltInDeviceProviders(["github"])
         expect(providers.github).toMatchObject({
             id: "github",
             name: "GitHub",
@@ -28,7 +28,7 @@ describe("createBuiltInOAuthProviders", () => {
 
     test("throws error for invalid provider configuration", () => {
         vi.stubEnv("GITHUB_CLIENT_ID", "")
-        expect(() => createBuiltInOAuthProviders(["github"])).toThrow(
+        expect(() => createBuiltInDeviceProviders(["github"])).toThrow(
             /Missing or invalid environment variable for OAuth provider "github": GITHUB_CLIENT_ID/
         )
     })
@@ -36,7 +36,7 @@ describe("createBuiltInOAuthProviders", () => {
     test("throws error for invalid provider configuration details", () => {
         vi.stubEnv("CUSTOM_CLIENT_ID", "test-client-id")
         expect(() =>
-            createBuiltInOAuthProviders([
+            createBuiltInDeviceProviders([
                 {
                     id: "custom",
                     name: "Custom",

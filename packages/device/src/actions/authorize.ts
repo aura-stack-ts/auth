@@ -1,8 +1,8 @@
 import { safeParse } from "valibot"
 import { fetcher } from "@/shared/fetcher.ts"
-import { formHeaders, toFormBody } from "@/shared/form.ts"
+import { toHeaders, toFormBody } from "@/shared/fetcher.ts"
 import { DeviceAuthError, DeviceOAuthError } from "@/shared/errors.ts"
-import { resolveScope, resolveUrl } from "@/shared/url.ts"
+import { getResolvedScope, getResolvedURL } from "@/shared/url.ts"
 import { DEFAULT_POLL_INTERVAL_SECONDS } from "@/shared/constants.ts"
 import { OAuthDeviceAuthorizationResponse } from "@/schemas.ts"
 import type { BuiltInDeviceProvider } from "@/providers/index.ts"
@@ -15,8 +15,8 @@ export const authorize = (context: AppContext) => {
             throw new DeviceAuthError("INVALID_PROVIDER", `Provider with id ${providerId} not found`)
         }
 
-        const url = resolveUrl(deviceConfig.deviceAuthorization)
-        const scope = resolveScope(deviceConfig.deviceAuthorization, deviceConfig.scope)
+        const url = getResolvedURL(deviceConfig.deviceAuthorization)
+        const scope = getResolvedScope(deviceConfig.deviceAuthorization, deviceConfig.scope)
         const bodyParams: Record<string, string> = {
             client_id: deviceConfig.clientId,
         }
@@ -26,16 +26,16 @@ export const authorize = (context: AppContext) => {
 
         const response = await fetcher(url, {
             method: "POST",
-            headers: formHeaders(),
+            headers: toHeaders(),
             body: toFormBody(bodyParams),
         })
 
-        const json = await response.json()
+        const json = await response.json().catch(() => null)
         if (!response.ok) {
-            const error = typeof json === "object" && json !== null && "error" in json ? String((json as { error: string }).error) : "server_error"
+            const error = typeof json === "object" && json !== null && "error" in json ? String(json.error) : "server_error"
             const description =
                 typeof json === "object" && json !== null && "error_description" in json
-                    ? String((json as { error_description: string }).error_description)
+                    ? String(json.error_description)
                     : `Device authorization request failed (${response.status}).`
             throw new DeviceOAuthError(error as DeviceOAuthError["error"], description)
         }
@@ -46,7 +46,7 @@ export const authorize = (context: AppContext) => {
         }
 
         const interval = output.interval ?? DEFAULT_POLL_INTERVAL_SECONDS
-        const result: DeviceAuthorizationResponse = {
+        const authorizationResponse: DeviceAuthorizationResponse = {
             deviceCode: output.device_code,
             userCode: output.user_code,
             verificationURI: output.verification_uri,
@@ -62,7 +62,6 @@ export const authorize = (context: AppContext) => {
             expiresAt: Date.now() + output.expires_in * 1000,
         }
         context.setPending?.(pending)
-
-        return result
+        return authorizationResponse
     }
 }

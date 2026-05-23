@@ -1,19 +1,7 @@
 import { describe, test, expect, vi, afterEach } from "vitest"
 import { authorize } from "@/actions/authorize.ts"
 import { DeviceAuthError, DeviceOAuthError } from "@/shared/errors.ts"
-import type { DeviceProviderCredentials } from "@/@types/device.ts"
-
-const githubProvider: DeviceProviderCredentials = {
-    id: "github",
-    name: "GitHub",
-    clientId: "test-client-id",
-    deviceAuthorization: {
-        url: "https://github.com/login/device/code",
-        params: { scope: "read:user user:email" },
-    },
-    accessToken: "https://github.com/login/oauth/access_token",
-    userInfo: "https://api.github.com/user",
-}
+import { createBuiltInDeviceProviders } from "@/providers/index.ts"
 
 const deviceAuthResponse = {
     device_code: "device-code-123",
@@ -29,31 +17,39 @@ afterEach(() => {
 })
 
 describe("authorize", () => {
+    test("unsupported provider", async () => {
+        const authorizeFn = authorize({ providers: createBuiltInDeviceProviders() })
+        await expect(authorizeFn("unsupported")).rejects.toThrow(/Provider with id unsupported not found/)
+    })
+
     test("POSTs client_id and scope to device authorization endpoint", async () => {
-        const fetchMock = vi.fn().mockResolvedValue(
-            new Response(JSON.stringify(deviceAuthResponse), { status: 200 })
-        )
+        vi.stubEnv("GITHUB_CLIENT_ID", "test-client-id")
+
+        const fetchMock = vi.fn().mockResolvedValue(Response.json(deviceAuthResponse))
         vi.stubGlobal("fetch", fetchMock)
 
         const setPending = vi.fn()
         const authorizeFn = authorize({
-            providers: { github: githubProvider },
+            providers: createBuiltInDeviceProviders(["github"]),
             setPending,
         })
 
-        const result = await authorizeFn("github")
+        const authorizationResponse = await authorizeFn("github")
 
-        expect(fetchMock).toHaveBeenCalledOnce()
-        const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
-        expect(url).toBe("https://github.com/login/device/code")
-        expect(init?.method).toBe("POST")
-        expect(init?.headers).toMatchObject({
-            "Content-Type": "application/x-www-form-urlencoded",
-            Accept: "application/json",
+        expect(fetchMock).toHaveBeenCalledWith("https://github.com/login/device/code", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                client_id: "test-client-id",
+                scope: "read:user user:email",
+            }),
+            signal: expect.any(AbortSignal),
         })
-        expect(init?.body?.toString()).toBe("client_id=test-client-id&scope=read%3Auser+user%3Aemail")
 
-        expect(result).toEqual({
+        expect(authorizationResponse).toEqual({
             deviceCode: "device-code-123",
             userCode: "ABCD-1234",
             verificationURI: "https://github.com/login/device",
@@ -71,22 +67,44 @@ describe("authorize", () => {
         )
     })
 
+    test("fails to parse JSON response", async () => {
+        vi.stubEnv("GITHUB_CLIENT_ID", "test-client-id")
+        vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("invalid json", { status: 200 })))
+
+        const authorizeFn = authorize({ providers: createBuiltInDeviceProviders(["github"]) })
+        await expect(authorizeFn("github")).rejects.toThrow(/Failed to parse device authorization response/)
+    })
+
+    test("incomplete response missing required fields", async () => {
+        vi.stubEnv("GITHUB_CLIENT_ID", "test-client-id")
+        vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ device_code: "code" })))
+
+        const authorizeFn = authorize({ providers: createBuiltInDeviceProviders(["github"]) })
+        await expect(authorizeFn("github")).rejects.toThrow(/Failed to parse device authorization response/)
+    })
+
     test("throws DeviceAuthError when provider is not found", async () => {
-        const authorizeFn = authorize({ providers: { github: githubProvider } })
+        vi.stubEnv("GITHUB_CLIENT_ID", "test-client-id")
+
+        const authorizeFn = authorize({ providers: createBuiltInDeviceProviders(["github"]) })
         await expect(authorizeFn("unknown" as "github")).rejects.toThrow(DeviceAuthError)
     })
 
     test("throws DeviceOAuthError on HTTP error response", async () => {
+        vi.stubEnv("GITHUB_CLIENT_ID", "test-client-id")
         vi.stubGlobal(
             "fetch",
             vi.fn().mockResolvedValue(
-                new Response(JSON.stringify({ error: "invalid_client", error_description: "Bad client" }), {
-                    status: 401,
-                })
+                Response.json(
+                    { error: "invalid_client", error_description: "Bad client" },
+                    {
+                        status: 401,
+                    }
+                )
             )
         )
 
-        const authorizeFn = authorize({ providers: { github: githubProvider } })
+        const authorizeFn = authorize({ providers: createBuiltInDeviceProviders(["github"]) })
         await expect(authorizeFn("github")).rejects.toThrow(DeviceOAuthError)
     })
 })

@@ -1,6 +1,6 @@
 import { poll } from "@/actions/poll.ts"
 import { authorize } from "@/actions/authorize.ts"
-import { createBuiltInOAuthProviders } from "@/providers/index.ts"
+import { createBuiltInDeviceProviders } from "@/providers/index.ts"
 import type { AuthInstance, DeviceClientOptions, PendingDeviceAuth } from "@/@types/config.ts"
 
 /**
@@ -10,7 +10,7 @@ import type { AuthInstance, DeviceClientOptions, PendingDeviceAuth } from "@/@ty
  * @returns Client with `authorize` and `poll` methods
  */
 export const createDeviceClient = (config: DeviceClientOptions): AuthInstance => {
-    const providers = createBuiltInOAuthProviders(config.providers)
+    const providers = createBuiltInDeviceProviders(config.providers)
     let pending: PendingDeviceAuth | null = null
 
     const context = {

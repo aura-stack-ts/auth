@@ -1,7 +1,7 @@
 {
   "name": "@aura-stack/device",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "description": "OAuth 2.0 Device Authorization Grant for the Aura Stack ecosystem",
   "scripts": {

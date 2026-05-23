@@ -3,7 +3,10 @@ interface V8ErrorConstructor extends ErrorConstructor {
 }
 
 const hasCaptureStackTrace = (errorConstructor: ErrorConstructor): errorConstructor is V8ErrorConstructor => {
-    return "captureStackTrace" in errorConstructor && typeof (errorConstructor as V8ErrorConstructor).captureStackTrace === "function"
+    return (
+        "captureStackTrace" in errorConstructor &&
+        typeof (errorConstructor as V8ErrorConstructor).captureStackTrace === "function"
+    )
 }
 
 export type DeviceAuthErrorCode = "NO_PENDING_AUTHORIZATION" | "INVALID_PROVIDER" | "INVALID_POLL_INPUT" | "POLL_TIMEOUT"

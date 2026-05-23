@@ -12,10 +12,11 @@ export const DeviceProviderCredentialsSchema = valibot.object({
     id: valibot.string(),
     name: valibot.string(),
     deviceAuthorization: DeviceAuthorizationConfigSchema,
-    accessToken: valibot.union([valibot.pipe(valibot.string(), valibot.url())]),
-    userInfo: valibot.union([valibot.pipe(valibot.string(), valibot.url())]),
+    accessToken: valibot.pipe(valibot.string(), valibot.url()),
+    userInfo: valibot.pipe(valibot.string(), valibot.url()),
     clientId: valibot.pipe(valibot.string(), valibot.minLength(1)),
     scope: valibot.optional(valibot.string()),
+    profile: valibot.function(),
 })
 
 export const OAuthDeviceAuthorizationResponse = valibot.object({
