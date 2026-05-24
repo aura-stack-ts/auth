@@ -207,7 +207,7 @@ To access the active session in your protected Express routes, use the `withAuth
 ```ts title="src/index.ts" lineNumbers
 import express, { type Express } from "express"
 import { toExpressHandler } from "@/lib/handler.js"
-import { withAuth } from "@/middlewares/verify-session.js"
+import { withAuth } from "@/middlewares/with-auth.js"
 
 const app: Express = express()
 

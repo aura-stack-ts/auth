@@ -62,7 +62,7 @@ export const authClient = createAuthClient({
 
 ## Mount HTTP Handlers
 
-Create a catch-all route in `pages/api/auth/[...aura]/route.ts` to handle all authentication endpoints dynamically. The `/api/auth` path should match with the Pages Router Structure and `basePath` defined in your Auth configuration.
+Create a catch-all route in `src/pages/api/auth/[...aura].ts` to handle all authentication endpoints dynamically. The `/api/auth` path should match with the Pages Router Structure and `basePath` defined in your Auth configuration.
 
 ```ts title="src/pages/api/auth/[...aura].ts"
 import { handlers } from "@/lib/auth"
