@@ -1,32 +1,16 @@
 ---
 title: Nuxt
-description: Build your first authentication flow with Aura Auth and Nuxt (Nitro)
+description: Integrate Aura Auth and Nuxt
 ---
 
-This guide walks you through creating a complete authentication flow using **Aura Auth** in a Nuxt application.
+This guide walks you through to implement Aura Auth in a Nuxt application to a complete support for Nitro Server Engine.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Nuxt application.
 
-## Overview
-
-Nuxt runs on the Nitro server engine, which natively uses `h3` event handlers. Aura Auth integrates cleanly because you can map standard Web Requests via Nitro's `toWebRequest` utility and route them to Aura Auth handlers.
-
-Before continuing, complete the installation and initial setup:
-
-- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
-- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
-- [Nuxt Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/nuxt) for a fully working example
-
-Then use this guide to integrate Aura Auth with a Nuxt server using best practices.
-
----
-
-## What You'll Build
-
-You will create a small Nuxt setup with:
-
-- a shared `shared/auth.ts` server configuration
-- a Nitro route at `server/api/auth/[...aura].ts` that forwards requests to Aura Auth handlers
-- a shared browser client in `shared/auth-client.ts`
-- a Vue example that signs users in, reads the current session, and signs users out
+<Callout type="info">
+  Aura Auth is working on developing a Nuxt-specific package that will provide additional utilities and hooks for Nuxt
+  applications. For now, the core package can be used to implement authentication in Nuxt with the patterns outlined in this
+  guide. Stay tuned for updates on the [Nuxt package!](https://github.com/aura-stack-ts/auth/tree/master/packages/nuxt)
+</Callout>
 
 ---
 
@@ -34,47 +18,13 @@ You will create a small Nuxt setup with:
 
 <Step>
 
-## Project Structure
-
-```files
-nuxt-app
-├── server
-│   └── api
-│       └── auth
-│           └── [...aura].ts
-├── shared
-│   ├── auth.ts
-│   └── auth-client.ts
-└── .env
-```
-
-</Step>
-
-<Step>
-
-## Environment Setup
-
-Create a `.env` file at the root of your project to store secrets securely.
-
-```bash title=".env"
-# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-AURA_AUTH_SALT="base64-or-hex-32-bytes"
-```
-
-<Callout type="warning">Never commit your `.env` file to version control. Use a secret manager in production.</Callout>
-
-</Step>
-
-<Step>
-
 ## Setup Aura Auth
 
-### HTTP Handlers
+### Create an Auth Instance
 
-Create an `auth.ts` file in your `shared` directory so it can be reused by both Nitro endpoints and client utilities.
+Create an `auth.ts` file in `shared` directory to configure your Aura Auth instance.
 
-```ts title="shared/auth.ts"
+```ts title="shared/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -86,11 +36,16 @@ export const auth = createAuth({
 export const { handlers, jose, api } = auth
 ```
 
-`basePath` must match the route mounted in `server/api/auth/[...aura].ts`. `baseURL` should point to your local development server or deployed application URL.
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
 
-### Client API
+### Create an Auth Client Instance
 
-```ts title="shared/auth-client.ts"
+Create an `auth-client.ts` file in `shared` directory to enable client-side features.
+
+```ts title="shared/auth-client.ts" lineNumbers
 import { createAuthClient } from "@aura-stack/auth/client"
 
 export const authClient = createAuthClient({
@@ -100,7 +55,9 @@ export const authClient = createAuthClient({
 ```
 
 <Callout type="warning">
-  The `baseURL` should point to your server's URL, and `basePath` MUST match the path where your auth routes are mounted.
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL. Both options should be the same as the ones used in your `auth.ts` configuration
+  to ensure client and server instances are aligned.
 </Callout>
 
 </Step>
@@ -109,7 +66,7 @@ export const authClient = createAuthClient({
 
 ## Mount HTTP Handlers
 
-Create a wildcard catch-all route that delegates to Aura Auth's `ALL` handler. Nitro's `toWebRequest` utility ensures `handlers.ALL` receives a standard `Request` object.
+Create a wildcard catch-all route in `server/api/auth/[...aura].ts` that delegates to Aura Auth's `ALL` handler. Nitro's `toWebRequest` utility ensures `handlers.ALL` receives a standard `Request` object.
 
 ```ts title="server/api/auth/[...aura].ts" lineNumbers
 import { toWebRequest } from "h3"
@@ -121,15 +78,11 @@ export default defineEventHandler(async (event) => {
 })
 ```
 
-<Callout type="info">Aura Auth endpoints will now be served at `/api/auth/*`.</Callout>
-
 </Step>
 
 <Step>
 
-## Usage
-
-### Client-Side Rendering (CSR)
+## Client-Side Rendering (CSR)
 
 With Nuxt, you can use the built-in `createAuthClient` utility to handle authentication directly from your Vue components.
 
@@ -190,5 +143,5 @@ This pattern works well for navigation bars, login pages, and other components t
 - [Aura Auth Documentation](/docs/quick-start)
 - [Nuxt Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/nuxt)
 - [Integration Guide](/docs/guides/integration)
-- [Configuration Reference](/docs/configuration/options)
+- [Configuration Reference](/docs/api-reference/options)
 - [TypeScript Guide](/docs/concepts/typescript)

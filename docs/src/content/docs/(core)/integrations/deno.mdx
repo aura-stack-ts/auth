@@ -1,68 +1,14 @@
 ---
 title: Deno
-description: Authenticate users in your TypeScript applications with Aura Auth and Deno's native server
+description: Integrate Aura Auth and Deno's native server
 ---
 
-This guide walks you through creating a complete authentication flow using **Aura Auth** directly with **Deno**.
-
-## Overview
-
-Aura Auth and Deno both follow the web-standard `Request` and `Response` interfaces for high-performance HTTP handling. This means Aura Auth works out of the box with `Deno.serve`, with no external adapters or frameworks required.
-
-Before continuing, complete the installation and initial setup:
-
-- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
-- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
-- [Deno Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/deno) for a fully working example
-
-Then use this guide to integrate Aura Auth with a Deno server using best practices.
-
----
-
-## What You'll Build
-
-You will create a small Deno app with:
-
-- a shared `src/lib/auth.ts` server configuration
-- a `src/index.ts` entry point that mounts the auth handlers
-- a protected route example that validates the current session before responding
-- a clear route setup that keeps auth and protected endpoints separate
+This guide walks you through to implement Aura Auth in the native Deno server to a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Deno native application.
 
 ---
 
 <Steps>
-
-<Step>
-
-## Project Structure
-
-```files
-deno-app
-├── src
-│   ├── lib
-│   │   └── auth.ts
-│   └── index.ts
-├── .env.local
-└── deno.json
-```
-
-</Step>
-
-<Step>
-
-## Environment Setup
-
-Create a `.env.local` file at the root of your project to store secrets securely.
-
-```bash title=".env.local"
-# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-AURA_AUTH_SALT="base64-or-hex-32-bytes"
-```
-
-<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
-
-</Step>
 
 <Step>
 
@@ -111,9 +57,7 @@ This keeps auth requests isolated from the rest of your application routes.
 
 <Step>
 
-## Usage
-
-### Get Session
+## Auth Request Flow
 
 Deno does not include framework-style middleware, but you can protect routes with a small helper-style handler that validates the current session.
 

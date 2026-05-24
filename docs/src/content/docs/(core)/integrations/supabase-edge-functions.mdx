@@ -1,54 +1,14 @@
 ---
 title: Supabase Edge Functions
-description: Build your first authentication flow with Aura Auth and Supabase Edge Functions
+description: Integrate Aura Auth and Supabase Edge Functions
 ---
 
-This guide walks you through creating a complete authentication flow using **Aura Auth** in **Supabase Edge Functions** (built on Deno).
-
-## Overview
-
-Supabase Edge Functions run on Deno and use the web-standard Fetch API (`Request` and `Response`). That makes them a natural fit for Aura Auth's framework-agnostic runtime model.
-
-Before continuing, complete the installation and initial setup:
-
-- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
-- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
-- [Supabase Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/supabase) for a fully working example
-
-Then use this guide to integrate Aura Auth with a Supabase Edge Function using best practices.
-
----
-
-## What You'll Build
-
-You will create a small Supabase project with:
-
-- a shared `functions/_shared/auth.ts` server configuration
-- a function route at `functions/auth/index.ts` that mounts the auth handlers
-- a `config.toml` file that points the route to the correct entrypoint
-- a protected route example that checks the active session before responding
+This guide walks you through to implement Aura Auth in a Supabase Edge Functions application with a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Supabase Edge Functions application.
 
 ---
 
 <Steps>
-
-<Step>
-
-## Project Structure
-
-```files
-supabase-app
-├── functions
-│   ├── _shared
-│   │   └── auth.ts
-│   ├── auth
-│   │   ├── deno.json
-│   │   └── index.ts
-├── config.toml
-└── .env.local
-```
-
-</Step>
 
 <Step>
 
@@ -71,23 +31,9 @@ entrypoint = "./functions/auth/index.ts"
 
 <Step>
 
-## Environment Setup
-
-Create a `.env.local` file at the root of your project to store secrets securely.
-
-```bash title=".env.local"
-# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-AURA_AUTH_SALT="base64-or-hex-32-bytes"
-```
-
-<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
-
-</Step>
-
-<Step>
-
 ## Setup Aura Auth
+
+### Create an Auth Instance
 
 Create an `auth.ts` file in `functions/_shared/` to configure authentication and export the shared helpers used by the function route.
 
@@ -174,5 +120,5 @@ This structure keeps all auth endpoints in one place and gives you a clear place
 - [Aura Auth Documentation](/docs/quick-start)
 - [Supabase Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/supabase)
 - [Integration Guide](/docs/guides/integration)
-- [Configuration Reference](/docs/configuration/options)
+- [Configuration Reference](/docs/api-reference/options)
 - [TypeScript Guide](/docs/concepts/typescript)

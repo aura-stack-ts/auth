@@ -1,32 +1,16 @@
 ---
 title: Elysia
-description: Build your first authentication flow with Aura Auth and Elysia
+description: Integrate Aura Auth and Elysia
 ---
 
-This guide walks you through creating a complete authentication flow using **Aura Auth** in an **Elysia** server environment.
+This guide walks you through to implement Aura Auth in a Elysia application to a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Elysia application.
 
-## Overview
-
-Aura Auth and Elysia, an ergonomic web framework for Bun, both follow the web-standard `Request` and `Response` interfaces for high-performance HTTP handling. That means Aura Auth works out of the box with Elysia, with no external adapters or frameworks required.
-
-Before continuing, complete the installation and initial setup:
-
-- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
-- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
-- [Elysia Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/elysia) for a fully working example
-
-Then use this guide to integrate Aura Auth with an Elysia server using best practices.
-
----
-
-## What You'll Build
-
-You will create a small Elysia app with:
-
-- a shared `src/lib/auth.ts` server configuration
-- a `src/index.ts` entry point that mounts the auth handlers
-- a `src/plugins/with-auth.ts` plugin that adds session data to the context
-- a protected route example that validates the session before responding
+<Callout type="info">
+  Aura Auth is working on developing a Elysia-specific package that will provide additional utilities for Elysia applications. For
+  now, the core package can be used to implement authentication in Elysia with the patterns outlined in this guide. Stay tuned for
+  updates on the [Elysia package!](https://github.com/aura-stack-ts/auth/tree/master/packages/elysia)
+</Callout>
 
 ---
 
@@ -34,42 +18,11 @@ You will create a small Elysia app with:
 
 <Step>
 
-## Project Structure
+## Setup Aura
 
-```files
-elysia-app
-├── src
-│   ├── lib
-│   │   └── auth.ts
-│   ├── plugins
-│   │   └── with-auth.ts
-│   └── index.ts
-└── .env.local
-```
+### Create an Auth Instance
 
-</Step>
-
-<Step>
-
-## Environment Setup
-
-Create a `.env.local` file at the root of your project to store secrets securely.
-
-```bash title=".env.local"
-# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-AURA_AUTH_SALT="base64-or-hex-32-bytes"
-```
-
-<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
-
-</Step>
-
-<Step>
-
-## Setup Aura Auth
-
-Create `auth.ts` in `src/lib/` to configure Aura Auth and export the shared handlers used by the server and plugins.
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
 
 ```ts title="src/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -77,13 +30,16 @@ import { createAuth } from "@aura-stack/auth"
 export const auth = createAuth({
   oauth: ["github"],
   basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
 })
 
 export const { handlers, jose, api } = auth
 ```
 
-`basePath` must match the route you expose in Elysia. If your server changes, update both the route and the auth config together.
-
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
 </Step>
 
 <Step>
@@ -104,8 +60,6 @@ app.all("/api/auth/*", (ctx) => {
 
 app.listen(3000)
 ```
-
-This keeps all auth endpoints in one place and leaves the rest of your routes free to use the same `auth` instance.
 
 </Step>
 
@@ -202,5 +156,5 @@ This pattern works well for dashboard pages, account APIs, and any route that sh
 - [Aura Auth Documentation](/docs/quick-start)
 - [Elysia Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/elysia)
 - [Integration Guide](/docs/guides/integration)
-- [Configuration Reference](/docs/configuration/options)
+- [Configuration Reference](/docs/api-reference/options)
 - [TypeScript Guide](/docs/concepts/typescript)

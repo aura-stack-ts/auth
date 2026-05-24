@@ -21,6 +21,10 @@ npm install @aura-stack/auth
 
 ### Project Structure
 
+<Tabs items={["Standard Structure", "Cloudflare Workers", "Supabase Edge Functions", "Vercel Edge Functions"]}>
+
+<Tab value="Standard Structure">
+
 Create a shared `auth.ts` file for server configuration and an optional `auth-client.ts` for browser client configuration inside the `src/lib` folder.
 
 ```files
@@ -31,6 +35,61 @@ auth-app
 │   │   └── auth-client.ts
 └── .env.local
 ```
+
+</Tab>
+
+<Tab value="Cloudflare Workers">
+
+Create a shared `auth.ts` file for server configuration inside the `src/lib` folder.
+
+```files
+cloudflare-app
+├── src
+│   ├── lib
+│   │   └── auth.ts
+│   └── index.ts
+├── .env.local
+└── wrangler.jsonc
+```
+
+</Tab>
+
+<Tab value="Supabase Edge Functions">
+
+Create a shared `auth.ts` file for server configuration inside the `functions/_shared` folder. The folders that start with an underscore `_` are not treated as Edge Function routes and are ideal for shared code.
+
+```files
+supabase-app
+├── functions
+│   ├── _shared
+│   │   └── auth.ts
+│   ├── auth
+│   │   ├── deno.json
+│   │   └── index.ts
+├── config.toml
+└── .env.local
+```
+
+</Tab>
+
+<Tab value="Vercel Edge Functions">
+
+Create a shared `_auth.ts` file for server configuration inside the `api` folder. The files that start with an underscore `_` are not treated as API routes and are ideal for shared code.
+
+```files
+vercel-app
+├── api
+│   ├── auth
+│   │   └── index.ts
+│   ├── _auth.ts
+│   └── index.ts
+├── .env.local
+└── vercel.json
+```
+
+</Tab>
+
+</Tabs>
 
 </Step>
 

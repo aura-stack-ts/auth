@@ -1,32 +1,16 @@
 ---
 title: Hono
-description: Build your first authentication flow with Aura Auth and Hono
+description: Integrate Aura Auth and Hono
 ---
 
-This guide walks you through creating a complete authentication flow using **Aura Auth** in a **Hono** application.
+This guide walks you through to implement Aura Auth in a Hono application to a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Hono application.
 
-## Overview
-
-Hono is built on web standards (`Request` and `Response`), which makes integrating Aura Auth straightforward. You can use the `ALL` handler to cover all authentication HTTP methods in a single route.
-
-Before continuing, complete the installation and initial setup:
-
-- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
-- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
-- [Hono Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/hono) for a fully working example
-
-Then use this guide to integrate Aura Auth with Hono using best practices.
-
----
-
-## What You'll Build
-
-You will create a small Hono app with:
-
-- a shared `src/lib/auth.ts` server configuration
-- a `src/index.ts` entry point that mounts the auth handlers
-- a `src/middlewares/with-auth.ts` middleware that adds session data to the context
-- a protected route example that validates the session before responding
+<Callout type="info">
+  Aura Auth is working on developing a Hono-specific package that will provide additional utilities for Hono applications. For
+  now, the core package can be used to implement authentication in Hono with the patterns outlined in this guide. Stay tuned for
+  updates on the [Hono package!](https://github.com/aura-stack-ts/auth/tree/master/packages/hono)
+</Callout>
 
 ---
 
@@ -34,44 +18,13 @@ You will create a small Hono app with:
 
 <Step>
 
-## Project Structure
-
-```files
-hono-app
-├── src
-│   ├── lib
-│   │   ├── auth.ts
-│   ├── middlewares
-│   │   └── with-auth.ts
-│   └── index.ts
-└── .env.local
-```
-
-</Step>
-
-<Step>
-
-## Environment Setup
-
-Create a `.env.local` file at the root of your project to store secrets securely.
-
-```bash title=".env.local"
-# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-AURA_AUTH_SALT="base64-or-hex-32-bytes"
-```
-
-<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
-
-</Step>
-
-<Step>
-
 ## Setup Aura Auth
 
-Create an `auth.ts` file in `src/lib/` to configure authentication and export the shared helpers used by the app and middleware.
+### Create an Auth Instance
 
-```ts title="src/lib/auth.ts"
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
+
+```ts title="src/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -82,8 +35,10 @@ export const auth = createAuth({
 export const { handlers, api, jose } = auth
 ```
 
-`basePath` must match the route you expose in your Hono app. If the route changes, update the auth config and route handler together.
-
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
 </Step>
 
 <Step>
@@ -104,8 +59,6 @@ app.all("/api/auth/*", async (ctx) => {
 
 export default app
 ```
-
-This keeps all auth endpoints in one place and leaves the rest of your routes free to use the same auth instance.
 
 </Step>
 
@@ -200,5 +153,5 @@ This pattern works well for dashboards, account endpoints, and any route that sh
 - [Aura Auth Documentation](/docs/quick-start)
 - [Hono Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/hono)
 - [Integration Guide](/docs/guides/integration)
-- [Configuration Reference](/docs/configuration/options)
+- [Configuration Reference](/docs/api-reference/options)
 - [TypeScript Guide](/docs/concepts/typescript)

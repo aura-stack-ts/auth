@@ -1,76 +1,20 @@
 ---
 title: Oak
-description: Build your first authentication flow with Aura Auth and Oak (Deno)
+description: Integrate Aura Auth with Oak (Deno)
 ---
 
-This guide walks you through creating a complete authentication flow using **Aura Auth** inside an Oak application running on Deno.
-
-## Overview
-
-Oak is a popular middleware framework for Deno. Because Oak builds on Deno's native web APIs, you can adapt requests from `ctx.request.source` to a standard `Request` object with minimal glue code.
-
-Before continuing, complete the installation and initial setup:
-
-- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
-- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
-- [Oak Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/oak) for a fully working example
-
-Then use this guide to integrate Aura Auth with Oak using best practices.
-
----
-
-## What You'll Build
-
-You will create a small Oak app with:
-
-- a shared `src/lib/auth.ts` server configuration
-- a `src/lib/handler.ts` adapter that bridges Oak and Aura Auth
-- a `src/middlewares/with-auth.ts` middleware that adds session data to Oak state
-- a protected route example that validates the current session before responding
-
----
+This guide walks you through to implement Aura Auth in a Oak application to a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Oak application.
 
 <Steps>
 
 <Step>
 
-## Project Structure
-
-```files
-oak-app
-├── src
-│   ├── lib
-│   │   ├── auth.ts
-│   │   ├── handler.ts
-│   ├── middlewares
-│   │   └── with-auth.ts
-│   └── index.ts
-└── .env.local
-```
-
-</Step>
-
-<Step>
-
-## Environment Setup
-
-Create a `.env.local` file at the root of your project to store secrets securely.
-
-```bash title=".env.local"
-# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-AURA_AUTH_SALT="base64-or-hex-32-bytes"
-```
-
-<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
-
-</Step>
-
-<Step>
-
 ## Setup Aura Auth
 
-Set up your `auth.ts` file in `src/lib/` and configure Aura Auth for your Oak app.
+### Create an Auth Instance
+
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
 
 ```ts title="src/lib/auth.ts"
 import { createAuth } from "npm:@aura-stack/auth"
@@ -80,10 +24,13 @@ export const auth = createAuth({
   basePath: "/api/auth",
 })
 
-export const { handlers, api } = auth
+export const { handlers, api, jose } = auth
 ```
 
-`basePath` must match the route you expose in your Oak app. If the route changes, update the auth config and adapter together.
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
 
 </Step>
 
@@ -256,5 +203,5 @@ This pattern works well for dashboards, account endpoints, and any route that sh
 - [Aura Auth Documentation](/docs/quick-start)
 - [Oak Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/oak)
 - [Integration Guide](/docs/guides/integration)
-- [Configuration Reference](/docs/configuration/options)
+- [Configuration Reference](/docs/api-reference/options)
 - [TypeScript Guide](/docs/concepts/typescript)

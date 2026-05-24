@@ -1,54 +1,22 @@
 ---
 title: Astro
-description: Build your first authentication flow with Aura Auth and Astro
+description: Integrate Aura Auth and Astro
 ---
 
-This guide walks you through creating a complete authentication flow using **Aura Auth** in an **Astro** application.
-
-## Overview
-
-Astro API routes receive and return Web Standard `Request` and `Response` objects, which makes Astro a natural fit for Aura Auth's unified handlers.
-
----
-
-## What You'll Build
-
-You will create a small Astro app with:
-
-- a shared `src/lib/auth.ts` server configuration
-- a `src/pages/api/auth/[...auth].ts` route that forwards auth requests
-- an optional `src/lib/auth-client.ts` browser client
-- server and client examples for sign-in, session lookup, and sign-out
-
----
+This guide walks you through to implement Aura Auth in a Astro application to a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Astro application.
 
 <Steps>
 
 <Step>
 
-## Environment Setup
-
-Create a `.env.local` file at the root of your project to store secrets securely.
-
-```bash title=".env.local"
-# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-AURA_AUTH_SALT="base64-or-hex-32-bytes"
-```
-
-<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
-
-</Step>
-
-<Step>
-
 ## Setup Aura Auth
 
-### HTTP Handlers
+### Create an Auth Instance
 
-Set up your core configuration file in `src/lib/` so both server routes and client helpers can reuse it.
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
 
-```ts title="src/auth.ts"
+```ts title="src/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -59,13 +27,16 @@ export const auth = createAuth({
 export const { handlers, jose, api } = auth
 ```
 
-`basePath` must match the route mounted in `src/pages/api/auth/[...auth].ts`. `baseURL` should point to your local development server or deployed application URL.
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
 
-### Client API
+### Create an Auth Client Instance
 
-To use Aura Auth's client-side features, create an `auth-client.ts` file to initialize the client.
+Create an `auth-client.ts` file in `src/lib` directory to enable client-side features.
 
-```ts title="src/lib/auth-client.ts"
+```ts title="src/lib/auth-client.ts" lineNumbers
 import { createAuthClient } from "@aura-stack/auth/client"
 
 export const authClient = createAuthClient({
@@ -75,10 +46,10 @@ export const authClient = createAuthClient({
 ```
 
 <Callout type="warning">
-  The `baseURL` should point to your server's URL, and `basePath` MUST match the path where your auth routes are mounted.
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL. Both options should be the same as the ones used in your `auth.ts` configuration
+  to ensure client and server instances are aligned.
 </Callout>
-
-Keep the client and server values in sync. If you move the auth route, update both `basePath` values together.
 
 </Step>
 
@@ -107,19 +78,13 @@ export const PATCH: APIRoute = async ({ request }) => {
 
 <Callout type="info">Ensure your `basePath` option in `createAuth` matches the actual route (`/api/auth`).</Callout>
 
-This route can be extended with additional methods if your auth flow needs them later.
-
 </Step>
 
 <Step>
 
-## Usage
+## Server Side Rendering (SSR)
 
-Use server-side code when you want to protect a page before it renders, and use the client helper when you need interactive buttons or session-aware UI.
-
-### Server Side Rendering (SSR)
-
-#### Get Session
+### Get Session
 
 ```astro title="src/pages/index.astro" lineNumbers
 ---
@@ -142,7 +107,7 @@ const session = result.session
 
 This is the recommended pattern for protected pages: check authentication on the server and only render private UI when a session is present.
 
-#### Sign-Out
+### Sign-Out
 
 ```astro title="src/pages/index.astro" lineNumbers
 ---
@@ -164,9 +129,9 @@ const signOutAction = async () => {
 
 If you prefer a client-only interaction, call `authClient.signOut()` from a client component instead.
 
-### Client Side Rendering (CSR)
+## Client Side Rendering (CSR)
 
-#### Sign-In
+### Sign-In
 
 ```tsx title="src/components/sign-in-button.tsx" lineNumbers
 import { authClient } from "@/lib/auth-client"
@@ -184,7 +149,7 @@ export default function SignInButton() {
 
 Use a client component for one-click auth entry points or custom UI that cannot be expressed as a server action.
 
-#### Get Session
+### Get Session
 
 ```tsx title="src/components/user-profile.tsx" lineNumbers
 import { useEffect, useState } from "react"
@@ -214,7 +179,7 @@ export default function UserProfile() {
 
 This approach is useful for nav bars, avatars, and other session-aware UI that updates after hydration.
 
-#### Sign-Out
+### Sign-Out
 
 ```tsx title="src/components/sign-out-button.tsx" lineNumbers
 import { authClient } from "@/lib/auth-client"
@@ -251,5 +216,5 @@ Client-side sign-out is best for interactive controls inside menus or profile po
 - [Aura Auth Documentation](/docs/quick-start)
 - [Astro Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/astro)
 - [Integration Guide](/docs/guides/integration)
-- [Configuration Reference](/docs/configuration/options)
+- [Configuration Reference](/docs/api-reference/options)
 - [TypeScript Guide](/docs/concepts/typescript)

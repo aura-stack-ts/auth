@@ -3,30 +3,14 @@ title: Express
 description: Build your first authentication flow with Aura Auth and Express
 ---
 
-This guide walks you through creating a complete authentication flow using **Aura Auth** in an **Express** application.
+This guide walks you through to implement Aura Auth in a Express application to a complete support for `IncomingMessage` and `ServerResponse` objects.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Express application.
 
-## Overview
-
-Express is built around Node.js `IncomingMessage` and `ServerResponse` streams rather than modern web-standard `Request` and `Response` objects. That means it needs a small adapter to bridge Express and Aura Auth's web-standard handlers.
-
-Before continuing, complete the installation and initial setup:
-
-- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
-- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
-- [Express Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/express) for a fully working example
-
-Then use this guide to integrate Aura Auth with an Express server using best practices.
-
----
-
-## What You'll Build
-
-You will create a small Express app with:
-
-- a shared `src/lib/auth.ts` server configuration
-- a `src/lib/handler.ts` adapter that bridges Express and Aura Auth
-- a `src/middlewares/verify-session.ts` middleware for protected routes
-- a `src/types.d.ts` augmentation for `res.locals.session`
+<Callout type="info">
+  Aura Auth is working on developing a Express-specific package that will provide additional utilities for Express applications.
+  For now, the core package can be used to implement authentication in Express with the patterns outlined in this guide. Stay
+  tuned for updates on the [Express package!](https://github.com/aura-stack-ts/auth/tree/master/packages/express)
+</Callout>
 
 ---
 
@@ -34,45 +18,11 @@ You will create a small Express app with:
 
 <Step>
 
-## Project Structure
-
-```files
-express-app
-├── src
-│   ├── lib
-│   │   ├── auth.ts
-│   │   └── handler.ts
-│   ├── middlewares
-│   │   └── verify-session.ts
-│   ├── types.d.ts
-│   └── index.ts
-├── tsconfig.json
-└── package.json
-```
-
-</Step>
-
-<Step>
-
-## Environment Setup
-
-Create a `.env.local` file at the root of your project to store secrets securely.
-
-```bash title=".env.local"
-# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-AURA_AUTH_SALT="base64-or-hex-32-bytes"
-```
-
-<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
-
-</Step>
-
-<Step>
-
 ## Setup Aura Auth
 
-Create an `auth.ts` file in `src/lib/` to configure authentication and export the shared handlers used by the adapter and middleware.
+### Create an Auth Instance
+
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
 
 ```ts title="src/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
@@ -80,12 +30,16 @@ import { createAuth } from "@aura-stack/auth"
 export const auth = createAuth({
   oauth: ["github"],
   basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
 })
 
-export const { handlers, api } = auth
+export const { handlers, jose, api } = auth
 ```
 
-`basePath` must match the route you expose in your Express app. If the route changes, update the auth config and adapter together.
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
 
 </Step>
 
@@ -212,36 +166,35 @@ Use this route for all auth methods, including sign-in, sign-out, session lookup
 
 Middlewares are a common pattern in Express apps for protecting routes. You can create a middleware that checks for an active session before allowing access to protected routes.
 
-```ts title="src/middlewares/verify-session.ts" lineNumbers
-import { auth } from "@/lib/auth.js"
-import { toWebRequest } from "@/lib/handler.js"
-import type { Request, Response, NextFunction } from "express"
+```ts title="src/middlewares/with-auth.ts" lineNumbers
+import { toWebRequest } from "@/lib/handler.ts"
+import type { RequestHandler } from "express"
+import type { AuthInstance, User, Session } from "@aura-stack/auth"
 
-export const verifySession = async (req: Request, res: Response, next: NextFunction) => {
-  const webRequest = toWebRequest(req)
-  const session = await auth.api.getSession({
-    headers: webRequest.headers,
-  })
-  if (!session.authenticated) {
-    return res.status(401).json({
-      error: "Unauthorized",
-      message: "You must be signed in to access this resource.",
-    })
-  }
-  res.locals.session = session.session
-  return next()
+export type LocalsWithSession<DefaultUser extends User = User> = {
+  session?: Session<DefaultUser> | null
 }
-```
 
-Express doesn't infer the `Locals` type automatically, so extend it to include the session:
-
-```ts title="src/types.d.ts" lineNumbers
-import type { Session } from "@aura-stack/auth"
-
-declare global {
-  namespace Express {
-    interface Locals {
-      session?: Session
+export const withAuth = <DefaultUser extends User = User>({
+  api,
+}: AuthInstance<DefaultUser>): RequestHandler<any, any, any, any, LocalsWithSession<DefaultUser>> => {
+  return async (req, res, next) => {
+    try {
+      const webRequest = toWebRequest(req)
+      const { session, headers } = await api.getSession({
+        headers: webRequest.headers,
+      })
+      for (const [key, value] of headers.entries()) {
+        if (key.toLowerCase() === "set-cookie") {
+          res.append(key, value)
+        } else {
+          res.setHeader(key, value)
+        }
+      }
+      res.locals.session = session
+      return next()
+    } catch (error) {
+      return next(error)
     }
   }
 }
@@ -249,12 +202,12 @@ declare global {
 
 ### Get Session
 
-To access the active session in your protected Express routes, use the `verifySession` middleware and read `res.locals.session`.
+To access the active session in your protected Express routes, use the `withAuth` middleware and read `res.locals.session`.
 
 ```ts title="src/index.ts" lineNumbers
 import express, { type Express } from "express"
 import { toExpressHandler } from "@/lib/handler.js"
-import { verifySession } from "@/middlewares/verify-session.js"
+import { withAuth } from "@/middlewares/verify-session.js"
 
 const app: Express = express()
 
@@ -263,7 +216,7 @@ app.use(express.urlencoded({ extended: true }))
 
 app.all("/api/auth/*", toExpressHandler)
 
-app.get("/api/protected", verifySession, (req, res) => {
+app.get("/api/protected", withAuth, (req, res) => {
   const session = res.locals.session
   return res.json({
     message: "You have access to this protected resource.",
@@ -299,5 +252,5 @@ This pattern keeps the session lookup centralized and makes protected route logi
 - [Aura Auth Documentation](/docs/quick-start)
 - [Express Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/express)
 - [Integration Guide](/docs/guides/integration)
-- [Configuration Reference](/docs/configuration/options)
+- [Configuration Reference](/docs/api-reference/options)
 - [TypeScript Guide](/docs/concepts/typescript)
