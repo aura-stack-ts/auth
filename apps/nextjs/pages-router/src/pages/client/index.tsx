@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/react"
+import { useAuth } from "@aura-stack/next/client"
 import { EditProfile } from "@/components/edit-profile"
 import type { SubmitEvent } from "react"
 
@@ -137,6 +137,7 @@ export default function AuthClientPage() {
                                         type="text"
                                         id="username"
                                         name="username"
+                                        aria-label="Username"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -148,6 +149,7 @@ export default function AuthClientPage() {
                                         type="password"
                                         id="password"
                                         name="password"
+                                        aria-label="Password"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>

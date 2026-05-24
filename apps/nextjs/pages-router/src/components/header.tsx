@@ -3,7 +3,7 @@ import { useRouter } from "next/router"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/react"
+import { useAuth } from "@aura-stack/next/client"
 
 export const Header = () => {
     const router = useRouter()
