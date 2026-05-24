@@ -1,0 +1,837 @@
+---
+title: "@aura-stack/jose"
+description: JOSE utilities for JWT signing, verification, and encryption
+---
+
+## JOSE API Reference
+
+`@aura-stack/jose` provides a curated API surface for working with **JWS**, **JWE**, and **JWT** standards.  
+It also includes a convenience re-export of the official [`jose`](https://github.com/panva/jose) library via the path `@aura-stack/jose/jose`, allowing consumers to access low-level cryptographic primitives when needed.
+
+```ts lineNumbers
+import { createJWT, createJWS, createJWE } from "@aura-stack/jose"
+
+// JWSs (Json Web Signature)
+export const { signJWS, verifyJWS } = createJWS("secret-key")
+
+// JWEs (Json Web Encryption)
+export const { encryptJWE, decryptJWE } = createJWE("secret-key")
+
+// JWTs (Json Web Token)
+export const { encodeJWT, decodeJWT } = createJWT("secret-key")
+```
+
+---
+
+## Features
+
+- **Direct re-export of `jose`** — access all primitives from the upstream package via `@aura-stack/jose/jose`.
+- **JWE utilities** — use `createJWE`, `encryptJWE`, and `decryptJWE` for encryption/decryption flows.
+- **JWS utilities** — use `createJWS`, `signJWS`, and `verifyJWS` for signature and verification.
+- **JWT helpers** — use `createJWT`, `encodeJWT`, and `decodeJWT` for signing and encrypting JSON Web Tokens.
+- **HKDF for key derivation** — use `deriveKey` and `createDeriveKey` for key derivation.
+- **Secure by design** — built on top of modern JOSE standards (RFC 7515, 7516, 7519).
+
+---
+
+## Installation
+
+If you haven’t installed the package yet:
+
+```npm
+npm install @aura-stack/jose
+```
+
+<Callout>
+  The `@aura-stack/jose` package is already included as a dependency of `@aura-stack/auth`. You only need to install it separately
+  if you want to use it standalone.
+</Callout>
+
+---
+
+## API Reference
+
+## Signing and Encrypting a JWT
+
+By default, Aura Auth uses the same secret value to encrypt and sign JWTs. However, a stronger version is provided that accepts separate secret keys for encryption and signing. The `encodeJWT`, `decodeJWT`, and `createJWT` functions accept an object with `jws` and `jwe` fields to specify separate keys. The second argument extends the `DerivedKeyInput` type.
+
+```ts lineNumbers
+import { DerivedKeyInput } from "@aura-stack/jose"
+
+const derivedKeys: DerivedKeyInput = {
+  jwe: process.env.AURA_AUTH_JWE_SECRET,
+  jws: process.env.AURA_AUTH_JWS_SECRET,
+}
+```
+
+### `encodeJWT(payload, secret)`
+
+Encodes a JWT by first signing it (JWS) and then encrypting it (JWE). This ensures both **integrity** and **confidentiality** as recommended by [RFC 7519 #11.2](https://datatracker.ietf.org/doc/html/rfc7519#section-11.2).
+
+#### Signature
+
+```ts lineNumbers
+type encodeJWT = (token: JWTPayload, secret: SecretInput | DerivedKeyInput) => Promise<string>
+```
+
+#### Parameters
+
+| Parameter | Type                               | Description                           |
+| --------- | ---------------------------------- | ------------------------------------- |
+| `token`   | `JWTPayload`                       | Payload data to encode in the JWT     |
+| `secret`  | `SecretInput` \| `DerivedKeyInput` | Secret key for signing and encrypting |
+
+#### Returns
+
+| Return  | Type              | Description                       |
+| ------- | ----------------- | --------------------------------- |
+| Encoded | `Promise<string>` | A signed and encrypted JWT string |
+
+#### Example
+
+```ts lineNumbers
+import { encodeJWT } from "@aura-stack/jose"
+
+const token = await encodeJWT(
+  {
+    sub: "user-123",
+    email: "user@example.com",
+    role: "admin",
+  },
+  process.env.JWT_SECRET!
+)
+
+console.log(token) // eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIi...
+```
+
+<Callout type="info">The token is first signed using HS256, then encrypted using A256GCM.</Callout>
+
+**Using Derived Keys**
+
+```ts lineNumbers
+import { encodeJWT } from "@aura-stack/jose"
+
+const token = await encodeJWT(
+  {
+    sub: "user-123",
+    email: "user@example.com",
+    role: "admin",
+  },
+  {
+    jwe: process.env.AURA_AUTH_JWE_SECRET,
+    jws: process.env.AURA_AUTH_JWS_SECRET,
+  }
+)
+
+console.log(token) // eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIi...
+```
+
+---
+
+### `decodeJWT(token, secret)`
+
+Decodes a JWT by first decrypting it (JWE) and then verifying it (JWS). This validates both **confidentiality** and **integrity**.
+
+#### Signature
+
+```ts lineNumbers
+function decodeJWT(token: string, secret: SecretInput | DerivedKeyInput): Promise<JWTPayload>
+```
+
+#### Parameters
+
+| Parameter | Type                               | Description                             |
+| --------- | ---------------------------------- | --------------------------------------- |
+| `token`   | `string`                           | Encoded JWT string to decode            |
+| `secret`  | `SecretInput` \| `DerivedKeyInput` | Secret key for decrypting and verifying |
+
+#### Returns
+
+| Return  | Type                  | Description                     |
+| ------- | --------------------- | ------------------------------- |
+| Decoded | `Promise<JWTPayload>` | The decoded JWT payload content |
+
+#### Example
+
+```ts lineNumbers
+import { decodeJWT } from "@aura-stack/jose"
+
+try {
+  const payload = await decodeJWT(token, process.env.JWT_SECRET!)
+
+  console.log(payload.sub) // 'user-123'
+  console.log(payload.email) // 'user@example.com'
+  console.log(payload.exp) // 1234567890 (expiration timestamp)
+} catch (error) {
+  console.error("Invalid or expired token")
+}
+```
+
+**Using Derived Keys**
+
+```ts lineNumbers
+import { decodeJWT } from "@aura-stack/jose"
+
+try {
+  const payload = await decodeJWT(token, {
+    jwe: process.env.AURA_AUTH_JWE_SECRET,
+    jws: process.env.AURA_AUTH_JWS_SECRET,
+  })
+
+  console.log(payload.sub) // 'user-123'
+  console.log(payload.email) // 'user@example.com'
+  console.log(payload.exp) // 1234567890 (expiration timestamp)
+} catch (error) {
+  console.error("Invalid or expired token")
+}
+```
+
+---
+
+### `createJWT(secret)`
+
+Creates a JWT handler with bound `encodeJWT` and `decodeJWT` methods.
+
+#### Signature
+
+```ts lineNumbers
+function createJWT(secret: SecretInput | DerivedKeyInput): {
+  encodeJWT: (payload: JWTPayload) => Promise<string>
+  decodeJWT: (token: string) => Promise<JWTPayload>
+}
+```
+
+#### Parameters
+
+| Parameter | Type                               | Description                       |
+| --------- | ---------------------------------- | --------------------------------- |
+| `secret`  | `SecretInput` \| `DerivedKeyInput` | Secret key for all JWT operations |
+
+#### Returns
+
+| Return     | Type                                       | Description                                                                |
+| ---------- | ------------------------------------------ | -------------------------------------------------------------------------- |
+| encodedJWT | `(payload: JWTPayload) => Promise<string>` | Function that encodes a JWT that is signed and encrypted from payload data |
+| decodedJWT | `(token: string) => Promise<JWTPayload>`   | Function that decodes the JWT string by verifying and decrypting it        |
+
+#### Example
+
+```ts lineNumbers
+import { createJWT } from "@aura-stack/jose"
+
+const jwt = createJWT(process.env.JWT_SECRET!)
+
+// Encode
+const token = await jwt.encodeJWT({ sub: "user-123" })
+
+// Decode
+const payload = await jwt.decodeJWT(token)
+```
+
+**Using Derived Keys**
+
+```ts lineNumbers
+import { createJWT } from "@aura-stack/jose"
+
+const jwt = createJWT({
+  jwe: process.env.AURA_AUTH_JWE_SECRET,
+  jws: process.env.AURA_AUTH_JWS_SECRET,
+})
+
+// Encode
+const token = await jwt.encodeJWT({ sub: "user-123" })
+
+// Decode
+const payload = await jwt.decodeJWT(token)
+```
+
+---
+
+## Signing API (JWS)
+
+### `signJWS(payload, secret)`
+
+Signs a JWT using HS256 algorithm with standard claims.
+
+#### Signature
+
+```ts lineNumbers
+function signJWS(payload: JWTPayload, secret: SecretInput): Promise<string>
+```
+
+#### Parameters
+
+| Parameter | Type          | Description              |
+| --------- | ------------- | ------------------------ |
+| `payload` | `JWTPayload`  | JWT payload data to sign |
+| `secret`  | `SecretInput` | Secret key for signing   |
+
+#### Returns
+
+| Return     | Type              | Description         |
+| ---------- | ----------------- | ------------------- |
+| Signed JWT | `Promise<string>` | A signed JWT string |
+
+#### Generated Claims [!toc]
+
+The following claims are automatically added:
+
+| Claim | Description                      |
+| ----- | -------------------------------- |
+| `alg` | Algorithm: `HS256`               |
+| `typ` | Type: `JWT`                      |
+| `iat` | Issued At: Current timestamp     |
+| `nbf` | Not Before: Current timestamp    |
+| `exp` | Expiration: 15 days from now     |
+| `jti` | JWT ID: Random unique identifier |
+
+#### Example
+
+```ts lineNumbers
+import { signJWS } from "@aura-stack/jose"
+
+const signed = await signJWS(
+  {
+    sub: "user-123",
+    email: "user@example.com",
+  },
+  process.env.JWT_SECRET!
+)
+
+// Result: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+---
+
+### `verifyJWS(token, secret, options)`
+
+Verifies a signed JWT and returns the payload if valid.
+
+#### Signature
+
+```ts lineNumbers
+function verifyJWS(token: string, secret: SecretInput, options?: JWTVerifyOptions): Promise<JWTPayload>
+```
+
+#### Parameters
+
+| Parameter | Type               | Description                                       |
+| --------- | ------------------ | ------------------------------------------------- |
+| `token`   | `string`           | The JWT string to be verified                     |
+| `secret`  | `SecretInput`      | Secret key for verifying the integrity of the JWT |
+| `options` | `JWTVerifyOptions` | Extra JWT verification options                    |
+
+#### Returns
+
+| Return               | Type                  | Description                      |
+| -------------------- | --------------------- | -------------------------------- |
+| Verified JWT payload | `Promise<JWTPayload>` | The verified JWT payload content |
+
+**Security**
+
+- Rejects tokens using the "none" algorithm (unsecured JWTs)
+- Validates signature integrity
+- Checks expiration automatically
+
+#### Example
+
+```ts lineNumbers
+import { verifyJWS } from "@aura-stack/jose"
+
+try {
+  const payload = await verifyJWS(signed, process.env.JWT_SECRET!)
+  console.log("Valid token:", payload)
+} catch (error) {
+  console.error("Invalid token:", error.message)
+}
+```
+
+**Using extra JWT verification options**
+
+```ts lineNumbers
+import { verifyJWS } from "@aura-stack/jose"
+
+try {
+  const payload = await verifyJWS(signed, process.env.JWT_SECRET!, {
+    algorithms: ["HS256"],
+    audience: "audience.value",
+  })
+  console.log("Valid token:", payload)
+} catch (error) {
+  console.error("Invalid token:", error.message)
+}
+```
+
+---
+
+### `createJWS(secret)`
+
+Creates a JWS handler with bound signing and verification methods.
+
+#### Signature
+
+```ts lineNumbers
+function createJWS(secret: SecretInput): {
+  signJWS: (payload: JWTPayload) => Promise<string>
+  verifyJWS: (token: string, options?: JWTVerifyOptions) => Promise<JWTPayload>
+}
+```
+
+#### Parameters
+
+| Parameter | Type          | Description                                  |
+| --------- | ------------- | -------------------------------------------- |
+| `secret`  | `SecretInput` | Secret key for signing and verifying the JWT |
+
+#### Returns
+
+| Return    | Type                                                                 | Description                                                                        |
+| --------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| signJWS   | `(payload: JWTPayload) => Promise<string>`                           | Function to sign a JWT using HS256 algorithm                                       |
+| verifyJWS | `(token: string, options?: JWTVerifyOptions) => Promise<JWTPayload>` | Function to verify the signature and JWT integrity signed using `signJWS` function |
+
+#### Example
+
+```ts lineNumbers
+import { createJWS } from "@aura-stack/jose"
+
+const jws = createJWS(process.env.JWT_SECRET!)
+
+const signed = await jws.signJWS({ sub: "user-123" })
+const payload = await jws.verifyJWS(signed)
+```
+
+---
+
+## Encryption API (JWE)
+
+### `encryptJWE(payload, secret, options)`
+
+Encrypts a JWT string using A256GCM encryption.
+
+#### Signature
+
+```ts lineNumbers
+function encryptJWE(payload: JWTPayload, secret: SecretInput, options?: EncryptOptions): Promise<string>
+```
+
+#### Parameters
+
+| Parameter | Type             | Description                                      |
+| --------- | ---------------- | ------------------------------------------------ |
+| `payload` | `JWTPayload`     | The JWTPayload data to be encrypted              |
+| `secret`  | `SecretInput`    | Secret key for encrypting and decrypting         |
+| `options` | `EncryptOptions` | Encryption options to set `nbf` and `exp` claims |
+
+#### Returns
+
+| Return    | Type              | Description             |
+| --------- | ----------------- | ----------------------- |
+| Encrypted | `Promise<string>` | An encrypted JWT string |
+
+**Generated Claims**
+
+| Claim | Description                          |
+| ----- | ------------------------------------ |
+| `alg` | Algorithm: `dir` (direct encryption) |
+| `enc` | Encryption: `A256GCM`                |
+| `typ` | Type: `JWT`                          |
+| `cty` | Content Type: `JWT`                  |
+| `iat` | Issued At: Current timestamp         |
+| `nbf` | Not Before: Current timestamp        |
+| `exp` | Expiration: 15 days from now         |
+| `jti` | JWT ID: Random unique identifier     |
+
+#### Example
+
+```ts lineNumbers
+import { encryptJWE } from "@aura-stack/jose"
+
+const encrypted = await encryptJWE({ sub: "user-123" }, process.env.ENCRYPTION_KEY!)
+```
+
+**Using encryption options**
+
+```ts lineNumbers
+import { encryptJWE } from "@aura-stack/jose"
+
+const encrypted = await encryptJWE({ sub: "user-123" }, process.env.ENCRYPTION_KEY!, {
+  nbf: Math.floor(Date.now() / 1000) + 60,
+  exp: Math.floor(Date.now() / 1000) + 60 * 60 * 5,
+})
+```
+
+---
+
+### `decryptJWE(token, secret, options)`
+
+Decrypts an encrypted JWT and returns the original payload.
+
+#### Signature
+
+```ts lineNumbers
+function decryptJWE(token: string, secret: SecretInput, options?: JWTDecryptOptions): Promise<JWTPayload>
+```
+
+#### Parameters
+
+| Parameter | Type                | Description                                |
+| --------- | ------------------- | ------------------------------------------ |
+| `token`   | `string`            | The string data to be decrypted            |
+| `secret`  | `SecretInput`       | Secret key for decrypting the token string |
+| `options` | `JWTDecryptOptions` | Extra JWE decryption options               |
+
+#### Returns
+
+| Return    | Type                  | Description                |
+| --------- | --------------------- | -------------------------- |
+| Decrypted | `Promise<JWTPayload>` | A decrypted payload object |
+
+#### Example
+
+```ts lineNumbers
+import { decryptJWE } from "@aura-stack/jose"
+
+try {
+  const decrypted = await decryptJWE(encrypted, process.env.ENCRYPTION_KEY!)
+  console.log("Decrypted JWT:", decrypted)
+} catch (error) {
+  console.error("Decryption failed:", error.message)
+}
+```
+
+---
+
+### `createJWE(secret)`
+
+Creates a JWE handler with bound encryption and decryption methods.
+
+#### Signature
+
+```ts lineNumbers
+function createJWE(secret: SecretInput): {
+  encryptJWE: (payload: JWTPayload, options?: EncryptOptions) => Promise<string>
+  decryptJWE: (token: string, options?: JWTDecryptOptions) => Promise<JWTPayload>
+}
+```
+
+#### Parameters
+
+| Parameter | Type          | Description                              |
+| --------- | ------------- | ---------------------------------------- |
+| `secret`  | `SecretInput` | Secret key for encrypting and decrypting |
+
+#### Returns
+
+| Return     | Type                                                                  | Description                                                      |
+| ---------- | --------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| encryptJWE | `(payload: JWTPayload, options?: EncryptOptions) => Promise<string>`  | Function to encrypt a payload using A256GCM algorithm            |
+| decryptJWE | `(token: string, options?: JWTDecryptOptions) => Promise<JWTPayload>` | Function to decrypt structural data encrypted using `encryptJWE` |
+
+#### Example
+
+```ts lineNumbers
+import { createJWE } from "@aura-stack/jose"
+
+const jwe = createJWE(process.env.ENCRYPTION_KEY!)
+
+const encrypted = await jwe.encryptJWE({ sub: "user-123" })
+const decrypted = await jwe.decryptJWE(encrypted)
+```
+
+---
+
+## Compact Encryption API (Compact JWE)
+
+For use cases where you need to encrypt and decrypt arbitrary strings rather than structured JSON objects, use the compact JWE APIs introduced in `@aura-stack/jose`.
+
+### `compactEncryptJWE(payload, secret, options)`
+
+Encrypts an arbitrary string payload using compact JWE serialization.
+
+#### Signature
+
+```ts lineNumbers
+function compactEncryptJWE(payload: string, secret: SecretInput, options?: EncryptOptions): Promise<string>
+```
+
+### `decryptCompactJWE(token, secret, options)`
+
+Decrypts a compact JWE string and returns the original string payload.
+
+#### Signature
+
+```ts lineNumbers
+function decryptCompactJWE(token: string, secret: SecretInput, options?: JWTDecryptOptions): Promise<string>
+```
+
+### `createCompactJWE(secret)`
+
+Creates a combined handler for compact encryption and decryption.
+
+#### Signature
+
+```ts lineNumbers
+function createCompactJWE(secret: SecretInput): {
+  compactEncryptJWE: (payload: string, options?: EncryptOptions) => Promise<string>
+  decryptCompactJWE: (token: string, options?: JWTDecryptOptions) => Promise<string>
+}
+```
+
+---
+
+## Key Derivation
+
+### `deriveKey(secret, salt, info, len)`
+
+Create a Key derivation which implements HKDF
+
+#### Signature
+
+```ts lineNumbers
+import type { SecretInput } from "@aura-stack/jose"
+
+function deriveKey(
+  secret: SecretInput,
+  salt: BinaryLike,
+  info: string,
+  length: number
+): {
+  key: ArrayBuffer
+  deriveKey: Buffer<ArrayBuffer>
+}
+```
+
+#### Parameters
+
+| Parameter | Type          | Description                        |
+| --------- | ------------- | ---------------------------------- |
+| `secret`  | `SecretInput` | Secret key for HKDF key derivation |
+| `salt`    | `BinaryLike`  | The salt value                     |
+| `info`    | `string`      | Additional information value       |
+| `length`  | `number`      | The length of the key to generate  |
+
+#### Returns
+
+| Return    | Type                  | Description                    |
+| --------- | --------------------- | ------------------------------ |
+| key       | `ArrayBuffer`         | The derived key as ArrayBuffer |
+| deriveKey | `Buffer<ArrayBuffer>` | The derived key as Buffer type |
+
+#### Example
+
+```ts lineNumbers
+import { deriveKey } from "@aura-stack/jose/hkdf"
+
+const secret = "secret-key"
+const salt = "salt"
+
+const sessionKey = deriveKey(secret, salt, "session key", 32)
+const databaseKey = deriveKey(secret, salt, "database key", 64)
+```
+
+### `createDeriveKey(secret, salt, info, len)`
+
+Creates a key derivation function that includes verification for the key length. It implements the `deriveKey` function.
+
+#### Signature
+
+```ts lineNumbers
+import type { SecretInput } from "@aura-stack/jose"
+
+function createDeriveKey(
+  secret: SecretInput,
+  salt?: BinaryLike
+  info?: string,
+  len?: number
+): {
+  key: ArrayBuffer
+  deriveKey: Buffer<ArrayBuffer>
+}
+```
+
+#### Parameters
+
+| Parameter | Type          | Description                        |
+| --------- | ------------- | ---------------------------------- |
+| `secret`  | `SecretInput` | Secret key for HKDF key derivation |
+| `salt`    | `BinaryLike`  | The salt value                     |
+| `info`    | `string`      | Additional information value       |
+| `length`  | `number`      | The length of the key to generate  |
+
+#### Returns
+
+| Return    | Type                  | Description                    |
+| --------- | --------------------- | ------------------------------ |
+| key       | `ArrayBuffer`         | The derived key as ArrayBuffer |
+| deriveKey | `Buffer<ArrayBuffer>` | The derived key as Buffer type |
+
+#### Example
+
+```ts lineNumbers
+import { createDeriveKey } from "@aura-stack/jose/hkdf"
+
+const secret = "secret-key"
+const salt = "salt"
+
+const sessionKey = createDeriveKey(secret, salt, "session key", 32)
+const databaseKey = createDeriveKey(secret, salt, "database key", 64)
+```
+
+---
+
+## Types
+
+### `SecretInput`
+
+Flexible secret key input type.
+
+```ts lineNumbers
+type SecretInput = KeyObject | Uint8Array | string
+```
+
+Accepts:
+
+- `KeyObject` - Node.js crypto key
+- `string` - String secret (converted internally)
+- `Uint8Array` - Binary secret
+
+### `JWTPayload`
+
+Standard JWT payload with registered claims.
+
+```ts lineNumbers
+interface JWTPayload {
+  iss?: string // Issuer
+  sub?: string // Subject (user ID)
+  aud?: string | string[] // Audience
+  exp?: number // Expiration time
+  nbf?: number // Not before
+  iat?: number // Issued at
+  jti?: string // JWT ID
+  [key: string]: any // Custom claims
+}
+```
+
+## Security Best Practices
+
+<Callout type="warn">**Critical Security Guidelines**</Callout>
+
+<Steps>
+
+<Step>
+
+### Strong Secrets
+
+Always use cryptographically secure random strings:
+
+```ts lineNumbers
+// ✅ Good: Strong random secret
+import crypto from "node:crypto"
+const secret = crypto.randomBytes(32).toString("hex")
+
+// ❌ Bad: Weak predictable secret
+const secret = "password123"
+```
+
+</Step>
+
+<Step>
+
+### Environment Variables
+
+Never hardcode secrets:
+
+```ts lineNumbers
+// ✅ Good: Environment variable
+const secret = process.env.JWT_SECRET
+
+// ❌ Bad: Hardcoded secret
+const secret = "my-secret-key-12345"
+```
+
+</Step>
+
+<Step>
+
+### Token Expiration
+
+Tokens automatically expire after 15 days. For custom expiration, use the underlying `jose` library directly.
+
+</Step>
+
+<Step>
+
+### HTTPS Only
+
+Always transmit JWTs over HTTPS in production to prevent token interception.
+
+</Step>
+
+<Step>
+
+### Token Storage
+
+- **Backend**: Store in secure HTTP-only cookies
+- **Frontend**: Avoid `localStorage` - use cookies or session storage with caution
+
+</Step>
+
+</Steps>
+
+---
+
+## Usage
+
+### With Session Management
+
+```ts lineNumbers
+import { encodeJWT, decodeJWT } from "@aura-stack/jose"
+
+// Create session token
+async function createSession(userId: string) {
+  return await encodeJWT(
+    {
+      sub: userId,
+      type: "session",
+      createdAt: Date.now(),
+    },
+    process.env.SESSION_SECRET!
+  )
+}
+
+// Validate session token
+async function validateSession(token: string) {
+  try {
+    const payload = await decodeJWT(token, process.env.SESSION_SECRET!)
+
+    if (payload.type !== "session") {
+      throw new Error("Invalid token type")
+    }
+
+    return payload.sub // Return user ID
+  } catch {
+    return null // Invalid or expired
+  }
+}
+
+// Usage
+const token = await createSession("user-123")
+const userId = await validateSession(token)
+
+if (userId) {
+  console.log("Valid session for user:", userId)
+}
+```
+
+## Underlying Library
+
+This package is built on top of [`jose`](https://github.com/panva/jose) - a robust implementation of JOSE standards. For advanced use cases, you can access the underlying library directly via the `@aura-stack/jose/jose` entry point.
+
+```ts lineNumbers
+import * as jose from "@aura-stack/jose/jose"
+
+// Full access to jose library
+const key = await jose.generateSecret("HS256")
+const jwt = await new jose.SignJWT({ foo: "bar" }).setProtectedHeader({ alg: "HS256" }).sign(key)
+```

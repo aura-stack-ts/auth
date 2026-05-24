@@ -1,0 +1,163 @@
+---
+title: Installation
+description: This guide walks you through installing Aura Auth in your project and setting up the initial configuration.
+---
+
+<Steps>
+
+<Step>
+
+### Install the Package
+
+Aura Auth packages are distributed via [npmjs](https://www.npmjs.com/), [jsr.io](https://jsr.io/), and [jsdelivr](https://www.jsdelivr.com/) CDN registries. You could install the package in any JavaScript project.
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Project Structure
+
+<Tabs items={["Standard Structure", "Cloudflare Workers", "Supabase Edge Functions", "Vercel Edge Functions"]}>
+
+<Tab value="Standard Structure">
+
+Create a shared `auth.ts` file for server configuration and an optional `auth-client.ts` for browser client configuration inside the `src/lib` folder.
+
+```files
+auth-app
+├── src
+│   ├── lib
+│   │   ├── auth.ts
+│   │   └── auth-client.ts
+└── .env.local
+```
+
+</Tab>
+
+<Tab value="Cloudflare Workers">
+
+Create a shared `auth.ts` file for server configuration inside the `src/lib` folder.
+
+```files
+cloudflare-app
+├── src
+│   ├── lib
+│   │   └── auth.ts
+│   └── index.ts
+├── .env.local
+└── wrangler.jsonc
+```
+
+</Tab>
+
+<Tab value="Supabase Edge Functions">
+
+Create a shared `auth.ts` file for server configuration inside the `functions/_shared` folder. The folders that start with an underscore `_` are not treated as Edge Function routes and are ideal for shared code.
+
+```files
+supabase-app
+├── functions
+│   ├── _shared
+│   │   └── auth.ts
+│   ├── auth
+│   │   ├── deno.json
+│   │   └── index.ts
+├── config.toml
+└── .env.local
+```
+
+</Tab>
+
+<Tab value="Vercel Edge Functions">
+
+Create a shared `_auth.ts` file for server configuration inside the `api` folder. The files that start with an underscore `_` are not treated as API routes and are ideal for shared code.
+
+```files
+vercel-app
+├── api
+│   ├── auth
+│   │   └── index.ts
+│   ├── _auth.ts
+│   └── index.ts
+├── .env.local
+└── vercel.json
+```
+
+</Tab>
+
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Create a `.env` or `.env.local` file at the root of your project to store secrets securely.
+
+<Callout type="warn">Never commit your `.env` and `.env.local` files. Always use a secret manager in production.</Callout>
+
+#### Secret Key
+
+A secret value used to sign and encrypt sessions and CSRF tokens. This should be a secure random value of at least 32 bytes (256 bits) in length, encoded in base64 or hex format.
+
+Use `openssl rand -base64 32` or `openssl rand -hex 32` to generate a secure random value.
+
+```bash title=".env"
+AURA_AUTH_SECRET=
+```
+
+#### Salting Key
+
+A random value used for salting the derivation keys for signing and encryption. This should also be a secure random value of at least 32 bytes (256 bits) in length, encoded in base64 or hex format.
+
+Use `openssl rand -base64 32` or `openssl rand -hex 32` to generate a secure random value.
+
+```bash title=".env"
+AURA_AUTH_SALT=
+```
+
+#### Base URL
+
+The base URL of your application, used to construct the full URLs.
+
+```bash title=".env"
+AURA_AUTH_BASE_URL=http://localhost:3000
+```
+
+</Step>
+
+<Step>
+
+### Set up TypeScript
+
+Aura Auth is built in TypeScript and provides first-class TypeScript support. If you're using TypeScript, make sure to configure your `tsconfig.json` properly.
+
+```json
+{
+  "compilerOptions": {
+    /**
+     * Recommend enabling strict mode.
+     */
+    "strict": true,
+    "skipLibCheck": true,
+    /**
+     * Aliases
+     */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+```
+
+For a complete Typescript set up guide, see the [TypeScript Configuration](/docs/concepts/typescript) documentation.
+
+</Step>
+
+</Steps>

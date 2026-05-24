@@ -1,0 +1,160 @@
+---
+title: Elysia
+description: Integrate Aura Auth and Elysia
+---
+
+This guide walks you through to implement Aura Auth in a Elysia application to a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Elysia application.
+
+<Callout type="info">
+  Aura Auth is working on developing a Elysia-specific package that will provide additional utilities for Elysia applications. For
+  now, the core package can be used to implement authentication in Elysia with the patterns outlined in this guide. Stay tuned for
+  updates on the [Elysia package!](https://github.com/aura-stack-ts/auth/tree/master/packages/elysia)
+</Callout>
+
+---
+
+<Steps>
+
+<Step>
+
+## Setup Aura
+
+### Create an Auth Instance
+
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
+
+```ts title="src/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+
+export const { handlers, jose, api } = auth
+```
+
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Mount auth handlers to process all traffic directed to the `/api/auth/*` path in your Elysia app. Elysia passes standard Web `Request` objects, so the shared handler can be called directly.
+
+```ts title="src/index.ts" lineNumbers
+import { Elysia } from "elysia"
+import { auth } from "@/lib/auth"
+
+const app = new Elysia()
+
+app.all("/api/auth/*", (ctx) => {
+  return auth.handlers.ALL(ctx.request)
+})
+
+app.listen(3000)
+```
+
+</Step>
+
+<Step>
+
+## Usage
+
+Use a plugin when you want session data to be available across multiple protected routes. That keeps your auth checks consistent and avoids repeating the same session lookup in every handler.
+
+### Plugin
+
+```ts title="src/plugins/with-auth.ts" lineNumbers
+import { Elysia } from "elysia"
+import { auth } from "@/lib/auth"
+
+export const withAuthPlugin = new Elysia({ name: "with-auth" })
+  .resolve({ as: "scoped" }, async (ctx) => {
+    try {
+      const session = await auth.api.getSession({
+        headers: ctx.request.headers,
+      })
+      if (!session.authenticated) {
+        return { session: null }
+      }
+      return { session }
+    } catch {
+      return { session: null }
+    }
+  })
+  .get("/api/auth/me", ({ session }) => session)
+```
+
+The plugin returns `session: null` when the request is unauthenticated, which keeps downstream routes simple and predictable.
+
+</Step>
+
+<Step>
+
+### Get Session
+
+Use the plugin in your app and protect routes by checking for an active session before returning private data.
+
+```ts title="src/index.ts" lineNumbers
+import { Elysia } from "elysia"
+import { auth } from "@/lib/auth"
+import { withAuthPlugin } from "@/plugins/with-auth"
+
+const app = new Elysia()
+
+app.all("/api/auth/*", (ctx) => {
+  return auth.handlers.ALL(ctx.request)
+})
+
+app.use(withAuthPlugin).get("/api/protected", (ctx) => {
+  if (!ctx.session?.authenticated) {
+    return ctx.json(
+      {
+        error: "Unauthorized",
+        message: "Active session required.",
+      },
+      { status: 401 }
+    )
+  }
+
+  return ctx.json({
+    message: "You have access to this protected resource.",
+    session: ctx.session,
+  })
+})
+
+app.listen(3000)
+```
+
+This pattern works well for dashboard pages, account APIs, and any route that should never return private data without a valid session.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with the route you mount**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Use the same auth instance everywhere**. Import `src/lib/auth.ts` from the server entry point and from plugins so there is one source of truth.
+- **Return `session: null` for anonymous requests**. That keeps downstream route handlers simple and avoids repeated null checks.
+- **Protect private routes before sending the response**. Check the session first, then return the private payload only when authentication succeeds.
+
+---
+
+## Resources
+
+- [Elysia Documentation](https://elysiajs.com/)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Elysia Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/elysia)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/api-reference/options)
+- [TypeScript Guide](/docs/concepts/typescript)

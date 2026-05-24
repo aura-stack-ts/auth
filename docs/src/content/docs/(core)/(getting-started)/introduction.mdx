@@ -1,0 +1,56 @@
+---
+title: Introduction
+description: Aura Auth is a modern, type-safe authentication for TypeScript — built for security, extensibility, and developer experience.
+---
+
+import { Fingerprint, Sparkles, Blocks, ShieldCheck, Layers, Globe } from "lucide-react"
+
+**Aura Auth** is an open-source authentication and authorization library for modern TypeScript applications built on web standards like `Web Standards`, `Crypto` and `OAuth 2.0`, inspired by [Auth.js](https://authjs.dev/); it delivers a **type-safe**, **framework-agnostic**, **runtime-agnostic** and **modular** API to implement secure authentication flows with first-class support for OAuth 2.0 and focuses on three core pillars: **Security** (strong, opinionated defaults), **Developer Experience** (simple ergonomics, complete TypeScript support), and **Modularity** (use only the features you need).
+
+## Features
+
+<Cards>
+  <Card title="Framework-agnostic" href="/docs/guides/integration" icon={<Layers />} className="[&>div>svg]:size-6">
+    Seamlessly integrate with any web framework (Next.js, Elysia, Cloudflare Workers, etc.).
+  </Card>
+  <Card title="Runtime-agnostic" href="/docs/concepts/architecture" icon={<Globe />} className="[&>div>svg]:size-6">
+    Run on any runtime using Web Standards APIs (Request, Response, Web Crypto).
+  </Card>
+  <Card title="OAuth 2.0" href="/docs/concepts/oauth" icon={<Fingerprint />} className="[&>div>svg]:size-6">
+    First-class support for OAuth 2.0 flows (Authorization Code with PKCE, Device Authorization).
+  </Card>
+  <Card title="Type-first API" href="/docs/concepts/typescript" icon={<Sparkles />} className="[&>div>svg]:size-6">
+    Written entirely in TypeScript with strong types, full IntelliSense, and predictable ergonomics.
+  </Card>
+  <Card title="Composable" href="/docs/api-reference/core#create-auth" icon={<Blocks />} className="[&>div>svg]:size-6">
+    Built from small, focused packages — use only what you need (auth handlers, JOSE helpers, cookie utilities).
+  </Card>
+  <Card title="Secure by default" href="/docs/security/security-model" icon={<ShieldCheck />} className="[&>div>svg]:size-6">
+    Strong defaults for PKCE, state validation, secure cookies, redirect validation, and CSRF protection.
+  </Card>
+</Cards>
+
+## Official OAuth Providers
+
+<Cards>
+  <Card title="GitHub" href="/docs/oauth/github">
+    Github OAuth Provider
+  </Card>
+  <Card title="Bitbucket" href="/docs/oauth/bitbucket">
+    Bitbucket OAuth Provider
+  </Card>
+  <Card title="Figma" href="/docs/oauth/figma">
+    Figma OAuth Provider
+  </Card>
+  <Card title="Discord" href="/docs/oauth/discord">
+    Discord OAuth Provider
+  </Card>
+  <Card title="X (Twitter)" href="/docs/oauth/x">
+    X (Twitter) OAuth Provider
+  </Card>
+  <Card title="Spotify" href="/docs/oauth/spotify">
+    Spotify OAuth Provider
+  </Card>
+</Cards>
+
+Additional providers such as **GitLab**, **Mailchimp**, **Notion**, **Pinterest**, **Strava**, **Atlassian** and list of 15+ providers. See the [OAuth Providers](/docs/oauth) section for the full list.
