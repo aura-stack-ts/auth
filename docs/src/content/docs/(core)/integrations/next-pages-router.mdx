@@ -3,30 +3,14 @@ title: Next.js (Pages Router)
 description: Build your first authentication flow with Aura Auth and Next.js Pages Router
 ---
 
-This guide walks you through creating a complete authentication flow using **Aura Auth** with the Next.js Pages Router, API Routes, and Server-Side Rendering.
+This guide walks you through to implement Aura Auth in a Next.js application using the Pages Router with a complete support for Server-Side Rendering (SSR) and Client-Side Rendering (CSR).
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Next.js Pages Router application.
 
-## Overview
-
-Aura Auth and Next.js (Pages Router) both use Node.js HTTP primitives (`IncomingMessage` and `ServerResponse`) under the hood. That means Aura Auth needs a small adapter in Pages API Routes, which is included in the example below.
-
-Before continuing, complete the installation and initial setup:
-
-- [Quick Start Guide](/docs/quick-start) to create your Aura Auth instance
-- [TypeScript Configuration](/docs/configuration/typescript) for TypeScript-specific setup
-- [Next.js Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/nextjs/pages-router) for a fully working example
-
-Then use this guide to integrate Aura Auth with a Next.js application using best practices.
-
----
-
-## What You'll Build
-
-You will create a small Next.js Pages Router setup with:
-
-- a shared `src/lib/auth.ts` server configuration
-- a custom `pages/api/auth/[...aura].ts` adapter that forwards requests to Aura Auth handlers
-- an optional `src/lib/auth-client.ts` browser client
-- server and client examples for session lookup, sign-in, and sign-out
+<Callout type="info">
+  Aura Auth is working on developing a Next.js-specific package that will provide additional utilities and hooks for Next.js
+  applications. For now, the core package can be used to implement authentication in Next.js with the patterns outlined in this
+  guide. Stay tuned for updates on the [Next.js package!](https://github.com/aura-stack-ts/auth/tree/master/packages/next)
+</Callout>
 
 ---
 
@@ -34,48 +18,13 @@ You will create a small Next.js Pages Router setup with:
 
 <Step>
 
-## Project Structure
-
-```files
-next-app
-├── src
-│   ├── pages
-│   │   └── api
-│   │       └── auth
-│   │           └── [...aura].ts
-│   ├── lib
-│   │   ├── auth.ts
-│   │   └── auth-client.ts
-└── .env.local
-```
-
-</Step>
-
-<Step>
-
-## Environment Setup
-
-Create a `.env.local` file at the root of your project to store secrets securely.
-
-```bash title=".env.local"
-# 32-bytes (256-bit) secret used to sign/encrypt sessions. Use a secure random value.
-AURA_AUTH_SECRET="base64-or-hex-32-bytes"
-AURA_AUTH_SALT="base64-or-hex-32-bytes"
-```
-
-<Callout type="warning">Never commit your `.env.local` file to version control. Use a secret manager in production.</Callout>
-
-</Step>
-
-<Step>
-
 ## Setup Aura Auth
 
-### HTTP Handlers
+### Create an Auth Instance
 
-Create an `auth.ts` file in `src/lib/` to configure authentication. This file is the shared source of truth for your server handlers, the client helper, and any server-side session utilities.
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
 
-```ts title="lib/auth.ts"
+```ts title="src/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -87,13 +36,16 @@ export const auth = createAuth({
 export const { handlers, api } = auth
 ```
 
-`basePath` must match the route mounted in `pages/api/auth/[...aura].ts`. `baseURL` should point to your local development server or deployed application URL.
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
 
-### Client API
+### Create an Auth Client Instance
 
-To use Aura Auth's client-side features, create an `auth-client.ts` file to initialize the client. This is the browser-facing helper for sign-in buttons, sign-out actions, and session-aware UI.
+Create an `auth-client.ts` file in `src/lib` directory to enable client-side features.
 
-```ts title="lib/auth-client.ts"
+```ts title="src/lib/auth-client.ts" lineNumbers
 import { createAuthClient } from "@aura-stack/auth/client"
 
 export const authClient = createAuthClient({
@@ -103,16 +55,16 @@ export const authClient = createAuthClient({
 ```
 
 <Callout type="warning">
-  The `baseURL` should point to your server's URL, and `basePath` MUST match the path where your auth routes are mounted.
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL. Both options should be the same as the ones used in your `auth.ts` configuration
+  to ensure client and server instances are aligned.
 </Callout>
-
-When you deploy, keep the same `basePath` but update `baseURL` to your production domain or environment-specific public URL.
 
 ## Mount HTTP Handlers
 
-Create a catch-all route to handle all authentication endpoints dynamically. Next.js Pages Router uses standard Node.js `IncomingMessage` and `ServerResponse` objects, so the handler below translates them into a standard Web `Request` before calling Aura Auth.
+Create a catch-all route in `pages/api/auth/[...aura]/route.ts` to handle all authentication endpoints dynamically. The `/api/auth` path should match with the Pages Router Structure and `basePath` defined in your Auth configuration.
 
-```ts title="pages/api/auth/[...aura].ts"
+```ts title="src/pages/api/auth/[...aura].ts"
 import { handlers } from "@/lib/auth"
 import type { NextApiRequest, NextApiResponse } from "next"
 
@@ -182,21 +134,17 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 export default handler
 ```
 
-This route should be the only file under `/api/auth/*`. It can handle all auth methods, including sign-in, sign-out, callback, and session checks.
-
 </Step>
 
 <Step>
 
-## Usage
-
-### Server Side Rendering (SSR)
+## Server Side Rendering (SSR)
 
 Use server-side rendering when you want to protect a page before any UI is sent to the browser. This is the safest pattern for dashboard pages, account settings, and other private routes.
 
-#### Get Session
+### Get Session
 
-```tsx title="pages/dashboard.tsx" lineNumbers
+```tsx title="src/pages/dashboard.tsx" lineNumbers
 import { api } from "@/lib/auth"
 import type { Session } from "@aura-stack/auth"
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
@@ -232,13 +180,13 @@ The server-side session lookup is the right place to redirect unauthenticated us
 
 <Step>
 
-### Client Side Rendering (CSR)
+## Client Side Rendering (CSR)
 
 Use client-side rendering when you need interactive auth controls inside menus, modals, or components that cannot use `getServerSideProps`.
 
-#### Sign In
+### Sign In
 
-```tsx title="pages/login.tsx" lineNumbers
+```tsx title="src/pages/login.tsx" lineNumbers
 import { authClient } from "@/lib/auth-client"
 
 export default function LoginPage() {
@@ -263,9 +211,9 @@ export default function LoginPage() {
 
 If you do not want an automatic redirect, set `redirect: false` and handle the returned URL yourself.
 
-#### Get Session
+### Get Session
 
-```tsx title="components/user-profile.tsx" lineNumbers
+```tsx title="src/components/user-profile.tsx" lineNumbers
 import { useEffect, useState } from "react"
 import { authClient } from "@/lib/auth-client"
 
@@ -293,9 +241,9 @@ export const UserProfile = () => {
 
 This pattern works well for menus, avatars, and client-only widgets that need to show the current user after hydration.
 
-#### Sign Out
+### Sign Out
 
-```tsx title="components/sign-out-button.tsx" lineNumbers
+```tsx title="src/components/sign-out-button.tsx" lineNumbers
 import { authClient } from "@/lib/auth-client"
 
 export const SignOutButton = () => {
@@ -333,5 +281,5 @@ Client-side sign-out is best when the logout control lives inside a dropdown, to
 - [Aura Auth Documentation](/docs/quick-start)
 - [Next.js Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/nextjs/pages-router)
 - [Integration Guide](/docs/guides/integration)
-- [Configuration Reference](/docs/configuration/options)
-- [TypeScript Guide](/docs/configuration/typescript)
+- [Configuration Reference](/docs/api-reference/options)
+- [TypeScript Guide](/docs/concepts/typescript)

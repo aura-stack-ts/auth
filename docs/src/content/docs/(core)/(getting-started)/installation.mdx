@@ -36,6 +36,44 @@ auth-app
 
 <Step>
 
+### Environment setup
+
+Create a `.env` or `.env.local` file at the root of your project to store secrets securely.
+
+<Callout type="warn">Never commit your `.env` and `.env.local` files. Always use a secret manager in production.</Callout>
+
+#### Secret Key
+
+A secret value used to sign and encrypt sessions and CSRF tokens. This should be a secure random value of at least 32 bytes (256 bits) in length, encoded in base64 or hex format.
+
+Use `openssl rand -base64 32` or `openssl rand -hex 32` to generate a secure random value.
+
+```bash title=".env"
+AURA_AUTH_SECRET=
+```
+
+#### Salting Key
+
+A random value used for salting the derivation keys for signing and encryption. This should also be a secure random value of at least 32 bytes (256 bits) in length, encoded in base64 or hex format.
+
+Use `openssl rand -base64 32` or `openssl rand -hex 32` to generate a secure random value.
+
+```bash title=".env"
+AURA_AUTH_SALT=
+```
+
+#### Base URL
+
+The base URL of your application, used to construct the full URLs.
+
+```bash title=".env"
+AURA_AUTH_BASE_URL=http://localhost:3000
+```
+
+</Step>
+
+<Step>
+
 ### Set up TypeScript
 
 Aura Auth is built in TypeScript and provides first-class TypeScript support. If you're using TypeScript, make sure to configure your `tsconfig.json` properly.

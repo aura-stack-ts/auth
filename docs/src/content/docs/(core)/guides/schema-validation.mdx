@@ -3,7 +3,7 @@ title: Schema Validation
 description: Learn how to validate your authentication schema with Aura Auth's built-in validation utilities.
 ---
 
-For the type extension, Aura Auth provides the `identity.schema` configuration option. This allows you to define a custom validation schema for user identity data, ensuring that the data conforms to a specific structure and set of fields and this schema is used as `User` and `Session` types across the library. By default, Aura Auth accepts a flexible identity shape, but you can provide your own schema to enforce a specific structure and set of fields.
+Aura Auth provides the `identity.schema` configuration option for type extension. This allows you to define a custom validation schema for user identity data, ensuring that the data conforms to a specific structure and set of fields. The schema is used to derive the `User` and `Session` types across the library. By default, Aura Auth accepts a flexible identity shape, but you can provide your own schema to enforce a specific structure.
 
 ```ts title="lib/auth.ts" lineNumbers
 import { z } from "zod"

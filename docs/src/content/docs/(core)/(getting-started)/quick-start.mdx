@@ -128,11 +128,11 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location")
       if (location) {
-        res.setHeaders(response.headers)
+        response.headers.forEach((value, key) => res.setHeader(key, value))
         return res.redirect(response.status, location)
       }
     }
-    res.setHeaders(response.headers)
+    response.headers.forEach((value, key) => res.setHeader(key, value))
     const data = await response.json()
     return res.status(response.status).json(data)
   } catch {
@@ -196,21 +196,6 @@ export default defineEventHandler(async (event) => {
   const webRequest = toWebRequest(event)
   return await handlers.ALL(webRequest)
 })
-```
-
-</Tab>
-
-<Tab value="elysia">
-
-```ts title="src/index.ts" lineNumbers
-import { Elysia } from "elysia"
-import { toHandler } from "@/lib/auth"
-
-const app = new Elysia()
-
-app.all("/api/auth/*", toHandler)
-
-app.listen(3000)
 ```
 
 </Tab>
