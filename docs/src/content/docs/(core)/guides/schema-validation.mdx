@@ -1,0 +1,50 @@
+---
+title: Schema Validation
+description: Learn how to validate your authentication schema with Aura Auth's built-in validation utilities.
+---
+
+For the type extension, Aura Auth provides the `identity.schema` configuration option. This allows you to define a custom validation schema for user identity data, ensuring that the data conforms to a specific structure and set of fields and this schema is used as `User` and `Session` types across the library. By default, Aura Auth accepts a flexible identity shape, but you can provide your own schema to enforce a specific structure and set of fields.
+
+```ts title="lib/auth.ts" lineNumbers
+import { z } from "zod"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentity, type InferUser, type InferSession } from "@aura-stack/auth/identity"
+
+const schema = UserIdentity.extend({
+  role: z.enum(["admin", "user"]),
+  permissions: z.array(z.string()),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+
+export type User = InferUser<typeof auth>
+export type Session = InferSession<typeof auth>
+```
+
+**Or, if you prefer to infer the types from the schema:**
+
+```ts title="lib/auth.ts" lineNumbers
+import { z } from "zod"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentity, type UserFrom, type SessionFrom } from "@aura-stack/auth/identity"
+
+const schema = UserIdentity.extend({
+  role: z.enum(["admin", "user"]),
+  permissions: z.array(z.string()),
+})
+
+type User = UserFrom<typeof schema>
+type Session = SessionFrom<typeof schema>
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```

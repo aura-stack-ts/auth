@@ -1,0 +1,26 @@
+{
+  "title": "Examples",
+  "description": "Example implementations",
+  "root": true,
+  "pages": [
+    "index",
+    "---Fullstack---",
+    "astro",
+    "next-app-router",
+    "next-pages-router",
+    "nuxt",
+    "react-router",
+    "tanstack-start",
+    "---Backend---",
+    "bun",
+    "deno",
+    "elysia",
+    "express",
+    "hono",
+    "oak",
+    "---Edge---",
+    "cloudflare-workers",
+    "supabase-edge-functions",
+    "vercel-edge-functions"
+  ]
+}

@@ -1,0 +1,66 @@
+---
+title: Installation
+description: This guide walks you through installing Aura Auth in your project and setting up the initial configuration.
+---
+
+<Steps>
+
+<Step>
+
+### Install the Package
+
+Aura Auth packages are distributed via [npmjs](https://www.npmjs.com/), [jsr.io](https://jsr.io/), and [jsdelivr](https://www.jsdelivr.com/) CDN registries. You could install the package in any JavaScript project.
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Project Structure
+
+Create a shared `auth.ts` file for server configuration and an optional `auth-client.ts` for browser client configuration inside the `src/lib` folder.
+
+```files
+auth-app
+├── src
+│   ├── lib
+│   │   ├── auth.ts
+│   │   └── auth-client.ts
+└── .env.local
+```
+
+</Step>
+
+<Step>
+
+### Set up TypeScript
+
+Aura Auth is built in TypeScript and provides first-class TypeScript support. If you're using TypeScript, make sure to configure your `tsconfig.json` properly.
+
+```json
+{
+  "compilerOptions": {
+    /**
+     * Recommend enabling strict mode.
+     */
+    "strict": true,
+    "skipLibCheck": true,
+    /**
+     * Aliases
+     */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+```
+
+For a complete Typescript set up guide, see the [TypeScript Configuration](/docs/concepts/typescript) documentation.
+
+</Step>
+
+</Steps>
