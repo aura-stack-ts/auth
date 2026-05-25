@@ -14,7 +14,6 @@ import type {
     SignOutReturn,
     UpdateSessionReturn,
     SignInCredentialsReturn,
-    SignInAPIReturn,
     SignInCredentialsOptions,
 } from "@/@types/index.ts"
 
@@ -73,7 +72,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                     redirect: false,
                 },
             })
-            const json = (await response.json()) as SignInAPIReturn
+            const json = await response.json()
             if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.signInURL) {
                 window.location.assign(json.signInURL)
             }
