@@ -60,7 +60,7 @@ export const signInCredentials = async ({
             redirectURL: null,
             error: { code, message },
             toResponse: () => {
-                return Response.json({ success: false, redirectURL: null, error: { code, message } }, { headers, status: 401 })
+                return Response.json({ success: false, redirectURL: null }, { headers, status: 401 })
             },
         }
         if (error instanceof AuthValidationError) {
