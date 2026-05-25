@@ -223,10 +223,13 @@ describe("createAuthClient", () => {
 
     test("signInCredentials with invalid credentials", async () => {
         const post = vi.fn().mockResolvedValue(
-            createJSONResponse({
-                success: false,
-                redirectURL: null,
-            })
+            createJSONResponse(
+                {
+                    success: false,
+                    redirectURL: null,
+                },
+                401
+            )
         )
 
         createClientMock.mockReturnValue({
@@ -281,7 +284,7 @@ describe("createAuthClient", () => {
         })
 
         const client = createAuthClient({ baseURL: "https://example.com" })
-        const expires = new Date(Math.floor(Date.now() / 1000) + 60 * 60 * 1000)
+        const expires = new Date(Date.now() + 60 * 60 * 1000)
         const response = await client.updateSession({
             session: { user: { name: "Alice" }, expires: expires.toISOString() },
         })
