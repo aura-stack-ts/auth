@@ -2,7 +2,11 @@ import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { UserIdentityArkType, UserIdentityValibot } from "@/shared/identity.ts"
 import { jose, PATCH } from "@test/presets.ts"
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi, afterEach } from "vitest"
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe("updateSession action", () => {
     test("invalid session", async () => {
