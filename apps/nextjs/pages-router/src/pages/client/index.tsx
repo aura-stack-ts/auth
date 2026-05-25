@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/react"
+import { useAuth } from "@aura-stack/next/client"
 import { EditProfile } from "@/components/edit-profile"
 import type { SubmitEvent } from "react"
 
@@ -46,7 +46,7 @@ export default function AuthClientPage() {
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-white">Aura Auth + Next.js Client Components</h1>
                     <p className="mt-2 text-base text-white/70 max-w-3xl">
-                        Official Next.js demo to showcase @aura-stack/react authentication library with Client Side Rendering
+                        Official Next.js demo to showcase @aura-stack/next authentication library with Client Side Rendering
                         (CSR), for Server-Side Rendering (SSR) visit{" "}
                         <Link className="text-white underline underline-offset-2" href="/server">
                             here
@@ -137,6 +137,7 @@ export default function AuthClientPage() {
                                         type="text"
                                         id="username"
                                         name="username"
+                                        aria-label="Username"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -148,6 +149,7 @@ export default function AuthClientPage() {
                                         type="password"
                                         id="password"
                                         name="password"
+                                        aria-label="Password"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>

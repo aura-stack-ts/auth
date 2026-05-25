@@ -13,7 +13,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist src/_core src/oauth",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "find dist -type f -name \"*.cts\" -delete",
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js --from react"
   },
@@ -60,6 +60,11 @@
       "types": "./dist/_core/shared.d.ts",
       "import": "./dist/_core/shared.js",
       "require": "./dist/_core/shared.cjs"
+    },
+    "./pages": {
+      "types": "./dist/pages/index.d.ts",
+      "import": "./dist/pages/index.js",
+      "require": "./dist/pages/index.cjs"
     },
     "./types": "./dist/@types/index.d.ts"
   },
