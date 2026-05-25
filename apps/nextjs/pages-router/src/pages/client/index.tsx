@@ -46,7 +46,7 @@ export default function AuthClientPage() {
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-white">Aura Auth + Next.js Client Components</h1>
                     <p className="mt-2 text-base text-white/70 max-w-3xl">
-                        Official Next.js demo to showcase @aura-stack/react authentication library with Client Side Rendering
+                        Official Next.js demo to showcase @aura-stack/next authentication library with Client Side Rendering
                         (CSR), for Server-Side Rendering (SSR) visit{" "}
                         <Link className="text-white underline underline-offset-2" href="/server">
                             here
