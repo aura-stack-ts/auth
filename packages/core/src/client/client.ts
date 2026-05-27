@@ -73,7 +73,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                 },
             })
             const json = await response.json()
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.signInURL) {
+            if (options?.redirect === true && typeof window !== "undefined" && json?.signInURL) {
                 window.location.assign(json.signInURL)
             }
             return json as unknown as SignInReturn<Options>
@@ -94,7 +94,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                 },
             })
             const json = await response.json()
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as SignInCredentialsReturn<Options>
@@ -128,7 +128,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                 },
             })
             const json = await response.json()
-            if ((options.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+            if (options.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as UpdateSessionReturn<Options, DefaultUser>
@@ -155,7 +155,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                 },
             })
             const json = await response.json()
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as SignOutReturn<Options>

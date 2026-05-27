@@ -185,38 +185,38 @@ export const AuthClientPage = () => {
 }
 
 const Page = () => {
-    const [signInWithCredentials] = useSignInCredentials()
-    const [updateSession] = useUpdateSession()
+    const { signInCredentials, isPending } = useSignInCredentials()
+    const { updateSession } = useUpdateSession()
     const session = useSession()
 
     return (
         <div className="flex items-center justify-center mt-10 gap-x-10">
             <Button
-                onClick={() => {
-                    signInWithCredentials({
+                disabled={isPending}
+                onClick={async () => {
+                    await signInCredentials({
                         payload: {
                             username: "testing-v1",
                             password: "password",
                         },
-                        redirect: false,
                     })
                 }}
             >
-                Sign In v1
+                {isPending ? "Signing In..." : "Sign In v1"}
             </Button>
             <Button
+                disabled={isPending}
                 variant="outline"
-                onClick={() => {
-                    signInWithCredentials({
+                onClick={async () => {
+                    await signInCredentials({
                         payload: {
                             username: "testing-v10",
                             password: "password",
                         },
-                        redirect: false,
                     })
                 }}
             >
-                Sign In v10
+                {isPending ? "Signing In..." : "Sign In v10"}
             </Button>
             <Button
                 onClick={() => {

@@ -1,77 +1,114 @@
-import { use, useCallback, useRef } from "react"
-import { AuthContext } from "@/context.tsx"
+"use client"
+import { User } from "@aura-stack/auth"
+import { use, useCallback, useTransition } from "react"
 import type {
-    LiteralUnion,
     BuiltInOAuthProvider,
-    SignInOptions,
-    SignOutOptions,
-    User,
+    LiteralUnion,
     SignInCredentialsOptions,
+    SignInCredentialsReturn,
+    SignInOptions,
+    SignInReturn,
+    SignOutOptions,
+    SignOutReturn,
     UpdateSessionOptions,
+    UpdateSessionReturn,
 } from "@aura-stack/auth/types"
-import type { AuthReactContextValue } from "@/@types/types.ts"
+import { AuthContext, broadcast, Context } from "./context.tsx"
 
-export const useAuth = <DefaultUser extends User = User>(): AuthReactContextValue<DefaultUser> => {
+const useAssertContext = <DefaultUser extends User = User>() => {
     const ctx = use(AuthContext)
-    if (!ctx) {
-        throw new Error("useAuth must be used within an AuthProvider.")
+    if (ctx === undefined) {
+        throw new Error("useAuth must be used within an <AuthProvider>.")
     }
-    return ctx as AuthReactContextValue<DefaultUser>
+    return ctx as Context<DefaultUser>
 }
 
 export const useSession = <DefaultUser extends User = User>() => {
-    const { session, status } = useAuth<DefaultUser>()
+    const { session, status } = useAssertContext<DefaultUser>()
     return { session, status }
 }
 
-/**
- * OAuth sign-in. Pass default {@link SignInOptions} once; each call can still override
- * `redirect`, `redirectTo`, etc. Call-time options win on conflict.
- */
-export const useSignIn = <DefaultUser extends User = User>(defaultOptions?: SignInOptions) => {
-    const { signIn } = useAuth<DefaultUser>()
-    const defaultsRef = useRef(defaultOptions)
-    defaultsRef.current = defaultOptions
-    return useCallback(
-        (oauth: LiteralUnion<BuiltInOAuthProvider>, signInOptions?: SignInOptions) =>
-            signIn(oauth, { ...defaultsRef.current, ...signInOptions }),
-        [signIn]
+export const useSignIn = () => {
+    const { client } = useAssertContext()
+    const [isPending, startTransition] = useTransition()
+
+    const signIn = useCallback(
+        <Options extends SignInOptions>(
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: Options
+        ): Promise<SignInReturn<Options>> => {
+            return new Promise((resolve) => {
+                startTransition(async () => {
+                    const value = await client.signIn(oauth, options)
+                    broadcast({ type: "session:sync" })
+                    resolve(value)
+                })
+            })
+        },
+        [client]
     )
+
+    return { signIn, isPending } as const
 }
 
-/**
- * Credentials sign-in. Default {@link SignInOptions} are merged with per-invocation options.
- */
-export const useSignInCredentials = <DefaultUser extends User = User>(defaultOptions?: SignInOptions) => {
-    const { signInCredentials } = useAuth<DefaultUser>()
-    const defaultsRef = useRef(defaultOptions)
-    defaultsRef.current = defaultOptions
-    return useCallback(
-        (options: SignInCredentialsOptions) => signInCredentials({ ...defaultsRef.current, ...options }),
-        [signInCredentials]
+export const useSignInCredentials = () => {
+    const { client } = useAssertContext()
+    const [isPending, startTransition] = useTransition()
+
+    const signInCredentials = useCallback(
+        <Options extends SignInCredentialsOptions>(options: Options): Promise<SignInCredentialsReturn<Options>> => {
+            return new Promise((resolve) => {
+                startTransition(async () => {
+                    const value = await client.signInCredentials(options)
+                    broadcast({ type: "session:sync" })
+                    resolve(value)
+                })
+            })
+        },
+        [client]
     )
+
+    return { signInCredentials, isPending } as const
 }
 
-/**
- * Sign-out. Default {@link SignOutOptions} (`redirect`, `redirectTo`, …) merge with each call.
- */
-export const useSignOut = <DefaultUser extends User = User>(defaultOptions?: SignOutOptions) => {
-    const { signOut } = useAuth<DefaultUser>()
-    const defaultsRef = useRef(defaultOptions)
-    defaultsRef.current = defaultOptions
-    return useCallback((signOutOptions?: SignOutOptions) => signOut({ ...defaultsRef.current, ...signOutOptions }), [signOut])
+export const useUpdateSession = <DefaultUser extends User = User>() => {
+    const [isPending, startTransition] = useTransition()
+    const { client } = useAssertContext<DefaultUser>()
+
+    const updateSession = useCallback(
+        <Options extends UpdateSessionOptions<DefaultUser>>(
+            options: Options
+        ): Promise<UpdateSessionReturn<Options, DefaultUser>> => {
+            return new Promise((resolve) => {
+                startTransition(async () => {
+                    const updated = await client.updateSession<Options>(options)
+                    broadcast({ type: "session:update", payload: (updated as any).session })
+                    resolve(updated)
+                })
+            })
+        },
+        [client]
+    )
+
+    return { updateSession, isPending } as const
 }
 
-/**
- * Patch session user/expiry. Default {`@link` UpdateSessionOptions} are merged with per-invocation options
- * (e.g. `redirect: false` to avoid a follow-up redirect and trigger a context refresh instead).
- */
-export const useUpdateSession = <DefaultUser extends User = User>(defaultOptions?: UpdateSessionOptions<DefaultUser>) => {
-    const { updateSession } = useAuth<DefaultUser>()
-    const defaultsRef = useRef(defaultOptions)
-    defaultsRef.current = defaultOptions
-    return useCallback(
-        (options: UpdateSessionOptions<DefaultUser>) => updateSession({ ...defaultsRef.current, ...options }),
-        [updateSession]
+export const useSignOut = () => {
+    const [isPending, startTransition] = useTransition()
+    const { client } = useAssertContext()
+
+    const signOut = useCallback(
+        <Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>> => {
+            return new Promise((resolve) => {
+                startTransition(async () => {
+                    const value = await client.signOut(options)
+                    broadcast({ type: "session:clear" })
+                    resolve(value)
+                })
+            })
+        },
+        [client]
     )
+
+    return { signOut, isPending } as const
 }

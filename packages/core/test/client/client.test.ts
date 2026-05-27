@@ -170,6 +170,29 @@ describe("createAuthClient", () => {
         expect(response).toEqual({ signInURL: "https://example.com/oauth" })
     })
 
+    test("signIn with redirect option", async () => {
+        vi.stubGlobal("window", { location: { assign: vi.fn() } })
+
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ signInURL: "https://example.com/oauth" }))
+
+        createClientMock.mockReturnValue({
+            get,
+            post: vi.fn(),
+        })
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        await client.signIn("github", { redirect: false })
+
+        expect(get).toHaveBeenCalledWith("/signIn/:oauth", {
+            params: { oauth: "github" },
+            searchParams: {
+                // The redirect is set to false in the request to prevent automatic
+                // redirection by server response by 302 status code.
+                redirect: false,
+            },
+        })
+        expect(window.location.assign).not.toHaveBeenCalled()
+    })
+
     test("signInCredentials", async () => {
         const post = vi.fn().mockResolvedValue(
             createJSONResponse({
