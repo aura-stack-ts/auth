@@ -76,11 +76,6 @@
       "import": "./dist/_core/shared.js",
       "require": "./dist/_core/shared.cjs"
     },
-    "./unstable": {
-      "types": "./dist/unstable.d.ts",
-      "import": "./dist/unstable.js",
-      "require": "./dist/unstable.cjs"
-    },
     "./types": "./dist/@types/index.d.ts"
   },
   "keywords": [],

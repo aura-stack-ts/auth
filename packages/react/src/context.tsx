@@ -1,20 +1,8 @@
-import { Session, User } from "@aura-stack/auth"
 import { createContext, useCallback, useEffect, useRef, useState } from "react"
-import { AuthClientInstance } from "./@types/types.ts"
+import type { Session, User } from "@aura-stack/auth"
+import type { AuthClientInstance, AuthProviderProps, BroadcastMessage, Context } from "@/@types/types.ts"
 
-export interface Context<DefaultUser extends User = User> {
-    session: Session | null
-    status: "authenticated" | "unauthenticated" | "pending"
-    client: AuthClientInstance<DefaultUser>
-}
-
-export interface AuthProviderProps<DefaultUser extends User = User> {
-    initialSession?: Session<DefaultUser> | null
-    client: AuthClientInstance<DefaultUser>
-    children: React.ReactNode
-}
-
-export type BroadcastMessage = { type: "session:update"; payload: Session } | { type: "session:sync" } | { type: "session:clear" }
+export { AuthProviderProps }
 
 export const AuthContext = createContext<Context | undefined>(undefined)
 

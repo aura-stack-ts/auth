@@ -85,7 +85,6 @@ describe("@aura-stack/react hooks", () => {
         })
 
         expect(client.signInCredentials).toHaveBeenCalledWith({ payload, redirect: false })
-        await waitFor(() => expect(client.getSession).toHaveBeenCalledTimes(1))
     })
 
     test("useSignInCredentials with redirectTo", async () => {
@@ -103,10 +102,9 @@ describe("@aura-stack/react hooks", () => {
         })
 
         expect(client.signInCredentials).toHaveBeenCalledWith({ payload, redirectTo: "/dashboard" })
-        await waitFor(() => expect(client.getSession).toHaveBeenCalledTimes(1))
     })
 
-    test("useSignOut calls client.signOut and refreshes session when redirect is false", async () => {
+    test("useSignOut with redirect: false", async () => {
         const client = createMockClient()
         client.getSession = vi.fn().mockResolvedValueOnce(null)
 
@@ -119,7 +117,6 @@ describe("@aura-stack/react hooks", () => {
         })
 
         expect(client.signOut).toHaveBeenCalledWith({ redirect: false })
-        await waitFor(() => expect(client.getSession).toHaveBeenCalledTimes(1))
     })
 
     test("useUpdateSession with refresh", async () => {

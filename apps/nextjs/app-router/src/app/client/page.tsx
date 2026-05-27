@@ -3,14 +3,16 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/next/client"
+import { useSession, useAuthActions } from "@aura-stack/next/client"
 import { EditProfile } from "@/components/edit-profile"
 import type { SubmitEvent } from "react"
-import { AuthProvider, useSession, useSignInCredentials, useUpdateSession } from "@aura-stack/next/unstable"
-import { authClient } from "@/lib/auth-client"
 
 export const AuthClientPage = () => {
-    const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
+    const { signIn, signInCredentials, updateSession, signOut, isPending } = useAuthActions()
+    /**
+     * It's failing.
+     */
+    const { session, status } = useSession()
     const isAuthenticated = status === "authenticated"
 
     const handleSignInCredentials = async (event: SubmitEvent<HTMLFormElement>) => {
@@ -175,66 +177,7 @@ export const AuthClientPage = () => {
                     </div>
                 )}
             </section>
-            <div>
-                <AuthProvider client={authClient}>
-                    <Page />
-                </AuthProvider>
-            </div>
         </main>
-    )
-}
-
-const Page = () => {
-    const { signInCredentials, isPending } = useSignInCredentials()
-    const { updateSession } = useUpdateSession()
-    const session = useSession()
-
-    return (
-        <div className="flex items-center justify-center mt-10 gap-x-10">
-            <Button
-                disabled={isPending}
-                onClick={async () => {
-                    await signInCredentials({
-                        payload: {
-                            username: "testing-v1",
-                            password: "password",
-                        },
-                    })
-                }}
-            >
-                {isPending ? "Signing In..." : "Sign In v1"}
-            </Button>
-            <Button
-                disabled={isPending}
-                variant="outline"
-                onClick={async () => {
-                    await signInCredentials({
-                        payload: {
-                            username: "testing-v10",
-                            password: "password",
-                        },
-                    })
-                }}
-            >
-                {isPending ? "Signing In..." : "Sign In v10"}
-            </Button>
-            <Button
-                onClick={() => {
-                    updateSession({
-                        session: {
-                            user: {
-                                name: "Alice to Bob",
-                            },
-                        },
-                    })
-                }}
-            >
-                Update Session
-            </Button>
-            <div>
-                <pre>{JSON.stringify(session, null, 2)}</pre>
-            </div>
-        </div>
     )
 }
 

@@ -66,11 +66,6 @@
       "import": "./dist/pages/index.js",
       "require": "./dist/pages/index.cjs"
     },
-    "./unstable": {
-      "types": "./dist/unstable.d.ts",
-      "import": "./dist/unstable.js",
-      "require": "./dist/unstable.cjs"
-    },
     "./types": "./dist/@types/index.d.ts"
   },
   "keywords": [],

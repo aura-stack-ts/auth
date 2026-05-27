@@ -14,6 +14,5 @@ export default defineConfig({
         "src/_core/crypto.ts",
         "src/_core/shared.ts",
         "src/@types/index.ts",
-        "src/unstable.tsx",
     ],
 })
