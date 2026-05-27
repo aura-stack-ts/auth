@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@aura-stack/next/client"
 import { EditProfile } from "@/components/edit-profile"
 import type { SubmitEvent } from "react"
+import { AuthProvider, useSession, useSignInCredentials, useUpdateSession } from "@aura-stack/next/unstable"
+import { authClient } from "@/lib/auth-client"
 
 export const AuthClientPage = () => {
     const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
@@ -137,6 +139,7 @@ export const AuthClientPage = () => {
                                         type="text"
                                         id="username"
                                         name="username"
+                                        aria-label="Username"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -148,6 +151,7 @@ export const AuthClientPage = () => {
                                         type="password"
                                         id="password"
                                         name="password"
+                                        aria-label="Password"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -171,7 +175,66 @@ export const AuthClientPage = () => {
                     </div>
                 )}
             </section>
+            <div>
+                <AuthProvider client={authClient}>
+                    <Page />
+                </AuthProvider>
+            </div>
         </main>
+    )
+}
+
+const Page = () => {
+    const [signInWithCredentials] = useSignInCredentials()
+    const [updateSession] = useUpdateSession()
+    const session = useSession()
+
+    return (
+        <div className="flex items-center justify-center mt-10 gap-x-10">
+            <Button
+                onClick={() => {
+                    signInWithCredentials({
+                        payload: {
+                            username: "testing-v1",
+                            password: "password",
+                        },
+                        redirect: false,
+                    })
+                }}
+            >
+                Sign In v1
+            </Button>
+            <Button
+                variant="outline"
+                onClick={() => {
+                    signInWithCredentials({
+                        payload: {
+                            username: "testing-v10",
+                            password: "password",
+                        },
+                        redirect: false,
+                    })
+                }}
+            >
+                Sign In v10
+            </Button>
+            <Button
+                onClick={() => {
+                    updateSession({
+                        session: {
+                            user: {
+                                name: "Alice to Bob",
+                            },
+                        },
+                    })
+                }}
+            >
+                Update Session
+            </Button>
+            <div>
+                <pre>{JSON.stringify(session, null, 2)}</pre>
+            </div>
+        </div>
     )
 }
 

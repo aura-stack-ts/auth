@@ -14,6 +14,7 @@ export default defineConfig({
         "src/_core/shared.ts",
         "src/@types/index.ts",
         "src/pages/index.ts",
+        "src/unstable.tsx",
     ],
     fixedExtension: false,
     deps: {
