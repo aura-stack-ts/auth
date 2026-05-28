@@ -95,6 +95,7 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*",
+    "msw": "^2.14.6",
     "typescript": "catalog:typescript",
     "vitest": "catalog:vitest"
   }

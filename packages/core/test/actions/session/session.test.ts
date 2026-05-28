@@ -133,9 +133,6 @@ describe("sessionAction", () => {
             token_type: "Bearer",
         }
 
-        /**
-         * Mock user info response. For this case it simulates the profile function
-         */
         const userInfoMock = {
             id: "user_123",
             email: "john.doe@example.com",

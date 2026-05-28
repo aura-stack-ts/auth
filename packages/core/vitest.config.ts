@@ -30,6 +30,8 @@ export default defineConfig({
             include: ["test/**/*.test-d.ts"],
             enabled: false,
         },
+        // Causes issues with msw and global fetch mocks, need to investigate further
+        //setupFiles: ["test/mocks/setupTest.ts"],
     },
     resolve: {
         alias: {
