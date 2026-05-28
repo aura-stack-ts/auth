@@ -11,6 +11,9 @@
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist src/_core src/oauth",
     "clean:cts": "find dist -type f -name \"*.cts\" -delete",
@@ -82,6 +85,7 @@
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*",
     "next": "catalog:next",
+    "node-mocks-http": "^1.17.2",
     "react": "catalog:react",
     "react-dom": "catalog:react"
   },

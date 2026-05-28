@@ -1,5 +1,5 @@
+import type { NextApiRequest, NextApiResponse } from "next"
 import type { AuthInstance, User } from "@aura-stack/react"
-import { NextApiRequest, NextApiResponse } from "next"
 
 const getBaseURL = (request: NextApiRequest) => {
     const protocol = request.headers["x-forwarded-proto"] ?? "http"
@@ -7,22 +7,14 @@ const getBaseURL = (request: NextApiRequest) => {
     return `${protocol}://${host}`
 }
 
-const setResponseHeaders = (res: NextApiResponse, headers: Headers) => {
+export const setResponseHeaders = (res: NextApiResponse, headers: Headers) => {
     for (const [key, value] of headers.entries()) {
-        res.setHeader(key, value)
-    }
-}
-
-const toWebHeaders = (headers: NextApiRequest["headers"]) => {
-    const webHeaders = new Headers()
-    for (const [key, value] of Object.entries(headers)) {
-        if (Array.isArray(value)) {
-            webHeaders.set(key, value.join(", "))
-        } else if (typeof value === "string") {
-            webHeaders.set(key, value)
+        if (key.toLowerCase() === "set-cookie") {
+            res.setHeader("Set-Cookie", headers.getSetCookie())
+        } else {
+            res.setHeader(key, value)
         }
     }
-    return webHeaders
 }
 
 /**
@@ -49,29 +41,23 @@ export const toHandler = <DefaultUser extends User = User>(handlers: AuthInstanc
         const url = new URL(req.url!, getBaseURL(req))
         const webRequest = new Request(url, {
             method,
-            headers: toWebHeaders(req.headers),
-            body: method !== "GET" && method !== "HEAD" && req.body ? JSON.stringify(req.body) : undefined,
+            headers: new Headers(req.headers as Record<string, string>),
+            body: method !== "GET" && method !== "HEAD" ? req.body : undefined,
         })
         try {
             const response = await handler(webRequest)
-            setResponseHeaders(res, response.headers)
             if (response.status >= 300 && response.status < 400) {
-                const location = response.headers.get("location")
-                if (location) {
-                    return res.redirect(response.status, location)
+                /**
+                 * Next.js Pages Router can't manage redirections and json responses at the same time,
+                 * so if the response is a redirection, we need to remove the Location header and manage the redirection manually.
+                 */
+                if (!req.url?.includes("/auth/signIn/") && !req.url?.includes("/auth/callback/")) {
+                    response.headers.delete("Location")
                 }
             }
-
-            const contentType = response.headers.get("content-type") ?? ""
-            if (contentType.includes("application/json")) {
-                const data = await response.json()
-                return res.status(response.status).json(data)
-            }
-            if (response.status === 204 || response.status === 304) {
-                return res.status(response.status).end()
-            }
-            const text = await response.text()
-            return res.status(response.status).send(text)
+            setResponseHeaders(res, response.headers)
+            const data = await response.json()
+            return res.status(response.status).json(data)
         } catch {
             return res.status(500).json({ error: "Internal Server Error" })
         }

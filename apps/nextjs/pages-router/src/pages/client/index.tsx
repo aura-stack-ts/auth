@@ -39,7 +39,7 @@ export default function AuthClientPage() {
     }
 
     const handleSignOut = async () => {
-        await signOut({ redirectTo: "/client" })
+        await signOut({ redirectTo: "/server" })
     }
 
     return (
@@ -120,7 +120,7 @@ export default function AuthClientPage() {
                                         variant="outline"
                                         disabled={isPending}
                                         key={provider}
-                                        onClick={() => signIn(provider.toLowerCase())}
+                                        onClick={() => signIn(provider.toLowerCase(), { redirect: true })}
                                     >
                                         Sign In with {provider}
                                     </Button>
