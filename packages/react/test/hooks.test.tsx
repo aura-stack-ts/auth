@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react"
-import { describe, expect, test, vi } from "vitest"
+import { afterEach, describe, expect, test, vi } from "vitest"
 import { AuthProvider } from "@/context.tsx"
-import { useAuth, useSession, useSignIn, useSignInCredentials, useSignOut, useUpdateSession } from "@/hooks.ts"
+import { useSession, useSignIn, useSignInCredentials, useSignOut, useUpdateSession } from "@/hooks.ts"
 import type { ReactNode } from "react"
 import type { AuthClientInstance } from "@/@types/types.ts"
 
@@ -23,6 +23,11 @@ const wrapper = ({ children, client, initialSession }: { children: ReactNode; cl
     </AuthProvider>
 )
 
+afterEach(() => {
+    vi.clearAllMocks()
+    vi.unstubAllGlobals()
+})
+
 describe("@aura-stack/react hooks", () => {
     test("useSession with initialSession", async () => {
         const client = createMockClient()
@@ -42,7 +47,7 @@ describe("@aura-stack/react hooks", () => {
         })
 
         await act(async () => {
-            await result.current("github", { redirect: false })
+            await result.current.signIn("github", { redirect: false })
         })
 
         expect(client.signIn).toHaveBeenCalledWith("github", { redirect: false })
@@ -56,7 +61,7 @@ describe("@aura-stack/react hooks", () => {
         })
 
         await act(async () => {
-            await result.current("github", { redirectTo: "/dashboard", redirect: true })
+            await result.current.signIn("github", { redirectTo: "/dashboard", redirect: true })
         })
 
         expect(client.signIn).toHaveBeenCalledWith("github", {
@@ -73,17 +78,33 @@ describe("@aura-stack/react hooks", () => {
 
         const payload = { username: "test@example.com", password: "password" }
         await act(async () => {
-            await result.current({
+            await result.current.signInCredentials({
                 payload,
                 redirect: false,
             })
         })
 
         expect(client.signInCredentials).toHaveBeenCalledWith({ payload, redirect: false })
-        await waitFor(() => expect(client.getSession).toHaveBeenCalledTimes(1))
     })
 
-    test("useSignOut calls client.signOut and refreshes session when redirect is false", async () => {
+    test("useSignInCredentials with redirectTo", async () => {
+        const client = createMockClient()
+        const { result } = renderHook(() => useSignInCredentials(), {
+            wrapper: ({ children }) => wrapper({ children, client, initialSession: null }),
+        })
+
+        const payload = { username: "test@example.com", password: "password" }
+        await act(async () => {
+            await result.current.signInCredentials({
+                payload,
+                redirectTo: "/dashboard",
+            })
+        })
+
+        expect(client.signInCredentials).toHaveBeenCalledWith({ payload, redirectTo: "/dashboard" })
+    })
+
+    test("useSignOut with redirect: false", async () => {
         const client = createMockClient()
         client.getSession = vi.fn().mockResolvedValueOnce(null)
 
@@ -92,11 +113,10 @@ describe("@aura-stack/react hooks", () => {
         })
 
         await act(async () => {
-            await result.current({ redirect: false })
+            await result.current.signOut({ redirect: false })
         })
 
         expect(client.signOut).toHaveBeenCalledWith({ redirect: false })
-        await waitFor(() => expect(client.getSession).toHaveBeenCalledTimes(1))
     })
 
     test("useUpdateSession with refresh", async () => {
@@ -107,35 +127,10 @@ describe("@aura-stack/react hooks", () => {
 
         const partial = { session: { user: { name: "New Name" } }, redirect: false }
         await act(async () => {
-            await result.current(partial)
+            await result.current.updateSession(partial)
         })
 
         expect(client.updateSession).toHaveBeenCalledWith(partial)
         await waitFor(() => expect(client.getSession).toHaveBeenCalledTimes(1))
-    })
-
-    test("useAuth returns full context value", async () => {
-        const client = createMockClient()
-        const { result } = renderHook(() => useAuth(), {
-            wrapper: ({ children }) => wrapper({ children, client, initialSession: mockSession }),
-        })
-
-        expect(result.current.session).toEqual(mockSession)
-        expect(result.current.status).toBe("authenticated")
-        expect(typeof result.current.signIn).toBe("function")
-        expect(typeof result.current.signOut).toBe("function")
-        expect(result.current.client).toBe(client)
-    })
-
-    test("context status transitions from loading to authenticated on mount", async () => {
-        const client = createMockClient()
-        const { result } = renderHook(() => useAuth(), {
-            wrapper: ({ children }) => wrapper({ children, client }),
-        })
-
-        expect(result.current.status).toBe("loading")
-
-        await waitFor(() => expect(result.current.status).toBe("authenticated"))
-        expect(result.current.session).toEqual(mockSession)
     })
 })

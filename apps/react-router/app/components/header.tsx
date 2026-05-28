@@ -2,12 +2,13 @@ import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Link, useRevalidator } from "react-router"
-import { useAuth } from "@aura-stack/react-router/client"
+import { useAuthActions, useSession } from "@aura-stack/react-router/client"
 
 export const Header = () => {
     const revalidator = useRevalidator()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { status, isPending, signOut, signIn } = useAuth()
+    const { status } = useSession()
+    const { isPending, signOut, signIn } = useAuthActions()
     const isAuthenticated = status === "authenticated"
 
     const handleSignOut = async () => {

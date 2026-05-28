@@ -1,7 +1,7 @@
 export {
     createAuthClient,
     AuthProvider,
-    useAuth,
+    useAuthActions,
     useSession,
     useSignIn,
     useSignInCredentials,

@@ -3,12 +3,13 @@ import { useRouter } from "next/router"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/next/client"
+import { useAuthActions, useSession } from "@aura-stack/next/client"
 
 export const Header = () => {
     const router = useRouter()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { status, isPending, signOut, signIn } = useAuth()
+    const { status } = useSession()
+    const { isPending, signOut, signIn } = useAuthActions()
     const isAuthenticated = status === "authenticated"
 
     const handleSignOut = async () => {

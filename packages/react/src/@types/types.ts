@@ -13,26 +13,12 @@ import type { createAuthClient } from "@aura-stack/auth/client"
 export type AuthClientInstance<DefaultUser extends User = User> = ReturnType<typeof createAuthClient<DefaultUser>>
 
 /** High-level UI state for whether a session is present, absent, or still being resolved. */
-export type AuthStatus = "authenticated" | "unauthenticated" | "loading"
+export type AuthStatus = "authenticated" | "unauthenticated" | "pending"
 
-/**
- * Full auth surface exposed through a single React context so session state and
- * mutations share one source of truth (no duplicate session fetches per subtree).
- */
-export type AuthReactContextValue<DefaultUser extends User = User> = {
-    /** Current session, `null` if unauthenticated, or `undefined` before the first load completes. */
-    session: Session<DefaultUser> | null | undefined
+export interface Context<DefaultUser extends User = User> {
+    session: Session | null
     status: AuthStatus
-    /** True while a transition updates session state (e.g. after refresh or a non-redirect sign-in). */
-    isPending: boolean
-    /** Bound auth HTTP client (same API as `createAuthClient`). */
     client: AuthClientInstance<DefaultUser>
-    /** Re-fetches session from the server and updates context state. */
-    refresh: () => Promise<void>
-    signIn: AuthClientInstance<DefaultUser>["signIn"]
-    signInCredentials: AuthClientInstance<DefaultUser>["signInCredentials"]
-    signOut: AuthClientInstance<DefaultUser>["signOut"]
-    updateSession: AuthClientInstance<DefaultUser>["updateSession"]
 }
 
 /** Props for {@link AuthProvider}: supply the client and optional SSR session to avoid a flash of loading state. */
@@ -46,3 +32,8 @@ export type AuthProviderProps<DefaultUser extends User = User> = {
      */
     initialSession?: Session<DefaultUser> | null
 }
+
+/**
+ * Triggerable messages for cross-tab session synchronization via BroadcastChannel.
+ */
+export type BroadcastMessage = { type: "session:update"; payload: Session } | { type: "session:sync" } | { type: "session:clear" }

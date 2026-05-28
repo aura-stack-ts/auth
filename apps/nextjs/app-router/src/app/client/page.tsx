@@ -3,12 +3,13 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/next/client"
+import { useSession, useAuthActions } from "@aura-stack/next/client"
 import { EditProfile } from "@/components/edit-profile"
 import type { SubmitEvent } from "react"
 
 export const AuthClientPage = () => {
-    const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
+    const { signIn, signInCredentials, updateSession, signOut, isPending } = useAuthActions()
+    const { session, status } = useSession()
     const isAuthenticated = status === "authenticated"
 
     const handleSignInCredentials = async (event: SubmitEvent<HTMLFormElement>) => {
@@ -118,7 +119,7 @@ export const AuthClientPage = () => {
                                         variant="outline"
                                         disabled={isPending}
                                         key={provider}
-                                        onClick={() => signIn(provider.toLowerCase())}
+                                        onClick={async () => await signIn(provider.toLowerCase(), { redirect: true })}
                                     >
                                         Sign In with {provider}
                                     </Button>
@@ -137,6 +138,7 @@ export const AuthClientPage = () => {
                                         type="text"
                                         id="username"
                                         name="username"
+                                        aria-label="Username"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -148,6 +150,7 @@ export const AuthClientPage = () => {
                                         type="password"
                                         id="password"
                                         name="password"
+                                        aria-label="Password"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
