@@ -170,7 +170,7 @@ describe("createAuthClient", () => {
         expect(response).toEqual({ signInURL: "https://example.com/oauth" })
     })
 
-    test("signIn with redirect option", async () => {
+    test("signIn with redirect: false does not navigate", async () => {
         vi.stubGlobal("window", { location: { assign: vi.fn() } })
 
         const get = vi.fn().mockResolvedValue(createJSONResponse({ signInURL: "https://example.com/oauth" }))

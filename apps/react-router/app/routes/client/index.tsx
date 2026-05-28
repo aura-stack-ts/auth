@@ -1,12 +1,13 @@
 import { Link, useRevalidator } from "react-router"
 import { Button } from "~/components/ui/button"
-import { useAuth } from "@aura-stack/react-router/client"
+import { useAuthActions, useSession } from "@aura-stack/react-router/client"
 import { EditProfile } from "~/components/edit-profile"
 import type { SubmitEvent } from "react"
 
 export const AuthClientPage = () => {
     const revalidator = useRevalidator()
-    const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
+    const { session, status } = useSession()
+    const { isPending, signIn, signOut, signInCredentials, updateSession } = useAuthActions()
     const isAuthenticated = status === "authenticated"
 
     const handleSignInCredentials = async (event: SubmitEvent<HTMLFormElement>) => {
@@ -130,6 +131,7 @@ export const AuthClientPage = () => {
                                         type="text"
                                         id="username"
                                         name="username"
+                                        aria-label="Username"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -141,6 +143,7 @@ export const AuthClientPage = () => {
                                         type="password"
                                         id="password"
                                         name="password"
+                                        aria-label="Password"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>

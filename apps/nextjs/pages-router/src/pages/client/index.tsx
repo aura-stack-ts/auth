@@ -1,12 +1,13 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/next/client"
+import { useAuthActions, useSession } from "@aura-stack/next/client"
 import { EditProfile } from "@/components/edit-profile"
 import type { SubmitEvent } from "react"
 
 export default function AuthClientPage() {
-    const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
+    const { session, status } = useSession()
+    const { isPending, signIn, signOut, signInCredentials, updateSession } = useAuthActions()
     const isAuthenticated = status === "authenticated"
 
     const handleSignInCredentials = async (event: SubmitEvent<HTMLFormElement>) => {
@@ -20,6 +21,7 @@ export default function AuthClientPage() {
                 username,
                 password,
             },
+            redirect: true,
             redirectTo: "/client",
         })
     }

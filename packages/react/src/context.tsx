@@ -24,6 +24,18 @@ export const broadcast = (message: BroadcastMessage): void => {
     getBroadcastChannel()?.postMessage(message)
 }
 
+/**
+ * Wrapper component that provides authentication context in client-side React applications.
+ *
+ * @param {AuthProviderProps<DefaultUser>} props The properties for the AuthProvider component
+ * @returns {JSX.Element} The AuthProvider component that wraps its children with authentication context
+ * @example
+ * const client = createAuthClient({ baseURL: "http://localhost:3000" })
+ *
+ * <AuthProvider client={client}>
+ *   <App />
+ * </AuthProvider>
+ */
 export const AuthProvider = <DefaultUser extends User = User>({
     initialSession,
     children,
@@ -53,7 +65,7 @@ export const AuthProvider = <DefaultUser extends User = User>({
     }, [])
 
     useEffect(() => {
-        if (initialSession === null) {
+        if (initialSession === undefined) {
             refreshSession()
         }
     }, [initialSession, refreshSession])

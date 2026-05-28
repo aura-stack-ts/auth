@@ -9,9 +9,6 @@ import type { SubmitEvent } from "react"
 
 export const AuthClientPage = () => {
     const { signIn, signInCredentials, updateSession, signOut, isPending } = useAuthActions()
-    /**
-     * It's failing.
-     */
     const { session, status } = useSession()
     const isAuthenticated = status === "authenticated"
 
@@ -122,7 +119,7 @@ export const AuthClientPage = () => {
                                         variant="outline"
                                         disabled={isPending}
                                         key={provider}
-                                        onClick={() => signIn(provider.toLowerCase())}
+                                        onClick={async () => await signIn(provider.toLowerCase(), { redirect: true })}
                                     >
                                         Sign In with {provider}
                                     </Button>

@@ -128,7 +128,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                 },
             })
             const json = await response.json()
-            if (options.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as UpdateSessionReturn<Options, DefaultUser>
