@@ -60,7 +60,7 @@ export interface APIOptionsWithRedirectTo {
     /**
      * Optional redirect strategy for server/programmatic API functions.
      *
-     * - `true`: the generated response is a redirect response.
+     * - `true`: The response includes a `Location` header.
      * - `false`: the API returns redirect data (`signInURL` or `redirectURL`) for custom handling.
      *
      * Defaults are action-specific; see each API option type.
@@ -281,5 +281,12 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User>
 
 /** Programmatic session update result with redirect metadata and `toResponse()`. */
 export type UpdateSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<
-    { success: true; session: Session<DefaultUser>; redirectURL: string } | { success: false; session: null; redirectURL: null }
+    /** redirect: true & redirectTo: string */
+    | { success: true; session: Session<DefaultUser>; redirect: true; redirectURL: null }
+    /** redirect: false & redirectTo: string */
+    | { success: true; session: Session<DefaultUser>; redirect: false; redirectURL: string }
+    /** redirect: false & redirectTo: null | undefined (not set) */
+    | { success: true; session: Session<DefaultUser>; redirect: false; redirectURL: null }
+    /** Failed session update */
+    | { success: false; session: null; redirect: false; redirectURL: null }
 >

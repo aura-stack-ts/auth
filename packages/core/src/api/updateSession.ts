@@ -7,6 +7,7 @@ import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIRetur
 export const updateSession = async <DefaultUser extends User = User>({
     ctx,
     request: requestInit,
+    redirect: redirectInit = true,
     headers: headersInit,
     session: sessionInit,
     redirectTo: redirectToInit,
@@ -26,21 +27,34 @@ export const updateSession = async <DefaultUser extends User = User>({
             let request = requestInit
             if (!request) {
                 const origin = await getBaseURL({ ctx, headers })
-                const url = `${origin}${ctx.basePath}/updateSession`
+                const url = `${origin}${ctx.basePath}/session`
                 request = new Request(url, { headers: newHeaders })
             }
             redirectURL = await createRedirectTo(request, redirectToInit, ctx)
+        }
+        const isSuccess = !!session
+        const shouldRedirectServer = isSuccess && redirectInit && !!redirectURL
+        const finalRedirectFlag = isSuccess ? (shouldRedirectServer ? true : false) : false
+
+        if (shouldRedirectServer) {
+            newHeaders.set("Location", redirectURL!)
         }
 
         return {
             headers: newHeaders,
             session,
-            success: !!session,
-            redirectURL,
+            success: isSuccess,
+            redirect: finalRedirectFlag,
+            redirectURL: shouldRedirectServer ? null : redirectURL,
             toResponse: () => {
                 return Response.json(
-                    { success: !!session, session, redirectURL },
-                    { headers: newHeaders, status: session ? 200 : 401 }
+                    {
+                        success: isSuccess,
+                        session,
+                        redirect: finalRedirectFlag,
+                        redirectURL: shouldRedirectServer ? null : redirectURL,
+                    },
+                    { headers: newHeaders, status: isSuccess ? (shouldRedirectServer ? 302 : 200) : 401 }
                 )
             },
         } as UpdateSessionAPIReturn<DefaultUser>
@@ -54,14 +68,15 @@ export const updateSession = async <DefaultUser extends User = User>({
 
         const headers = new Headers(secureApiHeaders)
         return {
-            success: false,
             headers,
             session: null,
+            success: false,
+            redirect: false,
             redirectURL: null,
             error: { code, message },
             toResponse: () => {
                 return Response.json(
-                    { success: false, session: null, redirectURL: null, error: { code, message } },
+                    { success: false, session: null, redirect: false, redirectURL: null },
                     { status: 400, headers }
                 )
             },
