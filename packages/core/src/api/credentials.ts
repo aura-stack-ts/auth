@@ -42,7 +42,7 @@ export const signInCredentials = async ({
         let redirectURL: string | null = null
         if (redirectTo) {
             redirectURL = await createRedirectTo(request, redirectTo, ctx)
-            if(redirect) {
+            if (redirect) {
                 headers.setHeader("Location", redirectURL)
             }
         }
@@ -56,8 +56,8 @@ export const signInCredentials = async ({
             redirectURL: redirect ? null : redirectURL,
             toResponse: () =>
                 Response.json(
-                    { success: true, redirect: shouldRedirectServer, redirectURL: redirect ? null : redirectURL },
-                    { headers: toHeaders }
+                    { success: true, redirect: shouldRedirectServer, redirectURL: shouldRedirectServer ? null : redirectURL },
+                    { headers: toHeaders, status: shouldRedirectServer ? 302 : 200 }
                 ),
         } as SignInCredentialsAPIReturn
     } catch (error) {

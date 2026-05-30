@@ -122,7 +122,7 @@ describe("signInCredentials action", () => {
         expect(await response.json()).toEqual({
             success: true,
             redirect: false,
-            redirectURL: null
+            redirectURL: null,
         })
     })
 
@@ -136,6 +136,7 @@ describe("signInCredentials action", () => {
                 }),
             })
         )
+        // status code 200 because doesn't provide valid redirecToñ
         expect(response.status).toBe(200)
         expect(response.headers.get("Location")).toBeNull()
         expect(await response.json()).toEqual({
@@ -145,7 +146,7 @@ describe("signInCredentials action", () => {
         })
     })
 
-        test("credentials with redirect: true and redirectTo", async () => {
+    test("credentials with redirect: true and redirectTo", async () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials?redirectTo=/dashboard", {
                 method: "POST",
@@ -155,7 +156,7 @@ describe("signInCredentials action", () => {
                 }),
             })
         )
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/dashboard")
         expect(await response.json()).toEqual({
             success: true,

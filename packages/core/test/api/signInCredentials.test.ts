@@ -26,7 +26,7 @@ describe("signInCredentials API", () => {
             headers: expect.any(Headers),
             redirect: false,
             redirectURL: null,
-            toResponse: expect.any(Function)
+            toResponse: expect.any(Function),
         })
         const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
         expect(decoded).toMatchObject({
@@ -77,9 +77,10 @@ describe("signInCredentials API", () => {
             headers: expect.any(Headers),
             error: {
                 code: "INVALID_OAUTH_CONFIGURATION",
-                message: "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders."
+                message:
+                    "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
             },
-            toResponse: expect.any(Function)
+            toResponse: expect.any(Function),
         })
     })
 
@@ -112,7 +113,7 @@ describe("signInCredentials API", () => {
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
-            toResponse: expect.any(Function)
+            toResponse: expect.any(Function),
         })
         const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
         expect(decoded).toMatchObject({
@@ -130,7 +131,6 @@ describe("signInCredentials API", () => {
         })
         expect(success).toBe(false)
     })
-
 
     test("signIn with redirect: true and redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
@@ -150,7 +150,7 @@ describe("signInCredentials API", () => {
             redirect: true,
             redirectURL: null,
             headers: expect.any(Headers),
-            toResponse: expect.any(Function)
+            toResponse: expect.any(Function),
         })
     })
 
@@ -169,7 +169,7 @@ describe("signInCredentials API", () => {
             redirect: true,
             redirectURL: null,
             headers: expect.any(Headers),
-            toResponse: expect.any(Function)
+            toResponse: expect.any(Function),
         })
     })
 
@@ -188,7 +188,7 @@ describe("signInCredentials API", () => {
             redirect: true,
             redirectURL: null,
             headers: expect.any(Headers),
-            toResponse: expect.any(Function)
+            toResponse: expect.any(Function),
         })
     })
 })

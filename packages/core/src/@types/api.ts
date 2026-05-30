@@ -240,7 +240,15 @@ export interface SignOutAPIOptions extends APIOptionsWithRedirectTo, APIOptionsW
 
 /** Programmatic sign-out result with redirect metadata and `toResponse()`. */
 export type SignOutAPIReturn = AuthActionAPIReturn<
-    { success: true; redirect: boolean; redirectURL: string } | { success: false; redirect: boolean; redirectURL: null }
+    /** redirect: true & redirectTo: string */
+    | { success: true; redirect: true; redirectURL: null }
+    /** redirect: false & redirectTo: string */
+    | { success: true; redirect: false; redirectURL: string }
+    /** redirect: false & redirectTo: null | undefined (not set) */
+    /** redirect: true & redirectTo: null | undefined (not set) */
+    | { success: true; redirect: false; redirectURL: null }
+    /** Failed */
+    | { success: false; redirect: false; redirectURL: null }
 >
 
 /** Client-side `updateSession` options: partial session payload plus optional redirect behavior. */
