@@ -163,3 +163,8 @@ export const RedirectOptionsSchema = object({
     redirect: z.stringbool().optional().default(true),
     redirectTo: string().optional(),
 })
+
+export const CredentialsPayloadSchema = object({
+    username: string(),
+    password: string(),
+})

@@ -1,6 +1,5 @@
-import type { Prettify } from "@aura-stack/jose"
 import type { Session, User } from "@/@types/session.ts"
-import type { AuthResponse, DeepPartial } from "@/@types/utility.ts"
+import type { AuthResponse, DeepPartial, Prettify } from "@/@types/utility.ts"
 import type { CredentialsPayload, RouterGlobalContext } from "@/@types/config.ts"
 
 /**
@@ -203,7 +202,15 @@ export interface SignInCredentialsAPIOptions extends APIOptionsWithRedirectTo, A
 
 /** Programmatic credentials sign-in result with response metadata and `toResponse()`. */
 export type SignInCredentialsAPIReturn = AuthActionAPIReturn<
-    { success: true; redirectURL: string } | { success: false; redirectURL: null }
+    /** redirect: true & redirectTo: string */
+    | { success: true; redirect: true; redirectURL: null }
+    /** redirect: false & redirectTo: string */
+    | { success: true; redirect: false; redirectURL: string }
+    /** redirect: false & redirectTo: null | undefined (not set) */
+    /** redirect: true & redirectTo: null | undefined (not set) */
+    | { success: true; redirect: false; redirectURL: null }
+    /** Failed credentials */
+    | { success: false; redirect: false; redirectURL: null }
 >
 
 /** Client-side sign-out options. */
