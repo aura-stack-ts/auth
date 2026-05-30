@@ -15,6 +15,8 @@ afterEach(() => {
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
         const updated = await api.updateSession({
             headers: new Headers(),
             session: {},
@@ -30,6 +32,8 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with skipCSRFCheck", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
             name: "John Doe",
@@ -70,6 +74,8 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with disabled skipCSRFCheck", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
             name: "John Doe",
@@ -163,6 +169,8 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with invalid user data", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
         const { jose, api } = createAuth({
             oauth: [],
         })
@@ -203,6 +211,8 @@ describe("updateSession API", () => {
     })
 
     test("updates expiry on valid session", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
             name: "John Doe",

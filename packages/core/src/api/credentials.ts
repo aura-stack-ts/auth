@@ -39,12 +39,11 @@ export const signInCredentials = async ({
             .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
             .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
 
-        let redirectURL: string | null = null
-        if (redirectTo) {
-            redirectURL = await createRedirectTo(request, redirectTo, ctx)
-            if (redirect) {
-                headers.setHeader("Location", redirectURL)
-            }
+        let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx)
+        redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
+
+        if (redirect && redirectURL) {
+            headers.setHeader("Location", redirectURL)
         }
 
         const shouldRedirectServer = redirect && !!redirectURL

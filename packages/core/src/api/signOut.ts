@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { isAuthErrorWithCode } from "@/shared/errors.ts"
-import { createRedirectTo, getBaseURL } from "@/actions/signIn/authorization.ts"
+import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
 
 export const signOut = async ({
@@ -19,6 +19,7 @@ export const signOut = async ({
             const url = `${origin}${ctx.basePath}/signOut`
             request = new Request(url, { headers })
         }
+        await getOriginURL(request, ctx)
 
         const headersBuilder = new HeadersBuilder(headers)
         let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx)

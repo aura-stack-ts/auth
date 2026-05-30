@@ -1,7 +1,7 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { isAuthErrorWithCode } from "@/shared/errors.ts"
-import { createRedirectTo, getBaseURL } from "@/actions/signIn/authorization.ts"
+import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
 export const updateSession = async <DefaultUser extends User = User>({
@@ -21,24 +21,24 @@ export const updateSession = async <DefaultUser extends User = User>({
         )
         const newHeaders = toUnionHeaders(headers, secureApiHeaders)
 
-        let redirectURL: string | null = null
-
-        if (redirectToInit) {
-            let request = requestInit
-            if (!request) {
-                const origin = await getBaseURL({ ctx, headers })
-                const url = `${origin}${ctx.basePath}/session`
-                request = new Request(url, { headers: newHeaders })
-            }
-            redirectURL = await createRedirectTo(request, redirectToInit, ctx)
+        let request = requestInit
+        if (!request) {
+            const origin = await getBaseURL({ ctx, headers })
+            const url = `${origin}${ctx.basePath}/session`
+            request = new Request(url, { headers: newHeaders })
         }
+        await getOriginURL(request, ctx)
+
+        let redirectURL: string | null = await createRedirectTo(request, redirectToInit, ctx)
+        redirectURL = redirectToInit ? redirectURL : redirectURL === "/" ? null : redirectURL
+
+        if (redirectInit && redirectURL) {
+            newHeaders.set("Location", redirectURL)
+        }
+
         const isSuccess = !!session
         const shouldRedirectServer = isSuccess && redirectInit && !!redirectURL
         const finalRedirectFlag = isSuccess ? (shouldRedirectServer ? true : false) : false
-
-        if (shouldRedirectServer) {
-            newHeaders.set("Location", redirectURL!)
-        }
 
         return {
             headers: newHeaders,
