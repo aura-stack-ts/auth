@@ -27,6 +27,10 @@ describe("updateSession API", () => {
             success: false,
             redirect: false,
             redirectURL: null,
+            error: {
+                code: "UPDATE_SESSION_INVALID",
+                message: "Failed to update session.",
+            },
             toResponse: expect.any(Function),
         })
     })

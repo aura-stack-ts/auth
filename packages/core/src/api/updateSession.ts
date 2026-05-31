@@ -1,6 +1,6 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { isAuthErrorWithCode } from "@/shared/errors.ts"
+import { AuthInternalError, isAuthErrorWithCode } from "@/shared/errors.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
@@ -19,6 +19,10 @@ export const updateSession = async <DefaultUser extends User = User>({
             sessionInit,
             skipCSRFCheck
         )
+        if (!session) {
+            throw new AuthInternalError("UPDATE_SESSION_INVALID", "Failed to update session.")
+        }
+
         const newHeaders = toUnionHeaders(headers, secureApiHeaders)
 
         let request = requestInit
@@ -36,25 +40,23 @@ export const updateSession = async <DefaultUser extends User = User>({
             newHeaders.set("Location", redirectURL)
         }
 
-        const isSuccess = !!session
-        const shouldRedirectServer = isSuccess && redirectInit && !!redirectURL
-        const finalRedirectFlag = isSuccess ? (shouldRedirectServer ? true : false) : false
+        const shouldRedirectServer = redirectInit && !!redirectURL
 
         return {
             headers: newHeaders,
             session,
-            success: isSuccess,
-            redirect: finalRedirectFlag,
+            success: true,
+            redirect: shouldRedirectServer,
             redirectURL: shouldRedirectServer ? null : redirectURL,
             toResponse: () => {
                 return Response.json(
                     {
-                        success: isSuccess,
+                        success: true,
                         session,
-                        redirect: finalRedirectFlag,
+                        redirect: shouldRedirectServer,
                         redirectURL: shouldRedirectServer ? null : redirectURL,
                     },
-                    { headers: newHeaders, status: isSuccess ? (shouldRedirectServer ? 302 : 200) : 401 }
+                    { headers: newHeaders, status: shouldRedirectServer ? 302 : 200 }
                 )
             },
         } as UpdateSessionAPIReturn<DefaultUser>

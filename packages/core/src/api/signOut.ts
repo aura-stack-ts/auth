@@ -59,7 +59,6 @@ export const signOut = async ({
             toResponse: () => {
                 return Response.json({
                     success: false,
-                    headers,
                     redirect: false,
                     redirectsURL: null,
                 })
