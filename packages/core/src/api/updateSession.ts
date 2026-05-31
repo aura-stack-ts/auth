@@ -1,12 +1,13 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { isAuthErrorWithCode } from "@/shared/errors.ts"
-import { createRedirectTo, getBaseURL } from "@/actions/signIn/authorization.ts"
+import { AuthInternalError, isAuthErrorWithCode } from "@/shared/errors.ts"
+import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
 export const updateSession = async <DefaultUser extends User = User>({
     ctx,
     request: requestInit,
+    redirect: redirectInit = true,
     headers: headersInit,
     session: sessionInit,
     redirectTo: redirectToInit,
@@ -18,29 +19,44 @@ export const updateSession = async <DefaultUser extends User = User>({
             sessionInit,
             skipCSRFCheck
         )
+        if (!session) {
+            throw new AuthInternalError("UPDATE_SESSION_INVALID", "Failed to update session.")
+        }
+
         const newHeaders = toUnionHeaders(headers, secureApiHeaders)
 
-        let redirectURL: string | null = null
-
-        if (redirectToInit) {
-            let request = requestInit
-            if (!request) {
-                const origin = await getBaseURL({ ctx, headers })
-                const url = `${origin}${ctx.basePath}/updateSession`
-                request = new Request(url, { headers: newHeaders })
-            }
-            redirectURL = await createRedirectTo(request, redirectToInit, ctx)
+        let request = requestInit
+        if (!request) {
+            const origin = await getBaseURL({ ctx, headers })
+            const url = `${origin}${ctx.basePath}/session`
+            request = new Request(url, { headers: newHeaders })
         }
+        await getOriginURL(request, ctx)
+
+        let redirectURL: string | null = await createRedirectTo(request, redirectToInit, ctx)
+        redirectURL = redirectToInit ? redirectURL : redirectURL === "/" ? null : redirectURL
+
+        if (redirectInit && redirectURL) {
+            newHeaders.set("Location", redirectURL)
+        }
+
+        const shouldRedirectServer = redirectInit && !!redirectURL
 
         return {
             headers: newHeaders,
             session,
-            success: !!session,
-            redirectURL,
+            success: true,
+            redirect: shouldRedirectServer,
+            redirectURL: shouldRedirectServer ? null : redirectURL,
             toResponse: () => {
                 return Response.json(
-                    { success: !!session, session, redirectURL },
-                    { headers: newHeaders, status: session ? 200 : 401 }
+                    {
+                        success: true,
+                        session,
+                        redirect: shouldRedirectServer,
+                        redirectURL: shouldRedirectServer ? null : redirectURL,
+                    },
+                    { headers: newHeaders, status: shouldRedirectServer ? 302 : 200 }
                 )
             },
         } as UpdateSessionAPIReturn<DefaultUser>
@@ -54,14 +70,15 @@ export const updateSession = async <DefaultUser extends User = User>({
 
         const headers = new Headers(secureApiHeaders)
         return {
-            success: false,
             headers,
             session: null,
+            success: false,
+            redirect: false,
             redirectURL: null,
             error: { code, message },
             toResponse: () => {
                 return Response.json(
-                    { success: false, session: null, redirectURL: null, error: { code, message } },
+                    { success: false, session: null, redirect: false, redirectURL: null },
                     { status: 400, headers }
                 )
             },

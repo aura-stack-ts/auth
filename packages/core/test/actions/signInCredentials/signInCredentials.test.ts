@@ -78,8 +78,10 @@ describe("signInCredentials action", () => {
         )
         const data = await response.json()
         expect(response.status).toBe(401)
-        expect(data).toMatchObject({
+        expect(data).toEqual({
             success: false,
+            redirect: false,
+            redirectURL: null,
         })
     })
 
@@ -116,6 +118,86 @@ describe("signInCredentials action", () => {
         expect(decoded).toMatchObject({
             sub: "1234567890-abcdef",
             name: "johndoe",
+        })
+        expect(await response.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("credentials with redirect: true (by default)", async () => {
+        const response = await POST(
+            new Request("http://localhost:3000/auth/signIn/credentials", {
+                method: "POST",
+                body: JSON.stringify({
+                    username: "alice",
+                    password: "1234567890",
+                }),
+            })
+        )
+        // status code 200 because doesn't provide valid redirecToñ
+        expect(response.status).toBe(200)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("credentials with redirect: true and redirectTo", async () => {
+        const response = await POST(
+            new Request("http://localhost:3000/auth/signIn/credentials?redirectTo=/dashboard", {
+                method: "POST",
+                body: JSON.stringify({
+                    username: "alice",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(302)
+        expect(response.headers.get("Location")).toBe("/dashboard")
+        expect(await response.json()).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
+        })
+    })
+
+    test("credentials with redirect: false", async () => {
+        const response = await POST(
+            new Request("http://localhost:3000/auth/signIn/credentials?redirect=false", {
+                method: "POST",
+                body: JSON.stringify({
+                    username: "alice",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("credentials with redirect: false and redirectTo", async () => {
+        const response = await POST(
+            new Request("http://localhost:3000/auth/signIn/credentials?redirect=false&redirectTo=/dashboard", {
+                method: "POST",
+                body: JSON.stringify({
+                    username: "alice",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: "/dashboard",
         })
     })
 })

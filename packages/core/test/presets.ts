@@ -40,11 +40,12 @@ const auth = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile],
     logger: true,
     credentials: {
-        authorize: async () => {
+        authorize: async ({ credentials }) => {
+            const { username } = credentials
             return {
                 sub: "1234567890",
-                email: "johndoe@example.com",
-                name: "John Doe",
+                email: `${username}@example.com`,
+                name: username,
                 image: "https://example.com/image.jpg",
             }
         },

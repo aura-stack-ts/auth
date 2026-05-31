@@ -39,7 +39,7 @@ describe("signOut API", async () => {
         expect(out).toMatchObject({
             success: true,
             redirect: false,
-            redirectURL: "/",
+            redirectURL: null,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -62,7 +62,7 @@ describe("signOut API", async () => {
         expect(out).toMatchObject({
             success: true,
             redirect: false,
-            redirectURL: "/",
+            redirectURL: null,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -83,7 +83,33 @@ describe("signOut API", async () => {
             },
             redirectTo: "/dashboard",
         })
-        expect(out).toMatchObject({
+        expect(out.headers.get("Location")).toBe("/dashboard")
+        expect(out).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signOut with redirect: false and redirectTo", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "john.doe@example.com",
+        })
+
+        const out = await api.signOut({
+            headers: {
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+            redirect: false,
+            redirectTo: "/dashboard",
+        })
+        expect(out).toEqual({
             success: true,
             redirect: false,
             redirectURL: "/dashboard",

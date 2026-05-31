@@ -10,6 +10,7 @@ export const signInCredentials = async ({
     payload,
     request: requestInit,
     headers: headerInit,
+    redirect = true,
     redirectTo,
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, sessionStrategy, logger } = ctx
@@ -33,19 +34,31 @@ export const signInCredentials = async ({
         const sessionToken = await sessionStrategy.createSession(session)
         const csrfToken = await createCSRF(ctx.jose)
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")
-        const redirectURL = await createRedirectTo(request, redirectTo, ctx)
 
         const headers = new HeadersBuilder(secureApiHeaders)
-            .setHeader("Location", redirectURL)
             .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
             .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
-            .toHeaders()
+
+        let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx)
+        redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
+
+        if (redirect && redirectURL) {
+            headers.setHeader("Location", redirectURL)
+        }
+
+        const shouldRedirectServer = redirect && !!redirectURL
+        const toHeaders = headers.toHeaders()
         return {
             success: true,
-            headers,
-            redirectURL,
-            toResponse: () => Response.json({ success: true, redirectURL }, { headers }),
-        }
+            headers: toHeaders,
+            redirect: shouldRedirectServer,
+            redirectURL: redirect ? null : redirectURL,
+            toResponse: () =>
+                Response.json(
+                    { success: true, redirect: shouldRedirectServer, redirectURL: shouldRedirectServer ? null : redirectURL },
+                    { headers: toHeaders, status: shouldRedirectServer ? 302 : 200 }
+                ),
+        } as SignInCredentialsAPIReturn
     } catch (error) {
         let code = "CREDENTIALS_SIGN_IN_ERROR"
         let message = "An error occurred during credentials sign-in."
@@ -57,10 +70,11 @@ export const signInCredentials = async ({
         const invalidCredentials: SignInCredentialsAPIReturn = {
             success: false,
             headers,
+            redirect: false,
             redirectURL: null,
             error: { code, message },
             toResponse: () => {
-                return Response.json({ success: false, redirectURL: null }, { headers, status: 401 })
+                return Response.json({ success: false, redirect: false, redirectURL: null }, { headers, status: 401 })
             },
         }
         if (error instanceof AuthValidationError) {
