@@ -40,6 +40,7 @@ export const AuthProvider = <DefaultUser extends User = User>({
     initialSession,
     children,
     client,
+    redirect,
 }: AuthProviderProps<DefaultUser>) => {
     const clientRef = useRef<AuthClientInstance<DefaultUser>>(client)
     clientRef.current = client
@@ -93,5 +94,5 @@ export const AuthProvider = <DefaultUser extends User = User>({
         }
     }, [refreshSession])
 
-    return <AuthContext value={{ session, status, client: clientRef.current }}>{children}</AuthContext>
+    return <AuthContext value={{ session, status, client: clientRef.current, redirect }}>{children}</AuthContext>
 }

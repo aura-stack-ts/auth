@@ -76,7 +76,7 @@ export const useSession = <DefaultUser extends User = User>() => {
  * }
  */
 export const useSignIn = () => {
-    const { client } = useAssertContext()
+    const { client, redirect } = useAssertContext()
     const { execute, isPending } = useAsyncAction()
 
     const signIn = useCallback(
@@ -85,12 +85,20 @@ export const useSignIn = () => {
             options?: Options
         ): Promise<SignInReturn<Options>> => {
             return execute(async () => {
-                const value = await client.signIn(oauth, options)
-                broadcast({ type: "session:sync" })
-                return value
+                const value = (await client.signIn(oauth, {
+                    ...options,
+                    redirect: redirect ? false : true,
+                })) as any
+                if (options?.redirect === true && redirect) {
+                    await redirect(value.signInURL!)
+                }
+                if (value.success) {
+                    broadcast({ type: "session:sync" })
+                }
+                return value as unknown as SignInReturn<Options>
             })
         },
-        [client, execute]
+        [client, execute, redirect]
     )
 
     return { signIn, isPending } as const
@@ -121,18 +129,26 @@ export const useSignIn = () => {
  * }
  */
 export const useSignInCredentials = () => {
-    const { client } = useAssertContext()
+    const { client, redirect } = useAssertContext()
     const { execute, isPending } = useAsyncAction()
 
     const signInCredentials = useCallback(
         <Options extends SignInCredentialsOptions>(options: Options): Promise<SignInCredentialsReturn<Options>> => {
             return execute(async () => {
-                const value = await client.signInCredentials(options)
-                broadcast({ type: "session:sync" })
+                const value = await client.signInCredentials({
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true && redirect) {
+                    await redirect(value.redirectURL!)
+                }
+                if (value.success) {
+                    broadcast({ type: "session:sync" })
+                }
                 return value
             })
         },
-        [client, execute]
+        [client, execute, redirect]
     )
 
     return { signInCredentials, isPending } as const
@@ -162,7 +178,7 @@ export const useSignInCredentials = () => {
  * }
  */
 export const useUpdateSession = <DefaultUser extends User = User>() => {
-    const { client } = useAssertContext<DefaultUser>()
+    const { client, redirect } = useAssertContext<DefaultUser>()
     const { execute, isPending } = useAsyncAction()
 
     const updateSession = useCallback(
@@ -170,12 +186,20 @@ export const useUpdateSession = <DefaultUser extends User = User>() => {
             options: Options
         ): Promise<UpdateSessionReturn<Options, DefaultUser>> => {
             return execute(async () => {
-                const updated = await client.updateSession<Options>(options)
-                broadcast({ type: "session:update", payload: (updated as any).session })
+                const updated = await client.updateSession({
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true && redirect) {
+                    await redirect(updated.redirectURL!)
+                }
+                if (updated.success) {
+                    broadcast({ type: "session:update", payload: updated.session })
+                }
                 return updated
             })
         },
-        [client, execute]
+        [client, execute, redirect]
     )
 
     return { updateSession, isPending } as const
@@ -196,18 +220,26 @@ export const useUpdateSession = <DefaultUser extends User = User>() => {
  * }
  */
 export const useSignOut = () => {
-    const { client } = useAssertContext()
+    const { client, redirect } = useAssertContext()
     const { execute, isPending } = useAsyncAction()
 
     const signOut = useCallback(
         <Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>> => {
             return execute(async () => {
-                const value = await client.signOut(options)
-                broadcast({ type: "session:clear" })
-                return value
+                const value = await client.signOut({
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true && redirect) {
+                    await redirect(value.redirectURL!)
+                }
+                if (value.success) {
+                    broadcast({ type: "session:clear" })
+                }
+                return value as unknown as SignOutReturn<Options>
             })
         },
-        [client, execute]
+        [client, execute, redirect]
     )
 
     return { signOut, isPending } as const

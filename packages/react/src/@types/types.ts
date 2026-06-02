@@ -18,7 +18,8 @@ export type AuthStatus = "authenticated" | "unauthenticated" | "pending"
 export interface Context<DefaultUser extends User = User> {
     session: Session | null
     status: AuthStatus
-    client: AuthClientInstance<DefaultUser>
+    client: AuthProviderProps<DefaultUser>["client"]
+    redirect: AuthProviderProps<DefaultUser>["redirect"]
 }
 
 /** Props for {@link AuthProvider}: supply the client and optional SSR session to avoid a flash of loading state. */
@@ -31,6 +32,12 @@ export type AuthProviderProps<DefaultUser extends User = User> = {
      * Pass `null` when the server knows there is no session (skip the initial client fetch).
      */
     initialSession?: Session<DefaultUser> | null
+    /**
+     * Callback for custom client-side redirects. It overrides the default behavior of window.location.assign
+     *
+     * @param url The URL to redirect to, as provided by the auth client (e.g. after signIn or signOut).
+     */
+    redirect?: (url: string) => void | Promise<void>
 }
 
 /**

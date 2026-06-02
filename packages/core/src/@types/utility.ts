@@ -155,3 +155,9 @@ export type AuthResponse<Body = unknown> = Prettify<
         json(): Promise<Body>
     }
 >
+
+export type RequiredKeys<Obj extends object, Keys extends keyof Obj = keyof Obj> = Wrap<
+    {
+        [K in Keys]-?: Obj[K]
+    } & Omit<Obj, Keys>
+>
