@@ -14,7 +14,10 @@ const createMockClient = () =>
         signIn: vi.fn().mockResolvedValue({ signInURL: "/api/auth/signIn" }),
         signInCredentials: vi.fn().mockResolvedValue({ redirectURL: "/dashboard" }),
         signOut: vi.fn().mockResolvedValue({ redirectURL: "/goodbye" }),
-        updateSession: vi.fn().mockResolvedValue(mockSession),
+        updateSession: vi.fn().mockResolvedValue({
+            session: mockSession,
+            redirectURL: "/dashboard",
+        }),
     }) as unknown as AuthClientInstance
 
 const redirectMock = vi.fn()
@@ -100,7 +103,8 @@ describe("@aura-stack/react hooks", () => {
     })
 
     test("useSignIn with redirect: true without redirect function", async () => {
-        vi.stubGlobal("window", { location: { assign: vi.fn() } })
+        const assign = vi.fn()
+        vi.stubGlobal("window", { location: { assign } })
 
         const client = createMockClient()
         const { result } = renderHook(() => useSignIn(), {
@@ -111,7 +115,7 @@ describe("@aura-stack/react hooks", () => {
             await result.current.signIn("github", { redirect: true, redirectTo: "/dashboard" })
         })
 
-        expect(window.location.assign).toHaveBeenCalledWith("/api/auth/signIn")
+        expect(assign).toHaveBeenCalledWith("/api/auth/signIn")
         expect(client.signIn).toHaveBeenCalledWith("github", {
             // Note: redirect is forced to false to handle redirection manually
             // in the hook by `redirect` function from context
@@ -175,6 +179,28 @@ describe("@aura-stack/react hooks", () => {
         expect(client.signInCredentials).toHaveBeenCalledWith({ payload, redirect: false, redirectTo: "/dashboard" })
     })
 
+    test("useSignInCredentials with redirect: true without redirect function", async () => {
+        const assign = vi.fn()
+        vi.stubGlobal("window", { location: { assign } })
+
+        const client = createMockClient()
+        const { result } = renderHook(() => useSignInCredentials(), {
+            wrapper: ({ children }) => wrapper({ children, client }),
+        })
+
+        const payload = { username: "test@example.com", password: "password" }
+        await act(async () => {
+            await result.current.signInCredentials({
+                payload,
+                redirect: true,
+                redirectTo: "/dashboard",
+            })
+        })
+
+        expect(assign).toHaveBeenCalledWith("/dashboard")
+        expect(client.signInCredentials).toHaveBeenCalledWith({ payload, redirect: false, redirectTo: "/dashboard" })
+    })
+
     test("useSignOut with redirect: true (by default)", async () => {
         const client = createMockClient()
         client.getSession = vi.fn().mockResolvedValueOnce(null)
@@ -223,6 +249,25 @@ describe("@aura-stack/react hooks", () => {
         expect(client.signOut).toHaveBeenCalledWith({ redirect: false, redirectTo: "/goodbye" })
     })
 
+    test("useSignOut with redirect: true without redirect function", async () => {
+        const assign = vi.fn()
+        vi.stubGlobal("window", { location: { assign } })
+
+        const client = createMockClient()
+        client.getSession = vi.fn().mockResolvedValueOnce(null)
+
+        const { result } = renderHook(() => useSignOut(), {
+            wrapper: ({ children }) => wrapper({ children, client, initialSession: mockSession }),
+        })
+
+        await act(async () => {
+            await result.current.signOut({ redirect: true, redirectTo: "/goodbye" })
+        })
+
+        expect(assign).toHaveBeenCalledWith("/goodbye")
+        expect(client.signOut).toHaveBeenCalledWith({ redirect: false, redirectTo: "/goodbye" })
+    })
+
     test("useUpdateSession with redirect: true (by default)", async () => {
         const client = createMockClient()
         const { result } = renderHook(() => useUpdateSession(), {
@@ -262,6 +307,24 @@ describe("@aura-stack/react hooks", () => {
             await result.current.updateSession(partial)
         })
 
+        expect(client.updateSession).toHaveBeenCalledWith({ ...partial, redirect: false, redirectTo: "/dashboard" })
+    })
+
+    test("useUpdateSession with redirect: true without redirect function", async () => {
+        const assign = vi.fn()
+        vi.stubGlobal("window", { location: { assign } })
+
+        const client = createMockClient()
+        const { result } = renderHook(() => useUpdateSession(), {
+            wrapper: ({ children }) => wrapper({ children, client, initialSession: mockSession }),
+        })
+
+        const partial = { session: { user: { name: "New Name" } }, redirect: true, redirectTo: "/dashboard" }
+        await act(async () => {
+            await result.current.updateSession(partial)
+        })
+
+        expect(assign).toHaveBeenCalledWith("/dashboard")
         expect(client.updateSession).toHaveBeenCalledWith({ ...partial, redirect: false, redirectTo: "/dashboard" })
     })
 })

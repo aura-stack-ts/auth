@@ -43,6 +43,15 @@ const useAsyncAction = () => {
     return { execute, isPending } as const
 }
 
+const performRedirect = async (redirect: ((url: string) => void | Promise<void>) | undefined, url?: string | null) => {
+    if (!url) return
+    if (redirect) {
+        await redirect(url)
+        return
+    }
+    window.location.assign(url)
+}
+
 /**
  * Gets the current authentication session and status.
  *
@@ -87,10 +96,10 @@ export const useSignIn = () => {
             return execute(async () => {
                 const value = (await client.signIn(oauth, {
                     ...options,
-                    redirect: redirect ? false : true,
+                    redirect: false,
                 })) as any
-                if (options?.redirect === true && redirect) {
-                    await redirect(value.signInURL!)
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.signInURL)
                 }
                 if (value.success) {
                     broadcast({ type: "session:sync" })
@@ -139,8 +148,8 @@ export const useSignInCredentials = () => {
                     ...options,
                     redirect: false,
                 })
-                if (options?.redirect === true && redirect) {
-                    await redirect(value.redirectURL!)
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
                 }
                 if (value.success) {
                     broadcast({ type: "session:sync" })
@@ -190,8 +199,8 @@ export const useUpdateSession = <DefaultUser extends User = User>() => {
                     ...options,
                     redirect: false,
                 })
-                if (options?.redirect === true && redirect) {
-                    await redirect(updated.redirectURL!)
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, updated.redirectURL)
                 }
                 if (updated.success) {
                     broadcast({ type: "session:update", payload: updated.session })
@@ -230,8 +239,8 @@ export const useSignOut = () => {
                     ...options,
                     redirect: false,
                 })
-                if (options?.redirect === true && redirect) {
-                    await redirect(value.redirectURL!)
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
                 }
                 if (value.success) {
                     broadcast({ type: "session:clear" })
