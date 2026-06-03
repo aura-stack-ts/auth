@@ -63,12 +63,13 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         options?: Options
     ): Promise<SignInReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
             const response = await client.get("/signIn/:oauth", {
                 params: {
                     oauth,
                 },
                 searchParams: {
-                    ...options,
+                    redirectTo,
                     redirect: false,
                 },
             })
@@ -87,11 +88,12 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         options: Options
     ): Promise<SignInCredentialsReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
             const response = await client.post("/signIn/credentials", {
                 body: options.payload,
                 // @ts-ignore - Fix type here - go to @aura-stack/router.
                 searchParams: {
-                    ...options,
+                    redirectTo,
                     redirect: false,
                 },
             })
@@ -114,7 +116,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             if (!csrfToken) {
                 throw new AuthClientError("Failed to fetch CSRF token for session update.")
             }
-            const { session } = options ?? {}
+            const { session, redirectTo } = options ?? {}
             if (!session) {
                 return { success: false, session: null } as UpdateSessionReturn<Options, DefaultUser>
             }
@@ -126,7 +128,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                     expires: session.expires ? new Date(session.expires) : undefined,
                 },
                 searchParams: {
-                    ...options,
+                    redirectTo,
                     redirect: false,
                 },
                 headers: {
@@ -154,7 +156,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             // @ts-ignore - Fix type here - go to @aura-stack/router.
             const response = await client.post("/signOut", {
                 searchParams: {
-                    ...options,
+                    redirectTo: options?.redirectTo,
                     redirect: false,
                     token_type_hint: "session_token",
                 },

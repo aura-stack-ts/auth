@@ -93,6 +93,7 @@
     "@aura-stack/tsdown-config": "workspace:*",
     "@testing-library/dom": "catalog:testing-library",
     "@testing-library/react": "catalog:testing-library",
+    "@testing-library/user-event": "catalog:testing-library",
     "vitest": "catalog:vitest",
     "react": "catalog:react",
     "@types/react": "catalog:react"
