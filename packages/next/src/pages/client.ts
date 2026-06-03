@@ -11,4 +11,4 @@ export {
     type AuthClientOptions,
     type AuthProviderProps,
 } from "@aura-stack/react"
-export { AuthProvider } from "@/context"
+export { AuthProvider } from "@/pages/context"

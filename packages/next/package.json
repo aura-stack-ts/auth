@@ -39,6 +39,11 @@
       "import": "./dist/client.js",
       "require": "./dist/client.cjs"
     },
+    "./context": {
+      "types": "./dist/context.d.ts",
+      "import": "./dist/context.js",
+      "require": "./dist/context.cjs"
+    },
     "./oauth": {
       "types": "./dist/oauth/index.d.ts",
       "import": "./dist/oauth/index.js",
@@ -69,6 +74,16 @@
       "import": "./dist/pages/index.js",
       "require": "./dist/pages/index.cjs"
     },
+    "./pages/client": {
+      "types": "./dist/pages/client.d.ts",
+      "import": "./dist/pages/client.js",
+      "require": "./dist/pages/client.cjs"
+    },
+    "./pages/context": {
+      "types": "./dist/pages/context.d.ts",
+      "import": "./dist/pages/context.js",
+      "require": "./dist/pages/context.cjs"
+    },
     "./types": "./dist/@types/index.d.ts"
   },
   "keywords": [],
@@ -84,6 +99,10 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*",
+    "@testing-library/dom": "catalog:testing-library",
+    "@testing-library/react": "catalog:testing-library",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
     "next": "catalog:next",
     "node-mocks-http": "^1.17.2",
     "react": "catalog:react",
