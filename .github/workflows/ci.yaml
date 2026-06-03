@@ -52,7 +52,7 @@ jobs:
       - name: Build packages
         run: pnpm build:prod
       - name: Run type checks
-        run: turbo run type-check --filter=./packages/*
+        run: pnpm type-check:packages
 
       - name: Run tests
         run: pnpm test

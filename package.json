@@ -17,6 +17,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "type-check": "turbo run type-check --parallel",
+    "type-check:packages": "turbo run type-check --parallel --filter=./packages/*",
     "create:integration": "node packages/shared/scripts/integration.js"
   },
   "repository": {
