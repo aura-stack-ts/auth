@@ -15,7 +15,7 @@ import { useRouter } from "next/router"
 const AuthProvider = ({ client, children, initialSession, redirect }: AuthProviderProps) => {
     const router = useRouter()
 
-    const onRedirect = redirect ?? ((to: string) => router.push(to))
+    const onRedirect: (to: string) => void = redirect ?? ((to: string) => router.push(to))
 
     return (
         <Provider client={client} initialSession={initialSession} redirect={onRedirect}>

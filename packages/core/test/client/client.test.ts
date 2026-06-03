@@ -212,6 +212,7 @@ describe("createAuthClient", () => {
         expect(post).toHaveBeenCalledWith("/signIn/credentials", {
             body: { username: "user", password: "pass" },
             searchParams: {
+                redirect: false,
                 redirectTo: undefined,
             },
         })
@@ -238,6 +239,7 @@ describe("createAuthClient", () => {
         expect(post).toHaveBeenCalledWith("/signIn/credentials", {
             body: { username: "user", password: "pass" },
             searchParams: {
+                redirect: false,
                 redirectTo: "/dashboard",
             },
         })
@@ -266,6 +268,7 @@ describe("createAuthClient", () => {
         expect(post).toHaveBeenCalledWith("/signIn/credentials", {
             body: { username: "user", password: "wrong_pass" },
             searchParams: {
+                redirect: false,
                 redirectTo: undefined,
             },
         })
@@ -320,6 +323,10 @@ describe("createAuthClient", () => {
             headers: {
                 "X-CSRF-Token": "csrf_token_1",
             },
+            searchParams: {
+                redirect: false,
+                redirectTo: undefined,
+            },
         })
         expect(response).toEqual({ success: true, session: { user: { id: "user_1", name: "Alice" } } })
     })
@@ -370,6 +377,10 @@ describe("createAuthClient", () => {
             headers: {
                 "X-CSRF-Token": "csrf_token_1",
             },
+            searchParams: {
+                redirect: false,
+                redirectTo: "/dashboard",
+            },
         })
         expect(response).toEqual({ success: true, session: { user: { id: "user_1", name: "Alice" } }, redirectURL: "/dashboard" })
     })
@@ -389,6 +400,7 @@ describe("createAuthClient", () => {
         expect(get).toHaveBeenCalledWith("/csrfToken")
         expect(post).toHaveBeenCalledWith("/signOut", {
             searchParams: {
+                redirect: false,
                 redirectTo: "/logout",
                 token_type_hint: "session_token",
             },

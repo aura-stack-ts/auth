@@ -3,6 +3,7 @@ import { useSignInCredentials } from "@/hooks.ts"
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
 import { createMockClient, wrapper } from "@test/hooks/presets.tsx"
 import { userEvent } from "@testing-library/user-event"
+import type { SubmitEvent } from "react"
 
 const redirectMock = vi.fn()
 
@@ -154,7 +155,7 @@ describe("useSignInCredentials", () => {
         const Page = () => {
             const { signInCredentials, isPending } = useSignInCredentials()
 
-            const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+            const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
                 e.preventDefault()
                 const formData = new FormData(e.currentTarget)
                 const username = formData.get("username") as string
@@ -179,7 +180,6 @@ describe("useSignInCredentials", () => {
 
         await user.type(screen.getByLabelText("Username"), "johndoe")
         await user.type(screen.getByLabelText("Password"), "password")
-        expect(screen.getByRole("button", { name: "Sign In" })).toBeDefined()
         await user.click(screen.getByRole("button", { name: "Sign In" }))
         expect(screen.getByRole("button", { name: "Signing in..." })).toBeDefined()
     })

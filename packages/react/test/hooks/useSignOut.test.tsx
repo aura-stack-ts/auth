@@ -152,7 +152,6 @@ describe("useSignOut", () => {
             wrapper: ({ children }) => wrapper({ children, client, initialSession: mockSession }),
         })
 
-        expect(screen.getByRole("button", { name: "Sign Out" })).toBeDefined()
         await user.click(screen.getByRole("button", { name: "Sign Out" }))
         expect(screen.getByRole("button", { name: "Signing out..." })).toBeDefined()
     })

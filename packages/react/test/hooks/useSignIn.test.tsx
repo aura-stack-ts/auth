@@ -26,7 +26,7 @@ describe("useSignIn", () => {
             await result.current.signIn("github")
         })
 
-        expect(redirectMock).not.toHaveBeenCalledOnce()
+        expect(redirectMock).not.toHaveBeenCalled()
         expect(client.signIn).toHaveBeenCalledWith("github", { redirect: false })
     })
 

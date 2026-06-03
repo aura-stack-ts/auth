@@ -1,10 +1,10 @@
 import { vi } from "vitest"
 import { AuthProvider } from "@/context.tsx"
-import type { ReactNode } from "react"
-import type { AuthClientInstance } from "@/@types/types.ts"
+import type { AuthClientInstance, AuthProviderProps } from "@/@types/types.ts"
+import type { Session, User } from "@aura-stack/auth"
 
-export const mockUser = { id: "1", email: "test@example.com", name: "Test User" }
-export const mockSession = { user: mockUser, expires: new Date(Date.now() + 3600 * 1000).toISOString() }
+export const mockUser = { id: "1", email: "test@example.com", name: "Test User" } as unknown as User
+export const mockSession = { user: mockUser, expires: new Date(Date.now() + 3600 * 1000).toISOString() } as Session
 
 export const createMockClient = () =>
     ({
@@ -16,19 +16,9 @@ export const createMockClient = () =>
             session: mockSession,
             redirectURL: "/dashboard",
         }),
-    }) as unknown as AuthClientInstance
+    }) as Partial<AuthClientInstance> as AuthClientInstance
 
-export const wrapper = ({
-    children,
-    client,
-    initialSession,
-    redirect,
-}: {
-    children: ReactNode
-    client: any
-    initialSession?: any
-    redirect?: any
-}) => (
+export const wrapper = ({ children, client, initialSession, redirect }: AuthProviderProps) => (
     <AuthProvider client={client} initialSession={initialSession} redirect={redirect}>
         {children}
     </AuthProvider>

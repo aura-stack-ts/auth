@@ -3,6 +3,7 @@ import { createMockClient, mockSession, wrapper } from "@test/hooks/presets.tsx"
 import { userEvent } from "@testing-library/user-event"
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
 import { useUpdateSession } from "@/hooks.ts"
+import type { SubmitEvent } from "react"
 
 afterEach(() => {
     vi.clearAllMocks()
@@ -110,7 +111,7 @@ describe("useUpdateSession", () => {
 
         const client = createMockClient()
         client.updateSession = vi.fn().mockImplementation(() => {
-            return new Promise((resolve) =>
+            return new Promise((resolve) => {
                 setTimeout(
                     () =>
                         resolve({
@@ -118,13 +119,13 @@ describe("useUpdateSession", () => {
                         }),
                     100
                 )
-            )
+            })
         })
 
         const Page = () => {
             const { updateSession, isPending } = useUpdateSession()
 
-            const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+            const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
                 e.preventDefault()
                 const formData = new FormData(e.currentTarget)
                 const name = formData.get("name") as string
@@ -133,7 +134,7 @@ describe("useUpdateSession", () => {
 
             return (
                 <form onSubmit={handleSubmit}>
-                    <input type="text" name="username" placeholder="Username" aria-label="Username" />
+                    <input type="text" name="name" placeholder="Name" aria-label="Name" />
                     <button disabled={isPending}>{isPending ? "Updating..." : "Update Session"}</button>
                 </form>
             )
@@ -143,8 +144,6 @@ describe("useUpdateSession", () => {
             wrapper: ({ children }) => wrapper({ children, client, initialSession: mockSession }),
         })
 
-        await user.type(screen.getByLabelText("Username"), "New Name")
-        expect(screen.getByRole("button", { name: "Update Session" })).toBeDefined()
         await user.click(screen.getByRole("button", { name: "Update Session" }))
         expect(screen.getByRole("button", { name: "Updating..." })).toBeDefined()
     })

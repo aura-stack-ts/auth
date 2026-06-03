@@ -76,7 +76,7 @@ export const signInCredentials = <DefaultUser extends User = User>({ api }: Auth
             payload: options.payload,
         })
         await applyCookies(signIn.headers)
-        if (signIn.success && options?.redirectTo) {
+        if (signIn.success && options?.redirectTo && signIn.redirectURL) {
             return redirect(signIn.redirectURL)
         }
         return signIn as NextSignInCredentials<Options>
@@ -93,7 +93,7 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
             headers: await headers(),
         })
         await applyCookies(updated.headers)
-        if (updated.success && options?.redirectTo) {
+        if (updated.success && options?.redirectTo && updated.redirectURL) {
             return redirect(updated.redirectURL)
         }
         return updated as NextUpdateSessionReturn<Options, DefaultUser>

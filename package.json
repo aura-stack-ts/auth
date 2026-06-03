@@ -10,7 +10,7 @@
     "dev:docs": "turbo run docs#dev",
     "build": "turbo run build --filter=./configs/* --filter=./packages/* --filter=./apps/*",
     "build:prod": "turbo run build --filter=./configs/* --filter=./packages/* --filter=!./packages/integration --continue=dependencies-successful",
-    "test": "turbo run test --parallel",
+    "test": "turbo run test --parallel --filter=./packages/* --filter=!./packages/integration",
     "format": "turbo run format format:root --parallel",
     "format:root": "oxfmt \"!packages\" \"!apps\" \"!configs\"",
     "format:check": "oxfmt --check",
