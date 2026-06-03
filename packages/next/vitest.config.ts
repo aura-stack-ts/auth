@@ -7,7 +7,10 @@ const SALT_KEY = createSecretValue(44)
 
 export default defineConfig({
     test: {
-        include: ["test/**/*.test.ts"],
+        include: ["test/**/*.test.ts", "test/**/*.test.tsx"],
+        environment: "node",
+        clearMocks: true,
+        restoreMocks: true,
         coverage: {
             provider: "v8",
             enabled: true,

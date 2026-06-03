@@ -12,6 +12,9 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
     "clean": "rm -rf dist src/_core src/oauth",
     "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
@@ -76,7 +79,13 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*",
-    "react-router": "catalog:react-router"
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "react-router": "catalog:react-router",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "@testing-library/dom": "catalog:testing-library",
+    "@testing-library/react": "catalog:testing-library"
   },
   "peerDependencies": {
     "react-router": ">=7.0.0"

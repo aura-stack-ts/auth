@@ -43,3 +43,6 @@ catalogs:
     "@vitest/coverage-v8": 4.1.4
   valibot:
     valibot: ^1.4.0
+  testing-library:
+    "@testing-library/dom": ^10.4.1
+    "@testing-library/react": ^16.3.2

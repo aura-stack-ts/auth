@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { createMocks, createResponse, RequestOptions, ResponseOptions } from "node-mocks-http"
-import { auth } from "@test/pages/preset"
+import { auth } from "@test/pages-router/preset"
 import { NextApiRequest, NextApiResponse } from "next"
 import { createCSRF } from "@aura-stack/react/crypto"
 import { setResponseHeaders } from "@/pages/handler"
@@ -98,7 +98,8 @@ describe("toHandler", () => {
         expect(res.statusCode).toBe(200)
         expect(res._getJSONData()).toEqual({
             success: true,
-            redirectURL: "/",
+            redirect: false,
+            redirectURL: null,
         })
     })
 
@@ -173,6 +174,7 @@ describe("toHandler", () => {
                 },
                 expires: expect.any(String),
             },
+            redirect: false,
             redirectURL: null,
         })
     })
@@ -204,7 +206,7 @@ describe("toHandler", () => {
         expect(res._getJSONData()).toEqual({
             success: true,
             redirect: false,
-            redirectURL: "/",
+            redirectURL: null,
         })
     })
 })
