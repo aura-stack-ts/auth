@@ -60,6 +60,13 @@ catalogs:
     tailwindcss:
       specifier: 4.1.18
       version: 4.1.18
+  testing-library:
+    '@testing-library/dom':
+      specifier: ^10.4.1
+      version: 10.4.1
+    '@testing-library/react':
+      specifier: ^16.3.2
+      version: 16.3.2
   typescript:
     typescript:
       specifier: ^5.9.2
@@ -497,7 +504,7 @@ importers:
         version: 0.561.0(react@19.2.4)
       nitro:
         specifier: npm:nitro-nightly@latest
-        version: nitro-nightly@3.0.260522-beta(chokidar@5.0.0)(dotenv@17.3.1)(giget@3.1.2)(ioredis@5.10.0)(jiti@2.6.1)(lru-cache@11.2.7)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: nitro-nightly@3.0.1-20260602-161340-ab30554d(chokidar@5.0.0)(dotenv@17.3.1)(giget@3.1.2)(ioredis@5.10.0)(jiti@2.6.1)(lru-cache@11.2.7)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       react:
         specifier: catalog:react
         version: 19.2.4
@@ -817,6 +824,18 @@ importers:
       '@aura-stack/tsdown-config':
         specifier: workspace:*
         version: link:../../configs/tsdown-config
+      '@testing-library/dom':
+        specifier: catalog:testing-library
+        version: 10.4.1
+      '@testing-library/react':
+        specifier: catalog:testing-library
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@types/react':
+        specifier: catalog:react
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: catalog:react
+        version: 19.2.3(@types/react@19.2.14)
       next:
         specifier: catalog:next
         version: 16.1.7(@babel/core@7.29.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -855,10 +874,10 @@ importers:
         specifier: workspace:*
         version: link:../../configs/tsdown-config
       '@testing-library/dom':
-        specifier: ^10.4.1
+        specifier: catalog:testing-library
         version: 10.4.1
       '@testing-library/react':
-        specifier: ^16.3.2
+        specifier: catalog:testing-library
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@types/react':
         specifier: catalog:react
@@ -882,6 +901,24 @@ importers:
       '@aura-stack/tsdown-config':
         specifier: workspace:*
         version: link:../../configs/tsdown-config
+      '@testing-library/dom':
+        specifier: catalog:testing-library
+        version: 10.4.1
+      '@testing-library/react':
+        specifier: catalog:testing-library
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@types/react':
+        specifier: catalog:react
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: catalog:react
+        version: 19.2.3(@types/react@19.2.14)
+      react:
+        specifier: catalog:react
+        version: 19.2.4
+      react-dom:
+        specifier: catalog:react
+        version: 19.2.4(react@19.2.4)
       react-router:
         specifier: catalog:react-router
         version: 7.12.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -7189,8 +7226,8 @@ packages:
   nf3@0.3.17:
     resolution: {integrity: sha512-N9zEWySuJFw+gR0lhS5863YsvNeudOdqRyFvNb+jMXbeTJOdrjDqkCpDginIZfUm0LzT1t1nCRiDeqQm/8kirQ==}
 
-  nitro-nightly@3.0.260522-beta:
-    resolution: {integrity: sha512-Pm0AiQ1nLcreUFZKJcmVI4l9K/ygXoFamIPhc44XJHj9vmt25Rlqjv55frw6sS0L1qHrySpo3xyVVBmR9aTBqA==}
+  nitro-nightly@3.0.1-20260602-161340-ab30554d:
+    resolution: {integrity: sha512-SclO7mj6bVrKyRrj5Yq4zMyJ5DPJEId+4iYGne5on/sm2Nt8BtAuPLDZrfLDff0abHYUaG1YHcatgl6mXdWnoQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -16302,7 +16339,7 @@ snapshots:
 
   nf3@0.3.17: {}
 
-  nitro-nightly@3.0.260522-beta(chokidar@5.0.0)(dotenv@17.3.1)(giget@3.1.2)(ioredis@5.10.0)(jiti@2.6.1)(lru-cache@11.2.7)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)):
+  nitro-nightly@3.0.1-20260602-161340-ab30554d(chokidar@5.0.0)(dotenv@17.3.1)(giget@3.1.2)(ioredis@5.10.0)(jiti@2.6.1)(lru-cache@11.2.7)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.5(srvx@0.11.15)
