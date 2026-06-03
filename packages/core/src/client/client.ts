@@ -89,8 +89,10 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         try {
             const response = await client.post("/signIn/credentials", {
                 body: options.payload,
+                // @ts-ignore - Fix type here - go to @aura-stack/router.
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    ...options,
+                    redirect: false,
                 },
             })
             const json = await response.json()
@@ -118,10 +120,14 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             }
             const user = session.user ?? {}
             const response = await client.patch("/session", {
-                // @ts-ignore - Fixing the type here - go to @aura-stack/router.
+                // @ts-ignore - Fix type here - go to @aura-stack/router.
                 body: {
                     user,
                     expires: session.expires ? new Date(session.expires) : undefined,
+                },
+                searchParams: {
+                    ...options,
+                    redirect: false,
                 },
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -145,9 +151,11 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                 throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
             }
 
+            // @ts-ignore - Fix type here - go to @aura-stack/router.
             const response = await client.post("/signOut", {
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    ...options,
+                    redirect: false,
                     token_type_hint: "session_token",
                 },
                 headers: {

@@ -1,5 +1,5 @@
 import type { Session, User } from "@/@types/session.ts"
-import type { AuthResponse, DeepPartial, Prettify } from "@/@types/utility.ts"
+import type { AuthResponse, DeepPartial, Prettify, RequiredKeys } from "@/@types/utility.ts"
 import type { CredentialsPayload, RouterGlobalContext } from "@/@types/config.ts"
 
 /**
@@ -182,9 +182,20 @@ export interface SignInCredentialsOptions extends OptionsWithRedirectTo {
     payload: CredentialsPayload
 }
 
+export type SignInCredentialsReturnData =
+    /** redirect: true & redirectTo: string */
+    | { success: true; redirect: true; redirectURL: null }
+    /** redirect: false & redirectTo: string */
+    | { success: true; redirect: false; redirectURL: string }
+    /** redirect: false & redirectTo: null | undefined (not set) */
+    /** redirect: true & redirectTo: null | undefined (not set) */
+    | { success: true; redirect: false; redirectURL: null }
+    /** Failed credentials */
+    | { success: false; redirect: false; redirectURL: null }
+
 /** Client-side credentials sign-in return type (redirect mode or manual redirect data). */
 export type SignInCredentialsReturn<Options extends SignInCredentialsOptions> = Options extends { redirect: false }
-    ? { success: true; redirectURL: string } | { success: false; redirectURL: null }
+    ? Extract<SignInCredentialsReturnData, { redirect: false }>
     : void
 
 /** Server/programmatic credentials sign-in options. */
@@ -201,45 +212,12 @@ export interface SignInCredentialsAPIOptions extends APIOptionsWithRedirectTo, A
 }
 
 /** Programmatic credentials sign-in result with response metadata and `toResponse()`. */
-export type SignInCredentialsAPIReturn = AuthActionAPIReturn<
-    /** redirect: true & redirectTo: string */
-    | { success: true; redirect: true; redirectURL: null }
-    /** redirect: false & redirectTo: string */
-    | { success: true; redirect: false; redirectURL: string }
-    /** redirect: false & redirectTo: null | undefined (not set) */
-    /** redirect: true & redirectTo: null | undefined (not set) */
-    | { success: true; redirect: false; redirectURL: null }
-    /** Failed credentials */
-    | { success: false; redirect: false; redirectURL: null }
->
+export type SignInCredentialsAPIReturn = AuthActionAPIReturn<SignInCredentialsReturnData>
 
 /** Client-side sign-out options. */
 export interface SignOutOptions extends OptionsWithRedirectTo {}
 
-/** Client-side sign-out return type (redirect mode or manual redirect data). */
-export type SignOutReturn<Options extends SignOutOptions> = Options extends { redirect: false }
-    ? { success: true; redirect: false; redirectURL: string } | { success: false; redirect: false; redirectURL: null }
-    : void
-
-/** Server/programmatic options for `signOut` API. */
-export interface SignOutAPIOptions extends APIOptionsWithRedirectTo, APIOptionsWithSkipCSRFCheck {
-    /**
-     * Required headers used to execute sign-out.
-     * Must include `session_token` and `csrf_token` cookies for CSRF validation.
-     * @example
-     * {
-     *   Cookie: "session_token=abc123; csrf_token=def456"
-     * }
-     */
-    headers: HeadersInit
-    /**
-     * Optional `Request` object as an alternative to manually providing `headers`.
-     */
-    request?: Request
-}
-
-/** Programmatic sign-out result with redirect metadata and `toResponse()`. */
-export type SignOutAPIReturn = AuthActionAPIReturn<
+export type SignOutReturnData =
     /** redirect: true & redirectTo: string */
     | { success: true; redirect: true; redirectURL: null }
     /** redirect: false & redirectTo: string */
@@ -249,7 +227,17 @@ export type SignOutAPIReturn = AuthActionAPIReturn<
     | { success: true; redirect: false; redirectURL: null }
     /** Failed */
     | { success: false; redirect: false; redirectURL: null }
->
+
+/** Client-side sign-out return type (redirect mode or manual redirect data). */
+export type SignOutReturn<Options extends SignOutOptions> = Options extends { redirect: false }
+    ? Extract<SignOutReturnData, { redirect: false }>
+    : void
+
+/** Server/programmatic options for `signOut` API. */
+export interface SignOutAPIOptions extends RequiredKeys<APIOptionsWithRequest, "headers">, APIOptionsWithSkipCSRFCheck {}
+
+/** Programmatic sign-out result with redirect metadata and `toResponse()`. */
+export type SignOutAPIReturn = AuthActionAPIReturn<SignOutReturnData>
 
 /** Client-side `updateSession` options: partial session payload plus optional redirect behavior. */
 export interface UpdateSessionOptions<DefaultUser extends User = User> extends OptionsWithRedirectTo {
@@ -257,29 +245,29 @@ export interface UpdateSessionOptions<DefaultUser extends User = User> extends O
     session: DeepPartial<Session<DefaultUser>>
 }
 
+export type UpdateSessionReturnData<DefaultUser extends User = User> =
+    /** redirect: true & redirectTo: string */
+    | { success: true; session: Session<DefaultUser>; redirect: true; redirectURL: null }
+    /** redirect: false & redirectTo: string */
+    | { success: true; session: Session<DefaultUser>; redirect: false; redirectURL: string }
+    /** redirect: false & redirectTo: null | undefined (not set) */
+    | { success: true; session: Session<DefaultUser>; redirect: false; redirectURL: null }
+    /** Failed session update */
+    | { success: false; session: null; redirect: false; redirectURL: null }
+
 /** Client-side `updateSession` return type. */
-export type UpdateSessionReturn<Options extends UpdateSessionOptions, DefaultUser extends User = User> = Options extends {
+export type UpdateSessionReturn<
+    Options extends UpdateSessionOptions<DefaultUser>,
+    DefaultUser extends User = User,
+> = Options extends {
     redirect: false
 }
-    ? { success: true; session: Session<DefaultUser> } | { success: false; session: null }
+    ? Extract<UpdateSessionReturnData<DefaultUser>, { redirect: false }>
     : void
 
 /** Server/programmatic options for `updateSession` API. */
 export interface UpdateSessionAPIOptions<DefaultUser extends User = User>
-    extends APIOptionsWithRequest, APIOptionsWithSkipCSRFCheck {
-    /**
-     * Required headers used to execute session update.
-     * Must include `session_token` and `csrf_token` cookies for CSRF validation.
-     * @example
-     * {
-     *  Cookie: "session_token=abc123; csrf_token=def456"
-     * }
-     */
-    headers: HeadersInit
-    /**
-     * Optional `Request` object as an alternative to manually providing `headers`.
-     */
-    request?: Request
+    extends RequiredKeys<APIOptionsWithRequest, "headers">, APIOptionsWithSkipCSRFCheck {
     /**
      * Partial session payload used to update the current session.
      * @see Session
@@ -295,13 +283,4 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User>
 }
 
 /** Programmatic session update result with redirect metadata and `toResponse()`. */
-export type UpdateSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<
-    /** redirect: true & redirectTo: string */
-    | { success: true; session: Session<DefaultUser>; redirect: true; redirectURL: null }
-    /** redirect: false & redirectTo: string */
-    | { success: true; session: Session<DefaultUser>; redirect: false; redirectURL: string }
-    /** redirect: false & redirectTo: null | undefined (not set) */
-    | { success: true; session: Session<DefaultUser>; redirect: false; redirectURL: null }
-    /** Failed session update */
-    | { success: false; session: null; redirect: false; redirectURL: null }
->
+export type UpdateSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<UpdateSessionReturnData<DefaultUser>>
