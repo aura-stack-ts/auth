@@ -9,6 +9,9 @@ on:
       - "configs/**"
       - "packages/**"
       - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - "pnpm-workspace.yaml"
   pull_request:
     branches:
       - master
@@ -17,6 +20,9 @@ on:
       - "configs/**"
       - "packages/**"
       - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - "pnpm-workspace.yaml"
   workflow_dispatch:
 
 concurrency:

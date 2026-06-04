@@ -42,7 +42,7 @@
     "@types/node": "catalog:node",
     "@vitest/coverage-v8": "catalog:vitest",
     "tsdown": "^0.21.8",
-    "turbo": "^2.7.5",
+    "turbo": "^2.9.16",
     "typescript": "catalog:typescript",
     "vitest": "catalog:vitest"
   },

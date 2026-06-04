@@ -64,6 +64,11 @@
       "import": "./dist/_core/shared.js",
       "require": "./dist/_core/shared.cjs"
     },
+    "./cookies": {
+      "types": "./dist/_core/cookies.d.ts",
+      "import": "./dist/_core/cookies.js",
+      "require": "./dist/_core/cookies.cjs"
+    },
     "./types": "./dist/@types/index.d.ts"
   },
   "keywords": [],
