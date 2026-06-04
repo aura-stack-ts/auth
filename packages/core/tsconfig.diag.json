@@ -5,8 +5,9 @@
       "@/*": ["./src/*"]
     },
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "!src/client/client.ts", "!src/client/index.ts"],
-  "exclude": ["node_modules", "dist", "test", "coverage", "dist", "src/client/client.ts", "src/client/index.ts"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "test", "coverage", "dist"]
 }
