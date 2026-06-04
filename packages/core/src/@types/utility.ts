@@ -1,5 +1,5 @@
 import { Type } from "arktype"
-import type { TProperties, TObject, Static, TSchema } from "typebox"
+import type { TProperties, TObject, TSchema } from "typebox"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
 import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer } from "zod/v4"
@@ -36,6 +36,10 @@ export type EditableShapeTypebox<T extends TProperties> = {
     [K in keyof T]: T[K] extends TObject ? Wrap<EditableShapeTypebox<T[K]["properties"]>> : TSchema
 }
 
+export type EditableUser = {
+    [K in keyof User]: any
+}
+
 export type ConfigSchema<T extends Identities> =
     IsZod<T> extends true
         ? ZodObject<T & ZodRawShape>
@@ -51,7 +55,7 @@ export type ValibotShapeToObject<S extends ObjectEntries> = Merge<InferOutput<Ob
 
 export type ArktypeShapeToObject<S extends Type> = S extends Type<infer Shape> ? Wrap<Merge<Shape, User>> : never
 
-export type TypeboxShapeToObject<S extends TProperties> = S extends TProperties ? Wrap<Merge<Static<TObject<S>>, User>> : never
+export type TypeboxShapeToObject<S> = Wrap<Merge<S, User>>
 
 export type EditableShapeArkType<T extends Type> = T extends Type<infer Shape> ? Type<{ [K in keyof Shape]: any }> : never
 
@@ -72,7 +76,9 @@ export type FromShapeToObject<S> = S extends ZodRawShape
         ? ArktypeShapeToObject<S>
         : S extends TProperties
           ? TypeboxShapeToObject<S>
-          : never
+          : S extends User
+            ? S
+            : never
 
 /** Recursively makes every property required. */
 export type DeepRequired<T> = {

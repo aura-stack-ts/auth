@@ -91,7 +91,7 @@
   "license": "MIT",
   "dependencies": {
     "@aura-stack/jose": "workspace:*",
-    "@aura-stack/router": "^0.7.0",
+    "@aura-stack/router": "^0.7.1",
     "arktype": "^2.2.0",
     "typebox": "^1.1.38",
     "valibot": "catalog:valibot",

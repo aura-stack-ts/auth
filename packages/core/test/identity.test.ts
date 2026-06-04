@@ -188,13 +188,13 @@ describe("createIdentity", () => {
             }),
         })
 
-        const auth = createAuth({
+        type ExpectedIdentity = Static<typeof Schema>
+        const auth = createAuth<ExpectedIdentity>({
             oauth: [],
             identity: {
-                schema: Schema,
+                schema: Schema as any,
             },
         })
-        type ExpectedIdentity = Static<typeof Schema>
         expectTypeOf<ExpectedIdentity>().toEqualTypeOf<InferUser<typeof auth>>()
     })
 })

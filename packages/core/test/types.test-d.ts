@@ -143,7 +143,7 @@ describe("createAuth", () => {
                 Partial<
                     {
                         sub: string
-                        role?: string | undefined
+                        role: Typebox.TOptional<Typebox.TString>
                         name?: string | null | undefined
                         image?: string | null | undefined
                         email?: string | null | undefined
@@ -226,7 +226,7 @@ describe("createAuth", () => {
     ).toEqualTypeOf<
         (options: GetSessionAPIOptions) => Promise<
             GetSessionAPIReturn<{
-                role?: string | undefined
+                role: Typebox.TOptional<Typebox.TString>
                 sub: string
                 name?: string | null | undefined
                 image?: string | null | undefined

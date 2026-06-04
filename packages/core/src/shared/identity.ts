@@ -3,7 +3,13 @@ import * as valibot from "valibot"
 import { Type as Typebox } from "typebox"
 import { type, type Type } from "arktype"
 import { isArkType, isTypeboxEntries, isValibotEntries, isZodEntries } from "@/shared/assert.ts"
-import type { EditableShape, EditableShapeArkType, EditableShapeTypebox, EditableShapeValibot } from "@/@types/utility.ts"
+import type {
+    EditableShape,
+    EditableShapeArkType,
+    EditableShapeTypebox,
+    EditableShapeValibot,
+    EditableUser,
+} from "@/@types/utility.ts"
 
 export type {
     InferUser,
@@ -63,6 +69,7 @@ export type Identities =
     | EditableShapeValibot<UserShapeValibot>
     | EditableShapeArkType<UserShapeArkType>
     | EditableShapeTypebox<UserShapeTypeBox>
+    | EditableUser
 
 type ReturnShapeType<T> =
     T extends EditableShape<UserShape>
