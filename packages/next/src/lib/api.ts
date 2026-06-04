@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { cookies, headers } from "next/headers"
+import { parseSetCookie } from "@aura-stack/react/cookies"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type {
     NextSignInCredentials,
@@ -20,13 +21,12 @@ import type {
 /**
  * Internal helper to sync Set-Cookie headers from Aura Auth to Next.js cookie store.
  */
-async function applyCookies(responseHeaders: Headers) {
+const setCookies = async (responseHeaders: Headers) => {
     const cookieStore = await cookies()
     const setCookies = responseHeaders.getSetCookie()
     for (const cookieStr of setCookies) {
-        const [nameValue] = cookieStr.split(";").map((s) => s.trim())
-        const [name, value] = nameValue.split("=")
-        cookieStore.set(name, value, {})
+        const { name, value, ...options } = parseSetCookie(cookieStr)
+        cookieStore.set(name, value ?? "", options)
     }
 }
 
@@ -56,12 +56,12 @@ export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<De
         const signIn = await api.signIn(provider, {
             headers: await headers(),
             ...options,
-            redirect: false,
+            redirect: !!options?.redirect,
         })
         if (options?.redirect === false) {
             return signIn as NextSignInReturn<Options>
         }
-        if (signIn.success && options?.redirectTo) {
+        if (signIn.success && signIn.signInURL) {
             return redirect(signIn.signInURL)
         }
         return signIn as NextSignInReturn<Options>
@@ -73,10 +73,10 @@ export const signInCredentials = <DefaultUser extends User = User>({ api }: Auth
         const signIn = await api.signInCredentials({
             headers: await headers(),
             ...options,
-            payload: options.payload,
+            redirect: !!options.redirect,
         })
-        await applyCookies(signIn.headers)
-        if (signIn.success && options?.redirectTo && signIn.redirectURL) {
+        await setCookies(signIn.headers)
+        if (signIn.success && signIn.redirectURL) {
             return redirect(signIn.redirectURL)
         }
         return signIn as NextSignInCredentials<Options>
@@ -88,12 +88,13 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
         options: Options
     ): Promise<NextUpdateSessionReturn<Options, DefaultUser>> => {
         const updated = await api.updateSession({
-            ...options,
-            session: options.session,
             headers: await headers(),
+            ...options,
+            redirect: !!options.redirect,
+            session: options.session,
         })
-        await applyCookies(updated.headers)
-        if (updated.success && options?.redirectTo && updated.redirectURL) {
+        await setCookies(updated.headers)
+        if (updated.success && updated.redirectURL) {
             return redirect(updated.redirectURL)
         }
         return updated as NextUpdateSessionReturn<Options, DefaultUser>
@@ -105,8 +106,9 @@ export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<D
         const out = await api.signOut({
             headers: await headers(),
             ...options,
+            redirect: !!options?.redirect,
         })
-        await applyCookies(out.headers)
+        await setCookies(out.headers)
         if (out.success && out.redirectURL) {
             return redirect(out.redirectURL)
         }
