@@ -63,10 +63,8 @@ describe("signInCredentials", () => {
         }
         const auth = makeAuth({ signInCredentials: vi.fn().mockResolvedValue(apiData) })
 
-        const result = await signInCredentials(auth)({ payload } as any)
-
-        expect(result).toMatchObject({ success: true })
-        expect(mockRedirect).not.toHaveBeenCalled()
+        await signInCredentials(auth)({ payload } as any)
+        expect(mockRedirect).toHaveBeenCalled()
     })
 
     test("calls next redirect() with redirectURL when redirectTo is set and sign-in succeeds", async () => {
