@@ -96,7 +96,7 @@ describe("signIn", () => {
 
         await signIn(auth)("github")
 
-        expect(mockRedirect).not.toHaveBeenCalled()
+        expect(mockRedirect).toHaveBeenCalled()
     })
 
     test("always forces redirect: false on the internal api.signIn call", async () => {

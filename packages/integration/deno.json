@@ -10,7 +10,8 @@
     "./oauth": "./src/oauth/index.ts",
     "./identity": "./src/_core/identity.ts",
     "./crypto": "./src/_core/crypto.ts",
-    "./shared": "./src/_core/shared.ts"
+    "./shared": "./src/_core/shared.ts",
+    "./cookies": "src/_core/cookies.ts"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/**/*.tsx", "README.md", "CHANGELOG.md"]

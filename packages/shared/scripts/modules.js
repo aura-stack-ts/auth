@@ -2,7 +2,7 @@ import { parseArgs } from "node:util"
 import { join, parse, resolve } from "node:path"
 import { glob, mkdir, readFile, writeFile } from "node:fs/promises"
 
-const coreModules = ["crypto", "identity", "shared"]
+const coreModules = ["crypto", "identity", "shared", "cookies"]
 const jsonExports = [
     {
         name: "./oauth",

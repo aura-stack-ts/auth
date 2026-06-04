@@ -12,6 +12,7 @@
     "./identity": "./src/_core/identity.ts",
     "./crypto": "./src/_core/crypto.ts",
     "./shared": "./src/_core/shared.ts",
+    "./cookies": "./src/_core/cookies.ts",
     "./types": "./src/@types/index.ts"
   },
   "publish": {

@@ -71,6 +71,11 @@
       "types": "./dist/shared/index.d.ts",
       "import": "./dist/shared/index.js",
       "require": "./dist/shared/index.cjs"
+    },
+    "./cookies": {
+      "types": "./dist/shared/cookies.d.ts",
+      "import": "./dist/shared/cookies.js",
+      "require": "./dist/shared/cookies.cjs"
     }
   },
   "keywords": [

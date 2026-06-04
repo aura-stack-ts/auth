@@ -9,6 +9,9 @@ on:
       - "configs/**"
       - "packages/**"
       - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - "pnpm-workspace.yaml"
   pull_request:
     branches:
       - master
@@ -17,6 +20,9 @@ on:
       - "configs/**"
       - "packages/**"
       - "pnpm-lock.yaml"
+      - "turbo.json"
+      - "package.json"
+      - "pnpm-workspace.yaml"
   workflow_dispatch:
 
 concurrency:
@@ -50,7 +56,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm build:prod
+        run: pnpm build:packages
       - name: Run type checks
         run: pnpm type-check:packages
 

@@ -11,5 +11,6 @@ export default defineConfig({
         "src/shared/identity.ts",
         "src/shared/crypto.ts",
         "src/shared/index.ts",
+        "src/shared/cookies.ts",
     ],
 })

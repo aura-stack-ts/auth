@@ -12,6 +12,7 @@
     "./crypto": "./src/shared/crypto.ts",
     "./shared": "./src/shared/index.ts",
     "./types": "./src/@types/index.ts",
+    "./cookies": "./src/shared/cookies.ts",
     "./oauth": "./src/oauth/index.ts",
     "./oauth/atlassian": "./src/oauth/atlassian.ts",
     "./oauth/bitbucket": "./src/oauth/bitbucket.ts",
