@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in an [Astro](https://astro.build/) application.
+This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/introduction) in an [Astro](https://astro.build/) application.
 
 ## Getting Started
 

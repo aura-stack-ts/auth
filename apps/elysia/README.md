@@ -4,7 +4,7 @@
 
 **Demonstration app**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Elysia](https://elysiajs.com/)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [Elysia](https://elysiajs.com/)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in a [Elysia](https://elysiajs.com/) application.
+This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/introduction) in a [Elysia](https://elysiajs.com/) application.
 
 This integration utilizes the dedicated [`@aura-stack/elysia`](../../packages/elysia) package, which provides standard middlewares and first-class TypeScript support for Elysia applications.
 

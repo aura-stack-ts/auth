@@ -4,7 +4,7 @@
 
 **Demonstration app**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Oak](https://oakserver.org/)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [Oak](https://oakserver.org/)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in a
+This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/introduction) in a
 [Oak](https://oakserver.org/) application.
 
 ## Getting Started

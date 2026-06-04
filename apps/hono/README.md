@@ -4,7 +4,7 @@
 
 **Integration Example App**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Hono](https://hono.dev/)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [Hono](https://hono.dev/)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates **Aura Auth** authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in a [Hono](https://hono.dev/) application.
+This project demonstrates **Aura Auth** authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/introduction) in a [Hono](https://hono.dev/) application.
 
 This integration utilizes the dedicated [`@aura-stack/hono`](../../packages/hono) package, which provides standard middlewares and first-class TypeScript support for Hono applications.
 

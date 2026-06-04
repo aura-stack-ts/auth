@@ -12,7 +12,7 @@
  
 ## Overview
  
-This project demonstrates **Aura Auth** authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in an [Express](https://expressjs.com/) application.
+This project demonstrates **Aura Auth** authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/introduction) in an [Express](https://expressjs.com/) application.
  
 This integration utilizes the dedicated [`@aura-stack/express`](../../packages/express) package, which provides standard middlewares and first-class TypeScript support for Express applications.
  

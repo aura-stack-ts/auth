@@ -4,7 +4,7 @@
 
 **Demonstration app**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Cloudflare Workers](https://developers.cloudflare.com/workers/get-started/guide/)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [Cloudflare Workers](https://developers.cloudflare.com/workers/get-started/guide/)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in a
+This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/introduction) in a
 [Cloudflare Workers](https://developers.cloudflare.com/workers/get-started/guide/) application.
 
 ## Getting Started

@@ -4,7 +4,7 @@
 
 **Demonstration app**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Nuxt](https://nuxt.com/)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [Nuxt](https://nuxt.com/)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in an [Nuxt](https://nuxt.com/) application.
+This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/introduction) in an [Nuxt](https://nuxt.com/) application.
 
 ## Getting Started
 

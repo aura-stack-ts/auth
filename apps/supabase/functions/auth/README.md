@@ -4,7 +4,7 @@
 
 **Demonstration app**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Supabase Edge Functions](https://supabase.com/docs/guides/functions)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [Supabase Edge Functions](https://supabase.com/docs/guides/functions)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in a [Supabase Edge Functions](https://supabase.com/docs/guides/functions) application.
+This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/introduction) in a [Supabase Edge Functions](https://supabase.com/docs/guides/functions) application.
 
 ## Getting Started
 
