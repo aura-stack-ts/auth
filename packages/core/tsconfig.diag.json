@@ -7,6 +7,6 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "test", "coverage", "dist"]
+  "include": ["src", "!src/client/client.ts", "!src/client/index.ts"],
+  "exclude": ["node_modules", "dist", "test", "coverage", "dist", "src/client/client.ts", "src/client/index.ts"]
 }
