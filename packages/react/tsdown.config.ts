@@ -16,4 +16,8 @@ export default defineConfig({
         "src/_core/cookies.ts",
         "src/@types/index.ts",
     ],
+    deps: {
+        ...tsdownConfig.deps,
+        neverBundle: ["react", "react-dom"],
+    },
 })

@@ -1,6 +1,6 @@
 import { describe, expect, test, vi, beforeEach } from "vitest"
 import { render, screen } from "@testing-library/react"
-import type { AuthClientInstance, AuthProviderProps } from "@/@types"
+import type { AuthClientInstance, AuthProviderProps } from "@/@types/index"
 
 /**
  * vi.hoisted ensures mock references are stable across the hoisting boundary —

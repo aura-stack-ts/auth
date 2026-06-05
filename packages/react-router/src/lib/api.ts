@@ -7,7 +7,7 @@ import type {
     ReactRouterSignOutReturn,
     ReactRouterUpdateSessionReturn,
     ReactRouterUpdateSessionAPIOptions,
-} from "@/@types"
+} from "@/@types/index"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type { BuiltInOAuthProvider, GetSessionAPIOptions, LiteralUnion } from "@aura-stack/react/types"
 
@@ -30,7 +30,7 @@ export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<De
     return async <Options extends ReactRouterSignInAPIOptions>(
         providerId: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
-    ): Promise<ReactRouterSignInReturn<Options>> => {
+    ) => {
         const signIn = await api.signIn(providerId, options)
         if (options?.redirect === false) {
             return signIn as ReactRouterSignInReturn<Options>

@@ -16,7 +16,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
     "clean": "rm -rf dist src/_core src/oauth",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "find dist -type f -name \"*.cts\" -delete",
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js --from react"
   },

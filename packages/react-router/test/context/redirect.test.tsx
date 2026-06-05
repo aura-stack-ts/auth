@@ -1,7 +1,7 @@
 import { describe, expect, test, vi, beforeEach } from "vitest"
 import { render, screen, fireEvent, act } from "@testing-library/react"
 import { useSignOut, useSignIn } from "@aura-stack/react"
-import type { AuthClientInstance } from "@/@types"
+import type { AuthClientInstance } from "@/@types/index"
 
 const mockNavigate = vi.hoisted(() => vi.fn())
 

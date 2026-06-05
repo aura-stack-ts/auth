@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist src/_core src/oauth",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "find dist -type f -name \"*.cts\" -delete",
     "prepublishOnly": "pnpm clean:cts && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js"
   },
