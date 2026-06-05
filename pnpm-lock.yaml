@@ -507,7 +507,7 @@ importers:
         version: 0.561.0(react@19.2.4)
       nitro:
         specifier: npm:nitro-nightly@latest
-        version: nitro-nightly@3.0.1-20260604-184855-0a07991c(chokidar@5.0.0)(dotenv@17.3.1)(giget@3.1.2)(ioredis@5.10.0)(jiti@2.6.1)(lru-cache@11.2.7)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: nitro-nightly@3.0.1-20260605-145636-4ab22a9d(chokidar@5.0.0)(dotenv@17.3.1)(giget@3.1.2)(ioredis@5.10.0)(jiti@2.6.1)(lru-cache@11.2.7)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       react:
         specifier: catalog:react
         version: 19.2.4
@@ -673,8 +673,8 @@ importers:
         specifier: workspace:*
         version: link:../jose
       '@aura-stack/router':
-        specifier: ^0.7.1
-        version: 0.7.1(arktype@2.2.0)(typebox@1.1.38)(valibot@1.4.0(typescript@5.9.3))(zod@4.3.5)
+        specifier: ^0.7.2
+        version: 0.7.2(arktype@2.2.0)(typebox@1.1.38)(valibot@1.4.0(typescript@5.9.3))(zod@4.3.5)
       arktype:
         specifier: ^2.2.0
         version: 2.2.0
@@ -1013,8 +1013,8 @@ packages:
   '@astrojs/yaml2ts@0.2.3':
     resolution: {integrity: sha512-PJzRmgQzUxI2uwpdX2lXSHtP4G8ocp24/t+bZyf5Fy0SZLSF9f9KXZoMlFM/XCGue+B0nH/2IZ7FpBYQATBsCg==}
 
-  '@aura-stack/router@0.7.1':
-    resolution: {integrity: sha512-8Hw6TwmGglPCKTnd9qQAak6mL5petDvGg6C2CnEPYxAbz0tkTBWph+EIN12xJlWVDv72qwBL6Tv3KDkKNbl37A==}
+  '@aura-stack/router@0.7.2':
+    resolution: {integrity: sha512-Swxm9SDvJEmM+V3rxjyOm7Fvysnnw//e/7ZXS+7Gn01J9MD3EJNJDOOFKmlmtVwlPoLtLf/NVNGCMji4kb5kcw==}
     peerDependencies:
       arktype: ^2.0.0
       typebox: ^1.1.38
@@ -7268,8 +7268,8 @@ packages:
   nf3@0.3.17:
     resolution: {integrity: sha512-N9zEWySuJFw+gR0lhS5863YsvNeudOdqRyFvNb+jMXbeTJOdrjDqkCpDginIZfUm0LzT1t1nCRiDeqQm/8kirQ==}
 
-  nitro-nightly@3.0.1-20260604-184855-0a07991c:
-    resolution: {integrity: sha512-qfSO9IQLP37UMei9r634Sjq6axyOvTB/4gBow0d10LXUDFdTppGoMHJ8TGbKGE7CwP5GTS0/I4ylqBrGiUhTww==}
+  nitro-nightly@3.0.1-20260605-145636-4ab22a9d:
+    resolution: {integrity: sha512-3nYxRiivfZ5/QEP9aNqZxfU+DlKuApNf7qamc3ieerbiOW6qkXHrjHXpph2ZY2SRzRbfw0g/J6Ewxtrg7PqRGQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -9745,7 +9745,7 @@ snapshots:
     dependencies:
       yaml: 2.8.2
 
-  '@aura-stack/router@0.7.1(arktype@2.2.0)(typebox@1.1.38)(valibot@1.4.0(typescript@5.9.3))(zod@4.3.5)':
+  '@aura-stack/router@0.7.2(arktype@2.2.0)(typebox@1.1.38)(valibot@1.4.0(typescript@5.9.3))(zod@4.3.5)':
     dependencies:
       cookie: 1.1.1
     optionalDependencies:
@@ -15103,7 +15103,7 @@ snapshots:
   h3@2.0.1-rc.16(crossws@0.4.5(srvx@0.11.16)):
     dependencies:
       rou3: 0.8.1
-      srvx: 0.11.15
+      srvx: 0.11.16
     optionalDependencies:
       crossws: 0.4.5(srvx@0.11.16)
 
@@ -16378,7 +16378,7 @@ snapshots:
 
   nf3@0.3.17: {}
 
-  nitro-nightly@3.0.1-20260604-184855-0a07991c(chokidar@5.0.0)(dotenv@17.3.1)(giget@3.1.2)(ioredis@5.10.0)(jiti@2.6.1)(lru-cache@11.2.7)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)):
+  nitro-nightly@3.0.1-20260605-145636-4ab22a9d(chokidar@5.0.0)(dotenv@17.3.1)(giget@3.1.2)(ioredis@5.10.0)(jiti@2.6.1)(lru-cache@11.2.7)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.5(srvx@0.11.16)
