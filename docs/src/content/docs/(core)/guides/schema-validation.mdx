@@ -7,7 +7,7 @@ Aura Auth provides the `identity.schema` configuration option for type extension
 
 Aura Auth supports `zod`, `valibot`, `arktype` and `typebox` schemas for validation. You can choose the one that best fits your needs, based on the constraints, limitations and features of each library.
 
-For each library, its provided the default `Identity` schemas, which you can extend to create your own custom schema. This allows you to add additional fields or constraints to the user identity data while still leveraging the built-in validation and type inference capabilities of Aura Auth. They schemas contains `sub`, `name`, `email` and `image` fields by default, but you can extend it with any additional fields you need.
+For each library, Aura Auth provides a default `Identity` schema, which you can extend to create your own custom schema. This allows you to add additional fields or constraints to user identity data while leveraging built-in validation across all supported libraries, and built-in type inference where supported (zod, valibot, and arktype). The default `Identity` schema contains `sub`, `name`, `email`, and `image` fields, but you can extend it with any additional fields you need. TypeBox is supported for validation, but does not support direct type inference here.
 
 <Tabs items={["zod", "valibot", "arktype", "typebox"]} groupId="schema-validation" persist>
 
@@ -110,7 +110,7 @@ The `User` and `Session` types can be inferred from the auth configuration using
 ```ts title="lib/auth.ts" lineNumbers
 import { z } from "zod"
 import { createAuth } from "@aura-stack/auth"
-import { UserIdentity, type UserFrom, type SessionFrom, type UserFrom, type SessionFrom } from "@aura-stack/auth/identity"
+import { UserIdentity, type UserFrom, type SessionFrom, type InferUser, type InferSession } from "@aura-stack/auth/identity"
 
 const schema = UserIdentity.extend({
   role: z.enum(["admin", "user"]),
