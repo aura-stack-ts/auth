@@ -2,7 +2,7 @@ import { createContext, useCallback, useEffect, useRef, useState } from "react"
 import type { Session, User } from "@aura-stack/auth"
 import type { AuthClientInstance, AuthProviderProps, BroadcastMessage, Context } from "@/@types/types.ts"
 
-export { AuthProviderProps }
+export type { AuthProviderProps }
 
 export const AuthContext = createContext<Context | undefined>(undefined)
 

@@ -1,8 +1,8 @@
 import { createSecret } from "@/secret.ts"
 import { KeyDerivationError } from "@/errors.ts"
 import { encoder, getSubtleCrypto } from "@/crypto.ts"
-import { SecretInput } from "./index.ts"
-import { isJWKKey } from "./assert.ts"
+import { isJWKKey } from "@/assert.ts"
+import type { SecretInput } from "@/index.ts"
 
 /**
  * Generate a derived key using HKDF (HMAC-based Extract-and-Expand Key Derivation Function)

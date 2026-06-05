@@ -1,6 +1,6 @@
 import { getEnv, getEnvBoolean } from "@/shared/env.ts"
+import type { Identities } from "./identity.ts"
 import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
-import { Identities } from "./identity.ts"
 
 /**
  * Log message definitions organized by category.

@@ -4,6 +4,7 @@
  */
 import type {
     Prettify,
+    GetSessionAPIOptions,
     SignInAPIOptions,
     SignInAPIReturn,
     SignInCredentialsAPIOptions,
@@ -14,7 +15,9 @@ import type {
     UpdateSessionAPIReturn,
     UpdateSessionOptions,
     User,
+    Session,
 } from "@aura-stack/react/types"
+import type { BuiltInOAuthProvider, LiteralUnion } from "@aura-stack/react/types"
 
 /** Core `signIn` options plus the incoming `Request` (required in React Router data APIs). */
 export type ReactRouterSignInAPIOptions = Prettify<
@@ -71,3 +74,18 @@ export type ReactRouterUpdateSessionReturn<
 }
     ? UpdateSessionAPIReturn<DefaultUser>
     : Response
+
+export interface ReactRouterAPI<DefaultUser extends User = User> {
+    getSession: (options: GetSessionAPIOptions) => Promise<Session<DefaultUser> | null>
+    signIn: <Options extends ReactRouterSignInAPIOptions>(
+        providerId: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<ReactRouterSignInReturn<Options>>
+    signInCredentials: <Options extends ReactRouterSignInCredentialsAPIOptions>(
+        options: Options
+    ) => Promise<ReactRouterSignInCredentialsReturn<Options>>
+    updateSession: <Options extends ReactRouterUpdateSessionAPIOptions<DefaultUser>>(
+        options: Options
+    ) => Promise<ReactRouterUpdateSessionReturn<Options, DefaultUser>>
+    signOut: <Options extends ReactRouterSignOutAPIOptions>(options: Options) => Promise<ReactRouterSignOutReturn<Options>>
+}

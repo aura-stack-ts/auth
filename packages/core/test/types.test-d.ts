@@ -4,12 +4,12 @@ import { createAuth } from "@/createAuth.ts"
 import { z, ZodOptional, ZodString } from "zod/v4"
 import { Type as Typebox } from "typebox"
 import {
-    Identities,
     UserIdentity,
     UserIdentityArkType,
     UserIdentityTypeBox,
     UserIdentityValibot,
-    UserShapeValibot,
+    type Identities,
+    type UserShapeValibot,
 } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
 import type {

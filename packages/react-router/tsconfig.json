@@ -5,7 +5,7 @@
       "@/*": ["./src/*"],
       "@test/*": ["./test/*"]
     },
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": true
   },
   "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]

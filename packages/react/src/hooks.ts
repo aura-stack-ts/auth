@@ -1,5 +1,5 @@
 "use client"
-import { User } from "@aura-stack/auth"
+import type { User } from "@aura-stack/auth"
 import { use, useCallback, useTransition } from "react"
 import { AuthContext, broadcast } from "@/context.tsx"
 import type {

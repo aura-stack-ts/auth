@@ -1,9 +1,10 @@
 import { createAuth as createAuthInstance } from "@aura-stack/react/server"
 import { api } from "@/lib/api"
 import type { AuthConfig } from "@aura-stack/react"
-import type { Identities } from "@aura-stack/react/identity"
+import type { ReactRouterInstance } from "@/@types/index"
+import type { FromShapeToObject, Identities } from "@aura-stack/react/identity"
 
-export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>) => {
+export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>): ReactRouterInstance<Identity> => {
     const auth = createAuthInstance<Identity>(config)
     return {
         /**
@@ -14,7 +15,7 @@ export const createAuth = <Identity extends Identities>(config: AuthConfig<Ident
         /**
          * Built-in API functions for server-side operations related to the auth flows.
          */
-        api: api(auth),
+        api: api<FromShapeToObject<Identity>>(auth),
         /**
          * The handlers object contains the HTTP request handlers.
          */

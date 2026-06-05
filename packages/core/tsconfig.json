@@ -5,9 +5,10 @@
       "@/*": ["./src/*"],
       "@test/*": ["./test/*"]
     },
+    "noEmit": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]

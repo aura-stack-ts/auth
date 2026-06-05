@@ -3,11 +3,11 @@ import * as valibot from "valibot"
 import { type } from "arktype"
 import { formatZodError } from "@/shared/utils.ts"
 import { IsObject, Type as Typebox } from "typebox"
-import { IdentityConfig } from "@/@types/config.ts"
 import { AuthValidationError } from "@/shared/errors.ts"
 import { createValidator } from "@/validator/validator.ts"
 import { UserIdentity, type SchemaTypes } from "@/shared/identity.ts"
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
+import type { IdentityConfig } from "@/@types/config.ts"
 
 export const deriveSchema = <Schema extends SchemaTypes>(
     schema: Schema,

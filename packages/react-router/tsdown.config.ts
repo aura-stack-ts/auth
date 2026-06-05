@@ -3,7 +3,7 @@ import { tsdownConfig } from "@aura-stack/tsdown-config"
 
 export default defineConfig({
     ...tsdownConfig,
-    platform: "neutral",
+    platform: "browser",
     entry: [
         "src/index.ts",
         "src/client.tsx",
