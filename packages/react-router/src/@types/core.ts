@@ -1,1 +1,1 @@
-export * from "@aura-stack/react/types"
+export type * from "@aura-stack/react/types"

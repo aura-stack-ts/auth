@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Rate limiter for @aura-stack/auth",
+  "description": "Rate limiting utilities for TypeScript and JavaScript applications with support for authentication flows powered by Aura Auth.",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "tsdown",
@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "clean:cts": "find dist -type f -name \"*.cts\" -delete",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm build && pnpm clean:cts"
   },
   "repository": {
@@ -29,7 +29,20 @@
   "files": [
     "dist"
   ],
-  "keywords": [],
+  "keywords": [
+    "rate-limiter",
+    "rate-limit",
+    "throttling",
+    "api",
+    "security",
+    "authentication",
+    "ddos",
+    "abuse-protection",
+    "typescript",
+    "javascript",
+    "nodejs",
+    "edge-runtime"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

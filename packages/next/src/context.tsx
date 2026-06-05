@@ -1,8 +1,8 @@
 "use client"
 
-import { User } from "@aura-stack/react"
 import { AuthProvider as Provider, type AuthProviderProps } from "@aura-stack/react/context"
 import { useRouter } from "next/navigation"
+import type { User } from "@aura-stack/react"
 
 /**
  * Wrapper component that provides authentication context for Next.js App Router applications.

@@ -1,9 +1,9 @@
-import { DeviceProviderCredentials } from "@/@types/device.ts"
-import { LiteralUnion } from "@/@types/index.ts"
 import { github } from "@/providers/github.ts"
 import { DeviceProviderCredentialsSchema } from "@/schemas.ts"
 import { getEnv } from "@/shared/env.ts"
 import { pick, safeParse } from "valibot"
+import type { LiteralUnion } from "@/@types/index.ts"
+import type { DeviceProviderCredentials } from "@/@types/device.ts"
 
 export * from "@/providers/github.ts"
 

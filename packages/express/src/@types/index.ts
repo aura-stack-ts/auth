@@ -1,7 +1,7 @@
-import { LocalsWithSession } from "@/lib/with-auth.ts"
-import { AuthInstance } from "@aura-stack/auth"
-import { FromShapeToObject, Identities } from "@aura-stack/auth/identity"
 import type { Request, RequestHandler, Response } from "express"
+import type { AuthInstance } from "@aura-stack/auth"
+import type { LocalsWithSession } from "@/lib/with-auth.ts"
+import type { FromShapeToObject, Identities } from "@aura-stack/auth/identity"
 
 /**
  * The ExpressInstance type represents the shape of the object returned by the `createAuth`

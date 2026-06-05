@@ -1,9 +1,9 @@
 import { describe, test, expect } from "vitest"
-import { createMocks, createResponse, RequestOptions, ResponseOptions } from "node-mocks-http"
+import { createMocks, createResponse, type RequestOptions, type ResponseOptions } from "node-mocks-http"
 import { auth } from "@test/pages-router/preset"
-import { NextApiRequest, NextApiResponse } from "next"
 import { createCSRF } from "@aura-stack/react/crypto"
 import { setResponseHeaders } from "@/pages/handler"
+import type { NextApiRequest, NextApiResponse } from "next"
 
 const createHandler = async (reqOptions?: RequestOptions, resOptions?: ResponseOptions) => {
     if (reqOptions?.body) {

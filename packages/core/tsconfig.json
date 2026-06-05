@@ -4,11 +4,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@test/*": ["./test/*"]
-    },
-    "noEmit": true,
-    "skipLibCheck": true,
-    "verbatimModuleSyntax": true,
-    "allowImportingTsExtensions": true
+    }
   },
   "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]
