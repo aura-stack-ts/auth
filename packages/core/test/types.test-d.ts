@@ -143,7 +143,7 @@ describe("createAuth", () => {
                 Partial<
                     {
                         sub: string
-                        role: Typebox.TOptional<Typebox.TString>
+                        role?: Typebox.TOptional<Typebox.TString>
                         name?: string | null | undefined
                         image?: string | null | undefined
                         email?: string | null | undefined

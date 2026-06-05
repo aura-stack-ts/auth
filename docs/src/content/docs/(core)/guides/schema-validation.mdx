@@ -5,6 +5,14 @@ description: Learn how to validate your authentication schema with Aura Auth's b
 
 Aura Auth provides the `identity.schema` configuration option for type extension. This allows you to define a custom validation schema for user identity data, ensuring that the data conforms to a specific structure and set of fields. The schema is used to derive the `User` and `Session` types across the library. By default, Aura Auth accepts a flexible identity shape, but you can provide your own schema to enforce a specific structure.
 
+Aura Auth supports `zod`, `valibot`, `arktype` and `typebox` schemas for validation. You can choose the one that best fits your needs, based on the constraints, limitations and features of each library.
+
+For each library, its provided the default `Identity` schemas, which you can extend to create your own custom schema. This allows you to add additional fields or constraints to the user identity data while still leveraging the built-in validation and type inference capabilities of Aura Auth. They schemas contains `sub`, `name`, `email` and `image` fields by default, but you can extend it with any additional fields you need.
+
+<Tabs items={["zod", "valibot", "arktype", "typebox"]} groupId="schema-validation" persist>
+
+<Tab value="zod">
+
 ```ts title="lib/auth.ts" lineNumbers
 import { z } from "zod"
 import { createAuth } from "@aura-stack/auth"
@@ -12,7 +20,129 @@ import { UserIdentity, type InferUser, type InferSession } from "@aura-stack/aut
 
 const schema = UserIdentity.extend({
   role: z.enum(["admin", "user"]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```
+
+</Tab>
+
+<Tab value="valibot">
+
+```ts title="lib/auth.ts" lineNumbers
+import * as valibot from "valibot"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityValibot, type InferUser, type InferSession } from "@aura-stack/auth/identity"
+
+const schema = valibot.object({
+  ...UserIdentityValibot.entries,
+  role: valibot.enum(["admin", "user"]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```
+
+</Tab>
+
+<Tab value="arktype">
+
+```ts title="lib/auth.ts" lineNumbers
+import { type } from "arktype"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityArkType, type InferUser, type InferSession } from "@aura-stack/auth/identity"
+
+const schema = UserIdentityArkType.and({
+  role: type.enumerated(["admin", "user"]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```
+
+</Tab>
+
+<Tab value="typebox">
+
+```ts title="lib/auth.ts" lineNumbers
+import { Type } from "typebox"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityTypeBox } from "@aura-stack/auth/identity"
+
+const schema = Type.Object({
+  ...UserIdentityTypeBox.properties,
+  role: Type.Union([Type.Literal("admin"), Type.Literal("user")]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```
+
+</Tab>
+
+</Tabs>
+
+Aura Auth provides utility types to infer the `User` and `Session` types from the identity schema. This allows you to have type safety and autocompletion when working with user identity data throughout your application. By using the provided utility types, you can ensure that your code is consistent with the defined schema and that you are accessing the correct fields on the user and session objects.
+
+The `User` and `Session` types can be inferred from the auth configuration using the `InferUser` and `InferSession` utility types or by using the `UserFrom` and `SessionFrom` types directly from the schema.
+
+<Tabs items={["zod", "valibot", "arktype", "typebox"]} groupId="schema-validation" persist>
+
+<Tab value="zod">
+
+```ts title="lib/auth.ts" lineNumbers
+import { z } from "zod"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentity, type UserFrom, type SessionFrom, type UserFrom, type SessionFrom } from "@aura-stack/auth/identity"
+
+const schema = UserIdentity.extend({
+  role: z.enum(["admin", "user"]),
   permissions: z.array(z.string()),
+})
+
+type _User = UserFrom<typeof schema>
+type _Session = SessionFrom<typeof schema>
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+
+export type User = InferUser<typeof auth>
+export type Session = InferSession<typeof auth>
+```
+
+</Tab>
+
+<Tab value="valibot">
+
+```ts title="lib/auth.ts" lineNumbers
+import * as valibot from "valibot"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityValibot, type InferUser, type InferSession } from "@aura-stack/auth/identity"
+
+const schema = valibot.object({
+  ...UserIdentityValibot.entries,
+  role: valibot.enum(["admin", "user"]),
 })
 
 export const auth = createAuth({
@@ -26,20 +156,52 @@ export type User = InferUser<typeof auth>
 export type Session = InferSession<typeof auth>
 ```
 
-**Or, if you prefer to infer the types from the schema:**
+</Tab>
+
+<Tab value="arktype">
 
 ```ts title="lib/auth.ts" lineNumbers
-import { z } from "zod"
+import { type } from "arktype"
 import { createAuth } from "@aura-stack/auth"
-import { UserIdentity, type UserFrom, type SessionFrom } from "@aura-stack/auth/identity"
+import { UserIdentityArkType, type InferUser, type InferSession } from "@aura-stack/auth/identity"
 
-const schema = UserIdentity.extend({
-  role: z.enum(["admin", "user"]),
-  permissions: z.array(z.string()),
+const schema = UserIdentityArkType.and({
+  role: type.enumerated(["admin", "user"]),
 })
 
-type User = UserFrom<typeof schema>
-type Session = SessionFrom<typeof schema>
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+
+export type User = InferUser<typeof auth>
+export type Session = InferSession<typeof auth>
+```
+
+</Tab>
+
+<Tab value="typebox">
+
+<Callout type="warning">
+  Aura Auth does not currently support inferring types directly from the TypeBox schema. To work around this, you can manually use
+  `Static` type from TypeBox to define the `User` and `Session` types based on the structure of your schema. This is a temporary
+  limitation by the expensive nature of TypeBox's type inference.
+</Callout>
+
+```ts title="lib/auth.ts" lineNumbers
+import { Type, type Static } from "typebox"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityTypeBox } from "@aura-stack/auth/identity"
+
+const schema = Type.Object({
+  ...UserIdentityTypeBox.properties,
+  role: Type.Union([Type.Literal("admin"), Type.Literal("user")]),
+})
+
+export type User = Static<typeof schema>
+export type Session = Static<typeof schema>
 
 export const auth = createAuth({
   oauth: [],
@@ -48,3 +210,7 @@ export const auth = createAuth({
   },
 })
 ```
+
+</Tab>
+
+</Tabs>

@@ -80,7 +80,9 @@ type ReturnShapeType<T> =
             ? T
             : T extends EditableShapeTypebox<UserShapeTypeBox>
               ? Typebox.TObject<T>
-              : never
+              : T extends EditableUser
+                ? z.ZodObject<T>
+                : never
 
 export const createIdentity = <S extends Identities>(shape: S): ReturnShapeType<S> => {
     if (isArkType(shape)) {
