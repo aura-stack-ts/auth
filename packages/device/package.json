@@ -15,7 +15,7 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm clean:cts && pnpm build && pnpm clean:cts"
   },
   "repository": {

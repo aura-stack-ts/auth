@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, afterEach } from "vitest"
 import { createBuiltInDeviceProviders } from "@/providers/index.ts"
-import { DeviceProviderCredentials } from "@/@types/device.ts"
+import type { DeviceProviderCredentials } from "@/@types/device.ts"
 
 afterEach(() => {
     vi.unstubAllEnvs()

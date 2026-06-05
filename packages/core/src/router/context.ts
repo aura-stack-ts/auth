@@ -1,11 +1,11 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createCookieStore } from "@/cookie.ts"
-import { Identities } from "@/shared/identity.ts"
 import { createProxyLogger } from "@/shared/logger.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
+import type { Identities } from "@/shared/identity.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
 
 export const createContext = <Identity extends Identities>(config?: AuthConfig<Identity>) => {

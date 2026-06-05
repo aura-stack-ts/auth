@@ -2,9 +2,10 @@ import { createAuth as createBasicAuth, type AuthConfig } from "@aura-stack/auth
 import { withAuth } from "@/lib/with-auth.ts"
 import { toExpressHandler } from "@/lib/handler.ts"
 import type { Request, Response } from "express"
+import type { ExpressInstance } from "@/@types/index.ts"
 import type { Identities, FromShapeToObject } from "@aura-stack/auth/identity"
 
-export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>) => {
+export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>): ExpressInstance<Identity> => {
     const auth = createBasicAuth<Identity>(config)
     return {
         ...auth,

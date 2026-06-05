@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "React integration for Aura Stack authentication library",
+  "description": "React authentication utilities including providers, hooks and OAuth flows for client-side and hybrid applications powered by Aura Auth.",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "pnpm sync:modules && tsdown",
@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist src/_core src/oauth",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js"
   },
@@ -83,7 +83,25 @@
     },
     "./types": "./dist/@types/index.d.ts"
   },
-  "keywords": [],
+  "keywords": [
+    "react",
+    "authentication",
+    "auth",
+    "oauth",
+    "jwt",
+    "session",
+    "context",
+    "hooks",
+    "typescript",
+    "javascript",
+    "authorization",
+    "frontend",
+    "web-api",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura auth",
+    "aura-auth"
+  ],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "homepage": "https://aura-stack-auth.vercel.app",
   "bugs": {

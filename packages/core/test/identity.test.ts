@@ -1,18 +1,18 @@
 import { describe, test, expect, expectTypeOf, vi, afterEach } from "vitest"
 import {
     createIdentity,
-    InferUser,
     UserIdentity,
     UserIdentityArkType,
     UserIdentityTypeBox,
     UserIdentityValibot,
+    type InferUser,
 } from "@/shared/identity.ts"
 import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"
 import { createSchemaRegistry, deriveSchema } from "@/validator/registry.ts"
 import { ArkErrors, type } from "arktype"
-import { Static, Type as Typebox } from "typebox"
+import { type Static, Type as Typebox } from "typebox"
 import { Value } from "typebox/value"
 
 afterEach(() => {
