@@ -10,6 +10,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.7.2] - 2026-06-05
+
+### Fixed
+
+- Republished the package to synchronize the `@aura-stack/router` dependency to version `0.7.2`.
+  > The codebase is identical to `v0.7.1`; differences are limited to synchronized lockfiles (`deno.lock`, `bun.lock`, and `pnpm-lock.yaml`).
+
+---
+
+## [0.7.1] - 2026-06-05
+
+### Added
+
+- Added a `/cookies` entry module for cookie management, providing utilities for authentication integrations and framework-specific packages. [#178](https://github.com/aura-stack-ts/auth/pull/178)
+
+### Changed
+
+- Removed TypeBox compile-time type inference from `createAuthClient` client functions and from the `createAuth` auth instance. Runtime validation with TypeBox remains supported. [#179](https://github.com/aura-stack-ts/auth/pull/179)
+
+---
+
 ## [0.7.0] - 2026-05-23
 
 ### Added
