@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation"
+import { cookies, headers } from "next/headers"
 import { parseSetCookie } from "@aura-stack/react/cookies"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type {
@@ -16,7 +17,6 @@ import type {
     BuiltInOAuthProvider,
     SignInCredentialsAPIOptions,
 } from "@aura-stack/react/types"
-import { cookies, headers } from "next/headers"
 
 /**
  * Internal helper to sync Set-Cookie headers from Aura Auth to Next.js cookie store.

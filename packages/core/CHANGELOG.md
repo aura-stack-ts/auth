@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.7.2] - 2026-06-05
+
+### Fixed
+
+- Republished the package to synchronize the `@aura-stack/router` dependency to version `0.7.2`.
+  > The codebase is identical to `v0.7.1`; differences are limited to synchronized lockfiles (`deno.lock`, `bun.lock`, and `pnpm-lock.yaml`).
+
+---
+
 ## [0.7.1] - 2026-06-05
 
 ### Added

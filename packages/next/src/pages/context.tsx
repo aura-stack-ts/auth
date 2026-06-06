@@ -1,5 +1,5 @@
 import { AuthProvider as Provider, type AuthProviderProps } from "@aura-stack/react/context"
-import { useRouter } from "next/router.d.ts"
+import { useRouter } from "next/router"
 
 /**
  * Wrapper component that provides authentication context for Next.js Pages Router applications.
