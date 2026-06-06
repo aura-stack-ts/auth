@@ -30,7 +30,7 @@
   "imports": {
     "@/": "./src/",
     "elysia": "npm:elysia@^1.2.22",
-    "@aura-stack/auth": "npm:@aura-stack/auth@^0.7.1"
+    "@aura-stack/auth": "npm:@aura-stack/auth@^0.7.2"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/_core", "src/oauth", "README.md", "CHANGELOG.md"],

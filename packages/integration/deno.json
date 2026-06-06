@@ -10,7 +10,7 @@
     "./identity": "./src/_core/identity.ts",
     "./crypto": "./src/_core/crypto.ts",
     "./shared": "./src/_core/shared.ts",
-    "./cookies": "src/_core/cookies.ts",
+    "./cookies": "./src/_core/cookies.ts",
     "./oauth": "./src/oauth/index.ts",
     "./oauth/atlassian": "./src/oauth/atlassian.ts",
     "./oauth/bitbucket": "./src/oauth/bitbucket.ts",

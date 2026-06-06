@@ -34,7 +34,7 @@
   "imports": {
     "@/": "./src/",
     "react": "npm:react@^19.2.3",
-    "@aura-stack/auth": "npm:@aura-stack/auth@^0.7.1"
+    "@aura-stack/auth": "npm:@aura-stack/auth@^0.7.2"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/**/*.tsx", "src/_core", "src/oauth", "README.md", "CHANGELOG.md"]
