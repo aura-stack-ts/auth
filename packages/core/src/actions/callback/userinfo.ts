@@ -2,7 +2,14 @@ import { fetchAsync } from "@/shared/fetch-async.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
 import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/shared/errors.ts"
-import type { InternalLogger, OAuthProviderCredentials, User } from "@/@types/index.ts"
+import type {
+    AccessTokenContext,
+    InternalLogger,
+    OAuthAccessTokenResponseType,
+    OAuthProviderCredentials,
+    User,
+} from "@/@types/index.ts"
+import { isCustomUserInfoFunction } from "@/shared/assert.ts"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response
@@ -24,17 +31,11 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
     }
 }
 
-/**
- * Get user information from the OAuth provider's userinfo endpoint using the provided access token.
- * The response by default is mapped to the standardized `User` format unless a custom
- * `profile` function is provided in the `oauthConfig`.
- *
- * @param oauthConfig - OAuth provider configuration
- * @param accessToken - Access Token to access the userinfo endpoint
- * @param logger - Optional logger instance
- * @returns The user information retrieved from the userinfo endpoint
- */
-export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessToken: string, logger?: InternalLogger) => {
+type ProviderConfig = {
+    userInfo: Exclude<OAuthProviderCredentials["userInfo"], { request: (context: AccessTokenContext) => any }>
+} & Omit<OAuthProviderCredentials, "userInfo">
+
+const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: string, logger?: InternalLogger) => {
     const userInfoConfig = oauthConfig.userInfo
     const userinfoURL = typeof userInfoConfig === "string" ? userInfoConfig : userInfoConfig.url
     const extraHeaders = typeof userInfoConfig === "string" ? undefined : userInfoConfig.headers
@@ -74,8 +75,56 @@ export const getUserInfo = async (oauthConfig: OAuthProviderCredentials, accessT
         }
         logger?.log("OAUTH_USERINFO_SUCCESS")
 
-        const userInfo = oauthConfig?.profile ? oauthConfig.profile(json) : getDefaultUserInfo(json)
+        return json
+    } catch (error) {
+        if (isOAuthProtocolError(error)) {
+            throw error
+        }
+        logger?.log("OAUTH_USERINFO_REQUEST_FAILED")
+        if (isNativeError(error)) {
+            throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information from OAuth provider", "", {
+                cause: error,
+            })
+        }
+        throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information", "", { cause: error })
+    }
+}
 
+/**
+ * Get user information from the OAuth provider's userinfo endpoint using the provided access token.
+ * The response by default is mapped to the standardized `User` format unless a custom
+ * `profile` function is provided in the `oauthConfig`.
+ *
+ * @param oauthConfig - OAuth provider configuration
+ * @param accessToken - Access Token to access the userinfo endpoint
+ * @param logger - Optional logger instance
+ * @returns The user information retrieved from the userinfo endpoint
+ */
+export const getUserInfo = async (
+    oauthConfig: OAuthProviderCredentials,
+    accessToken: OAuthAccessTokenResponseType,
+    logger?: InternalLogger
+) => {
+    try {
+        let userProfile: Record<string, any> = {}
+        if (isCustomUserInfoFunction(oauthConfig.userInfo)) {
+            logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
+                structuredData: {
+                    endpoint: oauthConfig.name,
+                },
+            })
+            userProfile = await oauthConfig.userInfo.request({
+                accessToken: accessToken.access_token,
+                expiresIn: accessToken?.expires_in,
+                refreshToken: accessToken?.refresh_token,
+                scope: accessToken?.scope,
+                tokenType: accessToken?.token_type,
+                userInfoURL: oauthConfig.userInfo.url,
+            })
+        } else {
+            userProfile = await createUserInfoRequest(oauthConfig as ProviderConfig, accessToken.access_token, logger)
+        }
+        const userInfo = oauthConfig?.profile ? oauthConfig.profile(userProfile) : getDefaultUserInfo(userProfile)
         return userInfo
     } catch (error) {
         if (isOAuthProtocolError(error)) {
