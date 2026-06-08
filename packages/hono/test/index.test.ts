@@ -119,7 +119,7 @@ describe("POST /api/auth/signIn/credentials", () => {
         const body = await res.json()
         expect(body).toMatchObject({
             success: true,
-            redirectURL: "/",
+            redirectURL: null,
         })
         expect(res.headers.get("set-cookie")).toBeDefined()
     })

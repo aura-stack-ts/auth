@@ -1,9 +1,9 @@
 {
   "name": "@aura-stack/jose",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": false,
   "type": "module",
-  "description": "JOSE utilities for @aura-stack/auth",
+  "description": "JOSE, JWT, JWS, JWE and JWK utilities for TypeScript and JavaScript applications built on Web Cryptography APIs.",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "tsdown",
@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm build && pnpm clean:cts"
   },
   "repository": {
@@ -25,7 +25,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/@aura-stack/jose"
+    "registry": "https://registry.npmjs.org/"
   },
   "files": [
     "dist"
@@ -65,7 +65,26 @@
   "keywords": [
     "auth",
     "session",
-    "authentication"
+    "authentication",
+    "jose",
+    "jwt",
+    "jws",
+    "jwe",
+    "jwk",
+    "crypto",
+    "cryptography",
+    "webcrypto",
+    "security",
+    "token",
+    "typescript",
+    "javascript",
+    "authentication",
+    "authorization",
+    "web-api",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura auth",
+    "aura-auth"
   ],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "homepage": "https://aura-stack-auth.vercel.app",

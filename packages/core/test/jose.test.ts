@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-import { createJoseInstance } from "@/jose.ts"
-import { createSecretValue } from "@/shared/crypto.ts"
+import { createJoseInstance, encoder } from "@/jose.ts"
+import { createSecretValue, exportJWKKeyPair } from "@/shared/crypto.ts"
+import { createAuth } from "@/createAuth.ts"
+import { generateKeyPair } from "@aura-stack/jose/jose"
+import { RS256PEMFormat, RSAOAEP256PEMFormat } from "./presets.ts"
 
 const payload = {
     sub: "1234567890",
@@ -8,10 +11,15 @@ const payload = {
     email: "alice@example.com",
     image: "alice.jpg",
 }
-
 beforeEach(() => {
-    vi.stubEnv("SALT", createSecretValue())
-    vi.stubEnv("SECRET", createSecretValue())
+    /**
+     * Skip environment variables because Aura Auth takes them as priority over
+     * the options passed to createAuth, and we want to test the options directly
+     * without interference from env vars.
+     */
+    vi.stubEnv("AURA_AUTH_SALT", undefined)
+    vi.stubEnv("AURA_AUTH_SECRET", undefined)
+    vi.stubEnv("BASE_URL", undefined)
 })
 
 afterEach(() => {
@@ -20,7 +28,10 @@ afterEach(() => {
 
 describe("createJoseInstance", () => {
     test("createJoseInstance with default options", async () => {
-        const jose = createJoseInstance()
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue())
+
+        const secret = createSecretValue()
+        const jose = createJoseInstance(secret)
 
         const signed = await jose.signJWS(payload)
         const verified = await jose.verifyJWS(signed)
@@ -36,6 +47,8 @@ describe("createJoseInstance", () => {
     })
 
     test("set issuer, audience and signing algorithm", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue())
+
         const secret = createSecretValue()
         const jose = createJoseInstance(secret, {
             jwt: {
@@ -56,6 +69,8 @@ describe("createJoseInstance", () => {
     })
 
     test("overrides signing algorithm", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue())
+
         const secret = createSecretValue()
         const jose = createJoseInstance(secret, {
             jwt: {
@@ -73,6 +88,8 @@ describe("createJoseInstance", () => {
     })
 
     test("overrides issuer and audience", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue())
+
         const secret = createSecretValue()
         const jose = createJoseInstance(secret, {
             jwt: {
@@ -106,6 +123,8 @@ describe("createJoseInstance", () => {
     })
 
     test("merge claims", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue())
+
         const secret = createSecretValue()
         const jose = createJoseInstance(secret, {
             jwt: {
@@ -129,9 +148,537 @@ describe("createJoseInstance", () => {
     })
 
     test("invalid token", async () => {
-        const jose = createJoseInstance()
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue())
+
+        const secret = createSecretValue()
+        const jose = createJoseInstance(secret)
         await expect(jose.verifyJWS("invalid-token")).rejects.toThrow()
         await expect(jose.decryptJWE("invalid-token")).rejects.toThrow()
         await expect(jose.decodeJWT("invalid-token")).rejects.toThrow()
+    })
+
+    test("rejects when a single CryptoKeyPair is reused with incompatible algs", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue())
+
+        const secret = await generateKeyPair("RS256", { extractable: true })
+
+        const jose = createJoseInstance(secret, {
+            jwt: {
+                mode: "sealed",
+                signingAlgorithm: "RS256",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+            },
+        })
+        // Same RS256 key pair cannot satisfy RSA-OAEP-256 encryption
+        await expect(jose.encodeJWT(payload)).rejects.toThrow()
+    })
+
+    test("invalid secret", () => {
+        expect(() => createAuth({ oauth: [] })).toThrow(
+            "AURA_AUTH_SECRET environment variable is not set and no secret was provided."
+        )
+    })
+
+    test("invalid salt", () => {
+        const secret = createSecretValue(32)
+        expect(() => createAuth({ oauth: [], secret })).toThrow(
+            "AURA_AUTH_SALT or AUTH_SALT environment variable is not set. A salt value is required for key derivation."
+        )
+    })
+
+    describe("Uint8Array", () => {
+        const secret = new Uint8Array(32)
+
+        test("JWS symmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "signed",
+                    signingAlgorithm: "HS256",
+                },
+            })
+            expect(jose).toBeDefined()
+            const signed = await jose.signJWS(payload)
+            const verified = await jose.verifyJWS(signed)
+            expect(verified).toMatchObject(payload)
+        })
+
+        test("JWE symmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "encrypted",
+                    keyAlgorithm: "dir",
+                    encryptionAlgorithm: "A256GCM",
+                },
+            })
+            expect(jose).toBeDefined()
+            const encrypted = await jose.encryptJWE(payload)
+            const decrypted = await jose.decryptJWE(encrypted)
+            expect(decrypted).toMatchObject(payload)
+        })
+
+        test("JWE invalid asymmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "encrypted",
+                    keyAlgorithm: "RSA-OAEP-256",
+                    encryptionAlgorithm: "A256CBC-HS512",
+                },
+            })
+            expect(jose).toBeDefined()
+            await expect(jose.encryptJWE(payload)).rejects.toThrow(/JWE encryption failed/)
+        })
+
+        test("JWT signed and encrypted", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "sealed",
+                    signingAlgorithm: "HS256",
+                    keyAlgorithm: "dir",
+                    encryptionAlgorithm: "A256GCM",
+                },
+            })
+            expect(jose).toBeDefined()
+            const token = await jose.encodeJWT(payload)
+            const decoded = await jose.decodeJWT(token)
+            expect(decoded).toMatchObject(payload)
+        })
+
+        test("JWT invalid signed and encrypted", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "sealed",
+                    signingAlgorithm: "RS256",
+                    keyAlgorithm: "RSA-OAEP-256",
+                    encryptionAlgorithm: "A256CBC-HS512",
+                },
+            })
+            expect(jose).toBeDefined()
+            await expect(jose.encodeJWT(payload)).rejects.toThrow()
+        })
+    })
+
+    describe("crypto.getRandomValues", () => {
+        const secret = createSecretValue(32)
+
+        test("JWS symmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "signed",
+                    signingAlgorithm: "HS256",
+                },
+            })
+
+            expect(jose).toBeDefined()
+            const signed = await jose.signJWS(payload)
+            const verified = await jose.verifyJWS(signed)
+            expect(verified).toMatchObject(payload)
+        })
+
+        test("JWS invalid asymmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "signed",
+                    signingAlgorithm: "RS256",
+                },
+            })
+            expect(jose).toBeDefined()
+            await expect(jose.signJWS(payload)).rejects.toThrow(/JWS signing failed/)
+        })
+
+        test("JWE symmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "encrypted",
+                    keyAlgorithm: "dir",
+                    encryptionAlgorithm: "A256GCM",
+                },
+            })
+            expect(jose).toBeDefined()
+            const encrypted = await jose.encryptJWE(payload)
+            const decrypted = await jose.decryptJWE(encrypted)
+            expect(decrypted).toMatchObject(payload)
+        })
+
+        test("JWE invalid asymmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "encrypted",
+                    keyAlgorithm: "RSA-OAEP-256",
+                    encryptionAlgorithm: "A256CBC-HS512",
+                },
+            })
+            expect(jose).toBeDefined()
+            await expect(jose.encryptJWE(payload)).rejects.toThrow(/JWE encryption failed/)
+        })
+
+        test("JWT signed and encrypted", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "sealed",
+                    signingAlgorithm: "HS256",
+                    keyAlgorithm: "dir",
+                    encryptionAlgorithm: "A256GCM",
+                },
+            })
+
+            expect(jose).toBeDefined()
+            const token = await jose.encodeJWT(payload)
+            const decoded = await jose.decodeJWT(token)
+            expect(decoded).toMatchObject(payload)
+        })
+
+        test("JWT invalid signed and encrypted", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "sealed",
+                    signingAlgorithm: "RS256",
+                    keyAlgorithm: "RSA-OAEP-256",
+                    encryptionAlgorithm: "A256CBC-HS512",
+                },
+            })
+            expect(jose).toBeDefined()
+            await expect(jose.encodeJWT(payload)).rejects.toThrow()
+        })
+    })
+
+    describe("crypto.generateKey", async () => {
+        test("JWS symmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+            const secret = await crypto.subtle.generateKey(
+                {
+                    name: "HMAC",
+                    hash: "SHA-256",
+                    length: 256,
+                },
+                true,
+                ["sign", "verify"]
+            )
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "signed",
+                    signingAlgorithm: "HS256",
+                },
+            })
+            expect(jose).toBeDefined()
+            const signed = await jose.signJWS(payload)
+            const verified = await jose.verifyJWS(signed)
+            expect(verified).toMatchObject(payload)
+        })
+
+        test("JWE symmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const secret = await crypto.subtle.generateKey(
+                {
+                    name: "AES-GCM",
+                    length: 256,
+                },
+                true,
+                ["encrypt", "decrypt"]
+            )
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "encrypted",
+                    keyAlgorithm: "dir",
+                    encryptionAlgorithm: "A256GCM",
+                },
+            })
+            expect(jose).toBeDefined()
+            const encrypted = await jose.encryptJWE(payload)
+            const decrypted = await jose.decryptJWE(encrypted)
+            expect(decrypted).toMatchObject(payload)
+        })
+
+        test("JWS asymmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const secret = await crypto.subtle.generateKey(
+                {
+                    name: "RSA-PSS",
+                    modulusLength: 2048,
+                    publicExponent: new Uint8Array([1, 0, 1]),
+                    hash: "SHA-256",
+                },
+                true,
+                ["sign", "verify"]
+            )
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "signed",
+                    signingAlgorithm: "PS256",
+                },
+            })
+            expect(jose).toBeDefined()
+            const signed = await jose.signJWS(payload)
+            const verified = await jose.verifyJWS(signed)
+            expect(verified).toMatchObject(payload)
+        })
+    })
+
+    describe("crypto.importKey", async () => {
+        test("JWS symmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const secretKey = encoder.encode(createSecretValue(32))
+            const secret = await crypto.subtle.importKey(
+                "raw",
+                secretKey,
+                {
+                    name: "HMAC",
+                    hash: "SHA-256",
+                },
+                true,
+                ["sign", "verify"]
+            )
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "signed",
+                    signingAlgorithm: "HS256",
+                },
+            })
+            expect(jose).toBeDefined()
+            const signed = await jose.signJWS(payload)
+            const verified = await jose.verifyJWS(signed)
+            expect(verified).toMatchObject(payload)
+        })
+    })
+
+    describe("asymmetric key pair (RSA)", async () => {
+        test("JWS asymmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const secret = await generateKeyPair("RS256", {
+                extractable: true,
+            })
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "signed",
+                    signingAlgorithm: "RS256",
+                },
+            })
+            expect(jose).toBeDefined()
+            const signed = await jose.signJWS(payload)
+            const verified = await jose.verifyJWS(signed)
+            expect(verified).toMatchObject(payload)
+        })
+
+        test("JWE asymmetric key", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const secret = await generateKeyPair("RSA-OAEP-256", {
+                extractable: true,
+            })
+
+            const jose = createJoseInstance(secret, {
+                jwt: {
+                    mode: "encrypted",
+                    keyAlgorithm: "RSA-OAEP-256",
+                    encryptionAlgorithm: "A256GCM",
+                },
+            })
+            expect(jose).toBeDefined()
+            const encrypted = await jose.encryptJWE(payload)
+            const decrypted = await jose.decryptJWE(encrypted)
+            expect(decrypted).toMatchObject(payload)
+        })
+
+        test("JWT signed and encrypted", async () => {
+            vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+            const jwsEntries = await generateKeyPair("RS256", {
+                extractable: true,
+            })
+
+            const jweEntries = await generateKeyPair("RSA-OAEP-256", {
+                extractable: true,
+            })
+
+            const jose = createJoseInstance(
+                {
+                    sign: jwsEntries,
+                    encrypt: jweEntries,
+                },
+                {
+                    jwt: {
+                        mode: "sealed",
+                        signingAlgorithm: "RS256",
+                        keyAlgorithm: "RSA-OAEP-256",
+                        encryptionAlgorithm: "A256GCM",
+                    },
+                }
+            )
+            expect(jose).toBeDefined()
+            const token = await jose.encodeJWT(payload)
+            const decoded = await jose.decodeJWT(token)
+            expect(decoded).toMatchObject(payload)
+        })
+    })
+
+    test("PEM formatted RSA keys", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const { publicKey, privateKey } = RS256PEMFormat
+
+        vi.stubEnv("AURA_AUTH_PUBLIC_KEY", publicKey)
+        vi.stubEnv("AURA_AUTH_PRIVATE_KEY", privateKey)
+
+        const jws = createJoseInstance(undefined, {
+            jwt: {
+                mode: "signed",
+                signingAlgorithm: "RS256",
+            },
+        })
+        const signed = await jws.signJWS(payload)
+        const verified = await jws.verifyJWS(signed)
+        expect(verified).toMatchObject(payload)
+
+        const jwe = createJoseInstance(undefined, {
+            jwt: {
+                mode: "encrypted",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+            },
+        })
+
+        const encrypted = await jwe.encryptJWE(payload)
+        const decrypted = await jwe.decryptJWE(encrypted)
+        expect(decrypted).toMatchObject(payload)
+
+        const jwt = createJoseInstance(undefined, {
+            jwt: {
+                mode: "sealed",
+                signingAlgorithm: "RS256",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+            },
+        })
+        await expect(jwt.encodeJWT(payload)).rejects.toThrow(
+            /Single PEM key pairs from environment variables require 'signed' or 'encrypted' JWT mode. For 'sealed' mode, provide separate signing and encryption keys or a combined key object./
+        )
+    })
+
+    test("PEM formatted RSA keys for sealed mode", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const { publicKey: jwsPublicKey, privateKey: jwsPrivateKey } = RS256PEMFormat
+        const { publicKey: jwePublicKey, privateKey: jwePrivateKey } = RSAOAEP256PEMFormat
+
+        vi.stubEnv("AURA_AUTH_SIGNING_PUBLIC_KEY", jwsPublicKey)
+        vi.stubEnv("AURA_AUTH_SIGNING_PRIVATE_KEY", jwsPrivateKey)
+        vi.stubEnv("AURA_AUTH_ENCRYPTION_PUBLIC_KEY", jwePublicKey)
+        vi.stubEnv("AURA_AUTH_ENCRYPTION_PRIVATE_KEY", jwePrivateKey)
+
+        const jwt = createJoseInstance(undefined, {
+            jwt: {
+                mode: "sealed",
+                signingAlgorithm: "RS256",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+            },
+        })
+
+        const token = await jwt.encodeJWT(payload)
+        const decoded = await jwt.decodeJWT(token)
+        expect(decoded).toMatchObject(payload)
+
+        const jws = createJoseInstance(undefined, {
+            jwt: {
+                mode: "signed",
+                signingAlgorithm: "RS256",
+            },
+        })
+        await expect(jws.signJWS(payload)).rejects.toThrow(
+            /Multiples PEM Key Pairs from environment variables require 'sealed' JWT mode. For 'signed' or 'encrypted' modes, provide a single PEM key pair or a combined key object./
+        )
+    })
+
+    test("JWS (signed) with JWK formatted keys", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const secret = await exportJWKKeyPair("RS256", { extractable: true })
+        const jose = createJoseInstance(secret, {
+            jwt: {
+                signingAlgorithm: "RS256",
+            },
+        })
+
+        const signed = await jose.signJWS(payload)
+        const verified = await jose.verifyJWS(signed)
+        expect(verified).toMatchObject(payload)
+    })
+
+    test("JWE (encrypted) with JWK formatted keys", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const secret = await exportJWKKeyPair("RSA-OAEP-256", { extractable: true })
+        const jose = createJoseInstance(secret, {
+            jwt: {
+                mode: "encrypted",
+                keyAlgorithm: "RSA-OAEP-256",
+                encryptionAlgorithm: "A256GCM",
+            },
+        })
+        const encrypted = await jose.encryptJWE(payload)
+        const decrypted = await jose.decryptJWE(encrypted)
+        expect(decrypted).toMatchObject(payload)
+    })
+
+    test("JWT (sealed) with JWK formatted keys", async () => {
+        vi.stubEnv("AURA_AUTH_SALT", createSecretValue(32))
+
+        const signingKeyPair = await exportJWKKeyPair("RS256", { extractable: true })
+        const encryptionKeyPair = await exportJWKKeyPair("RSA-OAEP-256", { extractable: true })
+        const jose = createJoseInstance(
+            {
+                sign: signingKeyPair,
+                encrypt: encryptionKeyPair,
+            },
+            {
+                jwt: {
+                    signingAlgorithm: "RS256",
+                    keyAlgorithm: "RSA-OAEP-256",
+                    encryptionAlgorithm: "A256GCM",
+                },
+            }
+        )
+
+        const encoded = await jose.encodeJWT(payload)
+        const decoded = await jose.decodeJWT(encoded)
+        expect(decoded).toMatchObject(payload)
+
+        const signed = await jose.signJWS(payload)
+        const verified = await jose.verifyJWS(signed)
+        expect(verified).toMatchObject(payload)
+
+        const encrypted = await jose.encryptJWE(payload)
+        const decrypted = await jose.decryptJWE(encrypted)
+        expect(decrypted).toMatchObject(payload)
     })
 })

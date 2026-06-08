@@ -13,6 +13,11 @@ export default defineConfig({
         "src/_core/identity.ts",
         "src/_core/crypto.ts",
         "src/_core/shared.ts",
+        "src/_core/cookies.ts",
         "src/@types/index.ts",
     ],
+    deps: {
+        ...tsdownConfig.deps,
+        neverBundle: ["react", "react-dom"],
+    },
 })

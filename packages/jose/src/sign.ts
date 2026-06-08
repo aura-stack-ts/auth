@@ -1,9 +1,9 @@
 import { base64url, jwtVerify, SignJWT, type JWTPayload, type JWTVerifyOptions, type JWTHeaderParameters } from "jose"
 import { createSecret } from "@/secret.ts"
 import { getRandomBytes } from "@/crypto.ts"
-import { isAuraJoseError, isFalsy, isInvalidPayload } from "@/assert.ts"
+import { isAsymmetricKeyPair, isAuraJoseError, isCryptoKey, isFalsy, isInvalidPayload } from "@/assert.ts"
 import { JWSSigningError, JWSVerificationError, InvalidPayloadError } from "@/errors.ts"
-import type { SecretInput, TypedJWTPayload } from "@/index.ts"
+import type { JWTSecretInput, SecretInput, TypedJWTPayload } from "@/index.ts"
 
 export type { JWTVerifyOptions, JWTHeaderParameters } from "jose"
 
@@ -30,11 +30,12 @@ export const signJWS = async <Payload extends JWTPayload>(
         if (isInvalidPayload(payload)) {
             throw new InvalidPayloadError("The payload must be a non-empty object")
         }
+        const isAsymmetricCryptoKey = isCryptoKey(secret) && secret.type === "private"
         const secretKey = createSecret(secret)
         const jti = base64url.encode(getRandomBytes(32))
 
         return await new SignJWT(payload)
-            .setProtectedHeader({ alg: "HS256", typ: "JWT", ...options })
+            .setProtectedHeader({ alg: isAsymmetricCryptoKey ? "RS256" : "HS256", typ: "JWT", ...options })
             .setIssuedAt(payload.iat ?? "0s")
             .setNotBefore(payload.nbf ?? "0s")
             .setExpirationTime(payload.exp ?? "15d")
@@ -67,9 +68,10 @@ export const verifyJWS = async <Payload extends JWTPayload>(
         if (isFalsy(token)) {
             throw new InvalidPayloadError("The token must be a non-empty string")
         }
+        const isAsymmetricCryptoKey = isCryptoKey(secret) && secret.type === "public"
         const secretKey = createSecret(secret)
         const { payload } = await jwtVerify(token, secretKey, {
-            algorithms: ["HS256"],
+            algorithms: [isAsymmetricCryptoKey ? "RS256" : "HS256"],
             typ: "JWT",
             ...options,
         })
@@ -90,13 +92,20 @@ export const verifyJWS = async <Payload extends JWTPayload>(
  * @param options - Optional signing options (e.g. algorithm)
  * @returns signJWS and verifyJWS functions
  */
-export const createJWS = <Payload extends JWTPayload>(secret: SecretInput) => {
+export const createJWS = <Payload extends JWTPayload>(secret: JWTSecretInput) => {
+    const isAsymmetric = isAsymmetricKeyPair(secret)
+    const signSecret = isAsymmetric ? secret.privateKey : secret
+    const verifySecret = isAsymmetric ? secret.publicKey : secret
     return {
         signJWS: <SignPayload extends JWTPayload = Payload>(
             payload: TypedJWTPayload<Partial<SignPayload>>,
             options?: JWTHeaderParameters
-        ) => signJWS<SignPayload>(payload, secret, options),
+        ) => signJWS<SignPayload>(payload, signSecret, isAsymmetric ? { alg: "RS256", ...options } : options),
         verifyJWS: <VerifyPayload extends JWTPayload = Payload>(payload: string, verifyOptions?: JWTVerifyOptions) =>
-            verifyJWS<VerifyPayload>(payload, secret, verifyOptions),
+            verifyJWS<VerifyPayload>(
+                payload,
+                verifySecret,
+                isAsymmetric ? { algorithms: ["RS256"], ...verifyOptions } : verifyOptions
+            ),
     }
 }

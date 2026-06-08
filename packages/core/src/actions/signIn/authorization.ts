@@ -3,12 +3,16 @@ import { AuthInternalError } from "@/shared/errors.ts"
 import { equals, extractPath, patternToRegex } from "@/shared/utils.ts"
 import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin } from "@/shared/assert.ts"
 import type { AuthConfig } from "@/@types/index.ts"
+import type { Identities } from "@/shared/identity.ts"
 import type { GlobalContext } from "@aura-stack/router"
 
 /**
  * Resolves trusted origins from config (array or function).
  */
-export const getTrustedOrigins = async (request: Request, trustedOrigins: AuthConfig["trustedOrigins"]): Promise<string[]> => {
+export const getTrustedOrigins = async (
+    request: Request,
+    trustedOrigins: AuthConfig<Identities>["trustedOrigins"]
+): Promise<string[]> => {
     if (!trustedOrigins) return []
     const raw = typeof trustedOrigins === "function" ? await trustedOrigins(request) : trustedOrigins
     return Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : []

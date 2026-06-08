@@ -4,7 +4,7 @@
 
 **Demonstration app**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Bun](https://bun.com/docs/runtime/http/server)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [Bun](https://bun.com/docs/runtime/http/server)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in a
+This project demonstrates Aura Auth authentication using [Aura Auth documentation](https://aura-stack-auth.vercel.app/docs/introduction) in a
 [Bun](https://bun.com/docs/runtime/http/server) application.
 
 ## Getting Started

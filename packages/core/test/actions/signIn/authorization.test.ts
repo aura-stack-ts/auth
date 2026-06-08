@@ -14,63 +14,103 @@ afterEach(() => {
 })
 
 describe("createRedirectURI", () => {
-    const testCases = [
-        {
-            description: "creates redirect URI from standard URL",
-            requestURL: "https://example.com/signIn/github",
-            oauth: "github",
-            expected: "https://example.com/auth/callback/github",
-        },
-        {
-            description: "creates redirect URI from URL with port",
-            requestURL: "http://localhost:3000/signIn/google",
-            oauth: "google",
-            expected: "http://localhost:3000/auth/callback/google",
-        },
-        {
-            description: "creates redirect URI from URL with path and query",
-            requestURL: "https://example.com/signIn/github?query=123",
-            oauth: "facebook",
-            expected: "https://example.com/auth/callback/facebook",
-        },
-        {
-            description: "creates redirect URI from URL with trailing slash",
-            requestURL: "https://example.com/signIn/github/",
-            oauth: "github",
-            expected: "https://example.com/auth/callback/github",
-        },
-        {
-            description: "creates redirect URI from URL with undefined query",
-            requestURL: "https://example.com/signIn/github?",
-            oauth: "github",
-            expected: "https://example.com/auth/callback/github",
-        },
-        {
-            description: "creates redirect URI from URL with hash",
-            requestURL: "https://example.com/signIn/twitter#section",
-            oauth: "twitter",
-            expected: "https://example.com/auth/callback/twitter",
-        },
-        {
-            description: "creates redirect URI from URL with subdomain",
-            requestURL: "https://subdomain.example.com/signIn/linkedin",
-            oauth: "linkedin",
-            expected: "https://subdomain.example.com/auth/callback/linkedin",
-        },
-        {
-            description: "creates redirect URI from URL with IP address",
-            requestURL: "http://192.168.1.1/signIn/github",
-            oauth: "github",
-            expected: "http://192.168.1.1/auth/callback/github",
-        },
-    ]
+    describe("valid request", () => {
+        const testCases = [
+            {
+                description: "creates redirect URI from standard URL",
+                request: new Request("https://example.com/signIn/github"),
+                oauth: "github",
+                expected: "https://example.com/auth/callback/github",
+                trustedProxyHeaders: false,
+            },
+            {
+                description: "creates redirect URI from URL with port",
+                request: new Request("http://localhost:3000/signIn/google"),
+                oauth: "google",
+                expected: "http://localhost:3000/auth/callback/google",
+                trustedProxyHeaders: false,
+            },
+            {
+                description: "creates redirect URI from URL with path and query",
+                request: new Request("https://example.com/signIn/github?query=123"),
+                oauth: "facebook",
+                expected: "https://example.com/auth/callback/facebook",
+                trustedProxyHeaders: false,
+            },
+            {
+                description: "creates redirect URI from URL with trailing slash",
+                request: new Request("https://example.com/signIn/github/"),
+                oauth: "github",
+                expected: "https://example.com/auth/callback/github",
+                trustedProxyHeaders: false,
+            },
+            {
+                description: "creates redirect URI from URL with undefined query",
+                request: new Request("https://example.com/signIn/github?"),
+                oauth: "github",
+                expected: "https://example.com/auth/callback/github",
+                trustedProxyHeaders: false,
+            },
+            {
+                description: "creates redirect URI from URL with hash",
+                request: new Request("https://example.com/signIn/twitter#section"),
+                oauth: "twitter",
+                expected: "https://example.com/auth/callback/twitter",
+                trustedProxyHeaders: false,
+            },
+            {
+                description: "creates redirect URI from URL with subdomain",
+                request: new Request("https://subdomain.example.com/signIn/linkedin"),
+                oauth: "linkedin",
+                expected: "https://subdomain.example.com/auth/callback/linkedin",
+                trustedProxyHeaders: false,
+            },
+            {
+                description: "creates redirect URI from URL with IP address",
+                request: new Request("http://192.168.1.1/signIn/github"),
+                oauth: "github",
+                expected: "http://192.168.1.1/auth/callback/github",
+                trustedProxyHeaders: false,
+            },
+        ]
 
-    for (const { description, requestURL, oauth, expected } of testCases) {
-        test(description, async () => {
-            const redirectURI = await createRedirectURI(new Request(requestURL), oauth, { basePath: "/auth" } as GlobalContext)
-            expect(redirectURI).toBe(expected)
-        })
-    }
+        for (const { description, request, oauth, expected, trustedProxyHeaders } of testCases) {
+            test(description, async () => {
+                const redirectURI = await createRedirectURI(request, oauth, {
+                    basePath: "/auth",
+                    trustedProxyHeaders,
+                } as GlobalContext)
+                expect(redirectURI).toBe(expected)
+            })
+        }
+    })
+
+    describe("invalid request", () => {
+        const testCases = [
+            {
+                description: "creates redirect URI from URL with trusted proxy headers",
+                request: new Request("http://localhost:3000/signIn/google", {
+                    headers: {
+                        "X-Forwarded-Proto": "https",
+                        "X-Forwarded-Host": "example.com",
+                    },
+                }),
+                oauth: "google",
+                trustedProxyHeaders: true,
+            },
+        ]
+
+        for (const { description, request, oauth, trustedProxyHeaders } of testCases) {
+            test(description, async () => {
+                await expect(
+                    createRedirectURI(request, oauth, {
+                        basePath: "/auth",
+                        trustedProxyHeaders,
+                    } as GlobalContext)
+                ).rejects.toThrow("The constructed origin URL is not trusted.")
+            })
+        }
+    })
 })
 
 describe("createAuthorizationURL", () => {
@@ -543,6 +583,89 @@ describe("createRedirectTo", () => {
             } as GlobalContext)
             expect(redirectTo).toBe("/")
         })
+
+        test("with wildcard pattern and subdomain and valid origin", async () => {
+            const request = new Request("https://app.example.com/auth/signIn/github")
+            const redirectTo = await createRedirectTo(request, "https://app.example.com/dashboard", {
+                trustedOrigins: ["https://*.example.com"],
+                trustedProxyHeaders: false,
+            } as GlobalContext)
+            expect(redirectTo).toBe("/dashboard")
+        })
+
+        test("with wildcard pattern and subdomain with invalid redirect value", async () => {
+            const request = new Request("https://app.example.com/auth/signIn/github")
+            const redirectTo = await createRedirectTo(request, "https://malicious.com/phishing", {
+                trustedOrigins: ["https://*.example.com"],
+                trustedProxyHeaders: false,
+            } as GlobalContext)
+            expect(redirectTo).toBe("/")
+        })
+
+        test("with wildcard pattern and subdomain with different subdomain", async () => {
+            const request = new Request("https://app.example.com/auth/signIn/github")
+            const redirectTo3 = await createRedirectTo(request, "https://sub.app.example.com/dashboard", {
+                trustedOrigins: ["https://*.example.com"],
+                trustedProxyHeaders: false,
+            } as GlobalContext)
+            expect(redirectTo3).toBe("/")
+        })
+
+        test("with wildcard pattern and subdomain with multiple subdomains", async () => {
+            const request = new Request("https://app.example.com/auth/signIn/github")
+            const redirectTo = await createRedirectTo(request, "https://evil.app.example.com/dashboard", {
+                trustedOrigins: ["https://*.example.com"],
+                trustedProxyHeaders: false,
+            } as GlobalContext)
+            expect(redirectTo).toBe("/")
+        })
+
+        test("with wildcard pattern with multiple subdomains", async () => {
+            const request = new Request("https://app.example.com/auth/signIn/github", {
+                headers: {
+                    "X-Forwarded-Proto": "https",
+                    "X-Forwarded-Host": "evil.app.example.com",
+                },
+            })
+            const redirectTo = await createRedirectTo(request, "https://evil.app.example.com/dashboard", {
+                trustedOrigins: ["https://*.example.com"],
+                trustedProxyHeaders: true,
+            } as GlobalContext)
+            expect(redirectTo).toBe("/")
+        })
+    })
+
+    describe("SECURITY", () => {
+        // This test demonstrates a potential security risk if trustedProxyHeaders is enabled in an
+        // insecure environment. It shows that if an attacker can control the X-Forwarded-Host header,
+        // they could potentially bypass the trusted origins check and redirect users to a malicious site.
+        test("with wildcard pattern with dangerous origin from trustedProxyHeaders", async () => {
+            const request = new Request("https://app.example.com/auth/signIn/github", {
+                headers: {
+                    "X-Forwarded-Proto": "https",
+                    "X-Forwarded-Host": "evil.example.com",
+                },
+            })
+            const redirectTo = await createRedirectTo(request, "https://evil.example.com/dashboard", {
+                trustedOrigins: ["https://*.example.com"],
+                trustedProxyHeaders: true,
+            } as GlobalContext)
+            expect(redirectTo).toBe("https://evil.example.com/dashboard")
+        })
+
+        test("with wildcard pattern with trustedProxyHeaders", async () => {
+            const request = new Request("https://app.example.com/auth/signIn/github", {
+                headers: {
+                    "X-Forwarded-Proto": "https",
+                    "X-Forwarded-Host": "app.example.com",
+                },
+            })
+            const redirectTo = await createRedirectTo(request, "https://evil.example.com/dashboard", {
+                trustedOrigins: ["https://*.example.com"],
+                trustedProxyHeaders: true,
+            } as GlobalContext)
+            expect(redirectTo).toBe("https://evil.example.com/dashboard")
+        })
     })
 })
 
@@ -646,6 +769,17 @@ describe("getOriginURL", () => {
                     headers: {
                         "X-Forwarded-Proto": "http",
                         "X-Forwarded-Host": "localhost:3000",
+                    },
+                }),
+                trustedOrigins: [],
+                trustedProxyHeaders: true,
+            },
+            {
+                description: "with trusted proxy headers and without trusted origins",
+                request: new Request("http://localhost:3000/auth/signIn/github", {
+                    headers: {
+                        "X-Forwarded-Proto": "https",
+                        "X-Forwarded-Host": "malicious.com",
                     },
                 }),
                 trustedOrigins: [],

@@ -1,5 +1,17 @@
 import type { AuthInternalErrorCode, AuthSecurityErrorCode, ErrorType, LiteralUnion } from "@/@types/index.ts"
 
+interface V8ErrorConstructor extends ErrorConstructor {
+    captureStackTrace(targetObject: object, constructorOpt?: Function): void
+}
+
+/**
+ * Type guard to check if the current runtime environment
+ * supports Error.captureStackTrace.
+ */
+export const hasCaptureStackTrace = (errorConstructor: ErrorConstructor): errorConstructor is V8ErrorConstructor => {
+    return "captureStackTrace" in errorConstructor && typeof (errorConstructor as any).captureStackTrace === "function"
+}
+
 /**
  * The object returned by the class to users its:
  *   - type: "OAUTH_PROTOCOL_ERROR" to identify the error type
@@ -17,7 +29,9 @@ export class OAuthProtocolError extends Error {
         this.error = error
         this.errorURI = errorURI
         this.name = new.target.name
-        Error?.captureStackTrace(this, new.target)
+        if (hasCaptureStackTrace(Error)) {
+            Error.captureStackTrace(this, new.target)
+        }
     }
 }
 
@@ -35,7 +49,9 @@ export class AuthInternalError extends Error {
         super(message, options)
         this.code = code
         this.name = new.target.name
-        Error?.captureStackTrace(this, new.target)
+        if (hasCaptureStackTrace(Error)) {
+            Error.captureStackTrace(this, new.target)
+        }
     }
 }
 
@@ -53,7 +69,9 @@ export class AuthSecurityError extends Error {
         super(message, options)
         this.code = code
         this.name = new.target.name
-        Error?.captureStackTrace(this, new.target)
+        if (hasCaptureStackTrace(Error)) {
+            Error.captureStackTrace(this, new.target)
+        }
     }
 }
 
@@ -65,7 +83,9 @@ export class AuthClientError extends Error {
         super(message, options)
         this.code = code
         this.name = new.target.name
-        Error?.captureStackTrace(this, new.target)
+        if (hasCaptureStackTrace(Error)) {
+            Error.captureStackTrace(this, new.target)
+        }
     }
 }
 
@@ -75,7 +95,9 @@ export class AuthInvalidConfigurationError extends Error {
     constructor(message?: string, options?: ErrorOptions) {
         super(message, options)
         this.name = new.target.name
-        Error?.captureStackTrace?.(this, new.target)
+        if (hasCaptureStackTrace(Error)) {
+            Error.captureStackTrace(this, new.target)
+        }
     }
 }
 
@@ -87,7 +109,23 @@ export class AuthValidationError extends Error {
         super(message, options)
         this.code = code
         this.name = new.target.name
-        Error?.captureStackTrace?.(this, new.target)
+        if (hasCaptureStackTrace(Error)) {
+            Error.captureStackTrace(this, new.target)
+        }
+    }
+}
+
+export class AuthJoseInitializationError extends Error {
+    readonly type = "JOSE_INITIALIZATION_FAILED"
+    readonly code: string
+
+    constructor(code: string, message?: string, options?: ErrorOptions) {
+        super(message, options)
+        this.code = code
+        this.name = new.target.name
+        if (hasCaptureStackTrace(Error)) {
+            Error.captureStackTrace(this, new.target)
+        }
     }
 }
 

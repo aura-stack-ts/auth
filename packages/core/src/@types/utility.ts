@@ -1,6 +1,10 @@
+import { Type } from "arktype"
+import type { TProperties, TObject, TSchema } from "typebox"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
 import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer } from "zod/v4"
+import type { Identities, IsArkType, IsZod, UserShapeTypeBox, UserShapeValibot } from "@/shared/identity.ts"
+import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
 
 /** Expands intersection types into a single flat object type for readable editor hints. */
 export type Prettify<T> = { [K in keyof T]: T[K] }
@@ -18,6 +22,43 @@ export type EditableShape<T extends ZodRawShape> = {
     [K in keyof T]: T[K] extends ZodObject<infer Inner extends ZodRawShape> ? ZodObject<EditableShape<Inner>> : ZodTypeAny
 }
 
+export type EditableShapeZod<T extends ZodRawShape> = EditableShape<T>
+
+type AnyShape = Record<string, AnyValibotSchema>
+
+export type EditableShapeValibot<T extends ObjectEntries> = {
+    [K in keyof T]: T[K] extends ObjectSchema<infer Inner extends AnyShape, undefined>
+        ? ObjectSchema<EditableShapeValibot<Inner>, undefined>
+        : BaseSchema<any, any, any>
+}
+
+export type EditableShapeTypebox<T extends TProperties> = {
+    [K in keyof T]: T[K] extends TObject ? Wrap<EditableShapeTypebox<T[K]["properties"]>> : TSchema
+}
+
+export type EditableUser = {
+    [K in keyof User]: any
+}
+
+export type ConfigSchema<T extends Identities> =
+    IsZod<T> extends true
+        ? ZodObject<T & ZodRawShape>
+        : T extends EditableShapeValibot<UserShapeValibot>
+          ? ObjectSchema<T & ObjectEntries, undefined>
+          : IsArkType<T> extends true
+            ? T
+            : T extends EditableShapeTypebox<UserShapeTypeBox>
+              ? TObject<T & TProperties>
+              : never
+
+export type ValibotShapeToObject<S extends ObjectEntries> = Merge<InferOutput<ObjectSchema<S, undefined>>, User>
+
+export type ArktypeShapeToObject<S extends Type> = S extends Type<infer Shape> ? Wrap<Merge<Shape, User>> : never
+
+export type TypeboxShapeToObject<S> = Wrap<Merge<S, User>>
+
+export type EditableShapeArkType<T extends Type> = T extends Type<infer Shape> ? Type<{ [K in keyof Shape]: any }> : never
+
 /** Merges type `B` over `A`, replacing overlapping keys with `B`. */
 export type Merge<A, B> = Omit<A, keyof B> & B
 
@@ -26,6 +67,18 @@ export type Merge<A, B> = Omit<A, keyof B> & B
  * so identity fields always include the base user contract.
  */
 export type ZodShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<Infer<ZodObject<S>>, User>
+
+export type FromShapeToObject<S> = S extends ZodRawShape
+    ? ZodShapeToObject<S>
+    : S extends ObjectEntries
+      ? ValibotShapeToObject<S>
+      : S extends Type
+        ? ArktypeShapeToObject<S>
+        : S extends TProperties
+          ? TypeboxShapeToObject<S>
+          : S extends User
+            ? S
+            : never
 
 /** Recursively makes every property required. */
 export type DeepRequired<T> = {
@@ -107,4 +160,10 @@ export type AuthResponse<Body = unknown> = Prettify<
     Omit<Response, "json"> & {
         json(): Promise<Body>
     }
+>
+
+export type RequiredKeys<Obj extends object, Keys extends keyof Obj = keyof Obj> = Wrap<
+    {
+        [K in Keys]-?: Obj[K]
+    } & Omit<Obj, Keys>
 >

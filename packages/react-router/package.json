@@ -1,9 +1,9 @@
 {
   "name": "@aura-stack/react-router",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "React Router integration for Aura Stack authentication library",
+  "description": "Authentication integration for React Router applications with server-side rendering, route protection, session management and OAuth flows powered by Aura Auth.",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "pnpm sync:modules && tsdown",
@@ -12,8 +12,11 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
     "clean": "rm -rf dist src/_core src/oauth",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js --from react"
   },
@@ -61,9 +64,32 @@
       "import": "./dist/_core/shared.js",
       "require": "./dist/_core/shared.cjs"
     },
+    "./cookies": {
+      "types": "./dist/_core/cookies.d.ts",
+      "import": "./dist/_core/cookies.js",
+      "require": "./dist/_core/cookies.cjs"
+    },
     "./types": "./dist/@types/index.d.ts"
   },
-  "keywords": [],
+  "keywords": [
+    "react-router",
+    "react",
+    "authentication",
+    "auth",
+    "oauth",
+    "jwt",
+    "session",
+    "ssr",
+    "routing",
+    "authorization",
+    "typescript",
+    "web",
+    "web-api",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura auth",
+    "aura-auth"
+  ],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "homepage": "https://aura-stack-auth.vercel.app",
   "bugs": {
@@ -76,7 +102,13 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*",
-    "react-router": "catalog:react-router"
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "react-router": "catalog:react-router",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "@testing-library/dom": "catalog:testing-library",
+    "@testing-library/react": "catalog:testing-library"
   },
   "peerDependencies": {
     "react-router": ">=7.0.0"

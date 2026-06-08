@@ -9,14 +9,15 @@
     "dev:core": "turbo run @aura-stack/auth#dev",
     "dev:docs": "turbo run docs#dev",
     "build": "turbo run build --filter=./configs/* --filter=./packages/* --filter=./apps/*",
-    "build:prod": "turbo run build --filter=./configs/* --filter=./packages/* --filter=!./packages/integration --continue=dependencies-successful",
-    "test": "turbo run test --parallel",
+    "build:packages": "turbo run build --filter=./configs/* --filter=./packages/* --filter=!./packages/integration --continue=dependencies-successful",
+    "test": "turbo run test --parallel --filter=./packages/* --filter=!./packages/integration",
     "format": "turbo run format format:root --parallel",
     "format:root": "oxfmt \"!packages\" \"!apps\" \"!configs\"",
     "format:check": "oxfmt --check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "type-check": "turbo run type-check --parallel",
+    "type-check:packages": "turbo run type-check --parallel --filter=./packages/*",
     "create:integration": "node packages/shared/scripts/integration.js"
   },
   "repository": {
@@ -40,11 +41,8 @@
   "devDependencies": {
     "@types/node": "catalog:node",
     "@vitest/coverage-v8": "catalog:vitest",
-    "eslint": "^9.35.0",
-    "oxfmt": "^0.41.0",
-    "oxlint": "^1.56.0",
     "tsdown": "^0.21.8",
-    "turbo": "^2.7.5",
+    "turbo": "^2.9.16",
     "typescript": "catalog:typescript",
     "vitest": "catalog:vitest"
   },
@@ -107,6 +105,14 @@
       "vitest": {
         "vitest": "4.1.4",
         "@vitest/coverage-v8": "4.1.4"
+      },
+      "valibot": {
+        "valibot": "^1.4.0"
+      },
+      "testing-library": {
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/react": "^16.3.2",
+        "@testing-library/user-event": "^14.6.1"
       }
     }
   },
@@ -123,5 +129,9 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "dependencies": {
+    "oxfmt": "^0.51.0",
+    "oxlint": "^1.66.0"
   }
 }

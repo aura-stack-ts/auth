@@ -1,0 +1,285 @@
+---
+title: Next.js (Pages Router)
+description: Integrate Aura Auth and Next.js Pages Router
+---
+
+This guide walks you through to implement Aura Auth in a Next.js application using the Pages Router with a complete support for Server-Side Rendering (SSR) and Client-Side Rendering (CSR).
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Next.js Pages Router application.
+
+<Callout type="info">
+  Aura Auth is working on developing a Next.js-specific package that will provide additional utilities and hooks for Next.js
+  applications. For now, the core package can be used to implement authentication in Next.js with the patterns outlined in this
+  guide. Stay tuned for updates on the [Next.js package!](https://github.com/aura-stack-ts/auth/tree/master/packages/next)
+</Callout>
+
+---
+
+<Steps>
+
+<Step>
+
+## Setup Aura Auth
+
+### Create an Auth Instance
+
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
+
+```ts title="src/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+
+export const { handlers, api } = auth
+```
+
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
+
+### Create an Auth Client Instance
+
+Create an `auth-client.ts` file in `src/lib` directory to enable client-side features.
+
+```ts title="src/lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+```
+
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL. Both options should be the same as the ones used in your `auth.ts` configuration
+  to ensure client and server instances are aligned.
+</Callout>
+
+## Mount HTTP Handlers
+
+Create a catch-all route in `src/pages/api/auth/[...aura].ts` to handle all authentication endpoints dynamically. The `/api/auth` path should match with the Pages Router Structure and `basePath` defined in your Auth configuration.
+
+```ts title="src/pages/api/auth/[...aura].ts"
+import { handlers } from "@/lib/auth"
+import type { NextApiRequest, NextApiResponse } from "next"
+
+const getBaseURL = (request: NextApiRequest) => {
+  const protocol = request.headers["x-forwarded-proto"] ?? "http"
+  const host = request.headers["x-forwarded-host"] ?? request.headers.host
+  return `${protocol}://${host}`
+}
+
+const toWebHeaders = (headers: NextApiRequest["headers"]) => {
+  const webHeaders = new Headers()
+  for (const [key, value] of Object.entries(headers)) {
+    if (Array.isArray(value)) {
+      webHeaders.set(key, value.join(", "))
+      continue
+    }
+    if (typeof value === "string") {
+      webHeaders.set(key, value)
+    }
+  }
+  return webHeaders
+}
+
+const setResponseHeaders = (res: NextApiResponse, headers: Headers) => {
+  for (const [key, value] of headers.entries()) {
+    res.setHeader(key, value)
+  }
+}
+
+export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const method = req.method ?? "GET"
+  const handler = handlers[method as keyof typeof handlers]
+  if (!handler) {
+    return res.status(405).json({ error: `Method ${method} Not Allowed` })
+  }
+  const url = new URL(req.url!, getBaseURL(req))
+  const webRequest = new Request(url, {
+    method,
+    headers: toWebHeaders(req.headers),
+    body: method !== "GET" && method !== "HEAD" && req.body ? JSON.stringify(req.body) : undefined,
+  })
+
+  try {
+    const response = await handler(webRequest)
+    setResponseHeaders(res, response.headers)
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location")
+      if (location) {
+        return res.redirect(response.status, location)
+      }
+    }
+
+    const contentType = response.headers.get("content-type") ?? ""
+    if (contentType.includes("application/json")) {
+      const data = await response.json()
+      return res.status(response.status).json(data)
+    }
+
+    const text = await response.text()
+    return res.status(response.status).send(text)
+  } catch {
+    return res.status(500).json({ error: "Internal Server Error" })
+  }
+}
+
+export default handler
+```
+
+</Step>
+
+<Step>
+
+## Server Side Rendering (SSR)
+
+Use server-side rendering when you want to protect a page before any UI is sent to the browser. This is the safest pattern for dashboard pages, account settings, and other private routes.
+
+### Get Session
+
+```tsx title="src/pages/dashboard.tsx" lineNumbers
+import { api } from "@/lib/auth"
+import type { Session } from "@aura-stack/auth"
+import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
+
+export const getServerSideProps: GetServerSideProps<{ session: Session | null }> = async ({ req }) => {
+  const session = await api.getSession({
+    headers: req.headers as Record<string, string>,
+  })
+
+  return {
+    props: {
+      session: session.authenticated ? session.session : null,
+    },
+  }
+}
+
+export default function DashboardPage({ session }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  if (!session) {
+    return <p>You must be signed in to view this page.</p>
+  }
+  return (
+    <div>
+      <h1>Welcome, {session.user?.name}!</h1>
+      <p>Email: {session.user?.email}</p>
+    </div>
+  )
+}
+```
+
+The server-side session lookup is the right place to redirect unauthenticated users or render a fallback state.
+
+</Step>
+
+<Step>
+
+## Client Side Rendering (CSR)
+
+Use client-side rendering when you need interactive auth controls inside menus, modals, or components that cannot use `getServerSideProps`.
+
+### Sign In
+
+```tsx title="src/pages/login.tsx" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+export default function LoginPage() {
+  const signIn = async () => {
+    const response = await authClient.signIn("github", {
+      redirect: true,
+      redirectTo: "/dashboard",
+    })
+    if (!response.ok) {
+      console.error("Sign-in failed:", response.error)
+    }
+  }
+
+  return (
+    <div>
+      <h1>Login</h1>
+      <button onClick={signIn}>Sign in with GitHub</button>
+    </div>
+  )
+}
+```
+
+If you do not want an automatic redirect, set `redirect: false` and handle the returned URL yourself.
+
+### Get Session
+
+```tsx title="src/components/user-profile.tsx" lineNumbers
+import { useEffect, useState } from "react"
+import { authClient } from "@/lib/auth-client"
+
+export const UserProfile = () => {
+  const [session, setSession] = useState(null)
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { session } = await authClient.getSession()
+      setSession(session)
+    }
+    fetchSession()
+  }, [])
+
+  if (!session) return <p>Loading...</p>
+
+  return (
+    <div>
+      <h1>Welcome back, {session.user?.name}</h1>
+      <p>Email: {session.user?.email}</p>
+    </div>
+  )
+}
+```
+
+This pattern works well for menus, avatars, and client-only widgets that need to show the current user after hydration.
+
+### Sign Out
+
+```tsx title="src/components/sign-out-button.tsx" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+export const SignOutButton = () => {
+  const handleSignOut = async () => {
+    await authClient.signOut({
+      redirect: true,
+      redirectTo: "/",
+    })
+  }
+
+  return <button onClick={handleSignOut}>Sign Out</button>
+}
+```
+
+Client-side sign-out is best when the logout control lives inside a dropdown, toolbar, or any interactive client component.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` and the route file aligned**. If your route is `pages/api/auth/[...aura].ts`, the auth configuration should use `basePath: "/api/auth"`.
+- **Pass the current request headers on the server**. `api.getSession()` needs the active request headers so Aura Auth can read cookies correctly.
+- **Treat `auth.ts` as shared server code**. Put the auth instance in `src/lib/auth.ts` so both API routes and server-side code can reuse it.
+- **Use client components only for interaction**. Page protection is stronger when it happens on the server before rendering private UI.
+
+---
+
+## Resources
+
+- [Next.js Pages Router Documentation](https://nextjs.org/docs/pages)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Next.js Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/nextjs/pages-router)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/api-reference/options)
+- [TypeScript Guide](/docs/concepts/typescript)

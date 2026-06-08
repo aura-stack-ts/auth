@@ -1,16 +1,11 @@
-import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { signInCredentials } from "@/api/credentials.ts"
+import { RedirectOptionsSchema, CredentialsPayloadSchema } from "@/schemas.ts"
 
 const config = createEndpointConfig({
     schemas: {
-        body: z.object({
-            username: z.string(),
-            password: z.string(),
-        }),
-        searchParams: z.object({
-            redirectTo: z.string().optional(),
-        }),
+        body: CredentialsPayloadSchema,
+        searchParams: RedirectOptionsSchema,
     },
 })
 
@@ -31,6 +26,7 @@ export const signInCredentialsAction = createEndpoint(
             payload,
             request: ctx.request,
             headers: ctx.request.headers,
+            redirect: ctx.searchParams.redirect,
             redirectTo: ctx.searchParams.redirectTo,
         })
         return toResponse()

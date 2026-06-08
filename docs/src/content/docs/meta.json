@@ -1,17 +1,3 @@
 {
-  "title": "Documentation",
-  "pages": [
-    "---Introduction---",
-    "index",
-    "quick-start",
-    "oauth",
-    "concepts",
-    "configuration",
-    "guides",
-    "integrations",
-    "api-reference",
-    "---Community---",
-    "contributing"
-  ],
-  "root": true
+  "pages": ["(core)", "examples"]
 }

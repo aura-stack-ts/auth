@@ -41,3 +41,9 @@ catalogs:
   vitest:
     vitest: 4.1.4
     "@vitest/coverage-v8": 4.1.4
+  valibot:
+    valibot: ^1.4.0
+  testing-library:
+    "@testing-library/dom": ^10.4.1
+    "@testing-library/react": ^16.3.2
+    "@testing-library/user-event": ^14.6.1

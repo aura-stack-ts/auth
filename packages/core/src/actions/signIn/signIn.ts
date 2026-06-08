@@ -1,5 +1,6 @@
 import { z } from "zod/v4"
 import { signIn } from "@/api/signIn.ts"
+import { RedirectOptionsSchema } from "@/schemas.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
 
@@ -12,10 +13,7 @@ const signInConfig = (oauth: OAuthProviderRecord) => {
                     "The OAuth provider is not supported or invalid."
                 ),
             }),
-            searchParams: z.object({
-                redirect: z.stringbool().optional().default(true),
-                redirectTo: z.string().optional(),
-            }),
+            searchParams: RedirectOptionsSchema,
         },
     })
 }

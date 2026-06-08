@@ -1,4 +1,6 @@
+import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { UserIdentityArkType, UserIdentityValibot } from "@/shared/identity.ts"
 import { jose, PATCH } from "@test/presets.ts"
 import { describe, test, expect } from "vitest"
 
@@ -10,14 +12,14 @@ describe("updateSession action", () => {
                 body: JSON.stringify({}),
             })
         )
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(400)
         expect(await response.json()).toMatchObject({
             session: null,
             success: false,
         })
     })
 
-    test("updates user session", async () => {
+    test("updates user session with redirect: true (by default)", async () => {
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
             name: "John Doe",
@@ -43,6 +45,175 @@ describe("updateSession action", () => {
             })
         )
         expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    ...newUser,
+                },
+                expires: expect.any(String),
+            },
+            success: true,
+            // Doesn't redirect because redirectTo is not set
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("updates user session with redirect: false", async () => {
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const newUser = {
+            name: "Alice Smith",
+            email: "alicesmith@example.com",
+            image: "https://example.com/alicesmith-avatar.jpg",
+        }
+
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session?redirect=false", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({ user: newUser }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    ...newUser,
+                },
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("updates user session with redirect: true and redirectTo: string", async () => {
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const newUser = {
+            name: "Alice Smith",
+            email: "alicesmith@example.com",
+            image: "https://example.com/alicesmith-avatar.jpg",
+        }
+
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session?redirectTo=/dashboard", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({ user: newUser }),
+            })
+        )
+        expect(response.status).toBe(302)
+        expect(response.headers.get("Location")).toBe("/dashboard")
+        expect(await response.json()).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    ...newUser,
+                },
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: true,
+            redirectURL: null,
+        })
+    })
+
+    test("updates user session with redirect: false and redirectTo: string", async () => {
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const newUser = {
+            name: "Alice Smith",
+            email: "alicesmith@example.com",
+            image: "https://example.com/alicesmith-avatar.jpg",
+        }
+
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session?redirect=false&redirectTo=/dashboard", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({ user: newUser }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    ...newUser,
+                },
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: false,
+            redirectURL: "/dashboard",
+        })
+    })
+
+    test("updates user session with valibot schema", async () => {
+        const { handlers, jose } = createAuth({
+            oauth: [],
+            identity: {
+                schema: UserIdentityValibot,
+            },
+        })
+
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const newUser = {
+            name: "Alice Smith",
+            email: "alicesmith@example.com",
+            image: "https://example.com/alicesmith-avatar.jpg",
+        }
+
+        const response = await handlers.PATCH(
+            new Request("http://localhost:3000/auth/session", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({ user: newUser }),
+            })
+        )
+        expect(response.status).toBe(200)
         expect(await response.json()).toMatchObject({
             session: {
                 user: {
@@ -52,6 +223,53 @@ describe("updateSession action", () => {
                 expires: expect.any(String),
             },
             success: true,
+        })
+    })
+
+    test("updates user session with arktype schema", async () => {
+        const { handlers, jose } = createAuth({
+            oauth: [],
+            identity: {
+                schema: UserIdentityArkType,
+            },
+        })
+
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://example.com/johndoe-avatar.jpg",
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const newUser = {
+            name: "Alice Smith",
+            email: "alicesmith@example.com",
+            image: "https://example.com/alicesmith-avatar.jpg",
+        }
+
+        const response = await handlers.PATCH(
+            new Request("http://localhost:3000/auth/session?redirect=false", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({ user: newUser }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    ...newUser,
+                },
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: false,
+            redirectURL: null,
         })
     })
 
@@ -79,10 +297,12 @@ describe("updateSession action", () => {
                 body: JSON.stringify({ user: newUser }),
             })
         )
-        expect(response.status).toBe(401)
-        expect(await response.json()).toMatchObject({
+        expect(response.status).toBe(400)
+        expect(await response.json()).toEqual({
             session: null,
             success: false,
+            redirect: false,
+            redirectURL: null,
         })
     })
 
@@ -104,7 +324,7 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("http://localhost:3000/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -114,7 +334,7 @@ describe("updateSession action", () => {
             })
         )
         expect(response.status).toBe(200)
-        expect(await response.json()).toMatchObject({
+        expect(await response.json()).toEqual({
             session: expect.objectContaining({
                 user: {
                     sub: "1234567890",
@@ -124,6 +344,8 @@ describe("updateSession action", () => {
                 },
             }),
             success: true,
+            redirect: false,
+            redirectURL: null,
         })
     })
 })

@@ -1,0 +1,250 @@
+---
+title: React Router v7
+description: Integrate Aura Auth and React Router v7
+---
+
+This guide walks you through to implement Aura Auth in a React Router v7 (formerly Remix) application to a complete support for Loaders, Actions, and Server Components.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your React Router application.
+
+<Callout type="info">
+  Aura Auth is working on developing a React Router-specific package that will provide additional utilities and hooks for React
+  Router applications. For now, the core package can be used to implement authentication in React Router with the patterns
+  outlined in this guide. Stay tuned for updates on the [React Router
+  package!](https://github.com/aura-stack-ts/auth/tree/master/packages/react-router)
+</Callout>
+
+<Steps>
+
+<Step>
+
+## Setup Aura Auth
+
+### Create an Auth Instance
+
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
+
+```ts title="src/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+  baseURL: "http://localhost:5173",
+})
+
+export const { handlers, api } = auth
+```
+
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
+
+### Create an Auth Client Instance
+
+Create an `auth-client.ts` file in `src/lib` directory to enable client-side features.
+
+```ts title="src/lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  basePath: "/api/auth",
+  baseURL: "http://localhost:5173",
+})
+```
+
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL. Both options should be the same as the ones used in your `auth.ts` configuration
+  to ensure client and server instances are aligned.
+</Callout>
+
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Create a catch-all route in `src/routes/api.auth.$.tsx` to handle all authentication endpoints dynamically. The `/api/auth` path should match with the route structure and `basePath` defined in your Auth configuration.
+
+```ts title="src/routes/api.auth.$.tsx" lineNumbers
+import { handlers } from "~/lib/auth"
+import type { Route } from "./+types/api.auth.$"
+
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  return handlers.GET(request)
+}
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  return handlers.ALL(request)
+}
+```
+
+</Step>
+
+<Step>
+
+## Server Side Rendering (SSR)
+
+### Sign In
+
+```tsx title="src/routes/sign-in.tsx" lineNumbers
+import { api } from "~/lib/auth"
+import { Form } from "react-router"
+import type { Route } from "./+types/sign-in"
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const formData = await request.formData()
+  const provider = formData.get("provider") as string
+  return await api.signIn(provider, { request })
+}
+
+export default function SignInPage() {
+  return (
+    <div>
+      <h1>Login</h1>
+      <Form method="post">
+        <button type="submit" name="provider" value="github">
+          Sign in with GitHub
+        </button>
+      </Form>
+    </div>
+  )
+}
+```
+
+### Get Session
+
+```ts title="src/routes/dashboard.tsx" lineNumbers
+import { api } from "~/lib/auth"
+import type { Route } from "./+types/dashboard"
+
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const session = await api.getSession({
+    headers: request.headers,
+  })
+
+  if (!session.authenticated) {
+    throw new Response("Unauthorized", { status: 401 })
+  }
+
+  return { session }
+}
+
+export default function DashboardPage({ loaderData }: Route.ComponentProps) {
+  const { user } = loaderData.session
+  return (
+    <div>
+      <h1>Welcome, {user?.name}!</h1>
+      <p>Email: {user?.email}</p>
+    </div>
+  )
+}
+```
+
+### Sign Out
+
+```ts title="src/routes/sign-out.tsx" lineNumbers
+import { api } from "~/lib/auth"
+import type { Route } from "./+types/sign-out"
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  return await api.signOut({ request })
+}
+```
+
+</Step>
+
+<Step>
+
+## Client Side Rendering (CSR)
+
+Use client components for interactive UI such as buttons, menus, and dialogs. The browser client is useful when you do not need a full route transition.
+
+### Sign In
+
+```tsx title="src/components/sign-in-button.tsx" lineNumbers
+import { authClient } from "~/lib/auth-client"
+
+export const SignInButton = () => {
+  const handleSignIn = async () => {
+    await authClient.signIn("github", {
+      redirectTo: "/dashboard",
+    })
+  }
+
+  return <button onClick={handleSignIn}>Sign in with GitHub</button>
+}
+```
+
+If you want a redirect-less flow, set `redirect: false` and use the returned URL yourself.
+
+### Get Session
+
+```tsx title="src/components/user-profile.tsx" lineNumbers
+import { useEffect, useState } from "react"
+import { authClient } from "~/lib/auth-client"
+
+export const UserProfile = () => {
+  const [session, setSession] = useState(null)
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { session } = await authClient.getSession()
+      setSession(session)
+    }
+    fetchSession()
+  }, [])
+
+  if (!session) return <p>Loading...</p>
+
+  return (
+    <div>
+      <h1>Welcome back, {session.user?.name}</h1>
+      <p>Email: {session.user?.email}</p>
+    </div>
+  )
+}
+```
+
+This works well for avatars, nav bars, and any component that should update after hydration.
+
+### Sign Out
+
+```tsx title="src/components/sign-out-button.tsx" lineNumbers
+import { authClient } from "~/lib/auth-client"
+
+export const SignOutButton = () => {
+  const handleSignOut = async () => {
+    await authClient.signOut()
+  }
+
+  return <button onClick={handleSignOut}>Sign Out</button>
+}
+```
+
+Client-side sign-out is best for interactive controls inside menus or profile popovers.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with the route segment**. If your route lives at `src/routes/api.auth.$.tsx`, the auth configuration should use `basePath: "/api/auth"`.
+- **Use the shared auth module everywhere**. Import `src/lib/auth.ts` from loaders, actions, and the auth route so there is one auth configuration.
+- **Protect pages in loaders when possible**. If a route should never render for unauthenticated users, check the session before returning the page component.
+- **Use the browser client for interaction, not page protection**. Client components are great for buttons and menus, but server-side checks are still the safer default for private routes.
+
+---
+
+## Resources
+
+- [React Router Documentation](https://reactrouter.com/)
+- [Aura Auth Documentation](/docs/quick-start)
+- [React Router Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/react-router)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/api-reference/options)
+- [TypeScript Guide](/docs/concepts/typescript)

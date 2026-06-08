@@ -22,7 +22,7 @@ const closeMenu = () => {
                 class="hidden md:flex items-center justify-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
             >
                 <a
-                    href="https://aura-stack-auth.vercel.app/docs"
+                    href="https://aura-stack-auth.vercel.app/docs/introduction"
                     class="text-sm text-muted-foreground hover:text-white transition-colors"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -74,7 +74,7 @@ const closeMenu = () => {
         >
             <div class="px-6 py-4 flex flex-col gap-4">
                 <a
-                    href="https://aura-stack-auth.vercel.app/docs"
+                    href="https://aura-stack-auth.vercel.app/docs/introduction"
                     class="text-sm text-muted-foreground hover:text-white transition-colors py-2"
                     target="_blank"
                     rel="noopener noreferrer"

@@ -1,9 +1,9 @@
 {
   "name": "@aura-stack/react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "React integration for Aura Stack authentication library",
+  "description": "React authentication utilities including providers, hooks and OAuth flows for client-side and hybrid applications powered by Aura Auth.",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "pnpm sync:modules && tsdown",
@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist src/_core src/oauth",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js"
   },
@@ -76,9 +76,32 @@
       "import": "./dist/_core/shared.js",
       "require": "./dist/_core/shared.cjs"
     },
+    "./cookies": {
+      "types": "./dist/_core/cookies.d.ts",
+      "import": "./dist/_core/cookies.js",
+      "require": "./dist/_core/cookies.cjs"
+    },
     "./types": "./dist/@types/index.d.ts"
   },
-  "keywords": [],
+  "keywords": [
+    "react",
+    "authentication",
+    "auth",
+    "oauth",
+    "jwt",
+    "session",
+    "context",
+    "hooks",
+    "typescript",
+    "javascript",
+    "authorization",
+    "frontend",
+    "web-api",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura auth",
+    "aura-auth"
+  ],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "homepage": "https://aura-stack-auth.vercel.app",
   "bugs": {
@@ -91,8 +114,9 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*",
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/react": "^16.3.2",
+    "@testing-library/dom": "catalog:testing-library",
+    "@testing-library/react": "catalog:testing-library",
+    "@testing-library/user-event": "catalog:testing-library",
     "vitest": "catalog:vitest",
     "react": "catalog:react",
     "@types/react": "catalog:react"

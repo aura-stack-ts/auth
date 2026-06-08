@@ -1,0 +1,356 @@
+---
+title: Quick Start
+description: Create your Aura Auth instance and start building authentication flows in simple steps.
+---
+
+<Steps>
+
+<Step>
+
+### Installation
+
+Install Aura Auth in your project:
+
+```npm
+npm install @aura-stack/auth
+```
+
+</Step>
+
+<Step>
+
+### Environment setup
+
+Create a `.env` or `.env.local` file at the root of your project to store secrets securely.
+
+<Callout type="warn">Never commit your `.env` and `.env.local` files. Always use a secret manager in production.</Callout>
+
+#### Secret Key
+
+A secret value used to sign and encrypt sessions and CSRF tokens. This should be a secure random value of at least 32 bytes (256 bits) in length, encoded in base64 or hex format.
+
+Use `openssl rand -base64 32` or `openssl rand -hex 32` to generate a secure random value.
+
+```bash title=".env"
+AURA_AUTH_SECRET=
+```
+
+#### Salting Key
+
+A random value used for salting the derivation keys for signing and encryption. This should also be a secure random value of at least 32 bytes (256 bits) in length, encoded in base64 or hex format.
+
+Use `openssl rand -base64 32` or `openssl rand -hex 32` to generate a secure random value.
+
+```bash title=".env"
+AURA_AUTH_SALT=
+```
+
+#### Base URL
+
+The base URL of your application, used to construct the full URLs.
+
+```bash title=".env"
+AURA_AUTH_BASE_URL=http://localhost:3000
+```
+
+</Step>
+
+<Step>
+
+### Create an Auth instance [#auth-instance]
+
+Create an `auth.ts` file inside a `lib` directory to configure your Auth instance.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { handlers, jose, api } = auth
+```
+
+Once the auth instance is created, you could export the handlers, jose utilities, and API methods for use in your application.
+
+</Step>
+
+<Step>
+
+### Mount HTTP Handlers
+
+Mount the HTTP handlers in your server or API routes to handle the HTTP requests for authentication flows.
+
+Create a new file in your server or API directory to manage the auth routes or create a route that delegates to the auth handlers.
+
+<Tabs items={["Fullstack", "Backend", "Edge"]}>
+
+<Tab value="Fullstack">
+
+<Tabs items={["Next.js App Router", "Next.js Pages Router", "React Router v7", "TanStack Router", "Nuxt 4"]}>
+
+<Tab value="Next.js App Router">
+
+```ts title="app/api/auth/[...aura]/route.ts" lineNumbers
+import { handlers } from "@/lib/auth"
+
+export const { GET, POST, PATCH } = handlers
+```
+
+</Tab>
+
+<Tab value="Next.js Pages Router">
+
+```ts title="pages/api/auth/[...aura].ts" lineNumbers
+import { handlers } from "@/lib/auth"
+import type { NextApiRequest, NextApiResponse } from "next"
+
+const getBaseURL = (request: NextApiRequest) => {
+  const protocol = request.headers["x-forwarded-proto"] ?? "http"
+  const host = request.headers["x-forwarded-host"] ?? request.headers.host
+  return `${protocol}://${host}`
+}
+
+export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const method = req.method ?? "GET"
+  const handler = handlers[method as keyof typeof handlers]
+  if (!handler) {
+    return res.status(405).json({ error: `Method ${method} Not Allowed` })
+  }
+  const url = new URL(req.url!, getBaseURL(req))
+  const webRequest = new Request(url, {
+    method,
+    headers: new Headers(req.headers as Record<string, string>),
+    body: method !== "GET" && req.body ? JSON.stringify(req.body) : undefined,
+  })
+  try {
+    const response = await handler(webRequest)
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location")
+      if (location) {
+        response.headers.forEach((value, key) => res.setHeader(key, value))
+        return res.redirect(response.status, location)
+      }
+    }
+    response.headers.forEach((value, key) => res.setHeader(key, value))
+    const data = await response.json()
+    return res.status(response.status).json(data)
+  } catch {
+    return res.status(500).json({ error: "Internal Server Error" })
+  }
+}
+
+export default handler
+```
+
+</Tab>
+
+<Tab value="React Router v7">
+
+```ts title="app/routes/api.auth.$.tsx" lineNumbers
+import { handlers } from "~/lib/auth"
+import type { Route } from "./+types/api.auth.$"
+
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  return handlers.GET(request)
+}
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  return handlers.ALL(request)
+}
+```
+
+</Tab>
+
+<Tab value="TanStack Router">
+
+```ts title="src/routes/api/auth.$.ts" lineNumbers
+import { handlers } from "@/lib/auth"
+import { createFileRoute } from "@tanstack/react-router"
+
+export const Route = createFileRoute("/api/auth/$")({
+  server: {
+    handlers: {
+      GET: async ({ request }) => {
+        return await handlers.GET(request)
+      },
+      POST: async ({ request }) => {
+        return await handlers.POST(request)
+      },
+      PATCH: async ({ request }) => {
+        return await handlers.PATCH(request)
+      },
+    },
+  },
+})
+```
+
+</Tab>
+
+<Tab value="Nuxt 4">
+
+```ts title="server/api/auth/[...aura].ts" lineNumbers
+import { handlers } from "#shared/auth"
+
+export default defineEventHandler(async (event) => {
+  const webRequest = toWebRequest(event)
+  return await handlers.ALL(webRequest)
+})
+```
+
+</Tab>
+
+</Tabs>
+
+</Tab>
+
+<Tab value="Backend">
+
+<Tabs items={["Elysia", "Hono", "Express"]}>
+
+<Tab value="Elysia">
+
+```ts title="src/index.ts" lineNumbers
+import { Elysia } from "elysia"
+import { toHandler } from "@/lib/auth"
+
+const app = new Elysia()
+
+app.all("/api/auth/*", toHandler)
+
+app.listen(3000)
+```
+
+</Tab>
+
+<Tab value="Hono">
+
+```ts title="src/index.ts" lineNumbers
+import { Hono } from "hono"
+import { toHandler, withAuth } from "@/lib/auth"
+
+const app = new Hono()
+
+app.all("/api/auth/*", toHandler)
+
+export default app
+```
+
+</Tab>
+
+<Tab value="Express">
+
+```ts title="src/index.ts" lineNumbers
+import express, { type Express } from "express"
+import { toHandler, withAuth } from "@/lib/auth.js"
+
+const app: Express = express()
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+app.all("/api/auth/*", toHandler)
+
+app.listen(PORT)
+```
+
+</Tab>
+
+</Tabs>
+
+</Tab>
+
+<Tab value="Edge">
+
+<Tabs items={["Vercel Functions", "Cloudflare Workers", "Supabase Edge Functions"]}>
+
+<Tab value="Vercel Functions">
+
+```ts title="api/auth/index.ts" lineNumbers
+import { handlers } from "../_auth.js"
+
+export const GET = async (request: Request) => {
+  return await handlers.GET(request)
+}
+
+export const POST = async (request: Request) => {
+  return await handlers.POST(request)
+}
+
+export const PATCH = async (request: Request) => {
+  return await handlers.PATCH(request)
+}
+```
+
+</Tab>
+
+<Tab value="Cloudflare Workers">
+
+```ts title="src/index.ts" lineNumbers
+import { handlers } from "./auth"
+
+export default {
+  async fetch(request): Promise<Response> {
+    const pathname = new URL(request.url).pathname
+    if (pathname === "/") {
+      return new Response("Welcome to Aura Auth Cloudflare Worker App!")
+    }
+    if (pathname.startsWith("/api/auth/")) {
+      return await handlers.ALL(request)
+    }
+    return new Response("Not Found", { status: 404 })
+  },
+} satisfies ExportedHandler<Env>
+```
+
+</Tab>
+
+<Tab value="Supabase Edge Functions">
+
+```ts title="supabase/functions/auth/index.ts" lineNumbers
+import { handlers } from "../_shared/auth.ts"
+
+import "@supabase/functions-js/edge-runtime.d.ts"
+
+Deno.serve(async (request) => {
+  const pathname = new URL(request.url).pathname
+  if (pathname === "/") {
+    return new Response("Welcome to Aura Auth Cloudflare Worker App!")
+  }
+  if (pathname.startsWith("/api/auth/")) {
+    return await handlers.ALL(request)
+  }
+  return new Response("Not Found", { status: 404 })
+})
+```
+
+</Tab>
+
+</Tabs>
+
+</Tab>
+
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Create Client Auth Instance [#client-instance]
+
+Create an `auth-client.ts` file in the same directory to create a client instance that can be used in your frontend code.
+
+```ts title="@/lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+
+export const { getSession, signIn, signInCredentials, updateSession, signOut } = authClient
+```
+
+</Step>
+
+</Steps>

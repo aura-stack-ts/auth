@@ -1,9 +1,9 @@
 {
   "name": "@aura-stack/auth",
-  "version": "0.6.0",
+  "version": "0.7.2",
   "private": false,
   "type": "module",
-  "description": "Core auth for @aura-stack/auth",
+  "description": "Open-source authentication and authorization library for modern TypeScript and JavaScript applications. Framework-agnostic, runtime-agnostic and built on web standards.",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "tsdown",
@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm build && pnpm clean:cts"
   },
   "repository": {
@@ -71,12 +71,31 @@
       "types": "./dist/shared/index.d.ts",
       "import": "./dist/shared/index.js",
       "require": "./dist/shared/index.cjs"
+    },
+    "./cookies": {
+      "types": "./dist/shared/cookies.d.ts",
+      "import": "./dist/shared/cookies.js",
+      "require": "./dist/shared/cookies.cjs"
     }
   },
   "keywords": [
     "auth",
+    "oauth",
+    "oauth2",
+    "security",
     "session",
-    "authentication"
+    "authentication",
+    "authorization",
+    "typescript",
+    "javascript",
+    "node",
+    "bun",
+    "deno",
+    "edge",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura auth",
+    "aura-auth"
   ],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "homepage": "https://aura-stack-auth.vercel.app",
@@ -86,7 +105,10 @@
   "license": "MIT",
   "dependencies": {
     "@aura-stack/jose": "workspace:*",
-    "@aura-stack/router": "^0.6.0",
+    "@aura-stack/router": "^0.7.2",
+    "arktype": "^2.2.0",
+    "typebox": "^1.1.38",
+    "valibot": "catalog:valibot",
     "zod": "catalog:zod-v4"
   },
   "devDependencies": {

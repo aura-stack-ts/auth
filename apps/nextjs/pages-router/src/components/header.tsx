@@ -3,12 +3,13 @@ import { useRouter } from "next/router"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/react"
+import { useAuthActions, useSession } from "@aura-stack/next/client"
 
 export const Header = () => {
     const router = useRouter()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const { status, isPending, signOut, signIn } = useAuth()
+    const { status } = useSession()
+    const { isPending, signOut, signIn } = useAuthActions()
     const isAuthenticated = status === "authenticated"
 
     const handleSignOut = async () => {
@@ -25,7 +26,7 @@ export const Header = () => {
                     </Link>
                     <div className="hidden md:flex items-center justify-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-muted-foreground">
                         <a
-                            href="https://aura-stack-auth.vercel.app/docs"
+                            href="https://aura-stack-auth.vercel.app/docs/introduction"
                             className="text-sm hover:text-white transition-colors"
                             target="_blank"
                         >
@@ -77,7 +78,7 @@ export const Header = () => {
                 <div className="md:hidden bg-black/95 backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]">
                     <div className="px-6 py-4 flex flex-col gap-4">
                         <Link
-                            href="https://aura-stack-auth.vercel.app/docs"
+                            href="https://aura-stack-auth.vercel.app/docs/introduction"
                             className="text-sm text-muted-foreground hover:text-white transition-colors py-2"
                             target="_blank"
                             onClick={() => setMobileMenuOpen(false)}

@@ -2,25 +2,31 @@ import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/shared/crypto.ts"
 import { cacheControl } from "@/shared/headers.ts"
-import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
+import { timingSafeEqual } from "@/shared/utils.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { OAuthAuthorizationErrorResponse } from "@/schemas.ts"
-import { AuthSecurityError, OAuthProtocolError } from "@/shared/errors.ts"
-import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
+import { getCookie, getExpiredCookie } from "@/cookie.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
-import { getCookie, expiredCookieAttributes } from "@/cookie.ts"
+import { AuthSecurityError, OAuthProtocolError } from "@/shared/errors.ts"
+import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
+import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
-import { timingSafeEqual } from "@/shared/utils.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
+    // @ts-ignore
     return createEndpointConfig("/callback/:oauth", {
+        /**
+         * @todo Add support to any schema (zod, arktype and valibot)
+         */
         schemas: {
+            // @ts-ignore
             params: z.object({
                 oauth: z.enum(
                     Object.keys(oauth) as (keyof OAuthProviderRecord)[],
                     "The OAuth provider is not supported or invalid."
                 ),
             }),
+            // @ts-ignore
             searchParams: z.object({
                 code: z.string("Missing code parameter in the OAuth authorization response."),
                 state: z.string("Missing state parameter in the OAuth authorization response."),
@@ -71,15 +77,25 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
             const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
 
+            const clearCookieHeaders = new HeadersBuilder(cacheControl)
+                .setCookie(cookies.state.name, "", getExpiredCookie(cookies.state.attributes))
+                .setCookie(cookies.redirectURI.name, "", getExpiredCookie(cookies.redirectURI.attributes))
+                .setCookie(cookies.redirectTo.name, "", getExpiredCookie(cookies.redirectTo.attributes))
+                .setCookie(cookies.codeVerifier.name, "", getExpiredCookie(cookies.codeVerifier.attributes))
+
             if (!timingSafeEqual(cookieState, state)) {
                 logger?.log("MISMATCHING_STATE", {
                     structuredData: {
                         oauth_provider: oauth,
                     },
                 })
-                throw new AuthSecurityError(
-                    "MISMATCHING_STATE",
-                    "The provided state passed in the OAuth response does not match the stored state."
+                return Response.json(
+                    {
+                        type: "AUTH_SECURITY_ERROR",
+                        code: "MISMATCHING_STATE",
+                        message: "The provided state passed in the OAuth response does not match the stored state.",
+                    },
+                    { headers: clearCookieHeaders.toHeaders(), status: 400 }
                 )
             }
 
@@ -118,14 +134,10 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 },
             })
 
-            const headers = new HeadersBuilder(cacheControl)
+            const headers = clearCookieHeaders
                 .setHeader("Location", cookieRedirectTo)
                 .setCookie(cookies.sessionToken.name, session, cookies.sessionToken.attributes)
                 .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
-                .setCookie(cookies.state.name, "", expiredCookieAttributes)
-                .setCookie(cookies.redirectURI.name, "", expiredCookieAttributes)
-                .setCookie(cookies.redirectTo.name, "", expiredCookieAttributes)
-                .setCookie(cookies.codeVerifier.name, "", expiredCookieAttributes)
                 .toHeaders()
             return Response.json({ oauth }, { status: 302, headers: headers })
         },

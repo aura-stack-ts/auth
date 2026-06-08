@@ -1,8 +1,11 @@
 import { AuthSecurityError } from "@/shared/errors.ts"
 import { isJWTPayloadWithToken } from "@/shared/assert.ts"
 import { equals, timingSafeEqual } from "@/shared/utils.ts"
+import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
-import type { AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
+import type { AsymmetricKeyPairFromEnv, AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
+
+export { generateKeyPair as createKeyPair } from "@aura-stack/jose/jose"
 
 export const createSecretValue = (length: number = 32) => {
     return base64url.encode(getRandomBytes(length))
@@ -93,8 +96,10 @@ export const verifyCSRF = async <DefaultUser extends User = User>(
  */
 export const hashPassword = async (password: string, salt?: string, iterations = 100000) => {
     const subtle = getSubtleCrypto()
-    const saltBuffer = (salt ? base64url.decode(salt) : getRandomBytes(16)) as any
-    const baseKey = await subtle.importKey("raw", encoder.encode(password) as any, "PBKDF2", false, ["deriveBits"])
+    const saltBuffer = (salt ? base64url.decode(salt) : getRandomBytes(16)) as Uint8Array<ArrayBuffer>
+    const baseKey = await subtle.importKey("raw", encoder.encode(password) as Uint8Array<ArrayBuffer>, "PBKDF2", false, [
+        "deriveBits",
+    ])
     const derivedKey = await subtle.deriveBits(
         {
             name: "PBKDF2",
@@ -127,8 +132,44 @@ export const verifyPassword = async (password: string, hashedPassword: string) =
         const iterations = parseInt(iterationsStr, 10)
         if (isNaN(iterations)) return false
         const newHashed = await hashPassword(password, saltStr, iterations)
-        return timingSafeEqual(newHashed, hashedPassword)
+        const [, , , hashA] = newHashed.split(":")
+        const [, , , hashB] = hashedPassword.split(":")
+        if (!hashA || !hashB) return false
+        return timingSafeEqual(hashA, hashB)
     } catch {
         return false
+    }
+}
+
+/**
+ * Imports a PEM-formatted asymmetric key pair from strings.
+ *
+ * @param key - An object containing the public and private keys as PEM-formatted strings
+ * @param algorithm - The intended algorithm for the keys (e.g. "RS256" for RSA signing, "RSA-OAEP" for RSA encryption)
+ * @returns A Promise that resolves to a CryptoKeyPair with the imported keys
+ */
+export const importPEMKeyPair = async (key: AsymmetricKeyPairFromEnv, algorithm: string) => {
+    const importedPrivateKey = await importPKCS8(key.privateKey, algorithm, { extractable: true })
+    const importedPublicKey = await importSPKI(key.publicKey, algorithm, { extractable: true })
+    return {
+        publicKey: importedPublicKey,
+        privateKey: importedPrivateKey,
+    }
+}
+
+/**
+ * Generates a new asymmetric key pair and exports it in JWK format.
+ *
+ * @param alg - The intended algorithm for the keys (e.g. "RS256" for RSA signing, "RSA-OAEP" for RSA encryption)
+ * @param options - Optional parameters for key generation (e.g. modulusLength for RSA)
+ * @returns A Promise that resolves to an object containing the public and private keys in JWK format
+ */
+export const exportJWKKeyPair = async (alg: string, options?: GenerateKeyPairOptions) => {
+    const { publicKey, privateKey } = await generateKeyPair(alg, options)
+    const jwkPublicKey = await exportJWK(publicKey)
+    const jwkPrivateKey = await exportJWK(privateKey)
+    return {
+        publicKey: jwkPublicKey,
+        privateKey: jwkPrivateKey,
     }
 }

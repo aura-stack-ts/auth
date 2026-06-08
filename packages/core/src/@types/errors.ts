@@ -53,6 +53,7 @@ export type AuthInternalErrorCode =
     | "DUPLICATED_OAUTH_PROVIDER_ID"
     | "CREDENTIALS_PROVIDER_NOT_CONFIGURED"
     | "IDENTITY_VALIDATION_FAILED"
+    | "UPDATE_SESSION_INVALID"
 
 /**
  * Machine-readable codes for security-sensitive failures (CSRF, session, open redirect, OAuth state).

@@ -1,75 +1,17 @@
-/**
- * React Router (framework) integration types: options include the current `Request`, and result types
- * distinguish JSON API results from full `Response` objects when returning from loaders/actions.
- */
-import type {
-    Prettify,
-    SignInAPIOptions,
-    SignInAPIReturn,
-    SignInCredentialsAPIOptions,
-    SignInCredentialsAPIReturn,
-    SignOutAPIOptions,
-    SignOutAPIReturn,
-    UpdateSessionAPIOptions,
-    UpdateSessionAPIReturn,
-    UpdateSessionOptions,
-    User,
-} from "@/@types/core"
+import type { ReactRouterAPI } from "@/@types/api"
+import type { AuthInstance } from "@aura-stack/react"
+import type { FromShapeToObject, Identities } from "@aura-stack/react/identity"
 
-export type * from "./core"
-
-/** Core `signIn` options plus the incoming `Request` (required in React Router data APIs). */
-export type ReactRouterSignInAPIOptions = Prettify<
-    SignInAPIOptions & {
-        request: Request
-    }
->
+export type * from "@/@types/api"
+export type * from "@/@types/core"
 
 /**
- * Credentials sign-in options plus `request` and an optional `redirect` flag matching the server helper behavior.
+ * The ReactRouterInstance type represents the shape of the object returned by the `createAuth`
+ * function in the React Router integration of Aura Auth. It was implemented due to errors related
+ * to unportable types from the `createAuth.api` object.
  */
-export type ReactRouterSignInCredentialsAPIOptions = Prettify<
-    SignInCredentialsAPIOptions & {
-        request: Request
-        redirect?: boolean
-    }
->
-
-/** Sign-out options plus the incoming `Request` for cookie and CSRF handling. */
-export type ReactRouterSignOutAPIOptions = Prettify<Partial<SignOutAPIOptions> & { request: Request }>
-
-export type ReactRouterSignOutReturn<Options extends ReactRouterSignOutAPIOptions> = Options extends { redirect: false }
-    ? SignOutAPIReturn
-    : Response
-
-/**
- * Result of the React Router `api.signIn` helper: the JSON API object when `redirect: false`,
- * otherwise the `Response` from `toResponse()` (redirect / navigation response).
- */
-export type ReactRouterSignInReturn<Options extends ReactRouterSignInAPIOptions> = Options extends {
-    redirect: false
+export interface ReactRouterInstance<Identity extends Identities = Identities> {
+    api: ReactRouterAPI<FromShapeToObject<Identity>>
+    core: AuthInstance<FromShapeToObject<Identity>>
+    handlers: AuthInstance<FromShapeToObject<Identity>>["handlers"]
 }
-    ? SignInAPIReturn
-    : Response
-
-/**
- * Result of the React Router `api.signInCredentials` helper: same discriminant as {@link ReactRouterSignInReturn}.
- */
-export type ReactRouterSignInCredentialsReturn<Options extends ReactRouterSignInCredentialsAPIOptions> = Options extends {
-    redirect: false
-}
-    ? SignInCredentialsAPIReturn
-    : Response
-
-export type ReactRouterUpdateSessionAPIOptions<DefaultUser extends User = User> = Prettify<
-    Partial<UpdateSessionAPIOptions<DefaultUser>> & { request: Request; session: UpdateSessionOptions<DefaultUser>["session"] }
->
-
-export type ReactRouterUpdateSessionReturn<
-    Options extends ReactRouterUpdateSessionAPIOptions<DefaultUser>,
-    DefaultUser extends User = User,
-> = Options extends {
-    redirect: false
-}
-    ? UpdateSessionAPIReturn<DefaultUser>
-    : Response

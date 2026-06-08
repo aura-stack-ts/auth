@@ -1,4 +1,5 @@
 import type {
+    ReactRouterAPI,
     ReactRouterSignInAPIOptions,
     ReactRouterSignInCredentialsAPIOptions,
     ReactRouterSignInCredentialsReturn,
@@ -7,7 +8,7 @@ import type {
     ReactRouterSignOutReturn,
     ReactRouterUpdateSessionReturn,
     ReactRouterUpdateSessionAPIOptions,
-} from "@/@types"
+} from "@/@types/api"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type { BuiltInOAuthProvider, GetSessionAPIOptions, LiteralUnion } from "@aura-stack/react/types"
 
@@ -177,5 +178,5 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * }
          */
         signOut: signOut<DefaultUser>(config),
-    }
+    } satisfies ReactRouterAPI<DefaultUser>
 }

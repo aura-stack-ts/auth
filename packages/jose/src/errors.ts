@@ -1,3 +1,15 @@
+interface V8ErrorConstructor extends ErrorConstructor {
+    captureStackTrace(targetObject: object, constructorOpt?: Function): void
+}
+
+/**
+ * Type guard to check if the current runtime environment
+ * supports Error.captureStackTrace.
+ */
+export const hasCaptureStackTrace = (errorConstructor: ErrorConstructor): errorConstructor is V8ErrorConstructor => {
+    return "captureStackTrace" in errorConstructor && typeof (errorConstructor as any).captureStackTrace === "function"
+}
+
 /**
  * @todo: add link attribute to docs when available
  */
@@ -9,7 +21,9 @@ export class AuraJoseError extends Error {
         super(message, options)
         this.name = new.target.name
         this.code = new.target.code
-        Error.captureStackTrace(this, new.target)
+        if (hasCaptureStackTrace(Error)) {
+            Error.captureStackTrace(this, new.target)
+        }
     }
 }
 

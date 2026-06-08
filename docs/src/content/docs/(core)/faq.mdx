@@ -1,0 +1,43 @@
+---
+title: FAQ
+description: Frequently Asked Questions about Aura Auth.
+---
+
+## Frequently Asked Questions
+
+<Accordions>
+
+<Accordion title="What is Aura Auth?" id="what-is-aura-auth">
+
+### Why does Aura Auth exist?
+
+Aura Auth exists thanks to Auth.js, which has been one of the most important and useful authentication libraries for JavaScript applications in recent years, providing a wide range of authentication methods for modern web apps, especially for `OAuth 2.0` and `OpenID Connect` flows.
+
+However, on September 22, 2025, it was announced that the core maintainer team would be stepping away from Auth.js, which has now become a side project of Better Auth (an authentication framework for TypeScript). Consequently, as a previous Developer Experience contributor to Auth.js, the decision was made to create a new alternative authentication library for TypeScript applications, inspired by Auth.js.
+
+Aura Auth is the spiritual successor to Auth.js — designed for the next generation of TypeScript applications.
+
+</Accordion>
+
+<Accordion title="What are the core features of Aura Auth?" id="core-features">
+
+### Secure by default (Philosophy)
+
+Aura Auth is built on a simple philosophy:
+
+> Provide a framework-agnostic, secure, and ergonomic authentication system — powered by open web standards like **OAuth 2.0** and **OpenID Connect** (coming soon).
+
+Security is not optional. Aura Auth enforces best practices by default:
+
+- PKCE on all supported OAuth flows
+- Mandatory state parameters
+- Cookie security (HTTP-only, Secure, SameSite)
+- CSRF protection via JWS
+- Verified redirect URLs
+- Strong cryptographic guarantees
+
+Aura Auth lets developers focus on building products — not re-implementing the same security layers again and again.
+
+</Accordion>
+
+</Accordions>

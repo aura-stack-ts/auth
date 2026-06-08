@@ -1,8 +1,8 @@
 import Link from "next/link"
 import Image from "next/image"
-import type { IncomingMessage } from "http"
 import { api } from "@/lib/auth"
-import { InferGetServerSidePropsType } from "next"
+import type { IncomingMessage } from "http"
+import type { InferGetServerSidePropsType } from "next"
 
 export const getServerSideProps = async ({ req }: { req: IncomingMessage }) => {
     const session = await api.getSession({
@@ -11,7 +11,9 @@ export const getServerSideProps = async ({ req }: { req: IncomingMessage }) => {
 
     return {
         props: {
-            session: session.session,
+            // @todo: Fix excessively deep type instantiation error in session typing
+            // @ts-ignore Type instantiation is excessively deep and possibly infinite.
+            session: session.success ? session.session : null,
         },
     }
 }
@@ -25,7 +27,7 @@ export default function AuthServerPage({ session }: InferGetServerSidePropsType<
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-white">Aura Auth + Next.js Server Components</h1>
                     <p className="mt-2 text-base text-white/70 max-w-3xl">
-                        Official Next.js demo to showcase @aura-stack/react authentication library with getServerSideProps Server
+                        Official Next.js demo to showcase @aura-stack/next authentication library with getServerSideProps Server
                         Side Rendering (SSR), for Client-Side Rendering (CSR) visit{" "}
                         <Link className="text-white underline underline-offset-2" href="/client">
                             here

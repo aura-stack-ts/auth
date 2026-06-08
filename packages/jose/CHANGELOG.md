@@ -10,6 +10,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.6.0] - 2026-05-23
+
+### Added
+
+- Introduced algorithm inference: signing and encryption algorithms are now inferred from the provided asymmetric keys to reduce configuration mismatches. Defaults: `RS256` (signing) and `RSA-OAEP-256` (encryption) for asymmetric keys; `HS256` (signing) and `dir` (encryption) for symmetric keys. [#165](https://github.com/aura-stack-ts/auth/pull/165)
+
+- Extended asymmetric cryptography support to accept JWK (JSON Web Key) format keys in addition to `CryptoKeyPair` across JOSE functions, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encryptCompactJWE`, `decryptCompactJWE`, `encodeJWT`, and `decodeJWT` functions, as well as the factory functions `createJWS`, `createJWE`, and `createJWT`. [#159](https://github.com/aura-stack-ts/auth/pull/159)
+
+- Added support for asymmetric cryptography using `public/private` key pairs via `CryptoKeyPair` across JOSE functions, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encryptCompactJWE`, `decryptCompactJWE`, `encodeJWT`, and `decodeJWT` functions, as well as the factory functions `createJWS`, `createJWE`, and `createJWT`. [#157](https://github.com/aura-stack-ts/auth/pull/157)
+
+### Changed
+
+- Added strict secret verification: require at least 4 bits of entropy per character and a minimum total entropy of 128 bits. [`#165`](https://github.com/aura-stack-ts/auth/pull/165)
+
+- Renamed compact JWE helpers from `compactEncryptJWE` to `encryptCompactJWE` to align naming with other JWE APIs. [#165](https://github.com/aura-stack-ts/auth/pull/165)
+
 ## [0.5.0] - 2026-04-21
 
 ### Added

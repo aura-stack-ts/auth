@@ -15,18 +15,24 @@ describe("signInCredentials API", () => {
     test("success signIn flow", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const { headers, success } = await api.signInCredentials({
+        const signIn = await api.signInCredentials({
             payload: {
                 username: "johndoe",
                 password: "1234567890",
             },
         })
-        expect(success).toBe(true)
-        const decoded = await jose.decodeJWT(getSetCookie(headers, "aura-auth.session_token")!)
+        expect(signIn).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            redirect: false,
+            redirectURL: null,
+            toResponse: expect.any(Function),
+        })
+        const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
         expect(decoded).toMatchObject({
             sub: "1234567890",
             email: "johndoe@example.com",
-            name: "John Doe",
+            name: "johndoe",
             image: "https://example.com/image.jpg",
         })
     })
@@ -58,13 +64,24 @@ describe("signInCredentials API", () => {
                     }) as any,
             },
         })
-        const { success } = await api.signInCredentials({
+        const signIn = await api.signInCredentials({
             payload: {
                 username: "johndoe",
                 password: "1234567890",
-            } as any,
+            },
         })
-        expect(success).toBe(false)
+        expect(signIn).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            error: {
+                code: "INVALID_OAUTH_CONFIGURATION",
+                message:
+                    "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
+            },
+            toResponse: expect.any(Function),
+        })
     })
 
     test("simulate hashing and verification", async () => {
@@ -85,14 +102,20 @@ describe("signInCredentials API", () => {
                 },
             },
         })
-        const { headers, success } = await api.signInCredentials({
+        const signIn = await api.signInCredentials({
             payload: {
                 username: "johndoe",
                 password: "1234567890",
             },
         })
-        expect(success).toBe(true)
-        const decoded = await jose.decodeJWT(getSetCookie(headers, "aura-auth.session_token")!)
+        expect(signIn).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
         expect(decoded).toMatchObject({
             sub: "1234567890-abcdef",
             name: "johndoe",
@@ -109,29 +132,63 @@ describe("signInCredentials API", () => {
         expect(success).toBe(false)
     })
 
-    test("signIn with valid redirectTo", async () => {
+    test("signIn with redirect: true and redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const { success } = await api.signInCredentials({
+        const signIn = await api.signInCredentials({
+            payload: {
+                username: "johndoe",
+                password: "1234567890",
+            },
+            redirect: true,
+            redirectTo: "https://example.com/dashboard",
+        })
+
+        expect(signIn.headers.get("Location")).toBe("/dashboard")
+        expect(signIn).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signIn with redirect: false and valid redirectTo", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const signIn = await api.signInCredentials({
             payload: {
                 username: "johndoe",
                 password: "1234567890",
             },
             redirectTo: "https://example.com/dashboard",
         })
-        expect(success).toBe(true)
+        expect(signIn).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
     })
 
     test("signIn with invalid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const { redirectURL } = await api.signInCredentials({
+        const signIn = await api.signInCredentials({
             payload: {
                 username: "johndoe",
                 password: "1234567890",
             },
             redirectTo: "https://malicious.com/phishing",
         })
-        expect(redirectURL).toBe("/")
+        expect(signIn).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
     })
 })

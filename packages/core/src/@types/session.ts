@@ -1,8 +1,9 @@
+import type { JWK } from "@aura-stack/jose/jose"
 import type { infer as Infer } from "zod/v4/core"
 import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { UserIdentity, UserShape } from "@/shared/identity.ts"
-import type { DeepPartial, EditableShape, ZodShapeToObject } from "@/@types/utility.ts"
-import type { CookieStoreConfig, IdentityConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
+import type { Identities, UserIdentity } from "@/shared/identity.ts"
+import type { DeepPartial, FromShapeToObject, Prettify } from "@/@types/utility.ts"
+import type { CookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof UserIdentity>
@@ -17,23 +18,32 @@ export interface Session<DefaultUser extends User = User> {
     expires: string
 }
 
+export interface CryptoSecret {
+    sign: CryptoKey | CryptoKeyPair | JWK | JsonWebKey | AsymmetricKeyPair
+    encrypt: CryptoKey | CryptoKeyPair | JWK | JsonWebKey | AsymmetricKeyPair
+}
+
+export interface AsymmetricKeyPairFromEnv {
+    publicKey: string
+    privateKey: string
+}
+
+export interface AsymmetricKeyPair {
+    publicKey: CryptoKey | JWK
+    privateKey: CryptoKey | JWK
+}
+
 /**
  * A symmetric secret or asymmetric key pair used for JWT operations.
  *
  * - string / Uint8Array: used as-is for HMAC (signed) or AES (encrypted)
  * - CryptoKey: Web Crypto API key, for environments that support it
- * - KeyPair: asymmetric signing (RS256, ES256, EdDSA, etc.)
+ * - CryptoKeyPair: asymmetric signing/encryption (RS256, ES256, EdDSA, RSA-OAEP, etc.)
  */
-export type SecretKey = string | Uint8Array | CryptoKey
-
-/** Asymmetric key pair for signing or key agreement (Web Crypto `CryptoKey` pair). */
-export interface KeyPair {
-    privateKey: CryptoKey
-    publicKey: CryptoKey
-}
+export type SecretKey = string | Uint8Array | CryptoKey | CryptoKeyPair | CryptoSecret | JWK | AsymmetricKeyPair
 
 /**
- * @todo: add key rotation support for "SecretKey | KeyPair | [SecretKey | KeyPair, ...(SecretKey | KeyPair)[]]"
+ * @todo: add key rotation support for "SecretKey | CryptoKeyPair | [SecretKey | CryptoKeyPair, ...(SecretKey | CryptoKeyPair)[]]"
  */
 export type JWTKey = SecretKey
 
@@ -109,32 +119,34 @@ export type JWTConfigBase = JWTSignedMode | JWTEncryptedMode | JWTSealedMode
 /** How session/JWT lifetime is enforced relative to `iat`, absolute caps, and sliding windows. */
 export type JWTExpirationStrategy = "fixed" | "rolling" | "absolute" | "sliding"
 
-export type JWTConfig = {
-    /**
-     * Token lifetime.
-     */
-    maxAge?: number
-    /**
-     * JWT `iss` (issuer) claim. Set this to your app's canonical URL.
-     * @example "https://auth.example.com"
-     */
-    issuer?: string
-    /**
-     * JWT `aud` claim. Single value or array for multi-audience tokens.
-     * @example ["https://api.example.com", "https://app.example.com"]
-     */
-    audience?: string | string[]
-    /**
-     * Maximum absolute session duration in seconds.
-     * Required for "absolute" and "sliding" strategies.
-     * Enforced via jose's maxTokenAge against the iat claim.
-     */
-    maxExpiration?: number
-    /**
-     * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
-     */
-    expirationStrategy?: JWTExpirationStrategy
-} & JWTConfigBase
+export type JWTConfig = Prettify<
+    {
+        /**
+         * Token lifetime.
+         */
+        maxAge?: number
+        /**
+         * JWT `iss` (issuer) claim. Set this to your app's canonical URL.
+         * @example "https://auth.example.com"
+         */
+        issuer?: string
+        /**
+         * JWT `aud` claim. Single value or array for multi-audience tokens.
+         * @example ["https://api.example.com", "https://app.example.com"]
+         */
+        audience?: string | string[]
+        /**
+         * Maximum absolute session duration in seconds.
+         * Required for "absolute" and "sliding" strategies.
+         * Enforced via jose's maxTokenAge against the iat claim.
+         */
+        maxExpiration?: number
+        /**
+         * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
+         */
+        expirationStrategy?: JWTExpirationStrategy
+    } & JWTConfigBase
+>
 
 /**
  * Stateless JWT strategy.
@@ -214,12 +226,12 @@ export interface SessionStrategy<DefaultUser extends User = User> {
 }
 
 /** Inputs for constructing a session strategy implementation for a given identity schema. */
-export interface CreateSessionStrategyOptions<Identity extends EditableShape<UserShape>> {
+export interface CreateSessionStrategyOptions<Identity extends Identities> {
     config?: SessionConfig
-    jose: JoseInstance<ZodShapeToObject<Identity> & User>
+    jose: JoseInstance<FromShapeToObject<Identity> & User>
     cookies: () => CookieStoreConfig
     logger?: InternalLogger
-    identity: IdentityConfig
+    identity: SchemaRegistryContext
 }
 
 /** Options specialized for the JWT-backed session strategy. */
@@ -228,7 +240,7 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
     jose: JoseInstance<DefaultUser>
     logger?: InternalLogger
     cookies: () => CookieStoreConfig
-    identity: IdentityConfig
+    identity: SchemaRegistryContext
 }
 
 /** Minimal token issue/verify surface used by session code paths. */

@@ -14,10 +14,6 @@ import type {
     SignOutReturn,
     UpdateSessionReturn,
     SignInCredentialsReturn,
-    SignInAPIReturn,
-    SignOutAPIReturn,
-    SignInCredentialsAPIReturn,
-    UpdateSessionAPIReturn,
     SignInCredentialsOptions,
 } from "@/@types/index.ts"
 
@@ -55,7 +51,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             if (!response.ok) return null
             const session = await response.json()
             if (!session.success) return null
-            return session.session
+            return session.session as Session<DefaultUser>
         } catch (error) {
             console.error("Error fetching session:", error)
             return null
@@ -67,17 +63,18 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         options?: Options
     ): Promise<SignInReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
             const response = await client.get("/signIn/:oauth", {
                 params: {
                     oauth,
                 },
                 searchParams: {
-                    ...options,
+                    redirectTo,
                     redirect: false,
                 },
             })
-            const json = (await response.json()) as SignInAPIReturn
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.signInURL) {
+            const json = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.signInURL) {
                 window.location.assign(json.signInURL)
             }
             return json as unknown as SignInReturn<Options>
@@ -91,14 +88,17 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         options: Options
     ): Promise<SignInCredentialsReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
             const response = await client.post("/signIn/credentials", {
                 body: options.payload,
+                // @ts-ignore - Fix type here - go to @aura-stack/router.
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    redirectTo,
+                    redirect: false,
                 },
             })
-            const json: SignInCredentialsAPIReturn = await response.json()
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+            const json = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as SignInCredentialsReturn<Options>
@@ -116,22 +116,27 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             if (!csrfToken) {
                 throw new AuthClientError("Failed to fetch CSRF token for session update.")
             }
-            const { session } = options ?? {}
+            const { session, redirectTo } = options ?? {}
             if (!session) {
                 return { success: false, session: null } as UpdateSessionReturn<Options, DefaultUser>
             }
             const user = session.user ?? {}
             const response = await client.patch("/session", {
+                // @ts-ignore - Fix type here - go to @aura-stack/router.
                 body: {
                     user,
                     expires: session.expires ? new Date(session.expires) : undefined,
+                },
+                searchParams: {
+                    redirectTo,
+                    redirect: false,
                 },
                 headers: {
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json: UpdateSessionAPIReturn<DefaultUser> = await response.json()
-            if ((options.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+            const json = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as UpdateSessionReturn<Options, DefaultUser>
@@ -148,17 +153,19 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
                 throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
             }
 
+            // @ts-ignore - Fix type here - go to @aura-stack/router.
             const response = await client.post("/signOut", {
                 searchParams: {
                     redirectTo: options?.redirectTo,
+                    redirect: false,
                     token_type_hint: "session_token",
                 },
                 headers: {
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json: SignOutAPIReturn = await response.json()
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+            const json = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as SignOutReturn<Options>

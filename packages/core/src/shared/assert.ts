@@ -1,5 +1,18 @@
+import { Type } from "arktype"
+import type { ZodObject, ZodTypeAny } from "zod"
+import { Type as TypeboxType } from "typebox"
+import type { BaseSchema, ObjectSchema } from "valibot"
 import { equals, patternToRegex } from "@/shared/utils.ts"
-import type { JWTConfig, JWTMode, JWTPayloadWithToken, SessionConfig } from "@/@types/index.ts"
+import type {
+    AsymmetricKeyPair,
+    AsymmetricKeyPairFromEnv,
+    CryptoSecret,
+    JWTConfig,
+    JWTMode,
+    JWTPayloadWithToken,
+    SessionConfig,
+} from "@/@types/index.ts"
+import type { JWK } from "@aura-stack/jose/jose"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -107,5 +120,95 @@ export const isSignedMode = (config?: SessionConfig): config is { jwt: Extract<J
 export const isEncryptedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "encrypted" }> } =>
     getJWTMode(config) === "encrypted"
 
-export const isSealedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "sealed" }> } =>
+export const isSealedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode?: "sealed" }> } =>
     getJWTMode(config) === "sealed"
+
+export const isCryptoKeyPair = (value: unknown): value is CryptoKeyPair => {
+    return typeof value === "object" && value !== null && "publicKey" in value && "privateKey" in value
+}
+
+export const isCryptoKey = (value: unknown): value is CryptoKey => {
+    return typeof value === "object" && value !== null && "algorithm" in value && "extractable" in value
+}
+
+export const isKeyPair = (value: unknown): value is AsymmetricKeyPair => {
+    return typeof value === "object" && value !== null && "publicKey" in value && "privateKey" in value
+}
+
+export const isCryptoSecret = (value: unknown): value is CryptoSecret => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "sign" in value &&
+        "encrypt" in value &&
+        (isCryptoKey(value.sign) || isCryptoKeyPair(value.sign)) &&
+        (isCryptoKey(value.encrypt) || isCryptoKeyPair(value.encrypt))
+    )
+}
+
+export const isPEMFormattedKey = (value: unknown): value is string => {
+    return typeof value === "string" && /-----BEGIN (PUBLIC|PRIVATE) KEY-----/.test(value)
+}
+
+export const isPEMFormattedKeyPairFromEnv = (value: unknown): value is { publicKey: string; privateKey: string } => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "publicKey" in value &&
+        "privateKey" in value &&
+        isPEMFormattedKey(value.publicKey) &&
+        isPEMFormattedKey(value.privateKey)
+    )
+}
+
+export const isJWTPEMFormattedKeyPair = (
+    value: unknown
+): value is { sign: AsymmetricKeyPairFromEnv; encrypt: AsymmetricKeyPairFromEnv } => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "sign" in value &&
+        "encrypt" in value &&
+        isPEMFormattedKeyPairFromEnv((value as any).sign) &&
+        isPEMFormattedKeyPairFromEnv((value as any).encrypt)
+    )
+}
+
+export const isJWKFormattedKey = (value: unknown): value is JWK => {
+    return typeof value === "object" && value !== null && "kty" in value && typeof (value as any).kty === "string"
+}
+
+export const isValibotSchema = (value: unknown): value is ObjectSchema<any, undefined> => {
+    return typeof value === "object" && value !== null && "~run" in value && typeof (value as any)["~run"] === "function"
+}
+
+export const isValibotEntries = (value: unknown): value is Record<string, BaseSchema<any, any, any>> => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value) &&
+        Object.values(value).length > 0 &&
+        Object.values(value).every(isValibotSchema)
+    )
+}
+
+export const isZodSchema = (value: unknown): value is ZodObject<any> => {
+    return typeof value === "object" && value !== null && "_def" in value
+}
+
+export const isZodEntries = (value: unknown): value is Record<string, ZodTypeAny> => {
+    return typeof value === "object" && value !== null && !Array.isArray(value) && Object.values(value).every(isZodSchema)
+}
+
+export const isArkType = (value: unknown): value is Type<{}, {}> => {
+    return typeof value === "function" && value !== null && "allows" in value && "assert" in value
+}
+
+export const isTypeboxEntries = (value: unknown): value is TypeboxType.TProperties => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value) &&
+        Object.values(value).every((v) => typeof v === "object" && "type" in v)
+    )
+}

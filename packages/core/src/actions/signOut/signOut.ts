@@ -1,12 +1,12 @@
 import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { signOut } from "@/api/signOut.ts"
+import { RedirectOptionsSchema } from "@/schemas.ts"
 
 const config = createEndpointConfig({
     schemas: {
-        searchParams: z.object({
+        searchParams: RedirectOptionsSchema.extend({
             token_type_hint: z.literal("session_token"),
-            redirectTo: z.string().optional(),
         }),
     },
 })
@@ -22,6 +22,7 @@ export const signOutAction = createEndpoint(
             ctx: ctx.context,
             request: ctx.request,
             headers: ctx.request.headers,
+            redirect: ctx.searchParams.redirect,
             redirectTo: ctx.searchParams.redirectTo,
         })
         return toResponse()

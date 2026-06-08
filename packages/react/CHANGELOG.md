@@ -8,7 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.1.0] - 2026-06-05
+
 ### Added
+
+- Added a `/cookies` entry module for cookie management, providing utilities for authentication integrations and framework-specific packages. [#178](https://github.com/aura-stack-ts/auth/pull/178)
+
+- Added support for a custom `redirect` function in `AuthProvider`, allowing callers to provide their own redirect implementation for seamless integration with framework-specific navigation APIs. [#175](https://github.com/aura-stack-ts/auth/pull/175)
+
+- Added support for multi-tab synchronization via `BroadcastChannel`, allowing sessions to stay synchronized across browser tabs during the auth flow. Additionally, added a centralized `useAuthActions` hook that re-exports all auth actions (`signIn`, `updateSession`, `signOut`, etc.). [#172](https://github.com/aura-stack-ts/auth/pull/172)
 
 - Updated React context and hooks (`useSignInCredentials`, `useUpdateSession`, and related context actions) to align with the standardized core client API contracts, including the new object-based credentials/session payload shapes and redirect-driven refresh behavior, while simplifying React-side auth type definitions. [#146](https://github.com/aura-stack-ts/auth/pull/146)
 

@@ -1,9 +1,9 @@
 {
   "name": "@aura-stack/hono",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Hono integration for Aura Stack authentication library",
+  "description": "Authentication integration for Hono applications. Provides middleware, route handlers and session verification powered by Aura Auth.",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "pnpm sync:modules && tsdown",
@@ -16,7 +16,7 @@
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist src/_core src/oauth",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js"
   },
@@ -58,9 +58,35 @@
       "types": "./dist/_core/shared.d.ts",
       "import": "./dist/_core/shared.js",
       "require": "./dist/_core/shared.cjs"
+    },
+    "./cookies": {
+      "types": "./dist/_core/cookies.d.ts",
+      "import": "./dist/_core/cookies.js",
+      "require": "./dist/_core/cookies.cjs"
     }
   },
-  "keywords": [],
+  "keywords": [
+    "auth",
+    "oauth",
+    "oauth2",
+    "security",
+    "session",
+    "authentication",
+    "authorization",
+    "hono",
+    "honojs",
+    "bun",
+    "edge-runtime",
+    "cloudflare-workers",
+    "middleware",
+    "typescript",
+    "javascript",
+    "web-api",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura auth",
+    "aura-auth"
+  ],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "homepage": "https://aura-stack-auth.vercel.app",
   "bugs": {

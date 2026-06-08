@@ -2,12 +2,13 @@
 
 export {
     createAuthClient,
-    AuthProvider,
-    useAuth,
+    useAuthActions,
     useSession,
     useSignIn,
     useSignInCredentials,
     useSignOut,
-    type AuthProviderProps,
+    useUpdateSession,
     type AuthClientOptions,
+    type AuthProviderProps,
 } from "@aura-stack/react"
+export { AuthProvider } from "@/context"

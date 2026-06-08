@@ -92,7 +92,7 @@ describe("createAccessToken", async () => {
 
         await expect(
             createAccessToken(oauthCustomService, "https://myapp.com/auth/callback/oauth-provider", "invalid_code", codeVerifier)
-        ).rejects.toThrow(/Failed to communicate with OAuth provider/)
+        ).rejects.toThrow(/Failed to retrieve access token/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",
@@ -128,7 +128,7 @@ describe("createAccessToken", async () => {
                 "authorization_code_123",
                 codeVerifier
             )
-        ).rejects.toThrow(/Failed to communicate with OAuth provider/)
+        ).rejects.toThrow(/Invalid access token response format/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",

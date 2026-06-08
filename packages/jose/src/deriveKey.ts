@@ -1,6 +1,7 @@
 import { createSecret } from "@/secret.ts"
 import { KeyDerivationError } from "@/errors.ts"
 import { encoder, getSubtleCrypto } from "@/crypto.ts"
+import { isJWKKey } from "@/assert.ts"
 import type { SecretInput } from "@/index.ts"
 
 /**
@@ -21,6 +22,7 @@ export const deriveKey = async (
 ): Promise<Uint8Array> => {
     try {
         const subtle = getSubtleCrypto()
+
         const secretBuffer = secret.buffer.slice(secret.byteOffset, secret.byteOffset + secret.byteLength)
         const baseKey = await subtle.importKey("raw", secretBuffer as BufferSource, "HKDF", false, ["deriveBits"])
 
@@ -61,9 +63,9 @@ export const createDeriveKey = async (
     info?: string | Uint8Array,
     length: number = 32
 ) => {
-    const secretKey = createSecret(secret)
-    if (secretKey instanceof CryptoKey) {
-        throw new KeyDerivationError("Cannot derive key from CryptoKey. Use Uint8Array or string secret instead.")
+    const secretKey = createSecret(secret) as Uint8Array<ArrayBufferLike>
+    if (secretKey instanceof CryptoKey || isJWKKey(secretKey)) {
+        throw new KeyDerivationError("Cannot derive key from CryptoKey or JWK. Use Uint8Array or string secret instead.")
     }
     const key = await deriveKey(secretKey, salt ?? "Aura Jose secret salt", info ?? "Aura Jose secret derivation", length)
     return key

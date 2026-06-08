@@ -101,7 +101,7 @@ describe("POST /api/auth/signIn/credentials", () => {
         expect(response.status).toBe(200)
         expect(response.body).toMatchObject({
             success: true,
-            redirectURL: "/",
+            redirectURL: null,
         })
         expect(response.headers["set-cookie"]).toBeDefined()
     })
@@ -112,7 +112,7 @@ describe("PATCH /api/auth/session", () => {
         const response = await supertest(app)
             .patch("/api/auth/session")
             .send({ user: { name: "Jane Doe" } })
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(400)
         expect(response.body).toMatchObject({
             session: null,
             success: false,

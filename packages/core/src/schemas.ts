@@ -158,3 +158,13 @@ export const OAuthEnvSchema = object({
     clientId: z.string().min(1, "OAuth Client ID is required in the environment variables."),
     clientSecret: z.string().min(1, "OAuth Client Secret is required in the environment variables."),
 })
+
+export const RedirectOptionsSchema = object({
+    redirect: z.stringbool().optional().default(true),
+    redirectTo: string().optional(),
+})
+
+export const CredentialsPayloadSchema = object({
+    username: string(),
+    password: string(),
+})
