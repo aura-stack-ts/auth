@@ -4,12 +4,14 @@ import { Type as TypeboxType } from "typebox"
 import type { BaseSchema, ObjectSchema } from "valibot"
 import { equals, patternToRegex } from "@/shared/utils.ts"
 import type {
+    AccessTokenContext,
     AsymmetricKeyPair,
     AsymmetricKeyPairFromEnv,
     CryptoSecret,
     JWTConfig,
     JWTMode,
     JWTPayloadWithToken,
+    OAuthProviderConfig,
     SessionConfig,
 } from "@/@types/index.ts"
 import type { JWK } from "@aura-stack/jose/jose"
@@ -210,5 +212,17 @@ export const isTypeboxEntries = (value: unknown): value is TypeboxType.TProperti
         value !== null &&
         !Array.isArray(value) &&
         Object.values(value).every((v) => typeof v === "object" && "type" in v)
+    )
+}
+
+type CustomUserInfoFunction = Extract<OAuthProviderConfig["userInfo"], { request: (context: AccessTokenContext) => any }>
+
+export const isCustomUserInfoFunction = (value: OAuthProviderConfig["userInfo"]): value is CustomUserInfoFunction => {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        typeof value.url === "string" &&
+        "request" in value &&
+        typeof value.request === "function"
     )
 }

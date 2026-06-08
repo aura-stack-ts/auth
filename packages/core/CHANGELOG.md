@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added support for a custom `userInfo` function in OAuth provider configuration, enabling callers to perform the user info request themselves. The `userInfo` option continues to accept either a URL string or an object with a `url` and optional request options (for example, custom headers). [#182](https://github.com/aura-stack-ts/auth/pull/182)
+
 ---
 
 ## [0.7.2] - 2026-06-05

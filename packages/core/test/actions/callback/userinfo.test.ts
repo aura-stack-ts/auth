@@ -21,7 +21,9 @@ describe("getUserInfo", () => {
             }))
         )
 
-        const response = await getUserInfo(oauthCustomService, "access_token_123")
+        const response = await getUserInfo(oauthCustomService, {
+            access_token: "access_token_123",
+        })
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -51,8 +53,9 @@ describe("getUserInfo", () => {
             }))
         )
 
-        const oauthConfig: OAuthProviderConfig<{ username: string; avatar_url: string; uniqueId: string; email: string }> = {
-            ...oauthCustomService,
+        type Profile = { username: string; avatar_url: string; uniqueId: string; email: string }
+        const oauthConfig: OAuthProviderConfig<Profile> = {
+            ...(oauthCustomService as unknown as OAuthProviderCredentials<Profile>),
             profile(profile) {
                 return {
                     sub: profile.uniqueId,
@@ -63,7 +66,9 @@ describe("getUserInfo", () => {
             },
         }
 
-        const response = await getUserInfo(oauthConfig as OAuthProviderCredentials, "access_token_123")
+        const response = await getUserInfo(oauthConfig as OAuthProviderCredentials, {
+            access_token: "access_token_123",
+        })
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -105,9 +110,11 @@ describe("getUserInfo", () => {
             },
         }
 
-        await expect(getUserInfo(oauthConfig as OAuthProviderCredentials, "access_token_123")).rejects.toThrow(
-            /Failed to fetch user information from OAuth provider/
-        )
+        await expect(
+            getUserInfo(oauthConfig as OAuthProviderCredentials, {
+                access_token: "access_token_123",
+            })
+        ).rejects.toThrow(/Failed to fetch user information from OAuth provider/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -134,7 +141,11 @@ describe("getUserInfo", () => {
             }))
         )
 
-        await expect(getUserInfo(oauthCustomService, "invalid_access_token")).rejects.toThrow(/Invalid userinfo response format/)
+        await expect(
+            getUserInfo(oauthCustomService, {
+                access_token: "invalid_access_token",
+            })
+        ).rejects.toThrow(/Invalid userinfo response format/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -155,9 +166,11 @@ describe("getUserInfo", () => {
             })
         )
 
-        await expect(getUserInfo(oauthCustomService, "access_token")).rejects.toThrow(
-            /Failed to fetch user information from OAuth provider/
-        )
+        await expect(
+            getUserInfo(oauthCustomService, {
+                access_token: "access_token",
+            })
+        ).rejects.toThrow(/Failed to fetch user information from OAuth provider/)
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -168,5 +181,74 @@ describe("getUserInfo", () => {
             },
             signal: expect.any(AbortSignal),
         })
+    })
+
+    test("with custom userInfo function", async () => {
+        const mockFetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ name: "John Doe", email: "johndoe@example.com" }),
+        })
+
+        vi.stubGlobal("fetch", mockFetch)
+
+        const oauthConfig: OAuthProviderConfig = {
+            ...oauthCustomService,
+            userInfo: {
+                url: "https://example.com/oauth/userinfo",
+                request: async (ctx) => {
+                    const response = await fetch(ctx.userInfoURL, {
+                        method: "GET",
+                        headers: {
+                            "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                        },
+                        mode: "no-cors",
+                    })
+                    const json = await response.json()
+                    return {
+                        sub: ctx.accessToken,
+                        name: json.name,
+                        email: json.email,
+                        image: "http://example.com/john-doe.jpg",
+                    }
+                },
+            },
+        }
+
+        const profile = await getUserInfo(oauthConfig, {
+            access_token: "access_token",
+        })
+
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+            },
+            mode: "no-cors",
+        })
+
+        expect(profile).toEqual({
+            sub: "access_token",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "http://example.com/john-doe.jpg",
+        })
+    })
+
+    test("custom userInfo function throws error", async () => {
+        const oauthConfig: OAuthProviderConfig = {
+            ...oauthCustomService,
+            userInfo: {
+                url: "https://example.com/oauth/userinfo",
+                request: async () => {
+                    throw new Error("Custom userInfo error")
+                },
+            },
+        }
+
+        await expect(
+            getUserInfo(oauthConfig, {
+                access_token: "access_token",
+            })
+        ).rejects.toThrow(/Failed to fetch user information from OAuth provider/)
     })
 })
