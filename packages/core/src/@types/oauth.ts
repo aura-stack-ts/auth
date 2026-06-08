@@ -1,8 +1,44 @@
+import type { infer as Infer } from "zod"
 import type { User } from "@/@types/session.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
+import type { OAuthAccessTokenResponse } from "@/schemas.ts"
 
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
+
+export type OAuthAccessTokenResponseType = Infer<typeof OAuthAccessTokenResponse>
+
+export type AccessTokenContext = {
+    /**
+     * Access token string returned by the OAuth provider's token endpoint. The token
+     * must be used to exchange for user information from the provider's userinfo endpoint.
+     */
+    accessToken: string
+    /**
+     * The access token type returned by the OAuth provider's token endpoint, typically "Bearer".
+     */
+    tokenType?: string | undefined
+    /**
+     * The number of seconds until the access token expires, as returned by the OAuth provider's
+     * token endpoint.
+     */
+    expiresIn?: number | undefined
+    /**
+     * Optional refresh token returned by the OAuth provider's token endpoint, which can be
+     * used to obtain a new access token when the current one expires.
+     */
+    refreshToken?: string | undefined
+    /**
+     * The scopes granted by the user for the access token, as returned by the OAuth provider's
+     * token endpoint.
+     */
+    scope?: string | string[] | null | undefined
+    /**
+     * The userinfo endpoint URL of the OAuth provider. This is required to fetch user
+     * information using the access token.
+     */
+    userInfoURL: string
+}
 
 /** Known query parameter names supported when building an OAuth authorization URL. */
 export type AuthorizeParams = LiteralUnion<
@@ -42,6 +78,10 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
               url: string
               headers?: Record<string, string>
               method?: string
+          }
+        | {
+              url: string
+              request: (context: AccessTokenContext) => Profile | Promise<Profile>
           }
     /**
      * @deprecated
@@ -84,3 +124,5 @@ export type OAuthProviderRecord<DefaultUser extends User = User> = Record<
     LiteralUnion<BuiltInOAuthProvider>,
     OAuthProviderCredentials<any, DefaultUser>
 >
+
+export type CustomUserInfoFunction = Extract<OAuthProviderConfig["userInfo"], { request: (context: AccessTokenContext) => any }>
