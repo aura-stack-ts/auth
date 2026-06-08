@@ -24,6 +24,10 @@ const UserInfoConfigSchema = z.union([
     string().url(),
     object({
         url: string().url(),
+        request: z.function(),
+    }),
+    object({
+        url: string().url(),
         headers: z.record(string(), string()).optional(),
         method: string().optional(),
     }),

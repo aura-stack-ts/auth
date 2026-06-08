@@ -1,5 +1,25 @@
 import type { OAuthProviderConfig, User } from "@/@types/index.ts"
 
+export interface HubSportSignedAccessToken {
+    appId: number
+    appInstallId: number
+    audience: string
+    expiresAt: string
+    hubId: number
+    hublet: string
+    installingUserId: number
+    isPrivateDistribution: boolean
+    isServiceAccount: boolean
+    isUserLevel: boolean
+    newSignature: string
+    scopeToScopeGroupPks: string
+    scopes: string
+    signature: string
+    trialScopeToScopeGroupPks: string
+    trialScopes: string
+    userId: number
+}
+
 /**
  * @see [HubSpot - Retrieve OAuth token metadata](https://developers.hubspot.com/docs/api-reference/legacy/authentication/oauth-tokens/v1/get-oauth-token-metadata)
  */
@@ -41,6 +61,8 @@ export interface HubSpotProfile {
      * Indicates whether the token is for a privately distributed application. If false, it is marketplace distributed.
      */
     is_private_distribution: boolean
+
+    signed_access_token: HubSportSignedAccessToken
     /**
      * The email address of the hubspot user for whom the access token was created.
      */
@@ -68,12 +90,14 @@ export const hubspot = <DefaultUser extends User = User>(
             },
         },
         accessToken: "https://api.hubapi.com/oauth/v1/token",
-        /**
-         * @todo: HubSpot doesn't have a dedicated userinfo endpoint, but we can retrieve
-         * the user information from the access token metadata endpoint.
-         * Expected: `https://api.hubapi.com/oauth/v1/access-tokens/{token}`
-         */
-        userInfo: "https://api.hubapi.com/oauth/v1/access-tokens",
+        userInfo: {
+            url: "https://api.hubapi.com/oauth/v1/access-tokens",
+            request: async ({ accessToken }) => {
+                const response = await fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${accessToken}`)
+                const json = await response.json()
+                return json
+            },
+        },
         profile: (profile) => {
             return {
                 sub: String(profile.user_id),
