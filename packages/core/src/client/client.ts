@@ -122,8 +122,8 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
             }
             const user = session.user ?? {}
             const response = await client.patch("/session", {
-                // @ts-ignore - Fix type here - go to @aura-stack/router.
                 body: {
+                    // @ts-ignore - Fix type here - go to @aura-stack/router.
                     user,
                     expires: session.expires ? new Date(session.expires) : undefined,
                 },

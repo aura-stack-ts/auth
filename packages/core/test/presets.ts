@@ -50,6 +50,21 @@ const auth = createAuth({
             }
         },
     },
+    signUp: {
+        onCreateUser: async ({ payload }) => {
+            /**
+             * Add type-inference for the signUp payload.
+             */
+            const { name, email, image, password } = payload
+            return {
+                sub: "1234567890",
+                name,
+                email,
+                image,
+                password,
+            }
+        },
+    },
 })
 
 export const {

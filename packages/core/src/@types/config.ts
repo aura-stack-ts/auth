@@ -2,7 +2,7 @@ import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
-import { UserIdentity, type Identities, type SchemaTypes } from "@/shared/identity.ts"
+import { UserIdentity, type Identities, type NullableIdentities, type SchemaTypes } from "@/shared/identity.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
@@ -13,7 +13,7 @@ import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/sess
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export type AuthConfig<Identity extends Identities> = {
+export type AuthConfig<Identity extends Identities, SignUpIdentity extends NullableIdentities> = {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
@@ -157,6 +157,11 @@ export type AuthConfig<Identity extends Identities> = {
      * Credentials provider for username/password or similar authentication.
      */
     credentials?: CredentialsProvider<Identity>
+    /**
+     * Configuration for the signUp process, including the schema for validation
+     * and required callback for user creation.
+     */
+    signUp?: SignUpConfig<Identity, SignUpIdentity>
 } & TrustedProxyHeadersConfig
 
 // @todo Should trustedOrigins support subdomain wildcards like `https://*.example.com`?
@@ -416,6 +421,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
     logger?: InternalLogger
     sessionStrategy: SessionStrategy<DefaultUser>
     identity: SchemaRegistryContext
+    signUp?: SignUpConfig<DefaultUser, any>
 }
 
 export interface SchemaRegistryContext {
@@ -461,4 +467,29 @@ export type InternalContext<Identity extends Identities> = RouterGlobalContext<F
         secure: CookieStoreConfig
         standard: CookieStoreConfig
     }
+}
+
+export interface OnCreateUserContext<Identity extends Identities> {
+    payload: FromShapeToObject<Identity>
+}
+
+/**
+ * Configuration for the signUp process, including the schema for validation
+ * and required callback for user creation.
+ */
+export interface SignUpConfig<Identity extends Identities, SignUpIdentity extends NullableIdentities> {
+    /**
+     * Optional schema for validating the sign-up payload. It supports any
+     * Zod, Arktype, Valibot or Typebox schema.
+     */
+    schema?: [SignUpIdentity] extends [never]
+        ? Record<string, unknown>
+        : ConfigSchema<SignUpIdentity extends Identities ? SignUpIdentity : never>
+    /**
+     * Callback function that is called when a new user signs up. It receives the validated
+     * sign-up payload and must handle the user creation.
+     */
+    onCreateUser: (
+        context: OnCreateUserContext<SignUpIdentity extends Identities ? SignUpIdentity : never>
+    ) => Promise<FromShapeToObject<Identity> | null> | FromShapeToObject<Identity> | null
 }

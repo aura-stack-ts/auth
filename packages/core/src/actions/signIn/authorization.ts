@@ -11,7 +11,7 @@ import type { GlobalContext } from "@aura-stack/router"
  */
 export const getTrustedOrigins = async (
     request: Request,
-    trustedOrigins: AuthConfig<Identities>["trustedOrigins"]
+    trustedOrigins: AuthConfig<Identities, Identities>["trustedOrigins"]
 ): Promise<string[]> => {
     if (!trustedOrigins) return []
     const raw = typeof trustedOrigins === "function" ? await trustedOrigins(request) : trustedOrigins

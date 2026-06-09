@@ -1,4 +1,4 @@
-import { getSession, signIn, signInCredentials, signOut, updateSession } from "@/api/index.ts"
+import { getSession, signIn, signInCredentials, signOut, updateSession, signUp } from "@/api/index.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type {
     BuiltInOAuthProvider,
@@ -14,9 +14,16 @@ import type {
     SignInCredentialsAPIReturn,
     SignOutAPIReturn,
     UpdateSessionAPIReturn,
+    SignUpAPIOptions,
+    SignUpAPIReturn,
 } from "@/@types/index.ts"
 
-export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContext) => {
+export const createAuthAPI = <
+    DefaultUser extends User = User,
+    SignUpPayload extends Record<string, unknown> = Record<string, unknown>,
+>(
+    ctx: GlobalContext
+) => {
     return {
         /**
          * Retrieves the current session data from the server-side.
@@ -63,6 +70,30 @@ export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContex
          */
         signInCredentials: async (options: SignInCredentialsAPIOptions): Promise<SignInCredentialsAPIReturn> => {
             return signInCredentials({ ctx, ...options })
+        },
+        /**
+         * Signs up a new user on the server-side. It requires a `payload` with the necessary information for
+         * user creation and a callback function configured in `signUp.onCreateUser` to handle the actual user
+         * creation logic.
+         *
+         * @params options - Options for the API call, including the sign-up payload, headers, and redirect behavior.
+         * @return The object returned by the API call {@link SignUpAPIReturn}
+         * @example
+         * const response = await api.signUp({
+         *   payload: {
+         *     name: "John",
+         *     lastName: "Doe",
+         *     email: "john.doe@example.com",
+         *     password: "1234567890"
+         *   },
+         *   redirectTo: "/dashboard",
+         *   request: await getRequest()
+         * })
+         */
+        signUp: async <Payload extends Record<string, unknown> = SignUpPayload>(
+            options: SignUpAPIOptions<Payload>
+        ): Promise<SignUpAPIReturn> => {
+            return signUp({ ctx, ...options })
         },
         /**
          * Updates the current session on the server-side. It allows partial updates to the session object, such as

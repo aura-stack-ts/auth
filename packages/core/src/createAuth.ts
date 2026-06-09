@@ -11,12 +11,15 @@ import {
     signOutAction,
     csrfTokenAction,
     updateSessionAction,
+    signUpAction,
 } from "@/actions/index.ts"
-import type { EditableShape, Identities, UserShape } from "@/shared/identity.ts"
-import type { AuthConfig, AuthInstance, FromShapeToObject, SchemaRegistryContext } from "@/@types/index.ts"
+import type { EditableShape, Identities, NullableIdentities, UserShape } from "@/shared/identity.ts"
+import type { AuthConfig, AuthInstance, FromShapeToObject, SchemaRegistryContext, SignUpConfig } from "@/@types/index.ts"
 
-const createInternalConfig = <Identity extends Identities>(config?: AuthConfig<Identity>): RouterConfig => {
-    const context = createContext<Identity>(config)
+const createInternalConfig = <Identity extends Identities, SignUpIdentity extends NullableIdentities>(
+    config?: AuthConfig<Identity, SignUpIdentity>
+): RouterConfig => {
+    const context = createContext<Identity, SignUpIdentity>(config)
     return {
         basePath: config?.basePath ?? "/auth",
         onError: createErrorHandler(context.logger),
@@ -31,8 +34,10 @@ const createInternalConfig = <Identity extends Identities>(config?: AuthConfig<I
     }
 }
 
-export const createAuthInstance = <Identity extends Identities>(authConfig: AuthConfig<Identity>) => {
-    const config = createInternalConfig<Identity>(authConfig)
+export const createAuthInstance = <Identity extends Identities, SignUpIdentity extends NullableIdentities>(
+    authConfig: AuthConfig<Identity, SignUpIdentity>
+) => {
+    const config = createInternalConfig<Identity, SignUpIdentity>(authConfig)
     const router = createRouter(
         [
             signInAction(config.context.oauth),
@@ -42,6 +47,7 @@ export const createAuthInstance = <Identity extends Identities>(authConfig: Auth
             signOutAction,
             csrfTokenAction,
             updateSessionAction(config.context.identity as SchemaRegistryContext),
+            signUpAction(config.context.signUp as SignUpConfig<Identity, SignUpIdentity>),
         ],
         config
     )
@@ -76,8 +82,15 @@ export const createAuthInstance = <Identity extends Identities>(authConfig: Auth
  *   }]
  * })
  */
-export const createAuth = <Identity extends Identities = EditableShape<UserShape>>(config: AuthConfig<Identity>) => {
-    const authInstance = createAuthInstance<Identity>(config) as unknown as AuthInstance<FromShapeToObject<Identity>>
+export const createAuth = <
+    Identity extends Identities = EditableShape<UserShape>,
+    SignUpIdentity extends NullableIdentities = undefined,
+>(
+    config: AuthConfig<Identity, SignUpIdentity>
+) => {
+    const authInstance = createAuthInstance<Identity, SignUpIdentity>(config) as unknown as AuthInstance<
+        FromShapeToObject<Identity>
+    >
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()
         const methodHandlers = {

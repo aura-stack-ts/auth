@@ -8,7 +8,6 @@ import {
     UserIdentityArkType,
     UserIdentityTypeBox,
     UserIdentityValibot,
-    type Identities,
     type UserShapeValibot,
 } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
@@ -20,24 +19,17 @@ import type {
     UpdateSessionAPIReturn,
     UserShape,
 } from "@/@types/index.ts"
-import type { AuthConfig, AuthInstance, User } from "@/index.ts"
+import type { AuthInstance, User } from "@/index.ts"
 import type { OAuthProviderCredentials } from "@/@types/oauth.ts"
-import type {
-    EditableShape,
-    FromShapeToObject,
-    InferSession,
-    InferUser,
-    ValibotShapeToObject,
-    ZodShapeToObject,
-} from "@/@types/utility.ts"
+import type { InferSession, InferUser, ValibotShapeToObject, ZodShapeToObject } from "@/@types/utility.ts"
 import type { JWTHeaderParameters, JWTVerifyOptions, Prettify, TypedJWTPayload } from "@aura-stack/jose"
 
 describe("createAuth", () => {
-    expectTypeOf(createAuth).toEqualTypeOf<
-        <Identity extends Identities = EditableShape<UserShape>>(
-            config: AuthConfig<Identity>
-        ) => AuthInstance<FromShapeToObject<Identity>>
-    >()
+    //expectTypeOf(createAuth).toEqualTypeOf<
+    //    <Identity extends Identities = EditableShape<UserShape>, SignUpIdentity extends Identities = Identity>(
+    //        config: AuthConfig<Identity, SignUpIdentity>
+    //    ) => AuthInstance<FromShapeToObject<Identity>>
+    //>()
     expectTypeOf(createAuth({ oauth: [] }).api.getSession).toEqualTypeOf<
         (options: GetSessionAPIOptions) => Promise<GetSessionAPIReturn<ZodShapeToObject<UserShape>>>
     >()

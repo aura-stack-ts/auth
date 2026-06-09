@@ -1,0 +1,83 @@
+import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
+import type { FunctionAPIContext, SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
+import { AuthValidationError } from "@/shared/errors.ts"
+import { createCSRF } from "@/shared/crypto.ts"
+import { HeadersBuilder } from "@aura-stack/router"
+import { secureApiHeaders } from "@/shared/headers.ts"
+
+export const signUp = async <Payload extends Record<string, unknown> = Record<string, unknown>>({
+    ctx,
+    payload,
+    headers: headersInit,
+    request: requestInit,
+    redirect = true,
+    redirectTo,
+}: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
+    const { signUp, cookies, sessionStrategy, logger } = ctx
+    try {
+        let request = requestInit
+        if (!request) {
+            const origin = await getBaseURL({ ctx, headers: headersInit })
+            const url = `${origin}${ctx.basePath}/signIn/credentials`
+            request = new Request(url, { headers: headersInit })
+        }
+        await getOriginURL(request, ctx)
+        const user = await signUp?.onCreateUser({
+            payload,
+        })
+        if (!user) {
+            throw new AuthValidationError("USER_CREATION_FAILED", "Failed to create user with the provided payload.")
+        }
+        const sessionToken = await sessionStrategy.createSession(user)
+        const csrfToken = await createCSRF(ctx.jose)
+        logger?.log("SIGN_UP_SUCCESS")
+
+        const headers = new HeadersBuilder(secureApiHeaders)
+            .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
+            .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
+
+        let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx)
+        redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
+
+        if (redirect && redirectURL) {
+            headers.setHeader("Location", redirectURL)
+        }
+
+        const shouldRedirectServer = redirect && !!redirectURL
+        const toHeaders = headers.toHeaders()
+        return {
+            success: true,
+            redirect: shouldRedirectServer,
+            redirectURL: redirect ? null : redirectURL,
+            headers: toHeaders,
+            toResponse: () => {
+                return Response.json(
+                    {
+                        success: true,
+                        redirect: shouldRedirectServer,
+                        redirectURL: shouldRedirectServer ? null : redirectURL,
+                    },
+                    { headers: toHeaders, status: shouldRedirectServer ? 302 : 200 }
+                )
+            },
+        } as SignUpAPIReturn
+    } catch (error) {
+        return {
+            success: false,
+            error: {
+                code: error instanceof AuthValidationError ? error.code : "UNKNOWN_ERROR",
+                message: error instanceof Error ? error.message : "An unknown error occurred during sign-up.",
+            },
+            redirect: false,
+            headers: new Headers(secureApiHeaders),
+            redirectURL: null,
+            toResponse: () => {
+                return Response.json({
+                    success: false,
+                    redirect: false,
+                    redirectURL: null,
+                })
+            },
+        }
+    }
+}
