@@ -16,6 +16,7 @@ export const createMockClient = () =>
             session: mockSession,
             redirectURL: "/dashboard",
         }),
+        signUp: vi.fn().mockResolvedValue({ redirectURL: "/welcome" }),
     }) as Partial<AuthClientInstance> as AuthClientInstance
 
 export const wrapper = ({ children, client, initialSession, redirect }: AuthProviderProps) => (
