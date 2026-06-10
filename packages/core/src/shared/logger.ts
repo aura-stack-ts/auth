@@ -1,5 +1,5 @@
 import { getEnv, getEnvBoolean } from "@/shared/env.ts"
-import type { Identities } from "./identity.ts"
+import type { Identities, SchemaTypes } from "./identity.ts"
 import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
 
 /**
@@ -309,6 +309,12 @@ export const logMessages = {
         msgId: "CREDENTIALS_SIGN_IN_FAILED",
         message: "An error occurred during credentials sign-in",
     },
+    SIGN_UP_SUCCESS: {
+        facility: 4,
+        severity: "info",
+        msgId: "SIGN_UP_SUCCESS",
+        message: "User successfully signed up and authenticated",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {
@@ -389,7 +395,9 @@ export const createLogger = (logger?: Required<Logger>): InternalLogger | undefi
  * Creates the logger instance based on the provided configuration and environment variables.
  * Priority: config.logger, LOG_LEVEL env, DEBUG env and defaults to undefined if logging is not enabled.
  */
-export const createProxyLogger = <Identity extends Identities>(config?: AuthConfig<Identity>) => {
+export const createProxyLogger = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    config?: AuthConfig<Identity, SignUpSchema>
+) => {
     const level = getEnv("LOG_LEVEL")
     const debug = getEnvBoolean("DEBUG")
     if (typeof config?.logger === "object") {

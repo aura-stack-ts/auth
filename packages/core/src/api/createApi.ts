@@ -1,5 +1,5 @@
-import { getSession, signIn, signInCredentials, signOut, updateSession } from "@/api/index.ts"
-import type { GlobalContext } from "@aura-stack/router"
+import { getSession, signIn, signInCredentials, signOut, updateSession, signUp } from "@/api/index.ts"
+import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
     BuiltInOAuthProvider,
     LiteralUnion,
@@ -14,9 +14,22 @@ import type {
     SignInCredentialsAPIReturn,
     SignOutAPIReturn,
     UpdateSessionAPIReturn,
+    SignUpAPIOptions,
+    SignUpAPIReturn,
+    Wrap,
 } from "@/@types/index.ts"
+import type { ZodObject } from "zod"
+import type { SchemaTypes } from "@/shared/identity.ts"
 
-export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContext) => {
+type InferSignUp<T> = Wrap<RemoveIndexSignature<InferSchema<T>>>
+
+type RemoveIndexSignature<T> = {
+    [K in keyof T as string extends K ? never : number extends K ? never : symbol extends K ? never : K]: T[K]
+}
+
+export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>>(
+    ctx: GlobalContext
+) => {
     return {
         /**
          * Retrieves the current session data from the server-side.
@@ -63,6 +76,30 @@ export const createAuthAPI = <DefaultUser extends User = User>(ctx: GlobalContex
          */
         signInCredentials: async (options: SignInCredentialsAPIOptions): Promise<SignInCredentialsAPIReturn> => {
             return signInCredentials({ ctx, ...options })
+        },
+        /**
+         * Signs up a new user on the server-side. It requires a `payload` with the necessary information for
+         * user creation and a callback function configured in `signUp.onCreateUser` to handle the actual user
+         * creation logic.
+         *
+         * @params options - Options for the API call, including the sign-up payload, headers, and redirect behavior.
+         * @return The object returned by the API call {@link SignUpAPIReturn}
+         * @example
+         * const response = await api.signUp({
+         *   payload: {
+         *     name: "John",
+         *     lastName: "Doe",
+         *     email: "john.doe@example.com",
+         *     password: "1234567890"
+         *   },
+         *   redirectTo: "/dashboard",
+         *   request: await getRequest()
+         * })
+         */
+        signUp: async <Payload extends Record<string, any> = InferSignUp<SignUpSchema>>(
+            options: SignUpAPIOptions<Payload>
+        ): Promise<SignUpAPIReturn> => {
+            return signUp({ ctx, ...options })
         },
         /**
          * Updates the current session on the server-side. It allows partial updates to the session object, such as

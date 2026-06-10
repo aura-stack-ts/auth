@@ -8,7 +8,6 @@ import {
     UserIdentityArkType,
     UserIdentityTypeBox,
     UserIdentityValibot,
-    type Identities,
     type UserShapeValibot,
 } from "@/shared/identity.ts"
 import { github, type GitHubProfile } from "@/oauth/github.ts"
@@ -16,28 +15,19 @@ import type {
     GetSessionAPIOptions,
     GetSessionAPIReturn,
     Session,
+    SignUpAPIOptions,
+    SignUpAPIReturn,
     UpdateSessionAPIOptions,
     UpdateSessionAPIReturn,
     UserShape,
 } from "@/@types/index.ts"
-import type { AuthConfig, AuthInstance, User } from "@/index.ts"
+import type { AuthInstance, User } from "@/index.ts"
 import type { OAuthProviderCredentials } from "@/@types/oauth.ts"
-import type {
-    EditableShape,
-    FromShapeToObject,
-    InferSession,
-    InferUser,
-    ValibotShapeToObject,
-    ZodShapeToObject,
-} from "@/@types/utility.ts"
+import type { InferSession, InferUser, ValibotShapeToObject, ZodShapeToObject } from "@/@types/utility.ts"
 import type { JWTHeaderParameters, JWTVerifyOptions, Prettify, TypedJWTPayload } from "@aura-stack/jose"
+import { type } from "arktype"
 
 describe("createAuth", () => {
-    expectTypeOf(createAuth).toEqualTypeOf<
-        <Identity extends Identities = EditableShape<UserShape>>(
-            config: AuthConfig<Identity>
-        ) => AuthInstance<FromShapeToObject<Identity>>
-    >()
     expectTypeOf(createAuth({ oauth: [] }).api.getSession).toEqualTypeOf<
         (options: GetSessionAPIOptions) => Promise<GetSessionAPIReturn<ZodShapeToObject<UserShape>>>
     >()
@@ -275,6 +265,69 @@ describe("createAuth", () => {
             >
         >
     >().toEqualTypeOf<Session<Prettify<User & { role?: string | undefined }>>>()
+
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            signUp: {
+                onCreateUser: () => null,
+            },
+        }).api.signUp
+    ).toEqualTypeOf<<Payload extends Record<string, any> = {}>(options: SignUpAPIOptions<Payload>) => Promise<SignUpAPIReturn>>()
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            signUp: {
+                schema: z.object({
+                    name: z.string(),
+                    lastName: z.string(),
+                    email: z.string().email(),
+                    password: z.string().min(8),
+                }),
+                onCreateUser: () => null,
+            },
+        }).api.signUp
+    ).toEqualTypeOf<
+        <Payload extends Record<string, any> = { name: string; lastName: string; email: string; password: string }>(
+            options: SignUpAPIOptions<Payload>
+        ) => Promise<SignUpAPIReturn>
+    >()
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            signUp: {
+                schema: valibot.object({
+                    name: valibot.string(),
+                    lastName: valibot.string(),
+                    email: valibot.pipe(valibot.string(), valibot.email()),
+                    password: valibot.pipe(valibot.string(), valibot.minLength(8)),
+                }),
+                onCreateUser: () => null,
+            },
+        }).api.signUp
+    ).toEqualTypeOf<
+        <Payload extends Record<string, any> = { name: string; lastName: string; email: string; password: string }>(
+            options: SignUpAPIOptions<Payload>
+        ) => Promise<SignUpAPIReturn>
+    >()
+    expectTypeOf(
+        createAuth({
+            oauth: [],
+            signUp: {
+                schema: type({
+                    name: "string",
+                    lastName: "string",
+                    email: "string",
+                    password: "string",
+                }),
+                onCreateUser: () => null,
+            },
+        }).api.signUp
+    ).toEqualTypeOf<
+        <Payload extends Record<string, any> = { name: string; lastName: string; email: string; password: string }>(
+            options: SignUpAPIOptions<Payload>
+        ) => Promise<SignUpAPIReturn>
+    >()
 })
 
 describe("OAuth providers", () => {

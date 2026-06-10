@@ -284,3 +284,22 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User>
 
 /** Programmatic session update result with redirect metadata and `toResponse()`. */
 export type UpdateSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<UpdateSessionReturnData<DefaultUser>>
+
+export interface SignUpAPIOptions<Payload extends Record<string, any> = Record<string, any>>
+    extends APIOptionsWithRedirectTo, APIOptionsWithRequest {
+    payload: Payload
+}
+
+export type SignUpReturnData =
+    /** redirect: true & redirectTo: string */
+    | { success: true; redirect: true; redirectURL: null }
+    /** redirect: false & redirectTo: string */
+    | { success: true; redirect: false; redirectURL: string }
+    /** redirect: false & redirectTo: null | undefined (not set) */
+    /** redirect: true & redirectTo: null | undefined (not set) */
+    | { success: true; redirect: false; redirectURL: null }
+    /** Failed sign-up */
+    | { success: false; redirect: false; redirectURL: null }
+
+/** Programmatic sign-up result with redirect metadata and `toResponse()`. */
+export type SignUpAPIReturn = AuthActionAPIReturn<SignUpReturnData>

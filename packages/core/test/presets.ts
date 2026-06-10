@@ -1,6 +1,6 @@
 import { createAuth } from "@/createAuth.ts"
 import type { JWTPayload } from "@/jose.ts"
-import type { OAuthProviderCredentials } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export const oauthCustomService: OAuthProviderCredentials = {
     id: "oauth-provider",
@@ -48,6 +48,17 @@ const auth = createAuth({
                 name: username,
                 image: "https://example.com/image.jpg",
             }
+        },
+    },
+    signUp: {
+        onCreateUser: ({ payload }) => {
+            const { name, email, image } = payload
+            return {
+                sub: "1234567890",
+                name,
+                email,
+                image,
+            } as User
         },
     },
 })
