@@ -425,7 +425,7 @@ describe("createAuthClient", () => {
         expect(post).not.toHaveBeenCalled()
     })
 
-    test("signUp", () => {
+    test("signUp", async () => {
         const post = vi.fn().mockResolvedValue(
             createJSONResponse({
                 success: true,
@@ -439,7 +439,7 @@ describe("createAuthClient", () => {
         })
 
         const client = createAuthClient({ baseURL: "https://example.com" })
-        client.signUp({
+        await client.signUp({
             payload: { username: "John", lastName: "Doe", password: "1234567890" },
             redirectTo: "/welcome",
             redirect: true,
