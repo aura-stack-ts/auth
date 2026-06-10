@@ -162,8 +162,30 @@ describe("signInCredentials API", () => {
                 username: "johndoe",
                 password: "1234567890",
             },
+            redirect: false,
             redirectTo: "https://example.com/dashboard",
         })
+        expect(signIn).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: "/dashboard",
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signIn redirect: true and invalid redirectTo", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const signIn = await api.signInCredentials({
+            payload: {
+                username: "johndoe",
+                password: "1234567890",
+            },
+            redirect: true,
+            redirectTo: "https://malicious.com/phishing",
+        })
+        expect(signIn.headers.get("Location")).toBe("/")
         expect(signIn).toEqual({
             success: true,
             redirect: true,
@@ -173,7 +195,7 @@ describe("signInCredentials API", () => {
         })
     })
 
-    test("signIn with invalid redirectTo", async () => {
+    test("signIn with redirect: false and invalid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const signIn = await api.signInCredentials({
@@ -181,12 +203,14 @@ describe("signInCredentials API", () => {
                 username: "johndoe",
                 password: "1234567890",
             },
+            redirect: false,
             redirectTo: "https://malicious.com/phishing",
         })
+        expect(signIn.headers.get("Location")).toBeNull()
         expect(signIn).toEqual({
             success: true,
-            redirect: true,
-            redirectURL: null,
+            redirect: false,
+            redirectURL: "/",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
