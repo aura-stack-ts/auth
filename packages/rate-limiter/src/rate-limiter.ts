@@ -1,5 +1,10 @@
 import { createMemoryStorage } from "@/memory.ts"
-import { createTokenBucketAlgorithm, createFixedWindowAlgorithm, createLeakyBucketAlgorithm } from "@/algorithms/index.ts"
+import {
+    createTokenBucketAlgorithm,
+    createFixedWindowAlgorithm,
+    createLeakyBucketAlgorithm,
+    createSlidingWindowAlgorithm,
+} from "@/algorithms/index.ts"
 import type { InferRules, RateLimiter, RateLimiterAlgorithm, RateLimiterConfig, RateLimiterRule } from "@/types.ts"
 
 /**
@@ -14,6 +19,8 @@ const buildAlgorithm = <RequestInit = Request>(rule: RateLimiterRule<RequestInit
             return createFixedWindowAlgorithm(rule)
         case "leaky-bucket":
             return createLeakyBucketAlgorithm(rule)
+        case "sliding-window":
+            return createSlidingWindowAlgorithm(rule)
         default: {
             throw new Error(`[rate-limiter] Unknown algorithm: "${String((rule as { algorithm?: string }).algorithm)}"`)
         }
@@ -28,6 +35,8 @@ const resetKeys = (rule: RateLimiterRule, key: string): string[] => {
             return [`${key}:fw`]
         case "leaky-bucket":
             return [`${key}:lb:tokens`, `${key}:lb:lastLeak`]
+        case "sliding-window":
+            return [`${key}:sw:${Math.floor(Date.now() / (rule.windowMs * 2)) * rule.windowMs * 2}`]
     }
 }
 

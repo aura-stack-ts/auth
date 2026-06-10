@@ -58,7 +58,7 @@ export interface RateLimiterAlgorithm<RequestInit = Request> {
     check(request: RequestInit): Promise<RateLimitResult>
 }
 
-export type AlgorithmType = "token-bucket" | "fixed-window" | "leaky-bucket"
+export type AlgorithmType = "token-bucket" | "fixed-window" | "leaky-bucket" | "sliding-window"
 
 interface BaseRule<RequestInit = Request> {
     algorithm: AlgorithmType
@@ -83,7 +83,7 @@ export type TokenBucketRule<RequestInit = Request> = BaseRule<RequestInit> & {
     refillRate: number
 }
 
-export type FixedWindowRule<RequestInit = Request> = BaseRule<RequestInit> & {
+export interface FixedWindowRule<RequestInit = Request> extends BaseRule<RequestInit> {
     algorithm: "fixed-window"
     /** Maximum requests allowed per window. */
     limit: number
@@ -91,7 +91,7 @@ export type FixedWindowRule<RequestInit = Request> = BaseRule<RequestInit> & {
     windowMs: number
 }
 
-export type LeakyBucketRule<RequestInit = Request> = BaseRule<RequestInit> & {
+export interface LeakyBucketRule<RequestInit = Request> extends BaseRule<RequestInit> {
     algorithm: "leaky-bucket"
     /**
      * The maximum queue size (burst capacity). When the bucket is full,
@@ -106,10 +106,19 @@ export type LeakyBucketRule<RequestInit = Request> = BaseRule<RequestInit> & {
     leakRatePerMs: number
 }
 
+export interface SlidingWindowRule<RequestInit = Request> extends BaseRule<RequestInit> {
+    algorithm: "sliding-window"
+    /** Maximum requests allowed per window. */
+    limit: number
+    /** Window duration in milliseconds. */
+    windowMs: number
+}
+
 export type RateLimiterRule<RequestInit = Request> =
     | TokenBucketRule<RequestInit>
     | FixedWindowRule<RequestInit>
     | LeakyBucketRule<RequestInit>
+    | SlidingWindowRule<RequestInit>
 
 export interface RateLimiterConfig<Rules extends Record<string, RateLimiterRule>> {
     storage?: RateLimiterStorage
