@@ -1,5 +1,5 @@
 import { getEnv, getEnvBoolean } from "@/shared/env.ts"
-import type { Identities, NullableIdentities } from "./identity.ts"
+import type { Identities, SchemaTypes } from "./identity.ts"
 import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
 
 /**
@@ -395,8 +395,8 @@ export const createLogger = (logger?: Required<Logger>): InternalLogger | undefi
  * Creates the logger instance based on the provided configuration and environment variables.
  * Priority: config.logger, LOG_LEVEL env, DEBUG env and defaults to undefined if logging is not enabled.
  */
-export const createProxyLogger = <Identity extends Identities, SignUpIdentity extends NullableIdentities>(
-    config?: AuthConfig<Identity, SignUpIdentity>
+export const createProxyLogger = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    config?: AuthConfig<Identity, SignUpSchema>
 ) => {
     const level = getEnv("LOG_LEVEL")
     const debug = getEnvBoolean("DEBUG")

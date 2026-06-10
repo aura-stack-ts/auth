@@ -71,8 +71,6 @@ export type Identities =
     | EditableShapeTypebox<UserShapeTypeBox>
     | EditableUser
 
-export type NullableIdentities = Identities | undefined | null
-
 type ReturnShapeType<T> =
     T extends EditableShape<UserShape>
         ? z.ZodObject<T>

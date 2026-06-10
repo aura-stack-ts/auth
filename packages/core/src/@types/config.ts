@@ -2,18 +2,20 @@ import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
-import { UserIdentity, type Identities, type NullableIdentities, type SchemaTypes } from "@/shared/identity.ts"
+import { UserIdentity, type Identities, type SchemaTypes } from "@/shared/identity.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
 import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
+import type { InferSchema } from "@aura-stack/router"
+import type { ZodObject } from "zod"
 
 /**
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export type AuthConfig<Identity extends Identities, SignUpIdentity extends NullableIdentities> = {
+export type AuthConfig<Identity extends Identities, SignUpSchema extends SchemaTypes> = {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
@@ -161,7 +163,7 @@ export type AuthConfig<Identity extends Identities, SignUpIdentity extends Nulla
      * Configuration for the signUp process, including the schema for validation
      * and required callback for user creation.
      */
-    signUp?: SignUpConfig<Identity, SignUpIdentity>
+    signUp?: SignUpConfig<Identity, SignUpSchema>
 } & TrustedProxyHeadersConfig
 
 // @todo Should trustedOrigins support subdomain wildcards like `https://*.example.com`?
@@ -342,7 +344,9 @@ export interface Logger {
  * Programmatic auth API returned with the auth instance: `getSession`, `signIn`, `signInCredentials`, `signOut`, `updateSession`.
  * Each method returns a result object plus `headers` and `toResponse()` for HTTP responses.
  */
-export type AuthAPI<DefaultUser extends User = User> = ReturnType<typeof createAuthAPI<DefaultUser>>
+export type AuthAPI<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>> = ReturnType<
+    typeof createAuthAPI<DefaultUser, SignUpSchema>
+>
 
 /** JWT and crypto helpers bound to the configured identity schema (sign, verify, claims). */
 export type JoseInstance<DefaultUser extends User = User> = ReturnType<typeof createJoseInstance<DefaultUser>>
@@ -408,7 +412,7 @@ export interface CredentialsProvider<Identity extends Identities> {
  * Runtime context passed into auth actions and API handlers: OAuth map, cookies, JWT, session strategy, trusted origins, etc.
  * This is the fully resolved configuration surface after `createAuth` initializes defaults.
  */
-export interface RouterGlobalContext<DefaultUser extends User = User> {
+export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>> {
     oauth: OAuthProviderRecord
     credentials?: CredentialsProvider<any>
     cookies: CookieStoreConfig
@@ -421,7 +425,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User> {
     logger?: InternalLogger
     sessionStrategy: SessionStrategy<DefaultUser>
     identity: SchemaRegistryContext
-    signUp?: SignUpConfig<DefaultUser, any>
+    signUp?: SignUpConfig<DefaultUser, SignUpSchema>
 }
 
 export interface SchemaRegistryContext {
@@ -439,11 +443,11 @@ export type AuthRuntimeConfig<DefaultUser extends User = User> = RouterGlobalCon
 /**
  * Public auth instance: programmatic {@link AuthAPI}, {@link JoseInstance}, and HTTP {@link AuthClient} handlers.
  */
-export interface AuthInstance<DefaultUser extends User = User> {
+export interface AuthInstance<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>> {
     /**
      * Programmatic API for authentication actions (getSession, signIn, signOut, etc.) that can be used in server-side contexts or API routes.
      */
-    api: AuthAPI<DefaultUser>
+    api: AuthAPI<DefaultUser, SignUpSchema>
     /**
      * JOSE helper functions for signin, encryption and verification of JWTs.
      */
@@ -462,34 +466,35 @@ export interface AuthInstance<DefaultUser extends User = User> {
 /**
  * Extended context used inside the library with both secure and standard cookie materializations.
  */
-export type InternalContext<Identity extends Identities> = RouterGlobalContext<FromShapeToObject<Identity> & User> & {
+export type InternalContext<Identity extends Identities, SignUpSchema extends SchemaTypes> = RouterGlobalContext<
+    FromShapeToObject<Identity>,
+    SignUpSchema
+> & {
     cookieConfig: {
         secure: CookieStoreConfig
         standard: CookieStoreConfig
     }
 }
 
-export interface OnCreateUserContext<Identity extends Identities> {
-    payload: FromShapeToObject<Identity>
+export interface OnCreateUserContext<Schema extends SchemaTypes> {
+    payload: InferSchema<Schema>
 }
 
 /**
  * Configuration for the signUp process, including the schema for validation
  * and required callback for user creation.
  */
-export interface SignUpConfig<Identity extends Identities, SignUpIdentity extends NullableIdentities> {
+export interface SignUpConfig<Identity extends Identities, SignUpSchema extends SchemaTypes> {
     /**
      * Optional schema for validating the sign-up payload. It supports any
      * Zod, Arktype, Valibot or Typebox schema.
      */
-    schema?: [SignUpIdentity] extends [never]
-        ? Record<string, unknown>
-        : ConfigSchema<SignUpIdentity extends Identities ? SignUpIdentity : never>
+    schema?: SignUpSchema
     /**
      * Callback function that is called when a new user signs up. It receives the validated
      * sign-up payload and must handle the user creation.
      */
     onCreateUser: (
-        context: OnCreateUserContext<SignUpIdentity extends Identities ? SignUpIdentity : never>
+        context: OnCreateUserContext<SignUpSchema>
     ) => Promise<FromShapeToObject<Identity> | null> | FromShapeToObject<Identity> | null
 }

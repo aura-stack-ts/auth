@@ -13,13 +13,14 @@ import {
     updateSessionAction,
     signUpAction,
 } from "@/actions/index.ts"
-import type { EditableShape, Identities, NullableIdentities, UserShape } from "@/shared/identity.ts"
+import type { ZodObject } from "zod"
+import type { EditableShape, Identities, SchemaTypes, UserShape } from "@/shared/identity.ts"
 import type { AuthConfig, AuthInstance, FromShapeToObject, SchemaRegistryContext, SignUpConfig } from "@/@types/index.ts"
 
-const createInternalConfig = <Identity extends Identities, SignUpIdentity extends NullableIdentities>(
-    config?: AuthConfig<Identity, SignUpIdentity>
+const createInternalConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    config?: AuthConfig<Identity, SignUpSchema>
 ): RouterConfig => {
-    const context = createContext<Identity, SignUpIdentity>(config)
+    const context = createContext<Identity, SignUpSchema>(config)
     return {
         basePath: config?.basePath ?? "/auth",
         onError: createErrorHandler(context.logger),
@@ -34,10 +35,10 @@ const createInternalConfig = <Identity extends Identities, SignUpIdentity extend
     }
 }
 
-export const createAuthInstance = <Identity extends Identities, SignUpIdentity extends NullableIdentities>(
-    authConfig: AuthConfig<Identity, SignUpIdentity>
+export const createAuthInstance = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    authConfig: AuthConfig<Identity, SignUpSchema>
 ) => {
-    const config = createInternalConfig<Identity, SignUpIdentity>(authConfig)
+    const config = createInternalConfig<Identity, SignUpSchema>(authConfig)
     const router = createRouter(
         [
             signInAction(config.context.oauth),
@@ -47,7 +48,7 @@ export const createAuthInstance = <Identity extends Identities, SignUpIdentity e
             signOutAction,
             csrfTokenAction,
             updateSessionAction(config.context.identity as SchemaRegistryContext),
-            signUpAction(config.context.signUp as SignUpConfig<Identity, SignUpIdentity>),
+            signUpAction(config.context.signUp as SignUpConfig<Identity, SignUpSchema>),
         ],
         config
     )
@@ -55,7 +56,7 @@ export const createAuthInstance = <Identity extends Identities, SignUpIdentity e
     return {
         handlers: router,
         jose: config.context.jose,
-        api: createAuthAPI(config.context),
+        api: createAuthAPI<FromShapeToObject<Identity>, SignUpSchema>(config.context),
     }
 }
 
@@ -84,12 +85,13 @@ export const createAuthInstance = <Identity extends Identities, SignUpIdentity e
  */
 export const createAuth = <
     Identity extends Identities = EditableShape<UserShape>,
-    SignUpIdentity extends NullableIdentities = undefined,
+    SignUpSchema extends SchemaTypes = ZodObject<any>,
 >(
-    config: AuthConfig<Identity, SignUpIdentity>
+    config: AuthConfig<Identity, SignUpSchema>
 ) => {
-    const authInstance = createAuthInstance<Identity, SignUpIdentity>(config) as unknown as AuthInstance<
-        FromShapeToObject<Identity>
+    const authInstance = createAuthInstance<Identity, SignUpSchema>(config) as unknown as AuthInstance<
+        FromShapeToObject<Identity>,
+        SignUpSchema
     >
     authInstance.handlers.ALL = async (request: Request) => {
         const method = request.method.toUpperCase()

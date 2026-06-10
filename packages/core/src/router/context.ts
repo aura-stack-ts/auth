@@ -5,11 +5,11 @@ import { createSessionStrategy } from "@/session/strategy.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
-import type { Identities, NullableIdentities } from "@/shared/identity.ts"
+import type { Identities, SchemaTypes } from "@/shared/identity.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
 
-export const createContext = <Identity extends Identities, SignUpIdentity extends NullableIdentities>(
-    config?: AuthConfig<Identity, SignUpIdentity>
+export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    config?: AuthConfig<Identity, SignUpSchema>
 ) => {
     const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
     const useProxyHeaders =
@@ -48,7 +48,7 @@ export const createContext = <Identity extends Identities, SignUpIdentity extend
             skipValidation,
         },
         signUp: config?.signUp,
-    } as InternalContext<Identity>
+    } as InternalContext<Identity, SignUpSchema>
     ctx.sessionStrategy = createSessionStrategy<Identity>({
         cookies: () => ctx.cookies,
         jose: ctx.jose,

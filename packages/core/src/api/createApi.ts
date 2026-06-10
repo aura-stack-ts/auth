@@ -1,5 +1,5 @@
 import { getSession, signIn, signInCredentials, signOut, updateSession, signUp } from "@/api/index.ts"
-import type { GlobalContext } from "@aura-stack/router"
+import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
     BuiltInOAuthProvider,
     LiteralUnion,
@@ -16,12 +16,18 @@ import type {
     UpdateSessionAPIReturn,
     SignUpAPIOptions,
     SignUpAPIReturn,
+    Wrap,
 } from "@/@types/index.ts"
+import type { ZodObject } from "zod"
+import type { SchemaTypes } from "@/shared/identity.ts"
 
-export const createAuthAPI = <
-    DefaultUser extends User = User,
-    SignUpPayload extends Record<string, unknown> = Record<string, unknown>,
->(
+type InferSignUp<T> = Wrap<RemoveIndexSignature<InferSchema<T>>>
+
+type RemoveIndexSignature<T> = {
+    [K in keyof T as string extends K ? never : number extends K ? never : symbol extends K ? never : K]: T[K]
+}
+
+export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>>(
     ctx: GlobalContext
 ) => {
     return {
@@ -90,7 +96,7 @@ export const createAuthAPI = <
          *   request: await getRequest()
          * })
          */
-        signUp: async <Payload extends Record<string, unknown> = SignUpPayload>(
+        signUp: async <Payload extends Record<string, any> = InferSignUp<SignUpSchema>>(
             options: SignUpAPIOptions<Payload>
         ): Promise<SignUpAPIReturn> => {
             return signUp({ ctx, ...options })

@@ -1,6 +1,6 @@
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
-import { AuthValidationError } from "@/shared/errors.ts"
+import { AuthValidationError, isAuthErrorWithCode } from "@/shared/errors.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
@@ -62,21 +62,31 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             },
         } as SignUpAPIReturn
     } catch (error) {
+        let code = "SIGN_UP_ERROR"
+        let message = "An error occurred during sign-up."
+        if (isAuthErrorWithCode(error)) {
+            code = error.code
+            message = error.message
+        }
+
         return {
             success: false,
             error: {
-                code: error instanceof AuthValidationError ? error.code : "UNKNOWN_ERROR",
-                message: error instanceof Error ? error.message : "An unknown error occurred during sign-up.",
+                code,
+                message,
             },
             redirect: false,
             headers: new Headers(secureApiHeaders),
             redirectURL: null,
             toResponse: () => {
-                return Response.json({
-                    success: false,
-                    redirect: false,
-                    redirectURL: null,
-                })
+                return Response.json(
+                    {
+                        success: false,
+                        redirect: false,
+                        redirectURL: null,
+                    },
+                    { headers: secureApiHeaders, status: 400 }
+                )
             },
         }
     }

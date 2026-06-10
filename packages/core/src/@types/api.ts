@@ -285,7 +285,7 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User>
 /** Programmatic session update result with redirect metadata and `toResponse()`. */
 export type UpdateSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<UpdateSessionReturnData<DefaultUser>>
 
-export interface SignUpAPIOptions<Payload extends Record<string, unknown> = Record<string, unknown>>
+export interface SignUpAPIOptions<Payload extends Record<string, any> = Record<string, any>>
     extends APIOptionsWithRedirectTo, APIOptionsWithRequest {
     payload: Payload
 }
