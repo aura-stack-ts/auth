@@ -15,13 +15,20 @@ import type {
     UpdateSessionReturn,
     SignInCredentialsReturn,
     SignInCredentialsOptions,
+    SignUpOptions,
+    SignUpReturn,
 } from "@/@types/index.ts"
 
 export type { AuthClientOptions }
 
 export const createClient = createClientAPI<AuthClient>
 
-export const createAuthClient = <DefaultUser extends User = User>(options: AuthClientOptions) => {
+export const createAuthClient = <
+    DefaultUser extends User = User,
+    SignUpPayload extends Record<string, any> = Record<string, any>,
+>(
+    options: AuthClientOptions
+) => {
     if (typeof window === "undefined" && !options.baseURL) {
         throw new AuthClientError("`baseURL` is required when createAuthClient is used outside the browser.")
     }
@@ -45,6 +52,15 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
+    /**
+     * Gets the current session for the authenticated user.
+     *
+     * @returns Session object if the user is authenticated, or null if not authenticated or an error occurs.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const session = await authClient.getSession()
+     */
     const getSession = async (): Promise<Session<DefaultUser> | null> => {
         try {
             const response = await client.get("/session")
@@ -58,6 +74,20 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
+    /**
+     * Initiates the sign-in process for a specified OAuth provider.
+     *
+     * @param oauth The OAuth provider identifier (e.g., "google", "github").
+     * @param options Optional sign-in options, including redirect behavior and target URL.
+     * @returns An object containing the sign-in result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.signIn("google", {
+     *   redirect: true,
+     *   redirectTo: "/dashboard"
+     * })
+     */
     const signIn = async <Options extends SignInOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
@@ -84,6 +114,21 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
+    /**
+     * Initiates the sign-in process using user credentials (e.g., email and password).
+     *
+     * @param options Sign-in options, including the credentials payload and redirect behavior.
+     * @returns An object containing the sign-in result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.signInCredentials({
+     *   payload: {
+     *     email: "user@example.com",
+     *     password: "securepassword"
+     *   }
+     * })
+     */
     const signInCredentials = async <Options extends SignInCredentialsOptions>(
         options: Options
     ): Promise<SignInCredentialsReturn<Options>> => {
@@ -108,6 +153,60 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
+    /**
+     * Initiates the sign-up process for a new user with the provided payload.
+     *
+     * @param options Sign-up options, including the payload for user registration and redirect behavior.
+     * @return An object containing the sign-up result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.signUp({
+     *   payload: {
+     *     name: "John Doe",
+     *     email: "john@example.com",
+     *     password: "securepassword"
+     *   },
+     * })
+     */
+    const signUp = async <Options extends SignUpOptions<SignUpPayload>>(options: Options): Promise<SignUpReturn<Options>> => {
+        try {
+            const { redirectTo } = options ?? {}
+            const response = await client.post("/signUp", {
+                // @ts-ignore - Fix type here - go to @aura-stack/router.
+                body: options.payload,
+                searchParams: {
+                    redirectTo,
+                    redirect: false,
+                },
+            })
+            const json = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as SignUpReturn<Options>
+        } catch (error) {
+            console.error("Error during sign-up:", error)
+            return { success: false, redirect: false, redirectURL: null } as unknown as SignUpReturn<Options>
+        }
+    }
+
+    /**
+     * Updates the current session with new information, such as user data or expiration time.
+     *
+     * @param options Update session options, including the new session data and redirect behavior.
+     * @returns An object containing the update session result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.updateSession({
+     *   session: {
+     *     user: {
+     *       name: "John Doe"
+     *     }
+     *   }
+     * })
+     */
     const updateSession = async <Options extends UpdateSessionOptions<DefaultUser>>(
         options: Options
     ): Promise<UpdateSessionReturn<Options, DefaultUser>> => {
@@ -147,6 +246,19 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
+    /**
+     * Signs out the current user, ending their session and optionally redirecting them to a specified URL.
+     *
+     * @param options Sign-out options, including redirect behavior and target URL after sign-out.
+     * @returns An object containing the sign-out result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.signOut({
+     *   redirect: true,
+     *   redirectTo: "/goodbye"
+     * })
+     */
     const signOut = async <Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
@@ -180,6 +292,7 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         getSession,
         signIn,
         signInCredentials,
+        signUp,
         updateSession,
         signOut,
     }
