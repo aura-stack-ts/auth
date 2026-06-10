@@ -77,10 +77,25 @@ export type TokenBucketRule<RequestInit = Request> = BaseRule<RequestInit> & {
     capacity: number
     /** Tokens added per millisecond. */
     refillRate: number
+    /**
+     * Optional storage instance specific to this rule.
+     */
     storage?: RateLimiterStorage
 }
 
-export type RateLimiterRule<RequestInit = Request> = TokenBucketRule<RequestInit>
+export type FixedWindowRule<RequestInit = Request> = {
+    algorithm: "fixed-window"
+    /** Maximum requests allowed per window. */
+    limit: number
+    /** Window duration in milliseconds. Hard resets at each boundary. */
+    windowMs: number
+    /**
+     * Optional storage instance specific to this rule.
+     */
+    storage?: RateLimiterStorage
+} & Omit<BaseRule<RequestInit>, "algorithm">
+
+export type RateLimiterRule<RequestInit = Request> = TokenBucketRule<RequestInit> | FixedWindowRule<RequestInit>
 
 export interface RateLimiterConfig<Rules extends Record<string, RateLimiterRule>> {
     storage?: RateLimiterStorage
