@@ -424,4 +424,87 @@ describe("createAuthClient", () => {
         expect(await client.signOut()).toMatchObject({ success: false, redirect: false, redirectURL: "/" })
         expect(post).not.toHaveBeenCalled()
     })
+
+    test("signUp", async () => {
+        const post = vi.fn().mockResolvedValue(
+            createJSONResponse({
+                success: true,
+                redirectURL: "/welcome",
+            })
+        )
+
+        createClientMock.mockReturnValue({
+            get: vi.fn(),
+            post,
+        })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        await client.signUp({
+            payload: { username: "John", lastName: "Doe", password: "1234567890" },
+            redirectTo: "/welcome",
+            redirect: true,
+        })
+
+        expect(post).toHaveBeenCalledWith("/signUp", {
+            body: { username: "John", lastName: "Doe", password: "1234567890" },
+            searchParams: {
+                redirectTo: "/welcome",
+                redirect: false,
+            },
+        })
+    })
+
+    test("signUp with error", async () => {
+        const post = vi.fn().mockThrow(/Error/)
+
+        createClientMock.mockReturnValue({
+            get: vi.fn(),
+            post,
+        })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.signUp({ payload: { username: "John", lastName: "Doe", password: "1234567890" } })
+
+        expect(post).toHaveBeenCalledWith("/signUp", {
+            body: { username: "John", lastName: "Doe", password: "1234567890" },
+            searchParams: {
+                redirectTo: undefined,
+                redirect: false,
+            },
+        })
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    test("signUp with redirect option", async () => {
+        vi.stubGlobal("window", { location: { assign: vi.fn() } })
+        const post = vi.fn().mockResolvedValue(
+            createJSONResponse({
+                success: true,
+                redirect: false,
+                redirectURL: "/welcome",
+            })
+        )
+
+        createClientMock.mockReturnValue({
+            get: vi.fn(),
+            post,
+        })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.signUp({
+            payload: { username: "John", lastName: "Doe", password: "1234567890" },
+            redirectTo: "/welcome",
+            redirect: true,
+        })
+
+        expect(post).toHaveBeenCalledWith("/signUp", {
+            body: { username: "John", lastName: "Doe", password: "1234567890" },
+            searchParams: {
+                redirectTo: "/welcome",
+                redirect: false,
+            },
+        })
+        expect(window.location.assign).toHaveBeenCalledWith("/welcome")
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/welcome" })
+    })
 })

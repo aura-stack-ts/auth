@@ -11,6 +11,8 @@ import type {
     SignInReturn,
     SignOutOptions,
     SignOutReturn,
+    SignUpOptions,
+    SignUpReturn,
     UpdateSessionOptions,
     UpdateSessionReturn,
 } from "@aura-stack/auth/types"
@@ -164,6 +166,56 @@ export const useSignInCredentials = () => {
 }
 
 /**
+ * Signs up a new user.
+ *
+ * @returns An object containing the signUp function and a isPending state
+ * @example
+ * const Page = () => {
+ *   const { signUp, isPending } = useSignUp()
+ *
+ *   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+ *     event.preventDefault()
+ *     const formData = new FormData(event.currentTarget)
+ *     const username = formData.get("username") as string
+ *     const password = formData.get("password") as string
+ *     await signUp({ payload: { username, password }, redirectTo: "/dashboard" })
+ *   }
+ *   return (
+ *     <form onSubmit={handleSubmit}>
+ *       <input name="username" type="text" placeholder="Username" required />
+ *       <input name="password" type="password" placeholder="Password" required />
+ *       <button type="submit" disabled={isPending}>Sign Up</button>
+ *     </form>
+ *   )
+ * }
+ */
+export const useSignUp = <Payload extends Record<string, any> = Record<string, any>>() => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const signUp = useCallback(
+        <Options extends SignUpOptions<Payload>>(options: Options): Promise<SignUpReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.signUp({
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                if (value.success) {
+                    broadcast({ type: "session:sync" })
+                }
+                return value
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { signUp, isPending } as const
+}
+
+/**
  * Updates the current user's session.
  *
  * @returns An object containing the updateSession function and a isPending state
@@ -257,10 +309,11 @@ export const useSignOut = () => {
 /**
  * Centralized hook that provides all authentication actions and their pending states.
  *
- * @returns An object containing all auth actions (signIn, signInCredentials, updateSession, signOut) and a combined isPending state
+ * @returns An object containing all auth actions (signIn, signInCredentials, updateSession,
+ * signOut and signUp) and a combined isPending state
  * @example
  * const Page = () => {
- *   const { signIn, signInCredentials, updateSession, signOut, isPending } = useAuthActions()
+ *   const { signIn, signInCredentials, updateSession, signOut, signUp, isPending } = useAuthActions()
  *   // Use the actions as needed in your component
  *   return <p>Auth actions are ready to use. isPending: {isPending ? "Yes" : "No"}</p>
  * }
@@ -270,12 +323,14 @@ export const useAuthActions = <DefaultUser extends User = User>() => {
     const { signInCredentials, isPending: isSignInCredentialsPending } = useSignInCredentials()
     const { updateSession, isPending: isUpdateSessionPending } = useUpdateSession<DefaultUser>()
     const { signOut, isPending: isSignOutPending } = useSignOut()
+    const { signUp, isPending: isSignUpPending } = useSignUp()
 
     return {
-        isPending: isSignInPending || isSignInCredentialsPending || isUpdateSessionPending || isSignOutPending,
+        isPending: isSignInPending || isSignInCredentialsPending || isUpdateSessionPending || isSignOutPending || isSignUpPending,
         signIn,
         signInCredentials,
         updateSession,
         signOut,
+        signUp,
     } as const
 }

@@ -303,3 +303,11 @@ export type SignUpReturnData =
 
 /** Programmatic sign-up result with redirect metadata and `toResponse()`. */
 export type SignUpAPIReturn = AuthActionAPIReturn<SignUpReturnData>
+
+export type SignUpOptions<SignUpSchema extends Record<string, any> = Record<string, any>> = OptionsWithRedirectTo & {
+    payload: SignUpSchema
+}
+
+export type SignUpReturn<Options extends SignUpOptions> = Options extends { redirect: false }
+    ? Extract<SignUpReturnData, { redirect: false }>
+    : void
