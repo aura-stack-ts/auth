@@ -36,7 +36,8 @@ const resetKeys = (rule: RateLimiterRule, key: string): string[] => {
         case "leaky-bucket":
             return [`${key}:lb:tokens`, `${key}:lb:lastLeak`]
         case "sliding-window":
-            return [`${key}:sw:${Math.floor(Date.now() / (rule.windowMs * 2)) * rule.windowMs * 2}`]
+            const boundary = Math.floor(Date.now() / rule.windowMs) * rule.windowMs
+            return [`${key}:sw:${boundary}`, `${key}:sw:${boundary - rule.windowMs}`]
     }
 }
 

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { createMemoryStorage } from "@/memory.ts"
 import { createSlidingWindowAlgorithm } from "@/algorithms/sliding-window.ts"
@@ -16,10 +16,14 @@ describe("createSlidingWindowAlgorithm", () => {
         vi.setSystemTime(0)
     })
 
+    afterEach(() => {
+        vi.useRealTimers()
+    })
+
     const request = new Request("https://example.com/api/auth/sign-in")
 
     describe("peek", () => {
-        it("returns full capacity before any requests", async () => {
+        test("returns full capacity before any requests", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit,
@@ -40,7 +44,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(result.resetAt).toBe(windowMs)
         })
 
-        it("does not consume capacity", async () => {
+        test("does not consume capacity", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit,
@@ -59,7 +63,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(result.ok).toBe(true)
         })
 
-        it("returns remaining capacity after requests", async () => {
+        test("returns remaining capacity after requests", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit: 5,
@@ -75,7 +79,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(result.remaining).toBe(4)
         })
 
-        it("carries part of the previous window into the current one", async () => {
+        test("carries part of the previous window into the current one", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit,
@@ -96,7 +100,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(result.remaining).toBe(5)
         })
 
-        it("fully expires previous traffic after two windows", async () => {
+        test("fully expires previous traffic after two windows", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit,
@@ -117,7 +121,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(result.remaining).toBe(limit)
         })
 
-        it("combines previous and current window counts", async () => {
+        test("combines previous and current window counts", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit,
@@ -141,7 +145,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(result.remaining).toBe(3)
         })
 
-        it("tracks each key independently", async () => {
+        test("tracks each key independently", async () => {
             const limiter = createSlidingWindowAlgorithm<{ ip: string }>({
                 algorithm: "sliding-window",
                 limit: 5,
@@ -159,7 +163,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(second.remaining).toBe(5)
         })
 
-        it("handles requests exactly at a window boundary", async () => {
+        test("handles requests exactly at a window boundary", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit,
@@ -180,7 +184,7 @@ describe("createSlidingWindowAlgorithm", () => {
     })
 
     describe("check", () => {
-        it("allows requests below the limit", async () => {
+        test("allows requests below the limit", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit: 3,
@@ -200,7 +204,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(third.remaining).toBe(0)
         })
 
-        it("blocks requests after reaching the limit", async () => {
+        test("blocks requests after reaching the limit", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit: 2,
@@ -219,7 +223,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(result.retryAfter).toBe(windowMs)
         })
 
-        it("returns retryAfter until the current window boundary", async () => {
+        test("returns retryAfter until the current window boundary", async () => {
             vi.setSystemTime(250)
 
             const limiter = createSlidingWindowAlgorithm({
@@ -238,7 +242,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(result.retryAfter).toBe(750)
         })
 
-        it("counts requests from the current window immediately", async () => {
+        test("counts requests from the current window immediately", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit: 3,
@@ -256,7 +260,7 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(third.remaining).toBe(0)
         })
 
-        it("blocks when the interpolated estimate exceeds the limit", async () => {
+        test("blocks when the interpolated estimate exceeds the limit", async () => {
             const limiter = createSlidingWindowAlgorithm({
                 algorithm: "sliding-window",
                 limit: 10,
