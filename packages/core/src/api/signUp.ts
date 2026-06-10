@@ -18,7 +18,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         let request = requestInit
         if (!request) {
             const origin = await getBaseURL({ ctx, headers: headersInit })
-            const url = `${origin}${ctx.basePath}/signIn/credentials`
+            const url = `${origin}${ctx.basePath}/signUp`
             request = new Request(url, { headers: headersInit })
         }
         await getOriginURL(request, ctx)
