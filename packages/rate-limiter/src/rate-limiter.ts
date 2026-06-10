@@ -1,5 +1,5 @@
 import { createMemoryStorage } from "@/memory.ts"
-import { createTokenBucketAlgorithm } from "@/algorithms/token-bucket.ts"
+import { createTokenBucketAlgorithm, createFixedWindowAlgorithm, createLeakyBucketAlgorithm } from "@/algorithms/index.ts"
 import type { InferRules, RateLimiter, RateLimiterAlgorithm, RateLimiterConfig, RateLimiterRule } from "@/types.ts"
 
 /**
@@ -10,6 +10,10 @@ const buildAlgorithm = <RequestInit = Request>(rule: RateLimiterRule<RequestInit
     switch (rule.algorithm) {
         case "token-bucket":
             return createTokenBucketAlgorithm(rule)
+        case "fixed-window":
+            return createFixedWindowAlgorithm(rule)
+        case "leaky-bucket":
+            return createLeakyBucketAlgorithm(rule)
         default: {
             throw new Error(`[rate-limiter] Unknown algorithm: "${String((rule as { algorithm?: string }).algorithm)}"`)
         }
@@ -20,6 +24,10 @@ const resetKeys = (rule: RateLimiterRule, key: string): string[] => {
     switch (rule.algorithm) {
         case "token-bucket":
             return [`${key}:tb:tokens`, `${key}:tb:lastRefill`]
+        case "fixed-window":
+            return [`${key}:fw`]
+        case "leaky-bucket":
+            return [`${key}:lb:tokens`, `${key}:lb:lastLeak`]
     }
 }
 
