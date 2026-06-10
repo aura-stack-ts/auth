@@ -15,7 +15,7 @@ import type { ZodObject } from "zod"
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export type AuthConfig<Identity extends Identities, SignUpSchema extends SchemaTypes> = {
+export type AuthConfig<Identity extends Identities, SignUpSchema extends SchemaTypes = ZodObject<any>> = {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
