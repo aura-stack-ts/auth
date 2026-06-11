@@ -65,7 +65,7 @@
         "next": "^16.2.6"
       },
       "node": {
-        "@types/node": "^24.9.2"
+        "@types/node": "^24.13.2"
       },
       "react": {
         "@types/react": "^19.2.7",
@@ -74,11 +74,11 @@
         "react-dom": "^19.2.3"
       },
       "tailwindcss": {
-        "@tailwindcss/postcss": "^4.1.16",
+        "@tailwindcss/postcss": "^4.3.0",
         "tailwindcss": "4.1.18"
       },
       "typescript": {
-        "typescript": "^5.9.2"
+        "typescript": "^5.9.3"
       },
       "vite": {
         "vite": "^7.3.2"
