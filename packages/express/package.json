@@ -99,10 +99,10 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*",
-    "@types/supertest": "^6.0.3",
-    "supertest": "^7.2.2",
-    "express": "catalog:express",
     "@types/express": "catalog:express",
+    "@types/supertest": "^7.2.0",
+    "express": "catalog:express",
+    "supertest": "^7.2.2",
     "vitest": "catalog:vitest"
   },
   "peerDependencies": {
