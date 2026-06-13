@@ -66,7 +66,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         let message = "An error occurred during sign-up."
         if (isAuraAuthError(error)) {
             code = error.code
-            message = error.message
+            message = error.userMessage
         }
 
         return {

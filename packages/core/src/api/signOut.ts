@@ -48,7 +48,7 @@ export const signOut = async ({
         let message = "Failed to sign-out session"
         if (isAuraAuthError(error)) {
             code = error.code
-            message = error.message
+            message = error.userMessage
         }
         return {
             success: false,
@@ -57,11 +57,14 @@ export const signOut = async ({
             redirectURL: null,
             error: { code, message },
             toResponse: () => {
-                return Response.json({
-                    success: false,
-                    redirect: false,
-                    redirectsURL: null,
-                })
+                return Response.json(
+                    {
+                        success: false,
+                        redirect: false,
+                        redirectsURL: null,
+                    },
+                    { headers, status: 400 }
+                )
             },
         }
     }

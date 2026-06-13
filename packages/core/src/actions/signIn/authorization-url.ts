@@ -24,7 +24,12 @@ export const buildAuthorizationURL = (
     if (!baseURL) {
         throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_URL_CONFIG" })
     }
-    const url = new URL(baseURL)
+    let url: URL
+    try {
+        url = new URL(baseURL)
+    } catch (cause) {
+        throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_URL_CONFIG", cause })
+    }
     const authorizeParams = typeof authorizeConfig === "string" ? undefined : authorizeConfig?.params
 
     setSearchParams(url, {

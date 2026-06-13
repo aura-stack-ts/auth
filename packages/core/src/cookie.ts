@@ -82,7 +82,7 @@ export const getExpiredCookie = (options?: SerializeOptions) => {
  */
 export const getCookie = (request: Request | Headers, cookieName: string) => {
     const cookies = request instanceof Request ? request.headers.get("Cookie") : request.get("Cookie")
-    if (!cookies) {
+    if (!cookies || cookies.length === 0) {
         throw new AuraAuthError({ code: "COOKIE_NOT_FOUND" })
     }
     const value = parse(cookies)[cookieName]

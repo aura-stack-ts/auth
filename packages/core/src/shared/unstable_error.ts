@@ -408,8 +408,8 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         type: "VALIDATION",
         statusCode: 500,
         name: "ConfigError",
-        message: "",
-        userMessage: "",
+        message: "The application base URL could not be resolved from the current runtime configuration.",
+        userMessage: "The application base URL is missing. Set BASE_URL or provide valid host/proxy headers.",
     },
     INVALID_AUTH_CONFIGURATION: {
         type: "VALIDATION",

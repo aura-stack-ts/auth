@@ -65,7 +65,7 @@ export const updateSession = async <DefaultUser extends User = User>({
         let message = "Failed to update session."
         if (isAuraAuthError(error)) {
             code = error.code
-            message = error.message
+            message = error.userMessage
         }
 
         const headers = new Headers(secureApiHeaders)

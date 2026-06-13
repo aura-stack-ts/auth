@@ -58,7 +58,7 @@ export const deriveSchema = <Schema extends SchemaTypes>(
                   })
                 : Typebox.Partial(schema)
     }
-    throw new AuraAuthError({ code: "SCHEMA_INVALID_MODE" })
+    throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
 export const deriveSchemaWithJWT = <Schema extends SchemaTypes>(schema: Schema): any => {
@@ -113,7 +113,7 @@ export const deriveSchemaWithJWT = <Schema extends SchemaTypes>(schema: Schema):
             mexp: z.number().optional(),
         })
     }
-    throw new AuraAuthError({ code: "SCHEMA_INVALID_MODE" })
+    throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
 export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any => {
@@ -153,7 +153,7 @@ export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any =
             expires: z.coerce.date().optional(),
         })
     }
-    throw new AuraAuthError({ code: "SCHEMA_INVALID_MODE" })
+    throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
 export const createSchemaRegistry = <Identity extends SchemaTypes>(config: IdentityConfig<Identity>) => {

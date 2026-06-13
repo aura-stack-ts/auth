@@ -81,7 +81,7 @@ export const createAccessToken = async (
                     error_description: data.error_description ?? "",
                 },
             })
-            throw new AuraAuthError({ code: "UNKNOWN_OAUTH_ACCESS_TOKEN_ERROR" })
+            throw new AuraAuthError({ code: "INVALID_OAUTH_ACCESS_TOKEN_RES_FORMAT" })
         }
 
         logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS")

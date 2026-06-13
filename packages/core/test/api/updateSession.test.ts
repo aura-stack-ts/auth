@@ -29,8 +29,7 @@ describe("updateSession API", () => {
             redirectURL: null,
             error: {
                 code: "UPDATE_SESSION_INVALID",
-                message:
-                    "The internal call to 'refreshSession' completed, but returned a nullish value, meaning token mutation could not finish cleanly.",
+                message: "Failed to update session parameters.",
             },
             toResponse: expect.any(Function),
         })

@@ -60,8 +60,7 @@ describe("signUp API", () => {
             redirectURL: null,
             error: {
                 code: "USER_CREATION_FAILED",
-                message:
-                    "The custom lifecycle hook 'onCreateUser' aborted execution, thrown exception handling traps, or returned an unexpected null reference mapping.",
+                message: "Failed to create user account with the provided metadata payload.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -92,7 +91,7 @@ describe("signUp API", () => {
             error: {
                 code: "SCHEMA_PARSER_FAILED",
                 message:
-                    "The schema validator failed to parse or execute the configured schema. This typically indicates a malformed schema definition or a runtime parser issue inside the selected validation adapter.",
+                    "An internal schema parsing error occurred. Please verify your schema configuration and validation adapter setup.",
             },
             toResponse: expect.any(Function),
         })
@@ -109,8 +108,7 @@ describe("signUp API", () => {
             headers: expect.any(Headers),
             error: {
                 code: "INVALID_AUTH_CONFIGURATION",
-                message:
-                    "The system cannot establish request resolution routes. Provide a valid 'BASE_URL' system environment configuration value or setup trusted proxy headers.",
+                message: "The application context URL cannot be constructed. Set BASE_URL or provide proxy host headers.",
             },
             toResponse: expect.any(Function),
         })

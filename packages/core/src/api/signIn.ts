@@ -76,7 +76,7 @@ export const signIn = async (
         let message = "An error occurred during the sign-in process."
         if (isAuraAuthError(error)) {
             code = error.code
-            message = error.message
+            message = error.userMessage
         }
         return {
             success: false,

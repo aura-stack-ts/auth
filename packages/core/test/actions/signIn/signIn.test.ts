@@ -169,8 +169,7 @@ describe("signIn action", () => {
             redirect: false,
             error: {
                 code: "INVALID_TRUSTED_ORIGIN",
-                message:
-                    "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules.",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
             },
         })
     })
@@ -251,8 +250,7 @@ describe("signIn action", () => {
             redirect: false,
             error: {
                 code: "INVALID_TRUSTED_ORIGIN",
-                message:
-                    "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules.",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
             },
         })
     })
@@ -280,8 +278,7 @@ describe("signIn action", () => {
             redirect: false,
             error: {
                 code: "INVALID_TRUSTED_ORIGIN",
-                message:
-                    "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules.",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
             },
         })
     })
@@ -377,8 +374,7 @@ describe("signIn action", () => {
             redirect: false,
             error: {
                 code: "INVALID_TRUSTED_ORIGIN",
-                message:
-                    "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules.",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
             },
         })
     })

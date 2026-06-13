@@ -19,8 +19,7 @@ describe("signIn API", () => {
             redirect: false,
             error: {
                 code: "UNSUPPORTED_OAUTH_CONFIGURATION",
-                message:
-                    "An execution request flow was initialized targeting a specific identity provider code string that doesn't exist within initialized provider definitions.",
+                message: "The targeted OAuth provider has not been configured in the initialization parameters.",
             },
             toResponse: expect.any(Function),
         })
@@ -83,8 +82,7 @@ describe("signIn API", () => {
             redirect: false,
             error: {
                 code: "INVALID_AUTH_CONFIGURATION",
-                message:
-                    "The system cannot establish request resolution routes. Provide a valid 'BASE_URL' system environment configuration value or setup trusted proxy headers.",
+                message: "The application context URL cannot be constructed. Set BASE_URL or provide proxy host headers.",
             },
             toResponse: expect.any(Function),
         })

@@ -1,6 +1,6 @@
 import { isJWTPayloadWithToken } from "@/shared/assert.ts"
 import { equals, timingSafeEqual } from "@/shared/utils.ts"
-import { AuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/unstable_error.ts"
 import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import type { AsymmetricKeyPairFromEnv, AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
@@ -81,6 +81,9 @@ export const verifyCSRF = async <DefaultUser extends User = User>(
         }
         return true
     } catch (error) {
+        if(isAuraAuthError(error)) {
+            throw error
+        }
         throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause: error })
     }
 }
