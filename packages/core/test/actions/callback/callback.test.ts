@@ -75,10 +75,11 @@ describe("callbackAction", () => {
 
     test("without cookies", async () => {
         const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=123&state=abc"))
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
-            type: "AUTH_INTERNAL_ERROR",
-            message: "No cookies found. There is no active session",
+            type: "AUTH_FLOW",
+            code: "COOKIE_NOT_FOUND",
+            message: "No cookies found. There is no active session.",
         })
     })
 
@@ -97,9 +98,9 @@ describe("callbackAction", () => {
         )
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
-            type: "AUTH_SECURITY_ERROR",
-            code: "MISMATCHING_STATE",
-            message: "The provided state passed in the OAuth response does not match the stored state.",
+            type: "PROTOCOL",
+            code: "AUTH_MISMATCHING_STATE",
+            message: "The provided state passed in the OAuth response does not match the stored token state.",
         })
     })
 
@@ -292,11 +293,12 @@ describe("callbackAction", () => {
         )
 
         expect(fetch).toHaveBeenCalledTimes(2)
-        expect(response.status).toBe(422)
+        expect(response.status).toBe(500)
         expect(await response.json()).toEqual({
-            type: "AUTH_VALIDATION_ERROR",
-            code: "INVALID_IDENTITY_VALIDATION_FAILED",
-            message: expect.any(String),
+            type: "VALIDATION",
+            code: "SCHEMA_PARSER_FAILED",
+            message:
+                "An internal schema parsing error occurred. Please verify your schema configuration and validation adapter setup.",
         })
     })
 

@@ -18,8 +18,9 @@ describe("signIn API", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "INVALID_OAUTH_CONFIGURATION",
-                message: 'The OAuth provider "unsupported" is not configured.',
+                code: "UNSUPPORTED_OAUTH_CONFIGURATION",
+                message:
+                    "An execution request flow was initialized targeting a specific identity provider code string that doesn't exist within initialized provider definitions.",
             },
             toResponse: expect.any(Function),
         })
@@ -81,9 +82,9 @@ describe("signIn API", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "INVALID_OAUTH_CONFIGURATION",
+                code: "INVALID_AUTH_CONFIGURATION",
                 message:
-                    "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
+                    "The system cannot establish request resolution routes. Provide a valid 'BASE_URL' system environment configuration value or setup trusted proxy headers.",
             },
             toResponse: expect.any(Function),
         })

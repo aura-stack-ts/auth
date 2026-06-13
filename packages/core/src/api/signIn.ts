@@ -1,6 +1,6 @@
 import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
 import { HeadersBuilder } from "@aura-stack/router"
-import { AuthInternalError, isAuthErrorWithCode } from "@/shared/errors.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/unstable_error.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"
 import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
@@ -16,7 +16,7 @@ export const signIn = async (
         const headers = new Headers(headersInit)
         const provider = ctx.oauth[oauth]
         if (!provider) {
-            throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", `The OAuth provider "${oauth}" is not configured.`)
+            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
         }
 
         let request = requestInit
@@ -74,7 +74,7 @@ export const signIn = async (
     } catch (error) {
         let code = "AUTH_SIGN_IN_FAILED"
         let message = "An error occurred during the sign-in process."
-        if (isAuthErrorWithCode(error)) {
+        if (isAuraAuthError(error)) {
             code = error.code
             message = error.message
         }

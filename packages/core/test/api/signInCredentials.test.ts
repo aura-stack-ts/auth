@@ -76,9 +76,9 @@ describe("signInCredentials API", () => {
             redirectURL: null,
             headers: expect.any(Headers),
             error: {
-                code: "INVALID_OAUTH_CONFIGURATION",
+                code: "INVALID_AUTH_CONFIGURATION",
                 message:
-                    "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
+                    "The system cannot establish request resolution routes. Provide a valid 'BASE_URL' system environment configuration value or setup trusted proxy headers.",
             },
             toResponse: expect.any(Function),
         })

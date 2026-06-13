@@ -1,5 +1,5 @@
 import { env } from "@/shared/env.ts"
-import { AuthInternalError } from "@/shared/errors.ts"
+import { AuraAuthError } from "@/shared/unstable_error.ts"
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
 import type { CookieStoreConfig, CookieConfig, InternalLogger } from "@/@types/index.ts"
 
@@ -83,11 +83,11 @@ export const getExpiredCookie = (options?: SerializeOptions) => {
 export const getCookie = (request: Request | Headers, cookieName: string) => {
     const cookies = request instanceof Request ? request.headers.get("Cookie") : request.get("Cookie")
     if (!cookies) {
-        throw new AuthInternalError("COOKIE_NOT_FOUND", "No cookies found. There is no active session")
+        throw new AuraAuthError({ code: "COOKIE_NOT_FOUND" })
     }
     const value = parse(cookies)[cookieName]
     if (!value) {
-        throw new AuthInternalError("COOKIE_NOT_FOUND", `Cookie "${cookieName}" not found. There is no active session`)
+        throw new AuraAuthError({ code: "COOKIE_INVALID_VALUE" })
     }
     return value
 }
@@ -102,11 +102,11 @@ export const getCookie = (request: Request | Headers, cookieName: string) => {
 export const getSetCookie = (response: Response | Headers, cookieName: string) => {
     const cookies = response instanceof Response ? response.headers.getSetCookie() : response.getSetCookie()
     if (!cookies) {
-        throw new AuthInternalError("COOKIE_NOT_FOUND", "No cookies found in response.")
+        throw new AuraAuthError({ code: "SET_COOKIE_NOT_FOUND" })
     }
     const strCookie = cookies.find((cookie) => cookie.startsWith(`${cookieName}=`))
     if (!strCookie) {
-        throw new AuthInternalError("COOKIE_NOT_FOUND", `Cookie "${cookieName}" not found in response.`)
+        throw new AuraAuthError({ code: "SET_COOKIE_INVALID_VALUE" })
     }
     return parseSetCookie(strCookie).value
 }

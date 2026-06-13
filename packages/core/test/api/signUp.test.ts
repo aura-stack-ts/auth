@@ -60,7 +60,8 @@ describe("signUp API", () => {
             redirectURL: null,
             error: {
                 code: "USER_CREATION_FAILED",
-                message: "Failed to create user with the provided payload.",
+                message:
+                    "The custom lifecycle hook 'onCreateUser' aborted execution, thrown exception handling traps, or returned an unexpected null reference mapping.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -89,8 +90,9 @@ describe("signUp API", () => {
             redirectURL: null,
             headers: expect.any(Headers),
             error: {
-                code: "INVALID_IDENTITY_VALIDATION_FAILED",
-                message: expect.any(String),
+                code: "SCHEMA_PARSER_FAILED",
+                message:
+                    "The schema validator failed to parse or execute the configured schema. This typically indicates a malformed schema definition or a runtime parser issue inside the selected validation adapter.",
             },
             toResponse: expect.any(Function),
         })
@@ -106,9 +108,9 @@ describe("signUp API", () => {
             redirectURL: null,
             headers: expect.any(Headers),
             error: {
-                code: "INVALID_OAUTH_CONFIGURATION",
+                code: "INVALID_AUTH_CONFIGURATION",
                 message:
-                    "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
+                    "The system cannot establish request resolution routes. Provide a valid 'BASE_URL' system environment configuration value or setup trusted proxy headers.",
             },
             toResponse: expect.any(Function),
         })

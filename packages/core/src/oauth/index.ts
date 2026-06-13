@@ -22,9 +22,8 @@ import { atlassian } from "./atlassian.ts"
 import { clickUp } from "./click-up.ts"
 import { dribbble } from "./dribbble.ts"
 import { hubspot } from "./hubspot.ts"
-import { formatZodError } from "@/shared/utils.ts"
-import { AuthInternalError } from "@/shared/errors.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
+import { AuraAuthError } from "@/shared/unstable_error.ts"
 
 export * from "./github.ts"
 export * from "./bitbucket.ts"
@@ -81,8 +80,7 @@ const defineOAuthEnvironment = (oauth: string) => {
         clientSecret: getEnv(`${oauth.replace("-", "_").toUpperCase()}_CLIENT_SECRET`),
     })
     if (!loadEnvs.success) {
-        const msg = JSON.stringify({ [oauth]: formatZodError(loadEnvs.error) }, null, 2)
-        throw new AuthInternalError("INVALID_ENVIRONMENT_CONFIGURATION", msg)
+        throw new AuraAuthError({ code: "INVALID_ENVIRONMENT_CONFIGURATION", cause: loadEnvs.error })
     }
     return loadEnvs.data
 }
@@ -93,11 +91,7 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
         const oauthConfig = builtInOAuthProviders[config]()
         const parsed = OAuthProviderCredentialsSchema.safeParse({ ...oauthConfig, ...definition })
         if (!parsed.success) {
-            const details = JSON.stringify({ [config]: formatZodError(parsed.error) }, null, 2)
-            throw new AuthInternalError(
-                "INVALID_OAUTH_PROVIDER_CONFIGURATION",
-                `Invalid configuration for OAuth provider "${config}": ${details}`
-            )
+            throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_SCHEMA_CONFIG", cause: parsed.error })
         }
         return parsed.data
     }
@@ -105,11 +99,7 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
     const envConfig = hasCredentials ? {} : defineOAuthEnvironment(config.id)
     const parsed = OAuthProviderCredentialsSchema.safeParse({ ...envConfig, ...config })
     if (!parsed.success) {
-        const details = JSON.stringify({ [config.id]: formatZodError(parsed.error) }, null, 2)
-        throw new AuthInternalError(
-            "INVALID_OAUTH_PROVIDER_CONFIGURATION",
-            `Invalid configuration for OAuth provider "${config.id}": ${details}`
-        )
+        throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_SCHEMA_CONFIG", cause: parsed.error })
     }
     return parsed.data
 }
@@ -131,10 +121,10 @@ export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuth
     return oauth.reduce((previous, config) => {
         const oauthConfig = defineOAuthProviderConfig(config)
         if (oauthConfig.id in previous) {
-            throw new AuthInternalError(
-                "DUPLICATED_OAUTH_PROVIDER_ID",
-                `Duplicate OAuth provider id "${oauthConfig.id}" found. Each provider must have a unique id.`
-            )
+            throw new AuraAuthError({
+                code: "DUPLICATED_OAUTH_PROVIDER_ID",
+                cause: new Error(`Duplicate OAuth provider id "${oauthConfig.id}" found. Each provider must have a unique id.`),
+            })
         }
         return { ...previous, [oauthConfig.id]: oauthConfig }
     }, {}) as Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials<any>>

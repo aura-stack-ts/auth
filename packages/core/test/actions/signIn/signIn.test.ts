@@ -168,8 +168,9 @@ describe("signIn action", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "UNTRUSTED_ORIGIN",
-                message: "The constructed origin URL is not trusted.",
+                code: "INVALID_TRUSTED_ORIGIN",
+                message:
+                    "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules.",
             },
         })
     })
@@ -249,8 +250,9 @@ describe("signIn action", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "UNTRUSTED_ORIGIN",
-                message: "The constructed origin URL is not trusted.",
+                code: "INVALID_TRUSTED_ORIGIN",
+                message:
+                    "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules.",
             },
         })
     })
@@ -277,8 +279,9 @@ describe("signIn action", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "UNTRUSTED_ORIGIN",
-                message: "The constructed origin URL is not trusted.",
+                code: "INVALID_TRUSTED_ORIGIN",
+                message:
+                    "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules.",
             },
         })
     })
@@ -373,8 +376,9 @@ describe("signIn action", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "UNTRUSTED_ORIGIN",
-                message: "The constructed origin URL is not trusted.",
+                code: "INVALID_TRUSTED_ORIGIN",
+                message:
+                    "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules.",
             },
         })
     })

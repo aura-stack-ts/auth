@@ -107,7 +107,9 @@ describe("createRedirectURI", () => {
                         basePath: "/auth",
                         trustedProxyHeaders,
                     } as GlobalContext)
-                ).rejects.toThrow("The constructed origin URL is not trusted.")
+                ).rejects.toThrow(
+                    "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules."
+                )
             })
         }
     })
@@ -146,7 +148,8 @@ describe("createAuthorizationURL", () => {
                     clientSecret: "2",
                 },
                 redirectURL: "https://example.com/auth/callback",
-                expected: "The OAuth provider configuration is invalid.",
+                expected:
+                    "The loaded configuration settings array failed standard library schema validation checks against required engine operational footprints.",
             },
             {
                 description: "missing clientSecret",
@@ -159,7 +162,8 @@ describe("createAuthorizationURL", () => {
                     clientId: "1",
                 },
                 redirectURL: "https://example.com/auth/callback",
-                expected: "The OAuth provider configuration is invalid.",
+                expected:
+                    "The loaded configuration settings array failed standard library schema validation checks against required engine operational footprints.",
             },
         ]
 

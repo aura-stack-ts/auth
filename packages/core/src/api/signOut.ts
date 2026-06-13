@@ -1,5 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { isAuthErrorWithCode } from "@/shared/errors.ts"
+import { isAuraAuthError } from "@/shared/unstable_error.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
 
@@ -46,7 +46,7 @@ export const signOut = async ({
     } catch (error) {
         let code = "SIGN_OUT_FAILED"
         let message = "Failed to sign-out session"
-        if (isAuthErrorWithCode(error)) {
+        if (isAuraAuthError(error)) {
             code = error.code
             message = error.message
         }
