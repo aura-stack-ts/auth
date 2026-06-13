@@ -23,11 +23,11 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
-            type: "AUTH_SECURITY_ERROR",
-            code: "SESSION_TOKEN_MISSING",
-            message: "The sessionToken is missing.",
+            type: "AUTH_FLOW",
+            code: "SESSION_NOT_FOUND",
+            message: "The session token is not found. There is no active session.",
         })
     })
 
@@ -40,11 +40,11 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(request.status).toBe(400)
+        expect(request.status).toBe(403)
         expect(await request.json()).toEqual({
-            type: "AUTH_SECURITY_ERROR",
-            code: "CSRF_HEADER_MISSING",
-            message: "The CSRF header is missing.",
+            type: "AUTH_FLOW",
+            code: "CSRF_DOUBLE_SUBMIT_FAILED",
+            message: "The CSRF header is missing. Please refresh and try again.",
         })
     })
 
@@ -62,11 +62,11 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(request.status).toBe(400)
+        expect(request.status).toBe(403)
         expect(await request.json()).toEqual({
-            type: "AUTH_SECURITY_ERROR",
+            type: "AUTH_FLOW",
             code: "CSRF_TOKEN_MISSING",
-            message: "The CSRF token is missing.",
+            message: "The CSRF token is missing. Please refresh and try again.",
         })
         decodeJWTMock.mockRestore()
     })
@@ -146,11 +146,11 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(request.status).toBe(400)
+        expect(request.status).toBe(403)
         expect(await request.json()).toEqual({
-            type: "AUTH_SECURITY_ERROR",
+            type: "AUTH_FLOW",
             code: "CSRF_TOKEN_MISSING",
-            message: "The CSRF token is missing.",
+            message: "The CSRF token is missing. Please refresh and try again.",
         })
     })
 

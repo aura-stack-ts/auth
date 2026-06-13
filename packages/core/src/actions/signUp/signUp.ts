@@ -7,7 +7,7 @@ import type { SignUpConfig } from "@/@types/config.ts"
 const signUpConfig = (config: SignUpConfig<any, any>) => {
     return createEndpointConfig({
         schemas: {
-            body: config?.schema ?? z.object({}),
+            body: config?.schema ?? z.object(),
             searchParams: RedirectOptionsSchema,
         },
     })

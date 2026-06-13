@@ -1,7 +1,6 @@
 import { getCookie } from "@/cookie.ts"
 import { verifyCSRF } from "@/shared/crypto.ts"
 import { getErrorName } from "@/shared/utils.ts"
-import { AuthSecurityError } from "@/shared/errors.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import type {
@@ -13,6 +12,7 @@ import type {
     GetStatelessSessionReturn,
     DeepPartial,
 } from "@/@types/index.ts"
+import { AuraAuthError } from "@/shared/unstable_error.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({
     config,
@@ -53,13 +53,15 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         const header = headers.get("X-CSRF-Token")
         try {
             session = getCookie(headers, cookies().sessionToken.name)
-        } catch {
-            throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
+        } catch (cause) {
+            //throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
+            throw new AuraAuthError({ code: "SESSION_NOT_FOUND", cause })
         }
         try {
             csrfToken = getCookie(headers, cookies().csrfToken.name)
-        } catch {
-            throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
+        } catch (cause) {
+            //throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
         }
         logger?.log("CSRF_TOKEN_REQUESTED", {
             structuredData: {
@@ -71,22 +73,26 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         })
         if (!session) {
             logger?.log("SESSION_TOKEN_MISSING")
-            throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
+            //throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
+            throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
         }
         if (!skipCSRFCheck) {
             if (!csrfToken) {
                 logger?.log("CSRF_TOKEN_MISSING")
-                throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
+                //throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
             }
             if (!header) {
                 logger?.log("CSRF_HEADER_MISSING")
-                throw new AuthSecurityError("CSRF_HEADER_MISSING", "The CSRF header is missing.")
+                //throw new AuthSecurityError("CSRF_HEADER_MISSING", "The CSRF header is missing.")
+                throw new AuraAuthError({ code: "CSRF_DOUBLE_SUBMIT_FAILED" })
             }
             try {
                 await verifyCSRF(jose, csrfToken, header)
             } catch (error) {
                 logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
-                throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
+                //throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
             }
             logger?.log("CSRF_TOKEN_VERIFIED")
         }

@@ -1,10 +1,10 @@
 import { getEnv } from "@/shared/env.ts"
-import { AuthInternalError } from "@/shared/errors.ts"
+import { AuraAuthError } from "@/shared/unstable_error.ts"
 import { equals, extractPath, patternToRegex } from "@/shared/utils.ts"
 import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin } from "@/shared/assert.ts"
 import type { AuthConfig } from "@/@types/index.ts"
-import type { Identities, SchemaTypes } from "@/shared/identity.ts"
 import type { GlobalContext } from "@aura-stack/router"
+import type { Identities, SchemaTypes } from "@/shared/identity.ts"
 
 /**
  * Resolves trusted origins from config (array or function).
@@ -38,19 +38,12 @@ export const getBaseURL = async ({
             headers?.get("X-Forwarded-Host") ??
             null
         if (host) return `${protocol}://${host}`
-        throw new AuthInternalError(
-            "INVALID_OAUTH_CONFIGURATION",
-            "The URL cannot be constructed. Please set the BASE_URL environment variable or provide trusted proxy host headers."
-        )
+        throw new AuraAuthError({ code: "INVALID_AUTH_CONFIGURATION" })
     }
     try {
         return new URL(request?.url ?? "not-found").origin
-    } catch (error) {
-        throw new AuthInternalError(
-            "INVALID_OAUTH_CONFIGURATION",
-            "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
-            { cause: error }
-        )
+    } catch (cause) {
+        throw new AuraAuthError({ code: "INVALID_AUTH_CONFIGURATION", cause })
     }
 }
 
@@ -60,7 +53,7 @@ export const getOriginURL = async (request: Request, context?: GlobalContext) =>
     const origin = await getBaseURL({ request, ctx: context })
     if (!isTrustedOrigin(origin, trustedOrigins)) {
         context?.logger?.log("UNTRUSTED_ORIGIN", { structuredData: { origin: origin } })
-        throw new AuthInternalError("UNTRUSTED_ORIGIN", "The constructed origin URL is not trusted.")
+        throw new AuraAuthError({ code: "INVALID_TRUSTED_ORIGIN" })
     }
     return origin
 }

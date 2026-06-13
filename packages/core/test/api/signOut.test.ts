@@ -19,7 +19,9 @@ describe("signOut API", async () => {
             api.signOut({
                 headers: new Headers(),
             })
-        ).rejects.toThrow(/The sessionToken is missing/)
+        ).rejects.toThrow(
+            /The context evaluation phase failed because the target identifier sessionToken could not be pulled from the cookies object context./
+        )
     })
 
     test("signOut with valid session token", async () => {

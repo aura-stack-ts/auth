@@ -1,11 +1,9 @@
 import { getEnv } from "@/shared/env.ts"
 import { encoder } from "@aura-stack/jose/crypto"
-import { AuthInternalError } from "@/shared/errors.ts"
+import { AuraAuthError } from "@/shared/unstable_error.ts"
 import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
-import type { ZodError } from "zod/v4"
-import type { APIErrorMap } from "@/@types/index.ts"
 
-export const AURA_AUTH_VERSION = "0.5.0"
+export const AURA_AUTH_VERSION = "0.7.2"
 
 export const equals = (a: string | number | undefined | null, b: string | number | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
@@ -25,22 +23,6 @@ export const isSecureConnection = (request: Request | Headers, trustedProxyHeade
               headers.get("X-Forwarded-Proto") === "https" ||
               (headers.get("Forwarded")?.includes("proto=https") ?? false)
         : (url?.startsWith("https://") ?? false)
-}
-
-export const formatZodError = <T extends Record<string, unknown> = Record<string, unknown>>(error: ZodError<T>): APIErrorMap => {
-    if (!error.issues || error.issues.length === 0) {
-        return {}
-    }
-    return error.issues.reduce((previous, issue) => {
-        const key = issue.path.join(".")
-        return {
-            ...previous,
-            [key]: {
-                code: issue.code,
-                message: issue.message,
-            },
-        }
-    }, {})
 }
 
 export const extractPath = (url: string): string => {
@@ -112,7 +94,7 @@ export const createBasicAuthHeader = (username: string, password: string): strin
     const getUsername = getEnv(username) ?? username
     const getPassword = getEnv(password) ?? password
     if (!getUsername || !getPassword) {
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing client credentials for OAuth provider configuration.")
+        throw new AuraAuthError({ code: "AUTH_BASIC_CREDENTIALS_INVALID" })
     }
     const credentials = `${getUsername}:${getPassword}`
     const binaryCredentials = String.fromCharCode.apply(null, Array.from(encoder.encode(credentials)))

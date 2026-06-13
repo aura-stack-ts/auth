@@ -176,14 +176,14 @@ describe("createJoseInstance", () => {
 
     test("invalid secret", () => {
         expect(() => createAuth({ oauth: [] })).toThrow(
-            "AURA_AUTH_SECRET environment variable is not set and no secret was provided."
+            "Core security initialization failed because both 'AURA_AUTH_SECRET' and 'AUTH_SECRET' environment string keys are completely missing from runtime access contexts."
         )
     })
 
     test("invalid salt", () => {
         const secret = createSecretValue(32)
         expect(() => createAuth({ oauth: [], secret })).toThrow(
-            "AURA_AUTH_SALT or AUTH_SALT environment variable is not set. A salt value is required for key derivation."
+            "Core security initialization failed because both 'AURA_AUTH_SALT' and 'AUTH_SALT' environment string keys are completely missing from runtime access contexts."
         )
     })
 
@@ -580,7 +580,7 @@ describe("createJoseInstance", () => {
             },
         })
         await expect(jwt.encodeJWT(payload)).rejects.toThrow(
-            /Single PEM key pairs from environment variables require 'signed' or 'encrypted' JWT mode. For 'sealed' mode, provide separate signing and encryption keys or a combined key object./
+            /A configuration layout rule conflict was detected. A single asymmetric key pair structure was loaded but the session processing mode was set to 'sealed'./
         )
     })
 
@@ -615,7 +615,7 @@ describe("createJoseInstance", () => {
             },
         })
         await expect(jws.signJWS(payload)).rejects.toThrow(
-            /Multiples PEM Key Pairs from environment variables require 'sealed' JWT mode. For 'signed' or 'encrypted' modes, provide a single PEM key pair or a combined key object./
+            /A configuration layout rule conflict was detected. Multiple asymmetric keys were passed but the runtime 'session.mode' parameter was not forced to 'sealed'./
         )
     })
 

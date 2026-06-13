@@ -114,7 +114,9 @@ describe("getUserInfo", () => {
             getUserInfo(oauthConfig as OAuthProviderCredentials, {
                 access_token: "access_token_123",
             })
-        ).rejects.toThrow(/Failed to fetch user information from OAuth provider/)
+        ).rejects.toThrow(
+            /An unclassified system runtime breakdown occurred while trying to process data records down inside the developer's user profile normalization routine/
+        )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -145,7 +147,9 @@ describe("getUserInfo", () => {
             getUserInfo(oauthCustomService, {
                 access_token: "invalid_access_token",
             })
-        ).rejects.toThrow(/Invalid userinfo response format/)
+        ).rejects.toThrow(
+            /The downstream endpoint fetch request to the provider user profile storage API returned an invalid response code status./
+        )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -170,7 +174,9 @@ describe("getUserInfo", () => {
             getUserInfo(oauthCustomService, {
                 access_token: "access_token",
             })
-        ).rejects.toThrow(/Failed to fetch user information from OAuth provider/)
+        ).rejects.toThrow(
+            /An unmapped connection trap exploded during asynchronous background operations inside the default profile fetch pipeline routines./
+        )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -249,6 +255,8 @@ describe("getUserInfo", () => {
             getUserInfo(oauthConfig, {
                 access_token: "access_token",
             })
-        ).rejects.toThrow(/Failed to fetch user information from OAuth provider/)
+        ).rejects.toThrow(
+            /An unclassified system runtime breakdown occurred while trying to process data records down inside the developer's user profile normalization routine/
+        )
     })
 })

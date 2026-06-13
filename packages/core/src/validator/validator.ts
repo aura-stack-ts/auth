@@ -1,6 +1,7 @@
 import { IsObject } from "typebox"
 import { Value } from "typebox/value"
 import { safeParse } from "valibot"
+import { AuraAuthError } from "@/shared/unstable_error.ts"
 import { isValibotSchema, isZodSchema, isArkType } from "@/shared/assert.ts"
 
 export type ValidationResult<T> = { success: true; data: T; error: null } | { success: false; data: null; error: any }
@@ -14,7 +15,7 @@ export interface SchemaAdapter<T> {
  */
 export const createValidator = <T>(schema: any): SchemaAdapter<T> => {
     if (!isZodSchema(schema) && !isValibotSchema(schema) && !isArkType(schema) && !IsObject(schema)) {
-        throw new Error("Unsupported schema type")
+        throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
     }
     return {
         validate: (data: unknown): ValidationResult<T> => {
@@ -48,7 +49,7 @@ export const createValidator = <T>(schema: any): SchemaAdapter<T> => {
                         ? { success: true, data: dataToValidate as T, error: null }
                         : { success: false, data: null, error: [...Value.Errors(schema, dataToValidate)] }
                 }
-                return { success: false, data: null, error: new Error("Unsupported schema type") }
+                return { success: false, data: null, error: new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" }) }
             } catch (e) {
                 return { success: false, data: null, error: e }
             }

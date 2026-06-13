@@ -24,7 +24,9 @@ describe("createBuiltInOAuthProviders", () => {
                     authorizeURL: "https://example.com/authorize",
                 } as OAuthProviderCredentials,
             ])
-        ).toThrow('Invalid configuration for OAuth provider "oauth_provider"')
+        ).toThrow(
+            "The loaded configuration settings array failed standard library schema validation checks against required engine operational footprints."
+        )
     })
 
     test("create oauth config override", async () => {
@@ -49,6 +51,8 @@ describe("createBuiltInOAuthProviders", () => {
     })
 
     test("create oauth config with duplicated id", () => {
-        expect(() => createBuiltInOAuthProviders(["github", "github"])).toThrow('Duplicate OAuth provider id "github"')
+        expect(() => createBuiltInOAuthProviders(["github", "github"])).toThrow(
+            "The registration collection contains duplicate identifier keys. Unique registration indices are mandatory across tracking providers"
+        )
     })
 })

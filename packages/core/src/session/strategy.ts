@@ -1,8 +1,8 @@
-import { AuthInvalidConfigurationError } from "@/shared/errors.ts"
+import { AuraAuthError } from "@/shared/unstable_error.ts"
 import { createStatelessStrategy } from "@/session/stateless.ts"
-import type { CreateSessionStrategyOptions, SessionStrategy, User } from "@/@types/session.ts"
-import type { FromShapeToObject } from "@/@types/utility.ts"
 import type { Identities } from "@/shared/identity.ts"
+import type { FromShapeToObject } from "@/@types/utility.ts"
+import type { CreateSessionStrategyOptions, SessionStrategy, User } from "@/@types/session.ts"
 
 export const createSessionStrategy = <Identity extends Identities>({
     config,
@@ -23,6 +23,6 @@ export const createSessionStrategy = <Identity extends Identities>({
                 identity,
             })
         default:
-            throw new AuthInvalidConfigurationError(`[auth] unknown session strategy "${strategy}". Valid options are: "jwt".`)
+            throw new AuraAuthError({ code: "INVALID_SESSION_STRATEGY" })
     }
 }
