@@ -3,18 +3,17 @@ import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stac
 import { createCSRF } from "@/shared/crypto.ts"
 import { cacheControl } from "@/shared/headers.ts"
 import { timingSafeEqual } from "@/shared/utils.ts"
-import { getUserInfo } from "@/actions/callback/userinfo.ts"
-import { OAuthAuthorizationErrorResponse } from "@/schemas.ts"
 import { getCookie, getExpiredCookie } from "@/cookie.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
+import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
-import { AuthSecurityError, OAuthProtocolError } from "@/shared/errors.ts"
 import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
 import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
     // @ts-ignore
-    return createEndpointConfig("/callback/:oauth", {
+    return createEndpointConfig({
         /**
          * @todo Add support to any schema (zod, arktype and valibot)
          */
@@ -32,29 +31,6 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
                 state: z.string("Missing state parameter in the OAuth authorization response."),
             }),
         },
-        use: [
-            (ctx) => {
-                const {
-                    searchParams,
-                    context: { logger },
-                } = ctx
-                const response = OAuthAuthorizationErrorResponse.safeParse(searchParams)
-                if (response.success) {
-                    const { error, error_description } = response.data
-                    const criticalAuthErrors = ["access_denied", "server_error"]
-                    const severity = criticalAuthErrors.includes(error.toLowerCase()) ? "critical" : "warning"
-                    logger?.log("OAUTH_AUTHORIZATION_ERROR", {
-                        severity,
-                        structuredData: {
-                            error,
-                            error_description: error_description ?? "",
-                        },
-                    })
-                    throw new OAuthProtocolError(error, error_description || "OAuth Authorization Error")
-                }
-                return ctx
-            },
-        ],
     })
 }
 
@@ -91,9 +67,9 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 })
                 return Response.json(
                     {
-                        type: "AUTH_SECURITY_ERROR",
-                        code: "MISMATCHING_STATE",
-                        message: "The provided state passed in the OAuth response does not match the stored state.",
+                        type: "PROTOCOL",
+                        code: "AUTH_MISMATCHING_STATE",
+                        message: "The provided state passed in the OAuth response does not match the stored token state.",
                     },
                     { headers: clearCookieHeaders.toHeaders(), status: 400 }
                 )
@@ -117,10 +93,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                             request_origin: requestOrigin,
                         },
                     })
-                    throw new AuthSecurityError(
-                        "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
-                        "Invalid redirect path. Potential open redirect attack detected."
-                    )
+                    throw new AuraAuthError({ code: "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED" })
                 }
             }
 

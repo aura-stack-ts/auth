@@ -1,4 +1,4 @@
-import { AuthInvalidConfigurationError } from "@/shared/errors.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import type { JoseInstance, User, JWTConfig, JWTManager } from "@/@types/index.ts"
 
 export const createJoseManager = <DefaultUser extends User = User>(
@@ -8,9 +8,7 @@ export const createJoseManager = <DefaultUser extends User = User>(
     const mode = config?.mode ?? "sealed"
 
     if (!["sealed", "signed", "encrypted"].includes(mode)) {
-        throw new AuthInvalidConfigurationError(
-            `[auth] invalid JWT mode "${mode}". Valid options are: "sealed", "signed", "encrypted".`
-        )
+        throw new AuraAuthError({ code: "JWT_INVALID_MODE" })
     }
 
     return {

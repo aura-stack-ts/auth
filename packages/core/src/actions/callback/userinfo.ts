@@ -1,7 +1,6 @@
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { OAuthErrorResponse } from "@/schemas.ts"
-import { isNativeError, isOAuthProtocolError, OAuthProtocolError } from "@/shared/errors.ts"
 import type {
     AccessTokenContext,
     InternalLogger,
@@ -10,6 +9,7 @@ import type {
     User,
 } from "@/@types/index.ts"
 import { isCustomUserInfoFunction } from "@/shared/assert.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response
@@ -20,7 +20,7 @@ import { isCustomUserInfoFunction } from "@/shared/assert.ts"
 const getDefaultUserInfo = (profile: Record<string, string>): User => {
     const sub = profile?.id ?? profile?.sub ?? profile?.uid ?? profile?.user_id ?? profile?.account_id
     if (!sub) {
-        throw new OAuthProtocolError("invalid_userinfo", "OAuth provider did not return a stable user identifier (id/sub/uid).")
+        throw new AuraAuthError({ code: "INVALID_USER_INFO" })
     }
 
     return {
@@ -58,7 +58,7 @@ const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: s
         })
         if (!response.ok) {
             logger?.log("OAUTH_USERINFO_INVALID_RESPONSE")
-            throw new OAuthProtocolError("INVALID_REQUEST", "Invalid userinfo response format")
+            throw new AuraAuthError({ code: "INVALID_OAUTH_USER_INFO_RESPONSE" })
         }
 
         const json = await response.json()
@@ -71,22 +71,17 @@ const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: s
                     error_description: data.error_description ?? "",
                 },
             })
-            throw new OAuthProtocolError("INVALID_REQUEST", "An error was received from the OAuth userinfo endpoint.")
+            throw new AuraAuthError({ code: "INVALID_OAUTH_USER_INFO_RES_FORMAT" })
         }
         logger?.log("OAUTH_USERINFO_SUCCESS")
 
         return json
     } catch (error) {
-        if (isOAuthProtocolError(error)) {
+        if (isAuraAuthError(error)) {
             throw error
         }
         logger?.log("OAUTH_USERINFO_REQUEST_FAILED")
-        if (isNativeError(error)) {
-            throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information from OAuth provider", "", {
-                cause: error,
-            })
-        }
-        throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information", "", { cause: error })
+        throw new AuraAuthError({ code: "UNKNOWN_OAUTH_USER_INFO_ERROR", cause: error })
     }
 }
 
@@ -127,15 +122,10 @@ export const getUserInfo = async (
         const userInfo = oauthConfig?.profile ? oauthConfig.profile(userProfile) : getDefaultUserInfo(userProfile)
         return userInfo
     } catch (error) {
-        if (isOAuthProtocolError(error)) {
+        if (isAuraAuthError(error)) {
             throw error
         }
         logger?.log("OAUTH_USERINFO_REQUEST_FAILED")
-        if (isNativeError(error)) {
-            throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information from OAuth provider", "", {
-                cause: error,
-            })
-        }
-        throw new OAuthProtocolError("SERVER_ERROR", "Failed to fetch user information", "", { cause: error })
+        throw new AuraAuthError({ code: "UNKNOWN_CUSTOM_USER_INFO_ERROR", cause: error })
     }
 }

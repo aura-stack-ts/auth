@@ -1,4 +1,3 @@
-import { AuthClientError } from "@/shared/errors.ts"
 import { createClient as createClientAPI } from "@aura-stack/router"
 import type {
     Session,
@@ -18,6 +17,7 @@ import type {
     SignUpOptions,
     SignUpReturn,
 } from "@/@types/index.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 
 export type { AuthClientOptions }
 
@@ -30,7 +30,7 @@ export const createAuthClient = <
     options: AuthClientOptions
 ) => {
     if (typeof window === "undefined" && !options.baseURL) {
-        throw new AuthClientError("`baseURL` is required when createAuthClient is used outside the browser.")
+        throw new AuraAuthError({ code: "CLIENT_BASE_URL_MISSING" })
     }
 
     const client = createClient({
@@ -172,6 +172,7 @@ export const createAuthClient = <
     const signUp = async <Options extends SignUpOptions<SignUpPayload>>(options: Options): Promise<SignUpReturn<Options>> => {
         try {
             const { redirectTo } = options ?? {}
+            // @ts-ignore
             const response = await client.post("/signUp", {
                 // @ts-ignore - Fix type here - go to @aura-stack/router.
                 body: options.payload,
@@ -213,7 +214,7 @@ export const createAuthClient = <
         try {
             const csrfToken = await getCSRFToken()
             if (!csrfToken) {
-                throw new AuthClientError("Failed to fetch CSRF token for session update.")
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
             }
             const { session, redirectTo } = options ?? {}
             if (!session) {
@@ -263,7 +264,7 @@ export const createAuthClient = <
         try {
             const csrfToken = await getCSRFToken()
             if (!csrfToken) {
-                throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
             }
 
             // @ts-ignore - Fix type here - go to @aura-stack/router.

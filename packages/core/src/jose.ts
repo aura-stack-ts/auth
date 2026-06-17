@@ -14,7 +14,6 @@ import {
     type JWTDecryptOptions,
 } from "@aura-stack/jose"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
-import { AuthInternalError, AuthJoseInitializationError, AuthSecurityError } from "@/shared/errors.ts"
 import {
     isCryptoKey,
     isCryptoKeyPair,
@@ -29,6 +28,7 @@ import {
 import { importPEMKeyPair } from "@/shared/crypto.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 import type { User, SessionConfig, JWTKey, AsymmetricKeyPairFromEnv } from "@/@types/index.ts"
+import { AuraAuthError } from "./shared/errors.ts"
 
 const getJWTConfig = (config?: SessionConfig) => {
     return config?.jwt
@@ -109,7 +109,7 @@ export const getDecryptOptions = (config?: SessionConfig, options?: JWTDecryptOp
 export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => {
     const now = Math.floor(Date.now() / 1000)
     if (payload.mexp && typeof payload.mexp === "number" && now > payload.mexp) {
-        throw new AuthSecurityError("TOKEN_EXPIRED", "The token has expired based on its maxExpiration (mexp) claim.")
+        throw new AuraAuthError({ code: "JWT_EXPIRED" })
     }
 }
 
@@ -120,10 +120,7 @@ const getSecrets = async (
 ) => {
     if (isJWTPEMFormattedKeyPair(secret)) {
         if (!isSealedMode(session)) {
-            throw new AuthJoseInitializationError(
-                "INVALID_PEM_KEY_PAIR",
-                "Multiples PEM Key Pairs from environment variables require 'sealed' JWT mode. For 'signed' or 'encrypted' modes, provide a single PEM key pair or a combined key object."
-            )
+            throw new AuraAuthError({ code: "INVALID_PEM_KEY_PAIR_MODE_MISMATCH" })
         }
 
         const { sign, encrypt } = secret
@@ -144,10 +141,7 @@ const getSecrets = async (
     }
     if (isPEMFormattedKeyPairFromEnv(secret)) {
         if (isSealedMode(session)) {
-            throw new AuthJoseInitializationError(
-                "INVALID_PEM_KEY_PAIR",
-                "Single PEM key pairs from environment variables require 'signed' or 'encrypted' JWT mode. For 'sealed' mode, provide separate signing and encryption keys or a combined key object."
-            )
+            throw new AuraAuthError({ code: "INVALID_PEM_KEY_PAIR_SINGLE_MISMATCH" })
         }
         const algorithm =
             getEnv("ALGORITHM") ||
@@ -237,10 +231,7 @@ const getSecretKey = (secret?: JWTKey) => {
             encrypt: encryption,
         }
     }
-    throw new AuthInternalError(
-        "JOSE_INITIALIZATION_FAILED",
-        "AURA_AUTH_SECRET environment variable is not set and no secret was provided."
-    )
+    throw new AuraAuthError({ code: "JOSE_INITIALIZATION_SECRET_MISSING" })
 }
 
 /**
@@ -261,19 +252,12 @@ export const createJoseInstance = <DefaultUser extends User = User>(secret?: JWT
     const secretKey = getSecretKey(secret)
     const salt = getEnv("SALT")
     if (!salt) {
-        throw new AuthInternalError(
-            "JOSE_INITIALIZATION_FAILED",
-            "AURA_AUTH_SALT or AUTH_SALT environment variable is not set. A salt value is required for key derivation."
-        )
+        throw new AuraAuthError({ code: "JOSE_INITIALIZATION_SALT_MISSING" })
     }
     try {
         createSecret(salt)
-    } catch (error) {
-        throw new AuthInternalError(
-            "INVALID_SALT_SECRET_VALUE",
-            "AURA_AUTH_SALT/AUTH_SALT is invalid. It must be at least 32 bytes long and meet entropy requirements.",
-            { cause: error }
-        )
+    } catch (cause) {
+        throw new AuraAuthError({ code: "INVALID_SALT_SECRET_VALUE", cause })
     }
 
     const jose = (async () => {

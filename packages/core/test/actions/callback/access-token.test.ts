@@ -63,7 +63,9 @@ describe("createAccessToken", async () => {
                 "authorization_code_123",
                 codeVerifier
             )
-        ).rejects.toThrow(/Failed to communicate with OAuth provider/)
+        ).rejects.toThrow(
+            /An unexpected runtime code path crash or unclassified transport exception occurred during the remote provider access token exchange execution flow./
+        )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",
@@ -92,7 +94,9 @@ describe("createAccessToken", async () => {
 
         await expect(
             createAccessToken(oauthCustomService, "https://myapp.com/auth/callback/oauth-provider", "invalid_code", codeVerifier)
-        ).rejects.toThrow(/Failed to retrieve access token/)
+        ).rejects.toThrow(
+            "The third-party authentication server responded with an HTTP status 200, but the returned data block structure fails schema verification (e.g. missing 'access_token')."
+        )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",
@@ -128,7 +132,9 @@ describe("createAccessToken", async () => {
                 "authorization_code_123",
                 codeVerifier
             )
-        ).rejects.toThrow(/Invalid access token response format/)
+        ).rejects.toThrow(
+            "The third-party authentication server responded with an HTTP status 200, but the returned data block structure fails schema verification (e.g. missing 'access_token')."
+        )
 
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
             method: "POST",

@@ -1,6 +1,6 @@
-import { AuthSecurityError } from "@/shared/errors.ts"
 import { isJWTPayloadWithToken } from "@/shared/assert.ts"
 import { equals, timingSafeEqual } from "@/shared/utils.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import type { AsymmetricKeyPairFromEnv, AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
@@ -31,7 +31,7 @@ export const createPKCE = async (verifier?: string) => {
     const byteLength = verifier ? undefined : Math.floor(Math.random() * (96 - 32 + 1) + 32)
     const codeVerifier = verifier ?? createSecretValue(byteLength ?? 64)
     if (codeVerifier.length < 43 || codeVerifier.length > 128) {
-        throw new AuthSecurityError("PKCE_VERIFIER_INVALID", "The code verifier must be between 43 and 128 characters in length.")
+        throw new AuraAuthError({ code: "PKCE_VERIFIER_INVALID" })
     }
     const codeChallenge = await createHash(codeVerifier)
     return { codeVerifier, codeChallenge, method: "S256" }
@@ -67,21 +67,24 @@ export const verifyCSRF = async <DefaultUser extends User = User>(
         const headerPayload = await jose.verifyJWS(header)
 
         if (!isJWTPayloadWithToken(cookiePayload)) {
-            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "Cookie payload missing token field.")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
         }
         if (!isJWTPayloadWithToken(headerPayload)) {
-            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "Header payload missing token field.")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
         }
 
         if (!equals(cookiePayload.token.length, headerPayload.token.length)) {
-            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
         }
         if (!timingSafeEqual(cookiePayload.token, headerPayload.token)) {
-            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
         }
         return true
-    } catch {
-        throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
+    } catch (error) {
+        if (isAuraAuthError(error)) {
+            throw error
+        }
+        throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause: error })
     }
 }
 

@@ -1,12 +1,11 @@
 import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { type } from "arktype"
-import { formatZodError } from "@/shared/utils.ts"
 import { IsObject, Type as Typebox } from "typebox"
-import { AuthValidationError } from "@/shared/errors.ts"
-import { createValidator } from "@/validator/validator.ts"
 import { UserIdentity, type SchemaTypes } from "@/shared/identity.ts"
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
+import { createValidator } from "@aura-stack/router/validator"
 import type { IdentityConfig } from "@/@types/config.ts"
 
 export const deriveSchema = <Schema extends SchemaTypes>(
@@ -59,10 +58,7 @@ export const deriveSchema = <Schema extends SchemaTypes>(
                   })
                 : Typebox.Partial(schema)
     }
-    throw new AuthValidationError(
-        "INVALID_IDENTITY_VALIDATION_FAILED",
-        `Unsupported schema mode configuration. Valid options are: "strip", "passthrough", "strict" and "partial".`
-    )
+    throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
 export const deriveSchemaWithJWT = <Schema extends SchemaTypes>(schema: Schema): any => {
@@ -117,7 +113,7 @@ export const deriveSchemaWithJWT = <Schema extends SchemaTypes>(schema: Schema):
             mexp: z.number().optional(),
         })
     }
-    throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", "Unsupported schema type for JWT extension.")
+    throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
 export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any => {
@@ -157,23 +153,7 @@ export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any =
             expires: z.coerce.date().optional(),
         })
     }
-    throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", "Unsupported schema type for schema  extension.")
-}
-
-const throwValidationError = (activeSchema: SchemaTypes, error: unknown): never => {
-    let errorDetails: unknown = {}
-    if (isZodSchema(activeSchema)) {
-        errorDetails = formatZodError(error as any)
-    } else if (isValibotSchema(activeSchema)) {
-        errorDetails = { issues: error }
-    } else if (isArkType(activeSchema)) {
-        errorDetails = { error }
-    } else if (IsObject(activeSchema)) {
-        errorDetails = { errors: error }
-    }
-    throw new AuthValidationError("INVALID_IDENTITY_VALIDATION_FAILED", JSON.stringify(errorDetails, null, 2), {
-        cause: isZodSchema(activeSchema) ? error : undefined,
-    })
+    throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
 export const createSchemaRegistry = <Identity extends SchemaTypes>(config: IdentityConfig<Identity>) => {
@@ -188,7 +168,7 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Ident
     const parse = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = validator.validate(data)
         if (!success) {
-            throwValidationError(schema, error)
+            throw new AuraAuthError({ code: "SCHEMA_PARSER_FAILED", cause: error })
         }
         return output
     }
@@ -196,7 +176,7 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Ident
     const parseAsPartial = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = partialValidator.validate(data)
         if (!success) {
-            throwValidationError(schemaAsPartial, error)
+            throw new AuraAuthError({ code: "SCHEMA_PARSER_FAILED", cause: error })
         }
         return output
     }
@@ -204,7 +184,7 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Ident
     const parseWithJWT = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = jwtValidator.validate(data)
         if (!success) {
-            throwValidationError(schemaWithJWT, error)
+            throw new AuraAuthError({ code: "SCHEMA_PARSER_FAILED", cause: error })
         }
         return output
     }

@@ -60,7 +60,7 @@ describe("signUp API", () => {
             redirectURL: null,
             error: {
                 code: "USER_CREATION_FAILED",
-                message: "Failed to create user with the provided payload.",
+                message: "Failed to create user account with the provided metadata payload.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -89,8 +89,9 @@ describe("signUp API", () => {
             redirectURL: null,
             headers: expect.any(Headers),
             error: {
-                code: "INVALID_IDENTITY_VALIDATION_FAILED",
-                message: expect.any(String),
+                code: "SCHEMA_PARSER_FAILED",
+                message:
+                    "An internal schema parsing error occurred. Please verify your schema configuration and validation adapter setup.",
             },
             toResponse: expect.any(Function),
         })
@@ -106,9 +107,8 @@ describe("signUp API", () => {
             redirectURL: null,
             headers: expect.any(Headers),
             error: {
-                code: "INVALID_OAUTH_CONFIGURATION",
-                message:
-                    "The URL cannot be constructed. Please set the BASE_URL environment variable or enable trustedProxyHeaders.",
+                code: "INVALID_AUTH_CONFIGURATION",
+                message: "The application context URL cannot be constructed. Set BASE_URL or provide proxy host headers.",
             },
             toResponse: expect.any(Function),
         })

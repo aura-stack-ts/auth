@@ -7,8 +7,6 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "prepare": "nuxi prepare",
     "type-check": "vue-tsc --noEmit",
     "format": "oxfmt",
     "format:check": "oxfmt --check"

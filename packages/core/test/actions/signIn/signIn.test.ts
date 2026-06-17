@@ -41,9 +41,10 @@ describe("signIn action", () => {
         const request = await GET(new Request("http://example.com/auth/signIn/unsupported"))
         expect(request.status).toBe(422)
         expect(await request.json()).toEqual({
-            type: "ROUTER_ERROR",
-            code: "INVALID_REQUEST",
-            message: {
+            type: "VALIDATION",
+            code: "UNPROCESSABLE_ENTITY",
+            message: "The request body or parameter schema layout contains input format errors.",
+            details: {
                 oauth: {
                     code: "invalid_value",
                     message: "The OAuth provider is not supported or invalid.",
@@ -168,8 +169,8 @@ describe("signIn action", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "UNTRUSTED_ORIGIN",
-                message: "The constructed origin URL is not trusted.",
+                code: "INVALID_TRUSTED_ORIGIN",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
             },
         })
     })
@@ -249,8 +250,8 @@ describe("signIn action", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "UNTRUSTED_ORIGIN",
-                message: "The constructed origin URL is not trusted.",
+                code: "INVALID_TRUSTED_ORIGIN",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
             },
         })
     })
@@ -277,8 +278,8 @@ describe("signIn action", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "UNTRUSTED_ORIGIN",
-                message: "The constructed origin URL is not trusted.",
+                code: "INVALID_TRUSTED_ORIGIN",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
             },
         })
     })
@@ -373,8 +374,8 @@ describe("signIn action", () => {
             signInURL: null,
             redirect: false,
             error: {
-                code: "UNTRUSTED_ORIGIN",
-                message: "The constructed origin URL is not trusted.",
+                code: "INVALID_TRUSTED_ORIGIN",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
             },
         })
     })

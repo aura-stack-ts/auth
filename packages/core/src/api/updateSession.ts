@@ -1,6 +1,6 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { AuthInternalError, isAuthErrorWithCode } from "@/shared/errors.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
@@ -20,7 +20,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             skipCSRFCheck
         )
         if (!session) {
-            throw new AuthInternalError("UPDATE_SESSION_INVALID", "Failed to update session.")
+            throw new AuraAuthError({ code: "UPDATE_SESSION_INVALID" })
         }
 
         const newHeaders = toUnionHeaders(headers, secureApiHeaders)
@@ -63,9 +63,9 @@ export const updateSession = async <DefaultUser extends User = User>({
     } catch (error) {
         let code = "UPDATE_SESSION_INVALID"
         let message = "Failed to update session."
-        if (isAuthErrorWithCode(error)) {
+        if (isAuraAuthError(error)) {
             code = error.code
-            message = error.message
+            message = error.userMessage
         }
 
         const headers = new Headers(secureApiHeaders)

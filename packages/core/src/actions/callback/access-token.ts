@@ -1,5 +1,5 @@
 import { fetchAsync } from "@/shared/fetch-async.ts"
-import { AuthInternalError, OAuthProtocolError } from "@/shared/errors.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.ts"
 import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.ts"
 
@@ -33,7 +33,7 @@ export const createAccessToken = async (
                 has_code_verifier: Boolean(codeVerifier),
             },
         })
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "The OAuth provider configuration is invalid.")
+        throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_URL_CONFIG" })
     }
 
     const tokenURL = typeof accessToken === "string" ? accessToken : accessToken.url
@@ -65,7 +65,7 @@ export const createAccessToken = async (
         })
         if (!response.ok) {
             logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
-            throw new OAuthProtocolError("invalid_request", "Invalid access token response")
+            throw new AuraAuthError({ code: "INVALID_OAUTH_ACCESS_TOKEN_RESPONSE" })
         }
         const json = await response.json()
         const token = OAuthAccessTokenResponse.safeParse(json)
@@ -73,7 +73,7 @@ export const createAccessToken = async (
             const { success, data } = OAuthAccessTokenErrorResponse.safeParse(json)
             if (!success) {
                 logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
-                throw new OAuthProtocolError("invalid_request", "Invalid access token response format")
+                throw new AuraAuthError({ code: "INVALID_OAUTH_ACCESS_TOKEN_RES_FORMAT" })
             }
             logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
                 structuredData: {
@@ -81,16 +81,16 @@ export const createAccessToken = async (
                     error_description: data.error_description ?? "",
                 },
             })
-            throw new OAuthProtocolError("INVALID_ACCESS_TOKEN", "Failed to retrieve access token")
+            throw new AuraAuthError({ code: "INVALID_OAUTH_ACCESS_TOKEN_RES_FORMAT" })
         }
 
         logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS")
         return token.data
     } catch (error) {
-        if (error instanceof OAuthProtocolError) {
+        if (isAuraAuthError(error)) {
             throw error
         }
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_FAILED")
-        throw new OAuthProtocolError("server_error", "Failed to communicate with OAuth provider", "", { cause: error })
+        throw new AuraAuthError({ code: "UNKNOWN_OAUTH_ACCESS_TOKEN_ERROR", cause: error })
     }
 }

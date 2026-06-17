@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { AuthValidationError, isAuthErrorWithCode } from "@/shared/errors.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
@@ -29,7 +29,7 @@ export const signInCredentials = async ({
             verifySecret: credentials?.verify ?? verifyPassword,
         })
         if (!session) {
-            throw new AuthValidationError("INVALID_CREDENTIALS", "The provided credentials are invalid.")
+            throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
         }
         const sessionToken = await sessionStrategy.createSession(session)
         const csrfToken = await createCSRF(ctx.jose)
@@ -62,9 +62,9 @@ export const signInCredentials = async ({
     } catch (error) {
         let code = "CREDENTIALS_SIGN_IN_ERROR"
         let message = "An error occurred during credentials sign-in."
-        if (isAuthErrorWithCode(error)) {
+        if (isAuraAuthError(error)) {
             code = error.code
-            message = error.message
+            message = error.userMessage
         }
         const headers = new Headers(secureApiHeaders)
         const invalidCredentials: SignInCredentialsAPIReturn = {
@@ -77,7 +77,7 @@ export const signInCredentials = async ({
                 return Response.json({ success: false, redirect: false, redirectURL: null }, { headers, status: 401 })
             },
         }
-        if (error instanceof AuthValidationError) {
+        if (isAuraAuthError(error) && error.code === "AUTH_CREDENTIALS_INVALID") {
             logger?.log("INVALID_CREDENTIALS", {
                 severity: "warning",
                 structuredData: { path: "/signIn/credentials" },

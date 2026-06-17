@@ -33,11 +33,11 @@ describe("createAuth", () => {
                 })
             )
 
-            expect(response.status).toBe(400)
+            expect(response.status).toBe(401)
             expect(await response.json()).toEqual({
-                type: "AUTH_SECURITY_ERROR",
-                code: "SESSION_TOKEN_MISSING",
-                message: "The sessionToken is missing.",
+                type: "AUTH_FLOW",
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
             })
         })
 

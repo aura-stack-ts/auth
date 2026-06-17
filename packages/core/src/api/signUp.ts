@@ -1,9 +1,9 @@
-import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
-import type { FunctionAPIContext, SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
-import { AuthValidationError, isAuthErrorWithCode } from "@/shared/errors.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
+import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
+import type { FunctionAPIContext, SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
 
 export const signUp = async <Payload extends Record<string, unknown> = Record<string, unknown>>({
     ctx,
@@ -26,7 +26,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             payload,
         })
         if (!user) {
-            throw new AuthValidationError("USER_CREATION_FAILED", "Failed to create user with the provided payload.")
+            throw new AuraAuthError({ code: "USER_CREATION_FAILED" })
         }
         const sessionToken = await sessionStrategy.createSession(user)
         const csrfToken = await createCSRF(ctx.jose)
@@ -64,9 +64,9 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     } catch (error) {
         let code = "SIGN_UP_ERROR"
         let message = "An error occurred during sign-up."
-        if (isAuthErrorWithCode(error)) {
+        if (isAuraAuthError(error)) {
             code = error.code
-            message = error.message
+            message = error.userMessage
         }
 
         return {

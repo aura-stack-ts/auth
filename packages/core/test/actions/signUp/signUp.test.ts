@@ -91,9 +91,10 @@ describe("signUp API", () => {
         )
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
-            type: "ROUTER_ERROR",
-            code: "INVALID_REQUEST",
-            message: {
+            type: "VALIDATION",
+            code: "UNPROCESSABLE_ENTITY",
+            message: "The request body or parameter schema layout contains input format errors.",
+            details: {
                 email: {
                     code: "invalid_type",
                     message: "Invalid input: expected string, received undefined",

@@ -1,5 +1,5 @@
-import { AuthInternalError } from "@/shared/errors.ts"
 import { OAuthAuthorization } from "@/schemas.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { createPKCE, createSecretValue } from "@/shared/crypto.ts"
 import type { OAuthProvider } from "@/@types/index.ts"
 import type { GlobalContext } from "@aura-stack/router"
@@ -22,9 +22,14 @@ export const buildAuthorizationURL = (
     const authorizeConfig = oauth.authorize
     const baseURL = typeof authorizeConfig === "string" ? authorizeConfig : (authorizeConfig?.url ?? oauth.authorizeURL)
     if (!baseURL) {
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing authorization URL in OAuth provider configuration.")
+        throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_URL_CONFIG" })
     }
-    const url = new URL(baseURL)
+    let url: URL
+    try {
+        url = new URL(baseURL)
+    } catch (cause) {
+        throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_URL_CONFIG", cause })
+    }
     const authorizeParams = typeof authorizeConfig === "string" ? undefined : authorizeConfig?.params
 
     setSearchParams(url, {
@@ -69,7 +74,7 @@ export const createAuthorizationURL = async (oauth: OAuthProvider, redirectURI: 
                 code_challenge_method: method,
             },
         })
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "The OAuth provider configuration is invalid.")
+        throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_SCHEMA_CONFIG" })
     }
 
     return {
