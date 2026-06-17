@@ -1,5 +1,5 @@
 import { fetchAsync } from "@/shared/fetch-async.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.ts"
 import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.ts"
 

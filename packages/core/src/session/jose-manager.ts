@@ -1,4 +1,4 @@
-import { AuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import type { JoseInstance, User, JWTConfig, JWTManager } from "@/@types/index.ts"
 
 export const createJoseManager = <DefaultUser extends User = User>(

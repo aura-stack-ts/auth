@@ -9,7 +9,7 @@ import type {
     User,
 } from "@/@types/index.ts"
 import { isCustomUserInfoFunction } from "@/shared/assert.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response

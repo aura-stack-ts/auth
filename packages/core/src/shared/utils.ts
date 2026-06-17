@@ -1,6 +1,6 @@
 import { getEnv } from "@/shared/env.ts"
 import { encoder } from "@aura-stack/jose/crypto"
-import { AuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
 
 export const AURA_AUTH_VERSION = "0.7.2"

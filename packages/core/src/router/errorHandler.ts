@@ -1,4 +1,4 @@
-import { isAuraAuthError } from "@/shared/unstable_error.ts"
+import { isAuraAuthError } from "@/shared/errors.ts"
 import { isAuraRouterError, isAuraRouterValidationError, type RouterConfig } from "@aura-stack/router"
 import type { InternalLogger } from "@/@types/index.ts"
 

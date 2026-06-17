@@ -1,4 +1,4 @@
-import { AuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { createStatelessStrategy } from "@/session/stateless.ts"
 import type { Identities } from "@/shared/identity.ts"
 import type { FromShapeToObject } from "@/@types/utility.ts"

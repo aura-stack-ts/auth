@@ -23,7 +23,7 @@ import { clickUp } from "./click-up.ts"
 import { dribbble } from "./dribbble.ts"
 import { hubspot } from "./hubspot.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
-import { AuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 
 export * from "./github.ts"
 export * from "./bitbucket.ts"

@@ -17,7 +17,7 @@ import type {
     SignUpOptions,
     SignUpReturn,
 } from "@/@types/index.ts"
-import { AuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 
 export type { AuthClientOptions }
 
@@ -172,6 +172,7 @@ export const createAuthClient = <
     const signUp = async <Options extends SignUpOptions<SignUpPayload>>(options: Options): Promise<SignUpReturn<Options>> => {
         try {
             const { redirectTo } = options ?? {}
+            // @ts-ignore
             const response = await client.post("/signUp", {
                 // @ts-ignore - Fix type here - go to @aura-stack/router.
                 body: options.payload,

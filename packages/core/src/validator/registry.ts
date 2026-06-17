@@ -2,11 +2,11 @@ import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { type } from "arktype"
 import { IsObject, Type as Typebox } from "typebox"
-import { createValidator } from "@/validator/validator.ts"
 import { UserIdentity, type SchemaTypes } from "@/shared/identity.ts"
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
+import { createValidator } from "@aura-stack/router/validator"
 import type { IdentityConfig } from "@/@types/config.ts"
-import { AuraAuthError } from "@/shared/unstable_error.ts"
 
 export const deriveSchema = <Schema extends SchemaTypes>(
     schema: Schema,

@@ -1,6 +1,6 @@
 import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
 import { HeadersBuilder } from "@aura-stack/router"
-import { AuraAuthError, isAuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"
 import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"

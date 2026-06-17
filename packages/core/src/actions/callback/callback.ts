@@ -4,9 +4,8 @@ import { createCSRF } from "@/shared/crypto.ts"
 import { cacheControl } from "@/shared/headers.ts"
 import { timingSafeEqual } from "@/shared/utils.ts"
 import { getCookie, getExpiredCookie } from "@/cookie.ts"
-import { AuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
-import { OAuthAuthorizationErrorResponse } from "@/schemas.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
 import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
 import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
@@ -14,7 +13,7 @@ import type { OAuthProviderRecord } from "@/@types/index.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
     // @ts-ignore
-    return createEndpointConfig("/callback/:oauth", {
+    return createEndpointConfig({
         /**
          * @todo Add support to any schema (zod, arktype and valibot)
          */
@@ -32,29 +31,6 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
                 state: z.string("Missing state parameter in the OAuth authorization response."),
             }),
         },
-        use: [
-            (ctx) => {
-                const {
-                    searchParams,
-                    context: { logger },
-                } = ctx
-                const response = OAuthAuthorizationErrorResponse.safeParse(searchParams)
-                if (response.success) {
-                    const { error, error_description } = response.data
-                    const criticalAuthErrors = ["access_denied", "server_error"]
-                    const severity = criticalAuthErrors.includes(error.toLowerCase()) ? "critical" : "warning"
-                    logger?.log("OAUTH_AUTHORIZATION_ERROR", {
-                        severity,
-                        structuredData: {
-                            error,
-                            error_description: error_description ?? "",
-                        },
-                    })
-                    throw new AuraAuthError({ code: "AUTH_CALLBACK_MISSING_PARAMETERS" })
-                }
-                return ctx
-            },
-        ],
     })
 }
 

@@ -12,7 +12,7 @@ import type {
     GetStatelessSessionReturn,
     DeepPartial,
 } from "@/@types/index.ts"
-import { AuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({
     config,

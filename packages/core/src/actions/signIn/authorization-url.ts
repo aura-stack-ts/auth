@@ -1,5 +1,5 @@
 import { OAuthAuthorization } from "@/schemas.ts"
-import { AuraAuthError } from "@/shared/unstable_error.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { createPKCE, createSecretValue } from "@/shared/crypto.ts"
 import type { OAuthProvider } from "@/@types/index.ts"
 import type { GlobalContext } from "@aura-stack/router"
