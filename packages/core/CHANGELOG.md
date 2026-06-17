@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added `InferSignUp`, a utility type for inferring the sign-up payload from `createAuth().signUp.schema`. This type can be reused as the second generic parameter of `createAuthClient()` to ensure consistent typing between server and client authentication configurations. [#190](https://github.com/aura-stack-ts/auth/pull/190)
+
 - Added a `signUp` client function accessible via `createAuthClient`, allowing interaction with the mounted `POST /signUp` endpoint. [#184](https://github.com/aura-stack-ts/auth/pull/184)
 
 - Introduced an experimental `signUp` flow for both the API and endpoint definitions. The new action enables user account creation within the authentication system and provides customizable payload validation through the supported schema. To enable this feature, developers must configure the `signUp` option when calling `createAuth`. [#183](https://github.com/aura-stack-ts/auth/pull/183)
