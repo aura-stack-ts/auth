@@ -18,9 +18,9 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/callback/invalid"))
         expect(response.status).toBe(404)
         expect(await response.json()).toEqual({
-            type: "ROUTER_ERROR",
-            code: "ROUTER_INTERNAL_ERROR",
-            message: "No route found for path: /callback/invalid",
+            type: "ROUTER_FLOW",
+            code: "NOT_FOUND",
+            message: "The requested route address cannot be found or is unavailable on this application endpoint server context.",
         })
     })
 
@@ -28,9 +28,10 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/auth/callback/unknown"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
-            type: "ROUTER_ERROR",
-            code: "INVALID_REQUEST",
-            message: {
+            type: "VALIDATION",
+            code: "UNPROCESSABLE_ENTITY",
+            message: "The request body or parameter schema layout contains input format errors.",
+            details: {
                 oauth: {
                     code: "invalid_value",
                     message: "The OAuth provider is not supported or invalid.",
@@ -43,9 +44,10 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/auth/callback/oauth-provider"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
-            type: "ROUTER_ERROR",
-            code: "INVALID_REQUEST",
-            message: {
+            type: "VALIDATION",
+            code: "UNPROCESSABLE_ENTITY",
+            message: "The request body or parameter schema layout contains input format errors.",
+            details: {
                 code: {
                     code: "invalid_type",
                     message: "Missing code parameter in the OAuth authorization response.",
@@ -62,9 +64,10 @@ describe("callbackAction", () => {
         const response = await GET(new Request("https://example.com/auth/callback/unknown?code=123&state=abc"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({
-            type: "ROUTER_ERROR",
-            code: "INVALID_REQUEST",
-            message: {
+            type: "VALIDATION",
+            code: "UNPROCESSABLE_ENTITY",
+            message: "The request body or parameter schema layout contains input format errors.",
+            details: {
                 oauth: {
                     code: "invalid_value",
                     message: "The OAuth provider is not supported or invalid.",

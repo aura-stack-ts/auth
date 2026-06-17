@@ -81,7 +81,7 @@ export const verifyCSRF = async <DefaultUser extends User = User>(
         }
         return true
     } catch (error) {
-        if(isAuraAuthError(error)) {
+        if (isAuraAuthError(error)) {
             throw error
         }
         throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause: error })
