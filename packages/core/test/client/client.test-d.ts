@@ -17,6 +17,7 @@ import type {
     UpdateSessionReturn,
     InferUser,
     InferSignUp,
+    UserFrom,
 } from "@/@types/index.ts"
 import { createAuth } from "@/createAuth.ts"
 import { z } from "zod/v4"
@@ -46,26 +47,30 @@ describe("Client Types", () => {
     })
 
     test("with custom zod identity schema", () => {
+        const schema = UserIdentity.extend({
+            isAdmin: z.boolean(),
+            role: z.enum(["admin", "user"]),
+        })
+
         const auth = createAuth({
             oauth: [],
             identity: {
-                schema: UserIdentity.extend({
-                    isAdmin: z.boolean(),
-                    role: z.enum(["admin", "user"]),
-                }),
+                schema,
             },
         })
 
-        type User = InferUser<typeof auth>
-
-        expectTypeOf<User>().toEqualTypeOf<{
+        type Expected = {
             sub: string
             name?: string | null | undefined
             image?: string | null | undefined
             email?: string | null | undefined
             isAdmin: boolean
             role: "admin" | "user"
-        }>()
+        }
+        type User = InferUser<typeof auth>
+
+        expectTypeOf<User>().toEqualTypeOf<Expected>()
+        expectTypeOf<UserFrom<typeof schema>>().toEqualTypeOf<Expected>()
 
         const authClient = createAuthClient<User>({})
         expectTypeOf(authClient).toEqualTypeOf<{
@@ -86,27 +91,31 @@ describe("Client Types", () => {
     })
 
     test("with custom valibot identity schema", () => {
+        const schema = valibot.object({
+            ...UserIdentityValibot.entries,
+            isAdmin: valibot.boolean(),
+            role: valibot.union([valibot.literal("admin"), valibot.literal("user")]),
+        })
+
         const auth = createAuth({
             oauth: [],
             identity: {
-                schema: valibot.object({
-                    ...UserIdentityValibot.entries,
-                    isAdmin: valibot.boolean(),
-                    role: valibot.union([valibot.literal("admin"), valibot.literal("user")]),
-                }),
+                schema,
             },
         })
 
-        type User = InferUser<typeof auth>
-
-        expectTypeOf<User>().toEqualTypeOf<{
+        type Expected = {
             sub: string
             name?: string | null | undefined
             image?: string | null | undefined
             email?: string | null | undefined
             isAdmin: boolean
             role: "admin" | "user"
-        }>()
+        }
+        type User = InferUser<typeof auth>
+
+        expectTypeOf<User>().toEqualTypeOf<Expected>()
+        expectTypeOf<UserFrom<typeof schema>>().toEqualTypeOf<Expected>()
 
         const authClient = createAuthClient<User>({})
         expectTypeOf(authClient).toEqualTypeOf<{
@@ -127,26 +136,30 @@ describe("Client Types", () => {
     })
 
     test("with custom arktype identity schema", () => {
+        const schema = UserIdentityArkType.and({
+            isAdmin: "boolean",
+            role: type.enumerated("admin", "user"),
+        })
+
         const auth = createAuth({
             oauth: [],
             identity: {
-                schema: UserIdentityArkType.and({
-                    isAdmin: "boolean",
-                    role: type.enumerated("admin", "user"),
-                }),
+                schema,
             },
         })
 
-        type User = InferUser<typeof auth>
-
-        expectTypeOf<User>().toEqualTypeOf<{
+        type Expected = {
             sub: string
             name?: string | null | undefined
             image?: string | null | undefined
             email?: string | null | undefined
             isAdmin: boolean
             role: "admin" | "user"
-        }>()
+        }
+        type User = InferUser<typeof auth>
+
+        expectTypeOf<User>().toEqualTypeOf<Expected>()
+        expectTypeOf<UserFrom<typeof schema>>().toEqualTypeOf<Expected>()
 
         const authClient = createAuthClient<User>({})
         expectTypeOf(authClient).toEqualTypeOf<{

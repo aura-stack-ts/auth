@@ -3,7 +3,7 @@ import type { TProperties, TObject, TSchema } from "typebox"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
 import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer, ZodOptional } from "zod/v4"
-import type { Identities, IsArkType, IsZod, UserShapeTypeBox, UserShapeValibot } from "@/shared/identity.ts"
+import type { Identities, IsArkType, IsZod, SchemaTypes, UserShapeTypeBox, UserShapeValibot } from "@/shared/identity.ts"
 import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
 import type { InferSchema } from "@aura-stack/router"
 
@@ -161,7 +161,7 @@ export type InferZodShape<T extends ZodObject> = T["shape"]
  *
  * type User = UserFrom<typeof schema>
  */
-export type UserFrom<T extends ZodObject> = Prettify<ZodShapeToObject<InferZodShape<T>>>
+export type UserFrom<T extends SchemaTypes> = Prettify<RemoveIndexSignature<InferSchema<T>>>
 
 /**
  * Infers the session type from a Zod identity schema.
@@ -174,7 +174,7 @@ export type UserFrom<T extends ZodObject> = Prettify<ZodShapeToObject<InferZodSh
  *
  * type Session = SessionFrom<typeof schema>
  */
-export type SessionFrom<T extends ZodObject> = Wrap<Session<Wrap<UserFrom<T>>>>
+export type SessionFrom<T extends SchemaTypes> = Wrap<Session<Merge<UserFrom<T>, User>>>
 
 /**
  * Infers the sign-up data type from an {@link AuthInstance} config's `signUp.schema`. It supports
