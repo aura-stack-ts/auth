@@ -325,7 +325,7 @@ describe("Client Types", () => {
         }>()
     })
 
-    test("with custom arktype signUp schema", () => {
+    test("with custom typebox signUp schema", () => {
         const schema = typebox.Type.Object({
             username: typebox.Type.String(),
             nickname: typebox.Type.String(),

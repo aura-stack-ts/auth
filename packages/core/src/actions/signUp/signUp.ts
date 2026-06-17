@@ -28,7 +28,7 @@ export const signUpAction = <Identity extends Identities, SignUpSchema extends S
         "POST",
         "/signUp",
         async (ctx) => {
-            // @ts-ignore - Type excessively expensive to compute.
+            // @ts-ignore - Deep generic inference with router body type is currently too expensive.
             const payload = ctx.body as any
             const { toResponse } = await signUp({
                 ctx: ctx.context,

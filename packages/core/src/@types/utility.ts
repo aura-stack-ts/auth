@@ -2,7 +2,7 @@ import { Type } from "arktype"
 import type { TProperties, TObject, TSchema } from "typebox"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
-import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer, ZodString, ZodOptional } from "zod/v4"
+import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer, ZodOptional } from "zod/v4"
 import type { Identities, IsArkType, IsZod, UserShapeTypeBox, UserShapeValibot } from "@/shared/identity.ts"
 import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
 import type { InferSchema } from "@aura-stack/router"
@@ -94,7 +94,7 @@ export type EditableToSchema<T> =
 
 export type ReturnUpdateSessionShape<T> =
     T extends EditableShape<infer S>
-        ? ZodObject<{ user?: ZodObject<S>; expires?: ZodOptional<ZodString> }>
+        ? ZodObject<{ user?: ZodObject<S>; expires?: ZodOptional<ZodTypeAny> }>
         : T extends EditableShapeValibot<infer S>
           ? ObjectSchema<{ user?: ObjectSchema<S, undefined>; expires?: BaseSchema<any, any, any> }, undefined>
           : T extends EditableShapeArkType<any>
