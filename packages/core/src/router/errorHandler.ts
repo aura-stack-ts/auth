@@ -16,6 +16,7 @@ export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onErr
         if (isAuraAuthError(error)) {
             return error.toResponse()
         }
+        console.log("error: ", error)
         logger?.log("SERVER_ERROR", { structuredData: { error_type: error.name, error_message: error.message } })
         return Response.json(
             { type: "SERVER_ERROR", code: "SERVER_ERROR", message: "An unexpected error occurred" },

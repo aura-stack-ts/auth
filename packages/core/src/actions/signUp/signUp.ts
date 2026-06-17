@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { signUp } from "@/api/signUp.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { RedirectOptionsSchema } from "@/schemas.ts"
@@ -7,7 +6,7 @@ import type { SignUpConfig } from "@/@types/config.ts"
 const signUpConfig = (config: SignUpConfig<any, any>) => {
     return createEndpointConfig({
         schemas: {
-            body: config?.schema ?? z.object({}),
+            body: config?.schema,
             searchParams: RedirectOptionsSchema,
         },
     })

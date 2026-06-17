@@ -90,7 +90,9 @@ describe("signUp API", () => {
             })
         )
         expect(response.status).toBe(422)
-        expect(await response.json()).toEqual({
+        const idk = await response.json()
+        console.log("idk: ", idk)
+        expect(idk).toEqual({
             type: "ROUTER_ERROR",
             code: "INVALID_REQUEST",
             message: {
