@@ -6,6 +6,7 @@ import {
     UserIdentityTypeBox,
     UserIdentityValibot,
     type InferUser,
+    type UserFrom,
 } from "@/shared/identity.ts"
 import { z } from "zod/v4"
 import * as valibot from "valibot"
@@ -59,6 +60,7 @@ describe("createIdentity", () => {
         })
         type ExpectedIdentity = z.infer<typeof schema>
         expectTypeOf<ExpectedIdentity>().toEqualTypeOf<InferUser<typeof auth>>()
+        expectTypeOf<ExpectedIdentity>().toEqualTypeOf<UserFrom<typeof schema>>()
     })
 
     test("createIdentity with Valibot schema", () => {
@@ -100,6 +102,7 @@ describe("createIdentity", () => {
         })
         type ExpectedIdentity = valibot.InferOutput<typeof schema>
         expectTypeOf<ExpectedIdentity>().toEqualTypeOf<InferUser<typeof auth>>()
+        expectTypeOf<ExpectedIdentity>().toEqualTypeOf<UserFrom<typeof schema>>()
     })
 
     test("createIdentity with Arktype schema", () => {
@@ -151,6 +154,7 @@ describe("createIdentity", () => {
         })
         type ExpectedIdentity = Exclude<ReturnType<typeof Schema>, ArkErrors>
         expectTypeOf<ExpectedIdentity>().toEqualTypeOf<InferUser<typeof auth>>()
+        expectTypeOf<ExpectedIdentity>().toEqualTypeOf<UserFrom<typeof Schema>>()
     })
 
     test("createIdentity with TypeBox schema", () => {
