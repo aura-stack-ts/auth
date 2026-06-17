@@ -61,7 +61,7 @@ export const signOut = async ({
                     {
                         success: false,
                         redirect: false,
-                        redirectsURL: null,
+                        redirectURL: null,
                     },
                     { headers, status: 400 }
                 )

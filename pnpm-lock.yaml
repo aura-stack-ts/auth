@@ -692,8 +692,8 @@ importers:
         specifier: workspace:*
         version: link:../jose
       '@aura-stack/router':
-        specifier: ^0.7.2
-        version: 0.7.2(arktype@2.2.0)(typebox@1.1.38)(valibot@1.4.0(typescript@5.9.3))(zod@4.3.5)
+        specifier: ^0.9.0
+        version: 0.9.0(arktype@2.2.0)(typebox@1.1.38)(valibot@1.4.0(typescript@5.9.3))(zod@4.3.5)
       arktype:
         specifier: ^2.2.0
         version: 2.2.0
@@ -1032,8 +1032,8 @@ packages:
   '@astrojs/yaml2ts@0.2.3':
     resolution: {integrity: sha512-PJzRmgQzUxI2uwpdX2lXSHtP4G8ocp24/t+bZyf5Fy0SZLSF9f9KXZoMlFM/XCGue+B0nH/2IZ7FpBYQATBsCg==}
 
-  '@aura-stack/router@0.7.2':
-    resolution: {integrity: sha512-Swxm9SDvJEmM+V3rxjyOm7Fvysnnw//e/7ZXS+7Gn01J9MD3EJNJDOOFKmlmtVwlPoLtLf/NVNGCMji4kb5kcw==}
+  '@aura-stack/router@0.9.0':
+    resolution: {integrity: sha512-8yX9GJCAvyUMNawpNB8bCwQL+9ZLYFtsm6+btcj78XegtZ83uv6Ye16MKNhyadaCN5gA8OKAVAAKORzxq22dXg==}
     peerDependencies:
       arktype: ^2.0.0
       typebox: ^1.1.38
@@ -10115,7 +10115,7 @@ snapshots:
     dependencies:
       yaml: 2.9.0
 
-  '@aura-stack/router@0.7.2(arktype@2.2.0)(typebox@1.1.38)(valibot@1.4.0(typescript@5.9.3))(zod@4.3.5)':
+  '@aura-stack/router@0.9.0(arktype@2.2.0)(typebox@1.1.38)(valibot@1.4.0(typescript@5.9.3))(zod@4.3.5)':
     dependencies:
       cookie: 1.1.1
     optionalDependencies:
