@@ -136,7 +136,6 @@ export const createAuthClient = <
             const { redirectTo } = options ?? {}
             const response = await client.post("/signIn/credentials", {
                 body: options.payload,
-                // @ts-ignore - Fix type here - go to @aura-stack/router.
                 searchParams: {
                     redirectTo,
                     redirect: false,
@@ -174,7 +173,6 @@ export const createAuthClient = <
             const { redirectTo } = options ?? {}
             // @ts-ignore
             const response = await client.post("/signUp", {
-                // @ts-ignore - Fix type here - go to @aura-stack/router.
                 body: options.payload,
                 searchParams: {
                     redirectTo,
@@ -226,6 +224,7 @@ export const createAuthClient = <
                 body: {
                     // @ts-ignore - Fix type here - go to @aura-stack/router.
                     user,
+                    // @ts-ignore - Fix type here - go to @aura-stack/router.
                     expires: session.expires ? new Date(session.expires) : undefined,
                 },
                 searchParams: {
@@ -267,7 +266,6 @@ export const createAuthClient = <
                 throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
             }
 
-            // @ts-ignore - Fix type here - go to @aura-stack/router.
             const response = await client.post("/signOut", {
                 searchParams: {
                     redirectTo: options?.redirectTo,

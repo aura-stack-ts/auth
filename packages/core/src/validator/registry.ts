@@ -2,11 +2,12 @@ import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { type } from "arktype"
 import { IsObject, Type as Typebox } from "typebox"
-import { UserIdentity, type SchemaTypes } from "@/shared/identity.ts"
+import { UserIdentity, type Identities, type SchemaTypes } from "@/shared/identity.ts"
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createValidator } from "@aura-stack/router/validator"
 import type { IdentityConfig } from "@/@types/config.ts"
+import type { EditableToSchema, ReturnUpdateSessionShape } from "@/@types/utility.ts"
 
 export const deriveSchema = <Schema extends SchemaTypes>(
     schema: Schema,
@@ -116,7 +117,9 @@ export const deriveSchemaWithJWT = <Schema extends SchemaTypes>(schema: Schema):
     throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
-export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any => {
+export const getFullSchema = <Identity extends Identities, Schema = EditableToSchema<Identity>>(
+    schema: Schema
+): ReturnUpdateSessionShape<Schema> => {
     if (isValibotSchema(schema)) {
         // @ts-ignore Deep type instantiation with external schemas
         return valibot.object({
@@ -145,13 +148,13 @@ export const getFullSchema = <Schema extends SchemaTypes>(schema: Schema): any =
         return Typebox.Object({
             user: schema,
             expires: Typebox.Optional(Typebox.String()),
-        })
+        }) as unknown as ReturnUpdateSessionShape<Schema>
     }
     if (isZodSchema(schema)) {
         return z.object({
             user: schema,
             expires: z.coerce.date().optional(),
-        })
+        }) as unknown as ReturnUpdateSessionShape<Schema>
     }
     throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }

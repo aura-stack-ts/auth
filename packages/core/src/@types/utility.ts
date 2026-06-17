@@ -2,9 +2,10 @@ import { Type } from "arktype"
 import type { TProperties, TObject, TSchema } from "typebox"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
-import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer } from "zod/v4"
+import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer, ZodOptional } from "zod/v4"
 import type { Identities, IsArkType, IsZod, UserShapeTypeBox, UserShapeValibot } from "@/shared/identity.ts"
 import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
+import type { InferSchema } from "@aura-stack/router"
 
 /** Expands intersection types into a single flat object type for readable editor hints. */
 export type Prettify<T> = { [K in keyof T]: T[K] }
@@ -80,6 +81,28 @@ export type FromShapeToObject<S> = S extends ZodRawShape
             ? S
             : never
 
+export type EditableToSchema<T> =
+    T extends EditableShape<infer S>
+        ? ZodObject<S>
+        : T extends EditableShapeValibot<infer S>
+          ? ObjectSchema<S, undefined>
+          : T extends EditableShapeTypebox<infer S>
+            ? TObject<S>
+            : T extends EditableShapeArkType<any>
+              ? T
+              : never
+
+export type ReturnUpdateSessionShape<T> =
+    T extends EditableShape<infer S>
+        ? ZodObject<{ user?: ZodObject<S>; expires?: ZodOptional<ZodTypeAny> }>
+        : T extends EditableShapeValibot<infer S>
+          ? ObjectSchema<{ user?: ObjectSchema<S, undefined>; expires?: BaseSchema<any, any, any> }, undefined>
+          : T extends EditableShapeArkType<any>
+            ? Type<{ user?: T; expires?: Type<string> }>
+            : T extends EditableShapeTypebox<infer S>
+              ? TObject<{ user?: TObject<S>; expires?: TSchema }>
+              : never
+
 /** Recursively makes every property required. */
 export type DeepRequired<T> = {
     [K in keyof T]-?: T[K] extends object ? DeepRequired<T[K]> : T[K]
@@ -152,6 +175,35 @@ export type UserFrom<T extends ZodObject> = Prettify<ZodShapeToObject<InferZodSh
  * type Session = SessionFrom<typeof schema>
  */
 export type SessionFrom<T extends ZodObject> = Wrap<Session<Wrap<UserFrom<T>>>>
+
+/**
+ * Infers the sign-up data type from an {@link AuthInstance} config's `signUp.schema`. It supports
+ * Zod, Valibot and ArkType schemas.
+ *
+ * > For TypeBox its recommended to use the `Static` utility type directly to infer the schema.
+ *
+ * @example
+ * const auth = createAuth({
+ *   oauth: [],
+ *   signUp: {
+ *     schema: z.object({
+ *       username: z.string(),
+ *       nickname: z.string(),
+ *       password: z.string(),
+ *     })
+ *   }
+ * })
+ *
+ * type SignUp = InferSignUp<typeof auth>
+ */
+export type InferSignUp<Config extends AuthInstance> =
+    Config extends AuthInstance<infer _, infer SignUpSchema>
+        ? Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>
+        : Record<string, any>
+
+export type RemoveIndexSignature<T> = {
+    [K in keyof T as string extends K ? never : number extends K ? never : symbol extends K ? never : K]: T[K]
+}
 
 /**
  * HTTP `Response` with `json()` typed to resolve to `Body` (defaults to `unknown`).

@@ -48,7 +48,7 @@ export const createAuthInstance = <Identity extends Identities, SignUpSchema ext
             signOutAction,
             csrfTokenAction,
             updateSessionAction(config.context.identity as SchemaRegistryContext),
-            signUpAction(config.context.signUp as SignUpConfig<Identity, SignUpSchema>),
+            signUpAction<Identity, SignUpSchema>(config.context.signUp as SignUpConfig<Identity, SignUpSchema>),
         ],
         config
     )

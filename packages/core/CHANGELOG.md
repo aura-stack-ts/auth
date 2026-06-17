@@ -10,11 +10,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added `InferSignUp`, a utility type for inferring the sign-up payload from `createAuth().signUp.schema`. This type can be reused as the second generic parameter of `createAuthClient()` to ensure consistent typing between server and client authentication configurations. [#190](https://github.com/aura-stack-ts/auth/pull/190)
+
 - Added a `signUp` client function accessible via `createAuthClient`, allowing interaction with the mounted `POST /signUp` endpoint. [#184](https://github.com/aura-stack-ts/auth/pull/184)
 
 - Introduced an experimental `signUp` flow for both the API and endpoint definitions. The new action enables user account creation within the authentication system and provides customizable payload validation through the supported schema. To enable this feature, developers must configure the `signUp` option when calling `createAuth`. [#183](https://github.com/aura-stack-ts/auth/pull/183)
 
 - Added support for a custom `userInfo` function in OAuth provider configuration, enabling callers to perform the user info request themselves. The `userInfo` option continues to accept either a URL string or an object with a `url` and optional request options (for example, custom headers). [#182](https://github.com/aura-stack-ts/auth/pull/182)
+
+### Fixed
+
+- Fixed type inference for authentication actions created with `createAuth()` and `createAuthClient()`. The `signUp.schema` configuration is now inferred correctly, improving type safety and reducing the need for manual type annotations. [#190](https://github.com/aura-stack-ts/auth/pull/190)
+
+### Changed
+
+- Refactored and standardized error handling across authentication flows. All authentication errors now extend the `AuraAuthError` base class, providing a consistent error model throughout the library. Error objects now expose structured metadata, including `type`, `code`, `message`, and `userMessage`. [#190](https://github.com/aura-stack-ts/auth/pull/190)
 
 ---
 
