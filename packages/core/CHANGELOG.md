@@ -16,6 +16,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Added support for a custom `userInfo` function in OAuth provider configuration, enabling callers to perform the user info request themselves. The `userInfo` option continues to accept either a URL string or an object with a `url` and optional request options (for example, custom headers). [#182](https://github.com/aura-stack-ts/auth/pull/182)
 
+### Fixed
+
+- Fixed type inference for authentication actions created with `createAuth()` and `createAuthClient()`. The `signUp.schema` configuration is now inferred correctly, improving type safety and reducing the need for manual type annotations. [#189](https://github.com/aura-stack-ts/auth/pull/189)
+
+### Changed
+
+- Refactored and standardized error handling across authentication flows. All authentication errors now extend the `AuraAuthError` base class, providing a consistent error model throughout the library. Error objects now expose structured metadata, including `type`, `code`, `message`, and `userMessage`. [#189](https://github.com/aura-stack-ts/auth/pull/189)
+
 ---
 
 ## [0.7.2] - 2026-06-05

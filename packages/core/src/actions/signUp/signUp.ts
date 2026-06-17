@@ -2,8 +2,11 @@ import { signUp } from "@/api/signUp.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { RedirectOptionsSchema } from "@/schemas.ts"
 import type { SignUpConfig } from "@/@types/config.ts"
+import type { Identities, SchemaTypes } from "@/shared/identity.ts"
 
-const signUpConfig = (config: SignUpConfig<any, any>) => {
+const signUpConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    config: SignUpConfig<Identity, SignUpSchema>
+) => {
     return createEndpointConfig({
         schemas: {
             body: config?.schema,
@@ -18,15 +21,18 @@ const signUpConfig = (config: SignUpConfig<any, any>) => {
  *
  * @returns The signed-up user's session
  */
-export const signUpAction = (config: SignUpConfig<any, any>) => {
+export const signUpAction = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    config: SignUpConfig<Identity, SignUpSchema>
+) => {
     return createEndpoint(
         "POST",
         "/signUp",
         async (ctx) => {
-            const payload = ctx.body
+            // @ts-ignore - Type excessively expensive to compute.
+            const payload = ctx.body as any
             const { toResponse } = await signUp({
                 ctx: ctx.context,
-                payload,
+                payload: payload,
                 request: ctx.request,
                 headers: ctx.request.headers,
                 redirect: ctx.searchParams.redirect,

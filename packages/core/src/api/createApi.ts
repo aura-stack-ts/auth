@@ -17,15 +17,12 @@ import type {
     SignUpAPIOptions,
     SignUpAPIReturn,
     Wrap,
+    RemoveIndexSignature,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/shared/identity.ts"
 
 type InferSignUp<T> = Wrap<RemoveIndexSignature<InferSchema<T>>>
-
-type RemoveIndexSignature<T> = {
-    [K in keyof T as string extends K ? never : number extends K ? never : symbol extends K ? never : K]: T[K]
-}
 
 export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>>(
     ctx: GlobalContext
