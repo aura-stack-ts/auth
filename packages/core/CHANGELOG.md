@@ -22,6 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed URL construction when proxy headers are enabled. The `trustedOrigins` option is now required to complete the configuration, allowing URLs to be constructed and validated against a list of trusted origins. [#193](https://github.com/aura-stack-ts/auth/pull/193)
+
 - Fixed type inference for authentication actions created with `createAuth()` and `createAuthClient()`. The `signUp.schema` configuration is now inferred correctly, improving type safety and reducing the need for manual type annotations. [#190](https://github.com/aura-stack-ts/auth/pull/190)
 
 ### Changed

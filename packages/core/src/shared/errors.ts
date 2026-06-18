@@ -60,6 +60,7 @@ export const AuraErrorCode = {
     INVALID_SALT_SECRET_VALUE: "INVALID_SALT_SECRET_VALUE",
     INVALID_PEM_KEY_PAIR_MODE_MISMATCH: "INVALID_PEM_KEY_PAIR_MODE_MISMATCH",
     INVALID_PEM_KEY_PAIR_SINGLE_MISMATCH: "INVALID_PEM_KEY_PAIR_SINGLE_MISMATCH",
+    AUTH_INVALID_PROXY_HEADERS_CONFIG: "AUTH_INVALID_PROXY_HEADERS_CONFIG",
     /**
      * OAuth Errors
      */
@@ -634,6 +635,15 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "The generated or passed PKCE 'code_verifier' configuration string structure does not fulfill security specification layout rules (must be between 43 and 128 characters long).",
         userMessage: "The cryptographic dynamic code verifier does not fit structural specification constraints (43-128 chars).",
+    },
+    AUTH_INVALID_PROXY_HEADERS_CONFIG: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "Security assertion failed during instantiation: 'trustedProxyHeaders' was enabled, but 'trustedOrigins' is completely empty or undefined. Real proxy networks require explicit origin mapping rules to mitigate host-header hijacking and cache-poisoning vectors.",
+        userMessage:
+            "Internal configuration failure. Enabling trusted proxy headers requires an explicit trusted origins array setup.",
     },
     /**
      * Schema Errors

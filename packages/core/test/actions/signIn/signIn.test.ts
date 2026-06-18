@@ -153,7 +153,7 @@ describe("signIn action", () => {
         } = createAuth({
             oauth: [oauthCustomService],
             trustedProxyHeaders: true,
-            trustedOrigins: [],
+            trustedOrigins: ["https://example.com"],
         })
         const request = await GET(
             new Request("http://example.com/auth/signIn/oauth-provider", {
@@ -234,7 +234,7 @@ describe("signIn action", () => {
         } = createAuth({
             oauth: [oauthCustomService],
             trustedProxyHeaders: true,
-            trustedOrigins: [],
+            trustedOrigins: ["https://example.com"],
         })
         const request = await GET(
             new Request("http://example.com/auth/signIn/oauth-provider", {
@@ -328,7 +328,7 @@ describe("signIn action", () => {
         } = createAuth({
             oauth: [oauthCustomService],
             trustedProxyHeaders: true,
-            trustedOrigins: [],
+            trustedOrigins: ["https://example.com"],
         })
 
         const request = await GET(
@@ -358,7 +358,7 @@ describe("signIn action", () => {
         } = createAuth({
             oauth: [oauthCustomService],
             trustedProxyHeaders: true,
-            trustedOrigins: [],
+            trustedOrigins: ["https://example.com"],
         })
 
         const request = await GET(

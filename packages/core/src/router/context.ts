@@ -1,13 +1,14 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createCookieStore } from "@/cookie.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { createProxyLogger } from "@/shared/logger.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
+import { createJoseManager } from "@/session/jose-manager.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import type { Identities, SchemaTypes } from "@/shared/identity.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
-import { createJoseManager } from "@/session/jose-manager.ts"
 
 export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>
@@ -15,6 +16,8 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
     const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
     const useProxyHeaders =
         trustedProxyHeadersEnv === undefined ? (config?.trustedProxyHeaders ?? false) : getEnvBoolean("TRUSTED_PROXY_HEADERS")
+    const envTrustedOrigins = getEnvArray("TRUSTED_ORIGINS")
+    const resolvedTrustedOrigins = envTrustedOrigins.length > 0 ? envTrustedOrigins : config?.trustedOrigins
     const logger = createProxyLogger(config)
     const cookiePrefix = config?.cookies?.prefix
     const cookieOverrides = config?.cookies?.overrides ?? {}
@@ -31,6 +34,13 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         skipValidation,
     })
 
+    if (
+        useProxyHeaders &&
+        (!resolvedTrustedOrigins || (Array.isArray(resolvedTrustedOrigins) && resolvedTrustedOrigins.length === 0))
+    ) {
+        throw new AuraAuthError({ code: "AUTH_INVALID_PROXY_HEADERS_CONFIG" })
+    }
+
     const ctx = {
         oauth: createBuiltInOAuthProviders(config?.oauth),
         credentials: config?.credentials,
@@ -39,7 +49,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         secret: config?.secret,
         basePath: config?.basePath ?? "/auth",
         trustedProxyHeaders: useProxyHeaders,
-        trustedOrigins: getEnvArray("TRUSTED_ORIGINS").length > 0 ? getEnvArray("TRUSTED_ORIGINS") : config?.trustedOrigins,
+        trustedOrigins: resolvedTrustedOrigins,
         logger,
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
         baseURL: config?.baseURL,
