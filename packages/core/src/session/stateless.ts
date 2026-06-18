@@ -178,15 +178,16 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 return { session: null, headers: cookieConfig.clear() }
             }
             const claims = await jwt.verifyToken(sessionToken)
+            const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
 
-            const defaultPayload = identity.skipValidation ? claims : await identity.schemaRegistry.parse(claims)
+            const defaultPayload = identity.skipValidation ? parsedClaims : await identity.schemaRegistry.parse(parsedClaims)
             const { exp, mexp, sub, iat } = defaultPayload
             const sessionPayload = identity.skipValidation
                 ? session.user
                 : await identity.schemaRegistry.parseAsPartial(session.user)
 
             const expiresAt = session.expires
-                ? new Date(session.expires)
+                ? new Date(Math.min(Date.now() + maxAge * 1000, new Date(session.expires).getTime()))
                 : (updateExpires({ exp }) ?? new Date(Date.now() + maxAge * 1000))
             const updatedSession: Session<DefaultUser> = {
                 user: {
@@ -196,9 +197,10 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 } as DefaultUser,
                 expires: expiresAt.toISOString(),
             }
+            const verifiedPayload = await identity.schemaRegistry.parse(updatedSession.user)
             const issuedAt = strategy === "absolute" ? iat : Math.floor(Date.now() / 1000)
             const newToken = await jwt.createToken({
-                ...updatedSession.user,
+                ...verifiedPayload,
                 exp: Math.floor(expiresAt.getTime() / 1000),
                 iat: issuedAt,
                 mexp,
