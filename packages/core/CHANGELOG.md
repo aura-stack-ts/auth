@@ -26,7 +26,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Enforced CSRF protection for `POST` actions and other sensitive operations, including `signUp` and `signInCredentials`, across both server-side APIs and client-side endpoints. Clients must now provide a valid CSRF token when invoking protected actions. [#192](https://github.com/aura-stack-ts/auth/pull/192)
+
 - Refactored and standardized error handling across authentication flows. All authentication errors now extend the `AuraAuthError` base class, providing a consistent error model throughout the library. Error objects now expose structured metadata, including `type`, `code`, `message`, and `userMessage`. [#190](https://github.com/aura-stack-ts/auth/pull/190)
+
+### Security
+
+- Fixed a vulnerability that could allow arbitrary session lifetime extension through the `updateSession` action and endpoint. Session updates now perform additional validation and authorization checks, and expiration times are constrained by the `maxExpiration` setting in `createAuth().session.jwt`. [#192](https://github.com/aura-stack-ts/auth/pull/192)
 
 ---
 

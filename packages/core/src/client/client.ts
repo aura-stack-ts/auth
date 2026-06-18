@@ -133,12 +133,19 @@ export const createAuthClient = <
         options: Options
     ): Promise<SignInCredentialsReturn<Options>> => {
         try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
             const { redirectTo } = options ?? {}
             const response = await client.post("/signIn/credentials", {
                 body: options.payload,
                 searchParams: {
                     redirectTo,
                     redirect: false,
+                },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
                 },
             })
             const json = await response.json()
@@ -170,6 +177,10 @@ export const createAuthClient = <
      */
     const signUp = async <Options extends SignUpOptions<SignUpPayload>>(options: Options): Promise<SignUpReturn<Options>> => {
         try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
             const { redirectTo } = options ?? {}
             // @ts-ignore
             const response = await client.post("/signUp", {
@@ -177,6 +188,9 @@ export const createAuthClient = <
                 searchParams: {
                     redirectTo,
                     redirect: false,
+                },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
                 },
             })
             const json = await response.json()
