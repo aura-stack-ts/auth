@@ -51,7 +51,7 @@ describe("signIn API", () => {
         const api = createAuth({
             oauth: [oauthCustomService],
             trustedProxyHeaders: true,
-            trustedOrigins: [],
+            trustedOrigins: ["https://example.com"],
         }).api
         const signIn = await api.signIn("oauth-provider", {
             headers: {

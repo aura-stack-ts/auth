@@ -1,13 +1,14 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createCookieStore } from "@/cookie.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { createProxyLogger } from "@/shared/logger.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
+import { createJoseManager } from "@/session/jose-manager.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import type { Identities, SchemaTypes } from "@/shared/identity.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
-import { createJoseManager } from "@/session/jose-manager.ts"
 
 export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>
@@ -30,6 +31,13 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         unknownKeys,
         skipValidation,
     })
+
+    if (
+        useProxyHeaders &&
+        (!config?.trustedOrigins || (Array.isArray(config.trustedOrigins) && config.trustedOrigins.length === 0))
+    ) {
+        throw new AuraAuthError({ code: "AUTH_INVALID_PROXY_HEADERS_CONFIG" })
+    }
 
     const ctx = {
         oauth: createBuiltInOAuthProviders(config?.oauth),

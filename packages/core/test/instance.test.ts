@@ -61,4 +61,28 @@ describe("createAuth", () => {
             expect(response.status).toBe(404)
         })
     })
+
+    describe("trustedProxyHeader", () => {
+        test("throws error if trustedProxyHeaders is enabled but trustedOrigins is not set", () => {
+            expect(() =>
+                createAuth({
+                    oauth: [],
+                    trustedProxyHeaders: true,
+                    trustedOrigins: [],
+                })
+            ).toThrow(
+                "Security assertion failed during instantiation: 'trustedProxyHeaders' was enabled, but 'trustedOrigins' is completely empty or undefined. Real proxy networks require explicit origin mapping rules to mitigate host-header hijacking and cache-poisoning vectors."
+            )
+        })
+
+        test("does not throw error if trustedProxyHeaders is enabled and trustedOrigins is set", () => {
+            expect(() =>
+                createAuth({
+                    oauth: [],
+                    trustedProxyHeaders: true,
+                    trustedOrigins: ["https://example.com"],
+                })
+            ).not.toThrow()
+        })
+    })
 })
