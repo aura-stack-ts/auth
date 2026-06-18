@@ -16,6 +16,8 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
     const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
     const useProxyHeaders =
         trustedProxyHeadersEnv === undefined ? (config?.trustedProxyHeaders ?? false) : getEnvBoolean("TRUSTED_PROXY_HEADERS")
+    const envTrustedOrigins = getEnvArray("TRUSTED_ORIGINS")
+    const resolvedTrustedOrigins = envTrustedOrigins.length > 0 ? envTrustedOrigins : config?.trustedOrigins
     const logger = createProxyLogger(config)
     const cookiePrefix = config?.cookies?.prefix
     const cookieOverrides = config?.cookies?.overrides ?? {}
@@ -34,7 +36,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
 
     if (
         useProxyHeaders &&
-        (!config?.trustedOrigins || (Array.isArray(config.trustedOrigins) && config.trustedOrigins.length === 0))
+        (!resolvedTrustedOrigins || (Array.isArray(resolvedTrustedOrigins) && resolvedTrustedOrigins.length === 0))
     ) {
         throw new AuraAuthError({ code: "AUTH_INVALID_PROXY_HEADERS_CONFIG" })
     }
@@ -47,7 +49,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         secret: config?.secret,
         basePath: config?.basePath ?? "/auth",
         trustedProxyHeaders: useProxyHeaders,
-        trustedOrigins: getEnvArray("TRUSTED_ORIGINS").length > 0 ? getEnvArray("TRUSTED_ORIGINS") : config?.trustedOrigins,
+        trustedOrigins: resolvedTrustedOrigins,
         logger,
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
         baseURL: config?.baseURL,

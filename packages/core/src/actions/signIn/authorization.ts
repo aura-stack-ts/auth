@@ -48,9 +48,10 @@ export const getBaseURL = async ({
 }
 
 export const getOriginURL = async (request: Request, context?: GlobalContext) => {
-    const trustedOrigins = await getTrustedOrigins(request, context?.trustedOrigins)
+    const trustedOrigins = [...(await getTrustedOrigins(request, context?.trustedOrigins))]
     if (!context?.trustedProxyHeaders) {
-        trustedOrigins.push(new URL(request.url).origin)
+        const requestOrigin = new URL(request.url).origin
+        if (!trustedOrigins.includes(requestOrigin)) trustedOrigins.push(requestOrigin)
     }
     const origin = await getBaseURL({ request, ctx: context })
     if (!isTrustedOrigin(origin, trustedOrigins)) {
