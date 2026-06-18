@@ -80,7 +80,6 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             message = error.userMessage
             statusCode = error.statusCode
         }
-        console.error("Sign-up error: ", error)
 
         return {
             success: false,

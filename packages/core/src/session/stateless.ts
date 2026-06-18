@@ -126,8 +126,9 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             const claims = await jwt.verifyToken(sessionToken)
             const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
 
+            const { exp, mexp, iat } = parsedClaims
             const defaultPayload = identity.skipValidation ? parsedClaims : await identity.schemaRegistry.parse(parsedClaims)
-            const { exp, mexp, sub, iat } = defaultPayload
+            const { sub } = defaultPayload
             const sessionPayload = identity.skipValidation
                 ? session.user
                 : await identity.schemaRegistry.parseAsPartial(session.user)

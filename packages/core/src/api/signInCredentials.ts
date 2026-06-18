@@ -71,9 +71,11 @@ export const signInCredentials = async ({
     } catch (error) {
         let code = "CREDENTIALS_SIGN_IN_ERROR"
         let message = "An error occurred during credentials sign-in."
+        let statusCode = 401
         if (isAuraAuthError(error)) {
             code = error.code
             message = error.userMessage
+            statusCode = error.statusCode
         }
         const headers = new Headers(secureApiHeaders)
         const invalidCredentials: SignInCredentialsAPIReturn = {
@@ -83,7 +85,7 @@ export const signInCredentials = async ({
             redirectURL: null,
             error: { code, message },
             toResponse: () => {
-                return Response.json({ success: false, redirect: false, redirectURL: null }, { headers, status: 401 })
+                return Response.json({ success: false, redirect: false, redirectURL: null }, { headers, status: statusCode })
             },
         }
         if (isAuraAuthError(error) && error.code === "AUTH_CREDENTIALS_INVALID") {

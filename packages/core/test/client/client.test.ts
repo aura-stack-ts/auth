@@ -194,6 +194,7 @@ describe("createAuthClient", () => {
     })
 
     test("signInCredentials", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
         const post = vi.fn().mockResolvedValue(
             createJSONResponse({
                 success: true,
@@ -202,24 +203,29 @@ describe("createAuthClient", () => {
         )
 
         createClientMock.mockReturnValue({
-            get: vi.fn(),
+            get,
             post,
         })
 
         const client = createAuthClient({ baseURL: "https://example.com" })
         const response = await client.signInCredentials({ payload: { username: "user", password: "pass" } })
 
+        expect(get).toHaveBeenCalledWith("/csrfToken")
         expect(post).toHaveBeenCalledWith("/signIn/credentials", {
             body: { username: "user", password: "pass" },
             searchParams: {
                 redirect: false,
                 redirectTo: undefined,
             },
+            headers: {
+                "X-CSRF-Token": "csrf_token_1",
+            },
         })
         expect(response).toEqual({ success: true, redirectURL: "/" })
     })
 
     test("signInCredentials with redirectTo option", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
         const post = vi.fn().mockResolvedValue(
             createJSONResponse({
                 success: true,
@@ -227,7 +233,7 @@ describe("createAuthClient", () => {
             })
         )
         createClientMock.mockReturnValue({
-            get: vi.fn(),
+            get,
             post,
         })
         const client = createAuthClient({ baseURL: "https://example.com" })
@@ -236,17 +242,22 @@ describe("createAuthClient", () => {
             redirectTo: "/dashboard",
         })
 
+        expect(get).toHaveBeenCalledWith("/csrfToken")
         expect(post).toHaveBeenCalledWith("/signIn/credentials", {
             body: { username: "user", password: "pass" },
             searchParams: {
                 redirect: false,
                 redirectTo: "/dashboard",
             },
+            headers: {
+                "X-CSRF-Token": "csrf_token_1",
+            },
         })
         expect(response).toEqual({ success: true, redirectURL: "/dashboard" })
     })
 
     test("signInCredentials with invalid credentials", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
         const post = vi.fn().mockResolvedValue(
             createJSONResponse(
                 {
@@ -258,7 +269,7 @@ describe("createAuthClient", () => {
         )
 
         createClientMock.mockReturnValue({
-            get: vi.fn(),
+            get,
             post,
         })
 
@@ -270,6 +281,9 @@ describe("createAuthClient", () => {
             searchParams: {
                 redirect: false,
                 redirectTo: undefined,
+            },
+            headers: {
+                "X-CSRF-Token": "csrf_token_1",
             },
         })
         expect(response).toEqual({ success: false, redirectURL: null })
@@ -426,6 +440,7 @@ describe("createAuthClient", () => {
     })
 
     test("signUp", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
         const post = vi.fn().mockResolvedValue(
             createJSONResponse({
                 success: true,
@@ -434,7 +449,7 @@ describe("createAuthClient", () => {
         )
 
         createClientMock.mockReturnValue({
-            get: vi.fn(),
+            get,
             post,
         })
 
@@ -445,31 +460,40 @@ describe("createAuthClient", () => {
             redirect: true,
         })
 
+        expect(get).toHaveBeenCalledWith("/csrfToken")
         expect(post).toHaveBeenCalledWith("/signUp", {
             body: { username: "John", lastName: "Doe", password: "1234567890" },
             searchParams: {
                 redirectTo: "/welcome",
                 redirect: false,
             },
+            headers: {
+                "X-CSRF-Token": "csrf_token_1",
+            },
         })
     })
 
     test("signUp with error", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
         const post = vi.fn().mockThrow(/Error/)
 
         createClientMock.mockReturnValue({
-            get: vi.fn(),
+            get,
             post,
         })
 
         const client = createAuthClient({ baseURL: "https://example.com" })
         const response = await client.signUp({ payload: { username: "John", lastName: "Doe", password: "1234567890" } })
 
+        expect(get).toHaveBeenCalledWith("/csrfToken")
         expect(post).toHaveBeenCalledWith("/signUp", {
             body: { username: "John", lastName: "Doe", password: "1234567890" },
             searchParams: {
                 redirectTo: undefined,
                 redirect: false,
+            },
+            headers: {
+                "X-CSRF-Token": "csrf_token_1",
             },
         })
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
@@ -477,6 +501,8 @@ describe("createAuthClient", () => {
 
     test("signUp with redirect option", async () => {
         vi.stubGlobal("window", { location: { assign: vi.fn() } })
+
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
         const post = vi.fn().mockResolvedValue(
             createJSONResponse({
                 success: true,
@@ -486,7 +512,7 @@ describe("createAuthClient", () => {
         )
 
         createClientMock.mockReturnValue({
-            get: vi.fn(),
+            get,
             post,
         })
 
@@ -497,11 +523,15 @@ describe("createAuthClient", () => {
             redirect: true,
         })
 
+        expect(get).toHaveBeenCalledWith("/csrfToken")
         expect(post).toHaveBeenCalledWith("/signUp", {
             body: { username: "John", lastName: "Doe", password: "1234567890" },
             searchParams: {
                 redirectTo: "/welcome",
                 redirect: false,
+            },
+            headers: {
+                "X-CSRF-Token": "csrf_token_1",
             },
         })
         expect(window.location.assign).toHaveBeenCalledWith("/welcome")

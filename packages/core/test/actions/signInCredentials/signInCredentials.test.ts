@@ -89,7 +89,7 @@ describe("signInCredentials action", async () => {
             })
         )
         const data = await response.json()
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(500)
         expect(data).toEqual({
             success: false,
             redirect: false,

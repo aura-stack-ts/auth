@@ -11,17 +11,18 @@ export const signOut = async ({
     redirectTo,
     skipCSRFCheck = false,
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
+    let responseHeaders = new Headers(headersInit)
     try {
-        const headers = await ctx.sessionStrategy.destroySession(new Headers(headersInit), skipCSRFCheck)
+        responseHeaders = await ctx.sessionStrategy.destroySession(responseHeaders, skipCSRFCheck)
         let request = requestInit
         if (!request) {
-            const origin = await getBaseURL({ ctx, headers })
+            const origin = await getBaseURL({ ctx, headers: responseHeaders })
             const url = `${origin}${ctx.basePath}/signOut`
-            request = new Request(url, { headers })
+            request = new Request(url, { headers: responseHeaders })
         }
         await getOriginURL(request, ctx)
 
-        const headersBuilder = new HeadersBuilder(headers)
+        const headersBuilder = new HeadersBuilder(responseHeaders)
         let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx)
         redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
 
@@ -54,7 +55,7 @@ export const signOut = async ({
         }
         return {
             success: false,
-            headers: new Headers(headersInit),
+            headers: responseHeaders,
             redirect: false,
             redirectURL: null,
             error: { code, message },
@@ -65,7 +66,7 @@ export const signOut = async ({
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: new Headers(headersInit), status: statusCode }
+                    { headers: responseHeaders, status: statusCode }
                 )
             },
         }

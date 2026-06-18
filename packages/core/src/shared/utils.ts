@@ -161,7 +161,6 @@ export const verifyCSRFToken = async ({
     logger: InternalLogger | undefined
     jose: JoseInstance
 }): Promise<boolean> => {
-    let session = null
     let csrfToken = null
     const header = headers.get("X-CSRF-Token")
 
@@ -173,7 +172,6 @@ export const verifyCSRFToken = async ({
     }
     logger?.log("CSRF_TOKEN_REQUESTED", {
         structuredData: {
-            has_session: Boolean(session),
             has_csrf_token: Boolean(csrfToken),
             has_csrf_header: Boolean(header),
             skip_csrf_check: skipCSRFCheck,
