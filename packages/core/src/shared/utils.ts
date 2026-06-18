@@ -1,7 +1,11 @@
 import { getEnv } from "@/shared/env.ts"
+import { getCookie } from "@/cookie.ts"
+import { verifyCSRF } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
+import type { JWTManager } from "@/@types/session.ts"
+import type { CookieStoreConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
 
 export const AURA_AUTH_VERSION = "0.7.2"
 
@@ -112,4 +116,85 @@ export const toUnionHeaders = (init: Headers, headers: HeadersInit): Headers => 
         }
     })
     return init
+}
+
+export const verifySessionToken = async ({
+    headers,
+    cookies,
+    jwt,
+    logger,
+}: {
+    headers: Headers
+    jwt: JWTManager
+    cookies: CookieStoreConfig
+    logger: InternalLogger | undefined
+}) => {
+    let session = null
+    try {
+        session = getCookie(headers, cookies.sessionToken.name)
+    } catch (cause) {
+        logger?.log("SESSION_NOT_FOUND")
+        throw new AuraAuthError({ code: "SESSION_NOT_FOUND", cause })
+    }
+    if (!session) {
+        logger?.log("SESSION_NOT_FOUND")
+        throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
+    }
+    try {
+        await jwt.verifyToken(session)
+    } catch (error) {
+        logger?.log("INVALID_JWT_TOKEN", { structuredData: { error_type: getErrorName(error) } })
+        throw new AuraAuthError({ code: "SESSION_INVALID", cause: error })
+    }
+}
+
+export const verifyCSRFToken = async ({
+    headers,
+    skipCSRFCheck,
+    cookies,
+    logger,
+    jose,
+}: {
+    headers: Headers
+    skipCSRFCheck: boolean
+    cookies: CookieStoreConfig
+    logger: InternalLogger | undefined
+    jose: JoseInstance
+}): Promise<boolean> => {
+    let session = null
+    let csrfToken = null
+    const header = headers.get("X-CSRF-Token")
+
+    try {
+        csrfToken = getCookie(headers, cookies.csrfToken.name)
+    } catch (cause) {
+        logger?.log("CSRF_TOKEN_MISSING")
+        throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
+    }
+    logger?.log("CSRF_TOKEN_REQUESTED", {
+        structuredData: {
+            has_session: Boolean(session),
+            has_csrf_token: Boolean(csrfToken),
+            has_csrf_header: Boolean(header),
+            skip_csrf_check: skipCSRFCheck,
+        },
+    })
+    if (!skipCSRFCheck) {
+        if (!csrfToken) {
+            logger?.log("CSRF_TOKEN_MISSING")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+        }
+        if (!header) {
+            logger?.log("CSRF_HEADER_MISSING")
+            throw new AuraAuthError({ code: "CSRF_DOUBLE_SUBMIT_FAILED" })
+        }
+        try {
+            await verifyCSRF(jose, csrfToken, header)
+        } catch (error) {
+            logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
+        }
+        logger?.log("CSRF_TOKEN_VERIFIED")
+    }
+    return true
 }

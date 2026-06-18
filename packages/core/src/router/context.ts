@@ -7,6 +7,7 @@ import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import type { Identities, SchemaTypes } from "@/shared/identity.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
+import { createJoseManager } from "@/session/jose-manager.ts"
 
 export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>
@@ -48,6 +49,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
             skipValidation,
         },
         signUp: config?.signUp,
+        jwtManager: createJoseManager(config?.session?.jwt, jose),
     } as InternalContext<Identity, SignUpSchema>
     ctx.sessionStrategy = createSessionStrategy<Identity>({
         cookies: () => ctx.cookies,

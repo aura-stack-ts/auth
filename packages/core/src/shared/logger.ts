@@ -315,6 +315,12 @@ export const logMessages = {
         msgId: "SIGN_UP_SUCCESS",
         message: "User successfully signed up and authenticated",
     },
+    SESSION_NOT_FOUND: {
+        facility: 4,
+        severity: "error",
+        msgId: "SESSION_NOT_FOUND",
+        message: "Session token was not found in the request cookies",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

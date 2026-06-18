@@ -11,8 +11,8 @@ export const signOut = async ({
     redirectTo,
     skipCSRFCheck = false,
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
-    const headers = await ctx.sessionStrategy.destroySession(new Headers(headersInit), skipCSRFCheck)
     try {
+        const headers = await ctx.sessionStrategy.destroySession(new Headers(headersInit), skipCSRFCheck)
         let request = requestInit
         if (!request) {
             const origin = await getBaseURL({ ctx, headers })
@@ -46,13 +46,15 @@ export const signOut = async ({
     } catch (error) {
         let code = "SIGN_OUT_FAILED"
         let message = "Failed to sign-out session"
+        let statusCode = 400
         if (isAuraAuthError(error)) {
             code = error.code
             message = error.userMessage
+            statusCode = error.statusCode
         }
         return {
             success: false,
-            headers,
+            headers: new Headers(headersInit),
             redirect: false,
             redirectURL: null,
             error: { code, message },
@@ -63,7 +65,7 @@ export const signOut = async ({
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers, status: 400 }
+                    { headers: new Headers(headersInit), status: statusCode }
                 )
             },
         }

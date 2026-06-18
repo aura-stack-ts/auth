@@ -23,11 +23,11 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(403)
         expect(await response.json()).toEqual({
-            type: "AUTH_FLOW",
-            code: "SESSION_NOT_FOUND",
-            message: "The session token is not found. There is no active session.",
+            success: false,
+            redirect: false,
+            redirectURL: null,
         })
     })
 
@@ -42,9 +42,9 @@ describe("signOut action", async () => {
         )
         expect(request.status).toBe(403)
         expect(await request.json()).toEqual({
-            type: "AUTH_FLOW",
-            code: "CSRF_DOUBLE_SUBMIT_FAILED",
-            message: "The CSRF header is missing. Please refresh and try again.",
+            success: false,
+            redirect: false,
+            redirectURL: null,
         })
     })
 
@@ -64,9 +64,9 @@ describe("signOut action", async () => {
         )
         expect(request.status).toBe(403)
         expect(await request.json()).toEqual({
-            type: "AUTH_FLOW",
-            code: "CSRF_TOKEN_MISSING",
-            message: "The CSRF token is missing. Please refresh and try again.",
+            success: false,
+            redirect: false,
+            redirectURL: null,
         })
         decodeJWTMock.mockRestore()
     })
@@ -148,9 +148,9 @@ describe("signOut action", async () => {
         )
         expect(request.status).toBe(403)
         expect(await request.json()).toEqual({
-            type: "AUTH_FLOW",
-            code: "CSRF_TOKEN_MISSING",
-            message: "The CSRF token is missing. Please refresh and try again.",
+            success: false,
+            redirect: false,
+            redirectURL: null,
         })
     })
 

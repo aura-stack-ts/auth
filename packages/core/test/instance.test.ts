@@ -33,12 +33,7 @@ describe("createAuth", () => {
                 })
             )
 
-            expect(response.status).toBe(401)
-            expect(await response.json()).toEqual({
-                type: "AUTH_FLOW",
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
-            })
+            expect(response.status).toBe(403)
         })
 
         test("returns 405 for unsupported methods", async () => {

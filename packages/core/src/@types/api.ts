@@ -199,7 +199,8 @@ export type SignInCredentialsReturn<Options extends SignInCredentialsOptions> = 
     : void
 
 /** Server/programmatic credentials sign-in options. */
-export interface SignInCredentialsAPIOptions extends APIOptionsWithRedirectTo, APIOptionsWithRequest {
+export interface SignInCredentialsAPIOptions
+    extends APIOptionsWithRedirectTo, APIOptionsWithRequest, APIOptionsWithSkipCSRFCheck {
     /**
      * Credentials payload validated by the configured `credentials.authorize` function.
      * @example
@@ -286,7 +287,7 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User>
 export type UpdateSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<UpdateSessionReturnData<DefaultUser>>
 
 export interface SignUpAPIOptions<Payload extends Record<string, any> = Record<string, any>>
-    extends APIOptionsWithRedirectTo, APIOptionsWithRequest {
+    extends APIOptionsWithRedirectTo, APIOptionsWithRequest, APIOptionsWithSkipCSRFCheck {
     payload: Payload
 }
 

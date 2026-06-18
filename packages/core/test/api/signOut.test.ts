@@ -15,13 +15,20 @@ describe("signOut API", async () => {
     const csrfToken = await createCSRF(jose)
 
     test("invalid session", async () => {
-        await expect(
-            api.signOut({
-                headers: new Headers(),
-            })
-        ).rejects.toThrow(
-            /The context evaluation phase failed because the target identifier sessionToken could not be pulled from the cookies object context./
-        )
+        const out = await api.signOut({
+            headers: new Headers(),
+        })
+        expect(out).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "CSRF_TOKEN_MISSING",
+                message: "The CSRF token is missing. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
     })
 
     test("signOut with valid session token", async () => {

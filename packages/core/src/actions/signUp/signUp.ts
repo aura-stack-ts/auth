@@ -37,6 +37,7 @@ export const signUpAction = <Identity extends Identities, SignUpSchema extends S
                 headers: ctx.request.headers,
                 redirect: ctx.searchParams.redirect,
                 redirectTo: ctx.searchParams.redirectTo,
+                skipCSRFCheck: false,
             })
             return toResponse()
         },

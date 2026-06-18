@@ -3,6 +3,7 @@ import { getSetCookie } from "@/cookie.ts"
 import { api, jose } from "@test/presets.ts"
 import { createAuth } from "@/createAuth.ts"
 import type { User } from "@/index.ts"
+import { createCSRF } from "@/shared/crypto.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -19,11 +20,18 @@ const payload = {
     password: "1234567890",
 }
 
-describe("signUp API", () => {
+describe("signUp API", async () => {
+    const csrfToken = await createCSRF(jose)
+
+    const headers = {
+        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+    }
+
     test("success signUp flow", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const signUp = await api.signUp({
+            headers,
             payload,
         })
         expect(signUp).toEqual({
@@ -52,6 +60,7 @@ describe("signUp API", () => {
             },
         })
         const output = await api.signUp({
+            headers,
             payload,
         })
         expect(output).toEqual({
@@ -81,6 +90,7 @@ describe("signUp API", () => {
             },
         })
         const output = await api.signUp({
+            headers,
             payload,
         })
         expect(output).toEqual({
@@ -99,6 +109,7 @@ describe("signUp API", () => {
 
     test("signUp without URL configuration", async () => {
         const signUp = await api.signUp({
+            headers,
             payload: {},
         })
         expect(signUp).toEqual({
@@ -118,6 +129,7 @@ describe("signUp API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const output = await api.signUp({
+            headers,
             payload,
             redirect: true,
             redirectTo: "/dashboard",
@@ -136,6 +148,7 @@ describe("signUp API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const output = await api.signUp({
+            headers,
             payload,
             redirect: true,
             redirectTo: "https://example.com/dashboard",
@@ -154,6 +167,7 @@ describe("signUp API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const output = await api.signUp({
+            headers,
             payload,
             redirect: false,
             redirectTo: "/dashboard",
@@ -172,6 +186,7 @@ describe("signUp API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const output = await api.signUp({
+            headers,
             payload,
             redirect: true,
             redirectTo: "https://malicious.com/dashboard",
@@ -190,6 +205,7 @@ describe("signUp API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const output = await api.signUp({
+            headers,
             payload,
             redirect: false,
             redirectTo: "https://malicious.com/dashboard",

@@ -1,5 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { signInCredentials } from "@/api/credentials.ts"
+import { signInCredentials } from "@/api/signInCredentials.ts"
 import { RedirectOptionsSchema, CredentialsPayloadSchema } from "@/schemas.ts"
 
 const config = createEndpointConfig({
