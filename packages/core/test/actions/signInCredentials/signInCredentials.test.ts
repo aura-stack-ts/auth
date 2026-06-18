@@ -1,7 +1,8 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
-import { POST } from "@test/presets.ts"
+import { jose, POST } from "@test/presets.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
+import { createCSRF } from "@/shared/crypto.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -11,11 +12,20 @@ afterEach(() => {
     vi.unstubAllEnvs()
 })
 
-describe("signInCredentials action", () => {
+describe("signInCredentials action", async () => {
+    const csrfToken = await createCSRF(jose)
+
+    const headers = {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+    }
+
     test("success signIn flow", async () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
+                headers,
                 body: JSON.stringify({
                     username: "johndoe",
                     password: "1234567890",
@@ -41,6 +51,7 @@ describe("signInCredentials action", () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
+                headers,
                 body: JSON.stringify({
                     username: "johndoe",
                     password: "wrongpassword",
@@ -70,6 +81,7 @@ describe("signInCredentials action", () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
+                headers,
                 body: JSON.stringify({
                     username: "johndoe",
                     password: "1234567890",
@@ -77,7 +89,7 @@ describe("signInCredentials action", () => {
             })
         )
         const data = await response.json()
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(500)
         expect(data).toEqual({
             success: false,
             redirect: false,
@@ -107,6 +119,7 @@ describe("signInCredentials action", () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
+                headers,
                 body: JSON.stringify({
                     username: "johndoe",
                     password: "1234567890",
@@ -130,6 +143,7 @@ describe("signInCredentials action", () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
+                headers,
                 body: JSON.stringify({
                     username: "alice",
                     password: "1234567890",
@@ -150,6 +164,7 @@ describe("signInCredentials action", () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials?redirectTo=/dashboard", {
                 method: "POST",
+                headers,
                 body: JSON.stringify({
                     username: "alice",
                     password: "1234567890",
@@ -169,6 +184,7 @@ describe("signInCredentials action", () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials?redirect=false", {
                 method: "POST",
+                headers,
                 body: JSON.stringify({
                     username: "alice",
                     password: "1234567890",
@@ -187,6 +203,7 @@ describe("signInCredentials action", () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials?redirect=false&redirectTo=/dashboard", {
                 method: "POST",
+                headers,
                 body: JSON.stringify({
                     username: "alice",
                     password: "1234567890",

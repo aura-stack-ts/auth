@@ -72,7 +72,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * })
          */
         signInCredentials: async (options: SignInCredentialsAPIOptions): Promise<SignInCredentialsAPIReturn> => {
-            return signInCredentials({ ctx, ...options })
+            return signInCredentials({ ctx, ...options, skipCSRFCheck: true })
         },
         /**
          * Signs up a new user on the server-side. It requires a `payload` with the necessary information for
@@ -96,7 +96,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
         signUp: async <Payload extends Record<string, any> = InferSignUp<SignUpSchema>>(
             options: SignUpAPIOptions<Payload>
         ): Promise<SignUpAPIReturn> => {
-            return signUp({ ctx, ...options })
+            return signUp({ ctx, ...options, skipCSRFCheck: true })
         },
         /**
          * Updates the current session on the server-side. It allows partial updates to the session object, such as

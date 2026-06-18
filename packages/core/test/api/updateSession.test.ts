@@ -1,9 +1,10 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
 import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
-import { api, jose } from "@test/presets.ts"
+import { api, jose, sessionPayload } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { UserIdentity } from "@/shared/identity.ts"
+import { getSetCookie } from "@/cookie.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -320,5 +321,93 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+    })
+
+    test("privilege escalation attempt is prevented when updating session", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const originalExpiration = new Date(Date.now() + 1000 * 60 * 60).getTime() / 1000
+        const sessionToken = await jose.encodeJWT({
+            ...sessionPayload,
+            exp: originalExpiration,
+            admin: false,
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: {
+                user: {
+                    sub: "0987-alter-claims",
+                    exp: attackerExpiration,
+                    admin: true,
+                } as any,
+            },
+        })
+
+        expect(updated).toEqual({
+            session: {
+                user: sessionPayload,
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
+        expect(decoded.sub).toBe(sessionPayload.sub)
+        expect(decoded.sub).not.toBe("0987-alter-claims")
+        // It contains the original claims but not the escalated ones
+        expect(decoded.exp).not.toEqual(attackerExpiration)
+        expect(decoded).not.toHaveProperty("admin")
+    })
+
+    test("arbitrary session lifetime extension is prevented when updating session", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const originalExpiration = new Date(Date.now() + 1000 * 60 * 60).getTime() / 1000
+        const sessionToken = await jose.encodeJWT({
+            ...sessionPayload,
+            exp: originalExpiration,
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: {
+                expires: new Date(attackerExpiration * 1000).toISOString(),
+            },
+        })
+
+        expect(updated).toEqual({
+            session: {
+                user: sessionPayload,
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const sessionExpiration = Math.floor(new Date(updated.session!.expires!).getTime() / 1000)
+        const fifteenDaysFromNow = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 15
+
+        expect(sessionExpiration).not.toBe(attackerExpiration)
+        expect(sessionExpiration).toBeLessThanOrEqual(fifteenDaysFromNow)
+
+        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
+        expect(decoded.exp).not.toEqual(attackerExpiration)
+        expect(decoded.exp).toBeLessThanOrEqual(fifteenDaysFromNow)
     })
 })

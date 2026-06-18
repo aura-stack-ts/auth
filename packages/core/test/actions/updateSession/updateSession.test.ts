@@ -1,7 +1,8 @@
+import { getSetCookie } from "@/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { UserIdentityArkType, UserIdentityValibot } from "@/shared/identity.ts"
-import { jose, PATCH } from "@test/presets.ts"
+import { jose, PATCH, sessionPayload } from "@test/presets.ts"
 import { describe, test, expect } from "vitest"
 
 describe("updateSession action", () => {
@@ -347,5 +348,100 @@ describe("updateSession action", () => {
             redirect: false,
             redirectURL: null,
         })
+    })
+
+    test("privilege escalation attempt is prevented when updating session", async () => {
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 60).getTime() / 1000
+        const sessionToken = await jose.encodeJWT({
+            ...sessionPayload,
+            exp: expiresAt,
+            admin: false,
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const expiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session?redirect=false", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({
+                    user: {
+                        /**
+                         * Sub can't be overwritten (its the unique identifier that can't be changed)
+                         */
+                        sub: "0987-alter-claims",
+                        /** Expiration override must be made from the body.expires */
+                        exp: expiration,
+                        admin: true,
+                    },
+                }),
+            })
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            session: {
+                user: sessionPayload,
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+
+        const decoded = await jose.decodeJWT(getSetCookie(response, "aura-auth.session_token")!)
+        expect(decoded.sub).toBe(sessionPayload.sub)
+        expect(decoded.sub).not.toBe("0987-alter-claims")
+        // It contains the original claims but not the escalated ones
+        expect(decoded.exp).not.toEqual(expiration)
+        expect(decoded).not.toHaveProperty("admin")
+    })
+
+    test("arbitrary session lifetime extension is prevented when updating session", async () => {
+        const originalExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 5
+
+        const sessionToken = await jose.encodeJWT({
+            ...sessionPayload,
+            exp: originalExpiration, // 5 hour from now
+        })
+        const csrfToken = await createCSRF(jose)
+
+        const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session?redirect=false", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({
+                    expires: new Date(attackerExpiration * 1000).toISOString(),
+                }),
+            })
+        )
+
+        expect(response.status).toBe(200)
+        const session = await response.json()
+        expect(session).toEqual({
+            session: {
+                user: sessionPayload,
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+        const sessionExpiration = Math.floor(new Date(session.session.expires).getTime() / 1000)
+        const fifteenDaysFromNow = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 15
+
+        expect(sessionExpiration).not.toBe(attackerExpiration)
+        expect(sessionExpiration).toBeLessThanOrEqual(fifteenDaysFromNow)
+
+        const decoded = await jose.decodeJWT(getSetCookie(response, "aura-auth.session_token")!)
+        expect(decoded.exp).not.toEqual(attackerExpiration)
+        expect(decoded.exp).toBeLessThanOrEqual(fifteenDaysFromNow)
     })
 })

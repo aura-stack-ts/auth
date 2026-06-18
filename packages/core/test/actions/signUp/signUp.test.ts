@@ -1,7 +1,8 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
 import { z } from "zod/v4"
-import { POST } from "@test/presets.ts"
+import { jose, POST } from "@test/presets.ts"
 import { createAuth } from "@/createAuth.ts"
+import { createCSRF } from "@/shared/crypto.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -18,14 +19,20 @@ const payload = {
     password: "1234567890",
 }
 
-describe("signUp API", () => {
+describe("signUp API", async () => {
+    const csrfToken = await createCSRF(jose)
+
+    const headers = {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+        Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; Secure; HttpOnly; SameSite=Strict; Path=/`,
+    }
+
     test("success signUp flow", async () => {
         const response = await POST(
             new Request("https://example.com/auth/signUp", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers,
                 body: JSON.stringify(payload),
             })
         )
@@ -49,13 +56,11 @@ describe("signUp API", () => {
         const response = await handlers.POST(
             new Request("https://example.com/auth/signUp", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers,
                 body: JSON.stringify(payload),
             })
         )
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(500)
         expect(await response.json()).toEqual({
             success: false,
             redirect: false,
@@ -79,9 +84,7 @@ describe("signUp API", () => {
         const response = await handlers.POST(
             new Request("https://example.com/auth/signUp", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers,
                 body: JSON.stringify({
                     name: "John Doe",
                     lastName: "Doe",
@@ -125,9 +128,7 @@ describe("signUp API", () => {
         const response = await handlers.POST(
             new Request("https://example.com/auth/signUp", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers,
                 body: JSON.stringify({
                     name: "John Doe",
                     lastName: "Doe",
@@ -148,6 +149,7 @@ describe("signUp API", () => {
         const response = await POST(
             new Request("https://example.com/auth/signUp?redirect=true&redirectTo=/dashboard", {
                 method: "POST",
+                headers,
                 body: JSON.stringify(payload),
             })
         )
@@ -164,6 +166,7 @@ describe("signUp API", () => {
         const response = await POST(
             new Request("https://example.com/auth/signUp?redirect=false", {
                 method: "POST",
+                headers,
                 body: JSON.stringify(payload),
             })
         )
@@ -180,6 +183,7 @@ describe("signUp API", () => {
         const response = await POST(
             new Request("https://example.com/auth/signUp?redirect=false&redirectTo=/dashboard", {
                 method: "POST",
+                headers,
                 body: JSON.stringify(payload),
             })
         )
@@ -196,6 +200,7 @@ describe("signUp API", () => {
         const response = await POST(
             new Request("https://example.com/auth/signUp?redirect=true&redirectTo=http://malicious.com", {
                 method: "POST",
+                headers,
                 body: JSON.stringify(payload),
             })
         )
@@ -212,6 +217,7 @@ describe("signUp API", () => {
         const response = await POST(
             new Request("https://example.com/auth/signUp?redirect=false&redirectTo=http://malicious.com", {
                 method: "POST",
+                headers,
                 body: JSON.stringify(payload),
             })
         )

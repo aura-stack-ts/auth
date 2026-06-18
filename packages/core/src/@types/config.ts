@@ -7,7 +7,7 @@ import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
-import type { JWTKey, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
+import type { JWTKey, JWTManager, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
 import type { InferSchema } from "@aura-stack/router"
 import type { ZodObject } from "zod"
 
@@ -426,6 +426,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     sessionStrategy: SessionStrategy<DefaultUser>
     identity: SchemaRegistryContext
     signUp?: SignUpConfig<DefaultUser, SignUpSchema>
+    jwtManager: JWTManager<DefaultUser>
 }
 
 export interface SchemaRegistryContext {

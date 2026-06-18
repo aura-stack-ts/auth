@@ -1,4 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
+import { verifyCSRFToken } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
@@ -12,9 +13,17 @@ export const signInCredentials = async ({
     headers: headerInit,
     redirect = true,
     redirectTo,
+    skipCSRFCheck = false,
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, sessionStrategy, logger } = ctx
     try {
+        await verifyCSRFToken({
+            headers: new Headers(headerInit),
+            cookies,
+            jose: ctx.jose,
+            logger: ctx.logger,
+            skipCSRFCheck,
+        })
         let request = requestInit
         if (!request) {
             const origin = await getBaseURL({ ctx, headers: headerInit })
@@ -62,9 +71,11 @@ export const signInCredentials = async ({
     } catch (error) {
         let code = "CREDENTIALS_SIGN_IN_ERROR"
         let message = "An error occurred during credentials sign-in."
+        let statusCode = 401
         if (isAuraAuthError(error)) {
             code = error.code
             message = error.userMessage
+            statusCode = error.statusCode
         }
         const headers = new Headers(secureApiHeaders)
         const invalidCredentials: SignInCredentialsAPIReturn = {
@@ -74,7 +85,7 @@ export const signInCredentials = async ({
             redirectURL: null,
             error: { code, message },
             toResponse: () => {
-                return Response.json({ success: false, redirect: false, redirectURL: null }, { headers, status: 401 })
+                return Response.json({ success: false, redirect: false, redirectURL: null }, { headers, status: statusCode })
             },
         }
         if (isAuraAuthError(error) && error.code === "AUTH_CREDENTIALS_INVALID") {

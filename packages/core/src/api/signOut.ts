@@ -11,17 +11,18 @@ export const signOut = async ({
     redirectTo,
     skipCSRFCheck = false,
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
-    const headers = await ctx.sessionStrategy.destroySession(new Headers(headersInit), skipCSRFCheck)
+    let responseHeaders = new Headers(headersInit)
     try {
+        responseHeaders = await ctx.sessionStrategy.destroySession(responseHeaders, skipCSRFCheck)
         let request = requestInit
         if (!request) {
-            const origin = await getBaseURL({ ctx, headers })
+            const origin = await getBaseURL({ ctx, headers: responseHeaders })
             const url = `${origin}${ctx.basePath}/signOut`
-            request = new Request(url, { headers })
+            request = new Request(url, { headers: responseHeaders })
         }
         await getOriginURL(request, ctx)
 
-        const headersBuilder = new HeadersBuilder(headers)
+        const headersBuilder = new HeadersBuilder(responseHeaders)
         let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx)
         redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
 
@@ -46,13 +47,15 @@ export const signOut = async ({
     } catch (error) {
         let code = "SIGN_OUT_FAILED"
         let message = "Failed to sign-out session"
+        let statusCode = 400
         if (isAuraAuthError(error)) {
             code = error.code
             message = error.userMessage
+            statusCode = error.statusCode
         }
         return {
             success: false,
-            headers,
+            headers: responseHeaders,
             redirect: false,
             redirectURL: null,
             error: { code, message },
@@ -63,7 +66,7 @@ export const signOut = async ({
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers, status: 400 }
+                    { headers: responseHeaders, status: statusCode }
                 )
             },
         }

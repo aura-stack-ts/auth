@@ -1,6 +1,4 @@
-import { getCookie } from "@/cookie.ts"
-import { verifyCSRF } from "@/shared/crypto.ts"
-import { getErrorName } from "@/shared/utils.ts"
+import { verifyCSRFToken, getErrorName, verifySessionToken } from "@/shared/utils.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import type {
@@ -11,8 +9,8 @@ import type {
     JWTStrategyOptions,
     GetStatelessSessionReturn,
     DeepPartial,
+    JoseInstance,
 } from "@/@types/index.ts"
-import { AuraAuthError } from "@/shared/errors.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({
     config,
@@ -44,64 +42,6 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             }
             default:
                 return null
-        }
-    }
-
-    const verifyCSRFToken = async (headers: Headers, skipCSRFCheck: boolean = false): Promise<boolean> => {
-        let session = null
-        let csrfToken = null
-        const header = headers.get("X-CSRF-Token")
-        try {
-            session = getCookie(headers, cookies().sessionToken.name)
-        } catch (cause) {
-            //throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
-            throw new AuraAuthError({ code: "SESSION_NOT_FOUND", cause })
-        }
-        try {
-            csrfToken = getCookie(headers, cookies().csrfToken.name)
-        } catch (cause) {
-            //throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
-            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
-        }
-        logger?.log("CSRF_TOKEN_REQUESTED", {
-            structuredData: {
-                has_session: Boolean(session),
-                has_csrf_token: Boolean(csrfToken),
-                has_csrf_header: Boolean(header),
-                skip_csrf_check: skipCSRFCheck,
-            },
-        })
-        if (!session) {
-            logger?.log("SESSION_TOKEN_MISSING")
-            //throw new AuthSecurityError("SESSION_TOKEN_MISSING", "The sessionToken is missing.")
-            throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
-        }
-        if (!skipCSRFCheck) {
-            if (!csrfToken) {
-                logger?.log("CSRF_TOKEN_MISSING")
-                //throw new AuthSecurityError("CSRF_TOKEN_MISSING", "The CSRF token is missing.")
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
-            if (!header) {
-                logger?.log("CSRF_HEADER_MISSING")
-                //throw new AuthSecurityError("CSRF_HEADER_MISSING", "The CSRF header is missing.")
-                throw new AuraAuthError({ code: "CSRF_DOUBLE_SUBMIT_FAILED" })
-            }
-            try {
-                await verifyCSRF(jose, csrfToken, header)
-            } catch (error) {
-                logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
-                //throw new AuthSecurityError("CSRF_TOKEN_INVALID", "CSRF token verification failed")
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
-            }
-            logger?.log("CSRF_TOKEN_VERIFIED")
-        }
-        try {
-            await jose.decodeJWT(session)
-            return true
-        } catch (error) {
-            logger?.log("INVALID_JWT_TOKEN", { structuredData: { error_type: getErrorName(error) } })
-            return false
         }
     }
 
@@ -173,20 +113,28 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             if (!sessionToken) {
                 return { session: null, headers: cookieConfig.clear() }
             }
-            const isValidToken = await verifyCSRFToken(headers, skipCSRFCheck)
+            const isValidToken = await verifyCSRFToken({
+                headers,
+                skipCSRFCheck,
+                cookies: cookies(),
+                logger,
+                jose: jose as JoseInstance,
+            })
             if (!isValidToken) {
                 return { session: null, headers: cookieConfig.clear() }
             }
             const claims = await jwt.verifyToken(sessionToken)
+            const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
 
-            const defaultPayload = identity.skipValidation ? claims : await identity.schemaRegistry.parse(claims)
-            const { exp, mexp, sub, iat } = defaultPayload
+            const { exp, mexp, iat } = parsedClaims
+            const defaultPayload = identity.skipValidation ? parsedClaims : await identity.schemaRegistry.parse(parsedClaims)
+            const { sub } = defaultPayload
             const sessionPayload = identity.skipValidation
                 ? session.user
                 : await identity.schemaRegistry.parseAsPartial(session.user)
 
             const expiresAt = session.expires
-                ? new Date(session.expires)
+                ? new Date(Math.min(Date.now() + maxAge * 1000, new Date(session.expires).getTime()))
                 : (updateExpires({ exp }) ?? new Date(Date.now() + maxAge * 1000))
             const updatedSession: Session<DefaultUser> = {
                 user: {
@@ -196,9 +144,10 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 } as DefaultUser,
                 expires: expiresAt.toISOString(),
             }
+            const verifiedPayload = await identity.schemaRegistry.parse(updatedSession.user)
             const issuedAt = strategy === "absolute" ? iat : Math.floor(Date.now() / 1000)
             const newToken = await jwt.createToken({
-                ...updatedSession.user,
+                ...verifiedPayload,
                 exp: Math.floor(expiresAt.getTime() / 1000),
                 iat: issuedAt,
                 mexp,
@@ -215,7 +164,8 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
     const revokeSession = async (_sessionId: string): Promise<void> => {}
 
     const destroySession = async (headers: Headers, skipCSRFCheck: boolean = false) => {
-        await verifyCSRFToken(headers, skipCSRFCheck)
+        await verifyCSRFToken({ headers, skipCSRFCheck, cookies: cookies(), logger, jose: jose as JoseInstance })
+        await verifySessionToken({ headers, cookies: cookies(), jwt, logger })
         return cookieConfig.clear()
     }
 

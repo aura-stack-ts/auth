@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { api, jose } from "@test/presets.ts"
+import { createCSRF } from "@/shared/crypto.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -11,11 +12,18 @@ afterEach(() => {
     vi.unstubAllEnvs()
 })
 
-describe("signInCredentials API", () => {
+describe("signInCredentials API", async () => {
+    const csrfToken = await createCSRF(jose)
+
+    const headers = {
+        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+    }
+
     test("success signIn flow", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const signIn = await api.signInCredentials({
+            headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
@@ -45,6 +53,7 @@ describe("signInCredentials API", () => {
             },
         })
         const { success } = await api.signInCredentials({
+            headers,
             payload: {
                 username: "johndoe",
                 password: "wrongpassword",
@@ -65,6 +74,7 @@ describe("signInCredentials API", () => {
             },
         })
         const signIn = await api.signInCredentials({
+            headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
@@ -102,6 +112,7 @@ describe("signInCredentials API", () => {
             },
         })
         const signIn = await api.signInCredentials({
+            headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
@@ -123,6 +134,7 @@ describe("signInCredentials API", () => {
 
     test("signIn without URL configuration", async () => {
         const { success } = await api.signInCredentials({
+            headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
@@ -135,6 +147,7 @@ describe("signInCredentials API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const signIn = await api.signInCredentials({
+            headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
@@ -157,6 +170,7 @@ describe("signInCredentials API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const signIn = await api.signInCredentials({
+            headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
@@ -177,6 +191,7 @@ describe("signInCredentials API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const signIn = await api.signInCredentials({
+            headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
@@ -198,6 +213,7 @@ describe("signInCredentials API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const signIn = await api.signInCredentials({
+            headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",

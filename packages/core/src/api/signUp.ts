@@ -1,5 +1,6 @@
 import { createCSRF } from "@/shared/crypto.ts"
 import { HeadersBuilder } from "@aura-stack/router"
+import { verifyCSRFToken } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
@@ -12,9 +13,18 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     request: requestInit,
     redirect = true,
     redirectTo,
+    skipCSRFCheck = false,
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
     const { signUp, cookies, sessionStrategy, logger } = ctx
     try {
+        await verifyCSRFToken({
+            headers: new Headers(headersInit),
+            cookies,
+            jose: ctx.jose,
+            logger: logger,
+            skipCSRFCheck,
+        })
+
         let request = requestInit
         if (!request) {
             const origin = await getBaseURL({ ctx, headers: headersInit })
@@ -64,9 +74,11 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     } catch (error) {
         let code = "SIGN_UP_ERROR"
         let message = "An error occurred during sign-up."
+        let statusCode = 400
         if (isAuraAuthError(error)) {
             code = error.code
             message = error.userMessage
+            statusCode = error.statusCode
         }
 
         return {
@@ -85,7 +97,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: secureApiHeaders, status: 400 }
+                    { headers: secureApiHeaders, status: statusCode }
                 )
             },
         }
