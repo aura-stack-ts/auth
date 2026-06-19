@@ -8,6 +8,7 @@ import type {
     AsymmetricKeyPair,
     AsymmetricKeyPairFromEnv,
     CryptoSecret,
+    InternalLogger,
     JWTConfig,
     JWTMode,
     JWTPayloadWithToken,
@@ -15,6 +16,7 @@ import type {
     SessionConfig,
 } from "@/@types/index.ts"
 import type { JWK } from "@aura-stack/jose/jose"
+import { AuraAuthError } from "./errors.ts"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
@@ -225,4 +227,14 @@ export const isCustomUserInfoFunction = (value: OAuthProviderConfig["userInfo"])
         "request" in value &&
         typeof value.request === "function"
     )
+}
+
+export const assertContentTypeResponse = (response: Response, logger?: InternalLogger | undefined) => {
+    const contentType = response.headers.get("Content-Type")
+    if (!contentType?.includes("application/json")) {
+        logger?.log("OAUTH_INVALID_CONTENT_TYPE", {
+            structuredData: { content_type: contentType! },
+        })
+        throw new AuraAuthError({ code: "OAUTH_INVALID_CONTENT_TYPE" })
+    }
 }

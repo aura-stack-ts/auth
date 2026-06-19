@@ -1,5 +1,6 @@
 import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
 import { HeadersBuilder } from "@aura-stack/router"
+import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"
@@ -24,6 +25,15 @@ export const signIn = async (
             const origin = await getBaseURL({ ctx, headers })
             const url = `${origin}${ctx.basePath}/signIn/${oauth}`
             request = new Request(url, { headers })
+        }
+
+        const rateLimit = await verifyRateLimit(ctx, request, "signIn")
+
+        if (rateLimit) {
+            /**
+             * Rate Limiting is not returning the expected body.
+             */
+            return rateLimit as unknown as SignInAPIReturn
         }
 
         if (redirect === false) {

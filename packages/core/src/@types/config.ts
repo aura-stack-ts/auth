@@ -3,13 +3,15 @@ import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { UserIdentity, type Identities, type SchemaTypes } from "@/shared/identity.ts"
+import type { ZodObject } from "zod"
+import type { InferSchema } from "@aura-stack/router"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
+import type { InferRules, RateLimiterRule } from "@aura-stack/rate-limiter/types"
 import type { JWTKey, JWTManager, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
-import type { InferSchema } from "@aura-stack/router"
-import type { ZodObject } from "zod"
+import type { RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter"
 
 /**
  * Main configuration interface for Aura Auth.
@@ -164,6 +166,10 @@ export type AuthConfig<Identity extends Identities, SignUpSchema extends SchemaT
      * and required callback for user creation.
      */
     signUp?: SignUpConfig<Identity, SignUpSchema>
+    /**
+     * Rate limiter configuration to protect authentication endpoints from DoS/DDoS attacks.
+     */
+    rateLimiter?: RateLimiterConfig
 } & TrustedProxyHeadersConfig
 
 // @todo Should trustedOrigins support subdomain wildcards like `https://*.example.com`?
@@ -427,6 +433,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     identity: SchemaRegistryContext
     signUp?: SignUpConfig<DefaultUser, SignUpSchema>
     jwtManager: JWTManager<DefaultUser>
+    rateLimiters: InferRules<Required<RateLimiterConfig>>
 }
 
 export interface SchemaRegistryContext {
@@ -499,3 +506,9 @@ export interface SignUpConfig<Identity extends Identities, SignUpSchema extends 
         context: OnCreateUserContext<SignUpSchema>
     ) => Promise<FromShapeToObject<Identity> | null> | FromShapeToObject<Identity> | null
 }
+
+// #region Rate Limiter
+
+export type RateLimiterConfig = Partial<
+    RaterLimiterBaseConfig<Record<"signIn" | "signInCredentials" | "updateSession" | "signUp", RateLimiterRule>>["rules"]
+>

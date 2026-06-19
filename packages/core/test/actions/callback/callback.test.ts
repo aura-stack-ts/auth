@@ -129,11 +129,17 @@ describe("callbackAction", () => {
 
         mockFetch.mockResolvedValueOnce({
             ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
             json: async () => accessTokenMock,
         })
 
         mockFetch.mockResolvedValueOnce({
             ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
             json: async () => userInfoMock,
         })
 
@@ -225,11 +231,17 @@ describe("callbackAction", () => {
 
         mockFetch.mockResolvedValueOnce({
             ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
             json: async () => accessTokenMock,
         })
 
         mockFetch.mockResolvedValueOnce({
             ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
             json: async () => userInfoMock,
         })
 
@@ -327,11 +339,17 @@ describe("callbackAction", () => {
 
         mockFetch.mockResolvedValueOnce({
             ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
             json: async () => accessTokenMock,
         })
 
         mockFetch.mockResolvedValueOnce({
             ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
             json: async () => userInfoMock,
         })
 

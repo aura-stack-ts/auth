@@ -25,6 +25,9 @@ describe("createAccessToken", async () => {
             "fetch",
             vi.fn(async () => ({
                 ok: true,
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
                 json: async () => mockResponse,
             }))
         )
@@ -88,6 +91,9 @@ describe("createAccessToken", async () => {
             "fetch",
             vi.fn(async () => ({
                 ok: true,
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
                 json: async () => mockResponse,
             }))
         )
@@ -121,6 +127,9 @@ describe("createAccessToken", async () => {
             "fetch",
             vi.fn(async () => ({
                 ok: true,
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
                 json: async () => mockResponse,
             }))
         )

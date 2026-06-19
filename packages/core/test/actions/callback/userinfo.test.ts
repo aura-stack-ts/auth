@@ -17,6 +17,9 @@ describe("getUserInfo", () => {
             "fetch",
             vi.fn(async () => ({
                 ok: true,
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
                 json: async () => mockResponse,
             }))
         )
@@ -49,6 +52,9 @@ describe("getUserInfo", () => {
             "fetch",
             vi.fn(async () => ({
                 ok: true,
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
                 json: async () => mockResponse,
             }))
         )
@@ -99,6 +105,9 @@ describe("getUserInfo", () => {
             "fetch",
             vi.fn(async () => ({
                 ok: true,
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
                 json: async () => mockResponse,
             }))
         )

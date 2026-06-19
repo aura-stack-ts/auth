@@ -2,6 +2,7 @@ import { createCSRF } from "@/shared/crypto.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { verifyCSRFToken } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
+import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
@@ -31,6 +32,12 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             const url = `${origin}${ctx.basePath}/signUp`
             request = new Request(url, { headers: headersInit })
         }
+
+        const rateLimit = await verifyRateLimit(ctx, request, "signUp")
+        if (rateLimit) {
+            return rateLimit as SignUpAPIReturn
+        }
+
         await getOriginURL(request, ctx)
         const user = await signUp?.onCreateUser({
             payload,

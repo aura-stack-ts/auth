@@ -2,6 +2,7 @@ import { fetchAsync } from "@/shared/fetch-async.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.ts"
 import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.ts"
+import { assertContentTypeResponse } from "@/shared/assert.ts"
 
 /**
  * Make a request to the OAuth provider to the token endpoint to exchange the authorization code provided
@@ -67,6 +68,7 @@ export const createAccessToken = async (
             logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
             throw new AuraAuthError({ code: "INVALID_OAUTH_ACCESS_TOKEN_RESPONSE" })
         }
+        assertContentTypeResponse(response, logger)
         const json = await response.json()
         const token = OAuthAccessTokenResponse.safeParse(json)
         if (!token.success) {

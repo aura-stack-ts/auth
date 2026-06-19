@@ -61,6 +61,14 @@ const auth = createAuth({
             } as User
         },
     },
+    rateLimiter: {
+        signIn: {
+            algorithm: "fixed-window",
+            limit: 5,
+            windowMs: 60 * 1000,
+            keyGenerator: () => "",
+        },
+    },
 })
 
 export const {

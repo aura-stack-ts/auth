@@ -7,6 +7,7 @@ import { createJoseManager } from "@/session/jose-manager.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
+import { createRateLimiterInstance } from "@/router/rate-limiter.ts"
 import type { Identities, SchemaTypes } from "@/shared/identity.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
 
@@ -60,6 +61,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         },
         signUp: config?.signUp,
         jwtManager: createJoseManager(config?.session?.jwt, jose),
+        rateLimiters: createRateLimiterInstance(config?.rateLimiter),
     } as InternalContext<Identity, SignUpSchema>
     ctx.sessionStrategy = createSessionStrategy<Identity>({
         cookies: () => ctx.cookies,

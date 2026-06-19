@@ -105,6 +105,7 @@
   "license": "MIT",
   "dependencies": {
     "@aura-stack/jose": "workspace:*",
+    "@aura-stack/rate-limiter": "workspace:*",
     "@aura-stack/router": "^0.9.0",
     "arktype": "^2.2.0",
     "typebox": "^1.1.38",
