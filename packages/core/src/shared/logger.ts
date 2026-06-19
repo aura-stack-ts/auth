@@ -321,6 +321,12 @@ export const logMessages = {
         msgId: "SESSION_NOT_FOUND",
         message: "Session token was not found in the request cookies",
     },
+    OAUTH_INVALID_CONTENT_TYPE: {
+        facility: 10,
+        severity: "error",
+        msgId: "OAUTH_INVALID_CONTENT_TYPE",
+        message: "OAuth endpoint returned an invalid Content-Type header",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

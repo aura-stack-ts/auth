@@ -94,10 +94,10 @@ export const verifyCSRF = async <DefaultUser extends User = User>(
  *
  * @param password - The password to hash.
  * @param salt - Optional salt (base64url encoded). If not provided, a random salt will be generated.
- * @param iterations - The number of PBKDF2 iterations. Default is 100,000.
+ * @param iterations - The number of PBKDF2 iterations. Default is 600,000.
  * @returns The hashed password in the format `iterations:salt:hash` (all segments base64url encoded).
  */
-export const hashPassword = async (password: string, salt?: string, iterations = 100000) => {
+export const hashPassword = async (password: string, salt?: string, iterations = 600_000) => {
     const subtle = getSubtleCrypto()
     const saltBuffer = (salt ? base64url.decode(salt) : getRandomBytes(16)) as Uint8Array<ArrayBuffer>
     const baseKey = await subtle.importKey("raw", encoder.encode(password) as Uint8Array<ArrayBuffer>, "PBKDF2", false, [

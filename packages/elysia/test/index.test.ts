@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { app, auth } from "./presets.ts"
+import { createCSRF } from "@aura-stack/auth/crypto"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
@@ -96,9 +97,15 @@ describe("GET /api/protected", () => {
 
 describe("POST /api/auth/signIn/credentials", () => {
     test("returns 401 when invalid credentials are provided", async () => {
+        const csrfToken = await createCSRF(auth.jose)
+
         const res = await app.handle(
             new Request("http://localhost/api/auth/signIn/credentials", {
                 method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                },
                 body: JSON.stringify({ username: "invalid", password: "invalid" }),
             })
         )
@@ -111,11 +118,15 @@ describe("POST /api/auth/signIn/credentials", () => {
     })
 
     test("returns 200 and a session cookie when valid credentials are provided", async () => {
+        const csrfToken = await createCSRF(auth.jose)
+
         const res = await app.handle(
             new Request("http://localhost/api/auth/signIn/credentials", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ username: "valid", password: "valid" }),
             })

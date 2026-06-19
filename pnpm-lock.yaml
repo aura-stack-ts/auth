@@ -691,6 +691,9 @@ importers:
       '@aura-stack/jose':
         specifier: workspace:*
         version: link:../jose
+      '@aura-stack/rate-limiter':
+        specifier: workspace:*
+        version: link:../rate-limiter
       '@aura-stack/router':
         specifier: ^0.9.0
         version: 0.9.0(arktype@2.2.0)(typebox@1.1.38)(valibot@1.4.0(typescript@5.9.3))(zod@4.3.5)

@@ -83,6 +83,8 @@ export const AuraErrorCode = {
     DUPLICATED_OAUTH_PROVIDER_ID: "DUPLICATED_OAUTH_PROVIDER_ID",
     INVALID_ENVIRONMENT_CONFIGURATION: "INVALID_ENVIRONMENT_CONFIGURATION",
     PKCE_VERIFIER_INVALID: "PKCE_VERIFIER_INVALID",
+    OAUTH_INVALID_CONTENT_TYPE: "OAUTH_INVALID_CONTENT_TYPE",
+
     /**
      * Schema Errors
      */
@@ -644,6 +646,15 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
             "Security assertion failed during instantiation: 'trustedProxyHeaders' was enabled, but 'trustedOrigins' is completely empty or undefined. Real proxy networks require explicit origin mapping rules to mitigate host-header hijacking and cache-poisoning vectors.",
         userMessage:
             "Internal configuration failure. Enabling trusted proxy headers requires an explicit trusted origins array setup.",
+    },
+    OAUTH_INVALID_CONTENT_TYPE: {
+        type: "PROTOCOL",
+        statusCode: 502,
+        name: "OAuthError",
+        message:
+            "The remote identity provider endpoint returned an invalid Content-Type header. Expected 'application/json', but received an incompatible format (e.g., text/html). This usually indicates an upstream server error, proxy block, or provider outage.",
+        userMessage:
+            "The identity provider returned an unreadable response format. Please try again or check the provider status.",
     },
     /**
      * Schema Errors

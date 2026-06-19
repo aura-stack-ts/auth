@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Integrated `@aura-stack/rate-limiter` into authentication flows. Rate limiting is now enforced for `signIn`, `signInCredentials`, `signUp`, and `updateSession` actions, providing built-in protection against abuse and excessive requests. [#194](https://github.com/aura-stack-ts/auth/pull/194)
+
 - Extended `UserFrom` to support type inference from `ArkType` and `Valibot` schemas. User types are now inferred correctly for `Zod`, `ArkType`, and `Valibot` schema definitions. [#191](https://github.com/aura-stack-ts/auth/pull/191)
 
 - Added `InferSignUp`, a utility type for inferring the sign-up payload from `createAuth().signUp.schema`. This type can be reused as the second generic parameter of `createAuthClient()` to ensure consistent typing between server and client authentication configurations. [#190](https://github.com/aura-stack-ts/auth/pull/190)

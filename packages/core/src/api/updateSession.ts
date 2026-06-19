@@ -3,6 +3,7 @@ import { secureApiHeaders } from "@/shared/headers.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
+import { verifyRateLimit } from "@/router/rate-limiter.ts"
 
 export const updateSession = async <DefaultUser extends User = User>({
     ctx,
@@ -32,6 +33,11 @@ export const updateSession = async <DefaultUser extends User = User>({
             request = new Request(url, { headers: newHeaders })
         }
         await getOriginURL(request, ctx)
+
+        const rateLimit = await verifyRateLimit(ctx, request, "updateSession")
+        if (rateLimit) {
+            return rateLimit as UpdateSessionAPIReturn<DefaultUser>
+        }
 
         let redirectURL: string | null = await createRedirectTo(request, redirectToInit, ctx)
         redirectURL = redirectToInit ? redirectURL : redirectURL === "/" ? null : redirectURL

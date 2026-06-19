@@ -82,6 +82,8 @@ describe("toHandler", () => {
     })
 
     test("POST /auth/signIn/credentials", async () => {
+        const csrfToken = await createCSRF(auth.jose)
+
         const { res } = await createHandler({
             method: "POST",
             url: "/auth/signIn/credentials",
@@ -89,6 +91,8 @@ describe("toHandler", () => {
                 Host: "localhost:3000",
                 "X-Forwarded-Proto": "http",
                 "Content-Type": "application/json",
+                "X-CSRF-Token": csrfToken,
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
             },
             body: {
                 username: "john.doe",
@@ -119,9 +123,10 @@ describe("toHandler", () => {
         })
         expect(res.statusCode).toBe(422)
         expect(res._getJSONData()).toEqual({
-            type: "ROUTER_ERROR",
-            code: "INVALID_REQUEST",
-            message: {
+            type: "VALIDATION",
+            code: "UNPROCESSABLE_ENTITY",
+            message: "The request body or parameter schema layout contains input format errors.",
+            details: {
                 password: {
                     code: "invalid_type",
                     message: "Invalid input: expected string, received undefined",

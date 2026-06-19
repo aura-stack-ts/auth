@@ -5,6 +5,7 @@ import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
 import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { FunctionAPIContext, SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
+import { verifyRateLimit } from "@/router/rate-limiter.ts"
 
 export const signInCredentials = async ({
     ctx,
@@ -30,6 +31,12 @@ export const signInCredentials = async ({
             const url = `${origin}${ctx.basePath}/signIn/credentials`
             request = new Request(url, { headers: headerInit })
         }
+
+        const rateLimit = await verifyRateLimit(ctx, request, "signInCredentials")
+        if (rateLimit) {
+            return rateLimit as SignInCredentialsAPIReturn
+        }
+
         await getOriginURL(request, ctx)
 
         const session = await credentials?.authorize({

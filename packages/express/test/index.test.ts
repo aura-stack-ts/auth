@@ -1,6 +1,7 @@
 import { describe, test, expect } from "vitest"
 import supertest from "supertest"
 import { app, auth } from "./presets.ts"
+import { createCSRF } from "@aura-stack/auth/crypto"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
@@ -86,9 +87,13 @@ describe("GET /api/protected", () => {
 
 describe("POST /api/auth/signIn/credentials", () => {
     test("returns 401 when invalid credentials are provided", async () => {
+        const csrfToken = await createCSRF(auth.jose)
+
         const response = await supertest(app)
             .post("/api/auth/signIn/credentials")
             .send({ username: "invalid", password: "invalid" })
+            .set("X-CSRF-Token", csrfToken)
+            .set("Cookie", `aura-auth.csrf_token=${csrfToken}`)
         expect(response.status).toBe(401)
         expect(response.body).toMatchObject({
             success: false,
@@ -97,7 +102,13 @@ describe("POST /api/auth/signIn/credentials", () => {
     })
 
     test("returns 200 and a session cookie when valid credentials are provided", async () => {
-        const response = await supertest(app).post("/api/auth/signIn/credentials").send({ username: "valid", password: "valid" })
+        const csrfToken = await createCSRF(auth.jose)
+
+        const response = await supertest(app)
+            .post("/api/auth/signIn/credentials")
+            .send({ username: "valid", password: "valid" })
+            .set("X-CSRF-Token", csrfToken)
+            .set("Cookie", `aura-auth.csrf_token=${csrfToken}`)
         expect(response.status).toBe(200)
         expect(response.body).toMatchObject({
             success: true,
@@ -109,9 +120,13 @@ describe("POST /api/auth/signIn/credentials", () => {
 
 describe("PATCH /api/auth/session", () => {
     test("returns 401 when no session cookie is present", async () => {
+        const csrfToken = await createCSRF(auth.jose)
+
         const response = await supertest(app)
             .patch("/api/auth/session")
             .send({ user: { name: "Jane Doe" } })
+            .set("X-CSRF-Token", csrfToken)
+            .set("Cookie", `aura-auth.csrf_token=${csrfToken}`)
         expect(response.status).toBe(400)
         expect(response.body).toMatchObject({
             session: null,

@@ -8,7 +8,7 @@ import type {
     OAuthProviderCredentials,
     User,
 } from "@/@types/index.ts"
-import { isCustomUserInfoFunction } from "@/shared/assert.ts"
+import { assertContentTypeResponse, isCustomUserInfoFunction } from "@/shared/assert.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 
 /**
@@ -61,6 +61,7 @@ const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: s
             throw new AuraAuthError({ code: "INVALID_OAUTH_USER_INFO_RESPONSE" })
         }
 
+        assertContentTypeResponse(response, logger)
         const json = await response.json()
         const { success, data } = OAuthErrorResponse.safeParse(json)
         if (success) {
