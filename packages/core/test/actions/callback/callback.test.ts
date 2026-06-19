@@ -1,5 +1,8 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
-import { GET, jose, oauthCustomService } from "@test/presets.ts"
+import { GET, jose, oauthCustomService, openIDCustomProvider, openIDMetadata, RS256PEMFormat } from "@test/presets.ts"
+import { clearResolvedProviderCache } from "@/actions/oidc/resolve-provider.ts"
+import { clearJWKSCache } from "@/actions/oidc/jwks.ts"
+import { SignJWT, exportJWK, importPKCS8, importSPKI } from "@aura-stack/jose/jose"
 import { createPKCE } from "@/shared/crypto.ts"
 import { setCookie, getSetCookie } from "@/cookie.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
@@ -254,7 +257,7 @@ describe("callbackAction", () => {
             oauth: [
                 {
                     ...oauthCustomService,
-                    profile: (profile) => ({
+                    profile: (profile: Record<string, string>) => ({
                         sub: profile.id,
                         email: profile.email,
                         name: profile.name,
@@ -362,7 +365,7 @@ describe("callbackAction", () => {
             oauth: [
                 {
                     ...oauthCustomService,
-                    profile: (profile) => ({
+                    profile: (profile: Record<string, string>) => ({
                         sub: profile.id,
                         email: profile.email,
                         name: profile.name,
@@ -432,6 +435,97 @@ describe("callbackAction", () => {
             image: "https://example.com/john-doe.jpg",
             extra_info: "extra_value",
             email_verified: true,
+        })
+    })
+
+    test("OIDC callback workflow with id_token validation", async () => {
+        clearResolvedProviderCache()
+        clearJWKSCache()
+
+        const nonce = "oidc-callback-nonce"
+        const privateKey = await importPKCS8(RS256PEMFormat.privateKey, "RS256")
+        const publicKey = await importSPKI(RS256PEMFormat.publicKey, "RS256")
+        const jwk = await exportJWK(publicKey)
+        const now = Math.floor(Date.now() / 1000)
+        const id_token = await new SignJWT({ sub: "user-123", nonce })
+            .setProtectedHeader({ alg: "RS256", kid: "test-kid" })
+            .setIssuer("https://id.example.com")
+            .setAudience("oidc_client_id")
+            .setIssuedAt(now)
+            .setExpirationTime(now + 3600)
+            .sign(privateKey)
+
+        const mockFetch = vi.fn(async (url: string) => {
+            if (url.includes("openid-configuration")) {
+                return {
+                    ok: true,
+                    headers: new Headers({ "Content-Type": "application/json" }),
+                    json: async () => openIDMetadata,
+                }
+            }
+            if (url.includes("/oauth/token")) {
+                return {
+                    ok: true,
+                    headers: new Headers({ "Content-Type": "application/json" }),
+                    json: async () => ({
+                        access_token: "access_123",
+                        id_token,
+                        token_type: "Bearer",
+                    }),
+                }
+            }
+            if (url.includes("/oauth/jwks")) {
+                return {
+                    ok: true,
+                    headers: new Headers({ "Content-Type": "application/json" }),
+                    json: async () => ({ keys: [{ ...jwk, kid: "test-kid", use: "sig", alg: "RS256" }] }),
+                }
+            }
+            if (url.includes("userinfo")) {
+                return {
+                    ok: true,
+                    headers: new Headers({ "Content-Type": "application/json" }),
+                    json: async () => ({
+                        sub: "user-123",
+                        email: "john@example.com",
+                        name: "John Doe",
+                        picture: "https://example.com/pic.jpg",
+                    }),
+                }
+            }
+            throw new Error(`Unexpected fetch: ${url}`)
+        })
+        vi.stubGlobal("fetch", mockFetch)
+
+        const oidcGET = createAuth({ oauth: [openIDCustomProvider] }).handlers.GET
+
+        const state = setCookie("__Secure-aura-auth.state", "abc")
+        const redirectURI = setCookie("__Secure-aura-auth.redirect_uri", "https://example.com/auth/callback/oidc-provider")
+        const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth")
+        const { codeVerifier } = await createPKCE()
+        const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier)
+        const nonceCookie = setCookie("__Secure-aura-auth.nonce", nonce)
+
+        const response = await oidcGET(
+            new Request("https://example.com/auth/callback/oidc-provider?code=auth_code_123&state=abc", {
+                headers: {
+                    Cookie: [state, redirectURI, redirectTo, codeVerifierCookie, nonceCookie].join("; "),
+                },
+            })
+        )
+
+        expect(response.status).toBe(302)
+        expect(mockFetch).toHaveBeenCalledWith(openIDMetadata.token_endpoint, expect.objectContaining({ method: "POST" }))
+        expect(mockFetch).toHaveBeenCalledWith(openIDMetadata.userinfo_endpoint, expect.objectContaining({ method: "GET" }))
+
+        expect(getSetCookie(response, "__Secure-aura-auth.session_token")).toBeDefined()
+
+        const session = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
+        expect(session).toMatchObject({
+            sub: "user-123",
+            email: "john@example.com",
+            name: "John Doe",
+            image: "https://example.com/pic.jpg",
         })
     })
 })

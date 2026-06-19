@@ -14,6 +14,25 @@ export const oauthCustomService: OAuthProviderCredentials = {
     clientSecret: "oauth_client_secret",
 }
 
+export const openIDCustomProvider = {
+    id: "oidc-provider",
+    name: "OIDC",
+    issuer: "https://id.example.com",
+    clientId: "oidc_client_id",
+    clientSecret: "oidc_client_secret",
+}
+
+export const openIDMetadata = {
+    issuer: "https://id.example.com",
+    authorization_endpoint: "https://id.example.com/oauth/authorize",
+    token_endpoint: "https://id.example.com/oauth/token",
+    userinfo_endpoint: "https://id.example.com/oauth/userinfo",
+    jwks_uri: "https://id.example.com/oauth/jwks",
+    grant_types_supported: ["authorization_code"],
+    subject_types_supported: ["public"],
+    id_token_signing_alg_values_supported: ["RS256"],
+}
+
 export const oauthCustomServiceProfile: OAuthProviderCredentials = {
     ...oauthCustomService,
     id: "oauth-profile",

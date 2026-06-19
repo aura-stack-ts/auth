@@ -1,4 +1,4 @@
-import { object, string, enum as options, number, z, null as nullable, union, array } from "zod/v4"
+import { object, string, enum as options, number, z, null as nullable, union, array, boolean } from "zod/v4"
 
 const AuthorizeConfigSchema = z.union([
     string().url(),
@@ -172,3 +172,122 @@ export const CredentialsPayloadSchema = object({
     username: string(),
     password: string(),
 })
+
+/**
+ * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
+ */
+export const OpenIDMetadataSchema = object({
+    issuer: string().url(),
+    authorization_endpoint: string().url(),
+    token_endpoint: string().url(),
+    userinfo_endpoint: string().url(),
+    jwks_uri: string().url(),
+    registration_endpoint: string().url().optional(),
+    scopes_supported: array(string()).optional(),
+    response_types_supported: array(string()).optional(),
+    response_modes_supported: array(string()).optional(),
+    grant_types_supported: array(string()),
+    acr_values_supported: array(string()).optional(),
+    subject_types_supported: array(string()),
+    id_token_signing_alg_values_supported: array(string()),
+    id_token_encryption_alg_values_supported: array(string()).optional(),
+    id_token_encryption_enc_values_supported: array(string()).optional(),
+    userinfo_signing_alg_values_supported: array(string()).optional(),
+    userinfo_encryption_alg_values_supported: array(string()).optional(),
+    userinfo_encryption_enc_values_supported: array(string()).optional(),
+    request_object_signing_alg_values_supported: array(string()).optional(),
+    request_object_encryption_alg_values_supported: array(string()).optional(),
+    request_object_encryption_enc_values_supported: array(string()).optional(),
+    token_endpoint_auth_methods_supported: array(string()).optional(),
+    token_endpoint_auth_signing_alg_values_supported: array(string()).optional(),
+    display_values_supported: array(string()).optional(),
+    claim_types_supported: array(string()).optional(),
+    claims_supported: array(string()).optional(),
+    service_documentation: string().url().optional(),
+    claims_locales_supported: array(string()).optional(),
+    ui_locales_supported: array(string()).optional(),
+    claims_parameter_supported: boolean().optional(),
+    request_parameter_supported: boolean().optional(),
+    request_uri_parameter_supported: boolean().optional(),
+    require_request_uri_registration: boolean().optional(),
+    op_policy_uri: string().url().optional(),
+    op_tos_uri: string().url().optional(),
+}).passthrough()
+
+export const OpenIDProviderSchema = object({
+    id: string(),
+    name: string(),
+    issuer: string().url(),
+    clientId: string().optional(),
+    clientSecret: string().optional(),
+    scope: string().optional(),
+    profile: z.function().optional(),
+})
+
+/**
+ * @see https://datatracker.ietf.org/doc/html/rfc7517
+ */
+export const JWKSchema = object({
+    kty: string(),
+    kid: string().optional(),
+    use: string().optional(),
+    alg: string().optional(),
+    n: string().optional(),
+    e: string().optional(),
+    x: string().optional(),
+    y: string().optional(),
+    crv: string().optional(),
+}).passthrough()
+
+export const JWKSResponseSchema = object({
+    keys: array(JWKSchema),
+})
+
+export const OIDCAccessTokenResponseSchema = object({
+    access_token: string(),
+    token_type: string().optional(),
+    expires_in: number().optional(),
+    refresh_token: string().optional(),
+    scope: union([string().optional().or(nullable()), array(string()).optional()]),
+    id_token: string().optional(),
+})
+
+/**
+ * @see https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+ */
+export const OIDCUserInfoSchema = object({
+    sub: string(),
+    name: string().optional(),
+    given_name: string().optional(),
+    family_name: string().optional(),
+    middle_name: string().optional(),
+    nickname: string().optional(),
+    preferred_username: string().optional(),
+    profile: string().url().optional(),
+    picture: string().url().optional(),
+    website: string().url().optional(),
+    email: string().optional(),
+    email_verified: boolean().optional(),
+    gender: string().optional(),
+    birthdate: string().optional(),
+    zoneinfo: string().optional(),
+    locale: string().optional(),
+    phone_number: string().optional(),
+    phone_number_verified: boolean().optional(),
+    address: z.record(string(), z.unknown()).optional(),
+    updated_at: number().optional(),
+}).passthrough()
+
+/**
+ * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+ */
+export const IDTokenClaimsSchema = object({
+    iss: string(),
+    sub: string(),
+    aud: z.union([string(), array(string())]),
+    exp: number(),
+    iat: number(),
+    nonce: string().optional(),
+    azp: string().optional(),
+    auth_time: number().optional(),
+}).passthrough()

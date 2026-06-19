@@ -3,7 +3,8 @@
  *
  * This modules re-exports OAuth providers available in Aura Auth to be used in the Auth instance configuration.
  */
-import { type LiteralUnion, type OAuthProviderCredentials } from "@/@types/index.ts"
+import { type LiteralUnion, type RuntimeOAuthProvider } from "@/@types/index.ts"
+import type { OpenIDProvider } from "@/@types/oidc.ts"
 import { getEnv } from "@/shared/env.ts"
 import { github } from "./github.ts"
 import { bitbucket } from "./bitbucket.ts"
@@ -22,8 +23,9 @@ import { atlassian } from "./atlassian.ts"
 import { clickUp } from "./click-up.ts"
 import { dribbble } from "./dribbble.ts"
 import { hubspot } from "./hubspot.ts"
-import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
+import { OAuthEnvSchema, OAuthProviderCredentialsSchema, OpenIDProviderSchema } from "@/schemas.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
+import { createOpenIDPlaceholder } from "@/actions/oidc/resolve-provider.ts"
 
 export * from "./github.ts"
 export * from "./bitbucket.ts"
@@ -85,7 +87,23 @@ const defineOAuthEnvironment = (oauth: string) => {
     return loadEnvs.data
 }
 
-const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderCredentials) => {
+const isOpenIDProvider = (config: BuiltInOAuthProvider | RuntimeOAuthProvider | OpenIDProvider): config is OpenIDProvider => {
+    return typeof config === "object" && "issuer" in config && !("accessToken" in config)
+}
+
+const defineOpenIDProviderConfig = (config: OpenIDProvider): RuntimeOAuthProvider => {
+    const parsed = OpenIDProviderSchema.safeParse(config)
+    if (!parsed.success) {
+        throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_SCHEMA_CONFIG", cause: parsed.error })
+    }
+    const hasCredentials = config.clientId && config.clientSecret
+    const envConfig = hasCredentials
+        ? { clientId: config.clientId!, clientSecret: config.clientSecret! }
+        : defineOAuthEnvironment(config.id)
+    return createOpenIDPlaceholder(config, envConfig)
+}
+
+const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | RuntimeOAuthProvider | OpenIDProvider) => {
     if (typeof config === "string") {
         const definition = defineOAuthEnvironment(config)
         const oauthConfig = builtInOAuthProviders[config]()
@@ -94,6 +112,9 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
             throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_SCHEMA_CONFIG", cause: parsed.error })
         }
         return parsed.data
+    }
+    if (isOpenIDProvider(config)) {
+        return defineOpenIDProviderConfig(config)
     }
     const hasCredentials = config.clientId && config.clientSecret
     const envConfig = hasCredentials ? {} : defineOAuthEnvironment(config.id)
@@ -117,7 +138,9 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderC
  * // Using built-in provider with explicit credentials via factory
  * createBuiltInOAuthProviders([github({ clientId: "...", clientSecret: "..." })])
  */
-export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any>)[] = []) => {
+export const createBuiltInOAuthProviders = (
+    oauth: (BuiltInOAuthProvider | RuntimeOAuthProvider<any> | OpenIDProvider)[] = []
+) => {
     return oauth.reduce((previous, config) => {
         const oauthConfig = defineOAuthProviderConfig(config)
         if (oauthConfig.id in previous) {
@@ -127,7 +150,7 @@ export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuth
             })
         }
         return { ...previous, [oauthConfig.id]: oauthConfig }
-    }, {}) as Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials<any>>
+    }, {}) as Record<LiteralUnion<BuiltInOAuthProvider>, RuntimeOAuthProvider<any>>
 }
 
 export type BuiltInOAuthProvider = keyof typeof builtInOAuthProviders

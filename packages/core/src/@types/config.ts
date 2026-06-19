@@ -9,6 +9,7 @@ import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
+import type { OpenIDProvider } from "@/@types/oidc.ts"
 import type { InferRules, RateLimiterRule } from "@aura-stack/rate-limiter/types"
 import type { JWTKey, JWTManager, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
 import type { RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter"
@@ -49,7 +50,11 @@ export type AuthConfig<Identity extends Identities, SignUpSchema extends SchemaT
      * ```
      */
     // @todo: add type inference for built-in providers
-    oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any, FromShapeToObject<Identity>>)[]
+    oauth: (
+        | BuiltInOAuthProvider
+        | OAuthProviderCredentials<any, FromShapeToObject<Identity>>
+        | OpenIDProvider<any, FromShapeToObject<Identity>>
+    )[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -290,7 +295,7 @@ export type CookieStrategyAttributes = StandardCookie | SecureCookie | HostCooki
  * - `redirectURI`: OAuth callback URI
  * - `redirectTo`: Post-authentication redirect path
  */
-export type CookieName = "sessionToken" | "csrfToken" | "state" | "codeVerifier" | "redirectTo" | "redirectURI"
+export type CookieName = "sessionToken" | "csrfToken" | "state" | "codeVerifier" | "redirectTo" | "redirectURI" | "nonce"
 
 /** Resolved cookie names and serialization attributes for each logical auth cookie. */
 export type CookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>

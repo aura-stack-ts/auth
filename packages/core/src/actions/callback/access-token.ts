@@ -1,8 +1,9 @@
 import { fetchAsync } from "@/shared/fetch-async.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse } from "@/schemas.ts"
-import type { InternalLogger, OAuthProviderCredentials } from "@/@types/index.ts"
 import { assertContentTypeResponse } from "@/shared/assert.ts"
+import { isOIDCProvider } from "@/actions/oidc/resolve-provider.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
+import { OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/schemas.ts"
+import type { InternalLogger, RuntimeOAuthProvider, OAuthAccessTokenResponseType } from "@/@types/index.ts"
 
 /**
  * Make a request to the OAuth provider to the token endpoint to exchange the authorization code provided
@@ -16,12 +17,12 @@ import { assertContentTypeResponse } from "@/shared/assert.ts"
  * @returns The access token response from the OAuth server
  */
 export const createAccessToken = async (
-    oauthConfig: OAuthProviderCredentials,
+    oauthConfig: RuntimeOAuthProvider,
     redirectURI: string,
     code: string,
     codeVerifier: string,
     logger?: InternalLogger
-) => {
+): Promise<OAuthAccessTokenResponseType & { id_token?: string }> => {
     const { accessToken, clientId, clientSecret } = oauthConfig
     if (!clientId || !clientSecret || !redirectURI || !code || !codeVerifier || !accessToken) {
         logger?.log("INVALID_OAUTH_CONFIGURATION", {
@@ -70,7 +71,8 @@ export const createAccessToken = async (
         }
         assertContentTypeResponse(response, logger)
         const json = await response.json()
-        const token = OAuthAccessTokenResponse.safeParse(json)
+        const tokenSchema = isOIDCProvider(oauthConfig) ? OIDCAccessTokenResponseSchema : OAuthAccessTokenResponse
+        const token = tokenSchema.safeParse(json)
         if (!token.success) {
             const { success, data } = OAuthAccessTokenErrorResponse.safeParse(json)
             if (!success) {
