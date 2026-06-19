@@ -231,7 +231,8 @@ export const isCustomUserInfoFunction = (value: OAuthProviderConfig["userInfo"])
 
 export const assertContentTypeResponse = (response: Response, logger?: InternalLogger | undefined) => {
     const contentType = response.headers.get("Content-Type")
-    if (!contentType?.includes("application/json")) {
+    const mediaType = contentType?.split(";")[0]?.trim().toLowerCase()
+    if (mediaType !== "application/json") {
         logger?.log("OAUTH_INVALID_CONTENT_TYPE", {
             structuredData: { content_type: contentType! },
         })

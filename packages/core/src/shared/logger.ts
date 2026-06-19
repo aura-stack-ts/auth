@@ -325,7 +325,7 @@ export const logMessages = {
         facility: 10,
         severity: "error",
         msgId: "OAUTH_INVALID_CONTENT_TYPE",
-        message: "OAuth token endpoint returned an invalid Content-Type header",
+        message: "OAuth endpoint returned an invalid Content-Type header",
     },
 } as const
 

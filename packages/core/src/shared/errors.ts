@@ -652,7 +652,7 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         statusCode: 502,
         name: "OAuthError",
         message:
-            "The remote identity provider token exchange endpoint returned an invalid Content-Type header. Expected 'application/json' or 'application/x-www-form-urlencoded', but received a non-JSON formatted alternative (e.g., text/html). This usually indicates an upstream server error, proxy block, or provider outage.",
+            "The remote identity provider endpoint returned an invalid Content-Type header. Expected 'application/json', but received an incompatible format (e.g., text/html). This usually indicates an upstream server error, proxy block, or provider outage.",
         userMessage:
             "The identity provider returned an unreadable response format. Please try again or check the provider status.",
     },

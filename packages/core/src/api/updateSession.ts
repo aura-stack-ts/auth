@@ -34,7 +34,7 @@ export const updateSession = async <DefaultUser extends User = User>({
         }
         await getOriginURL(request, ctx)
 
-        const rateLimit = await verifyRateLimit(ctx, request, "signIn")
+        const rateLimit = await verifyRateLimit(ctx, request, "updateSession")
         if (rateLimit) {
             return rateLimit as UpdateSessionAPIReturn<DefaultUser>
         }

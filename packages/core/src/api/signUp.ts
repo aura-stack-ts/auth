@@ -18,6 +18,19 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
     const { signUp, cookies, sessionStrategy, logger } = ctx
     try {
+        let request = requestInit
+        if (!request) {
+            const origin = await getBaseURL({ ctx, headers: headersInit })
+            const url = `${origin}${ctx.basePath}/signUp`
+            request = new Request(url, { headers: headersInit })
+        }
+        await getOriginURL(request, ctx)
+
+        const rateLimit = await verifyRateLimit(ctx, request, "signUp")
+        if (rateLimit) {
+            return rateLimit as SignUpAPIReturn
+        }
+
         await verifyCSRFToken({
             headers: new Headers(headersInit),
             cookies,
@@ -26,19 +39,6 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             skipCSRFCheck,
         })
 
-        let request = requestInit
-        if (!request) {
-            const origin = await getBaseURL({ ctx, headers: headersInit })
-            const url = `${origin}${ctx.basePath}/signUp`
-            request = new Request(url, { headers: headersInit })
-        }
-
-        const rateLimit = await verifyRateLimit(ctx, request, "signUp")
-        if (rateLimit) {
-            return rateLimit as SignUpAPIReturn
-        }
-
-        await getOriginURL(request, ctx)
         const user = await signUp?.onCreateUser({
             payload,
         })

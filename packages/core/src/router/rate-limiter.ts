@@ -1,6 +1,5 @@
-import type { RateLimiterConfig, RouterGlobalContext } from "@/@types/config.ts"
-import { secureApiHeaders } from "@/shared/headers.ts"
 import { createRateLimiter, type RateLimiterRule } from "@aura-stack/rate-limiter"
+import type { RateLimiterConfig, RouterGlobalContext } from "@/@types/config.ts"
 
 export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
     const getLimitKey = (request: Request, action: string): string => {
@@ -52,26 +51,7 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
 export const verifyRateLimit = async (ctx: RouterGlobalContext, request: Request, action: keyof RateLimiterConfig) => {
     const rateLimit = await ctx.rateLimiters[action].check(request)
     if (!rateLimit.ok) {
-        const response = rateLimit.toResponse()
-        const headersList = new Headers(secureApiHeaders)
-        response.headers.forEach((v: string, k: string) => headersList.set(k, v))
-        return {
-            success: false,
-            redirect: false,
-            redirectURL: null,
-            error: { code: "RATE_LIMIT_EXCEEDED", message: "Too many requests." },
-            headers: headersList,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { status: 429, headers: headersList }
-                )
-            },
-        }
+        return rateLimit.toResponse()
     }
     return undefined
 }
