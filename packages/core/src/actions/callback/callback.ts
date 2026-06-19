@@ -93,7 +93,10 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
 
             const accessToken = await createAccessToken(resolvedConfig, cookieRedirectURI, code, codeVerifier, logger)
 
-            if (isOIDC && accessToken.id_token) {
+            if (isOIDC) {
+                if (!accessToken.id_token) {
+                    throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
+                }
                 const { issuer, jwks_uri } = resolvedConfig.oidc!
                 if (!jwks_uri || !cookieNonce || !resolvedConfig.clientId) {
                     throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })

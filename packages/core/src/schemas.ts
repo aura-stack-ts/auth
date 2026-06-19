@@ -186,7 +186,7 @@ export const OpenIDMetadataSchema = object({
     scopes_supported: array(string()).optional(),
     response_types_supported: array(string()).optional(),
     response_modes_supported: array(string()).optional(),
-    grant_types_supported: array(string()),
+    grant_types_supported: array(string()).optional(),
     acr_values_supported: array(string()).optional(),
     subject_types_supported: array(string()),
     id_token_signing_alg_values_supported: array(string()),

@@ -4,7 +4,13 @@ import { fetchAsync } from "@/shared/fetch-async.ts"
 import { assertContentTypeResponse } from "@/shared/assert.ts"
 import { JWKSResponseSchema } from "@/schemas.ts"
 
-const jwksVerifierCache = new Map<string, JWTVerifyGetKey>()
+interface CachedVerifier {
+    verifier: JWTVerifyGetKey
+    fetchedAt: number
+}
+
+const jwksVerifierCache = new Map<string, CachedVerifier>()
+const JWKS_CACHE_TTL_MS = 5 * 60 * 1000
 
 export const fetchJWKS = async (jwks_uri: string) => {
     let response: Response
@@ -33,11 +39,16 @@ export const fetchJWKS = async (jwks_uri: string) => {
 }
 
 export const getJWKSVerifier = async (jwks_uri: string): Promise<JWTVerifyGetKey> => {
-    if (!jwksVerifierCache.has(jwks_uri)) {
+    const cached = jwksVerifierCache.get(jwks_uri)
+    const expired = !cached || Date.now() - cached.fetchedAt > JWKS_CACHE_TTL_MS
+    if (expired) {
         const keys = await fetchJWKS(jwks_uri)
-        jwksVerifierCache.set(jwks_uri, createLocalJWKSet({ keys }))
+        jwksVerifierCache.set(jwks_uri, {
+            verifier: createLocalJWKSet({ keys }),
+            fetchedAt: Date.now(),
+        })
     }
-    return jwksVerifierCache.get(jwks_uri)!
+    return jwksVerifierCache.get(jwks_uri)!.verifier
 }
 
 export const ensureJWKSValidated = async (jwks_uri: string): Promise<JWTVerifyGetKey> => {

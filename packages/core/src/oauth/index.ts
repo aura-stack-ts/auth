@@ -96,11 +96,11 @@ const defineOpenIDProviderConfig = (config: OpenIDProvider): RuntimeOAuthProvide
     if (!parsed.success) {
         throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_SCHEMA_CONFIG", cause: parsed.error })
     }
-    const hasCredentials = config.clientId && config.clientSecret
-    const envConfig = hasCredentials
-        ? { clientId: config.clientId!, clientSecret: config.clientSecret! }
-        : defineOAuthEnvironment(config.id)
-    return createOpenIDPlaceholder(config, envConfig)
+    const envConfig = !config.clientId || !config.clientSecret ? defineOAuthEnvironment(config.id) : undefined
+    return createOpenIDPlaceholder(config, {
+        clientId: config.clientId || envConfig!.clientId,
+        clientSecret: config.clientSecret || envConfig!.clientSecret,
+    })
 }
 
 const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | RuntimeOAuthProvider | OpenIDProvider) => {

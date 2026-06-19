@@ -55,7 +55,7 @@ export interface OpenIDMetadata {
      * If omitted, the default is that the OP supports only the authorization_code
      * grant type.
      */
-    grant_types_supported: string[]
+    grant_types_supported?: string[]
     /**
      * JSON array containing a list of the OP's supported ACR values. If omitted, the
      * default is that the OP does not support any ACR values.
