@@ -3,6 +3,8 @@ import { HeadersBuilder } from "@aura-stack/router"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
+import { createOIDCAuthorizationURL } from "@/actions/oidc/authorization-url.ts"
+import { isOIDCProvider, resolveOpenIDProvider } from "@/actions/oidc/resolve-provider.ts"
 import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"
 import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
 
@@ -53,19 +55,44 @@ export const signIn = async (
 
         const redirectURI = await createRedirectURI(request, oauth, ctx)
         const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
-        const { authorization, state, codeVerifier } = await createAuthorizationURL(provider, redirectURI, ctx)
+
+        const isOIDC = isOIDCProvider(provider)
+        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider) : provider
+
+        let authorization: string
+        let state: string
+        let codeVerifier: string
+        let nonce: string | undefined
+
+        if (isOIDC) {
+            const result = await createOIDCAuthorizationURL(resolvedProvider, redirectURI, ctx)
+            authorization = result.authorization
+            state = result.state
+            codeVerifier = result.codeVerifier
+            nonce = result.nonce
+        } else {
+            const result = await createAuthorizationURL(resolvedProvider, redirectURI, ctx)
+            authorization = result.authorization
+            state = result.state
+            codeVerifier = result.codeVerifier
+        }
 
         ctx?.logger?.log("SIGN_IN_INITIATED", {
-            structuredData: { oauth_provider: oauth },
+            structuredData: { oauth_provider: oauth, oidc: isOIDC },
         })
 
-        const headersList = new HeadersBuilder(cacheControl)
+        const headersBuilder = new HeadersBuilder(cacheControl)
             .setHeader("Location", authorization)
             .setCookie(ctx.cookies.state.name, state, ctx.cookies.state.attributes)
             .setCookie(ctx.cookies.redirectURI.name, redirectURI, ctx.cookies.redirectURI.attributes)
             .setCookie(ctx.cookies.redirectTo.name, redirectToValue, ctx.cookies.redirectTo.attributes)
             .setCookie(ctx.cookies.codeVerifier.name, codeVerifier, ctx.cookies.codeVerifier.attributes)
-            .toHeaders()
+
+        if (nonce) {
+            headersBuilder.setCookie(ctx.cookies.nonce.name, nonce, ctx.cookies.nonce.attributes)
+        }
+
+        const headersList = headersBuilder.toHeaders()
         return {
             success: true,
             redirect: true,

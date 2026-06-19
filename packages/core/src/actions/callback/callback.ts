@@ -3,10 +3,13 @@ import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stac
 import { createCSRF } from "@/shared/crypto.ts"
 import { cacheControl } from "@/shared/headers.ts"
 import { timingSafeEqual } from "@/shared/utils.ts"
+import { parse } from "@aura-stack/router/cookie"
 import { getCookie, getExpiredCookie } from "@/cookie.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
+import { isOIDCProvider, resolveOpenIDProvider } from "@/actions/oidc/resolve-provider.ts"
+import { validateIDToken } from "@/actions/oidc/id-token.ts"
 import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
 import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
@@ -34,6 +37,14 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
     })
 }
 
+const getOptionalCookie = (request: Request, cookieName: string): string | undefined => {
+    const cookies = request.headers.get("Cookie")
+    if (!cookies) {
+        return undefined
+    }
+    return parse(cookies)[cookieName]
+}
+
 export const callbackAction = (oauth: OAuthProviderRecord) => {
     return createEndpoint(
         "GET",
@@ -48,8 +59,10 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             const { oauth: providers, cookies, jose, logger, trustedOrigins } = context
 
             const oauthConfig = providers[oauth]
+            const isOIDC = isOIDCProvider(oauthConfig)
             const cookieState = getCookie(request, cookies.state.name)
             const codeVerifier = getCookie(request, cookies.codeVerifier.name)
+            const cookieNonce = isOIDC ? getOptionalCookie(request, cookies.nonce.name) : undefined
             const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
             const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
 
@@ -58,6 +71,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 .setCookie(cookies.redirectURI.name, "", getExpiredCookie(cookies.redirectURI.attributes))
                 .setCookie(cookies.redirectTo.name, "", getExpiredCookie(cookies.redirectTo.attributes))
                 .setCookie(cookies.codeVerifier.name, "", getExpiredCookie(cookies.codeVerifier.attributes))
+                .setCookie(cookies.nonce.name, "", getExpiredCookie(cookies.nonce.attributes))
 
             if (!timingSafeEqual(cookieState, state)) {
                 logger?.log("MISMATCHING_STATE", {
@@ -75,7 +89,25 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 )
             }
 
-            const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier, logger)
+            const resolvedConfig = isOIDC ? await resolveOpenIDProvider(oauthConfig) : oauthConfig
+
+            const accessToken = await createAccessToken(resolvedConfig, cookieRedirectURI, code, codeVerifier, logger)
+
+            if (isOIDC) {
+                if (!accessToken.id_token) {
+                    throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
+                }
+                const { issuer, jwks_uri } = resolvedConfig.oidc!
+                if (!jwks_uri || !cookieNonce || !resolvedConfig.clientId) {
+                    throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
+                }
+                await validateIDToken(accessToken.id_token, {
+                    issuer,
+                    clientId: resolvedConfig.clientId,
+                    nonce: cookieNonce,
+                    jwks_uri,
+                })
+            }
             const origins = await getTrustedOrigins(request, trustedOrigins)
             const requestOrigin = await getOriginURL(request, context)
 
@@ -97,7 +129,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 }
             }
 
-            const userInfo = await getUserInfo(oauthConfig, accessToken, logger)
+            const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
             const session = await context.sessionStrategy.createSession(userInfo)
             const csrfToken = await createCSRF(jose)
 

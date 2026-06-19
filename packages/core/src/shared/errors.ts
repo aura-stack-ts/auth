@@ -96,6 +96,19 @@ export const AuraErrorCode = {
      */
     NETWORK_REQUEST_FAILED: "NETWORK_REQUEST_FAILED",
     NETWORK_TIMEOUT: "NETWORK_TIMEOUT",
+    /**
+     * OpenID Connect Errors
+     */
+    OIDC_DISCOVERY_INVALID_RESPONSE: "OIDC_DISCOVERY_INVALID_RESPONSE",
+    OIDC_DISCOVERY_NETWORK_FAILED: "OIDC_DISCOVERY_NETWORK_FAILED",
+    OIDC_DISCOVERY_INVALID_FORMAT_RESPONSE: "OIDC_DISCOVERY_INVALID_FORMAT_RESPONSE",
+    OIDC_DISCOVERY_ISSUER_MISMATCH: "OIDC_DISCOVERY_ISSUER_MISMATCH",
+    OIDC_DISCOVERY_INVALID_SCHEMA: "OIDC_DISCOVERY_INVALID_SCHEMA",
+    OIDC_NONCE_MISMATCH: "OIDC_NONCE_MISMATCH",
+    OIDC_ID_TOKEN_INVALID: "OIDC_ID_TOKEN_INVALID",
+    OIDC_USERINFO_INVALID_SCHEMA: "OIDC_USERINFO_INVALID_SCHEMA",
+    OIDC_JWKS_INVALID_RESPONSE: "OIDC_JWKS_INVALID_RESPONSE",
+    OIDC_JWKS_INVALID_SCHEMA: "OIDC_JWKS_INVALID_SCHEMA",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -702,6 +715,88 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "The external API target connection pool or request fetch signal context exceeded designated millisecond timeout threshold rules without returning headers.",
         userMessage: "The network response time tracking expired before receiving data headers.",
+    },
+    /**
+     * OpenID Connect Errors
+     */
+    OIDC_DISCOVERY_INVALID_RESPONSE: {
+        type: "PROTOCOL",
+        statusCode: 502,
+        name: "OidcDiscoveryError",
+        message:
+            "The outbound HTTP request to the OpenID Connect metadata endpoint configuration route returned a non-2xx status code. The response 'ok' field resolved to false.",
+        userMessage: "The OpenID Connect discovery endpoint rejected the configuration request or is currently unreachable.",
+    },
+    OIDC_DISCOVERY_NETWORK_FAILED: {
+        type: "NETWORK",
+        statusCode: 504,
+        name: "OidcDiscoveryError",
+        message:
+            "An unhandled transport exception, socket hang-up, or DNS resolution failure occurred while communicating with the remote OIDC identity service provider context.",
+        userMessage:
+            "A network pipeline failure occurred while discovering configuration metadata properties from the third-party provider.",
+    },
+    OIDC_DISCOVERY_INVALID_FORMAT_RESPONSE: {
+        type: "PROTOCOL",
+        statusCode: 502,
+        name: "OidcDiscoveryError",
+        message:
+            "The OIDC discovery endpoint returned a payload structure that could not be parsed as a valid JSON object. The stream processing operation failed.",
+        userMessage: "The OIDC discovery document format is malformed or corrupted.",
+    },
+    OIDC_DISCOVERY_ISSUER_MISMATCH: {
+        type: "PROTOCOL",
+        statusCode: 502,
+        name: "OidcDiscoveryError",
+        message:
+            "OIDC metadata validation failed. The 'issuer' URL string returned in the remote discovery document does not exactly match the original provider base configuration URL. Verification stopped to prevent open validation or provider redirection vulnerabilities.",
+        userMessage: "The identity provider configuration could not be securely verified due to a provider issuer mismatch.",
+    },
+    OIDC_DISCOVERY_INVALID_SCHEMA: {
+        type: "VALIDATION",
+        statusCode: 502,
+        name: "OidcDiscoveryError",
+        message:
+            "The OIDC discovery document failed structural validation against the OpenID Provider Metadata schema. Required fields may be missing or malformed.",
+        userMessage: "The identity provider discovery document is invalid or incomplete.",
+    },
+    OIDC_NONCE_MISMATCH: {
+        type: "PROTOCOL",
+        statusCode: 400,
+        name: "OidcIdTokenError",
+        message:
+            "The nonce claim in the ID Token does not match the nonce value stored during the authorization request. This may indicate a replay attack or session mismatch.",
+        userMessage: "Authentication failed due to a security validation error. Please sign in again.",
+    },
+    OIDC_ID_TOKEN_INVALID: {
+        type: "PROTOCOL",
+        statusCode: 401,
+        name: "OidcIdTokenError",
+        message:
+            "The ID Token failed validation. The token may be malformed, expired, or contain invalid claims after signature verification.",
+        userMessage: "Authentication failed. Please sign in again.",
+    },
+    OIDC_USERINFO_INVALID_SCHEMA: {
+        type: "VALIDATION",
+        statusCode: 502,
+        name: "OidcUserInfoError",
+        message: "The UserInfo endpoint response failed structural validation against the OpenID Connect standard claims schema.",
+        userMessage: "The identity provider returned invalid user information.",
+    },
+    OIDC_JWKS_INVALID_RESPONSE: {
+        type: "PROTOCOL",
+        statusCode: 502,
+        name: "OidcJwksError",
+        message: "The outbound HTTP request to the JWKS endpoint returned a non-2xx status code or could not be retrieved.",
+        userMessage: "The identity provider key set could not be retrieved.",
+    },
+    OIDC_JWKS_INVALID_SCHEMA: {
+        type: "VALIDATION",
+        statusCode: 502,
+        name: "OidcJwksError",
+        message:
+            "The JWKS document failed structural validation against the JSON Web Key Set schema. Required keys array may be missing or malformed.",
+        userMessage: "The identity provider key set format is invalid.",
     },
 }
 

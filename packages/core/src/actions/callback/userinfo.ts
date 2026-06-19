@@ -1,15 +1,17 @@
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
-import { OAuthErrorResponse } from "@/schemas.ts"
+import { OAuthErrorResponse, OIDCUserInfoSchema } from "@/schemas.ts"
 import type {
     AccessTokenContext,
     InternalLogger,
     OAuthAccessTokenResponseType,
-    OAuthProviderCredentials,
+    OIDCAccessTokenResponseType,
+    RuntimeOAuthProvider,
     User,
 } from "@/@types/index.ts"
 import { assertContentTypeResponse, isCustomUserInfoFunction } from "@/shared/assert.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
+import { isOIDCProvider } from "@/actions/oidc/resolve-provider.ts"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response
@@ -32,8 +34,8 @@ const getDefaultUserInfo = (profile: Record<string, string>): User => {
 }
 
 type ProviderConfig = {
-    userInfo: Exclude<OAuthProviderCredentials["userInfo"], { request: (context: AccessTokenContext) => any }>
-} & Omit<OAuthProviderCredentials, "userInfo">
+    userInfo: Exclude<RuntimeOAuthProvider["userInfo"], { request: (context: AccessTokenContext) => any }>
+} & Omit<RuntimeOAuthProvider, "userInfo">
 
 const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: string, logger?: InternalLogger) => {
     const userInfoConfig = oauthConfig.userInfo
@@ -97,8 +99,8 @@ const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: s
  * @returns The user information retrieved from the userinfo endpoint
  */
 export const getUserInfo = async (
-    oauthConfig: OAuthProviderCredentials,
-    accessToken: OAuthAccessTokenResponseType,
+    oauthConfig: RuntimeOAuthProvider,
+    accessToken: OAuthAccessTokenResponseType | OIDCAccessTokenResponseType,
     logger?: InternalLogger
 ) => {
     try {
@@ -120,6 +122,16 @@ export const getUserInfo = async (
         } else {
             userProfile = await createUserInfoRequest(oauthConfig as ProviderConfig, accessToken.access_token, logger)
         }
+
+        if (isOIDCProvider(oauthConfig)) {
+            const parsed = OIDCUserInfoSchema.safeParse(userProfile)
+            if (!parsed.success) {
+                logger?.log("OAUTH_USERINFO_INVALID_RESPONSE")
+                throw new AuraAuthError({ code: "OIDC_USERINFO_INVALID_SCHEMA", cause: parsed.error })
+            }
+            userProfile = parsed.data
+        }
+
         const userInfo = oauthConfig?.profile ? oauthConfig.profile(userProfile) : getDefaultUserInfo(userProfile)
         return userInfo
     } catch (error) {

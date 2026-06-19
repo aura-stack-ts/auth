@@ -255,5 +255,17 @@ export const createCookieStore = (
                 logger
             ),
         },
+        nonce: {
+            name: `${securePrefix}${prefix}.${overrides?.nonce?.name ?? "nonce"}`,
+            attributes: defineSecureCookieOptions(
+                useSecure,
+                {
+                    ...oauthCookieOptions,
+                    ...overrides?.nonce?.attributes,
+                },
+                overrides?.nonce?.attributes?.strategy ?? "secure",
+                logger
+            ),
+        },
     }
 }
