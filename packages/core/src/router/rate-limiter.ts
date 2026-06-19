@@ -51,7 +51,17 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
 export const verifyRateLimit = async (ctx: RouterGlobalContext, request: Request, action: keyof RateLimiterConfig) => {
     const rateLimit = await ctx.rateLimiters[action].check(request)
     if (!rateLimit.ok) {
-        return rateLimit.toResponse()
+        const toResponse = rateLimit.toResponse()
+        let redirectField = action === "signIn" ? "signInURL" : "redirectURL"
+
+        return {
+            success: false,
+            redirect: false,
+            [redirectField]: null,
+            error: { code: "RATE_LIMIT_EXCEEDED", message: "Too many requests." },
+            headers: toResponse.headers,
+            toResponse: () => toResponse,
+        }
     }
     return undefined
 }

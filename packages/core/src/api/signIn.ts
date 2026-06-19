@@ -30,9 +30,6 @@ export const signIn = async (
         const rateLimit = await verifyRateLimit(ctx, request, "signIn")
 
         if (rateLimit) {
-            /**
-             * Rate Limiting is not returning the expected body.
-             */
             return rateLimit as unknown as SignInAPIReturn
         }
 
