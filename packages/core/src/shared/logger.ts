@@ -327,6 +327,18 @@ export const logMessages = {
         msgId: "OAUTH_INVALID_CONTENT_TYPE",
         message: "OAuth endpoint returned an invalid Content-Type header",
     },
+    SIGN_IN_PROVIDER_TYPE_DETECTED: {
+        facility: 4,
+        severity: "info",
+        msgId: "SIGN_IN_PROVIDER_TYPE_DETECTED",
+        message: "Detected OAuth provider type (OIDC or standard)",
+    },
+    OIDC_PROVIDER_RESOLVED: {
+        facility: 4,
+        severity: "info",
+        msgId: "OIDC_PROVIDER_RESOLVED",
+        message: "OIDC provider configuration resolved successfully",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

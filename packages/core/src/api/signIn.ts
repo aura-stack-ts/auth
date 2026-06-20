@@ -57,7 +57,17 @@ export const signIn = async (
         const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
 
         const isOIDC = isOIDCProvider(provider)
+        ctx.logger?.log("SIGN_IN_PROVIDER_TYPE_DETECTED", {
+            structuredData: { oauth_provider: oauth, oidc: isOIDC },
+        })
+
         const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider) : provider
+
+        if (isOIDC) {
+            ctx.logger?.log("OIDC_PROVIDER_RESOLVED", {
+                structuredData: { oauth_provider: oauth, oidc: isOIDC },
+            })
+        }
 
         let authorization: string
         let state: string

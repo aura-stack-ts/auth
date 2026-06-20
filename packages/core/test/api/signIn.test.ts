@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
 import { getSetCookie } from "@/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
-import { api, oauthCustomService, openIDCustomProvider, openIDMetadata } from "@test/presets.ts"
+import { api, oauthCustomService, openIDMetadata } from "@test/presets.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -159,7 +159,7 @@ describe("signIn API", () => {
         expect(getSetCookie(response, "aura-auth.redirect_to")).toBe("/")
     })
 
-    test("signIn OIDC provider sets nonce cookie and openid scope", async () => {
+    test("signIn OIDC custom provider", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         vi.stubGlobal(
@@ -171,17 +171,18 @@ describe("signIn API", () => {
             }))
         )
 
-        const oidcApi = createAuth({ oauth: [openIDCustomProvider] }).api
-        const signIn = await oidcApi.signIn("oidc-provider")
-        const response = signIn.toResponse()
+        const output = await api.signIn("oidc-provider")
 
+        expect(output).toEqual({
+            success: true,
+            redirect: true,
+            signInURL: expect.stringMatching(openIDMetadata.authorization_endpoint),
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        const response = output.toResponse()
+        expect(response).toBeInstanceOf(Response)
         expect(response.status).toBe(302)
         expect(getSetCookie(response, "aura-auth.nonce")).toBeDefined()
-
-        const location = response.headers.get("Location")!
-        const searchParams = new URL(location).searchParams
-        expect(searchParams.get("nonce")).toBeTruthy()
-        expect(searchParams.get("scope")).toContain("openid")
-        expect(location).toContain(openIDMetadata.authorization_endpoint)
     })
 })

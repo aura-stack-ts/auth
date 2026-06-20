@@ -1,7 +1,9 @@
 import { describe, test, expect, vi } from "vitest"
 import { createPKCE } from "@/shared/crypto.ts"
-import { oauthCustomService } from "@test/presets.ts"
+import { oauthCustomService, openIDCustomProvider, openIDMetadata } from "@test/presets.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
+import { resolveOpenIDProvider } from "@/actions/oidc/resolve-provider.ts"
+import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
 
 describe("createAccessToken", async () => {
     const { codeVerifier } = await createPKCE()
@@ -152,6 +154,70 @@ describe("createAccessToken", async () => {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams(bodyParams).toString(),
+            signal: expect.any(AbortSignal),
+        })
+    })
+
+    test("OIDC provider", async () => {
+        const mockFetch = vi.fn()
+
+        vi.stubGlobal("fetch", mockFetch)
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => openIDMetadata,
+        })
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => ({
+                access_token: "access_123",
+                token_type: "Bearer",
+            }),
+        })
+
+        const config = await resolveOpenIDProvider({
+            ...openIDCustomProvider,
+            oidc: { issuer: openIDCustomProvider.issuer },
+        } as unknown as RuntimeOAuthProvider)
+
+        expect(fetch).toHaveBeenCalledWith("https://id.example.com/.well-known/openid-configuration", {
+            headers: { Accept: "application/json" },
+            signal: expect.any(AbortSignal),
+        })
+
+        const accessToken = await createAccessToken(
+            config,
+            "http://localhost:3000/auth/callback/openid-provider",
+            "authorization_code_123",
+            codeVerifier
+        )
+
+        expect(accessToken).toEqual({
+            access_token: "access_123",
+            token_type: "Bearer",
+        })
+
+        expect(fetch).toHaveBeenCalledWith("https://id.example.com/oauth/token", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                client_id: "oidc_client_id",
+                client_secret: "oidc_client_secret",
+                code: "authorization_code_123",
+                redirect_uri: "http://localhost:3000/auth/callback/openid-provider",
+                grant_type: "authorization_code",
+                code_verifier: codeVerifier,
+            }).toString(),
             signal: expect.any(AbortSignal),
         })
     })

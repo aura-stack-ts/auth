@@ -109,6 +109,10 @@ const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | RuntimeOAuthPr
         const oauthConfig = builtInOAuthProviders[config]()
         const parsed = OAuthProviderCredentialsSchema.safeParse({ ...oauthConfig, ...definition })
         if (!parsed.success) {
+            const openIDParsed = OpenIDProviderSchema.safeParse({ ...oauthConfig, ...definition })
+            if (openIDParsed.success) {
+                return defineOpenIDProviderConfig(openIDParsed.data as OpenIDProvider)
+            }
             throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_SCHEMA_CONFIG", cause: parsed.error })
         }
         return parsed.data
