@@ -199,6 +199,11 @@ describe("createAccessToken", async () => {
             codeVerifier
         )
 
+        expect(accessToken).toEqual({
+            access_token: "access_123",
+            token_type: "Bearer",
+        })
+
         expect(fetch).toHaveBeenCalledWith("https://id.example.com/oauth/token", {
             method: "POST",
             headers: {

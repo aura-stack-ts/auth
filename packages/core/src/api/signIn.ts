@@ -62,9 +62,12 @@ export const signIn = async (
         })
 
         const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider) : provider
-        ctx.logger?.log("OIDC_PROVIDER_RESOLVED", {
-            structuredData: { oauth_provider: oauth, oidc: isOIDC },
-        })
+
+        if (isOIDC) {
+            ctx.logger?.log("OIDC_PROVIDER_RESOLVED", {
+                structuredData: { oauth_provider: oauth, oidc: isOIDC },
+            })
+        }
 
         let authorization: string
         let state: string
