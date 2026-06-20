@@ -67,7 +67,9 @@ export const createOpenIDPlaceholder = (
         },
         accessToken: "",
         userInfo: "",
-        oidc: { issuer: config.issuer },
+        oidc: {
+            issuer: config.issuer,
+        },
     }
 }
 

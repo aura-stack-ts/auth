@@ -1,6 +1,6 @@
 import { createAuth } from "@/createAuth.ts"
 import type { JWTPayload } from "@/jose.ts"
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import type { OAuthProviderCredentials, OpenIDProvider, User } from "@/@types/index.ts"
 
 export const oauthCustomService: OAuthProviderCredentials = {
     id: "oauth-provider",
@@ -14,7 +14,7 @@ export const oauthCustomService: OAuthProviderCredentials = {
     clientSecret: "oauth_client_secret",
 }
 
-export const openIDCustomProvider = {
+export const openIDCustomProvider: OpenIDProvider = {
     id: "oidc-provider",
     name: "OIDC",
     issuer: "https://id.example.com",
@@ -31,7 +31,7 @@ export const openIDMetadata = {
     grant_types_supported: ["authorization_code"],
     subject_types_supported: ["public"],
     id_token_signing_alg_values_supported: ["RS256"],
-}
+} as const
 
 export const oauthCustomServiceProfile: OAuthProviderCredentials = {
     ...oauthCustomService,
@@ -56,7 +56,7 @@ export const sessionPayload: JWTPayload = {
 }
 
 const auth = createAuth({
-    oauth: [oauthCustomService, oauthCustomServiceProfile],
+    oauth: [oauthCustomService, oauthCustomServiceProfile, openIDCustomProvider],
     logger: true,
     credentials: {
         authorize: async ({ credentials }) => {
