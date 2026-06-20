@@ -21,6 +21,8 @@
     "./oauth/figma": "./src/oauth/figma.ts",
     "./oauth/github": "./src/oauth/github.ts",
     "./oauth/gitlab": "./src/oauth/gitlab.ts",
+    "./oauth/google": "./src/oauth/google.ts",
+    "./oauth/hubspot": "./src/oauth/hubspot.ts",
     "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
     "./oauth/notion": "./src/oauth/notion.ts",
     "./oauth/pinterest": "./src/oauth/pinterest.ts",
