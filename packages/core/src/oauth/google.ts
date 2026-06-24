@@ -89,7 +89,6 @@ export interface GoogleProfile {
  * @see [Google - OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect)
  * @see [Google - OpenID Connect API Reference](https://developers.google.com/identity/openid-connect/reference)
  * @see [Google - Client Credentials](https://console.cloud.google.com/auth/clients)
- *
  */
 export const google = <DefaultUser extends User = User>(
     options?: Partial<OpenIDProvider<GoogleProfile, DefaultUser>>
