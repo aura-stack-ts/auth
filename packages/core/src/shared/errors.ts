@@ -803,8 +803,8 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         type: "VALIDATION",
         statusCode: 502,
         name: "OIDCInvalidIssuerError",
-        message: "",
-        userMessage: "",
+        message: "The configured OpenID Connect issuer parameters are missing or invalid, preventing issuer validation.",
+        userMessage: "The identity provider configuration is invalid. Please check issuer settings and try again.",
     },
 }
 

@@ -92,12 +92,12 @@ const isOpenIDProvider = (config: BuiltInOAuthProvider | RuntimeOAuthProvider | 
 }
 
 export const setDynamicParams = <const T extends string, P extends Record<string, unknown>>(template: T, params: P): string => {
-    return template.replace(/:([A-Za-z0-9_]+)/g, (_, key) => {
+    return template.replace(/(^|\/):([A-Za-z_][A-Za-z0-9_]*)/g, (_, prefix, key) => {
         const value = params[key]
         if (value == null) {
             throw new AuraAuthError({ code: "OIDC_INVALID_ISSUER_PARAMS" })
         }
-        return encodeURIComponent(String(value))
+        return `${prefix}${encodeURIComponent(String(value))}`
     })
 }
 

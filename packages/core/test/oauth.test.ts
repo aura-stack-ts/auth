@@ -120,6 +120,18 @@ describe("setDynamicParams", () => {
                 values: { slug: 1, id: 2 },
                 expected: "https://app.com/issuer/1/2",
             },
+            {
+                description: "set dynamic param with host",
+                input: "https://host:8443/realms/acme",
+                values: {},
+                expected: "https://host:8443/realms/acme",
+            },
+            {
+                description: "set dynamic param with host and path",
+                input: "https://host:8443/realms/:realm",
+                values: { realm: "acme" },
+                expected: "https://host:8443/realms/acme",
+            },
         ]
 
         for (const { description, input, values, expected } of testCases) {
