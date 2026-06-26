@@ -24,6 +24,7 @@ import { createAuth } from "@aura-stack/hono"
 export const auth = createAuth({
   oauth: ["github"],
   basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
 })
 
 export const { toHandler, withAuth, api, jose } = auth
@@ -72,7 +73,7 @@ Use the middleware in your app and protect routes by checking for an active sess
 import { Hono } from "hono"
 import { toHandler, withAuth } from "@/lib/auth"
 
-const app = new Hono<{ Variables: AuthVariables }>()
+const app = new Hono()
 
 app.get("/", (ctx) => {
   return ctx.text("Welcome to the Aura Auth Hono App!")

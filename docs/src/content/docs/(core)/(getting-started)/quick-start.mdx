@@ -61,11 +61,7 @@ AURA_AUTH_BASE_URL=http://localhost:3000
 
 Create an `auth.ts` file inside a `lib` directory to configure your Auth instance.
 
-<Tabs items={["Fullstack", "Backend"]} persist groupId="integration-id">
-
-<Tab value="Fullstack">
-
-<Tabs items={["Core", "Next.js App Router", "Next.js Pages Router", "React Router v7", "TanStack Router", "Nuxt 4"]} persist groupId="framework-id">
+<Tabs items={["Core", "Fullstack", "Backend"]} persist groupId="integration-id">
 
 <Tab value="Core">
 
@@ -80,6 +76,10 @@ export const { handlers, jose, api } = auth
 ```
 
 </Tab>
+
+<Tab value="Fullstack">
+
+<Tabs items={["Next.js App Router", "Next.js Pages Router", "React Router v7", "TanStack Router", "Nuxt 4"]} persist groupId="framework-id">
 
 <Tab value="Next.js App Router">
 
@@ -98,7 +98,7 @@ export const { handlers, jose, api } = auth
 <Tab value="Next.js Pages Router">
 
 ```ts title="@/lib/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/next"
+import { createAuth } from "@aura-stack/next/pages"
 
 export const auth = createAuth({
   oauth: ["github", "gitlab", "bitbucket"],
@@ -155,7 +155,7 @@ export const { handlers, jose, api } = auth
 
 </Tab>
 
-<Tab value="Backed">
+<Tab value="Backend">
 
 <Tabs items={["Elysia", "Hono", "Express"]} persist groupId="framework-id">
 

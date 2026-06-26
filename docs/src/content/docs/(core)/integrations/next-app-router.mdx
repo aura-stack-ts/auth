@@ -109,8 +109,6 @@ import { api } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
 export default async function DashboardPage() {
-  const headersStore = await headers()
-
   const { session, authenticated } = await api.getSession()
   if (!authenticated) {
     redirect("/login")
