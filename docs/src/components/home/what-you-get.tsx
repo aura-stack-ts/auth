@@ -9,14 +9,14 @@ const useCases = [
         description:
             "Seamlessly integrate with any web framework or library. Build authentication flows that work with React, Vue, Svelte, and more.",
         icon: Globe,
-        link: "/docs/concepts/architecture",
+        link: "/docs/concepts/framework-agnostic",
     },
     {
         title: "Runtime-Agnostic",
         description:
             "Run on any JavaScript runtime built on top of the Web Standard APIs (Request, Response, Fetch, Web Crypto).",
         icon: Layers,
-        link: "/docs/concepts/runtime",
+        link: "/docs/concepts/runtime-agnosstic",
     },
     {
         title: "OAuth 2.0 & OpenID Connect",
@@ -33,18 +33,18 @@ const useCases = [
         link: "/docs/concepts/typescript",
     },
     {
-        title: "Secure Session Management",
+        title: "Secure by default",
         description:
-            "Built-in JWT-based session management with encryption and signing. Sessions are encrypted by default with configurable expiration policies.",
+            "Strong default practices for PKCE, state validation, secure cookies, redirect validation and CSRF validation.",
         icon: Shield,
         link: "/docs/concepts/security-model#token-management",
     },
     {
-        title: "Cookie Security",
+        title: "Composable",
         description:
-            "Secure, configurable cookies for session persistence. Proper security flags, domain settings, and SameSite attributes out of the box.",
+            "Built from small, focused utilities and packages. Use only what you need (auth handlers, JOSE utilities and APIs).",
         icon: Cookie,
-        link: "/docs/guides/cookie-management",
+        link: "/docs/core-principles",
     },
 ]
 
