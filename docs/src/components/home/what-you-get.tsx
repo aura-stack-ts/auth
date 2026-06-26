@@ -5,18 +5,32 @@ import Image from "next/image"
 
 const useCases = [
     {
-        title: "OAuth 2.0 Integration",
+        title: "Framework-Agnostic",
         description:
-            "Native support for multiple OAuth providers. Easily integrate GitHub, Discord, Google, and more with built-in provider configurations.",
-        icon: Lock,
-        link: "/docs/oauth",
+            "Seamlessly integrate with any web framework or library. Build authentication flows that work with React, Vue, Svelte, and more.",
+        icon: Globe,
+        link: "/docs/concepts/architecture",
     },
     {
-        title: "Type-Safe Development",
+        title: "Runtime-Agnostic",
+        description:
+            "Run on any JavaScript runtime built on top of the Web Standard APIs (Request, Response, Fetch, Web Crypto).",
+        icon: Layers,
+        link: "/docs/concepts/runtime",
+    },
+    {
+        title: "OAuth 2.0 & OpenID Connect",
+        description:
+            "First-class support for OAuth 2.0 and OpenID Connect. Implements PKCE, Authorization Code Flow for secure authentication.",
+        icon: Lock,
+        link: "/docs/concepts/oauth",
+    },
+    {
+        title: "Type-first API",
         description:
             "First-class TypeScript support with complete type inference. Build authentication flows with confidence and catch errors at compile time.",
         icon: Code2,
-        link: "/docs",
+        link: "/docs/concepts/typescript",
     },
     {
         title: "Secure Session Management",
@@ -31,20 +45,6 @@ const useCases = [
             "Secure, configurable cookies for session persistence. Proper security flags, domain settings, and SameSite attributes out of the box.",
         icon: Cookie,
         link: "/docs/guides/cookie-management",
-    },
-    {
-        title: "Extensible Architecture",
-        description:
-            "Easily integrate with @aura-stack/router or custom routing layers. Build on top of a flexible, composable authentication foundation.",
-        icon: Layers,
-        link: "/docs/concepts/architecture",
-    },
-    {
-        title: "Framework-Agnostic Design",
-        description:
-            "Works seamlessly in any environment that supports the Web Request/Response APIs. Deploy anywhere, from traditional servers to edge runtimes.",
-        icon: Globe,
-        link: "/docs/concepts/architecture",
     },
 ]
 
