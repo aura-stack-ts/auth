@@ -6,12 +6,6 @@ description: Integrate Aura Auth and Elysia
 This guide walks you through to implement Aura Auth in a Elysia application to a complete support.
 If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Elysia application.
 
-<Callout type="info">
-  Aura Auth is working on developing a Elysia-specific package that will provide additional utilities for Elysia applications. For
-  now, the core package can be used to implement authentication in Elysia with the patterns outlined in this guide. Stay tuned for
-  updates on the [Elysia package!](https://github.com/aura-stack-ts/auth/tree/master/packages/elysia)
-</Callout>
-
 ---
 
 <Steps>
@@ -25,7 +19,7 @@ If you haven't configured Aura Auth yet, start with the [Installation Guide](/do
 Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
 
 ```ts title="src/lib/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
+import { createAuth } from "@aura-stack/elysia"
 
 export const auth = createAuth({
   oauth: ["github"],
@@ -33,7 +27,7 @@ export const auth = createAuth({
   baseURL: "http://localhost:3000",
 })
 
-export const { handlers, jose, api } = auth
+export const { toHandler, withAuth, jose, api } = auth
 ```
 
 <Callout type="warning">
@@ -50,13 +44,11 @@ Mount auth handlers to process all traffic directed to the `/api/auth/*` path in
 
 ```ts title="src/index.ts" lineNumbers
 import { Elysia } from "elysia"
-import { auth } from "@/lib/auth"
+import { toHandler } from "@/lib/auth"
 
 const app = new Elysia()
 
-app.all("/api/auth/*", (ctx) => {
-  return auth.handlers.ALL(ctx.request)
-})
+app.all("/api/auth/*", toHandler)
 
 app.listen(3000)
 ```
@@ -71,28 +63,7 @@ Use a plugin when you want session data to be available across multiple protecte
 
 ### Plugin
 
-```ts title="src/plugins/with-auth.ts" lineNumbers
-import { Elysia } from "elysia"
-import { auth } from "@/lib/auth"
-
-export const withAuthPlugin = new Elysia({ name: "with-auth" })
-  .resolve({ as: "scoped" }, async (ctx) => {
-    try {
-      const session = await auth.api.getSession({
-        headers: ctx.request.headers,
-      })
-      if (!session.authenticated) {
-        return { session: null }
-      }
-      return { session }
-    } catch {
-      return { session: null }
-    }
-  })
-  .get("/api/auth/me", ({ session }) => session)
-```
-
-The plugin returns `session: null` when the request is unauthenticated, which keeps downstream routes simple and predictable.
+The `withAuth` plugin returns `session: null` when the request is unauthenticated, which keeps downstream routes simple and predictable.
 
 </Step>
 
@@ -104,16 +75,13 @@ Use the plugin in your app and protect routes by checking for an active session 
 
 ```ts title="src/index.ts" lineNumbers
 import { Elysia } from "elysia"
-import { auth } from "@/lib/auth"
-import { withAuthPlugin } from "@/plugins/with-auth"
+import { toHandler, withAuth } from "@/lib/auth"
 
 const app = new Elysia()
 
-app.all("/api/auth/*", (ctx) => {
-  return auth.handlers.ALL(ctx.request)
-})
+app.all("/api/auth/*", toHandler)
 
-app.use(withAuthPlugin).get("/api/protected", (ctx) => {
+app.use(withAuth).get("/api/protected", (ctx) => {
   if (!ctx.session?.authenticated) {
     return ctx.json(
       {

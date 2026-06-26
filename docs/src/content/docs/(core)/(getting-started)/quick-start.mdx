@@ -61,6 +61,14 @@ AURA_AUTH_BASE_URL=http://localhost:3000
 
 Create an `auth.ts` file inside a `lib` directory to configure your Auth instance.
 
+<Tabs items={["Fullstack", "Backend"]} persist groupId="integration-id">
+
+<Tab value="Fullstack">
+
+<Tabs items={["Core", "Next.js App Router", "Next.js Pages Router", "React Router v7", "TanStack Router", "Nuxt 4"]} persist groupId="framework-id">
+
+<Tab value="Core">
+
 ```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
@@ -70,6 +78,134 @@ export const auth = createAuth({
 
 export const { handlers, jose, api } = auth
 ```
+
+</Tab>
+
+<Tab value="Next.js App Router">
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/next"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { handlers, jose, api } = auth
+```
+
+</Tab>
+
+<Tab value="Next.js Pages Router">
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/next"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { toHandler, jose, api } = auth
+```
+
+</Tab>
+
+<Tab value="React Router v7">
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/react-router"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { handlers, jose, api } = auth
+```
+
+</Tab>
+
+<Tab value="TanStack Router">
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { handlers, jose, api } = auth
+```
+
+</Tab>
+
+<Tab value="Nuxt 4">
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { handlers, jose, api } = auth
+```
+
+</Tab>
+
+</Tabs>
+
+</Tab>
+
+<Tab value="Backed">
+
+<Tabs items={["Elysia", "Hono", "Express"]} persist groupId="framework-id">
+
+<Tab value="Elysia">
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/elysia"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { toHandler, withAuth, jose, api } = auth
+```
+
+</Tab>
+
+<Tab value="Hono">
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/hono"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { toHandler, withAuth, jose, api } = auth
+```
+
+</Tab>
+
+<Tab value="Express">
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/express"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { toHandler, withAuth, jose, api } = auth
+```
+
+</Tab>
+
+</Tabs>
+
+</Tab>
+
+</Tabs>
 
 Once the auth instance is created, you could export the handlers, jose utilities, and API methods for use in your application.
 
@@ -83,11 +219,11 @@ Mount the HTTP handlers in your server or API routes to handle the HTTP requests
 
 Create a new file in your server or API directory to manage the auth routes or create a route that delegates to the auth handlers.
 
-<Tabs items={["Fullstack", "Backend", "Edge"]}>
+<Tabs items={["Fullstack", "Backend", "Edge"]} persist groupId="integration-id">
 
 <Tab value="Fullstack">
 
-<Tabs items={["Next.js App Router", "Next.js Pages Router", "React Router v7", "TanStack Router", "Nuxt 4"]}>
+<Tabs items={["Next.js App Router", "Next.js Pages Router", "React Router v7", "TanStack Router", "Nuxt 4"]} persist groupId="framework-id">
 
 <Tab value="Next.js App Router">
 
@@ -102,45 +238,9 @@ export const { GET, POST, PATCH } = handlers
 <Tab value="Next.js Pages Router">
 
 ```ts title="pages/api/auth/[...aura].ts" lineNumbers
-import { handlers } from "@/lib/auth"
-import type { NextApiRequest, NextApiResponse } from "next"
+import { toHandler } from "@/lib/auth"
 
-const getBaseURL = (request: NextApiRequest) => {
-  const protocol = request.headers["x-forwarded-proto"] ?? "http"
-  const host = request.headers["x-forwarded-host"] ?? request.headers.host
-  return `${protocol}://${host}`
-}
-
-export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const method = req.method ?? "GET"
-  const handler = handlers[method as keyof typeof handlers]
-  if (!handler) {
-    return res.status(405).json({ error: `Method ${method} Not Allowed` })
-  }
-  const url = new URL(req.url!, getBaseURL(req))
-  const webRequest = new Request(url, {
-    method,
-    headers: new Headers(req.headers as Record<string, string>),
-    body: method !== "GET" && req.body ? JSON.stringify(req.body) : undefined,
-  })
-  try {
-    const response = await handler(webRequest)
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get("location")
-      if (location) {
-        response.headers.forEach((value, key) => res.setHeader(key, value))
-        return res.redirect(response.status, location)
-      }
-    }
-    response.headers.forEach((value, key) => res.setHeader(key, value))
-    const data = await response.json()
-    return res.status(response.status).json(data)
-  } catch {
-    return res.status(500).json({ error: "Internal Server Error" })
-  }
-}
-
-export default handler
+export default toHandler
 ```
 
 </Tab>
@@ -206,7 +306,7 @@ export default defineEventHandler(async (event) => {
 
 <Tab value="Backend">
 
-<Tabs items={["Elysia", "Hono", "Express"]}>
+<Tabs items={["Elysia", "Hono", "Express"]} persist groupId="framework-id">
 
 <Tab value="Elysia">
 
@@ -262,7 +362,7 @@ app.listen(PORT)
 
 <Tab value="Edge">
 
-<Tabs items={["Vercel Functions", "Cloudflare Workers", "Supabase Edge Functions"]}>
+<Tabs items={["Vercel Functions", "Cloudflare Workers", "Supabase Edge Functions"]} persist groupId="framework-id">
 
 <Tab value="Vercel Functions">
 
@@ -340,6 +440,10 @@ Deno.serve(async (request) => {
 
 Create an `auth-client.ts` file in the same directory to create a client instance that can be used in your frontend code.
 
+<Tabs items={["Core", "React", "Next.js App Router", "Next.js Pages Router", "React Router v7"]} persist groupId="framework-id">
+
+<Tab value="Core">
+
 ```ts title="@/lib/auth-client.ts" lineNumbers
 import { createAuthClient } from "@aura-stack/auth/client"
 
@@ -348,8 +452,72 @@ export const authClient = createAuthClient({
   baseURL: "http://localhost:3000",
 })
 
-export const { getSession, signIn, signInCredentials, updateSession, signOut } = authClient
+export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
 ```
+
+</Tab>
+
+<Tab value="React">
+
+```ts title="@/lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/react"
+
+export const authClient = createAuthClient({
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+
+export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
+```
+
+</Tab>
+
+<Tab value="Next.js App Router">
+
+```ts title="@/lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/next/client"
+
+export const authClient = createAuthClient({
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+
+export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
+```
+
+</Tab>
+
+<Tab value="Next.js Pages Router">
+
+```ts title="@/lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/next/pages/client"
+
+export const authClient = createAuthClient({
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+
+export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
+```
+
+</Tab>
+
+<Tab value="React Router v7">
+
+```ts title="@/lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/react-router/client"
+
+export const authClient = createAuthClient({
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+
+export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
+```
+
+</Tab>
+
+</Tabs>
 
 </Step>
 
