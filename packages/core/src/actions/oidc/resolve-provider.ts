@@ -1,6 +1,7 @@
 import { discoveryMetadata } from "@/actions/oidc/discovery.ts"
 import type { OpenIDProvider } from "@/@types/oidc.ts"
 import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
+import { setDynamicParams } from "@/oauth/index.ts"
 
 const DEFAULT_OIDC_SCOPE = "openid profile email"
 
@@ -16,10 +17,11 @@ export const resolveOpenIDProvider = async (provider: RuntimeOAuthProvider): Pro
         return cached
     }
 
-    const issuer = provider.oidc?.issuer
+    let issuer = provider.oidc?.issuer
     if (!issuer) {
         throw new Error("OIDC provider is missing issuer configuration: " + provider.id)
     }
+    issuer = setDynamicParams(issuer, provider as unknown as Record<string, unknown>)
 
     const metadata = await discoveryMetadata(issuer)
     const scope =
@@ -68,7 +70,7 @@ export const createOpenIDPlaceholder = (
         accessToken: "",
         userInfo: "",
         oidc: {
-            issuer: config.issuer,
+            issuer: setDynamicParams(config.issuer, config),
         },
     }
 }

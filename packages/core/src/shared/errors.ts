@@ -109,6 +109,7 @@ export const AuraErrorCode = {
     OIDC_USERINFO_INVALID_SCHEMA: "OIDC_USERINFO_INVALID_SCHEMA",
     OIDC_JWKS_INVALID_RESPONSE: "OIDC_JWKS_INVALID_RESPONSE",
     OIDC_JWKS_INVALID_SCHEMA: "OIDC_JWKS_INVALID_SCHEMA",
+    OIDC_INVALID_ISSUER_PARAMS: "OIDC_INVALID_ISSUER_PARAMS",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -797,6 +798,13 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "The JWKS document failed structural validation against the JSON Web Key Set schema. Required keys array may be missing or malformed.",
         userMessage: "The identity provider key set format is invalid.",
+    },
+    OIDC_INVALID_ISSUER_PARAMS: {
+        type: "VALIDATION",
+        statusCode: 502,
+        name: "OIDCInvalidIssuerError",
+        message: "",
+        userMessage: "",
     },
 }
 

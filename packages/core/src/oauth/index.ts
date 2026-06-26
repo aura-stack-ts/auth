@@ -91,12 +91,23 @@ const isOpenIDProvider = (config: BuiltInOAuthProvider | RuntimeOAuthProvider | 
     return typeof config === "object" && "issuer" in config && !("accessToken" in config)
 }
 
-const defineOpenIDProviderConfig = (config: OpenIDProvider): RuntimeOAuthProvider => {
+export const setDynamicParams = <const T extends string, P extends Record<string, unknown>>(template: T, params: P): string => {
+    return template.replace(/:([A-Za-z0-9_]+)/g, (_, key) => {
+        const value = params[key]
+        if (value == null) {
+            throw new AuraAuthError({ code: "OIDC_INVALID_ISSUER_PARAMS" })
+        }
+        return encodeURIComponent(String(value))
+    })
+}
+
+export const defineOpenIDProviderConfig = (config: OpenIDProvider): RuntimeOAuthProvider => {
     const parsed = OpenIDProviderSchema.safeParse(config)
     if (!parsed.success) {
         throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_SCHEMA_CONFIG", cause: parsed.error })
     }
     const envConfig = !config.clientId || !config.clientSecret ? defineOAuthEnvironment(config.id) : undefined
+    config.issuer = setDynamicParams(config.issuer, config)
     return createOpenIDPlaceholder(config, {
         clientId: config.clientId || envConfig!.clientId,
         clientSecret: config.clientSecret || envConfig!.clientSecret,
