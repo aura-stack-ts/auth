@@ -1,0 +1,50 @@
+---
+title: Runtime Agnostic
+description: Learn how Aura Auth is designed to run across multiple JavaScript runtimes.
+---
+
+Aura Auth is designed to be **runtime-agnostic**, allowing it to run on any JavaScript runtime that implements the standard Web APIs, such as **Fetch**, **Request**, **Response**, **Headers**, **URL**, and **Web Crypto**.
+
+By relying exclusively on Web Standards instead of runtime-specific APIs, Aura Auth can be used across a wide variety of environments, including **Node.js**, **Deno**, **Bun**, **Cloudflare Workers**, **Vercel Edge Functions**, **Supabase Edge Functions**, and modern browsers.
+
+<Callout>
+
+Aura Auth does not depend on Node.js APIs, built-in Node modules, the `process` global, or any other runtime-specific features. Instead, it is built entirely on Web Standard APIs, making it portable across any compliant JavaScript runtime.
+
+</Callout>
+
+## Built on Web Standard APIs
+
+Aura Auth relies on the following standard Web APIs to provide a consistent developer experience across runtimes:
+
+- **[Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)** — Performs network requests using the standard Fetch API.
+- **[Request](https://developer.mozilla.org/en-US/docs/Web/API/Request)** — Represents incoming and outgoing HTTP requests.
+- **[Response](https://developer.mozilla.org/en-US/docs/Web/API/Response)** — Represents HTTP responses.
+- **[Headers](https://developer.mozilla.org/en-US/docs/Web/API/Headers)** — Provides an interface for working with HTTP headers.
+- **[Web Crypto](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)** — Provides cryptographic primitives used for hashing, signing, encryption, and secure authentication.
+- **[URL](https://developer.mozilla.org/en-US/docs/Web/API/URL)** — Parses and manipulates URLs, including OAuth callback URLs and redirects.
+- **[URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams)** — Reads and manipulates URL query parameters.
+- **Cookies** — Aura Auth works with HTTP cookies for session management through standard HTTP request and response headers, without relying on runtime-specific cookie APIs.
+
+## Supported Runtimes
+
+| Runtime                 | Supported |
+| ----------------------- | :-------: |
+| Node.js                 |    ✅     |
+| Deno                    |    ✅     |
+| Bun                     |    ✅     |
+| Cloudflare Workers      |    ✅     |
+| Vercel Edge Functions   |    ✅     |
+| Supabase Edge Functions |    ✅     |
+
+> **Note:** Any JavaScript runtime that implements the required Web Standard APIs should be compatible with Aura Auth, even if it is not explicitly listed here.
+
+## Benefits
+
+- **Portable** — Run the same authentication logic across multiple JavaScript runtimes without modification.
+- **Zero runtime lock-in** — Choose the runtime that best fits your application without changing your authentication layer.
+- **Standards-based** — Built entirely on Web APIs instead of Node.js-specific modules or globals.
+- **Future-proof** — As new JavaScript runtimes adopt Web Standards, Aura Auth can support them without requiring runtime-specific implementations.
+- **Consistent developer experience** — Write authentication code once and deploy it anywhere that supports the required Web APIs.
+
+Thanks to its runtime-agnostic architecture, Aura Auth can be used in traditional servers, serverless platforms, edge runtimes, and modern JavaScript environments. This portability also complements Aura Auth's framework-agnostic design, allowing you to use the same authentication library regardless of your runtime or framework.
