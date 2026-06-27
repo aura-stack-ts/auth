@@ -1,9 +1,9 @@
 ---
-name: Hono
-description: Implement production-ready @aura-stack/hono setup, including server setup and middlewares. Use this skill when users ask for auth setup in Hono backend applications.
+name: Cloudflare Workers
+description: Implement production-ready `@aura-stack/auth` setup for Cloudflare Workers. Use this skill when users ask for auth setup in Cloudflare Workers.
 ---
 
-> Aura Auth doens't provide a built-in Cloudflare Worker package, so its recomeded to use the core package @aura-stack/auth.
+> Aura Auth doesn't provide a built-in Cloudflare Worker package, so it's recommended to use the core package `@aura-stack/auth`.
 
 ## Implementation Steps
 
@@ -32,7 +32,7 @@ Prefer minimal defaults first, then layer advanced options only if user asks.
 
 ### 3) Wire route handlers correctly
 
-The handler mount must match basePath exactly (src/app/pages/auth/[...aura].ts):
+The handler mount must match basePath exactly (e.g., `src/index.ts` or `functions/auth/[[path]].ts`):
 
 ```ts
 import { handlers } from "../lib/auth"

@@ -1,9 +1,9 @@
 ---
-name: Hono
-description: Implement production-ready @aura-stack/hono setup, including server setup and middlewares. Use this skill when users ask for auth setup in Hono backend applications.
+name: Vercel Edge Functions
+description: Implement production-ready `@aura-stack/auth` setup for Vercel Edge Functions. Use this skill when users ask for auth setup in Vercel Edge Functions.
 ---
 
-> Aura Auth doens't provide a built-in Vercel Edge Functions package, so its recomeded to use the core package @aura-stack/auth.
+> Aura Auth doesn't provide a built-in Vercel Edge Functions package, so it's recommended to use the core package `@aura-stack/auth`.
 
 ## Implementation Steps
 

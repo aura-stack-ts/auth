@@ -1,9 +1,9 @@
 ---
-name: Hono
-description: Implement production-ready @aura-stack/hono setup, including server setup and middlewares. Use this skill when users ask for auth setup in Hono backend applications.
+name: Supabase Edge Functions
+description: Implement auth setup for Supabase Edge Functions using @aura-stack/auth.
 ---
 
-> Aura Auth doens't provide a built-in Cloudflare Worker package, so its recomeded to use the core package @aura-stack/auth.
+> Aura Auth doesn't provide a built-in Supabase Edge Functions package, so it's recommended to use the core package `@aura-stack/auth`.
 
 ## Implementation Steps
 
@@ -35,7 +35,7 @@ Prefer minimal defaults first, then layer advanced options only if user asks.
 The handler mount must match basePath exactly (functions/auth/index.ts):
 
 ```ts
-import { handlers } from "../lib/auth"
+import { handlers } from "../_shared/auth"
 
 Deno.serve(async (request) => {
   return await handlers.ALL(request)

@@ -30,7 +30,7 @@ Prefer minimal defaults first, then layer advanced options only if user asks.
 
 ### 3) Wire route handlers correctly
 
-The handler mount must match basePath exactly ("/auth/\*"):
+The handler mount must match basePath exactly ("/api/auth/\*"):
 
 ```ts
 import { Hono } from "hono"
@@ -53,7 +53,7 @@ import { toHandler, withAuth } from "@/lib/auth"
 
 const app = new Hono()
 
-app.all("/auth/*", toHandler)
+app.all("/api/auth/*", toHandler)
 
 app.get("/api/protected", withAuth, (ctx) => {
   const session = ctx.get("session")

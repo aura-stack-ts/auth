@@ -109,15 +109,15 @@ Prefer automatic environment variable loading.
 Aura Auth automatically looks for
 
 ```
-<PROVIDER>_CLIENT_ID
-<PROVIDER>_CLIENT_SECRET
+AURA_AUTH_<PROVIDER>_CLIENT_ID
+AURA_AUTH_<PROVIDER>_CLIENT_SECRET
 ```
 
 Example:
 
 ```
-GITHUB_CLIENT_ID
-GITHUB_CLIENT_SECRET
+AURA_AUTH_GITHUB_CLIENT_ID
+AURA_AUTH_GITHUB_CLIENT_SECRET
 ```
 
 Do not manually pass these values unless customization is required.

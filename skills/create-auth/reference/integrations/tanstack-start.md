@@ -3,7 +3,7 @@ name: TanStack React Start
 description: Implement production-ready @aura-stack/auth setup. Use this skill when users ask for auth setup in TanStack React Start applications using the @aura-stack/auth package
 ---
 
-> Aura Auth doens't provide a built-in TanStack React Start package, so its recomeded to use the core package @aura-stack/auth.
+> Aura Auth doesn't provide a built-in TanStack React Start package, so it's recommended to use the core package `@aura-stack/auth`.
 
 ## Implementation Steps
 
@@ -20,7 +20,7 @@ pnpm add @aura-stack/auth
 Default module example (src/lib/auth.ts):
 
 ```ts
-import { createAuth } from "@aura-stack/next"
+import { createAuth } from "@aura-stack/auth"
 
 export const { handlers, jose, api } = createAuth({
   oauth: ["github"],

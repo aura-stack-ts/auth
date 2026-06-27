@@ -41,7 +41,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 }
 
 export const action = async ({ request }: Route.ActionArgs) => {
-  return handlers.POST(request)
+  return handlers.ALL(request)
 }
 ```
 

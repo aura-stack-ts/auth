@@ -30,7 +30,7 @@ Prefer minimal defaults first, then layer advanced options only if user asks.
 
 ### 3) Wire route handlers correctly
 
-The handler mount must match basePath exactly (src/app/pages/auth/[...aura].ts):
+The handler mount must match basePath exactly (src/pages/auth/[...aura].ts):
 
 ```ts
 import { toHandler } from "@/lib/auth"
