@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `Hugging Face` OpenID Connect provider, enabling authentication through Hugging Face accounts with minimal configuration. [#198](https://github.com/aura-stack-ts/auth/pull/198)
+
 - Added the `Google` OpenID Connect provider, enabling authentication through Google accounts with minimal configuration. [#197](https://github.com/aura-stack-ts/auth/pull/197)
 
 - Added inference of dynamic parameters in OpenID Connect (OIDC) provider issuers. Issuers containing dynamic segments (prefixed with `:`) are now automatically detected, and users are required to provide values for those parameters when configuring the provider. [#200](https://github.com/aura-stack-ts/auth/pull/200)
