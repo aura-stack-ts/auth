@@ -1,4 +1,5 @@
 import type { User } from "@/@types/session.ts"
+import type { GetRouteParams } from "@aura-stack/router/types"
 
 /**
  * @link https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
@@ -206,13 +207,13 @@ export interface OpenIDMetadata {
     op_tos_uri?: string
 }
 
-export interface OpenIDProvider<Profile extends object = Record<string, any>, DefaultUser = User> {
+export type OpenIDProvider<Profile extends object = Record<string, any>, DefaultUser = User, Issuer extends string = string> = {
     id: string
     name: string
     /**
      * URL to concatenating the string /.well-known/openid-configuration to the Issuer.
      */
-    issuer: string
+    issuer: Issuer
     clientId?: string
     clientSecret?: string
     /**
@@ -220,4 +221,4 @@ export interface OpenIDProvider<Profile extends object = Record<string, any>, De
      */
     scope?: string
     profile?: (profile: Profile) => DefaultUser | Promise<DefaultUser>
-}
+} & GetRouteParams<`/${Issuer}`>

@@ -71,7 +71,7 @@ export const Header = () => {
                                     </Link>
                                 </Button>
                                 <Button className="w-full rounded-none lg:w-fit" variant="outline" size="lg" asChild>
-                                    <Link href="/docs">Get Started</Link>
+                                    <Link href="/docs/introduction">Get Started</Link>
                                 </Button>
                             </div>
                         </div>

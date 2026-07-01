@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `Hugging Face` OpenID Connect provider, enabling authentication through Hugging Face accounts with minimal configuration. [#198](https://github.com/aura-stack-ts/auth/pull/198)
+
+- Added the `Google` OpenID Connect provider, enabling authentication through Google accounts with minimal configuration. [#197](https://github.com/aura-stack-ts/auth/pull/197)
+
+- Added inference of dynamic parameters in OpenID Connect (OIDC) provider issuers. Issuers containing dynamic segments (prefixed with `:`) are now automatically detected, and users are required to provide values for those parameters when configuring the provider. [#200](https://github.com/aura-stack-ts/auth/pull/200)
+
+- Added OpenID Connect (OIDC) support alongside OAuth 2.0. Providers can now be configured through OpenID Provider Discovery, with built-in support for ID token validation, nonce generation and validation, and JWKS-based signature verification. [#195](https://github.com/aura-stack-ts/auth/pull/195)
+
 - Integrated `@aura-stack/rate-limiter` into authentication flows. Rate limiting is now enforced for `signIn`, `signInCredentials`, `signUp`, and `updateSession` actions, providing built-in protection against abuse and excessive requests. [#194](https://github.com/aura-stack-ts/auth/pull/194)
 
 - Extended `UserFrom` to support type inference from `ArkType` and `Valibot` schemas. User types are now inferred correctly for `Zod`, `ArkType`, and `Valibot` schema definitions. [#191](https://github.com/aura-stack-ts/auth/pull/191)
@@ -21,6 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Introduced an experimental `signUp` flow for both the API and endpoint definitions. The new action enables user account creation within the authentication system and provides customizable payload validation through the supported schema. To enable this feature, developers must configure the `signUp` option when calling `createAuth`. [#183](https://github.com/aura-stack-ts/auth/pull/183)
 
 - Added support for a custom `userInfo` function in OAuth provider configuration, enabling callers to perform the user info request themselves. The `userInfo` option continues to accept either a URL string or an object with a `url` and optional request options (for example, custom headers). [#182](https://github.com/aura-stack-ts/auth/pull/182)
+
+- Added the `HubSpot` OAuth provider to the supported integrations in Aura Auth. [#154](https://github.com/aura-stack-ts/auth/pull/154)
 
 ### Fixed
 

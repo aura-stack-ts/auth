@@ -69,4 +69,26 @@ describe("resolveOpenIDProvider", () => {
         expect(isOIDCProvider({ oidc: { issuer: "https://id.example.com" } })).toBe(true)
         expect(isOIDCProvider({})).toBe(false)
     })
+
+    test("resolve OIDC provider with dynamic params", async () => {
+        const fetchMock = vi.fn(async () => ({
+            ok: true,
+            headers: new Headers({ "Content-Type": "application/json" }),
+            json: async () => ({ ...openIDMetadata, issuer: "https://app.com/issuer/1/apps/2" }),
+        }))
+        vi.stubGlobal("fetch", fetchMock)
+
+        const oidcProvider = {
+            ...openIDCustomProvider,
+            issuer: "https://app.com/issuer/:teamId/apps/:appId",
+            teamId: 1,
+            appId: 2,
+        }
+        const placeholder = createOpenIDPlaceholder(oidcProvider, {
+            clientId: oidcProvider.clientId!,
+            clientSecret: oidcProvider.clientSecret!,
+        })
+
+        await resolveOpenIDProvider(placeholder)
+    })
 })
