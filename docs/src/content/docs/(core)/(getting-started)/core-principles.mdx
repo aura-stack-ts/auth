@@ -1,0 +1,51 @@
+---
+title: Core Principles
+description: Learn about the design principles behind Aura Auth.
+---
+
+Aura Auth is built around five core principles that shape every API, feature, and integration. These principles ensure the library is secure, portable, and enjoyable to use across the JavaScript ecosystem.
+
+## Secure by Default
+
+Security is the foundation of Aura Auth. Instead of making developers opt into secure practices, Aura Auth enables them by default so you can focus on building your application rather than reimplementing authentication security.
+
+Some of the built-in security features include:
+
+- PKCE for supported OAuth flows
+- Mandatory `state` validation
+- Secure, HTTP-only, and SameSite cookies
+- CSRF protection using JWS
+- Redirect URL validation
+- Modern cryptographic primitives powered by Web Crypto
+
+## Framework Agnostic
+
+Aura Auth integrates with virtually any web framework or library by relying on standard Web APIs instead of framework-specific abstractions.
+
+Whether you're using Next.js, Hono, Express, React, or a custom server, the same authentication core works without requiring framework-specific implementations.
+
+Learn more in the [Framework Agnostic](/docs/concepts/framework-agnostic) guide.
+
+## Runtime Agnostic
+
+Aura Auth is built on Web Standards rather than runtime-specific APIs, allowing it to run anywhere that supports the required Web APIs.
+
+The same codebase works across environments such as Node.js, Deno, Bun, Cloudflare Workers, Vercel Edge Functions, and other compatible runtimes.
+
+Learn more in the [Runtime Agnostic](/docs/concepts/runtime-agnostic) guide.
+
+## Type-First API
+
+Aura Auth is designed with TypeScript as a first-class citizen, providing end-to-end type safety, autocomplete, and intelligent type inference throughout the authentication workflow.
+
+This reduces configuration errors while making the developer experience faster and more predictable.
+
+To get the most out of Aura Auth, see the [TypeScript Configuration](/docs/concepts/typescript).
+
+## Modular
+
+Import only what you need.
+
+Aura Auth is organized into small, composable modules, allowing you to use individual utilities, authentication flows, adapters, or framework integrations without pulling in unnecessary code.
+
+This modular architecture keeps applications lightweight while making it easy to extend Aura Auth as your project grows.

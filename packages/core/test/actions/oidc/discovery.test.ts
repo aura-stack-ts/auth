@@ -31,6 +31,26 @@ describe("discoveryMetadata", () => {
         )
     })
 
+    test("fetches and validates discovery metadata - issuer with slig", async () => {
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(async () => ({
+                ok: true,
+                headers: new Headers({ "Content-Type": "application/json" }),
+                json: async () => ({ ...openIDMetadata, issuer: "https://app.com/issuer/1/apps/2" }),
+            }))
+        )
+
+        const metadata = await discoveryMetadata("https://app.com/issuer/1/apps/2")
+        expect(metadata).toEqual({ ...openIDMetadata, issuer: "https://app.com/issuer/1/apps/2" })
+        expect(fetch).toHaveBeenCalledWith(
+            "https://app.com/issuer/1/apps/2/.well-known/openid-configuration",
+            expect.objectContaining({
+                headers: { Accept: "application/json" },
+            })
+        )
+    })
+
     test("normalizes trailing slash on issuer comparison", async () => {
         vi.stubGlobal(
             "fetch",

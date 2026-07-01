@@ -1,6 +1,14 @@
 import { describe, test, expect } from "vitest"
-import { createBuiltInOAuthProviders, builtInOAuthProviders, type GitHubProfile } from "@/oauth/index.ts"
+import {
+    createBuiltInOAuthProviders,
+    builtInOAuthProviders,
+    type GitHubProfile,
+    setDynamicParams,
+    defineOpenIDProviderConfig,
+} from "@/oauth/index.ts"
 import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
+import { openIDCustomProvider } from "./presets.ts"
 
 describe("createBuiltInOAuthProviders", () => {
     test("create oauth config for github", () => {
@@ -54,5 +62,140 @@ describe("createBuiltInOAuthProviders", () => {
         expect(() => createBuiltInOAuthProviders(["github", "github"])).toThrow(
             "The registration collection contains duplicate identifier keys. Unique registration indices are mandatory across tracking providers"
         )
+    })
+
+    test("create oidc config", () => {
+        const oidc = createBuiltInOAuthProviders([openIDCustomProvider])
+        expect(oidc["oidc-provider"]).toMatchObject({
+            id: "oidc-provider",
+            name: "OIDC",
+            clientId: "oidc_client_id",
+            clientSecret: "oidc_client_secret",
+            oidc: {
+                issuer: "https://id.example.com",
+            },
+        })
+    })
+
+    test("create oidc config with slugs in issuer", () => {
+        const oidc = createBuiltInOAuthProviders([
+            { ...openIDCustomProvider, issuer: "https://app.com/issuer/:teamId/apps/:appId", teamId: 1, appId: 2 } as any,
+        ])
+        expect(oidc["oidc-provider"]).toMatchObject({
+            id: "oidc-provider",
+            name: "OIDC",
+            clientId: "oidc_client_id",
+            clientSecret: "oidc_client_secret",
+            oidc: {
+                issuer: "https://app.com/issuer/1/apps/2",
+            },
+        })
+    })
+})
+
+describe("setDynamicParams", () => {
+    describe("valid cases", () => {
+        const testCases = [
+            {
+                description: "set without dynamic param",
+                input: "https://app.com/issuer",
+                values: {},
+                expected: "https://app.com/issuer",
+            },
+            {
+                description: "set one dynamic param",
+                input: "https://app.com/issuer/:slug",
+                values: { slug: 1 },
+                expected: "https://app.com/issuer/1",
+            },
+            {
+                description: "set two dynamic params",
+                input: "https://app.com/issuer/:slug/apps/:appId",
+                values: { slug: 1, appId: 2 },
+                expected: "https://app.com/issuer/1/apps/2",
+            },
+            {
+                description: "set two continue params",
+                input: "https://app.com/issuer/:slug/:id",
+                values: { slug: 1, id: 2 },
+                expected: "https://app.com/issuer/1/2",
+            },
+            {
+                description: "set dynamic param with host",
+                input: "https://host:8443/realms/acme",
+                values: {},
+                expected: "https://host:8443/realms/acme",
+            },
+            {
+                description: "set dynamic param with host and path",
+                input: "https://host:8443/realms/:realm",
+                values: { realm: "acme" },
+                expected: "https://host:8443/realms/acme",
+            },
+        ]
+
+        for (const { description, input, values, expected } of testCases) {
+            test(description, () => {
+                expect(setDynamicParams(input, values)).toBe(expected)
+            })
+        }
+    })
+
+    describe("invalid cases", () => {
+        const testCases = [
+            {
+                description: "missing dynamic values",
+                input: "https://app.com/issuer/:slug",
+                values: {},
+            },
+        ]
+
+        for (const { description, input, values } of testCases) {
+            test(description, () => {
+                expect(() => setDynamicParams(input, values)).toThrow(AuraAuthError)
+            })
+        }
+    })
+})
+
+describe("defineOpenIDProviderConfig", () => {
+    test("default oidc provider", () => {
+        const oidc = defineOpenIDProviderConfig({
+            id: "oidc",
+            name: "OIDC",
+            issuer: "https://app.com/issuer",
+            clientId: "oidc_id",
+            clientSecret: "oidc_secret",
+        })
+        expect(oidc).toMatchObject({
+            id: "oidc",
+            name: "OIDC",
+            clientId: "oidc_id",
+            clientSecret: "oidc_secret",
+            oidc: {
+                issuer: "https://app.com/issuer",
+            },
+        })
+    })
+
+    test("oidc provider with dynamic params", () => {
+        const oidc = defineOpenIDProviderConfig({
+            id: "oidc",
+            name: "OIDC",
+            issuer: "https://app.com/issuer/:teamId/apps/:appId",
+            clientId: "oidc_id",
+            clientSecret: "oidc_secret",
+            teamId: 1,
+            appId: 2,
+        } as any)
+        expect(oidc).toMatchObject({
+            id: "oidc",
+            name: "OIDC",
+            clientId: "oidc_id",
+            clientSecret: "oidc_secret",
+            oidc: {
+                issuer: "https://app.com/issuer/1/apps/2",
+            },
+        })
     })
 })

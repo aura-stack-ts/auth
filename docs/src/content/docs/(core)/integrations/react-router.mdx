@@ -6,13 +6,6 @@ description: Integrate Aura Auth and React Router v7
 This guide walks you through to implement Aura Auth in a React Router v7 (formerly Remix) application to a complete support for Loaders, Actions, and Server Components.
 If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your React Router application.
 
-<Callout type="info">
-  Aura Auth is working on developing a React Router-specific package that will provide additional utilities and hooks for React
-  Router applications. For now, the core package can be used to implement authentication in React Router with the patterns
-  outlined in this guide. Stay tuned for updates on the [React Router
-  package!](https://github.com/aura-stack-ts/auth/tree/master/packages/react-router)
-</Callout>
-
 <Steps>
 
 <Step>
@@ -24,7 +17,7 @@ If you haven't configured Aura Auth yet, start with the [Installation Guide](/do
 Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
 
 ```ts title="src/lib/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
+import { createAuth } from "@aura-stack/react-router"
 
 export const auth = createAuth({
   oauth: ["github"],
@@ -45,7 +38,7 @@ export const { handlers, api } = auth
 Create an `auth-client.ts` file in `src/lib` directory to enable client-side features.
 
 ```ts title="src/lib/auth-client.ts" lineNumbers
-import { createAuthClient } from "@aura-stack/auth/client"
+import { createAuthClient } from "@aura-stack/react-router/client"
 
 export const authClient = createAuthClient({
   basePath: "/api/auth",

@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added the `Google` OpenID Connect provider, enabling authentication through Google accounts with minimal configuration. [#197](https://github.com/aura-stack-ts/auth/pull/197)
 
 - Added OpenID Connect (OIDC) support alongside OAuth 2.0. Providers can now be configured through OpenID Provider Discovery, with built-in support for ID token validation, nonce generation and validation, and JWKS-based signature verification. [#195](https://github.com/aura-stack-ts/auth/pull/195)
+- Added inference of dynamic parameters in OpenID Connect (OIDC) provider issuers. Issuers containing dynamic segments (prefixed with `:`) are now automatically detected, and users are required to provide values for those parameters when configuring the provider. [#200](https://github.com/aura-stack-ts/auth/pull/200)
 
 - Integrated `@aura-stack/rate-limiter` into authentication flows. Rate limiting is now enforced for `signIn`, `signInCredentials`, `signUp`, and `updateSession` actions, providing built-in protection against abuse and excessive requests. [#194](https://github.com/aura-stack-ts/auth/pull/194)
 
