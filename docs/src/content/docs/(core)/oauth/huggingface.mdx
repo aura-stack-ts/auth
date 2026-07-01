@@ -15,11 +15,12 @@ The first step is to create and register an OAuth App on the Hugging Face Connec
 
 1. Navigate to your Hugging Face profile and go to **Settings > Connected Apps > Developer Applications**.
 2. Click **Create App**.
-3. Fill in the "Application name" and "Homepage URL".
-4. Set the **Redirect URL** to `http://localhost:3000/auth/callback/github`.
+3. Fill in the "Application Name" and "Homepage URL".
+4. Select **openid**, **profile**, and **email** Account's scopes for the application.
+5. Set the **Redirect URLs** to `http://localhost:3000/auth/callback/huggingface`.
    - _(Make sure to replace `localhost:3000` with your production domain when deploying)_
-5. Click **Create application**.
-6. Ensure you copy the **Client ID** and click **Generate a new client secret**.
+6. Click **Create application**.
+7. Ensure you copy the **Client ID** and click **Generate a new client secret**.
 
 </Step>
 
@@ -97,7 +98,7 @@ import { huggingface } from "@aura-stack/auth/oauth/huggingface"
 export const auth = createAuth({
   oauth: [
     huggingface({
-        scope: "read:user user:email",
+      scope: "openid profile email read-repos",
     }),
   ],
 })
@@ -153,7 +154,7 @@ For environments supporting server-side actions, use the programmatic `api.signI
 import { api } from "./auth"
 
 export const serverSignIn = async () => {
-  const response = await api.signIn("github", {
+  const response = await api.signIn("huggingface", {
     redirectTo: "http://localhost:3000/dashboard",
   })
 
@@ -172,7 +173,7 @@ After a user successfully signs in, you can retrieve their session data securely
 
 ```ts
 const session = await authClient.getSession()
-console.log(session?.user) // The authenticated GitHub user profile
+console.log(session?.user) // The authenticated Hugging Face user profile
 ```
 
 **Server-Side:**
@@ -192,7 +193,7 @@ console.log(session?.user) // Safely retrieved backend session
 ## Resources
 
 - [RFC - The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
-- [Hugging Face - Sign in with Hugging Face](https://huggingface.co/docs/hub/en/oauth)
 - [Hugging Face - Create an OAuth App](https://huggingface.co/settings/applications/new)
+- [Hugging Face - Sign in with Hugging Face](https://huggingface.co/docs/hub/en/oauth)
 - [Hugging Face - OpenID Metadata](https://huggingface.co/.well-known/openid-configuration)
 - [Hugging Face - Open API Metadata](https://huggingface.co/.well-known/openapi.json)

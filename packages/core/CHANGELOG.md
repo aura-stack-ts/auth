@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `Google` OpenID Connect provider, enabling authentication through Google accounts with minimal configuration. [#198](https://github.com/aura-stack-ts/auth/pull/198)
+
 - Integrated `@aura-stack/rate-limiter` into authentication flows. Rate limiting is now enforced for `signIn`, `signInCredentials`, `signUp`, and `updateSession` actions, providing built-in protection against abuse and excessive requests. [#194](https://github.com/aura-stack-ts/auth/pull/194)
 
 - Extended `UserFrom` to support type inference from `ArkType` and `Valibot` schemas. User types are now inferred correctly for `Zod`, `ArkType`, and `Valibot` schema definitions. [#191](https://github.com/aura-stack-ts/auth/pull/191)
