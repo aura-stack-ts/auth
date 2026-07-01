@@ -6,12 +6,6 @@ description: Integrate Aura Auth and Hono
 This guide walks you through to implement Aura Auth in a Hono application to a complete support.
 If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Hono application.
 
-<Callout type="info">
-  Aura Auth is working on developing a Hono-specific package that will provide additional utilities for Hono applications. For
-  now, the core package can be used to implement authentication in Hono with the patterns outlined in this guide. Stay tuned for
-  updates on the [Hono package!](https://github.com/aura-stack-ts/auth/tree/master/packages/hono)
-</Callout>
-
 ---
 
 <Steps>
@@ -25,14 +19,15 @@ If you haven't configured Aura Auth yet, start with the [Installation Guide](/do
 Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
 
 ```ts title="src/lib/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
+import { createAuth } from "@aura-stack/hono"
 
 export const auth = createAuth({
   oauth: ["github"],
   basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
 })
 
-export const { handlers, api, jose } = auth
+export const { toHandler, withAuth, api, jose } = auth
 ```
 
 <Callout type="warning">
@@ -49,13 +44,11 @@ Mount the Aura Auth handlers using a wildcard route under your `/api/auth` subpa
 
 ```ts title="src/index.ts" lineNumbers
 import { Hono } from "hono"
-import { handlers } from "@/lib/auth"
+import { toHandler } from "@/lib/auth"
 
 const app = new Hono()
 
-app.all("/api/auth/*", async (ctx) => {
-  return await handlers.ALL(ctx.req.raw)
-})
+app.all("/api/auth/*", toHandler)
 
 export default app
 ```
@@ -68,35 +61,7 @@ export default app
 
 ### Middleware
 
-Middleware is a powerful way to protect your routes and access session data across your app. Create a `with-auth.ts` file in `src/middlewares`.
-
-```ts title="src/middlewares/with-auth.ts" lineNumbers
-import { api } from "@/lib/auth"
-import { createMiddleware } from "hono/factory"
-import type { Session } from "@aura-stack/auth"
-
-/**
- * Type definition for Hono's Context Variables to include the session.
- */
-export type AuthVariables = {
-  session: Session | null
-}
-
-export const withAuth = createMiddleware<{ Variables: AuthVariables }>(async (ctx, next) => {
-  try {
-    const session = await api.getSession({
-      headers: ctx.req.raw.headers,
-    })
-    if (!session.authenticated) {
-      return ctx.json({ error: "Unauthorized", message: "Active session required." }, 401)
-    }
-    ctx.set("session", session.session)
-    return await next()
-  } catch {
-    return ctx.json({ error: "Unauthorized", message: "Active session required." }, 401)
-  }
-})
-```
+Middleware is a powerful way to protect your routes and access session data across your app. Use the built-in `withAuth` middleware.
 
 The plugin returns session data only when the request is authenticated, which keeps downstream routes simple and predictable.
 
@@ -106,18 +71,15 @@ Use the middleware in your app and protect routes by checking for an active sess
 
 ```ts title="src/index.ts" lineNumbers
 import { Hono } from "hono"
-import { handlers } from "@/lib/auth"
-import { type AuthVariables, withAuth } from "@/middlewares/with-auth"
+import { toHandler, withAuth } from "@/lib/auth"
 
-const app = new Hono<{ Variables: AuthVariables }>()
+const app = new Hono()
 
 app.get("/", (ctx) => {
   return ctx.text("Welcome to the Aura Auth Hono App!")
 })
 
-app.all("/api/auth/*", async (ctx) => {
-  return await handlers.ALL(ctx.req.raw)
-})
+app.all("/api/auth/*", toHandler)
 
 app.get("/api/protected", withAuth, (ctx) => {
   const session = ctx.get("session")
