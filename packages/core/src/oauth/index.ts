@@ -25,6 +25,7 @@ import { dribbble } from "./dribbble.ts"
 import { hubspot } from "./hubspot.ts"
 import { google } from "./google.ts"
 import { huggingface } from "./huggingface.ts"
+import { authentik } from "./authentik.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema, OpenIDProviderSchema } from "@/schemas.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createOpenIDPlaceholder } from "@/actions/oidc/resolve-provider.ts"
@@ -48,6 +49,7 @@ export * from "./dribbble.ts"
 export * from "./hubspot.ts"
 export * from "./google.ts"
 export * from "./huggingface.ts"
+export * from "./authentik.ts"
 
 export const builtInOAuthProviders = {
     github,
@@ -69,6 +71,7 @@ export const builtInOAuthProviders = {
     hubspot,
     google,
     huggingface,
+    authentik,
 } as const
 
 /**

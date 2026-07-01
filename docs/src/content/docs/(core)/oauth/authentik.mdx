@@ -16,11 +16,11 @@ The first step is to create and register an OAuth App on the Authentik Applicati
 1. Navigate to your Authentik profile and go to **Applications > Applications > New Provider**.
 2. Click **New Application**.
 3. Select **OAuth2/OIDC** as Provider Type
-3. Fill in the "Application name" and "Homepage URL".
-4. Set the **Authorization callback URL** to `http://localhost:3000/auth/callback/authentik`.
+4. Fill in the "Application name" and "Homepage URL".
+5. Set the **Authorization callback URL** to `http://localhost:3000/auth/callback/authentik`.
    - _(Make sure to replace `localhost:3000` with your production domain when deploying)_
-5. Click **Register application**.
-6. Ensure you copy the **Client ID** and click **Generate a new client secret**.
+6. Click **Register application**.
+7. Ensure you copy the **Client ID** and click **Generate a new client secret**.
 
 </Step>
 
@@ -98,12 +98,7 @@ import { authentik } from "@aura-stack/auth/oauth/authentik"
 export const auth = createAuth({
   oauth: [
     authentik({
-      authorize: {
-        params: {
-          // Override default scopes
-          scope: "read:user user:email",
-        },
-      },
+      scope: "openid profile email",
     }),
   ],
 })
