@@ -103,7 +103,7 @@ export const auth = createAuth({
       authorize: {
         params: {
           // Override default scopes
-          scope: "read:user user:email",
+          scope: "openid email profile",
         },
       },
     }),

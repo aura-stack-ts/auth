@@ -21,14 +21,14 @@ export interface GoogleProfile {
     /**
      * The time of the ID token was issued.
      */
-    iat: string
+    iat: number
     /**
      * Expiration time on or after which the ID token must not be accepted.
      */
     exp: string
     /**
      * The client Identifier for the authorized presenter, obtained from
-     * the Goole Cloud Console.
+     * the Google Cloud Console.
      */
     azp?: string
     /**
@@ -41,7 +41,7 @@ export interface GoogleProfile {
      */
     auth_time?: number
     /**
-     * Access token hash. Provides validation that the Access TOken is tied
+     * Access token hash. Provides validation that the Access Token is tied
      * to the identity token.
      */
     at_hash?: string
