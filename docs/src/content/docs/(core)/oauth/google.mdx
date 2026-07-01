@@ -13,13 +13,16 @@ description: Add Google authorization provider to Aura Auth for authentication a
 
 The first step is to create and register an OAuth App on the Google Client Credentials to obtain access to the user's resources.
 
-1. Navigate to your Google profile and go to **Settings > Developer settings > OAuth Apps**.
-2. Click **Client Credentials**.
-3. Fill in the "Application name" and "Homepage URL".
-4. Set the **Authorization callback URL** to `http://localhost:3000/auth/callback/google`.
+1. Navigate to your Google Cloud Account and go to **APIs and Services > Credentials > OAuth Client IDs**.
+2. Click **Create Credentials**.
+3. Select **Application Type** and choose **Web application** as the application type.
+4. Fill in the "Name".
+5. Add the **Authorized JavaScript origins** as `http://localhost:3000`.
    - _(Make sure to replace `localhost:3000` with your production domain when deploying)_
-5. Click **Register application**.
-6. Ensure you copy the **Client ID** and click **Generate a new client secret**.
+6. Set the **Redirect URL** to `http://localhost:3000/auth/callback/google`.
+   - _(Make sure to replace `localhost:3000` with your production domain when deploying)_
+7. Click **Register application**.
+8. Ensure you copy the **Client ID** and click **Generate a new client secret**.
 
 </Step>
 
@@ -158,7 +161,7 @@ For environments supporting server-side actions, use the programmatic `api.signI
 import { api } from "./auth"
 
 export const serverSignIn = async () => {
-  const response = await api.signIn("github", {
+  const response = await api.signIn("google", {
     redirectTo: "http://localhost:3000/dashboard",
   })
 
@@ -177,7 +180,7 @@ After a user successfully signs in, you can retrieve their session data securely
 
 ```ts
 const session = await authClient.getSession()
-console.log(session?.user) // The authenticated GitHub user profile
+console.log(session?.user) // The authenticated Google user profile
 ```
 
 **Server-Side:**
