@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `Authentik` OpenID Connect provider, enabling authentication through Authentik accounts with minimal configuration. [#199](https://github.com/aura-stack-ts/auth/pull/199)
+
 - Added the `Hugging Face` OpenID Connect provider, enabling authentication through Hugging Face accounts with minimal configuration. [#198](https://github.com/aura-stack-ts/auth/pull/198)
 
 - Added the `Google` OpenID Connect provider, enabling authentication through Google accounts with minimal configuration. [#197](https://github.com/aura-stack-ts/auth/pull/197)
