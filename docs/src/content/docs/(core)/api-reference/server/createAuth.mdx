@@ -195,7 +195,7 @@ export const auth = createAuth({
 })
 ```
 
-For the full option reference (`schema`, `unknownKeys`, `skipValidation`), validator support across Zod/Valibot/ArkType/TypeBox, and type inference with `InferUser`/`InferSession`, see [Identity Schema](/docs/configuration/identity).
+For the full option reference (`schema`, `unknownKeys`, `skipValidation`), validator support across Zod/Valibot/ArkType/TypeBox, and type inference with `InferUser`/`InferSession`, see [Identity Schema](/docs/configuration/identity-schema).
 
 ### `credentials`
 
@@ -256,7 +256,7 @@ export const auth = createAuth({
 
 ### `trustedProxyHeaders` [#trusted-proxy-headers]
 
-Enables Aura Auth ro read proxy headers for scenarios where the application is behind a reverse proxy or load balancer. This configuration consumes `X-Forwarded-For`, `X-Forwarded-Host`, and `X-Forwarded-Proto` headers to determine the original client IP address and protocol. For more details, read [Proxy headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers#non-standard_headers).
+Enables Aura Auth to read proxy headers for scenarios where the application is behind a reverse proxy or load balancer. This configuration consumes `X-Forwarded-For`, `X-Forwarded-Host`, and `X-Forwarded-Proto` headers to determine the original client IP address and protocol. For more details, read [Proxy headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers#non-standard_headers).
 
 <Callout type="warning">
 
@@ -348,7 +348,9 @@ export const auth = createAuth({
   logger: {
     level: "info",
     log(metadata) {
-      console.log(`[${metadata.message}] - ${metadata.timestamp.toISOString()} - ${metadata.level.toUpperCase()} - `${metadata.msgId}``)
+      console.log(
+        `[${metadata.message}] - ${metadata.timestamp.toISOString()} - ${metadata.level.toUpperCase()} - ${metadata.msgId}`
+      )
     },
   },
 })

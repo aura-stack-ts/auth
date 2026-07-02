@@ -80,7 +80,7 @@ High-level helpers that combine JWS and JWE into a single nested-token flow, for
 
 ```ts lineNumbers
 function encodeJWT(payload: TypedJWTPayload<Partial<DefaultUser>>, options?: EncodeJWTOptions): Promise<string>
-function decodeJWT(token: string): TypedJWTPayload<Partial<DefaultUser>>
+function decodeJWT(token: string): Promise<TypedJWTPayload<Partial<DefaultUser>>>
 ```
 
 - `jose.encodeJWT(payload, options?)` — signs (JWS) and then encrypts (JWE) the payload in one step, guaranteeing both authenticity and confidentiality.

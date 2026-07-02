@@ -20,7 +20,7 @@ For reference implementations, see [Aura Auth Apps](https://github.com/aura-stac
 
 ### Aura Auth Instance
 
-The `createAuth` function is the entry function of the package which creates the Aura Auth instance configuration. It defines the behavior, options, and values to be supported by the Auth Instance. This includes the definitions of the [OAuth Providers](/docs/oauth) to be consumed, [Cookie Management](/docs/guides/cookie-management), and more configurable options. For more details, read the [createAuth API Reference](/docs/api-reference/core#create-auth).
+The `createAuth` function is the entry function of the package which creates the Aura Auth instance configuration. It defines the behavior, options, and values to be supported by the Auth Instance. This includes the definitions of the [OAuth Providers](/docs/oauth) to be consumed, [Cookie Management](/docs/guides/cookie-management), and more configurable options. For more details, read the [createAuth API Reference](/docs/api-reference/core#createAuth).
 
 ```ts title="@/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -38,7 +38,7 @@ The Auth Instance exposes two main objects:
 - `jose`: cryptographic utilities used internally and by integrations
 - `api`: programmatic API for interact with the authentication flows.
 
-For all configuration options, see [createAuth API Reference](/docs/api-reference/core#create-auth)
+For all configuration options, see [createAuth API Reference](/docs/api-reference/core#createAuth)
 
 ### HTTP Handlers
 

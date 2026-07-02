@@ -59,6 +59,7 @@ If sign-in fails to initiate (e.g. an unknown `providerId`), `signInURL` resolve
 import { api } from "@/lib/auth"
 
 const output = await api.signIn("github", {
+  request: getRequest(),
   redirectTo: "/dashboard",
 })
 ```
@@ -69,6 +70,7 @@ const output = await api.signIn("github", {
 import { api } from "@/lib/auth"
 
 const output = await api.signIn("google", {
+  request: getRequest(),
   redirect: false,
 })
 

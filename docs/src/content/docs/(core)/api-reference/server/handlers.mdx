@@ -53,7 +53,7 @@ Signs in a user with a username and password. Expects a JSON payload:
 }
 ```
 
-Requires [`credentials.authorize`](/docs/api-reference/server/create-auth#credentials) to be configured, it validates the submitted credentials and returns the user profile used to create the session.
+Requires [`credentials.authorize`](/docs/api-reference/server/createAuth#credentials) to be configured, it validates the submitted credentials and returns the user profile used to create the session.
 
 Supports the [redirect query parameters](#optional-query-parameters).
 
@@ -79,11 +79,11 @@ The session response filters out JWT-standard claims (`exp`, `iat`, `jti`, `nbf`
 
 ### `POST /auth/session`
 
-Updates session data from the initial OAuth profile, currently supports the `email`, `name`, and `image` fields, or any additional fields defined in [`identity.schema`](/docs/configuration/identity). For programmatic updates outside of a request/response cycle, use [`api.updateSession`](/docs/api-reference/server/api/update-session) instead.
+Updates session data from the initial OAuth profile, currently supports the `email`, `name`, and `image` fields, or any additional fields defined in [`identity.schema`](/docs/configuration/identity-schema). For programmatic updates outside of a request/response cycle, use [`api.updateSession`](/docs/api-reference/server/api/updateSession) instead.
 
 ### `PATCH /auth/session`
 
-Updates the current user's session. The request body follows the shape defined by [`identity.schema`](/docs/configuration/identity); by default it supports `email`, `name`, and `image`:
+Updates the current user's session. The request body follows the shape defined by [`identity.schema`](/docs/configuration/identity-schema); by default it supports `email`, `name`, and `image`:
 
 ```json lineNumbers
 {
@@ -102,7 +102,7 @@ Supports the [redirect query parameters](#optional-query-parameters).
 
 Registers a new user. No request body is required by default, though fields defined in `signUp.schema` may be included.
 
-Requires [`signUp.onCreateUser`](/docs/api-reference/server/create-auth#signup) to be configured, it creates the user record and returns the user profile used to create the session.
+Requires [`signUp.onCreateUser`](/docs/api-reference/server/createAuth#signup) to be configured, it creates the user record and returns the user profile used to create the session.
 
 Supports the [redirect query parameters](#optional-query-parameters).
 

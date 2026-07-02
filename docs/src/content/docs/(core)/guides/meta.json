@@ -1,5 +1,5 @@
 {
   "title": "Guides",
-  "pages": ["custom-providers", "jose-utilities", "schema-validation", "integration"],
+  "pages": ["custom-providers", "jose-utilities", "integration"],
   "defaultOpen": false
 }
