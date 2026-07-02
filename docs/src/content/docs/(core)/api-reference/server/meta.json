@@ -1,4 +1,4 @@
 {
   "title": "Server",
-  "pages": ["createAuth", "api"]
+  "pages": ["createAuth", "handlers", "jose", "api"]
 }

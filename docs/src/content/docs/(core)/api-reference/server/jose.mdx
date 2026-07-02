@@ -1,4 +1,100 @@
 ---
-title: JOSE Object
+title: jose
 description: The JOSE object provides methods for signing, verifying, encrypting, and decrypting JSON Web Tokens (JWTs) and JSON Web Encryption (JWE) objects.
 ---
+
+The `jose` object returned by `createAuth` is a fully instantiated, zero-config wrapper built on top of the standalone [**`@aura-stack/jose`**](/docs/api-reference/jose-package) package.
+
+## Zero-Config HKDF
+
+Reusing a single raw secret for multiple distinct cryptographic operations signing a token and encrypting a session payload, for instance introduces cryptographic vulnerabilities. `auth.jose` avoids this automatically:
+
+1. **Automatic secret resolution**: it extracts the master `secret` and `salt` from your configuration or environment (`AURA_AUTH_SECRET` and `AURA_AUTH_SALT`).
+2. **HKDF extraction & expansion**: it uses an internal HMAC-based Key Derivation Function (HKDF) to generate distinct, independent keys for JSON Web Signatures (JWS) and JSON Web Encryption (JWE).
+3. **Context isolation**: every method on `auth.jose` runs against these derived keys automatically. You never pass a secret, key, or salt manually.
+
+<Callout type="info">
+  Derived keys are cryptographically bound to `AURA_AUTH_SALT`. Keep it strictly deterministic across serverless cold starts or
+  restarts, a changing salt invalidates every existing session and token immediately.
+</Callout>
+
+---
+
+## Obtaining the instance
+
+`jose` is returned directly from `createAuth`, alongside `handlers` and `api`.
+
+```ts title="lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const { handlers, jose, api } = createAuth({
+  oauth: [],
+})
+```
+
+---
+
+## API Reference Overview
+
+### JWS — signing and verifying
+
+Used for data integrity: signing and verifying a payload whose contents aren't sensitive and don't need to be hidden from the holder of the token.
+
+```ts lineNumbers
+function signJWS(payload: TypedJWTPayload<Partial<DefaultUser>>, options?: JWTHeaderParameters): Promise<string>
+function verifyJWS(token: string, options?: JWTVerifyOptions): Promise<T>
+```
+
+- `jose.signJWS(payload, options?)` — signs a payload using the derived JWS key and returns a compact, three-part signature string.
+- `jose.verifyJWS(token, options?)` — verifies the token's signature, expiration bounds, and structural integrity, using the derived key automatically.
+
+```ts lineNumbers
+import { jose } from "@/lib/auth"
+
+const token = await jose.signJWS({ userId: 123, role: "admin" })
+const payload = await jose.verifyJWS(token)
+```
+
+### JWE — encrypting and decrypting
+
+Used for confidentiality: encrypting sensitive payload data so it's unreadable without the derived key.
+
+```ts lineNumbers
+function encryptJWE(payload: TypedJWTPayload<Partial<DefaultUser>>, options?: JWEHeaderParameters): Promise<string>
+function decryptJWE(token: string, options?: JWTDecryptOptions): Promise<T>
+```
+
+- `jose.encryptJWE(payload, options?)` — encrypts the payload into a compact, five-part JWE ciphertext string using the derived JWE key.
+- `jose.decryptJWE(token, options?)` — decrypts a JWE string back into its typed, structured payload.
+
+```ts lineNumbers
+import { jose } from "@/lib/auth"
+
+const encrypted = await jose.encryptJWE({ secretData: "Sensitive Info" })
+const decrypted = await jose.decryptJWE(encrypted)
+```
+
+### JWT — combined signing and encryption
+
+High-level helpers that combine JWS and JWE into a single nested-token flow, for when you need both authenticity and confidentiality without composing the two manually.
+
+```ts lineNumbers
+function encodeJWT(payload: TypedJWTPayload<Partial<DefaultUser>>, options?: EncodeJWTOptions): Promise<string>
+function decodeJWT(token: string): TypedJWTPayload<Partial<DefaultUser>>
+```
+
+- `jose.encodeJWT(payload, options?)` — signs (JWS) and then encrypts (JWE) the payload in one step, guaranteeing both authenticity and confidentiality.
+- `jose.decodeJWT(token)` — parses a token's payload **without verifying it**. This is a read-only shortcut for inspecting a token's structure, not a way to authenticate one.
+
+```ts lineNumbers
+import { jose } from "@/lib/auth"
+
+const jwt = await jose.encodeJWT({ userId: 123, role: "admin", secretData: "Sensitive Info" })
+const payload = await jose.decodeJWT(jwt)
+```
+
+<Callout type="warning">
+  `decodeJWT` performs no signature or expiration verification. Never use its output to make an authorization decision or to trust
+  the payload's contents — an attacker can submit any arbitrary token and `decodeJWT` will happily parse it. Use `verifyJWS`,
+  `decryptJWE`, or a verifying JWT method for anything security-relevant.
+</Callout>
