@@ -2,3 +2,110 @@
 title: signUp
 description: Sign up a new user with Aura Auth.
 ---
+
+The `signUp` client method is the primary programmatic entry point for registering a new user, from a client-side or browser context.
+
+```ts title="syntax.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.signUp({
+  payload: {
+    username: "user@example.com",
+    password: "password123",
+  },
+  redirectTo: "/dashboard",
+})
+```
+
+## Reference
+
+### Parameters
+
+| Parameter | Type            | Required | Description                                                      |
+| --------- | --------------- | -------- | ---------------------------------------------------------------- |
+| options   | `SignUpOptions` | No       | An object containing additional options for the sign-up process. |
+
+### SignUpOptions
+
+| Option     | Type                      | Default   | Description                                                                                            |
+| ---------- | ------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| payload    | `Record<string, unknown>` | undefined | The user registration data, matching your configured `signUp.schema` (if set).                         |
+| redirect   | `boolean`                 | `true`    | Whether to redirect via `window.location.assign` (`true`) or return the result as an object (`false`). |
+| redirectTo | `string`                  | undefined | The URL to redirect to after a successful sign-up.                                                     |
+
+### Returns
+
+| Return Type                      | Description                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `Promise<SignUpReturn<Options>>` | Resolves to an object containing `redirectURL`, `redirect`, and `success` — see [Behavior](#behavior). |
+
+## Behavior
+
+- Cookies are set automatically in the browser context — you don't need to handle them manually.
+- The CSRF token is automatically loaded and sent with the request — you don't need to handle it manually.
+- Sign-up success depends entirely on your configured [`signUp.onCreateUser`](/docs/api-reference/server/create-auth#signup) function on the server, which validates the submitted data and returns the `User` object (or `null` if invalid).
+- The return value depends on the `redirect` option:
+  - **`redirect: true`** (default) — navigates to `redirectTo` (or the default post-sign-up URL) via `window.location.assign`.
+  - **`redirect: false`** — resolves to an object with `redirectURL`, `redirect: false`, and `success`, letting you handle navigation yourself.
+- If the sign-up attempt fails (e.g. `onCreateUser` returns `null`, or `payload` fails `signUp.schema` validation), `redirectURL` resolves to `null` and `success` is `false`.
+
+## Setup
+
+```ts title="lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { createSecretValue } from "@aura-stack/auth/crypto"
+
+export const auth = createAuth({
+  oauth: [],
+  signUp: {
+    onCreateUser: async ({ payload }) => {
+      if (!payload || !payload.username || !payload.password) {
+        return null
+      }
+
+      const sub = createSecretValue(10)
+      return {
+        sub,
+        name: "John Doe",
+        email: payload.username,
+        image: `https://avatars.dicebear.com/api/initials/${sub}.svg`,
+      }
+    },
+  },
+})
+```
+
+## Usage
+
+### Sign up
+
+```ts title="credentials-signup.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.signUp({
+  payload: {
+    username: "johndoe@example.com",
+    password: "password",
+  },
+  redirectTo: "/dashboard",
+})
+```
+
+### Manual navigation
+
+```tsx title="manual-navigation.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.signUp({
+  payload: {
+    username: "johndoe@example.com",
+    password: "password",
+  },
+  redirect: false,
+  redirectTo: "/dashboard",
+})
+
+if (output.success) {
+  window.location.assign(output.redirectURL)
+}
+```

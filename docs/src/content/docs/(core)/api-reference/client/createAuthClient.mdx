@@ -2,3 +2,209 @@
 title: createAuthClient
 description: Create an Aura Auth client for your app with the given configuration.
 ---
+
+## Signature
+
+```ts lineNumbers
+function createAuthClient<DefaultUser extends User = User, SignUpPayload extends Record<string, any> = Record<string, any>>(
+  options: AuthClientOptions
+): {
+  getSession(): Promise<Session<User> | null>
+  signIn<Options extends SignInOptions>(
+    oauth: LiteralUnion<BuiltInOAuthProvider>,
+    options?: Options | undefined
+  ): Promise<SignInReturn<Options>>
+  signInCredentials<Options extends SignInCredentialsOptions>(options: Options): Promise<SignInCredentialsReturn<Options>>
+  signUp<Options extends SignUpOptions<Record<string, any>>>(options: Options): Promise<SignUpReturn<Options>>
+  updateSession<Options extends UpdateSessionOptions<User>>(options: Options): Promise<UpdateSessionReturn<Options, User>>
+  signOut<Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>>
+}
+```
+
+## Returns
+
+`createAuthClient()` returns an Auth Client instance for client-side usage, exposing the following methods:
+
+| Method                | Description                                                                                                | Link                                                           |
+| --------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `getSession()`        | Retrieves the current session from the `GET /auth/session` endpoint                                        | [Docs](/docs/api-reference/client/functions/getSession)        |
+| `signIn()`            | Initiates the sign-in process for the specified OAuth provider from the `GET /auth/signIn/:oauth` endpoint | [Docs](/docs/api-reference/client/functions/signIn)            |
+| `signInCredentials()` | Signs in a user with their email and password from the `POST /auth/signIn/credentials` endpoint            | [Docs](/docs/api-reference/client/functions/signInCredentials) |
+| `signUp()`            | Creates a new user account from the `POST /auth/signUp` endpoint                                           | [Docs](/docs/api-reference/client/functions/signUp)            |
+| `updateSession()`     | Updates the current session from the `PATCH /auth/session` endpoint                                        | [Docs](/docs/api-reference/client/functions/updateSession)     |
+| `signOut()`           | Signs out the current user from the `POST /auth/signOut` endpoint                                          | [Docs](/docs/api-reference/client/functions/signOut)           |
+
+<Callout type="info">
+  The Auth Client instance is designed for client-side usage and talks to the Aura Auth HTTP handler endpoints over `fetch`. It is
+  not intended for server-side usage — if you need to perform server-side flows, use the `api` object instead. See the [Server API
+  Reference](/docs/api-reference/server/api).
+</Callout>
+
+## Options
+
+`baseURL`, `basePath`, and `headers` configure how requests are addressed. `fetch`, `cache`, `credentials`, and `mode` are passed straight through to the underlying `fetch()` call the client makes internally — if you're familiar with the Fetch API, these behave exactly as they would in a normal `fetch()` call.
+
+### `baseURL`
+
+Base URL of the application used to construct absolute URLs for redirects and API calls. It should include the protocol and domain, and optionally a port if not standard (80 for HTTP, 443 for HTTPS). If not set, Aura Auth attempts to infer it from the request headers, which may not always be reliable.
+
+<Callout type="warning">
+  Setting `baseURL` is recommended for production environments to ensure consistent URL generation. Relying on header inference
+  can lead to incorrect URLs, especially behind proxies or load balancers, which may cause authentication failures or security
+  issues.
+</Callout>
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "https://api.example.com",
+})
+```
+
+### `basePath`
+
+Base path for the Aura Auth HTTP handler endpoints. Defaults to `/auth`. Set this if your Aura Auth handlers are mounted at a different path.
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  basePath: "/auth",
+  baseURL: "https://api.example.com",
+})
+```
+
+### `headers`
+
+Default headers to include in every request made by the Auth Client instance.
+
+#### Static headers
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "https://api.example.com",
+  headers: {
+    "X-Custom-Header": "MyCustomValue",
+  },
+})
+```
+
+#### Dynamic headers
+
+Pass a function returning a headers object to compute headers per-request — useful for attaching a token that changes over time.
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "https://api.example.com",
+  headers: () => {
+    return {
+      Authorization: `Bearer ${getAuthToken()}`,
+    }
+  },
+})
+```
+
+### `fetch`
+
+A custom `fetch` implementation for the Auth Client instance to use instead of the global `fetch` available in the environment.
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "https://api.example.com",
+  fetch: async (input, init) => {
+    // Custom fetch logic here
+    return fetch(input, init)
+  },
+})
+```
+
+### `cache`
+
+Sets the [Fetch API `cache` mode](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#cache) used for requests (`"default"`, `"no-store"`, `"reload"`, `"no-cache"`, `"force-cache"`, or `"only-if-cached"`). Defaults to `"no-store"`, the standard browser HTTP cache behavior.
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "https://api.example.com",
+  cache: "no-store",
+})
+```
+
+### `credentials`
+
+Sets the [Fetch API `credentials` mode](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#credentials) (`"omit"`, `"same-origin"`, or `"include"`), controlling whether cookies are sent with cross-origin requests. Defaults to `"include"`, the standard `fetch()` default
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "https://api.example.com",
+  credentials: "include",
+})
+```
+
+### `mode`
+
+Sets the [Fetch API `mode`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#mode) (`"cors"`, `"no-cors"`, or `"same-origin"`). Defaults to `"cors"`, the standard `fetch()` default for cross-origin requests.
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "https://api.example.com",
+  mode: "cors",
+})
+```
+
+## Generic types
+
+`createAuthClient` accepts two generic parameters, `DefaultUser` and `SignUpPayload`, letting you type the client to match your application's user shape and sign-up payload.
+
+### `DefaultUser`
+
+Infer this from your `createAuth` configuration with the `InferUser` utility type, or provide your own type directly.
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { auth } from "@/lib/auth"
+import { createAuthClient } from "@aura-stack/auth/client"
+
+type User = InferUser<typeof auth>
+
+export const authClient = createAuthClient<User>({
+  baseURL: "https://api.example.com",
+})
+```
+
+<Callout type="info">
+  This is only necessary if you've customized `identity.schema` in your `createAuth` configuration. If you haven't, the default
+  `User` type is used automatically. See [Identity Schema](/docs/configuration/identity-schema#type-inference).
+</Callout>
+
+### `SignUpPayload`
+
+Defines the shape of the payload sent during sign-up — useful when your sign-up form collects fields beyond the default set.
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { auth } from "@/lib/auth"
+import { createAuthClient } from "@aura-stack/auth/client"
+import type { User } from "@aura-stack/auth"
+
+type SignUpPayload = {
+  username: string
+  nickname: string
+  email: string
+  password: string
+}
+
+export const authClient = createAuthClient<User, SignUpPayload>({
+  baseURL: "https://api.example.com",
+})
+```

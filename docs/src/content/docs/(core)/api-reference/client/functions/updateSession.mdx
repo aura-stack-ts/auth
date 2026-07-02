@@ -2,3 +2,85 @@
 title: updateSession
 description: Update the current session with new identity data or refresh the session.
 ---
+
+The `updateSession` client method modifies or refreshes the data stored in the current user's session payload, without requiring them to sign out and back in.
+
+```ts title="syntax.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const session = await authClient.updateSession({
+  session: {
+    user: {
+      nickname: "newnickname",
+    },
+  },
+})
+```
+
+## Reference
+
+### Parameters
+
+| Parameter | Type                                | Required | Description                                                   |
+| --------- | ----------------------------------- | -------- | ------------------------------------------------------------- |
+| options   | `UpdateSessionOptions<DefaultUser>` | Yes      | An object containing the session updates and request context. |
+
+### UpdateSessionOptions
+
+| Option     | Type                                | Default   | Description                                                                                            |
+| ---------- | ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| session    | `DeepPartial<Session<DefaultUser>>` | undefined | The partial session data to merge into the current session.                                            |
+| redirect   | `boolean`                           | `true`    | Whether to redirect via `window.location.assign` (`true`) or return the result as an object (`false`). |
+| redirectTo | `string`                            | undefined | The URL to redirect to after a successful update.                                                      |
+
+### Returns
+
+| Return Type                             | Description                                                                           |
+| --------------------------------------- | ------------------------------------------------------------------------------------- |
+| `Promise<UpdateSessionReturn<Options>>` | Resolves to an object containing the updated session data, `redirect`, and `success`. |
+
+## Behavior
+
+- Cookies are set automatically in the browser context — you don't need to handle them manually.
+- The CSRF token is automatically loaded and sent with the request — you don't need to handle it manually.
+- The session token's integrity is verified before applying the update. If the session is invalid or expired, the call resolves with `success: false` rather than throwing.
+- The return value depends on the `redirect` option:
+  - **`redirect: true`** (default) — navigates to `redirectTo` (or the default post-update URL) via `window.location.assign`.
+  - **`redirect: false`** — resolves to an object with the updated session, `redirect: false`, and `success`, letting you handle navigation yourself.
+- If the update fails (invalid session, or data that doesn't match `identity.schema`), `success` is `false`.
+
+## Usage
+
+### Update session data
+
+```ts title="update-session.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const session = await authClient.updateSession({
+  session: {
+    user: {
+      nickname: "newnickname",
+    },
+  },
+})
+```
+
+### With navigation
+
+```tsx title="manual-navigation.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.updateSession({
+  session: {
+    user: {
+      nickname: "newnickname",
+    },
+  },
+  redirect: false,
+  redirectTo: "/dashboard",
+})
+
+if (output.success) {
+  window.location.assign(output.redirectURL)
+}
+```

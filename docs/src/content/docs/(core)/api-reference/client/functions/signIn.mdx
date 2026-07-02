@@ -2,3 +2,75 @@
 title: signIn
 description: Sign in to your Aura app with a built-in or custom OAuth provider.
 ---
+
+The `signIn` client function is the primary programmatic entry point for initiating an authentication flow with any configured OAuth 2.0 or OpenID Connect (OIDC) provider, from a client-side or browser context.
+
+```ts title="sign-in.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.signIn("google", {
+  redirectTo: "/dashboard",
+})
+```
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type            | Required | Description                                                      |
+| ---------- | --------------- | -------- | ---------------------------------------------------------------- |
+| providerId | `string`        | Yes      | The id of the OAuth provider to use for sign-in.                 |
+| options    | `SignInOptions` | No       | An object containing additional options for the sign-in process. |
+
+### SignInOptions
+
+| Option     | Type      | Default   | Description                                                                                            |
+| ---------- | --------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| redirect   | `boolean` | `false`   | Whether to redirect via `window.location.assign` (`true`) or return the result as an object (`false`). |
+| redirectTo | `string`  | undefined | The URL to redirect to after a successful sign-in.                                                     |
+
+<Callout type="info">
+  `redirect` defaults to `false` here — unlike the other client methods, which default to `true`. This is intentional: `signIn`
+  navigates the browser to a **cross-origin** OAuth provider URL, and doing that via a `Location` header on a `fetch()` response
+  runs into CORS restrictions on cross-origin redirects. To avoid that, the client resolves the authorize URL and navigates
+  manually with `window.location.assign`, which requires you to opt in or handle the navigation yourself.
+</Callout>
+
+### Returns
+
+| Return Type                      | Description                                                                                                |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `Promise<SignInReturn<Options>>` | Resolves to an object containing `signInURL`, `redirect`, and `success` — see [Behavior](#behavior) below. |
+
+## Behavior
+
+- Cookies are set automatically in the browser context — you don't need to handle them manually.
+- The return value depends on the `redirect` option:
+  - **`redirect: false`** (default) — resolves to an object with `signInURL`, `redirect: false`, and `success`, letting you handle navigation yourself.
+  - **`redirect: true`** — the client navigates the browser to the OAuth provider's authorize URL via `window.location.assign`. Nothing meaningful is returned to inspect programmatically; the navigation itself is the result.
+- If sign-in fails to initiate (e.g. an unknown `providerId`), `signInURL` resolves to `null` and `success` is `false`.
+
+## Usage
+
+### Social login
+
+```tsx title="social-login.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.signIn("github", {
+  redirect: true,
+  redirectTo: "/dashboard",
+})
+```
+
+### Manual navigation
+
+```tsx title="manual-navigation.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.signIn("google")
+
+if (output.success) {
+  window.location.assign(output.signInURL)
+}
+```

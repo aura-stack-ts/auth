@@ -8,7 +8,7 @@ The `api.getSession` method retrieves the active user session on the server. It 
 ```ts title="syntax.ts" lineNumbers
 import { api } from "@/lib/auth"
 
-const { session, authenticated, headers } = await api.getSession({
+const { session, success, headers } = await api.getSession({
   headers: getHeaders(),
 })
 ```
