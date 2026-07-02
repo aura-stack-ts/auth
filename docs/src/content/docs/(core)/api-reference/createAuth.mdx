@@ -1,55 +1,36 @@
 ---
-title: Configuration Options
-description: Configure and customize Aura Auth defaults via createAuth.
+title: createAuth
+description: The `createAuth` function initializes the Aura Auth instance with configuration options for OAuth providers, session management, cookie handling, and security settings. It returns an object containing the auth handlers, JOSE utilities, and API methods.
 ---
 
-## `createAuth` configuration options
+### Usage
+
+```ts lineNumbers
+function createAuth<Identity extends Identities = EditableShape<UserShape>, SignUpSchema extends SchemaTypes = ZodObject<any>>(
+  options: AuthConfig<Identity, SignUpSchema>
+): AuthInstance<FromShapeToObject<Identity>, SignUpSchema>
+```
 
 ### `oauth`
 
-Configures OAuth providers for an auth instance. Aura Auth's built-in providers can be used, or custom providers supplied.
+Defines the OAuth and OpenID Connect providers that Aura Auth will support. Each provider configuration includes the necessary endpoints, client credentials, and scopes required for authentication.
 
-```ts title="@/auth" lineNumbers
+Import them based on your preferred method, for more details read [OAuth Providers](/docs/oauth#configuration-methods).
+
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
-})
-```
-
-##### Built-in OAuth Providers
-
-Aura Auth ships ready-to-use OAuth providers. The `oauth` option in `createAuth` autocompletes these provider IDs (names are lowercase).
-
-```ts title="@/auth" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: ["github", "gitlab", "bitbucket"],
+  oauth: ["github", "google"],
+  basePath: "/auth",
 })
 ```
 
 ##### Custom OAuth Providers
 
-Provider configs are available via `@aura-stack/auth/oauth/index` (all providers) or `@aura-stack/auth/oauth/:provider` (specific). See [OAuth Providers](/docs/oauth) for details. Custom providers must implement `OAuthProvider`.
+Use `OAuthProviderCredentials` or `OpenIDProvider` to define custom providers with specific endpoints, issuer URLs and scopes.
 
-```ts title="@/auth" lineNumbers
-import { createAuth, type OAuthProvider } from "@aura-stack/auth"
-import { github } from "@aura-stack/auth/oauth/index"
-
-export const auth = createAuth({
-  oauth: [
-    github({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    }),
-  ],
-})
-```
-
-**or**
-
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -71,17 +52,11 @@ export const auth = createAuth({
 })
 ```
 
-<Callout>
-  Aura Auth infers the clientId and clientSecret field names from the provider ID. For example, a provider with `id: "github"`
-  looks for `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` environment variables by default. Custom providers should follow this
-  convention or explicitly set the clientId and clientSecret fields to avoid confusion.
-</Callout>
-
 ### `cookies`
 
-Per-cookie configuration to override Aura Auth's defaults. You can set a cookie name prefix and adjust the cookies Aura Auth uses internally. See [API Reference](/docs/api-reference/core#cookies) for details.
+Overrides the default cookie configuration used internally by Aura Auth. This allows you to customize the cookie names, attributes, and strategies used for session management and security.
 
-Supported cookies: `sessionToken`, `csrfToken`, `state`, `codeVerifier`, `redirectTo`, and `redirectURI`. Set per-cookie attributes as needed. For autocomplete and safer suggestions, set the `strategy` field, which provides type-safe defaults that follow cookie best practices.
+For autocomplete and safer suggestions, set the `strategy` field, which provides type-safe defaults that follow cookie best practices. For more details read [Cookie Configuration](/docs/configuration/cookie-management).
 
 <Callout type="warning">
   This option is security-sensitive. Misconfigured `cookies.overrides` can leak data or weaken protections. Aura Auth is not
@@ -89,7 +64,7 @@ Supported cookies: `sessionToken`, `csrfToken`, `state`, `codeVerifier`, `redire
   so cookies stay inaccessible to JavaScript.
 </Callout>
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -110,7 +85,7 @@ export const auth = createAuth({
 
 Defines the session management strategy and options for Aura Auth. The session strategy determines how user sessions are stored and maintained across requests. Supported strategies include `jwt` (JSON Web Tokens). Each strategy has its own configuration options for token expiration, refresh behavior, and storage mechanisms.
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -125,7 +100,7 @@ export const auth = createAuth({
 })
 ```
 
-#### `jwt` Session Strategy
+#### Session Strategy
 
 The `jwt` session strategy is the stateless option that uses JSON Web Tokens to manage user session. It includes options for token mode (sealed, signed or encrypted).
 
@@ -135,21 +110,6 @@ The `jwt` session strategy is the stateless option that uses JSON Web Tokens to 
 - `audience`: (optional) sets the `aud` claim in the JWT, which identifies the intended audience of the token. This can be used to restrict token usage to specific clients or services.
 - `maxExpiration`: (optional) sets the maximum expiration time for the JWT in seconds. This is a hard limit that prevents tokens from being valid indefinitely, even if they are refreshed.
 - `expirationStrategy`: (optional) determines how token expiration is handled. `absolute` (default) means the token expires after a fixed time from issuance. `rolling` means the token expiration is extended on each request, keeping the user logged in as long as they are active.
-
-### `basePath`
-
-Base path prefix where Aura Auth endpoints are mounted and exposed to your routing system. Defaults to `/auth`.
-
-<Callout type="warning">The `basePath` must start with a leading `/`.</Callout>
-
-```ts title="@/auth" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: [],
-  basePath: "/auth",
-})
-```
 
 ### `baseURL`
 
@@ -161,7 +121,7 @@ Base URL of the application used to construct absolute URLs for redirects and AP
   issues.
 </Callout>
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -170,11 +130,24 @@ export const auth = createAuth({
 })
 ```
 
+### `basePath`
+
+Base path prefix where Aura Auth endpoints are mounted and exposed to your routing system. Defaults to `/auth`.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  basePath: "/auth",
+})
+```
+
 ### `secret`
 
 Secret used to sign, encrypt, and hash JWTs, CSRF tokens, and other sensitive values.
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -195,38 +168,141 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 openssl rand -base64 32
 ```
 
-Aura Auth also supports `CryptoKey`, `CryptoKeyPair`, and a `CryptoSecret` object (with separate `sign` and `encrypt` keys) for environments that support the Web Crypto API. This enables more secure key management and the use of asymmetric keys for signing and encryption, depending on the `jwt.mode` option. However, it requires additional setup for correct generation and usage.
+Aura Auth also supports Asymmetric keys for signing and encryption, depending on the `jwt.mode` option. However, it requires additional setup for correct generation and usage.
 
 <Callout type="warning">
-  If the `jwt.mode` is `signed` or `encrypted`, the secret must be a `CryptoKey` or `CryptoKeyPair` that is compatible with the
-  chosen signing or encryption mode. However, if the `jwt.mode` is `sealed`, the secret must be defined as an object with `sign`
-  and `encrypt` properties, each containing a `CryptoKey` or `CryptoKeyPair` for signing and encryption operations respectively.
-  Using incompatible key types or configurations can lead to authentication failures or security vulnerabilities. Always ensure
-  that the secret is properly configured according to the session strategy and JWT mode you are using.
+  If the passed secret is asymmetric key, it must be compatible with the chosen JWT mode and it must separate signing and
+  encryption keys (they must be different) and using the correct `sign` and `encrypt` properties.
 </Callout>
+
+### `identity`
+
+Defines the identity schema used to validate and manage user identities in Aura Auth. The identity config specifies the schema, unknown keys handling and disables validation if needed.
+
+It's supported `zod`, `ArkType`, `TypeBox` and `Valibot` schemas. The schema must include the required fields (id, name, email and image) and can extend with custom fields relevant to your application. For more details read [Schema validation](/docs/guides/schema-validation).
+
+By default Aura Auth uses the `UserIdentity` zod schema, which includes the required fields and basic validation rules.
+
+- `schema`: a zod schema that defines the structure and validation rules for user identities. It extends the default `UserIdentity` schema, allowing you to add custom fields while retaining the required fields (id, name, email, image).
+- `unknownKeys`: (Optional) determines how to handle unknown fields in the identity object. It can be set to `strip` (default) to remove any fields not defined in the schema, `passthrough` to allow unknown fields without validation, or `strict` to throw an error if unknown fields are present.
+- `skipValidation`: (optional) if set to `true`, it skips the validation of the identity schema. This can be useful in scenarios where you want to allow any shape of identity object without enforcing the schema rules, but it should be used with caution as it may lead to inconsistent or invalid identity data.
+
+#### Extend default Identity schema
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { z } from "zod"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentity } from "@aura-stack/auth/identity"
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema: UserIdentity.extend({
+      role: z.enum(["user", "admin"]),
+    }),
+  },
+})
+```
+
+#### Disable validation
+
+When the identity schema is not relevant to your application, you can disable validation by setting `skipValidation` to `true`. This allows any shape of identity object without enforcing the schema rules.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    skipValidation: true,
+  },
+})
+```
+
+### `credentials`
+
+Defines the credentials provider for username/password authentication. It allows you to configure how users can sign in using their credentials, including validation and verification logic.
+
+The `authorize` function is called during the `sign-in` process to validate the provided credentials and return the user identity if valid. If the credentials are invalid, it should return `null`. The returned `User` is compared against the `identity.schema` to ensure it matches the expected shape.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { findUserByEmail } from "@/lib/db"
+
+export const auth = createAuth({
+  oauth: [],
+  credentials: {
+    authorize: async ({ credentials, verifyPassword }) => {
+      const user = await findUserByEmail(credentials.email)
+      if (!user) return null
+
+      const isValid = await verifyPassword(credentials.password, user.passwordHash)
+      if (!isValid) return null
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+      }
+    },
+  },
+})
+```
+
+### `signUp`
+
+Defines the configuration for user sign-up functionality. It allows you to customize the sign-up process, including validation, user creation logic, and any additional fields required during registration.
+
+It includes the `onCreateUser` callback, which is called when a new user is created. This function should handle the logic for creating the user in your database and returning the user identity. For validate the user input, you can use the `signUp.schema` option to define a validation schema for the sign-up payload.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  signUp: {
+    onCreateUser: async ({ payload }) => {
+      const newUser = await createUserInDatabase(payload)
+
+      return {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        image: newUser.image,
+      }
+    },
+  },
+})
+```
 
 ### `trustedProxyHeaders` [#trusted-proxy-headers]
 
-Enables Aura Auth to read proxy headers when an application runs behind reverse proxies, load balancers, or CDNs to detect the original client protocol and IP.
+Enables Aura Auth ro read proxy headers for scenarios where the application is behind a reverse proxy or load balancer. This configuration consumes `X-Forwarded-For`, `X-Forwarded-Host`, and `X-Forwarded-Proto` headers to determine the original client IP address and protocol. For more details, read [Proxy headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers#non-standard_headers).
 
 <Callout type="warning">
-  **Experimental:** Enable only when deployed behind a **trusted proxy**. Misuse causes incorrect cookie security or IP spoofing
-  vulnerabilities. This is an experimental option and may change over time. Monitor the library for updates and possible changes
-  to this configuration option.
+
+**Experimental:** Enable only when deployed behind a **trusted proxy**. Misuse causes incorrect cookie security or IP spoofing
+vulnerabilities. This is an experimental option and may change over time. Monitor the library for updates and possible changes
+to this configuration option.
+
+When this option is enabled, is required to set `trustedOrigins` to a whitelist of allowed origins for CORS and redirect URI validation.
+
+**When to Enable**: reverse proxy (Nginx, Apache); platforms with automatic proxying (Vercel, Netlify, Heroku); load balancer (AWS ALB, Google Cloud LB); CDN (Cloudflare)
+
+**When NOT to Enable**: localhost or direct internet connection; untrusted or misconfigured proxy; unclear infrastructure setup
+
 </Callout>
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: [],
   trustedProxyHeaders: true,
+  trustedOrigins: ["https://app.example.com"],
 })
 ```
-
-**When to Enable**: reverse proxy (Nginx, Apache); platforms with automatic proxying (Vercel, Netlify, Heroku); load balancer (AWS ALB, Google Cloud LB); CDN (Cloudflare)
-
-**When NOT to Enable**: localhost or direct internet connection; untrusted or misconfigured proxy; unclear infrastructure setup
 
 ### `trustedOrigins`
 
@@ -241,7 +317,7 @@ Defines the allowed origins for CORS and redirect URI validation. It supports st
 
 Set the static origins accepted by Aura Auth.
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -254,7 +330,7 @@ export const auth = createAuth({
 
 Set the origin dynamically based on the original request.
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -283,7 +359,7 @@ The `*` wildcard is supported for flexible matching of subdomains and ports. The
 
 Trust one level of subdomains under a specific domain.
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -298,7 +374,7 @@ It matches any origin that starts with `https://` and ends with `.example.com`, 
 
 Trust any port on a specific domain.
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -318,37 +394,29 @@ It matches any port on `https://example.com` (e.g., `https://example.com:3000`, 
 | `https://example.com:*`      | `https://example.com:3000`, `https://example.com:4000`         | `https://example.com`, `http://example.com:3000`                             |
 | `https://*.example.com:*`    | `https://app.example.com:3001`, `https://www.example.com:4567` | `https://example.com:3000`, `http://app.example.com:3000`                    |
 
-### `identity`
+### `rateLimiter`
 
-Defines the identity schema used to validate and manage user identities in Aura Auth. The identity schema specifies the required fields, validation rules, and storage mechanisms for user identities. This allows you to customize how user information is structured and validated during authentication and session management.
+Defines the configuration for rate limiting authentication requests. It allows you to control the number of requests a user can make within a specified time window, helping to prevent abuse and protect against brute-force attacks.
 
-Uses the `UserIdentity` zod schema to extend the default identity fields (id, name, email and image) with custom fields relevant to your application. It is also provided the `createIdentity` function to generate a complete identity object from the provided fields, ensuring that all required fields are included and properly formatted.
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
 
-<Callout>
-When it's added a custom identity schema, it's recommeded to pass the shape of the zod schema to `createAuth`'s generic parameter for better type inference and autocompletion across the library. For example, if you add a `role` field to the identity schema, you can define the auth instance as `createAuth<YourIdentityShape>({ ... })` to have the `role` field available in the types of the user object and other related types.
-</Callout>
-
-```ts title="@/auth" lineNumbers
-import { createAuth, UserIdentity, type InferShape } from "@aura-stack/auth"
-
-const schema = UserIdentity.extend({
-  role: z.enum(["user", "admin"]),
-})
-
-type Shape = InferShape<typeof schema>
-
-export const auth = createAuth<Shape>({
+export const auth = createAuth({
   oauth: [],
-  identity: {
-    schema,
-    unknownKeys: "strip",
+  rateLimiter: {
+    signIn: {
+      algorithm: "fixed-window",
+      window: 60 * 1000, // 1 minute in milliseconds
+      limit: 5, // Maximum 5 requests per window
+    },
+    updateSession: {
+      algorithm: "sliding-window",
+      window: 60 * 1000, // 1 minute in milliseconds
+      limit: 10, // Maximum 10 requests per window
+    },
   },
 })
 ```
-
-- `schema`: a zod schema that defines the structure and validation rules for user identities. It extends the default `UserIdentity` schema, allowing you to add custom fields while retaining the required fields (id, name, email, image).
-- `unknownKeys`: (Optional) determines how to handle unknown fields in the identity object. It can be set to `strip` (default) to remove any fields not defined in the schema, `passthrough` to allow unknown fields without validation, or `strict` to throw an error if unknown fields are present.
-- `skipValidation`: (optional) if set to `true`, it skips the validation of the identity schema. This can be useful in scenarios where you want to allow any shape of identity object without enforcing the schema rules, but it should be used with caution as it may lead to inconsistent or invalid identity data.
 
 ### `logger`
 
@@ -356,7 +424,7 @@ Enables the built-in logger for debugging and monitoring, with configurable log 
 
 The built-in logger prints the metadata following the syslog format, which includes fields like `timestamp`, `level`, `message`, and `msgId` for correlation. Log levels can be set to control the verbosity of logs, and the logger can be enabled or disabled as needed.
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -369,7 +437,7 @@ export const auth = createAuth({
 
 Custom logger to replace the default syslog-based logger. The custom logger must implement the `Logger` interface, which includes methods for different log levels (`debug`, `info`, `warn`, `error`) and supports structured logging with metadata.
 
-```ts title="@/auth" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
