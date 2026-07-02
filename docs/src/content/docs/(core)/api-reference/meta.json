@@ -1,5 +1,5 @@
 {
   "title": "API Reference",
-  "pages": ["core", "jose", "options"],
+  "pages": ["server", "client"],
   "defaultOpen": false
 }
