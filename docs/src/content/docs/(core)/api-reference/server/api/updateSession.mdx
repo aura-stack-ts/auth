@@ -1,4 +1,85 @@
 ---
 title: updateSession
-description: Update the current session with new identity data or refresh the session.
+description: Complete API reference for the api.updateSession method, allowing programmatic modification of active session claims and stateless token payloads.
 ---
+
+The `api.updateSession` method modifies or refreshes the data stored in the current user's session payload without requiring them to sign out and back in.
+
+```ts title="syntax.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const session = await api.updateSession({
+  headers: getHeaders(),
+})
+```
+
+## Reference
+
+### Parameters
+
+| Parameter | Type                      | Required | Description                                                   |
+| --------- | ------------------------- | -------- | ------------------------------------------------------------- |
+| options   | `UpdateSessionAPIOptions` | Yes      | An object containing the session updates and request context. |
+
+### UpdateSessionAPIOptions
+
+| Option        | Type                                | Default   | Description                                                                                         |
+| ------------- | ----------------------------------- | --------- | --------------------------------------------------------------------------------------------------- |
+| session       | `DeepPartial<Session<DefaultUser>>` | undefined | The partial session data to merge into the current session.                                         |
+| request       | `Request`                           | undefined | The request object from the server-side context.                                                    |
+| headers       | `Headers`                           | undefined | The headers object from the server-side context.                                                    |
+| redirect      | `boolean`                           | `true`    | Whether to redirect via the `Location` header (`true`) or return the result as an object (`false`). |
+| redirectTo    | `string`                            | undefined | The URL to redirect to after a successful update.                                                   |
+| skipCSRFCheck | `boolean`                           | `false`   | Whether to skip CSRF token verification for this request. See the [warning](#behavior) below.       |
+
+<Callout type="info">
+  At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs.
+</Callout>
+
+### Returns
+
+| Return Type                                    | Description                                                                           |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `Promise<UpdateSessionAPIReturn<DefaultUser>>` | Resolves to an object containing the updated session data, `redirect`, and `success`. |
+
+## Behavior
+
+- The session token's integrity is verified before applying the update. If the session is invalid or expired, the call resolves with `success: false` rather than throwing.
+- CSRF protection is verified by default. Set `skipCSRFCheck: true` only if CSRF is enforced at a different layer.
+- The return value depends on the `redirect` option:
+  - **`redirect: true`** (default) — redirects to `redirectTo` (or the default post-update URL) via the `Location` header.
+  - **`redirect: false`** — resolves to an object with the updated session, `redirect: false`, and `success`, letting you handle navigation yourself.
+- If the update fails (invalid session, or data that doesn't match `identity.schema`), `success` is `false`.
+
+## Usage
+
+### Update session data
+
+```ts title="update-session.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const session = await api.updateSession({
+  session: {
+    user: {
+      nickname: "newnickname",
+    },
+  },
+  headers: getHeaders(),
+})
+```
+
+### With navigation
+
+```tsx title="manual-navigation.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.updateSession({
+  session: {
+    user: {
+      nickname: "newnickname",
+    },
+  },
+  headers: getHeaders(),
+  redirectTo: "/dashboard",
+})
+```

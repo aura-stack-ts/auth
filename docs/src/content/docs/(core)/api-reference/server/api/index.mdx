@@ -1,6 +1,6 @@
 ---
-title: API Object
-description: The API object is the main entry point for interacting with Aura Auth's server-side functionality. It provides methods for managing users, sessions, and other authentication-related operations.
+title: api
+description: The api object is the programmatic, server-side entry point for Aura Auth — sign-in, sign-up, session management, and sign-out without going through HTTP handlers.
 ---
 
 ### Signature
@@ -10,3 +10,39 @@ export interface AuthInstance<DefaultUser extends User = User, SignUpSchema exte
   api: AuthAPI<DefaultUser, SignUpSchema>
 }
 ```
+
+`auth.api` is the programmatic execution engine of `@aura-stack/auth` — a type-safe interface for every authentication workflow (sign-in, sign-up, session management, sign-out) without constructing HTTP requests yourself. It's one of the three top-level properties returned by [`createAuth`](/docs/api-reference/server/create-auth#returns), alongside `handlers` and `jose`.
+
+<Callout type="info">
+  These are the only functions exposed on `auth.api`. Internal implementation details of the OAuth flow — such as building the
+  authorization redirect or handling the provider callback — are not part of this surface. See [OAuth Authorization
+  Flow](/docs/concepts/oauth-authorization-flow) for how those work internally.
+</Callout>
+
+<Cards>
+
+<Card title="signIn" href="/docs/api-reference/server/api/sign-in">
+  Signs in a user with a built-in or custom OAuth provider.
+</Card>
+
+<Card title="signInCredentials" href="/docs/api-reference/server/api/sign-in-credentials">
+  Signs in a user with a username/email and password.
+</Card>
+
+<Card title="signUp" href="/docs/api-reference/server/api/sign-up">
+  Registers a new user.
+</Card>
+
+<Card title="getSession" href="/docs/api-reference/server/api/get-session">
+  Returns and verifies the current user's session.
+</Card>
+
+<Card title="updateSession" href="/docs/api-reference/server/api/update-session">
+  Updates the current user's session data.
+</Card>
+
+<Card title="signOut" href="/docs/api-reference/server/api/sign-out">
+  Signs out the current user and invalidates the session.
+</Card>
+
+</Cards>

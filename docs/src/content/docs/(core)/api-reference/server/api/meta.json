@@ -1,4 +1,4 @@
 {
   "title": "api",
-  "pages": ["..."]
+  "pages": ["signIn", "signInCredentials", "signUp", "getSession", "updateSession", "signOut"]
 }

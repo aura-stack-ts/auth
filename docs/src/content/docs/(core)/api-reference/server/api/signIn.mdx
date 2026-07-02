@@ -2,3 +2,77 @@
 title: signIn
 description: Sign in to your Aura app with a built-in or custom OAuth provider.
 ---
+
+The `api.signIn` method is the primary programmatic entry point for initiating an authentication flow with any configured OAuth 2.0 or OpenID Connect (OIDC) provider. This method runs on the server, so it requires you to pass the `request` or `headers` object from your server-side context.
+
+```ts title="sign-in.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signIn("google", {
+  request: getRequest(),
+  redirectTo: "/dashboard",
+})
+```
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type               | Required | Description                                                      |
+| ---------- | ------------------ | -------- | ---------------------------------------------------------------- |
+| providerId | `string`           | Yes      | The id of the OAuth provider to use for sign-in.                 |
+| options    | `SignInAPIOptions` | No       | An object containing additional options for the sign-in process. |
+
+### SignInAPIOptions
+
+| Option     | Type      | Default   | Description                                                                                         |
+| ---------- | --------- | --------- | --------------------------------------------------------------------------------------------------- |
+| request    | `Request` | undefined | The request object from the server-side context.                                                    |
+| headers    | `Headers` | undefined | The headers object from the server-side context.                                                    |
+| redirect   | `boolean` | `true`    | Whether to redirect via the `Location` header (`true`) or return the result as an object (`false`). |
+| redirectTo | `string`  | undefined | The URL to redirect to after a successful sign-in.                                                  |
+
+<Callout type="info">
+  At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs.
+</Callout>
+
+### Returns
+
+| Return Type                | Description                                                                                                |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `Promise<SignInAPIReturn>` | Resolves to an object containing `signInURL`, `redirect`, and `success` — see [Behavior](#behavior) below. |
+
+## Behavior
+
+The return value of `api.signIn` depends on the `redirect` option:
+
+- **`redirect: true`** (default) — the response redirects the user to the OAuth provider's authorize URL via the `Location` header. Nothing meaningful is returned to inspect programmatically; the redirect itself is the result.
+- **`redirect: false`** — no redirect is performed. The function instead resolves to an object with `signInURL`, `redirect: false`, and `success` properties, so you can handle navigation yourself. `signInURL` is the URL the user should be sent to in order to continue the sign-in flow.
+
+If sign-in fails to initiate (e.g. an unknown `providerId`), `signInURL` resolves to `null` and `success` is `false`.
+
+## Usage
+
+### Social login
+
+```tsx title="social-login.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signIn("github", {
+  redirectTo: "/dashboard",
+})
+```
+
+### Manual navigation
+
+```tsx title="manual-navigation.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signIn("google", {
+  redirect: false,
+})
+
+if (output.success) {
+  redirect(output.signInURL)
+}
+```
