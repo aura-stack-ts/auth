@@ -10,6 +10,11 @@ import { api } from "@/lib/auth"
 
 const session = await api.updateSession({
   headers: getHeaders(),
+  session: {
+    user: {
+      nickname: "newnickname",
+    },
+  },
 })
 ```
 

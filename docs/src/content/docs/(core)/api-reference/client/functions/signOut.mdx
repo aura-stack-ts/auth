@@ -2,3 +2,70 @@
 title: signOut
 description: Sign out of your Aura app and clear the current session.
 ---
+
+The `signOut` client method signs out the current user: it invalidates the session token and clears the session cookie, from a client-side or browser context.
+
+```ts title="sign-out.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.signOut({
+  redirectTo: "/login",
+})
+```
+
+## Reference
+
+### Parameters
+
+| Parameter | Type             | Required | Description                                                       |
+| --------- | ---------------- | -------- | ----------------------------------------------------------------- |
+| options   | `SignOutOptions` | No       | An object containing additional options for the sign-out process. |
+
+### SignOutOptions
+
+| Option     | Type      | Default   | Description                                                                                            |
+| ---------- | --------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| redirect   | `boolean` | `true`    | Whether to redirect via `window.location.assign` (`true`) or return the result as an object (`false`). |
+| redirectTo | `string`  | undefined | The URL to redirect to after sign-out completes.                                                       |
+
+### Returns
+
+| Return Type                       | Description                                                                |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| `Promise<SignOutReturn<Options>>` | Resolves to an object containing `redirectURL`, `redirect`, and `success`. |
+
+## Behavior
+
+- Cookies are cleared automatically in the browser context — you don't need to handle them manually.
+- The CSRF token is automatically loaded and sent with the request — you don't need to handle it manually.
+- The return value depends on the `redirect` option:
+  - **`redirect: true`** (default) — navigates to `redirectTo` (or the default post-sign-out URL) via `window.location.assign`.
+  - **`redirect: false`** — resolves to an object with `redirectURL`, `redirect: false`, and `success`, letting you handle navigation yourself.
+- If sign-out fails (e.g. missing or mismatched CSRF token, or no active session to invalidate), `redirectURL` resolves to `null` and `success` is `false`.
+
+## Usage
+
+### Sign out
+
+```ts title="sign-out.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.signOut({
+  redirectTo: "/login",
+})
+```
+
+### Manual navigation
+
+```tsx title="manual-navigation.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const output = await authClient.signOut({
+  redirect: false,
+  redirectTo: "/login",
+})
+
+if (output.success) {
+  window.location.assign(output.redirectURL)
+}
+```

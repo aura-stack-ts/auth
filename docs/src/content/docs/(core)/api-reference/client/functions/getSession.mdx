@@ -2,3 +2,54 @@
 title: getSession
 description: Get the current session for a user with Aura Auth.
 ---
+
+The `getSession` client method retrieves the active user session from a client-side or browser context. It verifies the session token's integrity and returns the associated user data if the session is valid.
+
+```ts title="syntax.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const session = await authClient.getSession()
+```
+
+## Reference
+
+This function accepts no parameters — session data is read automatically from the browser's cookies.
+
+### Returns
+
+| Return Type                             | Description                                        |
+| --------------------------------------- | -------------------------------------------------- |
+| `Promise<Session<DefaultUser> \| null>` | Resolves to the current session object, or `null`. |
+
+<Callout type="info">
+  This return shape is intentionally simpler than the server-side [`api.getSession`](/docs/api-reference/server/api/get-session),
+  which returns `{ session, success, headers }`. The client doesn't need the `headers` field that server-side rolling
+  session rotation requires — the browser already handles the refreshed cookie automatically.
+</Callout>
+
+## Behavior
+
+- Cookies are read automatically from the browser context — you don't need to handle them manually.
+- If there is no valid session (missing, expired, or tampered token), the resolved value is `null`. This does not throw — a missing session is an expected, non-error outcome.
+
+## Usage
+
+### Get the current session
+
+```ts title="get-session.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const session = await authClient.getSession()
+```
+
+### Guarding a route
+
+```tsx title="protected-route.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const session = await authClient.getSession()
+
+if (!session) {
+  window.location.assign("/login")
+}
+```

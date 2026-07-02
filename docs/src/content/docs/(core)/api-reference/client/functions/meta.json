@@ -1,4 +1,4 @@
 {
   "title": "Functions",
-  "pages": ["..."]
+  "pages": ["signIn", "signInCredentials", "signUp", "getSession", "updateSession", "signOut"]
 }
