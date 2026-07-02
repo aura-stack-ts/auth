@@ -1,5 +1,5 @@
 {
   "title": "Configuration",
-  "pages": ["env", "cookie-management", "typescript"],
+  "pages": ["typescript", "env", "session-strategies", "cookie-management", "identity-schema", "trusted-origins"],
   "defaultOpen": false
 }

@@ -1,0 +1,281 @@
+---
+title: Identity Schema
+description: Configure and extend the identity schema Aura Auth uses to validate user data, across Zod, Valibot, ArkType, and TypeBox.
+---
+
+The `identity` option on [`createAuth`](/docs/api-reference/server/createAuth#identity) defines the schema Aura Auth uses to validate and shape user identity data. The schema you provide is also used to derive the `User` and `Session` types used across the rest of the library, so setting it up correctly gets you type-safe access to your custom fields everywhere `User`/`Session` are used.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { z } from "zod"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentity } from "@aura-stack/auth/identity"
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema: UserIdentity.extend({
+      role: z.enum(["user", "admin"]),
+    }),
+  },
+})
+```
+
+## Options
+
+| Option           | Type                                   | Required               | Description                                                                                                                                      |
+| ---------------- | -------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `schema`         | Validator-specific schema type         | No                     | Extends the default identity schema for your chosen validator. See [Choosing a validator](#choosing-a-validator).                                |
+| `unknownKeys`    | `"strip" \| "passthrough" \| "strict"` | No (default `"strip"`) | Controls how fields not defined in the schema are handled. `strip` removes them, `passthrough` allows them through unvalidated, `strict` throws. |
+| `skipValidation` | `boolean`                              | No (default `false`)   | Skips identity validation entirely. See [Disabling validation](#disabling-validation).                                                           |
+
+## Choosing a validator
+
+Zod is the first-class, bundled default. Valibot, ArkType, and TypeBox are supported as peer dependencies — install the one you want and import its default schema from `@aura-stack/auth/identity`.
+
+Built-in type inference (via `InferUser`/`InferSession`) is supported for Zod, Valibot, and ArkType. TypeBox is supported for validation but does not support direct type inference — see the [Type Inference](#type-inference) section for the workaround.
+
+## Extending the default schema
+
+Each supported validator ships a default `Identity` schema containing the required base fields. Extend it with whatever additional fields your application needs.
+
+<Tabs items={["zod", "valibot", "arktype", "typebox"]} groupId="schema-validation" persist>
+
+<Tab value="zod">
+
+```ts title="lib/auth.ts" lineNumbers
+import { z } from "zod"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentity } from "@aura-stack/auth/identity"
+
+const schema = UserIdentity.extend({
+  role: z.enum(["admin", "user"]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```
+
+</Tab>
+
+<Tab value="valibot">
+
+```ts title="lib/auth.ts" lineNumbers
+import * as valibot from "valibot"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityValibot } from "@aura-stack/auth/identity"
+
+const schema = valibot.object({
+  ...UserIdentityValibot.entries,
+  role: valibot.enum(["admin", "user"]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```
+
+</Tab>
+
+<Tab value="arktype">
+
+```ts title="lib/auth.ts" lineNumbers
+import { type } from "arktype"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityArkType } from "@aura-stack/auth/identity"
+
+const schema = UserIdentityArkType.and({
+  role: type.enumerated(["admin", "user"]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```
+
+</Tab>
+
+<Tab value="typebox">
+
+```ts title="lib/auth.ts" lineNumbers
+import { Type } from "typebox"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityTypeBox } from "@aura-stack/auth/identity"
+
+const schema = Type.Object({
+  ...UserIdentityTypeBox.properties,
+  role: Type.Union([Type.Literal("admin"), Type.Literal("user")]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```
+
+</Tab>
+
+</Tabs>
+
+## Type inference
+
+Aura Auth provides utility types to infer `User` and `Session` from your identity schema, so the rest of your application gets type safety and autocompletion on custom fields without manual duplication.
+
+Infer directly from the `auth` instance with `InferUser`/`InferSession`, or from the schema itself with `UserFrom`/`SessionFrom`.
+
+<Tabs items={["zod", "valibot", "arktype", "typebox"]} groupId="schema-validation" persist>
+
+<Tab value="zod">
+
+```ts title="lib/auth.ts" lineNumbers
+import { z } from "zod"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentity, type UserFrom, type SessionFrom, type InferUser, type InferSession } from "@aura-stack/auth/identity"
+
+const schema = UserIdentity.extend({
+  role: z.enum(["admin", "user"]),
+  permissions: z.array(z.string()),
+})
+
+type _User = UserFrom<typeof schema>
+type _Session = SessionFrom<typeof schema>
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+
+export type User = InferUser<typeof auth>
+export type Session = InferSession<typeof auth>
+```
+
+</Tab>
+
+<Tab value="valibot">
+
+```ts title="lib/auth.ts" lineNumbers
+import * as valibot from "valibot"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityValibot, type InferUser, type InferSession } from "@aura-stack/auth/identity"
+
+const schema = valibot.object({
+  ...UserIdentityValibot.entries,
+  role: valibot.enum(["admin", "user"]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+
+export type User = InferUser<typeof auth>
+export type Session = InferSession<typeof auth>
+```
+
+</Tab>
+
+<Tab value="arktype">
+
+```ts title="lib/auth.ts" lineNumbers
+import { type } from "arktype"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityArkType, type InferUser, type InferSession } from "@aura-stack/auth/identity"
+
+const schema = UserIdentityArkType.and({
+  role: type.enumerated(["admin", "user"]),
+})
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+
+export type User = InferUser<typeof auth>
+export type Session = InferSession<typeof auth>
+```
+
+</Tab>
+
+<Tab value="typebox">
+
+<Callout type="warning">
+  Aura Auth does not currently support inferring types directly from a TypeBox schema, due to the computational cost of TypeBox's
+  type inference. As a workaround, use TypeBox's own `Static` type to derive `User` and `Session` from your schema manually.
+</Callout>
+
+```ts title="lib/auth.ts" lineNumbers
+import { Type, type Static } from "typebox"
+import { createAuth } from "@aura-stack/auth"
+import { UserIdentityTypeBox } from "@aura-stack/auth/identity"
+
+const schema = Type.Object({
+  ...UserIdentityTypeBox.properties,
+  role: Type.Union([Type.Literal("admin"), Type.Literal("user")]),
+})
+
+export type User = Static<typeof schema>
+export type Session = Static<typeof schema>
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    schema,
+  },
+})
+```
+
+</Tab>
+
+</Tabs>
+
+## Handling unknown keys
+
+By default, fields present on an incoming identity object but absent from your schema are silently removed (`strip`). Change this with `unknownKeys` if you need unvalidated passthrough fields, or want unexpected fields to fail loudly during development.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    unknownKeys: "strict", // throws if the identity object has fields outside the schema
+  },
+})
+```
+
+## Disabling validation
+
+When schema validation isn't relevant to your application, set `skipValidation` to `true` to accept any shape of identity object without enforcement.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  identity: {
+    skipValidation: true,
+  },
+})
+```
+
+<Callout type="warning">
+  Skipping validation removes Aura Auth's guarantee that `User`/`Session` objects match your declared shape at runtime. Only
+  disable this if your upstream identity provider or database layer already enforces the shape you need.
+</Callout>

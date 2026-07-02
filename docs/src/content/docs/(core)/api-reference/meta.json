@@ -1,5 +1,5 @@
 {
   "title": "API Reference",
-  "pages": ["createAuth", "api", "---Client---", "createAuthClient", "client-api"],
+  "pages": ["server", "client"],
   "defaultOpen": false
 }

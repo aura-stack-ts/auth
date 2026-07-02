@@ -3,13 +3,23 @@ title: createAuth
 description: The `createAuth` function initializes the Aura Auth instance with configuration options for OAuth providers, session management, cookie handling, and security settings. It returns an object containing the auth handlers, JOSE utilities, and API methods.
 ---
 
-### Usage
+### Signature
 
 ```ts lineNumbers
 function createAuth<Identity extends Identities = EditableShape<UserShape>, SignUpSchema extends SchemaTypes = ZodObject<any>>(
   options: AuthConfig<Identity, SignUpSchema>
 ): AuthInstance<FromShapeToObject<Identity>, SignUpSchema>
 ```
+
+### Returns
+
+`createAuth()` returns an `AuthInstance` with three top-level properties. Server-side functions are **not** returned directly on the instance — they are namespaced under `api`.
+
+| Property   | Description                                                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api`      | Server-side functions: `signIn`, `signInCredentials`, `signUp`, `signOut`, `getSession`, `updateSession`. See [API Functions](/docs/api-reference/server/api). |
+| `handlers` | HTTP handlers (`GET`, `POST`, `PATCH`, `ALL`) to mount in your router or framework adapter. See [Handlers](/docs/api-reference/server/handlers).               |
+| `jose`     | JOSE utilities for signing, encrypting, and verifying tokens outside the request/response cycle. See [JOSE](/docs/api-reference/server/jose).                  |
 
 ### `oauth`
 
@@ -83,7 +93,7 @@ export const auth = createAuth({
 
 ### `session`
 
-Defines the session management strategy and options for Aura Auth. The session strategy determines how user sessions are stored and maintained across requests. Supported strategies include `jwt` (JSON Web Tokens). Each strategy has its own configuration options for token expiration, refresh behavior, and storage mechanisms.
+Defines the session management strategy. How user sessions are stored and maintained across requests. Aura Auth currently supports the `jwt` (stateless) strategy.
 
 ```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -100,16 +110,7 @@ export const auth = createAuth({
 })
 ```
 
-#### Session Strategy
-
-The `jwt` session strategy is the stateless option that uses JSON Web Tokens to manage user session. It includes options for token mode (sealed, signed or encrypted).
-
-- `mode`: determines how the JWT is protected. `sealed` (default) provides confidentiality and integrity by encrypting the token. `signed` provides integrity only by signing the token, but the payload is visible. `encrypted` provides confidentiality by encrypting the token, but does not include a signature for integrity verification.
-- `maxAge`: sets the maximum age of the JWT in seconds. After this period, the token expires and the user must re-authenticate.
-- `issuer`: (optional) sets the `iss` claim in the JWT, which identifies the issuer of the token. This can be used for additional validation on the client or server side.
-- `audience`: (optional) sets the `aud` claim in the JWT, which identifies the intended audience of the token. This can be used to restrict token usage to specific clients or services.
-- `maxExpiration`: (optional) sets the maximum expiration time for the JWT in seconds. This is a hard limit that prevents tokens from being valid indefinitely, even if they are refreshed.
-- `expirationStrategy`: (optional) determines how token expiration is handled. `absolute` (default) means the token expires after a fixed time from issuance. `rolling` means the token expiration is extended on each request, keeping the user logged in as long as they are active.
+For the full list of `jwt` options (`mode`, `maxAge`, `issuer`, `audience`, `maxExpiration`, `expirationStrategy`) and guidance on choosing between them, see [Session Strategies](/docs/configuration/session-strategies).
 
 ### `baseURL`
 
@@ -177,17 +178,7 @@ Aura Auth also supports Asymmetric keys for signing and encryption, depending on
 
 ### `identity`
 
-Defines the identity schema used to validate and manage user identities in Aura Auth. The identity config specifies the schema, unknown keys handling and disables validation if needed.
-
-It's supported `zod`, `ArkType`, `TypeBox` and `Valibot` schemas. The schema must include the required fields (id, name, email and image) and can extend with custom fields relevant to your application. For more details read [Schema validation](/docs/guides/schema-validation).
-
-By default Aura Auth uses the `UserIdentity` zod schema, which includes the required fields and basic validation rules.
-
-- `schema`: a zod schema that defines the structure and validation rules for user identities. It extends the default `UserIdentity` schema, allowing you to add custom fields while retaining the required fields (id, name, email, image).
-- `unknownKeys`: (Optional) determines how to handle unknown fields in the identity object. It can be set to `strip` (default) to remove any fields not defined in the schema, `passthrough` to allow unknown fields without validation, or `strict` to throw an error if unknown fields are present.
-- `skipValidation`: (optional) if set to `true`, it skips the validation of the identity schema. This can be useful in scenarios where you want to allow any shape of identity object without enforcing the schema rules, but it should be used with caution as it may lead to inconsistent or invalid identity data.
-
-#### Extend default Identity schema
+Defines the identity schema used to validate and manage user identities in Aura Auth. The identity config specifies the schema, unknown-keys handling, and whether to disable validation. By default Aura Auth uses the `UserIdentity` Zod schema.
 
 ```ts title="@/lib/auth.ts" lineNumbers
 import { z } from "zod"
@@ -204,20 +195,7 @@ export const auth = createAuth({
 })
 ```
 
-#### Disable validation
-
-When the identity schema is not relevant to your application, you can disable validation by setting `skipValidation` to `true`. This allows any shape of identity object without enforcing the schema rules.
-
-```ts title="@/lib/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: [],
-  identity: {
-    skipValidation: true,
-  },
-})
-```
+For the full option reference (`schema`, `unknownKeys`, `skipValidation`), validator support across Zod/Valibot/ArkType/TypeBox, and type inference with `InferUser`/`InferSession`, see [Identity Schema](/docs/configuration/identity).
 
 ### `credentials`
 
@@ -308,15 +286,6 @@ export const auth = createAuth({
 
 Defines the allowed origins for CORS and redirect URI validation. It supports static matches and wildcards in subdomains and ports.
 
-<Callout type="warning">
-  This option is security-sensitive. Misconfigured `trustedOrigins` can lead to CORS vulnerabilities or open redirect flaws.
-  Always ensure that origins are specific and do not unintentionally allow malicious sites.
-</Callout>
-
-#### Static Matches
-
-Set the static origins accepted by Aura Auth.
-
 ```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
@@ -326,73 +295,7 @@ export const auth = createAuth({
 })
 ```
 
-#### Dynamic Matches
-
-Set the origin dynamically based on the original request.
-
-```ts title="@/lib/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: [],
-  trustedOrigins: (request) => {
-    const origin = request.headers.get("origin")
-    if (origin && origin.endsWith(".example.com")) {
-      return [origin]
-    }
-    return []
-  },
-})
-```
-
-#### Wildcard Patterns
-
-The `*` wildcard is supported for flexible matching of subdomains and ports. The wildcard can only be used at the start of a subdomain or as an entire port.
-
-<Callout type="warning">
-  Use wildcards with caution. Overly permissive patterns can introduce security risks. Always prefer specific origins when
-  possible. It's recommended to be as restrictive as possible with allowed origins to minimize attacks and risks. Use
-  `trustedOrigins` carefully and only allow known origins.
-</Callout>
-
-##### Subdomain Wildcards [!toc]
-
-Trust one level of subdomains under a specific domain.
-
-```ts title="@/lib/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: [],
-  trustedOrigins: ["https://*.example.com"],
-})
-```
-
-It matches any origin that starts with `https://` and ends with `.example.com`, allowing for any single subdomain level (e.g., `https://app.example.com`, `https://www.example.com`), but not the root domain itself (`https://example.com`) or multiple subdomain levels (`https://sub.app.example.com`).
-
-##### Port Wildcards [!toc]
-
-Trust any port on a specific domain.
-
-```ts title="@/lib/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: [],
-  trustedOrigins: ["https://example.com:*"],
-})
-```
-
-It matches any port on `https://example.com` (e.g., `https://example.com:3000`, `https://example.com:3001`, `https://example.com:8080`), but not the domain without a port (`https://example.com`) or with a different protocol (`http://example.com:3000`).
-
-| Pattern                      | Matches                                                        | Does Not Match                                                               |
-| ---------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `https://example.com`        | `https://example.com`                                          | `http://example.com`, `https://app.example.com`, `https://example.com:3000`  |
-| `https://example.com:3000`   | `https://example.com:3000`                                     | `https://example.com`, `https://example.com:4000`, `http://example.com:3000` |
-| `https://*.example.com`      | `https://app.example.com`, `https://www.example.com`           | `https://example.com`, `http://app.example.com`                              |
-| `https://*.example.com:3000` | `https://app.example.com:3000`, `https://www.example.com:3000` | `https://example.com:3000`, `https://app.example.com:4000`                   |
-| `https://example.com:*`      | `https://example.com:3000`, `https://example.com:4000`         | `https://example.com`, `http://example.com:3000`                             |
-| `https://*.example.com:*`    | `https://app.example.com:3001`, `https://www.example.com:4567` | `https://example.com:3000`, `http://app.example.com:3000`                    |
+For dynamic origin resolution, wildcard pattern rules, and the full matching reference table, see [Trusted Origins](/docs/configuration/trusted-origins).
 
 ### `rateLimiter`
 
@@ -445,7 +348,7 @@ export const auth = createAuth({
   logger: {
     level: "info",
     log(metadata) {
-      console.log(`[${metadata.message}] - ${metadata.timestamp.toISOString()} - ${metadata.level.toUpperCase()} - `${metadata.msgId}`)
+      console.log(`[${metadata.message}] - ${metadata.timestamp.toISOString()} - ${metadata.level.toUpperCase()} - `${metadata.msgId}``)
     },
   },
 })
