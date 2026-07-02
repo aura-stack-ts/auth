@@ -1,0 +1,65 @@
+---
+title: Session Strategies
+description: Configure how Aura Auth stores and maintains user sessions across requests.
+---
+
+The `session` option on [`createAuth`](/docs/api-reference/server/createAuth#session) defines the session management strategy — how a user's session is stored and validated on subsequent requests. Aura Auth currently supports the `jwt` (stateless) strategy.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "jwt",
+    jwt: {
+      mode: "sealed",
+      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+    },
+  },
+})
+```
+
+## `jwt` strategy
+
+The `jwt` session strategy is the stateless option: it uses a JSON Web Token to represent the session, with no server-side storage or database lookup required to validate a request.
+
+### Options
+
+| Option               | Type                                  | Required                  | Description                                                                                                                                 |
+| -------------------- | ------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode`               | `"sealed" \| "signed" \| "encrypted"` | No (default `"sealed"`)   | Determines how the JWT is protected. See [Choosing a mode](#choosing-a-mode) below.                                                         |
+| `maxAge`             | `number` (seconds)                    | Yes                       | Maximum age of the JWT. After this period, the token expires and the user must re-authenticate.                                             |
+| `issuer`             | `string`                              | No                        | Sets the `iss` claim on the JWT, identifying the issuer of the token. Useful for additional validation on the client or server.             |
+| `audience`           | `string`                              | No                        | Sets the `aud` claim on the JWT, identifying the intended audience. Useful for restricting token usage to specific clients or services.     |
+| `maxExpiration`      | `number` (seconds)                    | No                        | A hard ceiling on token expiration that persists even if the token is refreshed, preventing indefinitely-valid tokens.                      |
+| `expirationStrategy` | `"absolute" \| "rolling"`             | No (default `"absolute"`) | `absolute` expires the token a fixed time after issuance. `rolling` extends the expiration on each request, keeping active users signed in. |
+
+### Choosing a mode
+
+- **`sealed`** (default) — encrypts the token, providing both confidentiality and integrity. The payload is not readable without the secret, and it cannot be tampered with. Use this unless you have a specific reason not to.
+- **`signed`** — signs the token without encrypting it. Integrity is guaranteed (the token cannot be modified undetected), but the payload is plainly visible to anyone holding the token. Use this only if you need the payload to be readable outside of Aura Auth (for example, by a separate service that only verifies signatures).
+- **`encrypted`** — encrypts the token without signing it. The payload is confidential, but there is no signature to verify integrity. This mode is narrower in purpose than `sealed` and should generally be avoided unless you have a specific compatibility requirement.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "jwt",
+    jwt: {
+      mode: "sealed",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxExpiration: 60 * 60 * 24 * 30, // hard ceiling: 30 days
+      expirationStrategy: "rolling",
+    },
+  },
+})
+```
+
+<Callout type="info">
+  Stateful (database-backed) and hybrid session strategies are on the roadmap but not yet available. If your application requires
+  the ability to revoke a session server-side before its `maxAge` expires, track this on the roadmap rather than working around it
+  with a short `maxAge`.
+</Callout>

@@ -1,0 +1,131 @@
+---
+title: signUp
+description: Complete API reference for the api.signUp method, the centralized entry point for user registration, input validation, and automatic profile provisioning.
+---
+
+The `api.signUp` method is the primary programmatic entry point for initiating user registration flows. This method runs on the server-side so it requires to pass the request or headers as arguments.
+
+```ts title="syntax.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = api.signUp({
+  payload: {
+    username: "user@example.com",
+    password: "password123",
+  },
+  request: getRequest(),
+  redirectTo: "/dashboard",
+})
+```
+
+---
+
+## Reference
+
+### Parameters
+
+| Parameter | Type               | Required | Description                                                      |
+| --------- | ------------------ | -------- | ---------------------------------------------------------------- |
+| options   | `SignUpAPIOptions` | No       | An object containing additional options for the sign-in process. |
+
+### SignUpOptions
+
+| Option        | Type                      | Default   | Description                                                                                            |
+| ------------- | ------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| payload       | `Record<string, unknown>` | undefined | The user registration data.                                                                            |
+| request       | `Request`                 | undefined | The request object from the server-side context.                                                       |
+| headers       | `Headers`                 | undefined | The headers object from the server-side context.                                                       |
+| redirect      | `boolean`                 | true      | Whether to redirect the user after successful sign-in by `Location` header or returns an object result |
+| redirectTo    | `string`                  | undefined | The URL to redirect to after successful sign-in.                                                       |
+| skipCSRFCheck | `boolean`                 | true      | Whether to skip the CSRF token check for the sign-in process.                                          |
+
+### Returns
+
+| Return Type                | Description                                              |
+| -------------------------- | -------------------------------------------------------- |
+| `Promise<SignUpAPIReturn>` | A promise that resolves to an object containing the sign |
+
+---
+
+## Behavior
+
+- The complete success of the sign-up process depends on `signUp.onCreateUser` function that verifies the provided user data and returns the `User` object if the data is valid or `null` if it is invalid
+- The function implements CSRF Token protection by default, it checks the integrity of the csrf token header. But for a strict Double Submit Cookie pattern you can set the `skipCSRFCheck` option to `false` to enforce the CSRF token check.
+- The behavior of `api.signUp` function depends on the `redirect` option:
+  - If `redirect: true`, the user will be redirected to the authorize URL of the specified OAuth provider using the `Location` header in the request.
+  - If `redirect: false`, the function will return an object containing `redirectURL`, `redirect` and `success` properties. The `redirectURL` is the URL to which the user should be redirected for sign-up auth flow.
+
+- If the sign-up process fails, the `redirectURL` will be `null`, and the `success` property will be `false`.
+
+<Callout>
+  For the server-side functions like `api.signUp` is mandatory to pass the `request` or `headers` object to construct the incoming
+  URL and validate the redirect URLs
+</Callout>
+
+---
+
+## Setup
+
+```ts title="lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { createSecretValue } from "@aura-stack/auth/crypto"
+
+export const auth = createAuth({
+  oauth: [],
+  signUp: {
+    onCreateUser: async ({ payload }) => {
+      if (!payload || !payload.username || !payload.password) {
+        return null
+      }
+
+      const sub = createSecretValue(10)
+      return {
+        sub,
+        name: "John Doe",
+        email: payload.username,
+        image: `https://avatars.dicebear.com/api/initials/${sub}.svg`,
+      }
+    },
+  },
+})
+```
+
+## Usage
+
+### Sign Up
+
+```ts title="credentials-signup.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signUp({
+  payload: {
+    username: "John Doe",
+    nickname: "johndoe",
+    email: "johndoe@example.com",
+    password: "password",
+  },
+  request: getRequest(),
+  redirectTo: "/dashboard",
+})
+```
+
+### Manual Navigation
+
+```tsx title="manual-navigation.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signUp({
+  payload: {
+    username: "John Doe",
+    nickname: "johndoe",
+    email: "johndoe@example.com",
+    password: "password",
+  },
+  request: getRequest(),
+  redirectTo: "/dashboard",
+})
+
+if (output.success) {
+  redirect(output.redirectURL)
+}
+```

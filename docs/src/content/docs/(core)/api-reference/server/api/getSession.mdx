@@ -1,0 +1,92 @@
+---
+title: getSession
+description: Complete API reference for the api.getSession method, providing type-safe retrieval and verification of the active user session.
+---
+
+The `api.getSession` method retrieves the active user session on the server. It verifies the session token's integrity and returns the associated user data if the session is valid.
+
+```ts title="syntax.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { session, authenticated, headers } = await api.getSession({
+  headers: getHeaders(),
+})
+```
+
+## Reference
+
+### Parameters
+
+| Parameter | Type                   | Required | Description                                                        |
+| --------- | ---------------------- | -------- | ------------------------------------------------------------------ |
+| options   | `GetSessionAPIOptions` | Yes      | An object containing the request headers used to read the session. |
+
+### GetSessionAPIOptions
+
+| Option  | Type      | Required | Description                                      |
+| ------- | --------- | -------- | ------------------------------------------------ |
+| headers | `Headers` | Yes      | The headers object from the server-side context. |
+
+<Callout type="info">
+  Unlike the other `api` methods, `getSession` only accepts `headers` — not `request` — since it's a read-only lookup that doesn't
+  need to construct or validate a redirect URL.
+</Callout>
+
+### Returns
+
+| Return Type                                 | Description                                                           |
+| ------------------------------------------- | --------------------------------------------------------------------- |
+| `Promise<GetSessionAPIReturn<DefaultUser>>` | Resolves to an object containing `session`, `success`, and `headers`. |
+
+| Field     | Type                           | Description                                                                                                               |
+| --------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `session` | `Session<DefaultUser> \| null` | The current session, or `null` if there is no valid session.                                                              |
+| `success` | `boolean`                      | Mirrors whether `session` is non-null — a convenience flag so you don't have to null-check `session` for a boolean check. |
+| `headers` | `Headers \| null`              | Non-null only when the session was rotated during this call (e.g. a rolling-expiration JWT was reissued). See below.      |
+
+## Behavior
+
+- If there is no valid session (missing, expired, or tampered token), `session` is `null` and `success` is `false`. This does not throw — a missing session is an expected, non-error outcome.
+- If the session strategy uses `expirationStrategy: "rolling"` and the call triggers a token refresh, `headers` is returned non-null and **must be forwarded on your response** (merged into your outgoing headers) so the refreshed session cookie is actually persisted to the browser. If you discard `headers`, the user's session silently fails to extend.
+
+## Usage
+
+### Get the current session
+
+```ts title="get-session.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { session, success } = await api.getSession({
+  headers: getHeaders(),
+})
+```
+
+### Guarding a route
+
+```tsx title="protected-route.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success } = await api.getSession({
+  headers: getHeaders(),
+})
+
+if (!success) {
+  redirect("/login")
+}
+```
+
+### Forwarding rotated session headers
+
+```ts title="forward-headers.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { session, headers } = await api.getSession({
+  headers: getHeaders(),
+})
+
+const response = new Response(JSON.stringify({ session }))
+
+if (headers) {
+  headers.forEach((value, key) => response.headers.set(key, value))
+}
+```

@@ -1,0 +1,98 @@
+---
+title: Trusted Origins
+description: Configure allowed origins for CORS and redirect URI validation, including dynamic and wildcard matching.
+---
+
+The `trustedOrigins` option on [`createAuth`](/docs/api-reference/server/createAuth#trustedorigins) defines the allowed origins for CORS and redirect URI validation. It supports static matches, origins resolved dynamically per-request, and wildcard patterns for subdomains and ports.
+
+<Callout type="warning">
+  This option is security-sensitive. Misconfigured `trustedOrigins` can lead to CORS vulnerabilities or open redirect flaws.
+  Always ensure that origins are specific and do not unintentionally allow malicious sites.
+</Callout>
+
+## Static matches
+
+Set the static origins accepted by Aura Auth.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: ["http://example.com", "https://app.example.com:3000"],
+})
+```
+
+## Dynamic matches
+
+Resolve the trusted origin at request time based on the incoming request.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: (request) => {
+    const origin = request.headers.get("origin")
+    if (origin && origin.endsWith(".example.com")) {
+      return [origin]
+    }
+    return []
+  },
+})
+```
+
+## Wildcard patterns
+
+The `*` wildcard is supported for flexible matching of subdomains and ports. The wildcard can only be used at the start of a subdomain or as an entire port.
+
+<Callout type="warning">
+  Use wildcards with caution. Overly permissive patterns can introduce security risks. Always prefer specific origins when
+  possible, and be as restrictive as your application allows.
+</Callout>
+
+### Subdomain wildcards
+
+Trust one level of subdomains under a specific domain.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: ["https://*.example.com"],
+})
+```
+
+Matches any origin that starts with `https://` and ends with `.example.com`, allowing exactly one subdomain level (e.g. `https://app.example.com`, `https://www.example.com`), but **not** the root domain (`https://example.com`) or multiple subdomain levels (`https://sub.app.example.com`).
+
+### Port wildcards
+
+Trust any port on a specific domain.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  trustedOrigins: ["https://example.com:*"],
+})
+```
+
+Matches any port on `https://example.com` (e.g. `https://example.com:3000`, `https://example.com:8080`), but **not** the domain without a port (`https://example.com`) or with a different protocol (`http://example.com:3000`).
+
+## Matching reference
+
+| Pattern                      | Matches                                                        | Does not match                                                               |
+| ---------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `https://example.com`        | `https://example.com`                                          | `http://example.com`, `https://app.example.com`, `https://example.com:3000`  |
+| `https://example.com:3000`   | `https://example.com:3000`                                     | `https://example.com`, `https://example.com:4000`, `http://example.com:3000` |
+| `https://*.example.com`      | `https://app.example.com`, `https://www.example.com`           | `https://example.com`, `http://app.example.com`                              |
+| `https://*.example.com:3000` | `https://app.example.com:3000`, `https://www.example.com:3000` | `https://example.com:3000`, `https://app.example.com:4000`                   |
+| `https://example.com:*`      | `https://example.com:3000`, `https://example.com:4000`         | `https://example.com`, `http://example.com:3000`                             |
+| `https://*.example.com:*`    | `https://app.example.com:3001`, `https://www.example.com:4567` | `https://example.com:3000`, `http://app.example.com:3000`                    |
+
+<Callout type="info">
+  `trustedOrigins` is required whenever [`trustedProxyHeaders`](/docs/api-reference/server/createAuth#trusted-proxy-headers) is
+  enabled — without a whitelist, proxy-forwarded origin headers cannot be safely trusted for CORS or redirect validation.
+</Callout>

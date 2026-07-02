@@ -1,4 +1,4 @@
 {
-  "title": "Core Concepts",
-  "pages": ["typescript", "env", "oauth", "architecture", "runtime-agnostic", "framework-agnostic"]
+  "title": "Concepts",
+  "pages": ["architecture", "oauth", "security-model", "runtime-agnostic", "framework-agnostic"]
 }

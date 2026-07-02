@@ -1,0 +1,5 @@
+{
+  "title": "Configuration",
+  "pages": ["typescript", "env", "session-strategies", "cookie-management", "identity-schema", "trusted-origins"],
+  "defaultOpen": false
+}

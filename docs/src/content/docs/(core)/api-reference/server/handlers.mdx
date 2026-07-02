@@ -1,0 +1,152 @@
+---
+title: handlers
+description: HTTP handlers that implement the OAuth 2.0 authorization, credentials, session, and sign-out endpoints for Aura Auth.
+---
+
+## Signature
+
+```ts lineNumbers
+type Handlers = {
+  GET: (req: Request) => Response | Promise<Response>
+  POST: (req: Request) => Response | Promise<Response>
+  PATCH: (req: Request) => Response | Promise<Response>
+  ALL: (req: Request) => Response | Promise<Response>
+}
+```
+
+`auth.handlers` exposes the HTTP handlers that drive the OAuth 2.0 authorization and credentials sign-in flow. `GET`, `POST`, and `PATCH` are exported individually so you can mount them per-method; `ALL` is a unified handler that consolidates all three into a single entry point for routers that only accept one handler per route.
+
+<Callout type="info">
+  The HTTP handlers can be implemented by any runtime that supports the native `Request`/`Response` Web APIs.
+</Callout>
+
+All routes below are relative to your configured [`basePath`](/docs/api-reference/server/createAuth#basepath) (default: `/auth`).
+
+## Endpoints
+
+| Method  | Path                       | Description                                      |
+| ------- | -------------------------- | ------------------------------------------------ |
+| `GET`   | `/auth/signIn/:oauth`      | Initiates the OAuth authorization flow.          |
+| `POST`  | `/auth/signIn/credentials` | Signs in a user with username/password.          |
+| `GET`   | `/auth/session`            | Returns the current user's session.              |
+| `POST`  | `/auth/session`            | Updates session data from the OAuth profile.     |
+| `PATCH` | `/auth/session`            | Updates the current user's session.              |
+| `POST`  | `/auth/signUp`             | Registers a new user.                            |
+| `GET`   | `/auth/callback/:oauth`    | Handles the OAuth provider callback.             |
+| `GET`   | `/auth/csrfToken`          | Issues a CSRF token for state-changing requests. |
+| `POST`  | `/auth/signOut`            | Signs out the current user.                      |
+
+### `GET /auth/signIn/:oauth`
+
+Initiates the OAuth authorization flow, where `:oauth` is the id of the configured OAuth provider, either a built-in provider or a custom one. See [OAuth Providers](/docs/oauth) for the list of built-in providers and how to register custom ones.
+
+Supports the [redirect query parameters](#optional-query-parameters).
+
+### `POST /auth/signIn/credentials`
+
+Signs in a user with a username and password. Expects a JSON payload:
+
+```json lineNumbers
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+Requires [`credentials.authorize`](/docs/api-reference/server/createAuth#credentials) to be configured, it validates the submitted credentials and returns the user profile used to create the session.
+
+Supports the [redirect query parameters](#optional-query-parameters).
+
+### `GET /auth/session`
+
+Returns the current user's session as a JSON object containing the user's profile and the session expiration time. The session is created on sign-in and stored in a secure cookie.
+
+```ts lineNumbers
+export interface User {
+  sub: string
+  name?: string
+  email?: string
+  image?: string
+}
+
+export interface Session {
+  user: User
+  expires: string
+}
+```
+
+The session response filters out JWT-standard claims (`exp`, `iat`, `jti`, `nbf`) and returns only user-facing profile data.
+
+### `POST /auth/session`
+
+Updates session data from the initial OAuth profile, currently supports the `email`, `name`, and `image` fields, or any additional fields defined in [`identity.schema`](/docs/configuration/identity-schema). For programmatic updates outside of a request/response cycle, use [`api.updateSession`](/docs/api-reference/server/api/updateSession) instead.
+
+### `PATCH /auth/session`
+
+Updates the current user's session. The request body follows the shape defined by [`identity.schema`](/docs/configuration/identity-schema); by default it supports `email`, `name`, and `image`:
+
+```json lineNumbers
+{
+  "user": {
+    "name": "string",
+    "email": "string",
+    "image": "string"
+  },
+  "expires": "string"
+}
+```
+
+Supports the [redirect query parameters](#optional-query-parameters).
+
+### `POST /auth/signUp`
+
+Registers a new user. No request body is required by default, though fields defined in `signUp.schema` may be included.
+
+Requires [`signUp.onCreateUser`](/docs/api-reference/server/createAuth#signup) to be configured, it creates the user record and returns the user profile used to create the session.
+
+Supports the [redirect query parameters](#optional-query-parameters).
+
+### `GET /auth/callback/:oauth`
+
+Handles the OAuth provider callback after the user authorizes the request. `:oauth` must match the provider id used in the original `GET /auth/signIn/:oauth` call. Expects `code` and `state` query parameters to be present, as set by the provider.
+
+For what happens internally between the initial redirect and a session being created (PKCE, state validation, token exchange), see [OAuth Authorization Flow](/docs/concepts/oauth).
+
+### `GET /auth/csrfToken`
+
+Returns a JSON object containing a CSRF token, used to protect state-changing requests (`POST`, `PATCH`) from cross-site request forgery. This token is required by [`POST /auth/signOut`](#post-authsignout).
+
+```json lineNumbers
+{
+  "csrfToken": "string"
+}
+```
+
+<Callout type="info">
+  The CSRF token is signed to guarantee its integrity, it cannot be forged or replayed with a modified value.
+</Callout>
+
+### `POST /auth/signOut`
+
+Signs out the current user and invalidates the session. Requires a signed CSRF token, submitted both as a cookie and as the `X-CSRF-Token` header, this is standard [double-submit cookie](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie-pattern) CSRF protection:
+
+```ts lineNumbers
+new Request("/auth/signOut", {
+  method: "POST",
+  headers: {
+    "X-CSRF-Token": "...",
+    Cookie: "...",
+  },
+})
+```
+
+Supports the [redirect query parameters](#optional-query-parameters).
+
+## Optional Query Parameters
+
+#### Redirect
+
+Any endpoint above marked "Supports the redirect query parameters" accepts `redirect` and `redirectTo` to control post-request navigation:
+
+- `redirect` — `"true"` or `"false"`. If `true`, the response redirects to `redirectTo` via the `Location` header. If `false` (default), the response is returned as JSON with no redirect.
+- `redirectTo` — the URL to redirect to when `redirect=true`. Ignored otherwise. If omitted while `redirect=true`, the default post-action URL is used.

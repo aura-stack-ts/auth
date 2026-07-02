@@ -1,0 +1,81 @@
+---
+title: signOut
+description: Complete API reference for the api.signOut method, handling cookie destruction, back-channel token invalidation, and secure redirection.
+---
+
+The `api.signOut` method signs out the current user: it invalidates the session token and clears the session cookie. This method runs on the server, so it requires you to pass the `request` or `headers` object from your server-side context.
+
+```ts title="sign-out.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signOut({
+  headers: getHeaders(),
+  redirectTo: "/login",
+})
+```
+
+## Reference
+
+### Parameters
+
+| Parameter | Type                | Required | Description                                                       |
+| --------- | ------------------- | -------- | ----------------------------------------------------------------- |
+| options   | `SignOutAPIOptions` | No       | An object containing additional options for the sign-out process. |
+
+### SignOutAPIOptions
+
+| Option        | Type      | Default   | Description                                                                                         |
+| ------------- | --------- | --------- | --------------------------------------------------------------------------------------------------- |
+| request       | `Request` | undefined | The request object from the server-side context.                                                    |
+| headers       | `Headers` | undefined | The headers object from the server-side context.                                                    |
+| redirect      | `boolean` | `true`    | Whether to redirect via the `Location` header (`true`) or return the result as an object (`false`). |
+| redirectTo    | `string`  | undefined | The URL to redirect to after sign-out completes.                                                    |
+| skipCSRFCheck | `boolean` | `false`   | Whether to skip CSRF token verification for this request. See the [warning](#behavior) below.       |
+
+<Callout type="info">
+  At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs. Per the [`POST
+  /auth/signOut` handler](/docs/api-reference/server/handlers#post-authsignout), a valid CSRF token must also be present (as a
+  cookie and, at the HTTP layer, the `X-CSRF-Token` header) unless `skipCSRFCheck` is set.
+</Callout>
+
+### Returns
+
+| Return Type                 | Description                                                                |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `Promise<SignOutAPIReturn>` | Resolves to an object containing `redirectURL`, `redirect`, and `success`. |
+
+## Behavior
+
+- CSRF protection is verified by default, matching the [`signOut` HTTP handler](/docs/api-reference/server/handlers#post-authsignout)'s double-submit cookie check. Set `skipCSRFCheck: true` only if CSRF is enforced at a different layer.
+- The return value depends on the `redirect` option:
+  - **`redirect: true`** (default) — redirects to `redirectTo` (or the default post-sign-out URL) via the `Location` header.
+  - **`redirect: false`** — resolves to an object with `redirectURL`, `redirect: false`, and `success`, letting you handle navigation yourself.
+- If sign-out fails (e.g. missing or mismatched CSRF token, or no active session to invalidate), `redirectURL` resolves to `null` and `success` is `false`.
+
+## Usage
+
+### Sign out
+
+```ts title="sign-out.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signOut({
+  headers: getHeaders(),
+  redirectTo: "/login",
+})
+```
+
+### Manual navigation
+
+```tsx title="manual-navigation.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signOut({
+  headers: getHeaders(),
+  redirect: false,
+})
+
+if (output.success) {
+  redirect(output.redirectURL)
+}
+```

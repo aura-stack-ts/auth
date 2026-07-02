@@ -4,10 +4,10 @@
   "pages": [
     "(getting-started)",
     "concepts",
+    "configuration",
     "guides",
     "integrations",
     "oauth",
-    "security",
     "ai-resources",
     "api-reference",
     "---Community---",
