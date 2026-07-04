@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `Instagram` OAuth provider to the supported integrations in Aura Auth. [#209](https://github.com/aura-stack-ts/auth/pull/209)
+
 - Added the `Authentik` OpenID Connect provider, enabling authentication through Authentik accounts with minimal configuration. [#199](https://github.com/aura-stack-ts/auth/pull/199)
 
 - Added the `Hugging Face` OpenID Connect provider, enabling authentication through Hugging Face accounts with minimal configuration. [#198](https://github.com/aura-stack-ts/auth/pull/198)
