@@ -1,10 +1,11 @@
 {
   "name": "@aura-stack/next",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
+    "./context": "./src/context.tsx",
     "./identity": "./src/_core/identity.ts",
     "./crypto": "./src/_core/crypto.ts",
     "./shared": "./src/_core/shared.ts",
@@ -15,12 +16,17 @@
     "./pages/context": "./src/pages/context.tsx",
     "./oauth": "./src/oauth/index.ts",
     "./oauth/atlassian": "./src/oauth/atlassian.ts",
+    "./oauth/authentik": "./src/oauth/authentik.ts",
     "./oauth/bitbucket": "./src/oauth/bitbucket.ts",
+    "./oauth/click-up": "./src/oauth/click-up.ts",
     "./oauth/discord": "./src/oauth/discord.ts",
+    "./oauth/dribbble": "./src/oauth/dribbble.ts",
     "./oauth/dropbox": "./src/oauth/dropbox.ts",
     "./oauth/figma": "./src/oauth/figma.ts",
     "./oauth/github": "./src/oauth/github.ts",
     "./oauth/gitlab": "./src/oauth/gitlab.ts",
+    "./oauth/google": "./src/oauth/google.ts",
+    "./oauth/hubspot": "./src/oauth/hubspot.ts",
     "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
     "./oauth/notion": "./src/oauth/notion.ts",
     "./oauth/pinterest": "./src/oauth/pinterest.ts",
@@ -33,7 +39,7 @@
     "@/": "./src/",
     "next": "npm:next@16.1.6",
     "react": "npm:react@19.2.3",
-    "@aura-stack/react": "npm:@aura-stack/react@^0.1.0"
+    "@aura-stack/react": "npm:@aura-stack/react@^0.2.0"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/**/*.tsx", "src/_core", "src/oauth", "README.md", "CHANGELOG.md"]

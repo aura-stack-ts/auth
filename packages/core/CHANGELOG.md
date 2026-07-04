@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.8.0] - 2026-07-04
+
 ### Added
 
 - Added the `Authentik` OpenID Connect provider, enabling authentication through Authentik accounts with minimal configuration. [#199](https://github.com/aura-stack-ts/auth/pull/199)

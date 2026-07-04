@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/elysia",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
@@ -13,12 +13,17 @@
     "./cookies": "./src/_core/cookies.ts",
     "./oauth": "./src/oauth/index.ts",
     "./oauth/atlassian": "./src/oauth/atlassian.ts",
+    "./oauth/authentik": "./src/oauth/authentik.ts",
     "./oauth/bitbucket": "./src/oauth/bitbucket.ts",
+    "./oauth/click-up": "./src/oauth/click-up.ts",
     "./oauth/discord": "./src/oauth/discord.ts",
+    "./oauth/dribbble": "./src/oauth/dribbble.ts",
     "./oauth/dropbox": "./src/oauth/dropbox.ts",
     "./oauth/figma": "./src/oauth/figma.ts",
     "./oauth/github": "./src/oauth/github.ts",
     "./oauth/gitlab": "./src/oauth/gitlab.ts",
+    "./oauth/google": "./src/oauth/google.ts",
+    "./oauth/hubspot": "./src/oauth/hubspot.ts",
     "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
     "./oauth/notion": "./src/oauth/notion.ts",
     "./oauth/pinterest": "./src/oauth/pinterest.ts",
@@ -30,7 +35,7 @@
   "imports": {
     "@/": "./src/",
     "elysia": "npm:elysia@^1.2.22",
-    "@aura-stack/auth": "npm:@aura-stack/auth@^0.7.2"
+    "@aura-stack/auth": "npm:@aura-stack/auth@^0.8.0"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/_core", "src/oauth", "README.md", "CHANGELOG.md"],
