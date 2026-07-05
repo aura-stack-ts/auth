@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.2.1] - 2026-07-04
+
+### Fixed
+
+- Republished the package to include the missing `huggingface` OAuth provider in the published package.
+  > This release contains no code changes compared to `v0.2.0`; it only corrects the published package contents.
+
+---
+
 ## [0.2.0] - 2026-07-04
 
 ### Added

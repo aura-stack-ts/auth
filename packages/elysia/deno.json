@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/elysia",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
@@ -24,6 +24,7 @@
     "./oauth/gitlab": "./src/oauth/gitlab.ts",
     "./oauth/google": "./src/oauth/google.ts",
     "./oauth/hubspot": "./src/oauth/hubspot.ts",
+    "./oauth/huggingface": "./src/oauth/huggingface.ts",
     "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
     "./oauth/notion": "./src/oauth/notion.ts",
     "./oauth/pinterest": "./src/oauth/pinterest.ts",
@@ -35,7 +36,7 @@
   "imports": {
     "@/": "./src/",
     "elysia": "npm:elysia@^1.2.22",
-    "@aura-stack/auth": "npm:@aura-stack/auth@^0.8.0"
+    "@aura-stack/auth": "npm:@aura-stack/auth@^0.8.1"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/_core", "src/oauth", "README.md", "CHANGELOG.md"],

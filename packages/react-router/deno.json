@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/react-router",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
@@ -26,6 +26,7 @@
     "./oauth/gitlab": "./src/oauth/gitlab.ts",
     "./oauth/google": "./src/oauth/google.ts",
     "./oauth/hubspot": "./src/oauth/hubspot.ts",
+    "./oauth/huggingface": "./src/oauth/huggingface.ts",
     "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
     "./oauth/notion": "./src/oauth/notion.ts",
     "./oauth/pinterest": "./src/oauth/pinterest.ts",
@@ -38,7 +39,7 @@
     "@/": "./src/",
     "react": "npm:react@^19.2.3",
     "react-router": "npm:react-router@^7.12.0",
-    "@aura-stack/react": "npm:@aura-stack/react@^0.2.0"
+    "@aura-stack/react": "npm:@aura-stack/react@^0.2.1"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/**/*.tsx", "src/_core", "src/oauth", "README.md", "CHANGELOG.md"]

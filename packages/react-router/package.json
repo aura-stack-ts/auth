@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/react-router",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "type": "module",
   "description": "Authentication integration for React Router applications with server-side rendering, route protection, session management and OAuth flows powered by Aura Auth.",

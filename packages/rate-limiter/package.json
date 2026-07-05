@@ -49,17 +49,17 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./types": "./dist/types.d.ts",
     "./algorithms": {
-      "types": "./dist/algorithms.d.ts",
-      "import": "./dist/algorithms.js",
-      "require": "./dist/algorithms.cjs"
+      "types": "./dist/algorithms/index.d.ts",
+      "import": "./dist/algorithms/index.js",
+      "require": "./dist/algorithms/index.cjs"
     },
     "./algorithms/*": {
       "types": "./dist/algorithms/*/index.d.ts",
       "import": "./dist/algorithms/*/index.js",
       "require": "./dist/algorithms/*/index.cjs"
-    }
+    },
+    "./types": "./dist/types.d.ts"
   },
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "homepage": "https://aura-stack-auth.vercel.app",

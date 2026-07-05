@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/elysia",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "type": "module",
   "description": "Authentication integration for Elysia applications. Provides middleware, route handlers and session verification powered by Aura Auth.",

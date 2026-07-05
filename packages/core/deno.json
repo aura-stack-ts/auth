@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/auth",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
@@ -26,6 +26,7 @@
     "./oauth/gitlab": "./src/oauth/gitlab.ts",
     "./oauth/google": "./src/oauth/google.ts",
     "./oauth/hubspot": "./src/oauth/hubspot.ts",
+    "./oauth/huggingface": "./src/oauth/huggingface.ts",
     "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
     "./oauth/notion": "./src/oauth/notion.ts",
     "./oauth/pinterest": "./src/oauth/pinterest.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/auth",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": false,
   "type": "module",
   "description": "Open-source authentication and authorization library for modern TypeScript and JavaScript applications. Framework-agnostic, runtime-agnostic and built on web standards.",

@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/next",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
@@ -27,6 +27,7 @@
     "./oauth/gitlab": "./src/oauth/gitlab.ts",
     "./oauth/google": "./src/oauth/google.ts",
     "./oauth/hubspot": "./src/oauth/hubspot.ts",
+    "./oauth/huggingface": "./src/oauth/huggingface.ts",
     "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
     "./oauth/notion": "./src/oauth/notion.ts",
     "./oauth/pinterest": "./src/oauth/pinterest.ts",
@@ -39,7 +40,7 @@
     "@/": "./src/",
     "next": "npm:next@16.1.6",
     "react": "npm:react@19.2.3",
-    "@aura-stack/react": "npm:@aura-stack/react@^0.2.0"
+    "@aura-stack/react": "npm:@aura-stack/react@^0.2.1"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/**/*.tsx", "src/_core", "src/oauth", "README.md", "CHANGELOG.md"]
