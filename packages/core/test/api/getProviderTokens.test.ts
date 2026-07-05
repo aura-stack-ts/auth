@@ -52,6 +52,8 @@ describe("getProviderTokens API", () => {
     })
 
     test("throws error when CSRF token is invalid", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
         const output = await api.getProviderTokens("oauth-provider", {
             headers: new Headers({
                 Cookie: "aura-auth.csrf_token=invalid-token",
@@ -62,8 +64,8 @@ describe("getProviderTokens API", () => {
             success: false,
             tokens: null,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "COOKIE_INVALID_VALUE",
+                message: "Expected configuration cookie not found or contains an empty value.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

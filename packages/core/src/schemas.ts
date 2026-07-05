@@ -51,6 +51,7 @@ export const OAuthProviderCredentialsSchema = object({
             object({
                 url: string().url(),
                 headers: z.record(string(), string()).optional(),
+                params: z.record(string(), string()).optional(),
             }),
         ])
         .optional(),
@@ -307,7 +308,10 @@ export const OAuthTokenPayloadSchema = object({
     refreshToken: string().optional(),
     refreshTokenExpiresAt: number().optional(),
     idToken: string().optional(),
-    tokenType: options(["Bearer"]),
+    tokenType: z
+        .string()
+        .transform((v) => (v.toLowerCase() === "bearer" ? "Bearer" : v))
+        .pipe(options(["Bearer"])),
     scopes: array(string()).or(string()),
     issuer: string().optional(),
     issuedAt: number(),

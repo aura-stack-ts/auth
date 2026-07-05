@@ -170,7 +170,7 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Ident
     const validator = createValidator(schema)
     const partialValidator = createValidator(schemaAsPartial)
     const jwtValidator = createValidator(schemaWithJWT)
-    const oauthTokensValidator = createValidator(oauthTokens)
+    const oauthTokensValidator = createValidator<OAuthTokenPayload>(oauthTokens)
 
     const parse = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = validator.validate(data)
@@ -201,7 +201,7 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Ident
         if (!success) {
             throw new AuraAuthError({ code: "SCHEMA_PARSER_FAILED", cause: error })
         }
-        return output as unknown as OAuthTokenPayload
+        return output
     }
 
     return { parse, parseAsPartial, parseWithJWT, parseOAuthTokens, schema, schemaAsPartial, schemaWithJWT }

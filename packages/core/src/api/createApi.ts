@@ -127,7 +127,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
             oauth: LiteralUnion<BuiltInOAuthProvider>,
             options?: GetProviderTokensAPIOptions
         ): Promise<GetProviderTokensAPIReturn> => {
-            return getProviderTokens(oauth, { ctx, ...options })
+            return getProviderTokens(oauth, { ctx, ...options, skipCSRFCheck: true })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

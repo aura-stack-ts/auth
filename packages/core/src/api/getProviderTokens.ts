@@ -19,6 +19,9 @@ export const refreshProviderToken = async (
     if (!provider.refreshToken || (typeof provider.refreshToken === "object" && !("url" in provider.refreshToken))) {
         throw new AuraAuthError({ code: "OAUTH_INVALID_REFRESH_TOKEN_CONFIG" })
     }
+    if (!payload.refreshToken) {
+        throw new AuraAuthError({ code: "OAUTH_INVALID_REFRESH_TOKEN_CONFIG" })
+    }
     const url = typeof provider.refreshToken === "string" ? provider.refreshToken : provider.refreshToken.url
     const response = await fetchAsync(url, {
         method: "POST",
@@ -31,6 +34,7 @@ export const refreshProviderToken = async (
             refresh_token: payload.refreshToken!,
             client_id: provider.clientId!,
             client_secret: provider.clientSecret!,
+            ...(typeof provider.refreshToken === "object" && provider.refreshToken.params ? provider.refreshToken.params : {}),
         }),
     })
     if (!response.ok) {
