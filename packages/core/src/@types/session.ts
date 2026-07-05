@@ -248,3 +248,42 @@ export type JWTManager<DefaultUser extends User = User> = {
     createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
     verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }
+
+export interface OAuthTokenPayload {
+    /**
+     * The raw access token string issued by the OAuth provider.
+     */
+    accessToken: string
+    /**
+     * The expiration time of the access token, in seconds since the epoch (Unix time).
+     */
+    expiresAt: number
+    /**
+     * The raw refresh token string issued by the OAuth provider, if applicable.
+     */
+    refreshToken?: string
+    /**
+     * The expiration time of the refresh token, in seconds since the epoch (Unix time).
+     */
+    refreshTokenExpiresAt?: number
+    /**
+     * The raw ID token string issued by the OIDC provider. Only supported by OIDC-compliant providers.
+     */
+    idToken?: string
+    /**
+     * The type of token issued by the OAuth provider. Typically "Bearer" for OAuth 2.0.
+     */
+    tokenType: "Bearer"
+    /**
+     * The scopes granted to the access token, as an array of strings. These define the permissions the token has.
+     */
+    scopes: string[]
+    /**
+     * The issuer of the token, typically the OAuth provider's URL. This is used to validate the token's authenticity.
+     */
+    issuer?: string
+    /**
+     * The time at which the token was issued, in seconds since the epoch (Unix time).
+     */
+    issuedAt: number
+}

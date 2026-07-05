@@ -8,6 +8,8 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { createValidator } from "@aura-stack/router/validator"
 import type { IdentityConfig } from "@/@types/config.ts"
 import type { EditableToSchema, ReturnUpdateSessionShape } from "@/@types/utility.ts"
+import { OAuthTokenPayloadSchema } from "@/schemas.ts"
+import type { OAuthTokenPayload } from "@/@types/session.ts"
 
 export const deriveSchema = <Schema extends SchemaTypes>(
     schema: Schema,
@@ -163,10 +165,12 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Ident
     const schema = deriveSchema(config.schema ?? UserIdentity, config.unknownKeys)
     const schemaAsPartial = deriveSchema(config.schema ?? UserIdentity, "partial")
     const schemaWithJWT = deriveSchemaWithJWT(config.schema ?? UserIdentity)
+    const oauthTokens = deriveSchema(OAuthTokenPayloadSchema)
 
     const validator = createValidator(schema)
     const partialValidator = createValidator(schemaAsPartial)
     const jwtValidator = createValidator(schemaWithJWT)
+    const oauthTokensValidator = createValidator(oauthTokens)
 
     const parse = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = validator.validate(data)
@@ -192,5 +196,13 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Ident
         return output
     }
 
-    return { parse, parseAsPartial, parseWithJWT, schema, schemaAsPartial, schemaWithJWT }
+    const parseOAuthTokens = async (data: unknown = {}): Promise<OAuthTokenPayload> => {
+        const { data: output, success, error } = oauthTokensValidator.validate(data)
+        if (!success) {
+            throw new AuraAuthError({ code: "SCHEMA_PARSER_FAILED", cause: error })
+        }
+        return output as unknown as OAuthTokenPayload
+    }
+
+    return { parse, parseAsPartial, parseWithJWT, parseOAuthTokens, schema, schemaAsPartial, schemaWithJWT }
 }

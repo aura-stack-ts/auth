@@ -45,6 +45,15 @@ export const OAuthProviderCredentialsSchema = object({
     userInfo: UserInfoConfigSchema,
     /** @deprecated */
     responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
+    refreshToken: z
+        .union([
+            string().url(),
+            object({
+                url: string().url(),
+                headers: z.record(string(), string()).optional(),
+            }),
+        ])
+        .optional(),
     clientId: string(),
     clientSecret: string(),
     profile: z.function().optional(),
@@ -291,3 +300,15 @@ export const IDTokenClaimsSchema = object({
     azp: string().optional(),
     auth_time: number().optional(),
 }).passthrough()
+
+export const OAuthTokenPayloadSchema = object({
+    accessToken: string(),
+    expiresAt: number(),
+    refreshToken: string().optional(),
+    refreshTokenExpiresAt: number().optional(),
+    idToken: string().optional(),
+    tokenType: options(["Bearer"]),
+    scopes: array(string()).or(string()),
+    issuer: string().optional(),
+    issuedAt: number(),
+})

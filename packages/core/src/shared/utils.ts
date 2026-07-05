@@ -4,7 +4,7 @@ import { verifyCSRF } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
-import type { JWTManager } from "@/@types/session.ts"
+import type { JWTManager, OAuthTokenPayload } from "@/@types/session.ts"
 import type { CookieStoreConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
 
 export const AURA_AUTH_VERSION = "0.7.2"
@@ -195,4 +195,11 @@ export const verifyCSRFToken = async ({
         logger?.log("CSRF_TOKEN_VERIFIED")
     }
     return true
+}
+
+export const shouldRefresh = (payload: OAuthTokenPayload, refreshWindow: number): boolean => {
+    const now = Math.floor(Date.now() / 1000)
+    if (now >= payload.expiresAt) return true
+    if (payload.expiresAt - now <= refreshWindow) return true
+    return false
 }

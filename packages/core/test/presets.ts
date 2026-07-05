@@ -10,6 +10,7 @@ export const oauthCustomService: OAuthProviderCredentials = {
     scope: "profile email",
     responseType: "code",
     userInfo: "https://example.com/oauth/userinfo",
+    refreshToken: "https://example.com/oauth/refresh_token",
     clientId: "oauth_client_id",
     clientSecret: "oauth_client_secret",
 }

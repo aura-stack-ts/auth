@@ -84,6 +84,8 @@ export const AuraErrorCode = {
     INVALID_ENVIRONMENT_CONFIGURATION: "INVALID_ENVIRONMENT_CONFIGURATION",
     PKCE_VERIFIER_INVALID: "PKCE_VERIFIER_INVALID",
     OAUTH_INVALID_CONTENT_TYPE: "OAUTH_INVALID_CONTENT_TYPE",
+    OAUTH_INVALID_REFRESH_TOKEN_CONFIG: "OAUTH_INVALID_REFRESH_TOKEN_CONFIG",
+    OAUTH_INVALID_REFRESH_TOKEN_RESPONSE: "OAUTH_INVALID_REFRESH_TOKEN_RESPONSE",
 
     /**
      * Schema Errors
@@ -805,6 +807,23 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         name: "OIDCInvalidIssuerError",
         message: "The configured OpenID Connect issuer parameters are missing or invalid, preventing issuer validation.",
         userMessage: "The identity provider configuration is invalid. Please check issuer settings and try again.",
+    },
+    OAUTH_INVALID_REFRESH_TOKEN_CONFIG: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "OAuthError",
+        message:
+            "The token refresh sequence was aborted because the targeted OAuth provider instance does not have a refresh token strategy configured. Ensure that your provider registration includes token rotation settings or appropriate scopes (e.g., 'offline_access').",
+        userMessage:
+            "Internal library configuration error. Token refresh operations are not enabled or configured for this identity provider.",
+    },
+    OAUTH_INVALID_REFRESH_TOKEN_RESPONSE: {
+        type: "PROTOCOL",
+        statusCode: 401,
+        name: "OAuthError",
+        message:
+            "The remote identity provider rejected the refresh token exchange request. The response 'ok' field resolved to false. This typically indicates that the refresh token has expired, been reused, or has been explicitly revoked by the end-user.",
+        userMessage: "Your secure session renewal failed. Please sign in again to continue.",
     },
 }
 

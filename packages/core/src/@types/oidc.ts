@@ -217,6 +217,11 @@ export type OpenIDProvider<Profile extends object = Record<string, any>, Default
     clientId?: string
     clientSecret?: string
     /**
+     * Refresh window in seconds before the access token expires to attempt a refresh.
+     * Defaults to 300 seconds.
+     */
+    refreshWindow?: number
+    /**
      * Override the default OIDC scope (`openid profile email`).
      */
     scope?: string
