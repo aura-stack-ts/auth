@@ -1,4 +1,4 @@
-import type { Session, User } from "@/@types/session.ts"
+import type { OAuthTokenPayload, Session, User } from "@/@types/session.ts"
 import type { AuthResponse, DeepPartial, Prettify, RequiredKeys } from "@/@types/utility.ts"
 import type { CredentialsPayload, RouterGlobalContext } from "@/@types/config.ts"
 
@@ -26,7 +26,7 @@ type AuthActionAPIReturn<Body extends object, ErrorCodes = any> =
  * Utility to merge the internal router global context (`ctx`) with per-function options.
  * Used by implementation-level API functions in `src/api/*`.
  */
-export type FunctionAPIContext<Options extends object> = Prettify<
+export type FunctionAPIContext<Options extends object = {}> = Prettify<
     {
         ctx: RouterGlobalContext
     } & Options
@@ -312,3 +312,10 @@ export type SignUpOptions<SignUpSchema extends Record<string, any> = Record<stri
 export type SignUpReturn<Options extends SignUpOptions> = Options extends { redirect: false }
     ? Extract<SignUpReturnData, { redirect: false }>
     : void
+
+export interface GetProviderTokensAPIOptions
+    extends Pick<APIOptionsWithRequest, "headers" | "request">, APIOptionsWithSkipCSRFCheck {}
+
+export type GetProviderTokensAPIReturn = AuthActionAPIReturn<
+    { success: true; tokens: OAuthTokenPayload } | { success: false; tokens: null }
+>

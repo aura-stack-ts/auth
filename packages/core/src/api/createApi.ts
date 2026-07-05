@@ -1,4 +1,4 @@
-import { getSession, signIn, signInCredentials, signOut, updateSession, signUp } from "@/api/index.ts"
+import { getSession, signIn, signInCredentials, signOut, updateSession, signUp, getProviderTokens } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
     BuiltInOAuthProvider,
@@ -18,6 +18,8 @@ import type {
     SignUpAPIReturn,
     Wrap,
     RemoveIndexSignature,
+    GetProviderTokensAPIOptions,
+    GetProviderTokensAPIReturn,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/shared/identity.ts"
@@ -120,6 +122,12 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          */
         updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
             return updateSession<DefaultUser>({ ctx, ...options, skipCSRFCheck: true })
+        },
+        getProviderTokens: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: GetProviderTokensAPIOptions
+        ): Promise<GetProviderTokensAPIReturn> => {
+            return getProviderTokens(oauth, { ctx, ...options, skipCSRFCheck: true })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

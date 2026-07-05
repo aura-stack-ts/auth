@@ -42,6 +42,7 @@ export const resolveOpenIDProvider = async (provider: RuntimeOAuthProvider): Pro
         },
         accessToken: metadata.token_endpoint,
         userInfo: metadata.userinfo_endpoint,
+        refreshToken: metadata.token_endpoint,
         oidc: {
             issuer: metadata.issuer,
             jwks_uri: metadata.jwks_uri,
@@ -69,6 +70,8 @@ export const createOpenIDPlaceholder = (
         },
         accessToken: "",
         userInfo: "",
+        refreshToken: "",
+        refreshWindow: config.refreshWindow,
         oidc: {
             issuer: setDynamicParams(config.issuer, config),
         },

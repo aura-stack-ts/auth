@@ -267,5 +267,17 @@ export const createCookieStore = (
                 logger
             ),
         },
+        accessToken: {
+            name: `${securePrefix}${prefix}.${overrides?.accessToken?.name ?? "access_token"}`,
+            attributes: defineSecureCookieOptions(
+                useSecure,
+                {
+                    ...oauthCookieOptions,
+                    ...overrides?.accessToken?.attributes,
+                },
+                overrides?.accessToken?.attributes?.strategy ?? "secure",
+                logger
+            ),
+        },
     }
 }

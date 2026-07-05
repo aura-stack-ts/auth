@@ -295,7 +295,15 @@ export type CookieStrategyAttributes = StandardCookie | SecureCookie | HostCooki
  * - `redirectURI`: OAuth callback URI
  * - `redirectTo`: Post-authentication redirect path
  */
-export type CookieName = "sessionToken" | "csrfToken" | "state" | "codeVerifier" | "redirectTo" | "redirectURI" | "nonce"
+export type CookieName =
+    | "sessionToken"
+    | "csrfToken"
+    | "state"
+    | "codeVerifier"
+    | "redirectTo"
+    | "redirectURI"
+    | "nonce"
+    | "accessToken"
 
 /** Resolved cookie names and serialization attributes for each logical auth cookie. */
 export type CookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
@@ -515,5 +523,7 @@ export interface SignUpConfig<Identity extends Identities, SignUpSchema extends 
 // #region Rate Limiter
 
 export type RateLimiterConfig = Partial<
-    RaterLimiterBaseConfig<Record<"signIn" | "signInCredentials" | "updateSession" | "signUp", RateLimiterRule>>["rules"]
+    RaterLimiterBaseConfig<
+        Record<"signIn" | "signInCredentials" | "updateSession" | "signUp" | "getProviderTokens", RateLimiterRule>
+    >["rules"]
 >

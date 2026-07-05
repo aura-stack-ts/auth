@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added the experimental `getProviderTokens()` API for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. To enable refresh token retrieval, the provider must be configured with the `refreshToken` option. [#212](https://github.com/aura-stack-ts/auth/pull/212)
+
 ---
 
 ## [0.8.1] - 2026-07-04

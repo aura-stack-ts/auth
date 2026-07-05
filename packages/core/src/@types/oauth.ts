@@ -79,12 +79,7 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
               url: string
               params?: Partial<Record<AuthorizeParams, string> & { responseType: ResponseType }>
           }
-    accessToken:
-        | string
-        | {
-              url: string
-              headers?: Record<string, string>
-          }
+    accessToken: string | { url: string; headers?: Record<string, string> }
     userInfo:
         | string
         | {
@@ -96,6 +91,16 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
               url: string
               request: (context: AccessTokenContext) => Profile | Promise<Profile>
           }
+    /**
+     * Refresh token configuration for the OAuth provider. This option allows refreshing access tokens
+     * when they expire.
+     */
+    refreshToken?: string | { url: string; headers?: Record<string, string>; params?: Record<string, string> }
+    /**
+     * Refresh window in seconds before the access token expires to attempt a refresh.
+     * Defaults to 300 seconds.
+     */
+    refreshWindow?: number
     /**
      * @deprecated
      * use `authorize.params.scope` instead of `scope`
