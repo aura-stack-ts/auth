@@ -8,9 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.2.1] - 2026-07-04
+
+### Fixed
+
+- Republished the package to include the missing `huggingface` OAuth provider in the published package.
+  > This release contains no code changes compared to `v0.2.0`; it only corrects the published package contents.
+
+---
+
+## [0.2.0] - 2026-07-04
+
 ### Added
 
 - Introduced an experimental `signUp` flow for both the API and endpoint definitions. The new action enables user account creation within the authentication system and provides customizable payload validation through the supported schema. To enable this feature, developers must configure the `signUp` option when calling `createAuth`. [#183](https://github.com/aura-stack-ts/auth/pull/183)
+
+### Changed
+
+- Updated the `@aura-stack/auth` dependency to `v0.8.0`. [#211](https://github.com/aura-stack-ts/auth/pull/211)
 
 ---
 

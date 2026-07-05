@@ -110,6 +110,39 @@
     "@ark/util@0.56.0": {
       "integrity": "sha512-BghfRC8b9pNs3vBoDJhcta0/c1J1rsoS1+HgVUreMFPdhz/CRAKReAu57YEllNaSy98rWAdY1gE+gFup7OXpgA=="
     },
+    "@aura-stack/auth@0.7.2_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5": {
+      "integrity": "sha512-fnlE+yIM90/ibGMSdIJRB20cJ1e7P8YYKY0ixCe0zrjYAdolVPUpDKiVEBnYzM9ICT2UNFSV4saGzhUtelIAAg==",
+      "dependencies": [
+        "@aura-stack/jose",
+        "@aura-stack/router@0.7.2_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5",
+        "arktype",
+        "typebox",
+        "valibot",
+        "zod"
+      ]
+    },
+    "@aura-stack/jose@0.6.0": {
+      "integrity": "sha512-wt1Jg6S42x1s9nqftvTBPXK/iYQX6Ihn01Oo5PO3i5ULW+QJNZFww6udicqzXKAFMu5rmez4e8L9qf/sx6uJaA==",
+      "dependencies": [
+        "jose"
+      ]
+    },
+    "@aura-stack/router@0.7.2_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5": {
+      "integrity": "sha512-Swxm9SDvJEmM+V3rxjyOm7Fvysnnw//e/7ZXS+7Gn01J9MD3EJNJDOOFKmlmtVwlPoLtLf/NVNGCMji4kb5kcw==",
+      "dependencies": [
+        "arktype",
+        "cookie@1.1.1",
+        "typebox",
+        "valibot",
+        "zod"
+      ],
+      "optionalPeers": [
+        "arktype",
+        "typebox",
+        "valibot",
+        "zod"
+      ]
+    },
     "@aura-stack/router@0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5": {
       "integrity": "sha512-8yX9GJCAvyUMNawpNB8bCwQL+9ZLYFtsm6+btcj78XegtZ83uv6Ye16MKNhyadaCN5gA8OKAVAAKORzxq22dXg==",
       "dependencies": [
@@ -2026,7 +2059,7 @@
       },
       "packages/elysia": {
         "dependencies": [
-          "npm:@aura-stack/auth@~0.7.2",
+          "npm:@aura-stack/auth@0.8",
           "npm:elysia@^1.2.22"
         ],
         "packageJson": {
@@ -2037,7 +2070,7 @@
       },
       "packages/express": {
         "dependencies": [
-          "npm:@aura-stack/auth@~0.7.2",
+          "npm:@aura-stack/auth@0.8",
           "npm:express@^4.18.2"
         ],
         "packageJson": {
@@ -2049,7 +2082,7 @@
       },
       "packages/hono": {
         "dependencies": [
-          "npm:@aura-stack/auth@~0.7.2",
+          "npm:@aura-stack/auth@0.8",
           "npm:hono@4"
         ]
       },
@@ -2065,7 +2098,7 @@
       },
       "packages/next": {
         "dependencies": [
-          "npm:@aura-stack/react@0.1",
+          "npm:@aura-stack/react@0.2",
           "npm:next@16.1.6",
           "npm:react@19.2.3"
         ],
@@ -2077,13 +2110,13 @@
       },
       "packages/react": {
         "dependencies": [
-          "npm:@aura-stack/auth@~0.7.2",
+          "npm:@aura-stack/auth@0.8",
           "npm:react@^19.2.3"
         ]
       },
       "packages/react-router": {
         "dependencies": [
-          "npm:@aura-stack/react@0.1",
+          "npm:@aura-stack/react@0.2",
           "npm:react-router@^7.12.0",
           "npm:react@^19.2.3"
         ]

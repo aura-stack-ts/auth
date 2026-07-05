@@ -1,17 +1,20 @@
 {
   "name": "@aura-stack/rate-limiter",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
   },
-  "export": {
+  "exports": {
     ".": "./src/index.ts",
     "./algorithms": "./src/algorithms/index.ts",
+    "./algorithms/fixed-window": "./src/algorithms/fixed-window.ts",
+    "./algorithms/leaky-bucket": "./src/algorithms/leaky-bucket.ts",
+    "./algorithms/sliding-window": "./src/algorithms/sliding-window.ts",
     "./algorithms/token-bucket": "./src/algorithms/token-bucket.ts",
-    "./types": "./src/@types/index.ts"
+    "./types": "./src/types.ts"
   },
-  "import": {
+  "imports": {
     "@/": "./src/"
   },
   "publish": {
