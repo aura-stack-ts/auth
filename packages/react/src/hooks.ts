@@ -320,7 +320,9 @@ export const useSignOut = () => {
  *
  *   useEffect(() => {
  *     const fetchTokens = async () => {
- *       const { accessToken } = await getProviderTokens("spotify")
+ *       const { success, tokens } = await getProviderTokens("spotify")
+ *       if (!success || !tokens) return
+ *       const { accessToken } = tokens
  *
  *       const response = await fetch("https://api.spotify.com/v1/me/top/tracks", {
  *         headers: {

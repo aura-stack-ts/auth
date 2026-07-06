@@ -118,6 +118,8 @@ describe("useProviderTokens", () => {
         const button = screen.getByRole("button", { name: "Load Github Tokens" })
         await user.click(button)
 
-        expect(screen.getByRole("button", { name: "Loading Tokens..." })).toBeDefined()
+        await waitFor(() => {
+            expect(screen.getByRole("button", { name: "Loading Tokens..." })).toBeDefined()
+        })
     })
 })
