@@ -265,7 +265,7 @@ export const createAuthClient = <
      * Fetches the OAuth tokens for a specified provider, if available.
      *
      * @param oauth The OAuth provider identifier (e.g., "google", "github").
-     * @returns An object containing the tokens if successful, or null if not available or an error occurs.
+     * @returns An object with `success` and `tokens`, where `tokens` is null if unavailable or on error.
      * @example
      * const authClient = createAuthClient({ ... })
      *

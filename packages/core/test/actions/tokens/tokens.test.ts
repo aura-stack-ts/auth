@@ -1,8 +1,7 @@
 import { describe, test, expect, vi, afterEach, beforeEach } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-import { GET, jose, oauthCustomService } from "@test/presets.ts"
-import type { OAuthTokenPayload } from "@/@types/session.ts"
+import { GET, jose, oauthCustomService, oauthTokens } from "@test/presets.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -14,20 +13,10 @@ afterEach(() => {
     vi.unstubAllGlobals()
 })
 
-const oauthTokens: OAuthTokenPayload = {
-    accessToken: "access-token",
-    expiresAt: Math.floor(Date.now() / 1000) + 3600,
-    refreshToken: "refresh-token",
-    refreshTokenExpiresAt: Math.floor(Date.now() / 1000) + 7200,
-    issuedAt: Math.floor(Date.now() / 1000),
-    scopes: ["scope1", "scope2"],
-    tokenType: "Bearer",
-}
-
 describe("tokensAction", () => {
     const { encodeJWT } = jose
 
-    test("should return 400 if the provider is not supported", async () => {
+    test("should return 422 if the provider is not supported", async () => {
         const response = await GET(new Request("https://example.com/auth/providers/unsupported/tokens"))
         expect(response.status).toBe(422)
         expect(await response.json()).toEqual({

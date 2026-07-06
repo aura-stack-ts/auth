@@ -10,9 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Added the `/providers/:provider/tokens` endpoint for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. This endpoint is intended for client-side integrations. To retrieve refresh tokens, the provider must be configured with the `refreshToken` option. [#213](https://github.com/aura-stack-ts/auth/pull/213)
+- Added the `/providers/:oauth/tokens` endpoint for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. This endpoint is intended for client-side integrations. To retrieve refresh tokens, the provider must be configured with the `refreshToken` option. [#213](https://github.com/aura-stack-ts/auth/pull/213)
 
-- Added the `getProviderTokens()` client API to `createAuthClient()`, providing a client-side interface for the `/providers/:provider/tokens` endpoint. [#213](https://github.com/aura-stack-ts/auth/pull/213)
+- Added the `getProviderTokens()` client API to `createAuthClient()`, providing a client-side interface for the `/providers/:oauth/tokens` endpoint. [#213](https://github.com/aura-stack-ts/auth/pull/213)
 
 - Added the experimental `getProviderTokens()` API for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. To enable refresh token retrieval, the provider must be configured with the `refreshToken` option. [#212](https://github.com/aura-stack-ts/auth/pull/212)
 
