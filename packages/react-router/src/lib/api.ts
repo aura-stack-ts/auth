@@ -12,6 +12,7 @@ import type {
 import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type {
     BuiltInOAuthProvider,
+    GetProviderTokensAPIOptions,
     GetProviderTokensAPIReturn,
     GetSessionAPIOptions,
     LiteralUnion,
@@ -73,8 +74,11 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
 }
 
 export const getProviderTokens = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<GetProviderTokensAPIReturn> => {
-        return await api.getProviderTokens(oauth)
+    return async (
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: GetProviderTokensAPIOptions
+    ): Promise<GetProviderTokensAPIReturn> => {
+        return await api.getProviderTokens(oauth, options)
     }
 }
 

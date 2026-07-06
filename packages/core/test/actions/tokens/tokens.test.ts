@@ -32,7 +32,7 @@ describe("tokensAction", async () => {
         })
     })
 
-    test("should return 403 if session token is missing", async () => {
+    test("should return 401 if session token is missing", async () => {
         const response = await GET(new Request("https://example.com/auth/providers/oauth-provider/tokens"))
         expect(response.status).toBe(401)
         expect(await response.json()).toEqual({

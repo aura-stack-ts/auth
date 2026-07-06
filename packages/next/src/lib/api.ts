@@ -16,6 +16,7 @@ import type {
     LiteralUnion,
     BuiltInOAuthProvider,
     SignInCredentialsAPIOptions,
+    GetProviderTokensAPIOptions,
 } from "@aura-stack/react/types"
 
 /**
@@ -102,8 +103,8 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
 }
 
 export const getProviderTokens = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async (oauth: LiteralUnion<BuiltInOAuthProvider>) => {
-        return await api.getProviderTokens(oauth, { headers: await headers() })
+    return async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: GetProviderTokensAPIOptions) => {
+        return await api.getProviderTokens(oauth, { headers: await headers(), ...options })
     }
 }
 
