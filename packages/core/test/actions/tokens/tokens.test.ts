@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, afterEach, beforeEach } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-import { GET, jose, oauthCustomService, oauthTokens } from "@test/presets.ts"
+import { GET, jose, oauthCustomService, oauthTokens, sessionPayload } from "@test/presets.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -13,7 +13,7 @@ afterEach(() => {
     vi.unstubAllGlobals()
 })
 
-describe("tokensAction", () => {
+describe("tokensAction", async () => {
     const { encodeJWT } = jose
 
     test("should return 422 if the provider is not supported", async () => {
@@ -32,8 +32,23 @@ describe("tokensAction", () => {
         })
     })
 
-    test("should return 403 if CSRF token is missing", async () => {
+    test("should return 401 if session token is missing", async () => {
         const response = await GET(new Request("https://example.com/auth/providers/oauth-provider/tokens"))
+        expect(response.status).toBe(401)
+        expect(await response.json()).toEqual({
+            success: false,
+            tokens: null,
+        })
+    })
+
+    test("should return 403 if CSRF token is missing", async () => {
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const response = await GET(
+            new Request("https://example.com/auth/providers/oauth-provider/tokens", {
+                headers: { Cookie: `__Secure-aura-auth.session_token=${sessionToken}` },
+            })
+        )
         expect(response.status).toBe(403)
         expect(await response.json()).toEqual({
             success: false,
@@ -42,10 +57,13 @@ describe("tokensAction", () => {
     })
 
     test("should return 403 if CSRF token is invalid", async () => {
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
         const response = await GET(
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "x-csrf-token": "invalid-token",
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -58,12 +76,13 @@ describe("tokensAction", () => {
 
     test("should return 403 if provider token doesn not exist", async () => {
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const response = await GET(
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Secure-aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -77,12 +96,13 @@ describe("tokensAction", () => {
     test("successfully get provider tokens", async () => {
         const csrfToken = await createCSRF(jose)
         const encodedTokens = await encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const response = await GET(
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -95,6 +115,7 @@ describe("tokensAction", () => {
 
     test("refreshToken config not provided", async () => {
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const encodedTokens = await jose.encodeJWT({
             ...oauthTokens,
@@ -110,7 +131,7 @@ describe("tokensAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -124,6 +145,7 @@ describe("tokensAction", () => {
 
     test("refreshToken successfully refreshes tokens", async () => {
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -140,7 +162,7 @@ describe("tokensAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -151,6 +173,7 @@ describe("tokensAction", () => {
             tokens: {
                 ...oauthTokens,
                 expiresAt: expect.any(Number),
+                issuedAt: expect.any(Number),
             },
         })
 
@@ -169,6 +192,7 @@ describe("tokensAction", () => {
 
     test("refreshToken fails when OAuth provider returns an error", async () => {
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: false,
@@ -186,7 +210,7 @@ describe("tokensAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -200,7 +224,7 @@ describe("tokensAction", () => {
 
     test("refreshToken handles unexpected network exceptions gracefully", async () => {
         const csrfToken = await createCSRF(jose)
-
+        const sessionToken = await jose.encodeJWT(sessionPayload)
         const mockFetch = vi.fn().mockRejectedValueOnce(new Error("Network connection lost"))
         vi.stubGlobal("fetch", mockFetch)
 
@@ -213,7 +237,7 @@ describe("tokensAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -227,6 +251,7 @@ describe("tokensAction", () => {
 
     test("returns current tokens without refreshing when close to expiry but outside the refresh window", async () => {
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const mockFetch = vi.fn()
         vi.stubGlobal("fetch", mockFetch)
@@ -242,7 +267,7 @@ describe("tokensAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -260,7 +285,7 @@ describe("tokensAction", () => {
 
     test("automatically refreshes the token when its lifetime falls inside the refresh window", async () => {
         const csrfToken = await createCSRF(jose)
-
+        const sessionToken = await jose.encodeJWT(sessionPayload)
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -282,7 +307,7 @@ describe("tokensAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -293,6 +318,7 @@ describe("tokensAction", () => {
             tokens: {
                 ...oauthTokens,
                 accessToken: "brand-new-refreshed-token",
+                issuedAt: expect.any(Number),
                 expiresAt: expect.any(Number),
             },
         })

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
-import { api, jose, oauthCustomService, oauthTokens } from "@test/presets.ts"
+import { api, jose, oauthCustomService, oauthTokens, sessionPayload } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 
@@ -26,8 +26,28 @@ describe("getProviderTokens API", () => {
         })
     })
 
-    test("throws error when CSRF token is missing", async () => {
+    test("throws error when session token is missing", async () => {
         const output = await api.getProviderTokens("oauth-provider", { headers: new Headers() })
+        expect(output).toEqual({
+            success: false,
+            tokens: null,
+            error: {
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("throws error when CSRF token is missing", async () => {
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const output = await api.getProviderTokens("oauth-provider", {
+            headers: {
+                Cookie: `aura-auth.session_token=${sessionToken}`,
+            },
+        })
         expect(output).toEqual({
             success: false,
             tokens: null,
@@ -42,10 +62,11 @@ describe("getProviderTokens API", () => {
 
     test("throws error when CSRF token is invalid", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const output = await api.getProviderTokens("oauth-provider", {
             headers: new Headers({
-                Cookie: "aura-auth.csrf_token=invalid-token",
+                Cookie: `aura-auth.csrf_token=invalid-token; aura-auth.session_token=${sessionToken}`,
                 "X-CSRF-Token": "invalid-token",
             }),
         })
@@ -64,11 +85,12 @@ describe("getProviderTokens API", () => {
     test("throws error when provider token does not exist", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -86,13 +108,14 @@ describe("getProviderTokens API", () => {
     test("successfully gets provider tokens", async () => {
         vi.stubEnv("BASE_URL", "http://localhost:3000")
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
 
         const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output).toEqual({
@@ -106,6 +129,7 @@ describe("getProviderTokens API", () => {
     test("refreshToken config not provided", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const encodedTokens = await jose.encodeJWT({
             ...oauthTokens,
@@ -118,7 +142,7 @@ describe("getProviderTokens API", () => {
         const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output).toEqual({
@@ -137,6 +161,7 @@ describe("getProviderTokens API", () => {
     test("refreshToken successfully refreshes tokens", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const mockFetch = vi.fn()
 
@@ -155,7 +180,7 @@ describe("getProviderTokens API", () => {
         const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output).toEqual({
@@ -163,6 +188,7 @@ describe("getProviderTokens API", () => {
             tokens: {
                 ...oauthTokens,
                 expiresAt: expect.any(Number),
+                issuedAt: expect.any(Number),
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -184,6 +210,7 @@ describe("getProviderTokens API", () => {
     test("refreshToken fails when OAuth provider returns an error", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: false,
@@ -200,7 +227,7 @@ describe("getProviderTokens API", () => {
         const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -219,6 +246,7 @@ describe("getProviderTokens API", () => {
     test("refreshToken handles unexpected network exceptions gracefully", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const mockFetch = vi.fn().mockRejectedValueOnce(new Error("Network connection lost"))
         vi.stubGlobal("fetch", mockFetch)
@@ -231,7 +259,7 @@ describe("getProviderTokens API", () => {
         const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -250,7 +278,7 @@ describe("getProviderTokens API", () => {
     test("returns current tokens without refreshing when close to expiry but outside the refresh window", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
-
+        const sessionToken = await jose.encodeJWT(sessionPayload)
         const mockFetch = vi.fn()
         vi.stubGlobal("fetch", mockFetch)
 
@@ -264,7 +292,7 @@ describe("getProviderTokens API", () => {
         const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -283,6 +311,7 @@ describe("getProviderTokens API", () => {
     test("automatically refreshes the token when its lifetime falls inside the refresh window", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -304,7 +333,7 @@ describe("getProviderTokens API", () => {
         const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -314,6 +343,7 @@ describe("getProviderTokens API", () => {
                 ...oauthTokens,
                 accessToken: "brand-new-refreshed-token",
                 expiresAt: expect.any(Number),
+                issuedAt: expect.any(Number),
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
