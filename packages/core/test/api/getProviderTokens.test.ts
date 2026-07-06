@@ -1,7 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
-import { api, jose, oauthCustomService } from "@test/presets.ts"
+import { api, jose, oauthCustomService, oauthTokens } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-import type { OAuthTokenPayload } from "@/@types/session.ts"
 import { createAuth } from "@/createAuth.ts"
 
 beforeEach(() => {
@@ -11,16 +10,6 @@ beforeEach(() => {
 afterEach(() => {
     vi.unstubAllEnvs()
 })
-
-const oauthTokens: OAuthTokenPayload = {
-    accessToken: "access-token",
-    expiresAt: Math.floor(Date.now() / 1000) + 3600,
-    refreshToken: "refresh-token",
-    refreshTokenExpiresAt: Math.floor(Date.now() / 1000) + 7200,
-    issuedAt: Math.floor(Date.now() / 1000),
-    scopes: ["scope1", "scope2"],
-    tokenType: "Bearer",
-}
 
 describe("getProviderTokens API", () => {
     test("throws error when provider is missing", async () => {

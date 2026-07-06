@@ -12,6 +12,7 @@ import {
     csrfTokenAction,
     updateSessionAction,
     signUpAction,
+    tokensAction,
 } from "@/actions/index.ts"
 import type { ZodObject } from "zod"
 import type { EditableShape, Identities, SchemaTypes, UserShape } from "@/shared/identity.ts"
@@ -49,6 +50,7 @@ export const createAuthInstance = <Identity extends Identities, SignUpSchema ext
             csrfTokenAction,
             updateSessionAction(config.context.identity as SchemaRegistryContext),
             signUpAction<Identity, SignUpSchema>(config.context.signUp as SignUpConfig<Identity, SignUpSchema>),
+            tokensAction(config.context.oauth),
         ],
         config
     )
