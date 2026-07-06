@@ -121,16 +121,20 @@ export const getProviderTokens = async (
     } catch (error) {
         let code = "PROVIDER_TOKENS_ERROR"
         let message = "Failed to get provider tokens"
+        let statusCode = 400
         if (isAuraAuthError(error)) {
             message = error.userMessage
             code = error.code
+            statusCode = error.statusCode
         }
+
+        const headers = new Headers(secureApiHeaders)
         return {
             success: false,
             tokens: null,
             error: { code, message },
-            headers: new Headers(secureApiHeaders),
-            toResponse: () => Response.json({ success: false, tokens: null }, { status: 400 }),
+            headers,
+            toResponse: () => Response.json({ success: false, tokens: null }, { status: statusCode, headers }),
         }
     }
 }

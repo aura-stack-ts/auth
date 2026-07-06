@@ -18,6 +18,7 @@ import type {
     InferUser,
     InferSignUp,
     UserFrom,
+    GetProviderTokensReturn,
 } from "@/@types/index.ts"
 import { createAuth } from "@/createAuth.ts"
 import { z } from "zod/v4"
@@ -42,6 +43,7 @@ describe("Client Types", () => {
             updateSession: <Options extends UpdateSessionOptions<User>>(
                 options: Options
             ) => Promise<UpdateSessionReturn<Options, User>>
+            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -86,6 +88,7 @@ describe("Client Types", () => {
             updateSession: <Options extends UpdateSessionOptions<User>>(
                 options: Options
             ) => Promise<UpdateSessionReturn<Options, User>>
+            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -131,6 +134,7 @@ describe("Client Types", () => {
             updateSession: <Options extends UpdateSessionOptions<User>>(
                 options: Options
             ) => Promise<UpdateSessionReturn<Options, User>>
+            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -175,6 +179,7 @@ describe("Client Types", () => {
             updateSession: <Options extends UpdateSessionOptions<User>>(
                 options: Options
             ) => Promise<UpdateSessionReturn<Options, User>>
+            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -223,6 +228,7 @@ describe("Client Types", () => {
             updateSession: <Options extends UpdateSessionOptions<User>>(
                 options: Options
             ) => Promise<UpdateSessionReturn<Options, User>>
+            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -260,6 +266,7 @@ describe("Client Types", () => {
             updateSession: <Options extends UpdateSessionOptions<User>>(
                 options: Options
             ) => Promise<UpdateSessionReturn<Options, User>>
+            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -297,6 +304,7 @@ describe("Client Types", () => {
             updateSession: <Options extends UpdateSessionOptions<User>>(
                 options: Options
             ) => Promise<UpdateSessionReturn<Options, User>>
+            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -334,6 +342,7 @@ describe("Client Types", () => {
             updateSession: <Options extends UpdateSessionOptions<User>>(
                 options: Options
             ) => Promise<UpdateSessionReturn<Options, User>>
+            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -373,6 +382,7 @@ describe("Client Types", () => {
             updateSession: <Options extends UpdateSessionOptions<User>>(
                 options: Options
             ) => Promise<UpdateSessionReturn<Options, User>>
+            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })

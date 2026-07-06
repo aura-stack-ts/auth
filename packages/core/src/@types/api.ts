@@ -316,6 +316,8 @@ export type SignUpReturn<Options extends SignUpOptions> = Options extends { redi
 export interface GetProviderTokensAPIOptions
     extends Pick<APIOptionsWithRequest, "headers" | "request">, APIOptionsWithSkipCSRFCheck {}
 
-export type GetProviderTokensAPIReturn = AuthActionAPIReturn<
-    { success: true; tokens: OAuthTokenPayload } | { success: false; tokens: null }
->
+export type GetProviderTokensData = { success: true; tokens: OAuthTokenPayload } | { success: false; tokens: null }
+
+export type GetProviderTokensAPIReturn = AuthActionAPIReturn<GetProviderTokensData>
+
+export type GetProviderTokensReturn = GetProviderTokensData

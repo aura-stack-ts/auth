@@ -16,6 +16,7 @@ import type {
     SignInCredentialsOptions,
     SignUpOptions,
     SignUpReturn,
+    GetProviderTokensReturn,
 } from "@/@types/index.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 
@@ -261,6 +262,51 @@ export const createAuthClient = <
     }
 
     /**
+     * Fetches the OAuth tokens for a specified provider, if available.
+     *
+     * @param oauth The OAuth provider identifier (e.g., "google", "github").
+     * @returns An object containing the tokens if successful, or null if not available or an error occurs.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.getProviderTokens("google")
+     * // Expected:
+     * {
+     *   success: true,
+     *   tokens: {
+     *     accessToken: "access_token_value",
+     *     expiresAt: 1234567890,
+     *     refreshToken: "refresh_token_value",
+     *     refreshTokenExpiresAt: 1234567890,
+     *     scopes: ["scope1", "scope2"],
+     *     tokenType: "Bearer",
+     *   }
+     * }
+     */
+    const getProviderTokens = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<GetProviderTokensReturn> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
+
+            const response = await client.get("/providers/:oauth/tokens", {
+                params: {
+                    oauth,
+                },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json = await response.json()
+            return json
+        } catch (error) {
+            console.error("Error getting provider tokens:", error)
+            return { success: false, tokens: null } as unknown as GetProviderTokensReturn
+        }
+    }
+
+    /**
      * Signs out the current user, ending their session and optionally redirecting them to a specified URL.
      *
      * @param options Sign-out options, including redirect behavior and target URL after sign-out.
@@ -307,6 +353,7 @@ export const createAuthClient = <
         signInCredentials,
         signUp,
         updateSession,
+        getProviderTokens,
         signOut,
     }
 }
