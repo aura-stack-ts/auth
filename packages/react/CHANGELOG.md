@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added the `useProviderTokens()` hook for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. The hook communicates with the `GET /providers/:oauth/tokens` endpoint and exposes `getProviderTokens()` and `isPending` for managing token retrieval. [#214](https://github.com/aura-stack-ts/auth/pull/214)
+
 ---
 
 ## [0.2.1] - 2026-07-04
