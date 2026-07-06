@@ -101,6 +101,12 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
     }
 }
 
+export const getProviderTokens = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async (oauth: LiteralUnion<BuiltInOAuthProvider>) => {
+        return await api.getProviderTokens(oauth, { headers: await headers() })
+    }
+}
+
 export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async <Options extends SignOutAPIOptions>(options?: Partial<Options>): Promise<NextSignOutReturn<Options>> => {
         const out = await api.signOut({
@@ -184,6 +190,20 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * })
          */
         updateSession: updateSession<DefaultUser>(config),
+        /**
+         * Retrieves the OAuth provider tokens for the current session on the server-side. It allows access to the
+         * provider's access and refresh tokens, which can be used for making authenticated requests to the provider's API.
+         *
+         * @params options - Options for the API call, including headers to verify `session_token` cookie.
+         * @returns The object returned by the API call {@link GetProviderTokensAPIReturn}
+         * @example
+         * import { headers } from "next/headers"
+         *
+         * const response = await api.getProviderTokens("github", {
+         *   headers: await headers()
+         * })
+         */
+        getProviderTokens: getProviderTokens<DefaultUser>(config),
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for
          * server-side calls it only verifies and validates the CSRF Token, it also provides Double-Submit
