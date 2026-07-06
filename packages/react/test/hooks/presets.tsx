@@ -2,9 +2,15 @@ import { vi } from "vitest"
 import { AuthProvider } from "@/context.tsx"
 import type { AuthClientInstance, AuthProviderProps } from "@/@types/types.ts"
 import type { Session, User } from "@aura-stack/auth"
+import type { OAuthTokenPayload } from "@aura-stack/auth/types"
 
 export const mockUser = { id: "1", email: "test@example.com", name: "Test User" } as unknown as User
 export const mockSession = { user: mockUser, expires: new Date(Date.now() + 3600 * 1000).toISOString() } as Session
+export const providerTokens = {
+    accessToken: "access_token",
+    refreshToken: "refresh_token",
+    expiresAt: Date.now(),
+} as OAuthTokenPayload
 
 export const createMockClient = () =>
     ({
@@ -17,6 +23,7 @@ export const createMockClient = () =>
             redirectURL: "/dashboard",
         }),
         signUp: vi.fn().mockResolvedValue({ redirectURL: "/welcome" }),
+        getProviderTokens: vi.fn().mockResolvedValue(providerTokens),
     }) as Partial<AuthClientInstance> as AuthClientInstance
 
 export const wrapper = ({ children, client, initialSession, redirect }: AuthProviderProps) => (
