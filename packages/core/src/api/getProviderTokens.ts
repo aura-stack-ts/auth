@@ -4,7 +4,7 @@ import { fetchAsync } from "@/shared/fetch-async.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
-import { shouldRefresh, toUnionHeaders, verifyCSRFToken } from "@/shared/utils.ts"
+import { shouldRefresh, toUnionHeaders, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { OAuthTokenPayload } from "@/@types/session.ts"
@@ -68,6 +68,13 @@ export const getProviderTokens = async (
             throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
         }
         const headers = new Headers(headersInit ?? requestInit?.headers)
+        await verifySessionToken({
+            headers,
+            cookies,
+            jwt: ctx.jwtManager,
+            logger: ctx.logger,
+        })
+
         await verifyCSRFToken({
             headers,
             cookies,
