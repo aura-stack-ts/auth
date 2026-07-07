@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Re-exported `useProviderTokens()` from `@aura-stack/react`, making the hook available directly from this package. The hook exposes `getProviderTokens()` and `isPending` for retrieving provider `accessToken` and `refreshToken` values after a successful OAuth or OpenID Connect (OIDC) sign-in. [#214](https://github.com/aura-stack-ts/auth/pull/214)
 
+### Fixed
+
+- Fixed type inference for the `signUp.schema` configuration. Sign-up schema types are now inferred correctly throughout the authentication fl
+
 ---
 
 ## [0.2.1] - 2026-07-04

@@ -1,10 +1,12 @@
 import { createAuth as createAuthInstance } from "@aura-stack/react/server"
 import { toHandler } from "@/pages/handler"
 import type { AuthConfig } from "@aura-stack/react"
-import type { Identities } from "@aura-stack/react/identity"
+import type { Identities, SchemaTypes } from "@aura-stack/react/identity"
 
-export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>) => {
-    const auth = createAuthInstance<Identity>(config)
+export const createAuth = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    config: AuthConfig<Identity, SignUpSchema>
+) => {
+    const auth = createAuthInstance<Identity, SignUpSchema>(config)
 
     return {
         ...auth,

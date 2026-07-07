@@ -25,7 +25,10 @@ import { z } from "zod/v4"
 import { type } from "arktype"
 import * as valibot from "valibot"
 import * as typebox from "typebox"
-import { UserIdentity, UserIdentityArkType, UserIdentityTypeBox, UserIdentityValibot } from "@/shared/identity.ts"
+import { identitySchema as UserIdentity } from "@/identity/zod.ts"
+import { identitySchema as UserIdentityArkType } from "@/identity/arktype.ts"
+import { identitySchema as UserIdentityTypeBox } from "@/identity/typebox.ts"
+import { identitySchema as UserIdentityValibot } from "@/identity/valibot.ts"
 
 describe("Client Types", () => {
     test("createAuthClient returns the correct type", () => {

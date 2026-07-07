@@ -60,16 +60,30 @@ const resolvePackageName = (from) => {
     return from === "core" ? "auth" : from
 }
 
-try {
-    const outDir = resolve(process.cwd(), join(out, "oauth"))
+const copyFolder = async (dirName, outPath = dirName) => {
+    const outDir = resolve(process.cwd(), join(out, outPath))
     console.log("From:", resolve(process.cwd(), join("..", from)), "\nOut:", resolve(process.cwd(), out))
     await mkdir(outDir, { recursive: true })
-    for await (const file of glob(`../core/src/oauth/*.ts`)) {
+    for await (const file of glob(`../core/src/${dirName}/*.ts`)) {
         const oauthName = parse(file).name
         const outPath = resolve(outDir, `${oauthName}.ts`)
-        await writeFile(outPath, `export * from "@aura-stack/${resolvePackageName(from)}/oauth/${oauthName}"\n`, "utf-8")
+        await writeFile(outPath, `export * from "@aura-stack/${resolvePackageName(from)}/${dirName}/${oauthName}"\n`, "utf-8")
     }
-    console.log("\x1b[32mOAuth modules were exported successfully!\x1b[0m")
+    console.log(`\x1b[32m${dirName} modules were exported successfully!\x1b[0m`)
+}
+
+try {
+    //const outDir = resolve(process.cwd(), join(out, "oauth"))
+    //console.log("From:", resolve(process.cwd(), join("..", from)), "\nOut:", resolve(process.cwd(), out))
+    //await mkdir(outDir, { recursive: true })
+    //for await (const file of glob(`../core/src/oauth/*.ts`)) {
+    //    const oauthName = parse(file).name
+    //    const outPath = resolve(outDir, `${oauthName}.ts`)
+    //    await writeFile(outPath, `export * from "@aura-stack/${resolvePackageName(from)}/oauth/${oauthName}"\n`, "utf-8")
+    //}
+    //console.log("\x1b[32mOAuth modules were exported successfully!\x1b[0m")
+    copyFolder("oauth")
+    copyFolder("identity")
 
     if (core === true) {
         const outDirCore = resolve(process.cwd(), join(out, "_core"))

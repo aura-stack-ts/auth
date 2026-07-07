@@ -2,14 +2,15 @@ import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { type } from "arktype"
 import { IsObject, Type as Typebox } from "typebox"
-import { UserIdentity, type Identities, type SchemaTypes } from "@/shared/identity.ts"
+import { identitySchema } from "@/identity/zod.ts"
+import { OAuthTokenPayloadSchema } from "@/schemas.ts"
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createValidator } from "@aura-stack/router/validator"
 import type { IdentityConfig } from "@/@types/config.ts"
-import type { EditableToSchema, ReturnUpdateSessionShape } from "@/@types/utility.ts"
-import { OAuthTokenPayloadSchema } from "@/schemas.ts"
 import type { OAuthTokenPayload } from "@/@types/session.ts"
+import type { Identities, SchemaTypes } from "@/identity/index.ts"
+import type { EditableToSchema, ReturnUpdateSessionShape } from "@/@types/utility.ts"
 
 export const deriveSchema = <Schema extends SchemaTypes>(
     schema: Schema,
@@ -162,9 +163,9 @@ export const getFullSchema = <Identity extends Identities, Schema = EditableToSc
 }
 
 export const createSchemaRegistry = <Identity extends SchemaTypes>(config: IdentityConfig<Identity>) => {
-    const schema = deriveSchema(config.schema ?? UserIdentity, config.unknownKeys)
-    const schemaAsPartial = deriveSchema(config.schema ?? UserIdentity, "partial")
-    const schemaWithJWT = deriveSchemaWithJWT(config.schema ?? UserIdentity)
+    const schema = deriveSchema(config.schema ?? identitySchema, config.unknownKeys)
+    const schemaAsPartial = deriveSchema(config.schema ?? identitySchema, "partial")
+    const schemaWithJWT = deriveSchemaWithJWT(config.schema ?? identitySchema)
     const oauthTokens = deriveSchema(OAuthTokenPayloadSchema)
 
     const validator = createValidator(schema)

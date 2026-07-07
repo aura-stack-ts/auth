@@ -22,7 +22,7 @@ import type {
     GetProviderTokensAPIReturn,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
-import type { SchemaTypes } from "@/shared/identity.ts"
+import type { SchemaTypes } from "@/identity/index.ts"
 
 type InferSignUp<T> = Wrap<RemoveIndexSignature<InferSchema<T>>>
 

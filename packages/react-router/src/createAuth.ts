@@ -2,10 +2,12 @@ import { createAuth as createAuthInstance } from "@aura-stack/react/server"
 import { api } from "@/lib/api"
 import type { AuthConfig } from "@aura-stack/react"
 import type { ReactRouterInstance } from "@/@types/index"
-import type { FromShapeToObject, Identities } from "@aura-stack/react/identity"
+import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/react/identity"
 
-export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>): ReactRouterInstance<Identity> => {
-    const auth = createAuthInstance<Identity>(config)
+export const createAuth = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    config: AuthConfig<Identity, SignUpSchema>
+): ReactRouterInstance<Identity> => {
+    const auth = createAuthInstance<Identity, SignUpSchema>(config)
     return {
         /**
          * The core auth instance. It can be used to advanced use cases, such as creating custom behaviors.

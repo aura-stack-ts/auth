@@ -8,7 +8,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.tsx",
-    "./identity": "./src/_core/identity.ts",
+    "./identity": "./src/identity/index.ts",
+    "./identity/zod": "./src/identity/zod.ts",
+    "./identity/valibot": "./src/identity/valibot.ts",
+    "./identity/arktype": "./src/identity/arktype.ts",
+    "./identity/typebox": "./src/identity/typebox.ts",
     "./crypto": "./src/_core/crypto.ts",
     "./shared": "./src/_core/shared.ts",
     "./cookies": "./src/_core/cookies.ts",

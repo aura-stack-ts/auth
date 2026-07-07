@@ -3,13 +3,11 @@ import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"
 import { z, ZodOptional, ZodString } from "zod/v4"
 import { Type as Typebox } from "typebox"
-import {
-    UserIdentity,
-    UserIdentityArkType,
-    UserIdentityTypeBox,
-    UserIdentityValibot,
-    type UserShapeValibot,
-} from "@/shared/identity.ts"
+import { identitySchema as UserIdentity } from "@/identity/zod.ts"
+import { identitySchema as UserIdentityArkType } from "@/identity/arktype.ts"
+import { identitySchema as UserIdentityTypeBox } from "@/identity/typebox.ts"
+import { identitySchema as UserIdentityValibot, type IdentityShape as UserShapeValibot } from "@/identity/valibot.ts"
+
 import { github, type GitHubProfile } from "@/oauth/github.ts"
 import type {
     GetSessionAPIOptions,

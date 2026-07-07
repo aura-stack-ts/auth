@@ -1,14 +1,15 @@
+import { identitySchema } from "@/identity/zod.ts"
 import type { JWK } from "@aura-stack/jose/jose"
 import type { infer as Infer } from "zod/v4/core"
 import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { Identities, UserIdentity } from "@/shared/identity.ts"
+import type { Identities } from "@/identity/index.ts"
 import type { DeepPartial, FromShapeToObject, Prettify } from "@/@types/utility.ts"
 import type { CookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
-export type User = Infer<typeof UserIdentity>
+export type User = Infer<typeof identitySchema>
 
-export type { UserShape } from "@/shared/identity.ts"
+export type { UserShape } from "@/identity/index.ts"
 
 /**
  * Session data returned by the session endpoint.

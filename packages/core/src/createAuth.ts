@@ -15,8 +15,16 @@ import {
     tokensAction,
 } from "@/actions/index.ts"
 import type { ZodObject } from "zod"
-import type { EditableShape, Identities, SchemaTypes, UserShape } from "@/shared/identity.ts"
-import type { AuthConfig, AuthInstance, FromShapeToObject, SchemaRegistryContext, SignUpConfig } from "@/@types/index.ts"
+import type { Identities, SchemaTypes } from "@/identity/index.ts"
+import type {
+    AuthConfig,
+    AuthInstance,
+    FromShapeToObject,
+    SchemaRegistryContext,
+    SignUpConfig,
+    EditableShape,
+    ZodIdentitySchema,
+} from "@/@types/index.ts"
 
 const createInternalConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>
@@ -86,7 +94,7 @@ export const createAuthInstance = <Identity extends Identities, SignUpSchema ext
  * })
  */
 export const createAuth = <
-    Identity extends Identities = EditableShape<UserShape>,
+    Identity extends Identities = EditableShape<ZodIdentitySchema>,
     SignUpSchema extends SchemaTypes = ZodObject<any>,
 >(
     config: AuthConfig<Identity, SignUpSchema>
