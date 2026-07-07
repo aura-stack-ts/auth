@@ -3,7 +3,7 @@ import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose, sessionPayload } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-import { UserIdentity } from "@/shared/identity.ts"
+import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 import { getSetCookie } from "@/cookie.ts"
 
 beforeEach(() => {

@@ -45,9 +45,14 @@
       "require": "./dist/oauth/*.cjs"
     },
     "./identity": {
-      "types": "./dist/_core/identity.d.ts",
-      "import": "./dist/_core/identity.js",
-      "require": "./dist/_core/identity.cjs"
+      "types": "./dist/identity/index.d.ts",
+      "import": "./dist/identity/index.js",
+      "require": "./dist/identity/index.cjs"
+    },
+    "./identity/*": {
+      "types": "./dist/identity/*.d.ts",
+      "import": "./dist/identity/*.js",
+      "require": "./dist/identity/*.cjs"
     },
     "./crypto": {
       "types": "./dist/_core/crypto.d.ts",

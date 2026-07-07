@@ -1,6 +1,8 @@
 import { Object, String, Optional, Union, Null } from "typebox"
-import type { Identities } from "@/shared/identity/index.ts"
+import type { Identities } from "@/identity/index.ts"
 import type { EditableShapeTypebox } from "@/@types/utility.ts"
+
+export * as typebox from "typebox"
 
 export const identitySchema = Object({
     sub: String(),

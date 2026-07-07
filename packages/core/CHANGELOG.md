@@ -10,11 +10,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added dedicated identity schema entry points under `/identity/:schema` (`zod`, `arktype`, `valibot`, and `typebox`). Each entry point exports the `identitySchema` validation schema, the `IdentityShape` type, the `isIdentity` type guard, and re-exports the corresponding schema library. [#216](https://github.com/aura-stack-ts/auth/pull/216)
+
 - Added the `/providers/:oauth/tokens` endpoint for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. This endpoint is intended for client-side integrations. To retrieve refresh tokens, the provider must be configured with the `refreshToken` option. [#213](https://github.com/aura-stack-ts/auth/pull/213)
 
 - Added the `getProviderTokens()` client API to `createAuthClient()`, providing a client-side interface for the `/providers/:oauth/tokens` endpoint. [#213](https://github.com/aura-stack-ts/auth/pull/213)
 
 - Added the experimental `getProviderTokens()` API for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. To enable refresh token retrieval, the provider must be configured with the `refreshToken` option. [#212](https://github.com/aura-stack-ts/auth/pull/212)
+
+### BREAKING CHANGES
+
+- Reorganized identity schemas, types, and type guards into dedicated `/identity/:schema` entry points. As part of this change, schema-specific prefixes and suffixes (such as `Zod`) have been removed to provide a consistent API across all supported schema libraries. [#216](https://github.com/aura-stack-ts/auth/pull/216)
+  - Renamed `UserIdentity` to `identitySchema` and moved it to `/identity/:schema`.
+  - Renamed `UserShape` to `IdentityShape` and moved it to `/identity/:schema`.
+  - Moved `ShapeToObject` to the `/types` entry point.
+  - Moved type guards to their respective `/identity/:schema` entry points.
 
 ---
 

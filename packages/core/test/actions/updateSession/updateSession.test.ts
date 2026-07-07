@@ -1,7 +1,8 @@
 import { getSetCookie } from "@/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-import { UserIdentityArkType, UserIdentityValibot } from "@/shared/identity.ts"
+import { identitySchema as UserIdentityArkType } from "@/identity/arktype.ts"
+import { identitySchema as UserIdentityValibot } from "@/identity/valibot.ts"
 import { jose, PATCH, sessionPayload } from "@test/presets.ts"
 import { describe, test, expect, vi } from "vitest"
 

@@ -15,7 +15,7 @@ import {
     tokensAction,
 } from "@/actions/index.ts"
 import type { ZodObject } from "zod"
-import type { Identities, SchemaTypes } from "@/shared/identity/index.ts"
+import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type {
     AuthConfig,
     AuthInstance,

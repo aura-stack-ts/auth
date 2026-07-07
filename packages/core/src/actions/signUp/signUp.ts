@@ -2,7 +2,7 @@ import { signUp } from "@/api/signUp.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { RedirectOptionsSchema } from "@/schemas.ts"
 import type { SignUpConfig } from "@/@types/config.ts"
-import type { Identities, SchemaTypes } from "@/shared/identity/index.ts"
+import type { Identities, SchemaTypes } from "@/identity/index.ts"
 
 const signUpConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config: SignUpConfig<Identity, SignUpSchema>

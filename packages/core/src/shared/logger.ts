@@ -1,5 +1,5 @@
 import { getEnv, getEnvBoolean } from "@/shared/env.ts"
-import type { Identities, SchemaTypes } from "@/shared/identity/index.ts"
+import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { AuthConfig, InternalLogger, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"
 
 /**

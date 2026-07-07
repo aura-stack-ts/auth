@@ -18,11 +18,11 @@ export type * from "@/@types/api.ts"
 
 export type { TypedJWTPayload } from "@aura-stack/jose"
 
-export type { UserShape } from "@/shared/identity/index.ts"
-export type { IdentityShape as ZodIdentitySchema } from "@/shared/identity/zod.ts"
-export type { IdentityShape as ArkTypeIdentitySchema } from "@/shared/identity/arktype.ts"
-export type { IdentityShape as TypeboxIdentitySchema } from "@/shared/identity/typebox.ts"
-export type { IdentityShape as ValibotIdentitySchema } from "@/shared/identity/valibot.ts"
+export type { UserShape } from "@/identity/index.ts"
+export type { IdentityShape as ZodIdentitySchema } from "@/identity/zod.ts"
+export type { IdentityShape as ArkTypeIdentitySchema } from "@/identity/arktype.ts"
+export type { IdentityShape as TypeboxIdentitySchema } from "@/identity/typebox.ts"
+export type { IdentityShape as ValibotIdentitySchema } from "@/identity/valibot.ts"
 
 /**
  * Standard JWT claims that are managed internally by the token system.

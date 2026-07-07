@@ -58,14 +58,14 @@
       "require": "./dist/client/index.cjs"
     },
     "./identity": {
-      "types": "./dist/shared/identity/index.d.ts",
-      "import": "./dist/shared/identity/index.js",
-      "require": "./dist/shared/identity/index.cjs"
+      "types": "./dist/identity/index.d.ts",
+      "import": "./dist/identity/index.js",
+      "require": "./dist/identity/index.cjs"
     },
     "./identity/*": {
-      "types": "./dist/shared/identity/*.d.ts",
-      "import": "./dist/shared/identity/*.js",
-      "require": "./dist/shared/identity/*.cjs"
+      "types": "./dist/identity/*.d.ts",
+      "import": "./dist/identity/*.js",
+      "require": "./dist/identity/*.cjs"
     },
     "./crypto": {
       "types": "./dist/shared/crypto.d.ts",

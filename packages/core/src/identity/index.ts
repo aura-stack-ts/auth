@@ -3,10 +3,10 @@ import * as valibot from "valibot"
 import { type Type } from "arktype"
 import { Type as Typebox } from "typebox"
 import { isArkType, isTypeboxEntries, isValibotEntries, isZodEntries } from "@/shared/assert.ts"
-import type { IdentityShape, IdentityShape as ZodShape } from "@/shared/identity/zod.ts"
-import type { IdentityShape as ArkTypeShape } from "@/shared/identity/arktype.ts"
-import type { IdentityShape as TypeboxShape } from "@/shared/identity/typebox.ts"
-import type { IdentityShape as ValibotShape } from "@/shared/identity/valibot.ts"
+import type { IdentityShape as ZodShape } from "@/identity/zod.ts"
+import type { IdentityShape as ArkTypeShape } from "@/identity/arktype.ts"
+import type { IdentityShape as TypeboxShape } from "@/identity/typebox.ts"
+import type { IdentityShape as ValibotShape } from "@/identity/valibot.ts"
 import type {
     EditableShape,
     EditableShapeArkType,
@@ -25,7 +25,7 @@ export type { InferUser, InferSession, UserFrom, SessionFrom, EditableToSchema, 
 /**
  * @deprecated Use `IdentityShape` from `@/shared/identity/zod.ts` instead.
  */
-export type UserShape = IdentityShape
+export type UserShape = ZodShape
 
 export type Identities =
     | EditableShape<ZodShape>
