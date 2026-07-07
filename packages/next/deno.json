@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/next",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
@@ -47,7 +47,7 @@
     "@aura-stack/react": "npm:@aura-stack/react@^0.2.1"
   },
   "publish": {
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/_core", "src/oauth", "README.md", "CHANGELOG.md"]
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/_core", "src/oauth", "src/identity", "README.md", "CHANGELOG.md"]
   },
   "exclude": ["dist", "node_modules"]
 }

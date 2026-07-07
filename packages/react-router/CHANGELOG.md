@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.2.2] - 2026-07-04
+
 ### Added
 
 - Added the `api.getProviderTokens()` API to retrieve provider `accessToken` and `refreshToken` values after a successful OAuth or OpenID Connect (OIDC) sign-in. [#215](https://github.com/aura-stack-ts/auth/pull/215)
@@ -16,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- Fixed type inference for the `signUp.schema` configuration. Sign-up schema types are now inferred correctly throughout the authentication fl
+- Fixed type inference for the `signUp.schema` configuration. Sign-up schema types are now inferred correctly throughout the authentication flow. [#216](https://github.com/aura-stack-ts/auth/pull/216)
 
 ---
 

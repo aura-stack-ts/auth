@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/hono",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": false,
   "type": "module",
   "description": "Authentication integration for Hono applications. Provides middleware, route handlers and session verification powered by Aura Auth.",
