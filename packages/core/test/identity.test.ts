@@ -1,13 +1,10 @@
 import { describe, test, expect, expectTypeOf, vi, afterEach } from "vitest"
-import {
-    createIdentity,
-    UserIdentity,
-    UserIdentityArkType,
-    UserIdentityTypeBox,
-    UserIdentityValibot,
-    type InferUser,
-    type UserFrom,
-} from "@/shared/identity.ts"
+import { UserIdentity, UserIdentityArkType, UserIdentityTypeBox, UserIdentityValibot } from "@/shared/identity.ts"
+import { createIdentity, type InferUser, type UserFrom } from "@/shared/identity/index.ts"
+//import { identitySchema as UserIdentity } from "@/shared/identity/zod.ts"
+//import { identitySchema as UserIdentityArkType } from "@/shared/identity/arktype.ts"
+//import { identitySchema as UserIdentityTypeBox } from "@/shared/identity/valibot.ts"
+//import { identitySchema as UserIdentityValibot } from "@/shared/identity/typebox.ts"
 import { z } from "zod/v4"
 import * as valibot from "valibot"
 import { createAuth } from "@/createAuth.ts"

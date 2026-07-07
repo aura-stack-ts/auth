@@ -4,7 +4,7 @@ import { equals, extractPath, patternToRegex } from "@/shared/utils.ts"
 import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin } from "@/shared/assert.ts"
 import type { AuthConfig } from "@/@types/index.ts"
 import type { GlobalContext } from "@aura-stack/router"
-import type { Identities, SchemaTypes } from "@/shared/identity.ts"
+import type { Identities, SchemaTypes } from "@/shared/identity/index.ts"
 
 /**
  * Resolves trusted origins from config (array or function).

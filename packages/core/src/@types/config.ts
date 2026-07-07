@@ -2,14 +2,15 @@ import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
-import { UserIdentity, type Identities, type SchemaTypes } from "@/shared/identity.ts"
+import { identitySchema } from "@/shared/identity/zod.ts"
 import type { ZodObject } from "zod"
 import type { InferSchema } from "@aura-stack/router"
+import type { OpenIDProvider } from "@/@types/oidc.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
+import type { Identities, SchemaTypes } from "@/shared/identity/index.ts"
 import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
 import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
-import type { OpenIDProvider } from "@/@types/oidc.ts"
 import type { InferRules, RateLimiterRule } from "@aura-stack/rate-limiter/types"
 import type { JWTKey, JWTManager, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
 import type { RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter"
@@ -380,7 +381,7 @@ export interface InternalLogger {
  * Identity validation settings used when building session strategy and OAuth profile mapping.
  * Controls the Zod schema and how unknown keys are handled on user objects.
  */
-export interface IdentityConfig<Schema extends SchemaTypes = typeof UserIdentity> {
+export interface IdentityConfig<Schema extends SchemaTypes = typeof identitySchema> {
     schema?: Schema
     schemaAsPartial?: Schema
     skipValidation?: boolean

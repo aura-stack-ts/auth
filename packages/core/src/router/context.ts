@@ -8,7 +8,7 @@ import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import { createRateLimiterInstance } from "@/router/rate-limiter.ts"
-import type { Identities, SchemaTypes } from "@/shared/identity.ts"
+import type { Identities, SchemaTypes } from "@/shared/identity/index.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
 
 export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(

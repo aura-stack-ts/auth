@@ -58,8 +58,8 @@ export type UserShapeValibot = typeof UserIdentityValibot.entries
 export type UserShapeArkType = typeof UserIdentityArkType
 export type UserShapeTypeBox = typeof UserIdentityTypeBox.properties
 
-export type IsArkType<T extends Identities> = T extends EditableShapeArkType<UserShapeArkType> ? true : false
 export type IsZod<T extends Identities> = T extends EditableShape<UserShape> ? true : false
+export type IsArkType<T extends Identities> = T extends EditableShapeArkType<UserShapeArkType> ? true : false
 export type IsValibot<T extends Identities> = T extends EditableShapeValibot<UserShapeValibot> ? true : false
 
 export type SchemaTypes = ZodObject<any> | valibot.ObjectSchema<any, undefined> | Type<{}> | Typebox.TObject

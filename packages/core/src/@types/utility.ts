@@ -3,7 +3,11 @@ import type { TProperties, TObject, TSchema } from "typebox"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
 import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer, ZodOptional } from "zod/v4"
-import type { Identities, IsArkType, IsZod, SchemaTypes, UserShapeTypeBox, UserShapeValibot } from "@/shared/identity.ts"
+import type { IdentityShape as TypeboxIdentitySchema } from "@/shared/identity/typebox.ts"
+import type { IdentityShape as ValibotIdentitySchema } from "@/shared/identity/valibot.ts"
+import type { Identities, SchemaTypes } from "@/shared/identity/index.ts"
+import type { IsZod } from "@/shared/identity/zod.ts"
+import type { IsArkType } from "@/shared/identity/arktype.ts"
 import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
 import type { InferSchema } from "@aura-stack/router"
 
@@ -15,6 +19,9 @@ export type Prettify<T> = { [K in keyof T]: T[K] }
  * Useful for autocomplete on known keys while still allowing custom values.
  */
 export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>)
+
+/** Merges type `B` over `A`, replacing overlapping keys with `B`. */
+export type Merge<A, B> = Omit<A, keyof B> & B
 
 /**
  * Transforms a Zod raw shape so nested `ZodObject` fields become editable (same structure, for config authoring).
@@ -44,13 +51,19 @@ export type EditableUser = {
 export type ConfigSchema<T extends Identities> =
     IsZod<T> extends true
         ? ZodObject<T & ZodRawShape>
-        : T extends EditableShapeValibot<UserShapeValibot>
+        : T extends EditableShapeValibot<ValibotIdentitySchema>
           ? ObjectSchema<T & ObjectEntries, undefined>
           : IsArkType<T> extends true
             ? T
-            : T extends EditableShapeTypebox<UserShapeTypeBox>
+            : T extends EditableShapeTypebox<TypeboxIdentitySchema>
               ? TObject<T & TProperties>
               : never
+
+/**
+ * Infers the runtime object type from a Zod `shape` and intersects it with {@link User}
+ * so identity fields always include the base user contract.
+ */
+export type ZodShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<Infer<ZodObject<S>>, User>
 
 export type ValibotShapeToObject<S extends ObjectEntries> = Merge<InferOutput<ObjectSchema<S, undefined>>, User>
 
@@ -59,15 +72,6 @@ export type ArktypeShapeToObject<S extends Type> = S extends Type<infer Shape> ?
 export type TypeboxShapeToObject<S> = Wrap<Merge<S, User>>
 
 export type EditableShapeArkType<T extends Type> = T extends Type<infer Shape> ? Type<{ [K in keyof Shape]: any }> : never
-
-/** Merges type `B` over `A`, replacing overlapping keys with `B`. */
-export type Merge<A, B> = Omit<A, keyof B> & B
-
-/**
- * Infers the runtime object type from a Zod `shape` and intersects it with {@link User}
- * so identity fields always include the base user contract.
- */
-export type ZodShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<Infer<ZodObject<S>>, User>
 
 export type FromShapeToObject<S> = S extends ZodRawShape
     ? ZodShapeToObject<S>
