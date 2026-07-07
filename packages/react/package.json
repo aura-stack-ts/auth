@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/react",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": false,
   "type": "module",
   "description": "React authentication utilities including providers, hooks and OAuth flows for client-side and hybrid applications powered by Aura Auth.",

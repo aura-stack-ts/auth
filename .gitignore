@@ -192,6 +192,9 @@ worker-configuration.d.ts
 # Packages
 packages/**/_core
 packages/**/oauth
+packages/**/identity
 
 !packages/core/src/oauth/
 !packages/core/src/oauth/**
+!packages/core/src/identity/
+!packages/core/src/identity/**
