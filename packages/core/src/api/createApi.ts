@@ -1,4 +1,13 @@
-import { getSession, signIn, signInCredentials, signOut, updateSession, signUp, getProviderTokens } from "@/api/index.ts"
+import {
+    getSession,
+    signIn,
+    signInCredentials,
+    signOut,
+    updateSession,
+    signUp,
+    getProviderTokens,
+    getAccessToken,
+} from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
     BuiltInOAuthProvider,
@@ -20,6 +29,8 @@ import type {
     RemoveIndexSignature,
     GetProviderTokensAPIOptions,
     GetProviderTokensAPIReturn,
+    AccessTokenAPIOptions,
+    AccessTokenAPIReturn,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -123,11 +134,48 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
         updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
             return updateSession<DefaultUser>({ ctx, ...options, skipCSRFCheck: true })
         },
+        /**
+         * Retrieves the access token for a specific OAuth provider on the server-side.
+         * It implements CSRF Protection by default, for server-side calls it only verifies and validates the CSRF Token,
+         * it also provides Double-Submit Cookie protection by requiring the `session_token` cookie to be included in
+         * the request headers.
+         *
+         * @params oauth - The OAuth provider for which to retrieve the access token (e.g., "github", "gitlab", "bitbucket").
+         * @params options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, tokens } = await api.getProviderTokens("github", {
+         *    headers: getHeaders()
+         * })
+         *
+         * const { accessToken, refreshToken } = tokens
+         */
         getProviderTokens: async (
             oauth: LiteralUnion<BuiltInOAuthProvider>,
             options?: GetProviderTokensAPIOptions
         ): Promise<GetProviderTokensAPIReturn> => {
             return getProviderTokens(oauth, { ctx, ...options, skipCSRFCheck: true })
+        },
+        /**
+         * Retrieves the access token for a specific OAuth provider on the server-side.
+         * It implements CSRF Protection by default, for server-side calls it only verifies and validates the CSRF Token,
+         * it also provides Double-Submit Cookie protection by requiring the `session_token` cookie to be included in
+         * the request headers.
+         *
+         * > **NOTE**: This method is based on `getProviderTokens` and it's recommended for simple use cases where only the
+         * access token is needed. For more advanced scenarios, consider using `getProviderTokens` directly.
+         *
+         * @params oauth - The OAuth provider for which to retrieve the access token (e.g., "github", "gitlab", "bitbucket").
+         * @params options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, accessToken } = await api.getAccessToken("github", {
+         *    headers: getHeaders()
+         * })
+         */
+        getAccessToken: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: AccessTokenAPIOptions
+        ): Promise<AccessTokenAPIReturn> => {
+            return getAccessToken(oauth, { ctx, ...options, skipCSRFCheck: true })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

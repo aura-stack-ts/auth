@@ -307,6 +307,26 @@ export const createAuthClient = <
     }
 
     /**
+     * Retrieves the access token for a specific OAuth provider, if available.
+     *
+     * > **NOTE**: This method is based on `getProviderTokens` and it's recommended for simple use cases where only the
+     * access token is needed. For more advanced scenarios, consider using `getProviderTokens` directly.
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @returns the access token string if available, or null if not available or on error.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const accessToken = await authClient.getAccessToken("google")
+     * // Expected:
+     * "access_token_value" or null
+     */
+    const getAccessToken = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<string | null> => {
+        const { success, tokens } = await getProviderTokens(oauth)
+        return success && tokens ? tokens.accessToken : null
+    }
+
+    /**
      * Signs out the current user, ending their session and optionally redirecting them to a specified URL.
      *
      * @param options Sign-out options, including redirect behavior and target URL after sign-out.
@@ -354,6 +374,7 @@ export const createAuthClient = <
         signUp,
         updateSession,
         getProviderTokens,
+        getAccessToken,
         signOut,
     }
 }

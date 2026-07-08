@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `getAccessToken()` client API to `createAuthClient()`. The API provides a client-side interface for retrieving the provider access token through the `GET /providers/:provider/tokens` endpoint. It is a convenience wrapper around `getProviderTokens()`. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
+- Added the experimental `getAccessToken()` API for retrieving the provider `accessToken` after a successful OAuth or OpenID Connect (OIDC) sign-in. This API is a simplified alternative to `getProviderTokens()` when only the access token is required. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
 - Added dedicated identity schema entry points under `/identity/:schema` (`zod`, `arktype`, `valibot`, and `typebox`). Each entry point exports the `identitySchema` validation schema, the `IdentityShape` type, the `isIdentity` type guard, and re-exports the corresponding schema library. [#216](https://github.com/aura-stack-ts/auth/pull/216)
 
 - Added the `/providers/:oauth/tokens` endpoint for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. This endpoint is intended for client-side integrations. To retrieve refresh tokens, the provider must be configured with the `refreshToken` option. [#213](https://github.com/aura-stack-ts/auth/pull/213)
