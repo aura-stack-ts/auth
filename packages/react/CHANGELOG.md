@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added the `useAccessToken()` hook, a simplified React API for retrieving the provider `accessToken` as a `string | null` after a successful OAuth or OpenID Connect (OIDC) sign-in. The hook exposes `getAccessToken()` and `isPending`, and internally communicates with the `GET /providers/:provider/tokens` endpoint. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
 ---
 
 ## [0.2.2] - 2026-07-07

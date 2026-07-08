@@ -17,6 +17,8 @@ import type {
     User,
     Session,
     GetProviderTokensAPIReturn,
+    AccessTokenAPIOptions,
+    AccessTokenAPIReturn,
 } from "@aura-stack/react/types"
 import type { BuiltInOAuthProvider, LiteralUnion } from "@aura-stack/react/types"
 
@@ -89,5 +91,6 @@ export interface ReactRouterAPI<DefaultUser extends User = User> {
         options: Options
     ) => Promise<ReactRouterUpdateSessionReturn<Options, DefaultUser>>
     getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensAPIReturn>
+    getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: AccessTokenAPIOptions) => Promise<AccessTokenAPIReturn>
     signOut: <Options extends ReactRouterSignOutAPIOptions>(options: Options) => Promise<ReactRouterSignOutReturn<Options>>
 }

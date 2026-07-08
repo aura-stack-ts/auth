@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added the `api.getAccessToken()` API with built-in support for automatically forwarding request headers via the `headers()` function from `next/headers`, simplifying server-side access to the provider `accessToken`. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
+- Re-exported the `useAccessToken()` hook from `@aura-stack/react`, making it available directly from this package. The hook exposes `getAccessToken()` and `isPending` for retrieving the provider `accessToken` after a successful OAuth or OpenID Connect (OIDC) sign-in. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
 ---
 
 ## [0.2.2] - 2026-07-07

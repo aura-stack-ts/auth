@@ -10,6 +10,7 @@ export {
     useUpdateSession,
     useSignUp,
     useProviderTokens,
+    useAccessToken,
     type AuthClientOptions,
     type AuthProviderProps,
 } from "@aura-stack/react"

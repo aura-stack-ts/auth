@@ -305,19 +305,49 @@ export type SignUpReturnData =
 /** Programmatic sign-up result with redirect metadata and `toResponse()`. */
 export type SignUpAPIReturn = AuthActionAPIReturn<SignUpReturnData>
 
+/**
+ * Client-side `signUp` options: payload plus optional redirect behavior.
+ */
 export type SignUpOptions<SignUpSchema extends Record<string, any> = Record<string, any>> = OptionsWithRedirectTo & {
     payload: SignUpSchema
 }
 
+/**
+ * Client-side `signUp` return type.
+ *
+ * - Redirect mode (`redirect: true`): returns `void` because navigation is handled by the client.
+ * - Manual mode (`redirect: false`): returns `redirectURL` for caller-controlled navigation.
+ */
 export type SignUpReturn<Options extends SignUpOptions> = Options extends { redirect: false }
     ? Extract<SignUpReturnData, { redirect: false }>
     : void
 
+/**
+ * Programmatic options for `getProviderTokens` API.
+ */
 export interface GetProviderTokensAPIOptions
     extends Pick<APIOptionsWithRequest, "headers" | "request">, APIOptionsWithSkipCSRFCheck {}
 
 export type GetProviderTokensData = { success: true; tokens: OAuthTokenPayload } | { success: false; tokens: null }
 
+/**
+ * Programmatic result for `getProviderTokens` API with response metadata and `toResponse()`.
+ */
 export type GetProviderTokensAPIReturn = AuthActionAPIReturn<GetProviderTokensData>
 
+/**
+ * Client-side `getProviderTokens` return type.
+ */
 export type GetProviderTokensReturn = GetProviderTokensData
+
+/**
+ * Programmatic options for `getAccessToken` API.
+ */
+export type AccessTokenAPIOptions = GetProviderTokensAPIOptions
+
+export type AccessTokenData = { success: true; accessToken: string } | { success: false; accessToken: null }
+
+/**
+ * Programmatic result for `getAccessToken` API with response metadata and `toResponse()`.
+ */
+export type AccessTokenAPIReturn = AuthActionAPIReturn<AccessTokenData>
