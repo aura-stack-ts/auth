@@ -11,6 +11,8 @@ import type {
 } from "@/@types/api"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type {
+    AccessTokenAPIOptions,
+    AccessTokenAPIReturn,
     BuiltInOAuthProvider,
     GetProviderTokensAPIOptions,
     GetProviderTokensAPIReturn,
@@ -79,6 +81,12 @@ export const getProviderTokens = <DefaultUser extends User = User>({ api }: Auth
         options?: GetProviderTokensAPIOptions
     ): Promise<GetProviderTokensAPIReturn> => {
         return await api.getProviderTokens(oauth, options)
+    }
+}
+
+export const getAccessToken = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: AccessTokenAPIOptions): Promise<AccessTokenAPIReturn> => {
+        return await api.getAccessToken(oauth, options)
     }
 }
 
@@ -193,6 +201,28 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          *
          */
         getProviderTokens: getProviderTokens<DefaultUser>(config),
+        /**
+         * Retrieves the access token for a specific OAuth provider on the server-side.
+         * It implements CSRF Protection by default, for server-side calls it only verifies and validates the CSRF Token,
+         * it also provides Double-Submit Cookie protection by requiring the `session_token` cookie to be included in
+         * the request headers.
+         *
+         * > **NOTE**: This method is based on `getProviderTokens` and it's recommended for simple use cases where only the
+         * access token is needed. For more advanced scenarios, consider using `getProviderTokens` directly.
+         *
+         * @params oauth - The OAuth provider for which to retrieve the access token (e.g., "github", "gitlab", "bitbucket").
+         * @params options - Options for the API call, including headers and request object.
+         * @example
+         * export const loader = async ({ request }) => {
+         *   const { accessToken } = await api.getAccessToken("github", {
+         *     request,
+         *     headers: request.headers
+         *   })
+         *
+         *   // Use the access token to make authenticated requests to the provider's API
+         * }
+         */
+        getAccessToken: getAccessToken<DefaultUser>(config),
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for
          * server-side calls it only verifies and validates the CSRF Token, it also provides Double-Submit
