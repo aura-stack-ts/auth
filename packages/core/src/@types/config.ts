@@ -525,6 +525,9 @@ export interface SignUpConfig<Identity extends Identities, SignUpSchema extends 
 
 export type RateLimiterConfig = Partial<
     RaterLimiterBaseConfig<
-        Record<"signIn" | "signInCredentials" | "updateSession" | "signUp" | "getProviderTokens", RateLimiterRule>
+        Record<
+            "signIn" | "signInCredentials" | "updateSession" | "signUp" | "getProviderTokens" | "refreshUserInfo",
+            RateLimiterRule
+        >
     >["rules"]
 >

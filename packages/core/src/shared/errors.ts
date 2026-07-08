@@ -112,6 +112,13 @@ export const AuraErrorCode = {
     OIDC_JWKS_INVALID_RESPONSE: "OIDC_JWKS_INVALID_RESPONSE",
     OIDC_JWKS_INVALID_SCHEMA: "OIDC_JWKS_INVALID_SCHEMA",
     OIDC_INVALID_ISSUER_PARAMS: "OIDC_INVALID_ISSUER_PARAMS",
+
+    /**
+     * User Info Refresh Errors
+     */
+    INVALID_ACCESS_TOKEN_RETRIVING_REFRESH_USER_INFO: "INVALID_ACCESS_TOKEN_RETRIVING_REFRESH_USER_INFO",
+    INVALID_REFRESH_USER_INFO_RESPONSE: "INVALID_REFRESH_USER_INFO_RESPONSE",
+    INVALID_REFRESH_USER_INFO_NETWORK: "INVALID_REFRESH_USER_INFO_NETWORK",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -824,6 +831,30 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "The remote identity provider rejected the refresh token exchange request. The response 'ok' field resolved to false. This typically indicates that the refresh token has expired, been reused, or has been explicitly revoked by the end-user.",
         userMessage: "Your secure session renewal failed. Please sign in again to continue.",
+    },
+    INVALID_ACCESS_TOKEN_RETRIVING_REFRESH_USER_INFO: {
+        type: "VALIDATION",
+        statusCode: 401,
+        name: "AuthError",
+        message:
+            "The profile refresh sequence was aborted because a valid access token could not be extracted or resolved from the current session context inside the refreshUserInfo function.",
+        userMessage: "Failed to sync profile data. Your active session access token is missing or invalid.",
+    },
+    INVALID_REFRESH_USER_INFO_RESPONSE: {
+        type: "PROTOCOL",
+        statusCode: 502,
+        name: "AuthError",
+        message:
+            "The outbound HTTP request to the provider user info profile endpoint returned a non-2xx status code during a synchronization sync block. The response 'ok' field resolved to false.",
+        userMessage: "The identity provider rejected the request to update profile details.",
+    },
+    INVALID_REFRESH_USER_INFO_NETWORK: {
+        type: "NETWORK",
+        statusCode: 504,
+        name: "AuthError",
+        message:
+            "A raw connection timeout, network failure, or socket hang-up occurred while trying to retrieve updated user info metadata from the remote identity platform.",
+        userMessage: "A network transport failure prevented fetching updated profile data from the provider.",
     },
 }
 

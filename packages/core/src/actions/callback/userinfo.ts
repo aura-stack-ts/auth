@@ -83,6 +83,7 @@ const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: s
         if (isAuraAuthError(error)) {
             throw error
         }
+        console.log("Error fetching user info:", error)
         logger?.log("OAUTH_USERINFO_REQUEST_FAILED")
         throw new AuraAuthError({ code: "UNKNOWN_OAUTH_USER_INFO_ERROR", cause: error })
     }

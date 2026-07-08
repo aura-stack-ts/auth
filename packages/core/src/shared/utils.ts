@@ -203,3 +203,12 @@ export const shouldRefresh = (payload: OAuthTokenPayload, refreshWindow: number)
     if (payload.expiresAt - now <= refreshWindow) return true
     return false
 }
+
+export const merge = (origin: Record<string, unknown>, source: Record<string, unknown>) => {
+    for (const key in source) {
+        if (source[key] instanceof Object && key in origin) {
+            Object.assign(source[key], merge(origin[key] as Record<string, unknown>, source[key] as Record<string, unknown>))
+        }
+    }
+    return { ...origin, ...source }
+}
