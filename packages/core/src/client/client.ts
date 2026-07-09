@@ -194,7 +194,7 @@ export const createAuthClient = <
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json = await response.json()
+            const json: any = await response.json()
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -327,6 +327,45 @@ export const createAuthClient = <
     }
 
     /**
+     * Refreshes the user information from making a request to the user info endpoint of the specified
+     * OAuth provider. This is useful for keeping the session data up-to-date without requiring the user
+     * to re-authenticate,
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @returns the updated session object if successful, or null if the refresh fails or the user is not authenticated.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const updatedSession = await authClient.refreshUserInfo("google")
+     * // Expected:
+     * {
+     *   sub: "user_id",
+     *   name: "John Doe",
+     *   email: "john.doe@example.com",
+     *   image: "https://example.com/avatar.jpg",
+     * }
+     */
+    const refreshUserInfo = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<Session<DefaultUser> | null> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
+            const response = await client.post("/providers/:oauth/user/refresh", {
+                params: { oauth },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json = await response.json()
+            return json.session as Session<DefaultUser> | null
+        } catch (error) {
+            console.error("Error refreshing user info:", error)
+            return null
+        }
+    }
+
+    /**
      * Signs out the current user, ending their session and optionally redirecting them to a specified URL.
      *
      * @param options Sign-out options, including redirect behavior and target URL after sign-out.
@@ -375,6 +414,7 @@ export const createAuthClient = <
         updateSession,
         getProviderTokens,
         getAccessToken,
+        refreshUserInfo,
         signOut,
     }
 }

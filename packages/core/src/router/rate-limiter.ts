@@ -48,8 +48,33 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
                 keyGenerator: (request) => getLimitKey(request, "getProviderTokens"),
                 ...config?.getProviderTokens,
             } as RateLimiterRule,
+            refreshUserInfo: {
+                algorithm: "sliding-window",
+                limit: 10,
+                windowMs: 15 * 60 * 1000,
+                keyGenerator: (request) => getLimitKey(request, "refreshUserInfo"),
+                ...config?.refreshUserInfo,
+            } as RateLimiterRule,
         },
     })
+}
+
+const defaultValues = (action: keyof RateLimiterConfig) => {
+    switch (action) {
+        case "getProviderTokens":
+            return { tokens: null }
+        case "refreshUserInfo":
+            return { session: null }
+        case "signIn":
+            return { redirect: false, signInURL: null }
+        case "updateSession":
+            return { session: null, redirect: false, redirectURL: null }
+        default:
+            return {
+                redirect: false,
+                redirectURL: null,
+            }
+    }
 }
 
 /**
@@ -59,13 +84,11 @@ export const verifyRateLimit = async (ctx: RouterGlobalContext, request: Request
     const rateLimit = await ctx.rateLimiters[action].check(request)
     if (!rateLimit.ok) {
         const toResponse = rateLimit.toResponse()
-        let redirectField = action === "signIn" ? "signInURL" : "redirectURL"
-        let tokensField = action === "getProviderTokens" ? "tokens" : "redirect"
+        const values = defaultValues(action)
 
         return {
+            ...values,
             success: false,
-            [tokensField]: tokensField === "tokens" ? null : false,
-            [redirectField]: null,
             error: { code: "RATE_LIMIT_EXCEEDED", message: "Too many requests." },
             headers: toResponse.headers,
             toResponse: () => toResponse,

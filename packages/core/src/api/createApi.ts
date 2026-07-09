@@ -31,9 +31,11 @@ import type {
     GetProviderTokensAPIReturn,
     AccessTokenAPIOptions,
     AccessTokenAPIReturn,
+    RefreshUserInfoAPIOptions,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
+import { refreshUserInfo } from "./refreshUserInfo.ts"
 
 type InferSignUp<T> = Wrap<RemoveIndexSignature<InferSchema<T>>>
 
@@ -176,6 +178,20 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
             options?: AccessTokenAPIOptions
         ): Promise<AccessTokenAPIReturn> => {
             return getAccessToken(oauth, { ctx, ...options, skipCSRFCheck: true })
+        },
+        /**
+         * Refreshes the user profile data from the OAuth provider on the server-side. It makes a request to the
+         * `userInfo` endpoint of the specified OAuth provider.
+         *
+         * @param oauth - The OAuth provider for which to refresh the user profile data (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, session } = await api.refreshUserInfo("github", {
+         *    headers: getHeaders()
+         * })
+         */
+        refreshUserInfo: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: RefreshUserInfoAPIOptions) => {
+            return refreshUserInfo<DefaultUser>(oauth, { ctx, ...options, skipCSRFCheck: true })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

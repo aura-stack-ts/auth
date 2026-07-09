@@ -1,5 +1,5 @@
 import { fetchAsync } from "@/shared/fetch-async.ts"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { AURA_AUTH_VERSION, getErrorName } from "@/shared/utils.ts"
 import { OAuthErrorResponse, OIDCUserInfoSchema } from "@/schemas.ts"
 import type {
     AccessTokenContext,
@@ -138,7 +138,7 @@ export const getUserInfo = async (
         if (isAuraAuthError(error)) {
             throw error
         }
-        logger?.log("OAUTH_USERINFO_REQUEST_FAILED")
+        logger?.log("OAUTH_USERINFO_REQUEST_FAILED", { structuredData: { error_type: getErrorName(error) } })
         throw new AuraAuthError({ code: "UNKNOWN_CUSTOM_USER_INFO_ERROR", cause: error })
     }
 }

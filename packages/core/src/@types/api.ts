@@ -351,3 +351,17 @@ export type AccessTokenData = { success: true; accessToken: string } | { success
  * Programmatic result for `getAccessToken` API with response metadata and `toResponse()`.
  */
 export type AccessTokenAPIReturn = AuthActionAPIReturn<AccessTokenData>
+
+/**
+ * Programmatic options for `refreshUserInfo` API.
+ */
+export type RefreshUserInfoAPIOptions = Pick<APIOptionsWithRequest, "headers" | "request"> & APIOptionsWithSkipCSRFCheck
+
+export type RefreshUserInfoData<DefaultUser extends User = User> =
+    | { success: true; session: Session<DefaultUser> }
+    | { success: false; session: null }
+
+/**
+ * Programmatic result for `refreshUserInfo` API with response metadata and `toResponse()`.
+ */
+export type RefreshUserInfoAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<RefreshUserInfoData<DefaultUser>>
