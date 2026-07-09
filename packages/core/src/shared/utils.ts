@@ -5,7 +5,7 @@ import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
 import type { JWTManager, OAuthTokenPayload } from "@/@types/session.ts"
-import type { CookieStoreConfig, InternalLogger, JoseInstance } from "@/@types/config.ts"
+import type { CookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
 
 export const AURA_AUTH_VERSION = "0.7.2"
 
@@ -211,4 +211,23 @@ export const merge = (origin: Record<string, unknown>, source: Record<string, un
         }
     }
     return { ...origin, ...source }
+}
+
+export const createStandardSession = async ({
+    sessionToken,
+    jwt,
+    identity,
+    newHeaders,
+}: {
+    sessionToken: string
+    jwt: JWTManager
+    identity: SchemaRegistryContext
+    newHeaders?: Headers
+}) => {
+    const claims = await jwt.verifyToken(sessionToken)
+    const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
+    const { exp: _exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
+    const userClaims = await identity.schemaRegistry.parse(defaultPayload)
+    if (!userClaims.sub) return { session: null, headers: newHeaders }
+    return userClaims
 }

@@ -3,11 +3,11 @@ import { secureApiHeaders } from "@/shared/headers.ts"
 import { getProviderTokens } from "./getProviderTokens.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { verifyCSRFToken, verifySessionToken, toUnionHeaders } from "@/shared/utils.ts"
+import { verifyCSRFToken, verifySessionToken, toUnionHeaders, createStandardSession } from "@/shared/utils.ts"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
-import type { Session, User } from "@/@types/session.ts"
+import type { User } from "@/@types/session.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { FunctionAPIContext, RefreshUserInfoAPIOptions, RefreshUserInfoAPIReturn } from "@/@types/api.ts"
 
@@ -100,16 +100,21 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
 
         const mergedHeaders = toUnionHeaders(newHeaders, headers)
 
-        const decodedSession = await ctx.jwtManager.verifyToken(sessionToken)
+        const session = await createStandardSession({
+            sessionToken,
+            jwt: ctx.jwtManager,
+            identity: ctx.identity,
+            newHeaders: mergedHeaders,
+        })
         return {
             success: true,
             headers: mergedHeaders,
-            session: decodedSession as unknown as Session<DefaultUser>,
+            session,
             toResponse: () => {
                 return Response.json(
                     {
+                        session,
                         success: true,
-                        session: decodedSession,
                     },
                     { headers: mergedHeaders, status: 200 }
                 )

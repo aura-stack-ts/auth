@@ -191,7 +191,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * })
          */
         refreshUserInfo: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: RefreshUserInfoAPIOptions) => {
-            return refreshUserInfo<DefaultUser>(oauth, { ctx, ...options })
+            return refreshUserInfo<DefaultUser>(oauth, { ctx, ...options, skipCSRFCheck: true })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
-import { api, jose, oauthCustomService, oauthTokens, sessionPayload } from "@test/presets.ts"
+import { jose, oauthCustomService, oauthTokens, POST, sessionPayload } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
@@ -36,83 +36,82 @@ vi.mock("@aura-stack/rate-limiter", async () => {
     }
 })
 
-describe("refreshUserInfo", () => {
+describe("refreshUserInfo action", () => {
     test("unsupported oauth provider", async () => {
-        const output = await api.refreshUserInfo("unsupported")
-        expect(output).toEqual({
-            success: false,
-            session: null,
-            error: {
-                code: "UNSUPPORTED_OAUTH_CONFIGURATION",
-                message: "The targeted OAuth provider has not been configured in the initialization parameters.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
+        const response = await POST(new Request("https://example.com/auth/unsupported/user/refresh", { method: "POST" }))
+        expect(await response.json()).toEqual({
+            code: "NOT_FOUND",
+            type: "ROUTER_FLOW",
+            message: "The requested route address cannot be found or is unavailable on this application endpoint server context.",
         })
     })
 
     test("invalid operation when the session token is missing", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
-        const output = await api.refreshUserInfo("oauth-provider", { headers: new Headers() })
-        expect(output).toEqual({
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", { method: "POST" })
+        )
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
     })
 
     test("throws error when CSRF token is missing", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}`,
-            },
-        })
-        expect(output).toEqual({
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "CSRF_TOKEN_MISSING",
-                message: "The CSRF token is missing. Please refresh and try again.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
+        })
+    })
+
+    test("throws error when CSRF token is invalid", async () => {
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                    "X-CSRF-Token": "invalid-token",
+                },
+            })
+        )
+        expect(await response.json()).toEqual({
+            success: false,
+            session: null,
         })
     })
 
     test("throws error when provider token does not exist", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
-            },
-        })
-        expect(output).toEqual({
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO",
-                message: "Failed to sync profile data. Your active session access token is missing or invalid.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
     })
 
     test("successfully refreshes user info", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -131,14 +130,17 @@ describe("refreshUserInfo", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
-            },
-        })
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
 
-        expect(output).toEqual({
+        expect(await response.json()).toEqual({
             success: true,
             session: {
                 sub: "1234567890",
@@ -146,9 +148,8 @@ describe("refreshUserInfo", () => {
                 name: "John Doe",
                 image: "https://example.com/image.jpg",
             },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
+        expect(response.status).toBe(200)
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
@@ -161,7 +162,6 @@ describe("refreshUserInfo", () => {
     })
 
     test("handles getUserInfo network error gracefully", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -170,27 +170,23 @@ describe("refreshUserInfo", () => {
         const mockFetch = vi.fn().mockRejectedValueOnce(new Error("Network connection lost"))
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
-            },
-        })
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
 
-        expect(output).toEqual({
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "UNKNOWN_OAUTH_USER_INFO_ERROR",
-                message: "Failed to communicate clean state down to the user configuration data provider.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
     })
 
     test("handles getUserInfo invalid response from provider", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -202,27 +198,23 @@ describe("refreshUserInfo", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
-            },
-        })
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
 
-        expect(output).toEqual({
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "INVALID_OAUTH_USER_INFO_RESPONSE",
-                message: "The resource userInfo target server returned an error code response.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
     })
 
     test("handles getUserInfo OAuth error response", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -238,27 +230,23 @@ describe("refreshUserInfo", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
-            },
-        })
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
 
-        expect(output).toEqual({
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "INVALID_OAUTH_USER_INFO_RES_FORMAT",
-                message: "The returned user info profile structure payload is corrupted or unexpected.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
     })
 
     test("handles getUserInfo missing required user fields", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -273,30 +261,15 @@ describe("refreshUserInfo", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
-            },
-        })
-
-        expect(output).toEqual({
-            success: false,
-            session: null,
-            error: {
-                code: "UNKNOWN_OAUTH_USER_INFO_ERROR",
-                message: "Failed to communicate clean state down to the user configuration data provider.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
-        })
-    })
-
-    test("toResponse returns correct response on failure", async () => {
-        const output = await api.refreshUserInfo("unsupported")
-
-        const response = output.toResponse()
-        expect(response.status).toBe(400)
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
 
         expect(await response.json()).toEqual({
             success: false,
@@ -305,7 +278,6 @@ describe("refreshUserInfo", () => {
     })
 
     test("handles getProviderTokens failure", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -315,24 +287,21 @@ describe("refreshUserInfo", () => {
         } as unknown as Record<string, unknown>)
 
         const { refreshToken: _, ...spread } = oauthCustomService
-        const { api } = createAuth({ oauth: [spread] })
+        const { handlers } = createAuth({ oauth: [spread] })
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
-            },
-        })
+        const response = await handlers.POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
 
-        expect(output).toEqual({
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO",
-                message: "Failed to sync profile data. Your active session access token is missing or invalid.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
     })
 
@@ -364,20 +333,29 @@ describe("refreshUserInfo", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
+
+        expect(await response.json()).toEqual({
+            success: true,
+            session: {
+                sub: "1234567890",
+                email: "john@example.com",
+                name: "John Doe",
+                image: "https://example.com/image.jpg",
             },
         })
-
-        expect(output.success).toBe(true)
-        expect(output.session).not.toBeNull()
         expect(mockFetch).toHaveBeenCalledTimes(2)
     })
 
     test("handles invalid user info response with missing content type", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -395,52 +373,43 @@ describe("refreshUserInfo", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
-            },
-        })
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
 
-        expect(output).toEqual({
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "OAUTH_INVALID_CONTENT_TYPE",
-                message:
-                    "The identity provider returned an unreadable response format. Please try again or check the provider status.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
     })
 
     test("handles session token verification failure", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const invalidSessionToken = "invalid.session.token"
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${invalidSessionToken}`,
-            },
-        })
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${invalidSessionToken}`,
+                },
+            })
+        )
 
-        expect(output).toEqual({
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "SESSION_INVALID",
-                message: "The session is not valid. Its signature or decryption parameters failed.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
     })
 
     test("updates session cookie with new session token", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -459,44 +428,49 @@ describe("refreshUserInfo", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
+
+        expect(await response.json()).toEqual({
+            success: true,
+            session: {
+                sub: "1234567890",
+                email: "john@example.com",
+                name: "John Doe",
+                image: "https://example.com/image.jpg",
             },
         })
-
-        expect(output.success).toBe(true)
-        const setCookieHeader = output.headers.get("set-cookie")
-        expect(setCookieHeader).toContain("aura-auth.session_token=")
+        expect(response.headers.get("set-cookie")).toContain("aura-auth.session_token=")
     })
 
     test("handles malformed provider tokens cookie", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=malformed-token`,
-            },
-        })
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=malformed-token`,
+                },
+            })
+        )
 
-        expect(output).toEqual({
+        expect(await response.json()).toEqual({
             success: false,
             session: null,
-            error: {
-                code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO",
-                message: "Failed to sync profile data. Your active session access token is missing or invalid.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
     })
 
     test("successfully refreshes with custom profile function", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -517,28 +491,28 @@ describe("refreshUserInfo", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-profile", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-profile=${encodedTokens}`,
-            },
-        })
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-profile/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-profile=${encodedTokens}`,
+                },
+            })
+        )
 
-        expect(output).toEqual({
+        expect(await response.json()).toEqual({
             success: true,
-            session: {
+            session: expect.objectContaining({
                 sub: "1234567890",
                 email: "john@example.com",
                 name: "John Doe",
                 image: "https://example.com/image.jpg",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
+            }),
         })
     })
 
     test("toResponse returns correct response on success", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -557,15 +531,15 @@ describe("refreshUserInfo", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
-            },
-        })
-
-        const response = output.toResponse()
-        expect(response.status).toBe(200)
+        const response = await POST(
+            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
 
         expect(await response.json()).toEqual({
             success: true,

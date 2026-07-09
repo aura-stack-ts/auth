@@ -67,6 +67,8 @@ const defaultValues = (action: keyof RateLimiterConfig) => {
             return { session: null }
         case "signIn":
             return { redirect: false, signInURL: null }
+        case "updateSession":
+            return { session: null, redirect: false, redirectURL: null }
         default:
             return {
                 redirect: false,
