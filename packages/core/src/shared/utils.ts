@@ -217,17 +217,15 @@ export const createStandardSession = async ({
     sessionToken,
     jwt,
     identity,
-    newHeaders,
 }: {
     sessionToken: string
     jwt: JWTManager
     identity: SchemaRegistryContext
-    newHeaders?: Headers
 }) => {
     const claims = await jwt.verifyToken(sessionToken)
     const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
     const { exp: _exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
     const userClaims = await identity.schemaRegistry.parse(defaultPayload)
-    if (!userClaims.sub) return { session: null, headers: newHeaders }
+    if (!userClaims.sub) return null
     return userClaims
 }

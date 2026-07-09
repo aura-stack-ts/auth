@@ -73,7 +73,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
         }
 
         const expiresIn = tokens?.expiresAt
-            ? Math.max(0, Math.floor(((tokens.expiresAt as number) - Date.now()) / 1000))
+            ? Math.max(0, Math.floor(tokens.expiresAt - Math.floor(Date.now() / 1000)))
             : undefined
 
         const userInfo = await getUserInfo(
@@ -104,7 +104,6 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             sessionToken,
             jwt: ctx.jwtManager,
             identity: ctx.identity,
-            newHeaders: mergedHeaders,
         })
         return {
             success: true,

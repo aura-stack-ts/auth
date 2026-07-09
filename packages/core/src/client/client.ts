@@ -339,7 +339,7 @@ export const createAuthClient = <
      * const updatedSession = await authClient.refreshUserInfo("google")
      * // Expected:
      * {
-     *   id: "user_id",
+     *   sub: "user_id",
      *   name: "John Doe",
      *   email: "john.doe@example.com",
      *   image: "https://example.com/avatar.jpg",
