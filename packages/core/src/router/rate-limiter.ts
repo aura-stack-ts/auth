@@ -61,6 +61,8 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
 
 const defaultValues = (action: keyof RateLimiterConfig) => {
     switch (action) {
+        case "getProviderTokens":
+            return { tokens: null }
         case "refreshUserInfo":
             return { session: null }
         case "signIn":

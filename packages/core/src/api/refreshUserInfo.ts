@@ -69,14 +69,18 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             ctx.logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
                 structuredData: { provider: oauth },
             })
-            throw new AuraAuthError({ code: "INVALID_ACCESS_TOKEN_RETRIVING_REFRESH_USER_INFO" })
+            throw new AuraAuthError({ code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO" })
         }
+
+        const expiresIn = tokens?.expiresAt
+            ? Math.max(0, Math.floor(((tokens.expiresAt as number) - Date.now()) / 1000))
+            : undefined
 
         const userInfo = await getUserInfo(
             provider,
             {
                 access_token: tokens.accessToken,
-                expires_in: tokens?.expiresAt,
+                expires_in: expiresIn,
                 refresh_token: tokens?.refreshToken,
                 id_token: tokens?.idToken,
                 scope: tokens?.scopes?.join(" "),

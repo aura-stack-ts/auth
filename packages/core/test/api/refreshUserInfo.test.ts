@@ -10,6 +10,7 @@ beforeEach(() => {
 
 afterEach(() => {
     vi.unstubAllEnvs()
+    vi.unstubAllGlobals()
 })
 
 vi.mock("@aura-stack/rate-limiter", async () => {
@@ -125,7 +126,7 @@ describe("refreshUserInfo", () => {
             success: false,
             session: null,
             error: {
-                code: "INVALID_ACCESS_TOKEN_RETRIVING_REFRESH_USER_INFO",
+                code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO",
                 message: "Failed to sync profile data. Your active session access token is missing or invalid.",
             },
             headers: expect.any(Headers),
@@ -252,6 +253,7 @@ describe("refreshUserInfo", () => {
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
+            headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 error: "invalid_token",
                 error_description: "The access token expired",
@@ -270,8 +272,8 @@ describe("refreshUserInfo", () => {
             success: false,
             session: null,
             error: {
-                code: "UNKNOWN_OAUTH_USER_INFO_ERROR",
-                message: "Failed to communicate clean state down to the user configuration data provider.",
+                code: "INVALID_OAUTH_USER_INFO_RES_FORMAT",
+                message: "The returned user info profile structure payload is corrupted or unexpected.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -350,7 +352,7 @@ describe("refreshUserInfo", () => {
             success: false,
             session: null,
             error: {
-                code: "INVALID_ACCESS_TOKEN_RETRIVING_REFRESH_USER_INFO",
+                code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO",
                 message: "Failed to sync profile data. Your active session access token is missing or invalid.",
             },
             headers: expect.any(Headers),
@@ -509,7 +511,7 @@ describe("refreshUserInfo", () => {
             success: false,
             session: null,
             error: {
-                code: "INVALID_ACCESS_TOKEN_RETRIVING_REFRESH_USER_INFO",
+                code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO",
                 message: "Failed to sync profile data. Your active session access token is missing or invalid.",
             },
             headers: expect.any(Headers),
