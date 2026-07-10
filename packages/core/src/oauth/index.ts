@@ -28,7 +28,7 @@ import { huggingface } from "./huggingface.ts"
 import { authentik } from "./authentik.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema, OpenIDProviderSchema } from "@/schemas.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
-import { createOpenIDPlaceholder } from "@/actions/oidc/resolve-provider.ts"
+import { createOpenIDPlaceholder } from "@/shared/oidc/resolve-provider.ts"
 
 export * from "./github.ts"
 export * from "./bitbucket.ts"

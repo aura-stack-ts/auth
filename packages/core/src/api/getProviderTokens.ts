@@ -5,11 +5,15 @@ import { secureApiHeaders } from "@/shared/headers.ts"
 import { shouldRefresh, toUnionHeaders } from "@/shared/utils.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
-import type { LiteralUnion } from "@/@types/utility.ts"
-import type { OAuthTokenPayload } from "@/@types/session.ts"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { FunctionAPIContext, GetProviderTokensAPIOptions, GetProviderTokensAPIReturn } from "@/@types/api.ts"
-import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
+import type {
+    FunctionAPIContext,
+    GetProviderTokensAPIOptions,
+    GetProviderTokensAPIReturn,
+    LiteralUnion,
+    OAuthTokenPayload,
+    BuiltInOAuthProvider,
+    RuntimeOAuthProvider,
+} from "@/@types/index.ts"
 
 export const refreshProviderToken = async (
     payload: OAuthTokenPayload,

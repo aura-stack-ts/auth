@@ -7,11 +7,11 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { timingSafeEqual } from "@/shared/utils.ts"
 import { getCookie, getExpiredCookie } from "@/cookie.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
-import { validateIDToken } from "@/actions/oidc/id-token.ts"
+import { validateIDToken } from "@/shared/oidc/id-token.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
 import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
 import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
-import { isOIDCProvider, resolveOpenIDProvider } from "@/actions/oidc/resolve-provider.ts"
+import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {

@@ -10,7 +10,7 @@ import type {
     User,
 } from "@/@types/index.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { isOIDCProvider } from "@/actions/oidc/resolve-provider.ts"
+import { isOIDCProvider } from "@/shared/oidc/resolve-provider.ts"
 import { assertContentTypeResponse, isCustomUserInfoFunction } from "@/shared/assert.ts"
 
 /**

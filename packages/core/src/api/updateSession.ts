@@ -1,8 +1,8 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
-import { secureApiHeaders } from "@/shared/headers.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
-import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
+import { secureApiHeaders } from "@/shared/headers.ts"
 import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
 export const updateSession = async <DefaultUser extends User = User>({
     ctx,

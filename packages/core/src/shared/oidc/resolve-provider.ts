@@ -1,4 +1,4 @@
-import { discoveryMetadata } from "@/actions/oidc/discovery.ts"
+import { discoveryMetadata } from "@/shared/oidc/discovery.ts"
 import type { OpenIDProvider } from "@/@types/oidc.ts"
 import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
 import { setDynamicParams } from "@/oauth/index.ts"

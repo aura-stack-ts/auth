@@ -1,14 +1,18 @@
+import { AuraAuthError } from "@/shared/errors.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { getCookie, getExpiredCookie } from "@/cookie.ts"
-import { AuraAuthError } from "@/shared/errors.ts"
-import { createBasicAuthHeader, toUnionHeaders } from "@/shared/utils.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
-import type { LiteralUnion } from "@/@types/utility.ts"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
-import type { FunctionAPIContext, RevokeTokenAPIOptions, RevokeTokenAPIReturn } from "@/@types/api.ts"
+import { createBasicAuthHeader, toUnionHeaders } from "@/shared/utils.ts"
+import type {
+    FunctionAPIContext,
+    RevokeTokenAPIOptions,
+    RevokeTokenAPIReturn,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+    RuntimeOAuthProvider,
+} from "@/@types/index.ts"
 
 const revokeProviderToken = async (provider: RuntimeOAuthProvider, accessToken: string) => {
     if (!provider.revokeToken || (typeof provider.revokeToken === "object" && !("url" in provider.revokeToken))) {

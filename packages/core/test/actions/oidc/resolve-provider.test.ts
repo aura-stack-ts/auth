@@ -4,7 +4,7 @@ import {
     createOpenIDPlaceholder,
     clearResolvedProviderCache,
     isOIDCProvider,
-} from "@/actions/oidc/resolve-provider.ts"
+} from "@/shared/oidc/resolve-provider.ts"
 import { openIDCustomProvider, openIDMetadata } from "@test/presets.ts"
 
 describe("resolveOpenIDProvider", () => {

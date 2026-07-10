@@ -1,7 +1,11 @@
 import { revokeToken } from "@/api/revokeToken.ts"
-import type { LiteralUnion } from "@/@types/utility.ts"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { DisconnectProviderAPIOptions, DisconnectProviderAPIReturn, FunctionAPIContext } from "@/@types/api.ts"
+import type {
+    DisconnectProviderAPIOptions,
+    DisconnectProviderAPIReturn,
+    FunctionAPIContext,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+} from "@/@types/index.ts"
 
 export const disconnectProvider = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,

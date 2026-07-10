@@ -7,7 +7,7 @@ import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
 import type { JWTManager, OAuthTokenPayload } from "@/@types/session.ts"
 import type { InternalCookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
 
-export const AURA_AUTH_VERSION = "0.7.2"
+export const AURA_AUTH_VERSION = "0.8.1"
 
 export const equals = (a: string | number | undefined | null, b: string | number | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
