@@ -47,7 +47,13 @@ const revokeProviderToken = async (provider: RuntimeOAuthProvider, accessToken: 
 
 export const revokeToken = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
-    { ctx, headers: headersInit, request: requestInit, skipCSRFCheck = false }: FunctionAPIContext<RevokeTokenAPIOptions>
+    {
+        ctx,
+        headers: headersInit,
+        request: requestInit,
+        skipCSRFCheck = false,
+        disconnect = false,
+    }: FunctionAPIContext<RevokeTokenAPIOptions> & { disconnect?: boolean }
 ) => {
     const { cookies } = ctx
     try {
@@ -99,15 +105,17 @@ export const revokeToken = async (
         const decodedToken = await ctx.jwtManager.verifyToken(cookie)
         const tokens = await ctx.identity.schemaRegistry.parseOAuthTokens(decodedToken)
 
-        ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
-            structuredData: { provider: oauth, hasAccessToken: !!tokens.accessToken },
-        })
+        if (!disconnect) {
+            ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
+                structuredData: { provider: oauth, hasAccessToken: !!tokens.accessToken },
+            })
 
-        await revokeProviderToken(provider, tokens.accessToken)
+            await revokeProviderToken(provider, tokens.accessToken)
 
-        ctx.logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
-            structuredData: { provider: oauth },
-        })
+            ctx.logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
+                structuredData: { provider: oauth },
+            })
+        }
 
         const builder = new HeadersBuilder(secureApiHeaders)
             .setCookie(cookieName, "", getExpiredCookie(cookies.accessToken.attributes))

@@ -209,7 +209,22 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * return new Response(null, { status: 200, headers })
          */
         revokeToken: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: RevokeTokenAPIOptions) => {
-            return revokeToken(oauth, { ctx, ...options, skipCSRFCheck: true })
+            return revokeToken(oauth, { ctx, ...options, disconnect: false, skipCSRFCheck: true })
+        },
+        /**
+         * Disconnects the OAuth provider for the current session on the server-side. It removes the association
+         * between the user's session and the specified OAuth provider.
+         * @params oauth - The OAuth provider to disconnect (e.g., "github", "gitlab", "bitbucket").
+         * @params options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, headers } = await api.disconnectProvider("github", {
+         *    headers: getHeaders()
+         * })
+         * // Use the returned headers to update the response headers in your server-side logic
+         * return new Response(null, { status: 200, headers })
+         */
+        disconnectProvider: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: RevokeTokenAPIOptions) => {
+            return revokeToken(oauth, { ctx, ...options, disconnect: true, skipCSRFCheck: true })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

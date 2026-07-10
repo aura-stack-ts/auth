@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `disconnectProvider()` client API to `createAuthClient()`, providing a client-side interface for the `DELETE /providers/:oauth` endpoint. The API disconnects an OAuth or OpenID Connect (OIDC) provider from the current session without revoking the provider's tokens. [#221](https://github.com/aura-stack-ts/auth/pull/221)
+
+- Added the experimental `disconnectProvider()` API for disconnecting an OAuth or OpenID Connect (OIDC) provider from the current session without revoking its tokens. Unlike `revokeToken()`, this API only removes the association between the current session and the provider. [#221](https://github.com/aura-stack-ts/auth/pull/221)
+
 - Added the `revokeToken()` client API to `createAuthClient()`, providing a client-side interface for the `POST /providers/:oauth/tokens/revoke` endpoint. [#220](https://github.com/aura-stack-ts/auth/pull/220)
 
 - Added the experimental `revokeToken()` API for revoking provider-issued OAuth or OpenID Connect (OIDC) tokens. Depending on the provider, this may revoke the current access token, refresh token, or both. [#220](https://github.com/aura-stack-ts/auth/pull/220)
