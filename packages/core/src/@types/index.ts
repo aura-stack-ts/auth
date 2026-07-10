@@ -9,7 +9,6 @@ import type { ClientOptions } from "@aura-stack/router"
 import type { createAuthInstance } from "@/createAuth.ts"
 
 export type * from "@/@types/config.ts"
-export type * from "@/@types/errors.ts"
 export type * from "@/@types/oauth.ts"
 export type * from "@/@types/oidc.ts"
 export type * from "@/@types/session.ts"
