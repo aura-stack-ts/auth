@@ -357,7 +357,6 @@ export const createAuthClient = <
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            console.log("Refresh user info response:", response)
             const json = await response.json()
             return json.session as Session<DefaultUser> | null
         } catch (error) {
@@ -395,6 +394,39 @@ export const createAuthClient = <
             return json?.success === true
         } catch (error) {
             console.error("Error revoking token:", error)
+            return false
+        }
+    }
+
+    /**
+     * Disconnets the OAuth provider with the current user, removing the association between the
+     * user's account and the OAuth provider. This action does not revoke the OAuth token, but it
+     * removes the link between the user's account and the provider, effectively "disconnecting" the provider.
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @params - Additional options for the disconnect operation (currently not used).
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * // Expected: true or false
+     * const success = await authClient.disconnectProvider("google")
+     */
+    const disconnectProvider = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
+            const response = await client.delete("/providers/:oauth", {
+                params: { oauth },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json = await response.json()
+            return json?.success === true
+        } catch (error) {
+            console.error("Error disconnecting provider:", error)
             return false
         }
     }
@@ -450,6 +482,7 @@ export const createAuthClient = <
         getAccessToken,
         refreshUserInfo,
         revokeToken,
+        disconnectProvider,
         signOut,
     }
 }

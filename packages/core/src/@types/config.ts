@@ -462,6 +462,10 @@ export interface SchemaRegistryContext {
  */
 export type AuthRuntimeConfig<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser>
 
+export type Handlers = {
+    [method in "GET" | "POST" | "PATCH" | "DELETE" | "ALL"]: (request: Request) => Response | Promise<Response>
+}
+
 /**
  * Public auth instance: programmatic {@link AuthAPI}, {@link JoseInstance}, and HTTP {@link AuthClient} handlers.
  */
@@ -477,12 +481,7 @@ export interface AuthInstance<DefaultUser extends User = User, SignUpSchema exte
     /**
      * HTTP handlers for mounting on a router or server.
      */
-    handlers: {
-        GET: (request: Request) => Response | Promise<Response>
-        POST: (request: Request) => Response | Promise<Response>
-        PATCH: (request: Request) => Response | Promise<Response>
-        ALL: (request: Request) => Response | Promise<Response>
-    }
+    handlers: Handlers
 }
 
 /**

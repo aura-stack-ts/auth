@@ -377,3 +377,15 @@ export type RevokeTokenData = { success: true } | { success: false }
  * Programmatic result for `revokeToken` API with response metadata and `toResponse()`.
  */
 export type RevokeTokenAPIReturn = AuthActionAPIReturn<RevokeTokenData>
+
+/**
+ * Programmatic options for `disconnectProvider` API.
+ */
+export type DisconnectProviderAPIOptions = APIOptionsWithRequest & APIOptionsWithSkipCSRFCheck
+
+export type DisconnectProviderData = { success: true } | { success: false }
+
+/**
+ * Programmatic result for `disconnectProvider` API with response metadata and `toResponse()`.
+ */
+export type DisconnectProviderAPIReturn = AuthActionAPIReturn<DisconnectProviderData>
