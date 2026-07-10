@@ -264,6 +264,8 @@ export const createAuthClient = <
     /**
      * Fetches the OAuth tokens for a specified provider, if available.
      *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
      * @param oauth The OAuth provider identifier (e.g., "google", "github").
      * @returns An object with `success` and `tokens`, where `tokens` is null if unavailable or on error.
      * @example
@@ -312,6 +314,8 @@ export const createAuthClient = <
      * > **NOTE**: This method is based on `getProviderTokens` and it's recommended for simple use cases where only the
      * access token is needed. For more advanced scenarios, consider using `getProviderTokens` directly.
      *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
      * @param oauth - The OAuth provider identifier (e.g., "google", "github").
      * @returns the access token string if available, or null if not available or on error.
      * @example
@@ -330,6 +334,8 @@ export const createAuthClient = <
      * Refreshes the user information from making a request to the user info endpoint of the specified
      * OAuth provider. This is useful for keeping the session data up-to-date without requiring the user
      * to re-authenticate,
+     *
+     *  > **NOTE**: This method is experimental and may change in future releases.
      *
      * @param oauth - The OAuth provider identifier (e.g., "google", "github").
      * @returns the updated session object if successful, or null if the refresh fails or the user is not authenticated.
@@ -369,6 +375,8 @@ export const createAuthClient = <
      * Revokes the OAuth token for a specified provider. It doesn't sign out the user, but it invalidates
      * the access token, preventing further use of the token for API requests.
      *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
      * @param oauth - The OAuth provider identifier (e.g., "google", "github").
      * @returns A boolean indicating whether the token revocation was successful.
      * @example
@@ -403,6 +411,8 @@ export const createAuthClient = <
      * user's account and the OAuth provider. This action does not revoke the OAuth token, but it
      * removes the link between the user's account and the provider, effectively "disconnecting" the provider.
      *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
      * @param oauth - The OAuth provider identifier (e.g., "google", "github").
      * @params - Additional options for the disconnect operation (currently not used).
      * @example
@@ -431,17 +441,22 @@ export const createAuthClient = <
         }
     }
 
+    /**
+     * Verifies if the specified OAuth provider is connected to the current user's account.
+     *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * // Expected: true or false
+     * const isConnected = await authClient.isProviderConnected("google")
+     */
     const isProviderConnected = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
         try {
-            const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
             const response = await client.get("/providers/:oauth", {
                 params: { oauth },
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                },
             })
             const json = await response.json()
             return json?.success === true && json?.connected === true

@@ -22,22 +22,10 @@ export const isProviderConnected = async (
             .execute()
 
         const cookieName = `${cookies.accessToken.name}.${oauth}`
-        let cookieValue: string | null = null
+        let cookieValue: string
         try {
             cookieValue = getCookie(request, cookieName)
         } catch {
-            ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
-                structuredData: { provider: oauth, hasCookie: false },
-            })
-            return {
-                success: true,
-                connected: false,
-                headers,
-                toResponse: () => Response.json({ success: true, connected: false }, { status: 200, headers }),
-            }
-        }
-
-        if (!cookieValue) {
             ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
                 structuredData: { provider: oauth, hasCookie: false },
             })
