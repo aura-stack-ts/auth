@@ -860,4 +860,54 @@ describe("createAuthClient", () => {
         })
         expect(response).toEqual(false)
     })
+
+    test("isProviderConnected with valid response", async () => {
+        const get = vi.fn()
+
+        get.mockResolvedValueOnce(
+            createJSONResponse({
+                success: true,
+                connected: true,
+            })
+        )
+
+        createClientMock.mockReturnValue({
+            get,
+            post: vi.fn(),
+        })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.isProviderConnected("github")
+
+        expect(get).toHaveBeenCalledOnce()
+        expect(get).toHaveBeenCalledWith("/providers/:oauth", {
+            params: { oauth: "github" },
+        })
+        expect(response).toEqual(true)
+    })
+
+    test("isProviderConnected with invalid response", async () => {
+        const get = vi.fn()
+
+        get.mockResolvedValueOnce(
+            createJSONResponse({
+                success: false,
+                connected: false,
+            })
+        )
+
+        createClientMock.mockReturnValue({
+            get,
+            post: vi.fn(),
+        })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.isProviderConnected("github")
+
+        expect(get).toHaveBeenCalledOnce()
+        expect(get).toHaveBeenCalledWith("/providers/:oauth", {
+            params: { oauth: "github" },
+        })
+        expect(response).toEqual(false)
+    })
 })

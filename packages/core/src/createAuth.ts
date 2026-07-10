@@ -16,6 +16,7 @@ import {
     refreshAction,
     revokeAction,
     disconnectAction,
+    connectedAction,
 } from "@/actions/index.ts"
 import type { ZodObject } from "zod"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
@@ -65,6 +66,7 @@ export const createAuthInstance = <Identity extends Identities, SignUpSchema ext
             refreshAction(config.context.oauth),
             revokeAction(config.context.oauth),
             disconnectAction(config.context.oauth),
+            connectedAction(config.context.oauth),
         ],
         config
     )

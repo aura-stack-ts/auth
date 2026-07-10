@@ -74,8 +74,8 @@ describe("getAccessToken API", () => {
             success: false,
             accessToken: null,
             error: {
-                code: "COOKIE_INVALID_VALUE",
-                message: "Expected configuration cookie not found or contains an empty value.",
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
