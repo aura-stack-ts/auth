@@ -10,11 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Added the `refreshUserInfo()` client API to `createAuthClient()`, providing a client-side interface for the `POST /providers/:provider/user/refresh` endpoint. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+- Added the `revokeToken()` client API to `createAuthClient()`, providing a client-side interface for the `POST /providers/:oauth/tokens/revoke` endpoint. [#220](https://github.com/aura-stack-ts/auth/pull/220)
+
+- Added the experimental `revokeToken()` API for revoking provider-issued OAuth or OpenID Connect (OIDC) tokens. Depending on the provider, this may revoke the current access token, refresh token, or both. [#220](https://github.com/aura-stack-ts/auth/pull/220)
+
+- Added the `refreshUserInfo()` client API to `createAuthClient()`, providing a client-side interface for the `POST /providers/:oauth/user/refresh` endpoint. [#219](https://github.com/aura-stack-ts/auth/pull/219)
 
 - Added the experimental `refreshUserInfo()` API for synchronizing the authenticated user's profile with the provider's `userInfo` endpoint. The API refreshes the stored user information without requiring the user to sign in again. [#219](https://github.com/aura-stack-ts/auth/pull/219)
 
-- Added the `getAccessToken()` client API to `createAuthClient()`. The API provides a client-side interface for retrieving the provider access token through the `GET /providers/:provider/tokens` endpoint. It is a convenience wrapper around `getProviderTokens()`. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+- Added the `getAccessToken()` client API to `createAuthClient()`. The API provides a client-side interface for retrieving the provider access token through the `GET /providers/:oauth/tokens` endpoint. It is a convenience wrapper around `getProviderTokens()`. [#218](https://github.com/aura-stack-ts/auth/pull/218)
 
 - Added the experimental `getAccessToken()` API for retrieving the provider `accessToken` after a successful OAuth or OpenID Connect (OIDC) sign-in. This API is a simplified alternative to `getProviderTokens()` when only the access token is required. [#218](https://github.com/aura-stack-ts/auth/pull/218)
 

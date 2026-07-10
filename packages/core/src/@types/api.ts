@@ -365,3 +365,15 @@ export type RefreshUserInfoData<DefaultUser extends User = User> =
  * Programmatic result for `refreshUserInfo` API with response metadata and `toResponse()`.
  */
 export type RefreshUserInfoAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<RefreshUserInfoData<DefaultUser>>
+
+/**
+ * Programmatic options for `revokeToken` API.
+ */
+export type RevokeTokenAPIOptions = Pick<APIOptionsWithRequest, "headers" | "request"> & APIOptionsWithSkipCSRFCheck
+
+export type RevokeTokenData = { success: true } | { success: false }
+
+/**
+ * Programmatic result for `revokeToken` API with response metadata and `toResponse()`.
+ */
+export type RevokeTokenAPIReturn = AuthActionAPIReturn<RevokeTokenData>

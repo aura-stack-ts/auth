@@ -57,6 +57,16 @@ export const OAuthProviderCredentialsSchema = object({
         .optional(),
     clientId: string(),
     clientSecret: string(),
+    revokeToken: z
+        .union([
+            string().url(),
+            object({
+                url: string().url(),
+                headers: z.record(string(), string()).optional(),
+                params: z.record(string(), string()).optional(),
+            }),
+        ])
+        .optional(),
     profile: z.function().optional(),
 })
 
@@ -75,6 +85,18 @@ export const OAuthProviderConfigSchema = object({
     responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
     clientId: string(),
     clientSecret: string(),
+    revokeToken: z
+        .union([
+            string().url(),
+            object({
+                url: string().url(),
+                headers: z.record(string(), string()).optional(),
+                params: z.record(string(), string()).optional(),
+            }),
+        ])
+        .optional(),
+    refreshWindow: number().optional(),
+    profile: z.function().optional(),
 })
 
 /**
@@ -232,6 +254,17 @@ export const OpenIDProviderSchema = object({
     clientSecret: string().optional(),
     scope: string().optional(),
     profile: z.function().optional(),
+    revokeToken: z
+        .union([
+            string().url(),
+            object({
+                url: string().url(),
+                headers: z.record(string(), string()).optional(),
+                params: z.record(string(), string()).optional(),
+            }),
+        ])
+        .optional(),
+    refreshWindow: number().optional(),
 })
 
 /**

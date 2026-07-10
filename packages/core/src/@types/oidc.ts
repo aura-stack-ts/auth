@@ -1,5 +1,6 @@
 import type { User } from "@/@types/session.ts"
 import type { GetRouteParams } from "@aura-stack/router/types"
+import type { RevokeTokenParams, RevokeTokenTokenHint } from "./oauth.ts"
 
 /**
  * @link https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
@@ -221,6 +222,13 @@ export type OpenIDProvider<Profile extends object = Record<string, any>, Default
      * Defaults to 300 seconds.
      */
     refreshWindow?: number
+    /**
+     * Revoke the access token configuration for the OAuth provider. It revokes the access token but not
+     * invalidate the session when there are multiple access token configured for the session.
+     */
+    revokeToken?:
+        | string
+        | { url: string; headers?: Record<string, string>; params?: Record<RevokeTokenParams, RevokeTokenTokenHint> }
     /**
      * Override the default OIDC scope (`openid profile email`).
      */

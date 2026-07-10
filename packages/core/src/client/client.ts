@@ -357,11 +357,45 @@ export const createAuthClient = <
                     "X-CSRF-Token": csrfToken,
                 },
             })
+            console.log("Refresh user info response:", response)
             const json = await response.json()
             return json.session as Session<DefaultUser> | null
         } catch (error) {
             console.error("Error refreshing user info:", error)
             return null
+        }
+    }
+
+    /**
+     * Revokes the OAuth token for a specified provider. It doesn't sign out the user, but it invalidates
+     * the access token, preventing further use of the token for API requests.
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @returns A boolean indicating whether the token revocation was successful.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const success = await authClient.revokeToken("google")
+     * // Expected:
+     * true or false
+     */
+    const revokeToken = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
+            const response = await client.post("/providers/:oauth/tokens/revoke", {
+                params: { oauth },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json = await response.json()
+            return json?.success === true
+        } catch (error) {
+            console.error("Error revoking token:", error)
+            return false
         }
     }
 
@@ -415,6 +449,7 @@ export const createAuthClient = <
         getProviderTokens,
         getAccessToken,
         refreshUserInfo,
+        revokeToken,
         signOut,
     }
 }

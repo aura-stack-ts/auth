@@ -7,6 +7,8 @@ import {
     signUp,
     getProviderTokens,
     getAccessToken,
+    refreshUserInfo,
+    revokeToken,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -32,10 +34,10 @@ import type {
     AccessTokenAPIOptions,
     AccessTokenAPIReturn,
     RefreshUserInfoAPIOptions,
+    RevokeTokenAPIOptions,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
-import { refreshUserInfo } from "./refreshUserInfo.ts"
 
 type InferSignUp<T> = Wrap<RemoveIndexSignature<InferSchema<T>>>
 
@@ -192,6 +194,22 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          */
         refreshUserInfo: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: RefreshUserInfoAPIOptions) => {
             return refreshUserInfo<DefaultUser>(oauth, { ctx, ...options, skipCSRFCheck: true })
+        },
+        /**
+         * Revokes the access token for a specific OAuth provider on the server-side. It makes a request to the
+         * `revokeToken` endpoint of the specified OAuth provider.
+         *
+         * @param oauth - The OAuth provider for which to revoke the access token (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, headers } = await api.revokeToken("github", {
+         *    headers: getHeaders()
+         * })
+         * // Use the returned headers to update the response headers in your server-side logic
+         * return new Response(null, { status: 200, headers })
+         */
+        revokeToken: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: RevokeTokenAPIOptions) => {
+            return revokeToken(oauth, { ctx, ...options, skipCSRFCheck: true })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for
