@@ -119,6 +119,12 @@ export const AuraErrorCode = {
     INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO",
     INVALID_REFRESH_USER_INFO_RESPONSE: "INVALID_REFRESH_USER_INFO_RESPONSE",
     INVALID_REFRESH_USER_INFO_NETWORK: "INVALID_REFRESH_USER_INFO_NETWORK",
+    /**
+     * Revoke Token Errors
+     */
+    OAUTH_INVALID_REVOKE_TOKEN_CONFIG: "OAUTH_INVALID_REVOKE_TOKEN_CONFIG",
+    OAUTH_INVALID_REVOKE_TOKEN_RESPONSE: "OAUTH_INVALID_REVOKE_TOKEN_RESPONSE",
+    OAUTH_INVALID_REVOKE_TOKEN_PROCESS: "OAUTH_INVALID_REVOKE_TOKEN_PROCESS",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -855,6 +861,31 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "A raw connection timeout, network failure, or socket hang-up occurred while trying to retrieve updated user info metadata from the remote identity platform.",
         userMessage: "A network transport failure prevented fetching updated profile data from the provider.",
+    },
+    OAUTH_INVALID_REVOKE_TOKEN_CONFIG: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "OAuthError",
+        message:
+            "The token revocation sequence was aborted because the targeted OAuth provider instance does not have a revocation endpoint or strategy configured.",
+        userMessage:
+            "Internal library configuration error. Token revocation operations are not enabled or configured for this identity provider.",
+    },
+    OAUTH_INVALID_REVOKE_TOKEN_RESPONSE: {
+        type: "PROTOCOL",
+        statusCode: 400,
+        name: "OAuthError",
+        message:
+            "The remote identity provider rejected the revocation token request. The response 'ok' field resolved to false. This typically indicates that the access token is invalid, or has already been explicitly revoked by the end-user.",
+        userMessage: "Failed to communicate token revocation down to the identity provider.",
+    },
+    OAUTH_INVALID_REVOKE_TOKEN_PROCESS: {
+        type: "PROTOCOL",
+        statusCode: 502,
+        name: "OAuthError",
+        message:
+            "The token revocation operation failed because the upstream server returned a non-200 status code. Per the RFC 7009 specification, successful token invalidation requests must respond with an HTTP status 200.",
+        userMessage: "The identity provider encountered an error while processing the token revocation.",
     },
 }
 

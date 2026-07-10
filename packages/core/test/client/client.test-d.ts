@@ -48,6 +48,8 @@ describe("Client Types", () => {
             ) => Promise<UpdateSessionReturn<Options, User>>
             getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
+            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -94,6 +96,8 @@ describe("Client Types", () => {
             ) => Promise<UpdateSessionReturn<Options, User>>
             getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
+            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -141,6 +145,8 @@ describe("Client Types", () => {
             ) => Promise<UpdateSessionReturn<Options, User>>
             getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
+            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -187,6 +193,8 @@ describe("Client Types", () => {
             ) => Promise<UpdateSessionReturn<Options, User>>
             getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
+            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -237,6 +245,8 @@ describe("Client Types", () => {
             ) => Promise<UpdateSessionReturn<Options, User>>
             getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
+            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -276,6 +286,8 @@ describe("Client Types", () => {
             ) => Promise<UpdateSessionReturn<Options, User>>
             getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
+            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -315,6 +327,8 @@ describe("Client Types", () => {
             ) => Promise<UpdateSessionReturn<Options, User>>
             getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
+            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -354,6 +368,8 @@ describe("Client Types", () => {
             ) => Promise<UpdateSessionReturn<Options, User>>
             getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
+            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })
@@ -395,6 +411,8 @@ describe("Client Types", () => {
             ) => Promise<UpdateSessionReturn<Options, User>>
             getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
             getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
+            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
             signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
         }>()
     })

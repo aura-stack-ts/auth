@@ -55,6 +55,13 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
                 keyGenerator: (request) => getLimitKey(request, "refreshUserInfo"),
                 ...config?.refreshUserInfo,
             } as RateLimiterRule,
+            revokeToken: {
+                algorithm: "sliding-window",
+                limit: 10,
+                windowMs: 15 * 60 * 1000,
+                keyGenerator: (request) => getLimitKey(request, "revokeToken"),
+                ...config?.revokeToken,
+            } as RateLimiterRule,
         },
     })
 }
@@ -65,6 +72,8 @@ const defaultValues = (action: keyof RateLimiterConfig) => {
             return { tokens: null }
         case "refreshUserInfo":
             return { session: null }
+        case "revokeToken":
+            return {}
         case "signIn":
             return { redirect: false, signInURL: null }
         case "updateSession":

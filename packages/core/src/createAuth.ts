@@ -13,6 +13,8 @@ import {
     updateSessionAction,
     signUpAction,
     tokensAction,
+    refreshAction,
+    revokeAction,
 } from "@/actions/index.ts"
 import type { ZodObject } from "zod"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
@@ -25,7 +27,6 @@ import type {
     EditableShape,
     ZodIdentitySchema,
 } from "@/@types/index.ts"
-import { refreshAction } from "./actions/user/refresh.ts"
 
 const createInternalConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>
@@ -61,6 +62,7 @@ export const createAuthInstance = <Identity extends Identities, SignUpSchema ext
             signUpAction<Identity, SignUpSchema>(config.context.signUp as SignUpConfig<Identity, SignUpSchema>),
             tokensAction(config.context.oauth),
             refreshAction(config.context.oauth),
+            revokeAction(config.context.oauth),
         ],
         config
     )

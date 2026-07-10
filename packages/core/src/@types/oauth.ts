@@ -58,6 +58,11 @@ export type AuthorizeParams = LiteralUnion<
     "clientId" | "prompt" | "scope" | "responseMode" | "audience" | "loginHint" | "nonce" | "display"
 >
 
+/** Known query parameter names supported when revoking an OAuth token. */
+export type RevokeTokenParams = LiteralUnion<"tokenHint">
+
+export type RevokeTokenTokenHint = LiteralUnion<"access_token" | "refresh_token">
+
 /** OAuth 2.0 `response_type` values used in authorization requests. */
 export type ResponseType = LiteralUnion<"code" | "token" | "refresh_token" | "id_token">
 
@@ -96,6 +101,13 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
      * when they expire.
      */
     refreshToken?: string | { url: string; headers?: Record<string, string>; params?: Record<string, string> }
+    /**
+     * Revoke the access token configuration for the OAuth provider. It revokes the access token but not
+     * invalidate the session when there are multiple access token configured for the session.
+     */
+    revokeToken?:
+        | string
+        | { url: string; headers?: Record<string, string>; params?: Record<RevokeTokenParams, RevokeTokenTokenHint> }
     /**
      * Refresh window in seconds before the access token expires to attempt a refresh.
      * Defaults to 300 seconds.

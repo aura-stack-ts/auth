@@ -13,6 +13,7 @@ export const oauthCustomService: OAuthProviderCredentials = {
     refreshToken: "https://example.com/oauth/refresh_token",
     clientId: "oauth_client_id",
     clientSecret: "oauth_client_secret",
+    revokeToken: "https://example.com/oauth/revoke_token",
 }
 
 export const openIDCustomProvider: OpenIDProvider = {
