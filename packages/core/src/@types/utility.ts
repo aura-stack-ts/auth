@@ -1,15 +1,15 @@
 import { Type } from "arktype"
-import type { TProperties, TObject, TSchema } from "typebox"
+import type { IsZod } from "@/identity/zod.ts"
+import type { InferSchema } from "@aura-stack/router"
+import type { IsArkType } from "@/identity/arktype.ts"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
-import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer, ZodOptional } from "zod/v4"
+import type { TProperties, TObject, TSchema } from "typebox"
+import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { IdentityShape as TypeboxIdentitySchema } from "@/identity/typebox.ts"
 import type { IdentityShape as ValibotIdentitySchema } from "@/identity/valibot.ts"
-import type { Identities, SchemaTypes } from "@/identity/index.ts"
-import type { IsZod } from "@/identity/zod.ts"
-import type { IsArkType } from "@/identity/arktype.ts"
+import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer, ZodOptional } from "zod/v4"
 import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
-import type { InferSchema } from "@aura-stack/router"
 
 /** Expands intersection types into a single flat object type for readable editor hints. */
 export type Prettify<T> = { [K in keyof T]: T[K] }
@@ -32,10 +32,8 @@ export type EditableShape<T extends ZodRawShape> = {
 
 export type EditableShapeZod<T extends ZodRawShape> = EditableShape<T>
 
-type AnyShape = Record<string, AnyValibotSchema>
-
 export type EditableShapeValibot<T extends ObjectEntries> = {
-    [K in keyof T]: T[K] extends ObjectSchema<infer Inner extends AnyShape, undefined>
+    [K in keyof T]: T[K] extends ObjectSchema<infer Inner extends Record<string, AnyValibotSchema>, undefined>
         ? ObjectSchema<EditableShapeValibot<Inner>, undefined>
         : BaseSchema<any, any, any>
 }
@@ -107,11 +105,6 @@ export type ReturnUpdateSessionShape<T> =
               ? TObject<{ user?: TObject<S>; expires?: TSchema }>
               : never
 
-/** Recursively makes every property required. */
-export type DeepRequired<T> = {
-    [K in keyof T]-?: T[K] extends object ? DeepRequired<T[K]> : T[K]
-}
-
 /** Recursively makes every property optional. */
 export type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
@@ -148,11 +141,6 @@ export type InferUser<Config extends AuthInstance> = Config extends AuthInstance
  * type Session = InferSession<typeof auth>
  */
 export type InferSession<Config extends AuthInstance> = Prettify<Session<Wrap<InferUser<Config>>>>
-
-/**
- * Shorthand for a Zod object’s `.shape` property.
- */
-export type InferZodShape<T extends ZodObject> = T["shape"]
 
 /**
  * Infers the user type from a Zod identity schema, or falls back to {@link User}.

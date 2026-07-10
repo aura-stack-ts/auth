@@ -1,6 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { isAuraAuthError } from "@/shared/errors.ts"
-import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
+import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext, SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
 
 export const signOut = async ({
@@ -14,24 +13,18 @@ export const signOut = async ({
     let responseHeaders = new Headers(headersInit)
     try {
         responseHeaders = await ctx.sessionStrategy.destroySession(responseHeaders, skipCSRFCheck)
-        let request = requestInit
-        if (!request) {
-            const origin = await getBaseURL({ ctx, headers: responseHeaders })
-            const url = `${origin}${ctx.basePath}/signOut`
-            request = new Request(url, { headers: responseHeaders })
-        }
-        await getOriginURL(request, ctx)
+        const { request } = await createValidation(ctx, responseHeaders).buildRequest(requestInit, "/signOut").execute()
 
         const headersBuilder = new HeadersBuilder(responseHeaders)
-        let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx)
-        redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
-
-        if (redirect && redirectURL) {
-            headersBuilder.setHeader("Location", redirectURL)
-        }
+        const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
+            ctx,
+            request,
+            redirect,
+            redirectTo,
+            headersBuilder
+        )
 
         const headersList = headersBuilder.toHeaders()
-        const shouldRedirectServer = redirect && !!redirectURL
         return {
             success: true,
             headers: headersList,
@@ -45,14 +38,7 @@ export const signOut = async ({
             },
         } as SignOutAPIReturn
     } catch (error) {
-        let code = "SIGN_OUT_FAILED"
-        let message = "Failed to sign-out session"
-        let statusCode = 400
-        if (isAuraAuthError(error)) {
-            code = error.code
-            message = error.userMessage
-            statusCode = error.statusCode
-        }
+        const { code, message, statusCode } = handleApiError(error, "SIGN_OUT_FAILED", "Failed to sign-out session")
         return {
             success: false,
             headers: responseHeaders,

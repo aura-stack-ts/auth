@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { createPKCE } from "@/shared/crypto.ts"
 import { oauthCustomService, openIDCustomProvider, openIDMetadata } from "@test/presets.ts"
 import { createAccessToken } from "@/actions/callback/access-token.ts"
-import { resolveOpenIDProvider } from "@/actions/oidc/resolve-provider.ts"
+import { resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
 
 describe("createAccessToken", async () => {

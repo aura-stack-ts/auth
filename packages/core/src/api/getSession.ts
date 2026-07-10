@@ -1,9 +1,8 @@
-import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
+import { getExpiredCookie } from "@/cookie.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { getExpiredCookie } from "@/cookie.ts"
-import type { User } from "@/@types/session.ts"
-import type { FunctionAPIContext, GetSessionAPIOptions, GetSessionAPIReturn } from "@/@types/api.ts"
+import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
+import type { FunctionAPIContext, GetSessionAPIOptions, GetSessionAPIReturn, User } from "@/@types/index.ts"
 
 export const getSession = async <DefaultUser extends User = User>({
     ctx,

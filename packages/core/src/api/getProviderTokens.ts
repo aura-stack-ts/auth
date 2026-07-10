@@ -2,15 +2,18 @@ import { getCookie } from "@/cookie.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { verifyRateLimit } from "@/router/rate-limiter.ts"
-import { getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
-import { shouldRefresh, toUnionHeaders, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import type { LiteralUnion } from "@/@types/utility.ts"
-import type { OAuthTokenPayload } from "@/@types/session.ts"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { FunctionAPIContext, GetProviderTokensAPIOptions, GetProviderTokensAPIReturn } from "@/@types/api.ts"
-import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
+import { shouldRefresh, toUnionHeaders } from "@/shared/utils.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
+import { createValidation, handleApiError } from "@/shared/utils/api.ts"
+import type {
+    FunctionAPIContext,
+    GetProviderTokensAPIOptions,
+    GetProviderTokensAPIReturn,
+    LiteralUnion,
+    OAuthTokenPayload,
+    BuiltInOAuthProvider,
+    RuntimeOAuthProvider,
+} from "@/@types/index.ts"
 
 export const refreshProviderToken = async (
     payload: OAuthTokenPayload,
@@ -63,34 +66,14 @@ export const getProviderTokens = async (
 ): Promise<GetProviderTokensAPIReturn> => {
     const { cookies, identity, jwtManager } = ctx
     try {
-        const provider = ctx.oauth[oauth]
-        if (!provider) {
-            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
-        }
-        const headers = new Headers(headersInit ?? requestInit?.headers)
-        await verifySessionToken({
-            headers,
-            cookies,
-            jwt: ctx.jwtManager,
-            logger: ctx.logger,
-        })
+        const { provider, headers, request, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+            .verifyOAuthProvider(oauth)
+            .verifySession()
+            .verifyCSRFToken(skipCSRFCheck)
+            .buildRequest(requestInit, `/providers/${oauth}/tokens`)
+            .verifyRateLimit("getProviderTokens")
+            .execute()
 
-        await verifyCSRFToken({
-            headers,
-            cookies,
-            jose: ctx.jose,
-            logger: ctx.logger,
-            skipCSRFCheck,
-        })
-        let request = requestInit
-        if (!request) {
-            const origin = await getBaseURL({ ctx, headers })
-            const url = `${origin}${ctx.basePath}/token/${oauth}`
-            request = new Request(url, { headers })
-        }
-        await getOriginURL(request, ctx)
-
-        const rateLimit = await verifyRateLimit(ctx, request, "getProviderTokens")
         if (rateLimit) {
             return rateLimit as unknown as GetProviderTokensAPIReturn
         }
@@ -105,7 +88,7 @@ export const getProviderTokens = async (
         const refreshed = shouldRefresh(tokens, refreshWindow)
 
         if (refreshed) {
-            const refreshedTokens = await refreshProviderToken(tokens, provider)
+            const refreshedTokens = await refreshProviderToken(tokens, provider!)
             const encodedTokens = await jwtManager.createToken(refreshedTokens as unknown as Record<string, unknown>)
             const builder = new HeadersBuilder(secureApiHeaders)
                 .setCookie(cookieName, encodedTokens, cookies.accessToken.attributes)
@@ -126,14 +109,7 @@ export const getProviderTokens = async (
             toResponse: () => Response.json({ success: true, tokens }, { status: 200, headers }),
         }
     } catch (error) {
-        let code = "PROVIDER_TOKENS_ERROR"
-        let message = "Failed to get provider tokens"
-        let statusCode = 400
-        if (isAuraAuthError(error)) {
-            message = error.userMessage
-            code = error.code
-            statusCode = error.statusCode
-        }
+        const { code, message, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
         const headers = new Headers(secureApiHeaders)
         return {

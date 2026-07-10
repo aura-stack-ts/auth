@@ -1,9 +1,8 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
+import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext, UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
-import { verifyRateLimit } from "@/router/rate-limiter.ts"
 
 export const updateSession = async <DefaultUser extends User = User>({
     ctx,
@@ -26,27 +25,22 @@ export const updateSession = async <DefaultUser extends User = User>({
 
         const newHeaders = toUnionHeaders(headers, secureApiHeaders)
 
-        let request = requestInit
-        if (!request) {
-            const origin = await getBaseURL({ ctx, headers })
-            const url = `${origin}${ctx.basePath}/session`
-            request = new Request(url, { headers: newHeaders })
-        }
-        await getOriginURL(request, ctx)
+        const { request, rateLimit } = await createValidation(ctx, newHeaders)
+            .buildRequest(requestInit, "/session")
+            .verifyRateLimit("updateSession")
+            .execute()
 
-        const rateLimit = await verifyRateLimit(ctx, request, "updateSession")
         if (rateLimit) {
             return rateLimit as UpdateSessionAPIReturn<DefaultUser>
         }
 
-        let redirectURL: string | null = await createRedirectTo(request, redirectToInit, ctx)
-        redirectURL = redirectToInit ? redirectURL : redirectURL === "/" ? null : redirectURL
-
-        if (redirectInit && redirectURL) {
-            newHeaders.set("Location", redirectURL)
-        }
-
-        const shouldRedirectServer = redirectInit && !!redirectURL
+        const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
+            ctx,
+            request,
+            redirectInit,
+            redirectToInit,
+            newHeaders
+        )
 
         return {
             headers: newHeaders,
@@ -67,12 +61,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             },
         } as UpdateSessionAPIReturn<DefaultUser>
     } catch (error) {
-        let code = "UPDATE_SESSION_INVALID"
-        let message = "Failed to update session."
-        if (isAuraAuthError(error)) {
-            code = error.code
-            message = error.userMessage
-        }
+        const { code, message } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
 
         const headers = new Headers(secureApiHeaders)
         return {

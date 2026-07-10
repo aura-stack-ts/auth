@@ -1,6 +1,6 @@
 import { z, type ZodObject } from "zod/v4"
 import * as valibot from "valibot"
-import { type Type } from "arktype"
+import type { Type } from "arktype"
 import { Type as Typebox } from "typebox"
 import { isArkType, isTypeboxEntries, isValibotEntries, isZodEntries } from "@/shared/assert.ts"
 import type { IdentityShape as ZodShape } from "@/identity/zod.ts"

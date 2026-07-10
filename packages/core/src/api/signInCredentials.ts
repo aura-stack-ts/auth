@@ -1,11 +1,9 @@
+import { AuraAuthError } from "@/shared/errors.ts"
 import { HeadersBuilder } from "@aura-stack/router"
-import { verifyCSRFToken } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
-import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
+import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext, SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
-import { verifyRateLimit } from "@/router/rate-limiter.ts"
 
 export const signInCredentials = async ({
     ctx,
@@ -18,26 +16,15 @@ export const signInCredentials = async ({
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, sessionStrategy, logger } = ctx
     try {
-        await verifyCSRFToken({
-            headers: new Headers(headerInit),
-            cookies,
-            jose: ctx.jose,
-            logger: ctx.logger,
-            skipCSRFCheck,
-        })
-        let request = requestInit
-        if (!request) {
-            const origin = await getBaseURL({ ctx, headers: headerInit })
-            const url = `${origin}${ctx.basePath}/signIn/credentials`
-            request = new Request(url, { headers: headerInit })
-        }
+        const { request, rateLimit } = await createValidation(ctx, headerInit)
+            .verifyCSRFToken(skipCSRFCheck)
+            .buildRequest(requestInit, "/signIn/credentials")
+            .verifyRateLimit("signInCredentials")
+            .execute()
 
-        const rateLimit = await verifyRateLimit(ctx, request, "signInCredentials")
         if (rateLimit) {
             return rateLimit as SignInCredentialsAPIReturn
         }
-
-        await getOriginURL(request, ctx)
 
         const session = await credentials?.authorize({
             credentials: payload,
@@ -51,19 +38,19 @@ export const signInCredentials = async ({
         const csrfToken = await createCSRF(ctx.jose)
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")
 
-        const headers = new HeadersBuilder(secureApiHeaders)
+        const builder = new HeadersBuilder(secureApiHeaders)
             .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
             .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
 
-        let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx)
-        redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
+        const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
+            ctx,
+            request,
+            redirect,
+            redirectTo,
+            builder
+        )
 
-        if (redirect && redirectURL) {
-            headers.setHeader("Location", redirectURL)
-        }
-
-        const shouldRedirectServer = redirect && !!redirectURL
-        const toHeaders = headers.toHeaders()
+        const toHeaders = builder.toHeaders()
         return {
             success: true,
             headers: toHeaders,
@@ -76,14 +63,12 @@ export const signInCredentials = async ({
                 ),
         } as SignInCredentialsAPIReturn
     } catch (error) {
-        let code = "CREDENTIALS_SIGN_IN_ERROR"
-        let message = "An error occurred during credentials sign-in."
-        let statusCode = 401
-        if (isAuraAuthError(error)) {
-            code = error.code
-            message = error.userMessage
-            statusCode = error.statusCode
-        }
+        const { code, message, statusCode } = handleApiError(
+            error,
+            "CREDENTIALS_SIGN_IN_ERROR",
+            "An error occurred during credentials sign-in.",
+            401
+        )
         const headers = new Headers(secureApiHeaders)
         const invalidCredentials: SignInCredentialsAPIReturn = {
             success: false,
@@ -95,7 +80,7 @@ export const signInCredentials = async ({
                 return Response.json({ success: false, redirect: false, redirectURL: null }, { headers, status: statusCode })
             },
         }
-        if (isAuraAuthError(error) && error.code === "AUTH_CREDENTIALS_INVALID") {
+        if (error instanceof AuraAuthError && error.code === "AUTH_CREDENTIALS_INVALID") {
             logger?.log("INVALID_CREDENTIALS", {
                 severity: "warning",
                 structuredData: { path: "/signIn/credentials" },

@@ -5,9 +5,9 @@ import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
 import type { JWTManager, OAuthTokenPayload } from "@/@types/session.ts"
-import type { CookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
+import type { InternalCookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
 
-export const AURA_AUTH_VERSION = "0.7.2"
+export const AURA_AUTH_VERSION = "0.8.1"
 
 export const equals = (a: string | number | undefined | null, b: string | number | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
@@ -126,7 +126,7 @@ export const verifySessionToken = async ({
 }: {
     headers: Headers
     jwt: JWTManager
-    cookies: CookieStoreConfig
+    cookies: InternalCookieStoreConfig
     logger: InternalLogger | undefined
 }) => {
     let session = null
@@ -157,7 +157,7 @@ export const verifyCSRFToken = async ({
 }: {
     headers: Headers
     skipCSRFCheck: boolean
-    cookies: CookieStoreConfig
+    cookies: InternalCookieStoreConfig
     logger: InternalLogger | undefined
     jose: JoseInstance
 }): Promise<boolean> => {
@@ -213,7 +213,7 @@ export const merge = (origin: Record<string, unknown>, source: Record<string, un
     return { ...origin, ...source }
 }
 
-export const createStandardSession = async ({
+export const getStandardSession = async ({
     sessionToken,
     jwt,
     identity,

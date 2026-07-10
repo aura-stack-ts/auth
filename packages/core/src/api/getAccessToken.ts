@@ -1,7 +1,11 @@
 import { getProviderTokens } from "@/api/getProviderTokens.ts"
-import type { AccessTokenAPIOptions, AccessTokenAPIReturn, FunctionAPIContext } from "@/@types/api.ts"
-import type { LiteralUnion } from "@/@types/utility.ts"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
+import type {
+    AccessTokenAPIOptions,
+    AccessTokenAPIReturn,
+    FunctionAPIContext,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+} from "@/@types/index.ts"
 
 export const getAccessToken = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,

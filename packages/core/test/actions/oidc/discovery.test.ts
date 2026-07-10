@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
-import { discoveryMetadata, normalizeIssuer } from "@/actions/oidc/discovery.ts"
+import { discoveryMetadata, normalizeIssuer } from "@/shared/oidc/discovery.ts"
 import { openIDMetadata } from "@test/presets.ts"
 
 describe("discoveryMetadata", () => {

@@ -1,15 +1,18 @@
 import { HeadersBuilder } from "@aura-stack/router"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { getProviderTokens } from "./getProviderTokens.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { verifyCSRFToken, verifySessionToken, toUnionHeaders, createStandardSession } from "@/shared/utils.ts"
-import { verifyRateLimit } from "@/router/rate-limiter.ts"
-import { getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
-import type { LiteralUnion } from "@/@types/utility.ts"
-import type { User } from "@/@types/session.ts"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { FunctionAPIContext, RefreshUserInfoAPIOptions, RefreshUserInfoAPIReturn } from "@/@types/api.ts"
+import { createValidation, handleApiError } from "@/shared/utils/api.ts"
+import { toUnionHeaders, getStandardSession } from "@/shared/utils.ts"
+import type {
+    FunctionAPIContext,
+    RefreshUserInfoAPIOptions,
+    RefreshUserInfoAPIReturn,
+    LiteralUnion,
+    User,
+    BuiltInOAuthProvider,
+} from "@/@types/index.ts"
 
 export const refreshUserInfo = async <DefaultUser extends User = User>(
     oauth: LiteralUnion<BuiltInOAuthProvider>,
@@ -21,43 +24,20 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             structuredData: { provider: oauth, skipCSRFCheck },
         })
 
-        const provider = ctx.oauth[oauth]
-        if (!provider) {
-            ctx.logger?.log("INVALID_OAUTH_CONFIGURATION", {
-                structuredData: { provider: oauth },
-            })
-            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
-        }
-        const headers = new Headers(headersInit ?? requestInit?.headers)
-        let request = requestInit
-        if (!request) {
-            const origin = await getBaseURL({ ctx, headers })
-            const url = `${origin}${ctx.basePath}/session`
-            request = new Request(url, { headers })
-        }
-        await getOriginURL(request, ctx)
+        const { provider, headers, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+            .verifyOAuthProvider(oauth)
+            .verifySession()
+            .verifyCSRFToken(skipCSRFCheck)
+            .buildRequest(requestInit, `/providers/${oauth}/user/refresh`)
+            .verifyRateLimit("refreshUserInfo")
+            .execute()
 
-        const rateLimit = await verifyRateLimit(ctx, request, "refreshUserInfo")
         if (rateLimit) {
             ctx.logger?.log("INVALID_REQUEST", {
                 structuredData: { provider: oauth },
             })
             return rateLimit as RefreshUserInfoAPIReturn<DefaultUser>
         }
-
-        await verifySessionToken({
-            headers,
-            cookies,
-            jwt: ctx.jwtManager,
-            logger: ctx.logger,
-        })
-        await verifyCSRFToken({
-            headers,
-            cookies,
-            jose: ctx.jose,
-            logger: ctx.logger,
-            skipCSRFCheck,
-        })
 
         const { success, tokens } = await getProviderTokens(oauth, {
             ctx,
@@ -77,7 +57,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             : undefined
 
         const userInfo = await getUserInfo(
-            provider,
+            provider!,
             {
                 access_token: tokens.accessToken,
                 expires_in: expiresIn,
@@ -100,7 +80,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
 
         const mergedHeaders = toUnionHeaders(newHeaders, headers)
 
-        const session = await createStandardSession({
+        const session = await getStandardSession({
             sessionToken,
             jwt: ctx.jwtManager,
             identity: ctx.identity,
@@ -120,14 +100,11 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             },
         }
     } catch (error) {
-        let code = "UNKNOWN_REFRESH_USER_INFO_ERROR"
-        let message = "Failed to refresh user information from the OAuth provider"
-        let statusCode = 400
-        if (isAuraAuthError(error)) {
-            code = error.code
-            message = error.userMessage
-            statusCode = error.statusCode
-        }
+        const { code, message, statusCode } = handleApiError(
+            error,
+            "UNKNOWN_REFRESH_USER_INFO_ERROR",
+            "Failed to refresh user information from the OAuth provider"
+        )
         const newHeaders = new Headers(secureApiHeaders)
         return {
             success: false,

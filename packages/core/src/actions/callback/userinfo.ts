@@ -9,9 +9,9 @@ import type {
     RuntimeOAuthProvider,
     User,
 } from "@/@types/index.ts"
-import { assertContentTypeResponse, isCustomUserInfoFunction } from "@/shared/assert.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { isOIDCProvider } from "@/actions/oidc/resolve-provider.ts"
+import { isOIDCProvider } from "@/shared/oidc/resolve-provider.ts"
+import { assertContentTypeResponse, isCustomUserInfoFunction } from "@/shared/assert.ts"
 
 /**
  * Map the default user information fields from the OAuth provider's userinfo response

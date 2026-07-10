@@ -1,15 +1,18 @@
+import { AuraAuthError } from "@/shared/errors.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { getCookie, getExpiredCookie } from "@/cookie.ts"
-import { verifyRateLimit } from "@/router/rate-limiter.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { createBasicAuthHeader, toUnionHeaders, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
-import { getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
-import type { LiteralUnion } from "@/@types/utility.ts"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
-import type { FunctionAPIContext, RevokeTokenAPIOptions, RevokeTokenAPIReturn } from "@/@types/api.ts"
+import { createValidation, handleApiError } from "@/shared/utils/api.ts"
+import { createBasicAuthHeader, toUnionHeaders } from "@/shared/utils.ts"
+import type {
+    FunctionAPIContext,
+    RevokeTokenAPIOptions,
+    RevokeTokenAPIReturn,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+    RuntimeOAuthProvider,
+} from "@/@types/index.ts"
 
 const revokeProviderToken = async (provider: RuntimeOAuthProvider, accessToken: string) => {
     if (!provider.revokeToken || (typeof provider.revokeToken === "object" && !("url" in provider.revokeToken))) {
@@ -65,43 +68,20 @@ export const revokeToken = async (
             structuredData: { provider: oauth, operation: disconnect ? "disconnect" : "revoke", skipCSRFCheck },
         })
 
-        const provider = ctx.oauth[oauth]
-        if (!provider) {
-            ctx.logger?.log("INVALID_OAUTH_CONFIGURATION", {
-                structuredData: { provider: oauth },
-            })
-            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
-        }
-        const headers = new Headers(headersInit ?? requestInit?.headers)
-        let request = requestInit
-        if (!request) {
-            const origin = await getBaseURL({ ctx, headers })
-            const url = `${origin}${ctx.basePath}/revokeToken/${oauth}`
-            request = new Request(url, { headers })
-        }
-        await getOriginURL(request, ctx)
+        const { provider, headers, request, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+            .verifyOAuthProvider(oauth)
+            .verifySession()
+            .verifyCSRFToken(skipCSRFCheck)
+            .buildRequest(requestInit, `/providers/${oauth}/tokens/revoke`)
+            .verifyRateLimit("revokeToken")
+            .execute()
 
-        const rateLimit = await verifyRateLimit(ctx, request, "revokeToken")
         if (rateLimit) {
             ctx.logger?.log("INVALID_REQUEST", {
                 structuredData: { provider: oauth, reason: "rate_limit_exceeded" },
             })
             return rateLimit as RevokeTokenAPIReturn
         }
-
-        await verifySessionToken({
-            headers,
-            cookies,
-            jwt: ctx.jwtManager,
-            logger: ctx.logger,
-        })
-        await verifyCSRFToken({
-            headers,
-            cookies,
-            jose: ctx.jose,
-            logger: ctx.logger,
-            skipCSRFCheck,
-        })
 
         const cookieName = `${cookies.accessToken.name}.${oauth}`
         const cookie = getCookie(request, cookieName)
@@ -114,7 +94,7 @@ export const revokeToken = async (
                 structuredData: { provider: oauth, hasAccessToken: !!tokens.accessToken },
             })
 
-            await revokeProviderToken(provider, tokens.accessToken)
+            await revokeProviderToken(provider!, tokens.accessToken)
 
             ctx.logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
                 structuredData: { provider: oauth },
@@ -133,14 +113,11 @@ export const revokeToken = async (
             },
         }
     } catch (error) {
-        let code = "UNKNOWN_REVOKE_TOKEN_ERROR"
-        let message = "Failed to revoke token for the OAuth provider"
-        let statusCode = 400
-        if (isAuraAuthError(error)) {
-            code = error.code
-            message = error.userMessage
-            statusCode = error.statusCode
-        }
+        const { code, message, statusCode } = handleApiError(
+            error,
+            "UNKNOWN_REVOKE_TOKEN_ERROR",
+            "Failed to revoke token for the OAuth provider"
+        )
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
             structuredData: { provider: oauth, code, errorType: error?.constructor?.name ?? "Unknown" },
         })

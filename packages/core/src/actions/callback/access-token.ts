@@ -1,6 +1,6 @@
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { assertContentTypeResponse } from "@/shared/assert.ts"
-import { isOIDCProvider } from "@/actions/oidc/resolve-provider.ts"
+import { isOIDCProvider } from "@/shared/oidc/resolve-provider.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { OAuthAccessTokenErrorResponse, OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/schemas.ts"
 import type { InternalLogger, RuntimeOAuthProvider, OAuthAccessTokenResponseType } from "@/@types/index.ts"

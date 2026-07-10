@@ -1,10 +1,8 @@
 import { createCSRF } from "@/shared/crypto.ts"
 import { HeadersBuilder } from "@aura-stack/router"
-import { verifyCSRFToken } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { verifyRateLimit } from "@/router/rate-limiter.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { createRedirectTo, getBaseURL, getOriginURL } from "@/actions/signIn/authorization.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
+import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext, SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
 
 export const signUp = async <Payload extends Record<string, unknown> = Record<string, unknown>>({
@@ -18,26 +16,15 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
     const { signUp, cookies, sessionStrategy, logger } = ctx
     try {
-        let request = requestInit
-        if (!request) {
-            const origin = await getBaseURL({ ctx, headers: headersInit })
-            const url = `${origin}${ctx.basePath}/signUp`
-            request = new Request(url, { headers: headersInit })
-        }
-        await getOriginURL(request, ctx)
+        const { request, rateLimit } = await createValidation(ctx, headersInit)
+            .verifyCSRFToken(skipCSRFCheck)
+            .buildRequest(requestInit, "/signUp")
+            .verifyRateLimit("signUp")
+            .execute()
 
-        const rateLimit = await verifyRateLimit(ctx, request, "signUp")
         if (rateLimit) {
             return rateLimit as SignUpAPIReturn
         }
-
-        await verifyCSRFToken({
-            headers: new Headers(headersInit),
-            cookies,
-            jose: ctx.jose,
-            logger: logger,
-            skipCSRFCheck,
-        })
 
         const user = await signUp?.onCreateUser({
             payload,
@@ -49,19 +36,19 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         const csrfToken = await createCSRF(ctx.jose)
         logger?.log("SIGN_UP_SUCCESS")
 
-        const headers = new HeadersBuilder(secureApiHeaders)
+        const builder = new HeadersBuilder(secureApiHeaders)
             .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
             .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
 
-        let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx)
-        redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
+        const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
+            ctx,
+            request,
+            redirect,
+            redirectTo,
+            builder
+        )
 
-        if (redirect && redirectURL) {
-            headers.setHeader("Location", redirectURL)
-        }
-
-        const shouldRedirectServer = redirect && !!redirectURL
-        const toHeaders = headers.toHeaders()
+        const toHeaders = builder.toHeaders()
         return {
             success: true,
             redirect: shouldRedirectServer,
@@ -79,14 +66,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             },
         } as SignUpAPIReturn
     } catch (error) {
-        let code = "SIGN_UP_ERROR"
-        let message = "An error occurred during sign-up."
-        let statusCode = 400
-        if (isAuraAuthError(error)) {
-            code = error.code
-            message = error.userMessage
-            statusCode = error.statusCode
-        }
+        const { code, message, statusCode } = handleApiError(error, "SIGN_UP_ERROR", "An error occurred during sign-up.")
 
         return {
             success: false,

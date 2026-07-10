@@ -2,8 +2,8 @@ import { jwtVerify, errors as joseErrors } from "@aura-stack/jose/jose"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { timingSafeEqual } from "@/shared/utils.ts"
 import { IDTokenClaimsSchema } from "@/schemas.ts"
-import { ensureJWKSValidated } from "@/actions/oidc/jwks.ts"
-import { normalizeIssuer } from "@/actions/oidc/discovery.ts"
+import { ensureJWKSValidated } from "@/shared/oidc/jwks.ts"
+import { normalizeIssuer } from "@/shared/oidc/discovery.ts"
 
 export interface ValidateIDTokenOptions {
     issuer: string

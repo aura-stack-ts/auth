@@ -1,11 +1,10 @@
-import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
 import { HeadersBuilder } from "@aura-stack/router"
-import { verifyRateLimit } from "@/router/rate-limiter.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
+import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
+import { createValidation, handleApiError } from "@/shared/utils/api.ts"
 import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
-import { createOIDCAuthorizationURL } from "@/actions/oidc/authorization-url.ts"
-import { isOIDCProvider, resolveOpenIDProvider } from "@/actions/oidc/resolve-provider.ts"
-import { createRedirectTo, createRedirectURI, createSignInURL, getBaseURL } from "@/actions/signIn/authorization.ts"
+import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
+import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
+import { createRedirectTo, createRedirectURI, createSignInURL } from "@/actions/signIn/authorization.ts"
 import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
 
 /**
@@ -16,20 +15,11 @@ export const signIn = async (
     { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions>
 ): Promise<SignInAPIReturn> => {
     try {
-        const headers = new Headers(headersInit)
-        const provider = ctx.oauth[oauth]
-        if (!provider) {
-            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
-        }
-
-        let request = requestInit
-        if (!request) {
-            const origin = await getBaseURL({ ctx, headers })
-            const url = `${origin}${ctx.basePath}/signIn/${oauth}`
-            request = new Request(url, { headers })
-        }
-
-        const rateLimit = await verifyRateLimit(ctx, request, "signIn")
+        const { provider, request, rateLimit } = await createValidation(ctx, headersInit)
+            .verifyOAuthProvider(oauth)
+            .buildRequest(requestInit, `/signIn/${oauth}`)
+            .verifyRateLimit("signIn")
+            .execute()
 
         if (rateLimit) {
             return rateLimit as unknown as SignInAPIReturn
@@ -56,12 +46,12 @@ export const signIn = async (
         const redirectURI = await createRedirectURI(request, oauth, ctx)
         const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
 
-        const isOIDC = isOIDCProvider(provider)
+        const isOIDC = isOIDCProvider(provider!)
         ctx.logger?.log("SIGN_IN_PROVIDER_TYPE_DETECTED", {
             structuredData: { oauth_provider: oauth, oidc: isOIDC },
         })
 
-        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider) : provider
+        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider!) : provider!
 
         if (isOIDC) {
             ctx.logger?.log("OIDC_PROVIDER_RESOLVED", {
@@ -116,12 +106,7 @@ export const signIn = async (
             },
         }
     } catch (error) {
-        let code = "AUTH_SIGN_IN_FAILED"
-        let message = "An error occurred during the sign-in process."
-        if (isAuraAuthError(error)) {
-            code = error.code
-            message = error.userMessage
-        }
+        const { code, message } = handleApiError(error, "AUTH_SIGN_IN_FAILED", "An error occurred during the sign-in process.")
         return {
             success: false,
             redirect: false,

@@ -3,17 +3,27 @@ import { createAuthAPI } from "@/api/createApi.ts"
 import { createLogEntry } from "@/shared/logger.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { identitySchema } from "@/identity/zod.ts"
+import type {
+    InferSchema,
+    OpenIDProvider,
+    BuiltInOAuthProvider,
+    Identities,
+    SchemaTypes,
+    ConfigSchema,
+    FromShapeToObject,
+    Prettify,
+    OAuthProviderCredentials,
+    OAuthProviderRecord,
+    JWTKey,
+    JWTManager,
+    SessionConfig,
+    SessionStrategy,
+    User,
+    Awaitable,
+} from "@/@types/index.ts"
 import type { ZodObject } from "zod"
-import type { InferSchema } from "@aura-stack/router"
-import type { OpenIDProvider } from "@/@types/oidc.ts"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { Identities, SchemaTypes } from "@/identity/index.ts"
-import type { ConfigSchema, FromShapeToObject, Prettify } from "@/@types/utility.ts"
-import type { OAuthProviderCredentials, OAuthProviderRecord } from "@/@types/oauth.ts"
-import type { InferRules, RateLimiterRule } from "@aura-stack/rate-limiter/types"
-import type { JWTKey, JWTManager, SessionConfig, SessionStrategy, User } from "@/@types/session.ts"
-import type { RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter"
+import type { InferRules, RateLimiterRule, RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter/types"
 
 /**
  * Main configuration interface for Aura Auth.
@@ -51,11 +61,7 @@ export type AuthConfig<Identity extends Identities, SignUpSchema extends SchemaT
      * ```
      */
     // @todo: add type inference for built-in providers
-    oauth: (
-        | BuiltInOAuthProvider
-        | OAuthProviderCredentials<any, FromShapeToObject<Identity>>
-        | OpenIDProvider<any, FromShapeToObject<Identity>>
-    )[]
+    oauth: OAuthProvidersConfig<Identity>[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine
@@ -119,7 +125,6 @@ export type AuthConfig<Identity extends Identities, SignUpSchema extends SchemaT
      * Defines the session management strategy for Aura Auth. It determines how sessions are created, stored, and validated.
      */
     session?: SessionConfig
-
     /**
      * Identity schema configuration for user data validation.
      * Allows you to define a custom Zod schema that will be used to validate:
@@ -141,45 +146,55 @@ export type AuthConfig<Identity extends Identities, SignUpSchema extends SchemaT
      *   unknownKeys: "strip",
      * }
      */
-    identity?: Partial<{
-        /**
-         * Skip schema validation for session data, JWT payloads, and OAuth profiles.
-         * This can be useful for performance optimization if you are certain that the
-         * data is valid, but it can lead to security vulnerabilities if misused.
-         * > ⚠️ WARNING: Use this option with caution.
-         */
-        skipValidation: boolean
-        /**
-         * Custom schema validation for user identity data. It supports any Zod, Arktype,
-         * Valibot or Typebox schema. Use `createIdentity` helper function to create a schema
-         * with the correct shape and inference.
-         */
-        schema: ConfigSchema<Identity>
-        /**
-         * Defines how unknown keys are handled during schema validation. It can be set to:
-         * - `passthrough`: Unknown keys are allowed and included in the validated data.
-         * - `strict`: Unknown keys will cause validation to fail with an error.
-         * - `strip`: Unknown keys are removed from the validated data.
-         */
-        unknownKeys: "passthrough" | "strict" | "strip"
-    }>
+    identity?: Partial<IdentityConfig<Identity>>
     /**
      * Credentials provider for username/password or similar authentication.
+     *
+     * @example
+     * credentials: {
+     *   authorize: async ({ credentials }) => {
+     *     // Validate the credentials and return a user object if valid
+     *     if (credentials.username === "admin" && credentials.password === "password") {
+     *       return { id: "1", name: "Admin User" }
+     *     }
+     *     return null
+     *   }
+     * }
      */
-    credentials?: CredentialsProvider<Identity>
+    credentials?: CredentialsConfig<Identity>
     /**
      * Configuration for the signUp process, including the schema for validation
      * and required callback for user creation.
+     *
+     * @example
+     * signUp: {
+     *   onCreateUser: async ({ payload }) => {
+     *     // Create a new user in your database and return the user object
+     *     return { id: "2", name: payload.name, email: payload.email }
+     *   }
+     * }
      */
     signUp?: SignUpConfig<Identity, SignUpSchema>
     /**
      * Rate limiter configuration to protect authentication endpoints from DoS/DDoS attacks.
+     *
+     * @example
+     * rateLimiter: {
+     *   signIn: {
+     *     algorithm: "fixed-window",
+     *     window: 60, // 60 seconds
+     *     limit: 5, // 5 requests per window
+     *   }
+     * }
      */
     rateLimiter?: RateLimiterConfig
 } & TrustedProxyHeadersConfig
 
-// @todo Should trustedOrigins support subdomain wildcards like `https://*.example.com`?
-// This option could introduce security risks if misconfigured.
+export type OAuthProvidersConfig<Identity extends Identities> =
+    | BuiltInOAuthProvider
+    | OAuthProviderCredentials<any, FromShapeToObject<Identity>>
+    | OpenIDProvider<any, FromShapeToObject<Identity>>
+
 export type TrustedProxyHeadersConfig =
     | {
           /**
@@ -218,7 +233,7 @@ export type TrustedProxyHeadersConfig =
            *   return [origin, "https://admin.example.com"]
            * }
            */
-          trustedOrigins: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
+          trustedOrigins: TrustedOrigin[] | ((request: Request) => Awaitable<TrustedOrigin[]>)
       }
     | {
           /**
@@ -258,7 +273,7 @@ export type TrustedProxyHeadersConfig =
            * }
            *
            */
-          trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
+          trustedOrigins?: TrustedOrigin[] | ((request: Request) => Awaitable<TrustedOrigin[]>)
       }
 
 /**
@@ -307,7 +322,9 @@ export type CookieName =
     | "accessToken"
 
 /** Resolved cookie names and serialization attributes for each logical auth cookie. */
-export type CookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
+export type CookieStoreConfig = Record<CookieName, { name?: string; attributes?: CookieStrategyAttributes }>
+
+export type InternalCookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
 
 export interface CookieConfig {
     /**
@@ -377,11 +394,34 @@ export interface InternalLogger {
     log: typeof createLogEntry
 }
 
+export interface IdentityConfig<Identity extends Identities> {
+    /**
+     * Skip schema validation for session data, JWT payloads, and OAuth profiles.
+     * This can be useful for performance optimization if you are certain that the
+     * data is valid, but it can lead to security vulnerabilities if misused.
+     * > ⚠️ WARNING: Use this option with caution.
+     */
+    skipValidation: boolean
+    /**
+     * Custom schema validation for user identity data. It supports any Zod, Arktype,
+     * Valibot or Typebox schema. Use `createIdentity` helper function to create a schema
+     * with the correct shape and inference.
+     */
+    schema: ConfigSchema<Identity>
+    /**
+     * Defines how unknown keys are handled during schema validation. It can be set to:
+     * - `passthrough`: Unknown keys are allowed and included in the validated data.
+     * - `strict`: Unknown keys will cause validation to fail with an error.
+     * - `strip`: Unknown keys are removed from the validated data.
+     */
+    unknownKeys: "passthrough" | "strict" | "strip"
+}
+
 /**
  * Identity validation settings used when building session strategy and OAuth profile mapping.
  * Controls the Zod schema and how unknown keys are handled on user objects.
  */
-export interface IdentityConfig<Schema extends SchemaTypes = typeof identitySchema> {
+export interface InternalIdentityConfig<Schema extends SchemaTypes = typeof identitySchema> {
     schema?: Schema
     schemaAsPartial?: Schema
     skipValidation?: boolean
@@ -398,7 +438,7 @@ export interface CredentialsPayload {
  * Context provided to the credentials provider's authorize function.
  * It includes the credentials sent by the user and hashing utilities.
  */
-export interface CredentialsProviderContext<T> {
+export interface CredentialsConfigContext<T> {
     /**
      * User-provided credentials (e.g., email, password).
      */
@@ -416,16 +456,14 @@ export interface CredentialsProviderContext<T> {
 /**
  * Interface for the credentials provider.
  */
-export interface CredentialsProvider<Identity extends Identities> {
+export interface CredentialsConfig<Identity extends Identities> {
     hash?: (password: string, salt?: string, iterations?: number) => Promise<string>
     verify?: (password: string, hashedPassword: string) => Promise<boolean>
     /**
      * Authenticates a user using credentials.
      * Must return a User object or the identity type if the identity schema is provided.
      */
-    authorize: (
-        ctx: CredentialsProviderContext<CredentialsPayload>
-    ) => Promise<FromShapeToObject<Identity> | null> | FromShapeToObject<Identity> | null
+    authorize: (ctx: CredentialsConfigContext<CredentialsPayload>) => Awaitable<FromShapeToObject<Identity> | null>
 }
 
 /**
@@ -434,8 +472,8 @@ export interface CredentialsProvider<Identity extends Identities> {
  */
 export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>> {
     oauth: OAuthProviderRecord
-    credentials?: CredentialsProvider<any>
-    cookies: CookieStoreConfig
+    credentials?: CredentialsConfig<any>
+    cookies: InternalCookieStoreConfig
     jose: JoseInstance<DefaultUser>
     secret?: JWTKey
     baseURL?: string
@@ -492,8 +530,8 @@ export type InternalContext<Identity extends Identities, SignUpSchema extends Sc
     SignUpSchema
 > & {
     cookieConfig: {
-        secure: CookieStoreConfig
-        standard: CookieStoreConfig
+        secure: InternalCookieStoreConfig
+        standard: InternalCookieStoreConfig
     }
 }
 
