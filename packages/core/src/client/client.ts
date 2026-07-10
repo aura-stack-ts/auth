@@ -357,7 +357,6 @@ export const createAuthClient = <
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            console.log("Refresh user info response:", response)
             const json = await response.json()
             return json.session as Session<DefaultUser> | null
         } catch (error) {

@@ -115,6 +115,7 @@ export const createAuth = <
             GET: authInstance.handlers.GET,
             POST: authInstance.handlers.POST,
             PATCH: authInstance.handlers.PATCH,
+            DELETE: authInstance.handlers.DELETE,
         } as const
         if (method in methodHandlers) {
             return await methodHandlers[method as keyof typeof methodHandlers](request)

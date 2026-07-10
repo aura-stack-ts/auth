@@ -33,6 +33,17 @@ const UserInfoConfigSchema = z.union([
     }),
 ])
 
+const RevokeTokenConfigSchema = z
+    .union([
+        string().url(),
+        object({
+            url: string().url(),
+            headers: z.record(string(), string()).optional(),
+            params: z.record(string(), string()).optional(),
+        }),
+    ])
+    .optional()
+
 export const OAuthProviderCredentialsSchema = object({
     id: string(),
     name: string(),
@@ -45,28 +56,10 @@ export const OAuthProviderCredentialsSchema = object({
     userInfo: UserInfoConfigSchema,
     /** @deprecated */
     responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
-    refreshToken: z
-        .union([
-            string().url(),
-            object({
-                url: string().url(),
-                headers: z.record(string(), string()).optional(),
-                params: z.record(string(), string()).optional(),
-            }),
-        ])
-        .optional(),
+    refreshToken: RevokeTokenConfigSchema,
     clientId: string(),
     clientSecret: string(),
-    revokeToken: z
-        .union([
-            string().url(),
-            object({
-                url: string().url(),
-                headers: z.record(string(), string()).optional(),
-                params: z.record(string(), string()).optional(),
-            }),
-        ])
-        .optional(),
+    revokeToken: RevokeTokenConfigSchema,
     profile: z.function().optional(),
 })
 

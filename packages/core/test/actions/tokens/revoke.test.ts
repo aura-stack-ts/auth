@@ -79,11 +79,11 @@ describe("Revoke Action", () => {
             new Request("https://example.com/auth/providers/oauth-provider/tokens/revoke", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(403)
         expect(await response.json()).toEqual({ success: false })
     })
 

@@ -16,10 +16,14 @@ const revokeProviderToken = async (provider: RuntimeOAuthProvider, accessToken: 
         throw new AuraAuthError({ code: "OAUTH_INVALID_REVOKE_TOKEN_CONFIG" })
     }
     if (!accessToken) {
-        throw new AuraAuthError({ code: "OAUTH_INVALID_REVOKE_TOKEN_CONFIG" })
+        throw new AuraAuthError({ code: "INVALID_ACCESS_TOKEN" })
     }
-    const tokenHint =
-        typeof provider.revokeToken === "object" ? (provider.revokeToken.params?.tokenHint ?? "access_token") : "access_token"
+    const { tokenHint: hintParam, ...extraParams } =
+        typeof provider.revokeToken === "object" && provider.revokeToken.params
+            ? provider.revokeToken.params
+            : ({} as Record<string, string>)
+    const tokenHint = hintParam ?? "access_token"
+
     const url = typeof provider.revokeToken === "string" ? provider.revokeToken : provider.revokeToken.url
     const basicAuth = createBasicAuthHeader(provider.clientId!, provider.clientSecret!)
 
@@ -33,7 +37,7 @@ const revokeProviderToken = async (provider: RuntimeOAuthProvider, accessToken: 
         body: new URLSearchParams({
             token: accessToken,
             token_type_hint: tokenHint,
-            ...(typeof provider.revokeToken === "object" && provider.revokeToken.params ? provider.revokeToken.params : {}),
+            ...extraParams,
         }),
     })
     if (!response.ok) {
@@ -58,7 +62,7 @@ export const revokeToken = async (
     const { cookies } = ctx
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
-            structuredData: { provider: oauth, operation: "revoke", skipCSRFCheck },
+            structuredData: { provider: oauth, operation: disconnect ? "disconnect" : "revoke", skipCSRFCheck },
         })
 
         const provider = ctx.oauth[oauth]

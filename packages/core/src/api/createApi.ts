@@ -9,6 +9,7 @@ import {
     getAccessToken,
     refreshUserInfo,
     revokeToken,
+    disconnectProvider,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -35,6 +36,7 @@ import type {
     AccessTokenAPIReturn,
     RefreshUserInfoAPIOptions,
     RevokeTokenAPIOptions,
+    DisconnectProviderAPIOptions,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -223,8 +225,8 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * // Use the returned headers to update the response headers in your server-side logic
          * return new Response(null, { status: 200, headers })
          */
-        disconnectProvider: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: RevokeTokenAPIOptions) => {
-            return revokeToken(oauth, { ctx, ...options, disconnect: true, skipCSRFCheck: true })
+        disconnectProvider: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: DisconnectProviderAPIOptions) => {
+            return disconnectProvider(oauth, { ctx, ...options, skipCSRFCheck: true })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for
