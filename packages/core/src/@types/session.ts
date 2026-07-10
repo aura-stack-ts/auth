@@ -2,9 +2,16 @@ import { identitySchema } from "@/identity/zod.ts"
 import type { JWK } from "@aura-stack/jose/jose"
 import type { infer as Infer } from "zod/v4/core"
 import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { Identities } from "@/identity/index.ts"
-import type { DeepPartial, FromShapeToObject, Prettify } from "@/@types/utility.ts"
-import type { CookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
+import type {
+    InternalCookieStoreConfig,
+    InternalLogger,
+    JoseInstance,
+    SchemaRegistryContext,
+    DeepPartial,
+    FromShapeToObject,
+    Prettify,
+    Identities,
+} from "@/@types/index.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof identitySchema>
@@ -230,7 +237,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
 export interface CreateSessionStrategyOptions<Identity extends Identities> {
     config?: SessionConfig
     jose: JoseInstance<FromShapeToObject<Identity> & User>
-    cookies: () => CookieStoreConfig
+    cookies: () => InternalCookieStoreConfig
     logger?: InternalLogger
     identity: SchemaRegistryContext
 }
@@ -240,7 +247,7 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
     config?: StatelessStrategyConfig
     jose: JoseInstance<DefaultUser>
     logger?: InternalLogger
-    cookies: () => CookieStoreConfig
+    cookies: () => InternalCookieStoreConfig
     identity: SchemaRegistryContext
 }
 

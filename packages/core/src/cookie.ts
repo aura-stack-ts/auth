@@ -1,7 +1,7 @@
 import { env } from "@/shared/env.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
-import type { CookieStoreConfig, CookieConfig, InternalLogger } from "@/@types/index.ts"
+import type { CookieConfig, InternalLogger, InternalCookieStoreConfig } from "@/@types/index.ts"
 
 /**
  * Prefix for all cookies set by Aura Auth.
@@ -177,7 +177,7 @@ export const createCookieStore = (
     prefix?: string,
     overrides?: CookieConfig["overrides"],
     logger?: InternalLogger
-): CookieStoreConfig => {
+): InternalCookieStoreConfig => {
     prefix ??= COOKIE_NAME
     const securePrefix = useSecure ? "__Secure-" : ""
     const hostPrefix = useSecure ? "__Host-" : ""

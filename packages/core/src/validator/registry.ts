@@ -7,7 +7,7 @@ import { OAuthTokenPayloadSchema } from "@/schemas.ts"
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createValidator } from "@aura-stack/router/validator"
-import type { IdentityConfig } from "@/@types/config.ts"
+import type { InternalIdentityConfig } from "@/@types/config.ts"
 import type { OAuthTokenPayload } from "@/@types/session.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { EditableToSchema, ReturnUpdateSessionShape } from "@/@types/utility.ts"
@@ -162,7 +162,7 @@ export const getFullSchema = <Identity extends Identities, Schema = EditableToSc
     throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
-export const createSchemaRegistry = <Identity extends SchemaTypes>(config: IdentityConfig<Identity>) => {
+export const createSchemaRegistry = <Identity extends SchemaTypes>(config: InternalIdentityConfig<Identity>) => {
     const schema = deriveSchema(config.schema ?? identitySchema, config.unknownKeys)
     const schemaAsPartial = deriveSchema(config.schema ?? identitySchema, "partial")
     const schemaWithJWT = deriveSchemaWithJWT(config.schema ?? identitySchema)

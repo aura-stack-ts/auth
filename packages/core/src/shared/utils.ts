@@ -5,7 +5,7 @@ import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
 import type { JWTManager, OAuthTokenPayload } from "@/@types/session.ts"
-import type { CookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
+import type { InternalCookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
 
 export const AURA_AUTH_VERSION = "0.7.2"
 
@@ -126,7 +126,7 @@ export const verifySessionToken = async ({
 }: {
     headers: Headers
     jwt: JWTManager
-    cookies: CookieStoreConfig
+    cookies: InternalCookieStoreConfig
     logger: InternalLogger | undefined
 }) => {
     let session = null
@@ -157,7 +157,7 @@ export const verifyCSRFToken = async ({
 }: {
     headers: Headers
     skipCSRFCheck: boolean
-    cookies: CookieStoreConfig
+    cookies: InternalCookieStoreConfig
     logger: InternalLogger | undefined
     jose: JoseInstance
 }): Promise<boolean> => {

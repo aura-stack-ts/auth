@@ -1,6 +1,6 @@
 import type { OAuthTokenPayload, Session, User } from "@/@types/session.ts"
-import type { AuthResponse, DeepPartial, Prettify, RequiredKeys } from "@/@types/utility.ts"
 import type { CredentialsPayload, RouterGlobalContext } from "@/@types/config.ts"
+import type { AuthResponse, DeepPartial, Prettify, RequiredKeys } from "@/@types/utility.ts"
 
 /**
  * Canonical return shape for server/programmatic API functions.
@@ -93,7 +93,7 @@ export interface APIOptionsWithRedirectTo {
     redirectTo?: string
 }
 
-export interface APIOptionsWithRequest extends APIOptionsWithRedirectTo {
+export interface APIOptionsWithRequest {
     /**
      * Optional `Request` object, useful for constructing the incoming URL on the server side.
      * This option is required when the `redirectTo` option is defined, to ensure the `redirectTo`
@@ -136,6 +136,14 @@ export type GetSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPI
  */
 export interface SignInOptions extends OptionsWithRedirectTo {}
 
+export type SignInReturnData =
+    /** redirect: true & redirectTo: string */
+    | { success: true; redirect: true; signInURL: string }
+    /** redirect: false & redirectTo: string */
+    | { success: true; redirect: false; signInURL: string }
+    /** redirect: false & redirectTo: null | undefined (not set) */
+    | { success: false; redirect: false; signInURL: null }
+
 /**
  * Client-side `signIn` return type.
  *
@@ -143,13 +151,13 @@ export interface SignInOptions extends OptionsWithRedirectTo {}
  * - Manual mode (`redirect: false`): returns `signInURL` for caller-controlled navigation.
  */
 export type SignInReturn<Options extends SignInOptions> = Options extends { redirect: false }
-    ? { success: true; redirect: false; signInURL: string } | { success: false; redirect: false; signInURL: null }
+    ? Extract<SignInReturnData, { redirect: false }>
     : void
 
 /**
  * Server/programmatic options for `signIn` API.
  */
-export interface SignInAPIOptions extends APIOptionsWithRedirectTo, APIOptionsWithRequest {}
+export interface SignInAPIOptions extends APIOptionsWithRequest, APIOptionsWithRedirectTo {}
 
 /**
  * Server/programmatic `signIn` result.
@@ -157,18 +165,7 @@ export interface SignInAPIOptions extends APIOptionsWithRedirectTo, APIOptionsWi
  * Includes `signInURL` and response metadata to support both framework-managed redirects
  * and custom response handling through `toResponse()`.
  */
-export type SignInAPIReturn = AuthActionAPIReturn<
-    | {
-          success: true
-          redirect: boolean
-          signInURL: string
-      }
-    | {
-          success: false
-          redirect: false
-          signInURL: null
-      }
->
+export type SignInAPIReturn = AuthActionAPIReturn<SignInReturnData>
 
 export interface SignInCredentialsOptions extends OptionsWithRedirectTo {
     /**
@@ -200,7 +197,7 @@ export type SignInCredentialsReturn<Options extends SignInCredentialsOptions> = 
 
 /** Server/programmatic credentials sign-in options. */
 export interface SignInCredentialsAPIOptions
-    extends APIOptionsWithRedirectTo, APIOptionsWithRequest, APIOptionsWithSkipCSRFCheck {
+    extends APIOptionsWithRequest, APIOptionsWithRedirectTo, APIOptionsWithSkipCSRFCheck {
     /**
      * Credentials payload validated by the configured `credentials.authorize` function.
      * @example
@@ -235,7 +232,8 @@ export type SignOutReturn<Options extends SignOutOptions> = Options extends { re
     : void
 
 /** Server/programmatic options for `signOut` API. */
-export interface SignOutAPIOptions extends RequiredKeys<APIOptionsWithRequest, "headers">, APIOptionsWithSkipCSRFCheck {}
+export interface SignOutAPIOptions
+    extends RequiredKeys<APIOptionsWithRequest, "headers">, APIOptionsWithRedirectTo, APIOptionsWithSkipCSRFCheck {}
 
 /** Programmatic sign-out result with redirect metadata and `toResponse()`. */
 export type SignOutAPIReturn = AuthActionAPIReturn<SignOutReturnData>
@@ -268,7 +266,7 @@ export type UpdateSessionReturn<
 
 /** Server/programmatic options for `updateSession` API. */
 export interface UpdateSessionAPIOptions<DefaultUser extends User = User>
-    extends RequiredKeys<APIOptionsWithRequest, "headers">, APIOptionsWithSkipCSRFCheck {
+    extends RequiredKeys<APIOptionsWithRequest, "headers">, APIOptionsWithRedirectTo, APIOptionsWithSkipCSRFCheck {
     /**
      * Partial session payload used to update the current session.
      * @see Session
@@ -287,7 +285,7 @@ export interface UpdateSessionAPIOptions<DefaultUser extends User = User>
 export type UpdateSessionAPIReturn<DefaultUser extends User = User> = AuthActionAPIReturn<UpdateSessionReturnData<DefaultUser>>
 
 export interface SignUpAPIOptions<Payload extends Record<string, any> = Record<string, any>>
-    extends APIOptionsWithRedirectTo, APIOptionsWithRequest, APIOptionsWithSkipCSRFCheck {
+    extends APIOptionsWithRequest, APIOptionsWithRedirectTo, APIOptionsWithSkipCSRFCheck {
     payload: Payload
 }
 
@@ -355,7 +353,7 @@ export type AccessTokenAPIReturn = AuthActionAPIReturn<AccessTokenData>
 /**
  * Programmatic options for `refreshUserInfo` API.
  */
-export type RefreshUserInfoAPIOptions = Pick<APIOptionsWithRequest, "headers" | "request"> & APIOptionsWithSkipCSRFCheck
+export interface RefreshUserInfoAPIOptions extends APIOptionsWithRequest, APIOptionsWithSkipCSRFCheck {}
 
 export type RefreshUserInfoData<DefaultUser extends User = User> =
     | { success: true; session: Session<DefaultUser> }
@@ -369,7 +367,7 @@ export type RefreshUserInfoAPIReturn<DefaultUser extends User = User> = AuthActi
 /**
  * Programmatic options for `revokeToken` API.
  */
-export type RevokeTokenAPIOptions = Pick<APIOptionsWithRequest, "headers" | "request"> & APIOptionsWithSkipCSRFCheck
+export interface RevokeTokenAPIOptions extends APIOptionsWithRequest, APIOptionsWithSkipCSRFCheck {}
 
 export type RevokeTokenData = { success: true } | { success: false }
 
@@ -381,7 +379,7 @@ export type RevokeTokenAPIReturn = AuthActionAPIReturn<RevokeTokenData>
 /**
  * Programmatic options for `disconnectProvider` API.
  */
-export type DisconnectProviderAPIOptions = APIOptionsWithRequest & APIOptionsWithSkipCSRFCheck
+export interface DisconnectProviderAPIOptions extends APIOptionsWithRequest, APIOptionsWithSkipCSRFCheck {}
 
 export type DisconnectProviderData = { success: true } | { success: false }
 
