@@ -4,7 +4,7 @@ import { secureApiHeaders } from "@/shared/headers.ts"
 import { getProviderTokens } from "./getProviderTokens.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
-import { toUnionHeaders, createStandardSession } from "@/shared/utils.ts"
+import { toUnionHeaders, getStandardSession } from "@/shared/utils.ts"
 import type {
     FunctionAPIContext,
     RefreshUserInfoAPIOptions,
@@ -80,7 +80,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
 
         const mergedHeaders = toUnionHeaders(newHeaders, headers)
 
-        const session = await createStandardSession({
+        const session = await getStandardSession({
             sessionToken,
             jwt: ctx.jwtManager,
             identity: ctx.identity,

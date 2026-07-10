@@ -213,7 +213,7 @@ export const merge = (origin: Record<string, unknown>, source: Record<string, un
     return { ...origin, ...source }
 }
 
-export const createStandardSession = async ({
+export const getStandardSession = async ({
     sessionToken,
     jwt,
     identity,
