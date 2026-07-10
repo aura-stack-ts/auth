@@ -2,7 +2,7 @@ import { getCookie } from "@/cookie.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { shouldRefresh, toUnionHeaders } from "@/shared/utils.ts"
+import { createBasicAuthHeader, shouldRefresh, toUnionHeaders } from "@/shared/utils.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
 import type {
@@ -14,29 +14,35 @@ import type {
     BuiltInOAuthProvider,
     RuntimeOAuthProvider,
 } from "@/@types/index.ts"
+import { isRefreshTokenObject } from "@/shared/assert.ts"
 
 export const refreshProviderToken = async (
     payload: OAuthTokenPayload,
     provider: RuntimeOAuthProvider
 ): Promise<OAuthTokenPayload> => {
-    if (!provider.refreshToken || (typeof provider.refreshToken === "object" && !("url" in provider.refreshToken))) {
+    if (!provider.refreshToken || (isRefreshTokenObject(provider.refreshToken) && !("url" in provider.refreshToken))) {
         throw new AuraAuthError({ code: "OAUTH_INVALID_REFRESH_TOKEN_CONFIG" })
     }
     if (!payload.refreshToken) {
         throw new AuraAuthError({ code: "OAUTH_INVALID_REFRESH_TOKEN_CONFIG" })
     }
-    const url = typeof provider.refreshToken === "string" ? provider.refreshToken : provider.refreshToken.url
+    const url = isRefreshTokenObject(provider.refreshToken) ? provider.refreshToken.url : provider.refreshToken
+    const basicAuth = createBasicAuthHeader(provider.clientId!, provider.clientSecret!)
+
+    const isCredentialsAuth = isRefreshTokenObject(provider.refreshToken)
+        ? provider.refreshToken.authorization?.type === "credentials"
+        : false
     const response = await fetchAsync(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
+            ...(isCredentialsAuth ? {} : { Authorization: basicAuth }),
             ...(typeof provider.refreshToken === "object" && provider.refreshToken.headers ? provider.refreshToken.headers : {}),
         },
         body: new URLSearchParams({
             grant_type: "refresh_token",
             refresh_token: payload.refreshToken!,
-            client_id: provider.clientId!,
-            client_secret: provider.clientSecret!,
+            ...(isCredentialsAuth ? { client_id: provider.clientId!, client_secret: provider.clientSecret! } : {}),
             ...(typeof provider.refreshToken === "object" && provider.refreshToken.params ? provider.refreshToken.params : {}),
         }),
     })
@@ -65,8 +71,9 @@ export const getProviderTokens = async (
     { ctx, request: requestInit, headers: headersInit, skipCSRFCheck = false }: FunctionAPIContext<GetProviderTokensAPIOptions>
 ): Promise<GetProviderTokensAPIReturn> => {
     const { cookies, identity, jwtManager } = ctx
+    const initialHeaders = new Headers(headersInit ?? requestInit?.headers)
     try {
-        const { provider, headers, request, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+        const { provider, headers, request, rateLimit } = await createValidation(ctx, initialHeaders)
             .verifyOAuthProvider(oauth)
             .verifySession()
             .verifyCSRFToken(skipCSRFCheck)
@@ -111,7 +118,7 @@ export const getProviderTokens = async (
     } catch (error) {
         const { code, message, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
-        const headers = new Headers(secureApiHeaders)
+        const headers = toUnionHeaders(initialHeaders, secureApiHeaders)
         return {
             success: false,
             tokens: null,

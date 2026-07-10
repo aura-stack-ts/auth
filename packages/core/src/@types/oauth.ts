@@ -100,7 +100,14 @@ export interface OAuthProviderConfig<Profile extends object = Record<string, any
      * Refresh token configuration for the OAuth provider. This option allows refreshing access tokens
      * when they expire.
      */
-    refreshToken?: string | { url: string; headers?: Record<string, string>; params?: Record<string, string> }
+    refreshToken?:
+        | string
+        | {
+              url: string
+              headers?: Record<string, string>
+              params?: Record<string, string>
+              authorization?: { type: "basic" | "credentials" }
+          }
     /**
      * Revoke the access token configuration for the OAuth provider. It revokes the access token but not
      * invalidate the session when there are multiple access token configured for the session.

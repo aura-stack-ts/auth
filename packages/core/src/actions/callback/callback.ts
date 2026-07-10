@@ -4,7 +4,7 @@ import { createCSRF } from "@/shared/crypto.ts"
 import { parse } from "@aura-stack/router/cookie"
 import { cacheControl } from "@/shared/headers.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
-import { timingSafeEqual } from "@/shared/utils.ts"
+import { timingSafeEqual, transformToTokenPayload } from "@/shared/utils.ts"
 import { getCookie, getExpiredCookie } from "@/cookie.ts"
 import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { validateIDToken } from "@/shared/oidc/id-token.ts"
@@ -132,6 +132,8 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
             const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
             const session = await context.sessionStrategy.createSession(userInfo)
             const csrfToken = await createCSRF(jose)
+            const tokenPayload = transformToTokenPayload(accessToken)
+            const providerToken = await context.jwtManager.createToken(tokenPayload)
 
             logger?.log("OAUTH_CALLBACK_SUCCESS", {
                 structuredData: {
@@ -143,6 +145,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 .setHeader("Location", cookieRedirectTo)
                 .setCookie(cookies.sessionToken.name, session, cookies.sessionToken.attributes)
                 .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
+                .setCookie(`${cookies.accessToken.name}.${oauth}`, providerToken, cookies.accessToken.attributes)
                 .toHeaders()
             return Response.json({ oauth }, { status: 302, headers: headers })
         },

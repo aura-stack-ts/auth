@@ -3,9 +3,10 @@ import { getCookie } from "@/cookie.ts"
 import { verifyCSRF } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
-import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
+import { isRelativeURL, isString, isValidURL } from "@/shared/assert.ts"
 import type { JWTManager, OAuthTokenPayload } from "@/@types/session.ts"
 import type { InternalCookieStoreConfig, InternalLogger, JoseInstance, SchemaRegistryContext } from "@/@types/config.ts"
+import type { OAuthAccessTokenResponseType } from "@/@types/oauth.ts"
 
 export const AURA_AUTH_VERSION = "0.8.1"
 
@@ -234,4 +235,19 @@ export const getStandardSession = async ({
     const userClaims = await identity.schemaRegistry.parse(defaultPayload)
     if (!userClaims.sub) return null
     return userClaims
+}
+
+export const transformToTokenPayload = (tokens: OAuthAccessTokenResponseType & { id_token?: string }) => {
+    return {
+        accessToken: tokens.access_token,
+        expiresAt: tokens.expires_in ? Math.floor(Date.now() / 1000) + tokens.expires_in : undefined,
+        refreshToken: tokens.refresh_token,
+        refreshTokenExpiresAt: tokens.refresh_token_expires_in
+            ? Math.floor(Date.now() / 1000) + tokens.refresh_token_expires_in
+            : undefined,
+        idToken: tokens.id_token,
+        tokenType: tokens.token_type,
+        scopes: isString(tokens.scope) ? [tokens.scope] : Array.isArray(tokens.scope) ? tokens.scope : [],
+        issuedAt: Math.floor(Date.now() / 1000),
+    }
 }
