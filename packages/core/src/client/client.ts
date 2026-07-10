@@ -431,6 +431,26 @@ export const createAuthClient = <
         }
     }
 
+    const isProviderConnected = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            if (!csrfToken) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
+            const response = await client.get("/providers/:oauth", {
+                params: { oauth },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json = await response.json()
+            return json?.success === true && json?.connected === true
+        } catch (error) {
+            console.error("Error checking provider connection:", error)
+            return false
+        }
+    }
+
     /**
      * Signs out the current user, ending their session and optionally redirecting them to a specified URL.
      *
@@ -483,6 +503,7 @@ export const createAuthClient = <
         refreshUserInfo,
         revokeToken,
         disconnectProvider,
+        isProviderConnected,
         signOut,
     }
 }

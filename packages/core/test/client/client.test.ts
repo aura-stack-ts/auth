@@ -860,4 +860,66 @@ describe("createAuthClient", () => {
         })
         expect(response).toEqual(false)
     })
+
+    test("isProviderConnected with valid response", async () => {
+        const get = vi.fn()
+
+        get.mockResolvedValueOnce(createJSONResponse({ csrfToken: "csrf_token_1" }))
+
+        get.mockResolvedValueOnce(
+            createJSONResponse({
+                success: true,
+                connected: true,
+            })
+        )
+
+        createClientMock.mockReturnValue({
+            get,
+            post: vi.fn(),
+        })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.isProviderConnected("github")
+
+        expect(get).toHaveBeenCalledTimes(2)
+        expect(get).toHaveBeenCalledWith("/csrfToken")
+        expect(get).toHaveBeenCalledWith("/providers/:oauth", {
+            params: { oauth: "github" },
+            headers: {
+                "X-CSRF-Token": "csrf_token_1",
+            },
+        })
+        expect(response).toEqual(true)
+    })
+
+    test("isProviderConnected with invalid response", async () => {
+        const get = vi.fn()
+
+        get.mockResolvedValueOnce(createJSONResponse({ csrfToken: "csrf_token_1" }))
+
+        get.mockResolvedValueOnce(
+            createJSONResponse({
+                success: false,
+                connected: false,
+            })
+        )
+
+        createClientMock.mockReturnValue({
+            get,
+            post: vi.fn(),
+        })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.isProviderConnected("github")
+
+        expect(get).toHaveBeenCalledTimes(2)
+        expect(get).toHaveBeenCalledWith("/csrfToken")
+        expect(get).toHaveBeenCalledWith("/providers/:oauth", {
+            params: { oauth: "github" },
+            headers: {
+                "X-CSRF-Token": "csrf_token_1",
+            },
+        })
+        expect(response).toEqual(false)
+    })
 })

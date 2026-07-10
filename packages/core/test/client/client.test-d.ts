@@ -30,29 +30,30 @@ import { identitySchema as UserIdentityArkType } from "@/identity/arktype.ts"
 import { identitySchema as UserIdentityTypeBox } from "@/identity/typebox.ts"
 import { identitySchema as UserIdentityValibot } from "@/identity/valibot.ts"
 
+type AuthClientReturn<DefaultUser extends User = User, SignUpUser extends Record<string, any> = Record<string, any>> = {
+    getSession: () => Promise<Session<DefaultUser> | null>
+    signIn: <Options extends SignInOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options | undefined
+    ) => Promise<SignInReturn<Options>>
+    signInCredentials: <Options extends SignInCredentialsOptions>(options: Options) => Promise<SignInCredentialsReturn<Options>>
+    signUp: <Options extends SignUpOptions<SignUpUser>>(options: Options) => Promise<SignUpReturn<Options>>
+    updateSession: <Options extends UpdateSessionOptions<DefaultUser>>(
+        options: Options
+    ) => Promise<UpdateSessionReturn<Options, DefaultUser>>
+    getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
+    getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
+    refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<DefaultUser> | null>
+    revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
+    disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
+    isProviderConnected: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
+    signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
+}
+
 describe("Client Types", () => {
     test("createAuthClient returns the correct type", () => {
         const authClient = createAuthClient({})
-        expectTypeOf(authClient).toEqualTypeOf<{
-            getSession: () => Promise<Session<User> | null>
-            signIn: <Options extends SignInOptions>(
-                oauth: LiteralUnion<BuiltInOAuthProvider>,
-                options?: Options | undefined
-            ) => Promise<SignInReturn<Options>>
-            signInCredentials: <Options extends SignInCredentialsOptions>(
-                options: Options
-            ) => Promise<SignInCredentialsReturn<Options>>
-            signUp: <Options extends SignUpOptions<Record<string, any>>>(options: Options) => Promise<SignUpReturn<Options>>
-            updateSession: <Options extends UpdateSessionOptions<User>>(
-                options: Options
-            ) => Promise<UpdateSessionReturn<Options, User>>
-            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
-            getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
-            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
-            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
-        }>()
+        expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn>()
     })
 
     test("with custom zod identity schema", () => {
@@ -82,26 +83,7 @@ describe("Client Types", () => {
         expectTypeOf<UserFrom<typeof schema>>().toEqualTypeOf<Expected>()
 
         const authClient = createAuthClient<User>({})
-        expectTypeOf(authClient).toEqualTypeOf<{
-            getSession: () => Promise<Session<User> | null>
-            signIn: <Options extends SignInOptions>(
-                oauth: LiteralUnion<BuiltInOAuthProvider>,
-                options?: Options | undefined
-            ) => Promise<SignInReturn<Options>>
-            signInCredentials: <Options extends SignInCredentialsOptions>(
-                options: Options
-            ) => Promise<SignInCredentialsReturn<Options>>
-            signUp: <Options extends SignUpOptions<Record<string, any>>>(options: Options) => Promise<SignUpReturn<Options>>
-            updateSession: <Options extends UpdateSessionOptions<User>>(
-                options: Options
-            ) => Promise<UpdateSessionReturn<Options, User>>
-            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
-            getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
-            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
-            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
-        }>()
+        expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User>>()
     })
 
     test("with custom valibot identity schema", () => {
@@ -132,26 +114,7 @@ describe("Client Types", () => {
         expectTypeOf<UserFrom<typeof schema>>().toEqualTypeOf<Expected>()
 
         const authClient = createAuthClient<User>({})
-        expectTypeOf(authClient).toEqualTypeOf<{
-            getSession: () => Promise<Session<User> | null>
-            signIn: <Options extends SignInOptions>(
-                oauth: LiteralUnion<BuiltInOAuthProvider>,
-                options?: Options | undefined
-            ) => Promise<SignInReturn<Options>>
-            signInCredentials: <Options extends SignInCredentialsOptions>(
-                options: Options
-            ) => Promise<SignInCredentialsReturn<Options>>
-            signUp: <Options extends SignUpOptions<Record<string, any>>>(options: Options) => Promise<SignUpReturn<Options>>
-            updateSession: <Options extends UpdateSessionOptions<User>>(
-                options: Options
-            ) => Promise<UpdateSessionReturn<Options, User>>
-            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
-            getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
-            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
-            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
-        }>()
+        expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User>>()
     })
 
     test("with custom arktype identity schema", () => {
@@ -181,26 +144,7 @@ describe("Client Types", () => {
         expectTypeOf<UserFrom<typeof schema>>().toEqualTypeOf<Expected>()
 
         const authClient = createAuthClient<User>({})
-        expectTypeOf(authClient).toEqualTypeOf<{
-            getSession: () => Promise<Session<User> | null>
-            signIn: <Options extends SignInOptions>(
-                oauth: LiteralUnion<BuiltInOAuthProvider>,
-                options?: Options | undefined
-            ) => Promise<SignInReturn<Options>>
-            signInCredentials: <Options extends SignInCredentialsOptions>(
-                options: Options
-            ) => Promise<SignInCredentialsReturn<Options>>
-            signUp: <Options extends SignUpOptions<Record<string, any>>>(options: Options) => Promise<SignUpReturn<Options>>
-            updateSession: <Options extends UpdateSessionOptions<User>>(
-                options: Options
-            ) => Promise<UpdateSessionReturn<Options, User>>
-            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
-            getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
-            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
-            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
-        }>()
+        expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User>>()
     })
 
     test("with custom typebox identity schema", () => {
@@ -234,26 +178,7 @@ describe("Client Types", () => {
         }>()
 
         const authClient = createAuthClient<User>({})
-        expectTypeOf(authClient).toEqualTypeOf<{
-            getSession: () => Promise<Session<User> | null>
-            signIn: <Options extends SignInOptions>(
-                oauth: LiteralUnion<BuiltInOAuthProvider>,
-                options?: Options | undefined
-            ) => Promise<SignInReturn<Options>>
-            signInCredentials: <Options extends SignInCredentialsOptions>(
-                options: Options
-            ) => Promise<SignInCredentialsReturn<Options>>
-            signUp: <Options extends SignUpOptions<Record<string, any>>>(options: Options) => Promise<SignUpReturn<Options>>
-            updateSession: <Options extends UpdateSessionOptions<User>>(
-                options: Options
-            ) => Promise<UpdateSessionReturn<Options, User>>
-            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
-            getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
-            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
-            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
-        }>()
+        expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User>>()
     })
 
     test("with custom zod signUp schema", () => {
@@ -276,26 +201,7 @@ describe("Client Types", () => {
         }>()
 
         const authClient = createAuthClient<User, SignUp>({})
-        expectTypeOf(authClient).toEqualTypeOf<{
-            getSession: () => Promise<Session<User> | null>
-            signIn: <Options extends SignInOptions>(
-                oauth: LiteralUnion<BuiltInOAuthProvider>,
-                options?: Options | undefined
-            ) => Promise<SignInReturn<Options>>
-            signInCredentials: <Options extends SignInCredentialsOptions>(
-                options: Options
-            ) => Promise<SignInCredentialsReturn<Options>>
-            signUp: <Options extends SignUpOptions<SignUp>>(options: Options) => Promise<SignUpReturn<Options>>
-            updateSession: <Options extends UpdateSessionOptions<User>>(
-                options: Options
-            ) => Promise<UpdateSessionReturn<Options, User>>
-            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
-            getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
-            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
-            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
-        }>()
+        expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User, SignUp>>()
     })
 
     test("with custom valibot signUp schema", () => {
@@ -318,26 +224,7 @@ describe("Client Types", () => {
         }>()
 
         const authClient = createAuthClient<User, SignUp>({})
-        expectTypeOf(authClient).toEqualTypeOf<{
-            getSession: () => Promise<Session<User> | null>
-            signIn: <Options extends SignInOptions>(
-                oauth: LiteralUnion<BuiltInOAuthProvider>,
-                options?: Options | undefined
-            ) => Promise<SignInReturn<Options>>
-            signInCredentials: <Options extends SignInCredentialsOptions>(
-                options: Options
-            ) => Promise<SignInCredentialsReturn<Options>>
-            signUp: <Options extends SignUpOptions<SignUp>>(options: Options) => Promise<SignUpReturn<Options>>
-            updateSession: <Options extends UpdateSessionOptions<User>>(
-                options: Options
-            ) => Promise<UpdateSessionReturn<Options, User>>
-            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
-            getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
-            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
-            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
-        }>()
+        expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User, SignUp>>()
     })
 
     test("with custom arktype signUp schema", () => {
@@ -360,26 +247,7 @@ describe("Client Types", () => {
         }>()
 
         const authClient = createAuthClient<User, SignUp>({})
-        expectTypeOf(authClient).toEqualTypeOf<{
-            getSession: () => Promise<Session<User> | null>
-            signIn: <Options extends SignInOptions>(
-                oauth: LiteralUnion<BuiltInOAuthProvider>,
-                options?: Options | undefined
-            ) => Promise<SignInReturn<Options>>
-            signInCredentials: <Options extends SignInCredentialsOptions>(
-                options: Options
-            ) => Promise<SignInCredentialsReturn<Options>>
-            signUp: <Options extends SignUpOptions<SignUp>>(options: Options) => Promise<SignUpReturn<Options>>
-            updateSession: <Options extends UpdateSessionOptions<User>>(
-                options: Options
-            ) => Promise<UpdateSessionReturn<Options, User>>
-            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
-            getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
-            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
-            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
-        }>()
+        expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User, SignUp>>()
     })
 
     test("with custom typebox signUp schema", () => {
@@ -404,25 +272,6 @@ describe("Client Types", () => {
         }>()
 
         const authClient = createAuthClient<User, SignUp>({})
-        expectTypeOf(authClient).toEqualTypeOf<{
-            getSession: () => Promise<Session<User> | null>
-            signIn: <Options extends SignInOptions>(
-                oauth: LiteralUnion<BuiltInOAuthProvider>,
-                options?: Options | undefined
-            ) => Promise<SignInReturn<Options>>
-            signInCredentials: <Options extends SignInCredentialsOptions>(
-                options: Options
-            ) => Promise<SignInCredentialsReturn<Options>>
-            signUp: <Options extends SignUpOptions<SignUp>>(options: Options) => Promise<SignUpReturn<Options>>
-            updateSession: <Options extends UpdateSessionOptions<User>>(
-                options: Options
-            ) => Promise<UpdateSessionReturn<Options, User>>
-            getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensReturn>
-            getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<string | null>
-            refreshUserInfo: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<Session<User> | null>
-            revokeToken: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
-            signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
-        }>()
+        expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User, SignUp>>()
     })
 })

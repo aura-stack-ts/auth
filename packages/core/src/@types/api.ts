@@ -387,3 +387,9 @@ export type DisconnectProviderData = { success: true } | { success: false }
  * Programmatic result for `disconnectProvider` API with response metadata and `toResponse()`.
  */
 export type DisconnectProviderAPIReturn = AuthActionAPIReturn<DisconnectProviderData>
+
+export type ProviderConnectedAPIOptions = APIOptionsWithRequest
+
+export type ProviderConnectedData = { success: true; connected: boolean } | { success: false; connected: false }
+
+export type ProviderConnectedAPIReturn = AuthActionAPIReturn<ProviderConnectedData>

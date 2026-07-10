@@ -10,6 +10,7 @@ import {
     refreshUserInfo,
     revokeToken,
     disconnectProvider,
+    isProviderConnected,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -37,6 +38,7 @@ import type {
     RefreshUserInfoAPIOptions,
     RevokeTokenAPIOptions,
     DisconnectProviderAPIOptions,
+    ProviderConnectedAPIOptions,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -227,6 +229,23 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          */
         disconnectProvider: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: DisconnectProviderAPIOptions) => {
             return disconnectProvider(oauth, { ctx, ...options, skipCSRFCheck: true })
+        },
+        /**
+         * Checks if the current session is connected to a specific OAuth provider on the server-side. It verifies
+         * the presence of a valid access token for the specified provider in the session.
+         *
+         * @param oauth - The OAuth provider to check for connection (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, connected } = await api.isProviderConnected("github", {
+         *    headers: getHeaders()
+         * })
+         * if (connected) {
+         *    // The session is connected to the GitHub provider
+         * }
+         */
+        isProviderConnected: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: ProviderConnectedAPIOptions) => {
+            return isProviderConnected(oauth, { ctx, ...options })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

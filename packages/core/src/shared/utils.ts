@@ -190,9 +190,15 @@ export const verifyCSRFToken = async ({
             await verifyCSRF(jose, csrfToken, header)
         } catch (error) {
             logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
-            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH", cause: error })
         }
         logger?.log("CSRF_TOKEN_VERIFIED")
+    } else {
+        try {
+            await jose.verifyJWS(csrfToken)
+        } catch (cause) {
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH", cause })
+        }
     }
     return true
 }
