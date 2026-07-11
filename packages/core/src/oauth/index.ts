@@ -29,6 +29,7 @@ import { authentik } from "./authentik.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema, OpenIDProviderSchema } from "@/schemas.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createOpenIDPlaceholder } from "@/shared/oidc/resolve-provider.ts"
+import { isFalsy } from "@/shared/assert.ts"
 
 export * from "./github.ts"
 export * from "./bitbucket.ts"
@@ -107,7 +108,7 @@ export const setDynamicParams = <const T extends string, P extends Record<string
 ): string => {
     return template.replace(/(^|\/):([A-Za-z_][A-Za-z0-9_]*)/g, (_, prefix, key) => {
         const value = getEnv(`${id.replace("-", "_").toUpperCase()}_${key}`) ?? params[key]
-        if (value == null) {
+        if (isFalsy(value)) {
             throw new AuraAuthError({
                 code: "OIDC_INVALID_ISSUER_PARAMS",
                 userMessage: `The "${id}" identity provider configuration is invalid. Please check issuer settings and try again.`,
