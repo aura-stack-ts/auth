@@ -1,0 +1,82 @@
+---
+title: isProviderConnected
+description: Complete API reference for the api.isProviderConnected method, verifying whether the current session has an active connection with a specific OAuth provider.
+---
+
+The `api.isProviderConnected` method checks whether the current session has an active connection with a specific OAuth provider. This method runs on the server, so it requires you to pass the `request` or `headers` object from your server-side context.
+
+```ts title="is-provider-connected.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.isProviderConnected("github", {
+  request: getRequest(),
+})
+```
+
+<Callout>
+  This method only checks connection status — it doesn't return any token data. If you need the access token itself, use
+  [`api.getAccessToken`](/docs/api-reference/server/api/get-access-token) instead.
+</Callout>
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type                          | Required | Description                                               |
+| ---------- | ----------------------------- | -------- | --------------------------------------------------------- |
+| providerId | `string`                      | Yes      | The id of the OAuth provider to check the connection for. |
+| options    | `ProviderConnectedAPIOptions` | Yes      | An object containing request context.                     |
+
+### ProviderConnectedAPIOptions
+
+| Option        | Type      | Default   | Description                                               |
+| ------------- | --------- | --------- | --------------------------------------------------------- |
+| request       | `Request` | undefined | The request object from the server-side context.          |
+| headers       | `Headers` | undefined | The headers object from the server-side context.          |
+| skipCSRFCheck | `boolean` | `false`   | Whether to skip CSRF token verification for this request. |
+
+<Callout type="info">
+  At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs.
+</Callout>
+
+### Returns
+
+| Return Type                           | Description                                                                             |
+| ------------------------------------- | --------------------------------------------------------------------------------------- |
+| `Promise<ProviderConnectedAPIReturn>` | Resolves to an object containing `success` and `connected` — see [Behavior](#behavior). |
+
+## Behavior
+
+- On success, `connected` resolves to `true` or `false` depending on whether the specified provider is currently connected to the session — it does not throw for the "not connected" case, since that's an expected outcome, not an error.
+- CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
+- If the check itself fails (e.g. no valid session), `connected` resolves to `null` and `success` is `false` — distinct from `connected: false`, which means the check succeeded and simply found no connection.
+
+## Errors
+
+See the [Errors Reference](/docs/api-reference/errors) for `CsrfError` (missing or mismatched token) and `SessionError` (no active session).
+
+## Usage
+
+### Check a provider's connection status
+
+```ts title="is-provider-connected.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success, connected } = await api.isProviderConnected("github", {
+  request: getRequest(),
+})
+```
+
+### Prompting the user to connect a provider
+
+```tsx title="connect-prompt.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success, connected } = await api.isProviderConnected("github", {
+  request: getRequest(),
+})
+
+if (success && !connected) {
+  redirect("/settings/connections/github")
+}
+```

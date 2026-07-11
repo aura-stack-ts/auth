@@ -1,0 +1,105 @@
+---
+title: getProviderTokens
+description: Complete API reference for the api.getProviderTokens method, providing type-safe OAuth token retrieval across all runtimes.
+---
+
+The `api.getProviderTokens` method is the primary programmatic entry point for retrieving the full set of OAuth tokens for a specific provider. This method runs on the server, so it requires you to pass the `request` or `headers` object from your server-side context.
+
+```ts title="get-provider-tokens.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.getProviderTokens("github", {
+  request: getRequest(),
+})
+```
+
+<Callout>
+  This method is the advanced version of `api.getAccessToken`, which is a simplified version that only returns the access token.
+  Use this method if you need the full set of OAuth tokens (access token, refresh token, and ID token) and want the flexibility to
+  handle them yourself. See [`api.getAccessToken`](/docs/api-reference/server/api/get-access-token) for the simpler alternative.
+</Callout>
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type                          | Required | Description                                              |
+| ---------- | ----------------------------- | -------- | -------------------------------------------------------- |
+| providerId | `string`                      | Yes      | The id of the OAuth provider to retrieve the tokens for. |
+| options    | `GetProviderTokensAPIOptions` | Yes      | An object containing request context.                    |
+
+### GetProviderTokensAPIOptions
+
+| Option        | Type      | Default   | Description                                               |
+| ------------- | --------- | --------- | --------------------------------------------------------- |
+| request       | `Request` | undefined | The request object from the server-side context.          |
+| headers       | `Headers` | undefined | The headers object from the server-side context.          |
+| skipCSRFCheck | `boolean` | `false`   | Whether to skip CSRF token verification for this request. |
+
+<Callout type="info">
+  At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs.
+</Callout>
+
+### Returns
+
+| Return Type                           | Description                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------------ |
+| `Promise<GetProviderTokensAPIReturn>` | Resolves to an object containing `success` and `tokens` — see [Behavior](#behavior). |
+
+## Behavior
+
+The method resolves the tokens in stages:
+
+1. If the current access token is valid, it retrieves the associated OAuth tokens for the specified provider directly.
+2. If the access token is invalid, it checks whether the refresh token is valid:
+   - If valid, it uses it to retrieve fresh OAuth tokens for the provider.
+   - If invalid, it returns `success: false` and `tokens: null`.
+
+- CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
+
+## Errors
+
+See the [Errors Reference](/docs/api-reference/errors) for `CsrfError` (missing or mismatched token) and provider-connection errors.
+
+## Usage
+
+### Get a provider's tokens
+
+```ts title="get-provider-tokens.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success, tokens } = await api.getProviderTokens("github", {
+  request: getRequest(),
+})
+```
+
+### Using a token in a request
+
+```tsx title="protected-fetch.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success, tokens } = await api.getProviderTokens("github", {
+  request: getRequest(),
+})
+
+if (!success) {
+  redirect("/login")
+}
+
+const response = await fetch("/api/some-protected-route", {
+  headers: {
+    Authorization: `Bearer ${tokens?.accessToken}`,
+  },
+})
+```
+
+### Delegating CSRF protection to a different layer
+
+```ts title="skip-csrf.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success, tokens } = await api.getProviderTokens("github", {
+  request: getRequest(),
+  skipCSRFCheck: true, // only if enforced elsewhere — see the warning above
+})
+```

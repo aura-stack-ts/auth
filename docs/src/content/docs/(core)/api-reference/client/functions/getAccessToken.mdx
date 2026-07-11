@@ -1,0 +1,64 @@
+---
+title: getAccessToken
+description: Retrieve the OAuth access token for a connected provider, from the client.
+---
+
+The `getAccessToken` client method retrieves the OAuth access token for a specific connected provider, from a client-side or browser context.
+
+```ts title="get-access-token.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const accessToken = await authClient.getAccessToken("github")
+```
+
+<Callout>
+  This is a simplified version of `getProviderTokens`, which retrieves the full set of OAuth tokens for a provider. See
+  [`getProviderTokens`](/docs/api-reference/client/functions/getProviderTokens) for the advanced alternative.
+</Callout>
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type     | Required | Description                                                    |
+| ---------- | -------- | -------- | -------------------------------------------------------------- |
+| providerId | `string` | Yes      | The id of the OAuth provider to retrieve the access token for. |
+
+### Returns
+
+| Return Type               | Description                                                |
+| ------------------------- | ---------------------------------------------------------- |
+| `Promise<string \| null>` | Resolves to the access token or `null` if retrieval fails. |
+
+## Behavior
+
+- Cookies are read automatically from the browser context — you don't need to handle them or CSRF tokens manually.
+- If retrieval fails (no valid access or refresh token for the provider), the method resolves to `null` — this does not throw an error, as "not connected" is an expected outcome.
+
+## Usage
+
+### Get a provider's access token
+
+```ts title="get-access-token.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const accessToken = await authClient.getAccessToken("github")
+```
+
+### Using the token in a request
+
+```tsx title="protected-fetch.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const accessToken = await authClient.getAccessToken("github")
+
+if (!accessToken) {
+  window.location.assign("/login")
+}
+
+const response = await fetch("/api/some-protected-route", {
+  headers: {
+    Authorization: `Bearer ${accessToken}`,
+  },
+})
+```

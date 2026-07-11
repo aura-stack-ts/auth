@@ -1,0 +1,58 @@
+---
+title: refreshUserInfo
+description: Refresh the current user's profile data from a connected provider, from the client.
+---
+
+The `refreshUserInfo` client method refreshes the current user's profile data from a connected provider, without requiring re-authentication, from a client-side or browser context.
+
+```ts title="refresh-user-info.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const userInfo = await authClient.refreshUserInfo("github")
+```
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type     | Required | Description                                             |
+| ---------- | -------- | -------- | ------------------------------------------------------- |
+| providerId | `string` | Yes      | The id of the OAuth provider to refresh user info from. |
+
+### Returns
+
+| Return Type                     | Description                                                       |
+| ------------------------------- | ----------------------------------------------------------------- |
+| `Promise<Session<DefaultUser>>` | Resolves to the refreshed session or `null` if the refresh fails. |
+
+## Behavior
+
+- Cookies are read automatically from the browser context — you don't need to handle them or CSRF tokens manually.
+- Uses the provider's existing access token to fetch fresh profile data and normalizes it into the session's `User` object, matching [`api.refreshUserInfo`](/docs/api-reference/server/api/refreshUserInfo#behavior)'s behavior.
+- If the refresh fails (invalid or expired access token, or the provider request fails), the `session` resolves to `null` or `session.user`
+
+## Usage
+
+### Refresh user info
+
+```ts title="refresh-user-info.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const userInfo = await authClient.refreshUserInfo("github")
+
+console.log("refreshed session:", session)
+```
+
+### Handling failure
+
+```tsx title="handle-failure.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const userInfo = await authClient.refreshUserInfo("github")
+
+if (!userInfo) {
+  window.location.assign("/login")
+}
+
+console.log("refreshed session:", session)
+```

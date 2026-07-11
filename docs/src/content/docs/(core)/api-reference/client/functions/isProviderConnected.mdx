@@ -1,0 +1,59 @@
+---
+title: isProviderConnected
+description: Check whether the current session has an active connection with a specific OAuth provider, from the client.
+---
+
+The `isProviderConnected` client method checks whether the current session has an active connection with a specific OAuth provider, from a client-side or browser context.
+
+```ts title="is-provider-connected.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const connected = await authClient.isProviderConnected("github")
+```
+
+<Callout>
+  This only checks connection status — it doesn't return token data. If you need the access token, use
+  [`getAccessToken`](/docs/api-reference/client/functions/getAccessToken) instead.
+</Callout>
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type     | Required | Description                                               |
+| ---------- | -------- | -------- | --------------------------------------------------------- |
+| providerId | `string` | Yes      | The id of the OAuth provider to check the connection for. |
+
+### Returns
+
+| Return Type        | Description                                                         |
+| ------------------ | ------------------------------------------------------------------- |
+| `Promise<boolean>` | Resolves to a boolean indicating whether the provider is connected. |
+
+## Behavior
+
+- Cookies are read automatically from the browser context — you don't need to handle them or CSRF tokens manually.
+- On success, the method resolves to `true` or `false`. This does not throw for "not connected" — that's an expected outcome.
+- If the check itself fails (e.g. no valid session), the method resolves to `null` and `success` is `false` — distinct from `connected: false`.
+
+## Usage
+
+### Check a provider's connection status
+
+```ts title="is-provider-connected.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const connected = await authClient.isProviderConnected("github")
+```
+
+### Prompting the user to connect a provider
+
+```tsx title="connect-prompt.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const connected = await authClient.isProviderConnected("github")
+
+if (!connected) {
+  window.location.assign("/settings/connections/github")
+}
+```
