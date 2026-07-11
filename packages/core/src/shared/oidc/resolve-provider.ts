@@ -21,7 +21,7 @@ export const resolveOpenIDProvider = async (provider: RuntimeOAuthProvider): Pro
     if (!issuer) {
         throw new Error("OIDC provider is missing issuer configuration: " + provider.id)
     }
-    issuer = setDynamicParams(issuer, provider as unknown as Record<string, unknown>)
+    issuer = setDynamicParams(issuer, provider as unknown as Record<string, unknown>, provider.id)
 
     const metadata = await discoveryMetadata(issuer)
     const scope =
@@ -75,7 +75,7 @@ export const createOpenIDPlaceholder = (
         revokeToken: config.revokeToken,
         refreshWindow: config.refreshWindow,
         oidc: {
-            issuer: setDynamicParams(config.issuer, config),
+            issuer: setDynamicParams(config.issuer, config, config.id),
         },
     }
 }

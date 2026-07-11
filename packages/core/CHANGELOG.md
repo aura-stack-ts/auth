@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added support for inferring OpenID Connect (OIDC) provider issuer slugs from environment variables. Issuer slugs can now be configured either through `provider.slugName` or an environment variable following the `PREFIX_SLUG_NAME` naming convention. [#225](https://github.com/aura-stack-ts/auth/pull/225)
+
 - Added the `isProviderConnected()` client API to `createAuthClient()`, providing a client-side interface for the `GET /providers/:provider` endpoint. The API checks whether an OAuth or OpenID Connect (OIDC) provider is currently connected to the active session. [#223](https://github.com/aura-stack-ts/auth/pull/223)
 
 - Added the experimental `isProviderConnected()` API for checking whether an OAuth or OpenID Connect (OIDC) provider is connected to the current session. This API complements `disconnectProvider()` by allowing applications to inspect the connection state without disconnecting the provider. [#223](https://github.com/aura-stack-ts/auth/pull/223)

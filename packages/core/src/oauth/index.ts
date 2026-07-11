@@ -29,6 +29,7 @@ import { authentik } from "./authentik.ts"
 import { OAuthEnvSchema, OAuthProviderCredentialsSchema, OpenIDProviderSchema } from "@/schemas.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createOpenIDPlaceholder } from "@/shared/oidc/resolve-provider.ts"
+import { isFalsy } from "@/shared/assert.ts"
 
 export * from "./github.ts"
 export * from "./bitbucket.ts"
@@ -100,11 +101,18 @@ const isOpenIDProvider = (config: BuiltInOAuthProvider | RuntimeOAuthProvider | 
     return typeof config === "object" && "issuer" in config && !("accessToken" in config)
 }
 
-export const setDynamicParams = <const T extends string, P extends Record<string, unknown>>(template: T, params: P): string => {
+export const setDynamicParams = <const T extends string, P extends Record<string, unknown>>(
+    template: T,
+    params: P,
+    id: string
+): string => {
     return template.replace(/(^|\/):([A-Za-z_][A-Za-z0-9_]*)/g, (_, prefix, key) => {
-        const value = params[key]
-        if (value == null) {
-            throw new AuraAuthError({ code: "OIDC_INVALID_ISSUER_PARAMS" })
+        const value = getEnv(`${id.replace("-", "_").toUpperCase()}_${key}`) ?? params[key]
+        if (isFalsy(value)) {
+            throw new AuraAuthError({
+                code: "OIDC_INVALID_ISSUER_PARAMS",
+                userMessage: `The "${id}" identity provider configuration is invalid. Please check issuer settings and try again.`,
+            })
         }
         return `${prefix}${encodeURIComponent(String(value))}`
     })
@@ -116,7 +124,7 @@ export const defineOpenIDProviderConfig = (config: OpenIDProvider): RuntimeOAuth
         throw new AuraAuthError({ code: "INVALID_OAUTH_PROVIDER_SCHEMA_CONFIG", cause: parsed.error })
     }
     const envConfig = !config.clientId || !config.clientSecret ? defineOAuthEnvironment(config.id) : undefined
-    config.issuer = setDynamicParams(config.issuer, config)
+    config.issuer = setDynamicParams(config.issuer, config, config.id)
     return createOpenIDPlaceholder(config, {
         clientId: config.clientId || envConfig!.clientId,
         clientSecret: config.clientSecret || envConfig!.clientSecret,

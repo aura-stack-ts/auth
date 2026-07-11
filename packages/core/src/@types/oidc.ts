@@ -234,4 +234,4 @@ export type OpenIDProvider<Profile extends object = Record<string, any>, Default
      */
     scope?: string
     profile?: (profile: Profile) => DefaultUser | Promise<DefaultUser>
-} & GetRouteParams<`/${Issuer}`>
+} & Partial<GetRouteParams<`/${Issuer}`>>

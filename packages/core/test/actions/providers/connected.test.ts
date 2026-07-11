@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, afterEach, beforeEach, expectTypeOf } from "vitest"
+import { describe, test, expect, vi, afterEach, beforeEach } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
 import { GET, jose, oauthTokens, sessionPayload } from "@test/presets.ts"
 
