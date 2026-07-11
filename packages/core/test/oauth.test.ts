@@ -1,14 +1,14 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import {
     createBuiltInOAuthProviders,
     builtInOAuthProviders,
-    type GitHubProfile,
     setDynamicParams,
     defineOpenIDProviderConfig,
+    type GitHubProfile,
 } from "@/oauth/index.ts"
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
-import { openIDCustomProvider } from "./presets.ts"
+import { openIDCustomProvider } from "@test/presets.ts"
+import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 describe("createBuiltInOAuthProviders", () => {
     test("create oauth config for github", () => {
@@ -91,6 +91,24 @@ describe("createBuiltInOAuthProviders", () => {
             },
         })
     })
+
+    test("infer dynamic slugs in issuer via environment variables", () => {
+        vi.stubEnv("AURA_AUTH_OIDC_PROVIDER_TEAMID", "1")
+        vi.stubEnv("AURA_AUTH_OIDC_PROVIDER_APPID", "2")
+
+        const oidc = createBuiltInOAuthProviders([
+            { ...openIDCustomProvider, issuer: "https://app.com/issuer/:teamId/apps/:appId" } as any,
+        ])
+        expect(oidc["oidc-provider"]).toMatchObject({
+            id: "oidc-provider",
+            name: "OIDC",
+            clientId: "oidc_client_id",
+            clientSecret: "oidc_client_secret",
+            oidc: {
+                issuer: "https://app.com/issuer/1/apps/2",
+            },
+        })
+    })
 })
 
 describe("setDynamicParams", () => {
@@ -136,7 +154,7 @@ describe("setDynamicParams", () => {
 
         for (const { description, input, values, expected } of testCases) {
             test(description, () => {
-                expect(setDynamicParams(input, values)).toBe(expected)
+                expect(setDynamicParams(input, values, "acme")).toBe(expected)
             })
         }
     })
@@ -152,7 +170,7 @@ describe("setDynamicParams", () => {
 
         for (const { description, input, values } of testCases) {
             test(description, () => {
-                expect(() => setDynamicParams(input, values)).toThrow(AuraAuthError)
+                expect(() => setDynamicParams(input, values, "acme")).toThrow(AuraAuthError)
             })
         }
     })
