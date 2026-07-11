@@ -41,6 +41,30 @@ export interface AuthInstance<DefaultUser extends User = User, SignUpSchema exte
   Updates the current user's session data.
 </Card>
 
+<Card title="isProviderConnected" href="/docs/api-reference/server/api/isProviderConnected">
+  Verifies if a user is connected to a specific OAuth provider.
+</Card>
+
+<Card title="getProviderTokens" href="/docs/api-reference/server/api/getProviderTokens">
+  Retrieves the tokens for a specific OAuth provider.
+</Card>
+
+<Card title="getAccessToken" href="/docs/api-reference/server/api/getAccessToken">
+  Retrieves the access token for a specific OAuth provider.
+</Card>
+
+<Card title="refreshUserInfo" href="/docs/api-reference/server/api/refreshUserInfo">
+  Refreshes the user's information from the OAuth provider.
+</Card>
+
+<Card title="disconnectProvider" href="/docs/api-reference/server/api/disconnectProvider">
+  Disconnects the user from a specific OAuth provider.
+</Card>
+
+<Card title="revokeToken" href="/docs/api-reference/server/api/revokeToken">
+  Revokes the token for a specific OAuth provider.
+</Card>
+
 <Card title="signOut" href="/docs/api-reference/server/api/signOut">
   Signs out the current user and invalidates the session.
 </Card>

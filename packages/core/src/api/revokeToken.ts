@@ -61,7 +61,7 @@ export const revokeToken = async (
         skipCSRFCheck = false,
         disconnect = false,
     }: FunctionAPIContext<RevokeTokenAPIOptions> & { disconnect?: boolean }
-) => {
+): Promise<RevokeTokenAPIReturn> => {
     const { cookies } = ctx
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {

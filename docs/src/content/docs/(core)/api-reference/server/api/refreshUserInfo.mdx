@@ -1,0 +1,88 @@
+---
+title: refreshUserInfo
+description: Complete API reference for the api.refreshUserInfo method, refreshing the user's profile data without requiring re-authentication.
+---
+
+The `api.refreshUserInfo` method refreshes a user's profile data from the provider without requiring them to re-authenticate. This method runs on the server, so it requires you to pass the `request` or `headers` object from your server-side context.
+
+```ts title="refresh-user-info.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.refreshUserInfo("github", {
+  request: getRequest(),
+})
+```
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type                        | Required | Description                                             |
+| ---------- | --------------------------- | -------- | ------------------------------------------------------- |
+| providerId | `string`                    | Yes      | The id of the OAuth provider to refresh user info from. |
+| options    | `RefreshUserInfoAPIOptions` | Yes      | An object containing request context.                   |
+
+### RefreshUserInfoAPIOptions
+
+| Option        | Type      | Default   | Description                                               |
+| ------------- | --------- | --------- | --------------------------------------------------------- |
+| request       | `Request` | undefined | The request object from the server-side context.          |
+| headers       | `Headers` | undefined | The headers object from the server-side context.          |
+| skipCSRFCheck | `boolean` | `false`   | Whether to skip CSRF token verification for this request. |
+
+<Callout type="info">
+  At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs.
+</Callout>
+
+### Returns
+
+| Return Type                                      | Description                                                                           |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `Promise<RefreshUserInfoAPIReturn<DefaultUser>>` | Resolves to an object containing `success` and `session` — see [Behavior](#behavior). |
+
+## Behavior
+
+- The method uses the provider's existing access token to call its `userInfo` endpoint, then normalizes the response through the provider's `profile` function into a `User` object, and returns the updated session.
+- CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
+- If the refresh fails (invalid or expired access token, or the provider request fails), `session` resolves to `null` and `success` is `false`.
+
+## Usage
+
+### Refresh user info
+
+```ts title="refresh-user-info.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success, session } = await api.refreshUserInfo("github", {
+  request: getRequest(),
+})
+
+console.log("refreshed session:", session)
+```
+
+### Handling failure
+
+```tsx title="handle-failure.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success, session } = await api.refreshUserInfo("github", {
+  request: getRequest(),
+})
+
+if (!success) {
+  redirect("/login")
+}
+
+console.log("refreshed session:", session)
+```
+
+### Delegating CSRF protection to a different layer
+
+```ts title="skip-csrf.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success, session } = await api.refreshUserInfo("github", {
+  request: getRequest(),
+  skipCSRFCheck: true, // only if enforced elsewhere — see the warning above
+})
+```

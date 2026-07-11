@@ -39,6 +39,10 @@ import type {
     RevokeTokenAPIOptions,
     DisconnectProviderAPIOptions,
     ProviderConnectedAPIOptions,
+    RefreshUserInfoAPIReturn,
+    RevokeTokenAPIReturn,
+    ProviderConnectedAPIReturn,
+    DisconnectProviderAPIReturn,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -196,7 +200,10 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          *    headers: getHeaders()
          * })
          */
-        refreshUserInfo: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: RefreshUserInfoAPIOptions) => {
+        refreshUserInfo: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: RefreshUserInfoAPIOptions
+        ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
             return refreshUserInfo<DefaultUser>(oauth, { ctx, ...options, skipCSRFCheck: true })
         },
         /**
@@ -212,7 +219,10 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * // Use the returned headers to update the response headers in your server-side logic
          * return new Response(null, { status: 200, headers })
          */
-        revokeToken: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: RevokeTokenAPIOptions) => {
+        revokeToken: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: RevokeTokenAPIOptions
+        ): Promise<RevokeTokenAPIReturn> => {
             return revokeToken(oauth, { ctx, ...options, disconnect: false, skipCSRFCheck: true })
         },
         /**
@@ -227,7 +237,10 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * // Use the returned headers to update the response headers in your server-side logic
          * return new Response(null, { status: 200, headers })
          */
-        disconnectProvider: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: DisconnectProviderAPIOptions) => {
+        disconnectProvider: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: DisconnectProviderAPIOptions
+        ): Promise<DisconnectProviderAPIReturn> => {
             return disconnectProvider(oauth, { ctx, ...options, skipCSRFCheck: true })
         },
         /**
@@ -244,7 +257,10 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          *    // The session is connected to the GitHub provider
          * }
          */
-        isProviderConnected: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: ProviderConnectedAPIOptions) => {
+        isProviderConnected: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: ProviderConnectedAPIOptions
+        ): Promise<ProviderConnectedAPIReturn> => {
             return isProviderConnected(oauth, { ctx, ...options })
         },
         /**

@@ -1,0 +1,64 @@
+---
+title: getProviderTokens
+description: Retrieve the full set of OAuth tokens for a connected provider, from the client.
+---
+
+The `getProviderTokens` client method retrieves the full set of OAuth tokens (access token, refresh token, and ID token) for a specific connected provider, from a client-side or browser context.
+
+```ts title="get-provider-tokens.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const { success, tokens } = await authClient.getProviderTokens("github")
+```
+
+<Callout>
+  This is the advanced version of `getAccessToken`, which only returns the access token. Use this if you need the full token set.
+  See [`getAccessToken`](/docs/api-reference/client/functions/getAccessToken) for the simpler alternative.
+</Callout>
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type     | Required | Description                                              |
+| ---------- | -------- | -------- | -------------------------------------------------------- |
+| providerId | `string` | Yes      | The id of the OAuth provider to retrieve the tokens for. |
+
+### Returns
+
+| Return Type                     | Description                                              |
+| ------------------------------- | -------------------------------------------------------- |
+| `Promise<ProviderTokensReturn>` | Resolves to an object containing `success` and `tokens`. |
+
+## Behavior
+
+- Cookies are read automatically from the browser context — you don't need to handle them or CSRF tokens manually.
+- Follows the same access-token → refresh-token fallback described in [`api.getProviderTokens`](/docs/api-reference/server/api/getProviderTokens#behavior). If neither is valid, resolves to `success: false` and `tokens: null`.
+
+## Usage
+
+### Get a provider's tokens
+
+```ts title="get-provider-tokens.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const { success, tokens } = await authClient.getProviderTokens("github")
+```
+
+### Using a token in a request
+
+```tsx title="protected-fetch.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const { success, tokens } = await authClient.getProviderTokens("github")
+
+if (!success) {
+  window.location.assign("/login")
+}
+
+const response = await fetch("/api/some-protected-route", {
+  headers: {
+    Authorization: `Bearer ${tokens?.accessToken}`,
+  },
+})
+```

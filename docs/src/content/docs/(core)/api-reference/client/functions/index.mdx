@@ -1,0 +1,87 @@
+---
+title: functions
+description: The functions exposed by createAuthClient — sign-in, sign-up, session management, OAuth token management, and sign-out for client-side and browser contexts.
+---
+
+### Signature
+
+```ts lineNumbers
+function createAuthClient<DefaultUser extends User = User, SignUpPayload extends Record<string, any> = Record<string, any>>(
+  options: AuthClientOptions
+): {
+  getSession(): Promise<Session<User> | null>
+  signIn<Options extends SignInOptions>(
+    oauth: LiteralUnion<BuiltInOAuthProvider>,
+    options?: Options | undefined
+  ): Promise<SignInReturn<Options>>
+  signInCredentials<Options extends SignInCredentialsOptions>(options: Options): Promise<SignInCredentialsReturn<Options>>
+  signUp<Options extends SignUpOptions<Record<string, any>>>(options: Options): Promise<SignUpReturn<Options>>
+  updateSession<Options extends UpdateSessionOptions<User>>(options: Options): Promise<UpdateSessionReturn<Options, User>>
+  signOut<Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>>
+  getAccessToken(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<string | null>
+  getProviderTokens(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<GetProviderTokensReturn>
+  isProviderConnected(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean>
+  refreshUserInfo(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<Session<User> | null>
+  revokeToken(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean>
+  disconnectProvider(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean>
+}
+```
+
+Unlike `auth.api` on the server, `createAuthClient()` returns a **flat object** — there's no `client.functions` namespace. This page exists purely as a browsable index; every method below is called directly on your `authClient` instance (e.g. `authClient.signIn(...)`).
+
+<Callout type="info">
+  All of these run in a client-side or browser context and read/write cookies automatically — none of them accept `request`,
+  `headers`, or `skipCSRFCheck`. For the equivalent server-side surface, see [`api`](/docs/api-reference/server/api).
+</Callout>
+
+<Cards>
+
+<Card title="signIn" href="/docs/api-reference/client/functions/signIn">
+  Signs in a user with a built-in or custom OAuth provider.
+</Card>
+
+<Card title="signInCredentials" href="/docs/api-reference/client/functions/signInCredentials">
+  Signs in a user with a username/email and password.
+</Card>
+
+<Card title="signUp" href="/docs/api-reference/client/functions/signUp">
+  Registers a new user.
+</Card>
+
+<Card title="getSession" href="/docs/api-reference/client/functions/getSession">
+  Returns the current user's session.
+</Card>
+
+<Card title="updateSession" href="/docs/api-reference/client/functions/updateSession">
+  Updates the current user's session data.
+</Card>
+
+<Card title="isProviderConnected" href="/docs/api-reference/client/functions/isProviderConnected">
+  Verifies whether the current session is connected to a specific OAuth provider.
+</Card>
+
+<Card title="getProviderTokens" href="/docs/api-reference/client/functions/getProviderTokens">
+  Retrieves the full set of tokens for a specific OAuth provider.
+</Card>
+
+<Card title="getAccessToken" href="/docs/api-reference/client/functions/getAccessToken">
+  Retrieves the access token for a specific OAuth provider.
+</Card>
+
+<Card title="refreshUserInfo" href="/docs/api-reference/client/functions/refreshUserInfo">
+  Refreshes the user's profile information from the OAuth provider.
+</Card>
+
+<Card title="disconnectProvider" href="/docs/api-reference/client/functions/disconnectProvider">
+  Disconnects the current session from a specific OAuth provider without revoking its token.
+</Card>
+
+<Card title="revokeToken" href="/docs/api-reference/client/functions/revokeToken">
+  Revokes the access token for a specific OAuth provider.
+</Card>
+
+<Card title="signOut" href="/docs/api-reference/client/functions/signOut">
+  Signs out the current user and invalidates the session.
+</Card>
+
+</Cards>

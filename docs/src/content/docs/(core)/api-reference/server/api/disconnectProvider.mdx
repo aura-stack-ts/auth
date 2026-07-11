@@ -1,0 +1,90 @@
+---
+title: disconnectProvider
+description: Complete API reference for the api.disconnectProvider method, providing type-safe OAuth provider disconnection across all runtimes.
+---
+
+The `api.disconnectProvider` method is the primary programmatic entry point for disconnecting an OAuth provider from the current session, without revoking its access token. This method runs on the server, so it requires you to pass the `request` or `headers` object from your server-side context.
+
+```ts title="disconnect-provider.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.disconnectProvider("github", {
+  request: getRequest(),
+})
+```
+
+<Callout>
+  This method is a softer alternative to `api.revokeToken`: it disconnects the provider from the session without revoking the
+  access token itself. If you need the token invalidated, use `api.revokeToken` instead. See
+  [`api.revokeToken`](/docs/api-reference/server/api/revoke-token) for the stronger alternative.
+</Callout>
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type                           | Required | Description                                 |
+| ---------- | ------------------------------ | -------- | ------------------------------------------- |
+| providerId | `string`                       | Yes      | The id of the OAuth provider to disconnect. |
+| options    | `DisconnectProviderAPIOptions` | Yes      | An object containing request context.       |
+
+### DisconnectProviderAPIOptions
+
+| Option        | Type      | Default   | Description                                               |
+| ------------- | --------- | --------- | --------------------------------------------------------- |
+| request       | `Request` | undefined | The request object from the server-side context.          |
+| headers       | `Headers` | undefined | The headers object from the server-side context.          |
+| skipCSRFCheck | `boolean` | `false`   | Whether to skip CSRF token verification for this request. |
+
+<Callout type="info">
+  At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs.
+</Callout>
+
+### Returns
+
+| Return Type                            | Description                                                             |
+| -------------------------------------- | ----------------------------------------------------------------------- |
+| `Promise<DisconnectProviderAPIReturn>` | Resolves to an object containing `success` — see [Behavior](#behavior). |
+
+## Behavior
+
+- This disconnects the provider from the current session's list of connected providers, without calling the provider's revocation endpoint. The access token itself remains valid until it naturally expires (or is separately revoked with `api.revokeToken`).
+- CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
+- If disconnection fails (the provider isn't connected to the current session), `success` is `false`.
+
+## Usage
+
+### Disconnect a provider
+
+```ts title="disconnect-provider.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success } = await api.disconnectProvider("github", {
+  request: getRequest(),
+})
+```
+
+### Handling failure
+
+```tsx title="handle-failure.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success } = await api.disconnectProvider("github", {
+  request: getRequest(),
+})
+
+if (!success) {
+  redirect("/settings/connections")
+}
+```
+
+### Delegating CSRF protection to a different layer
+
+```ts title="skip-csrf.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success } = await api.disconnectProvider("github", {
+  request: getRequest(),
+  skipCSRFCheck: true, // only if enforced elsewhere — see the warning above
+})
+```

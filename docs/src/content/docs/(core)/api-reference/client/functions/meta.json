@@ -1,4 +1,17 @@
 {
   "title": "Functions",
-  "pages": ["signIn", "signInCredentials", "signUp", "getSession", "updateSession", "signOut"]
+  "pages": [
+    "signIn",
+    "signInCredentials",
+    "signUp",
+    "getSession",
+    "updateSession",
+    "isProviderConnected",
+    "getProviderTokens",
+    "getAccessToken",
+    "refreshUserInfo",
+    "disconnectProvider",
+    "revokeToken",
+    "signOut"
+  ]
 }
