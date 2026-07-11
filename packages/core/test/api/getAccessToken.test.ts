@@ -2,6 +2,8 @@ import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
 import { api, jose, oauthCustomService, oauthTokens, sessionPayload } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
+import { createBasicAuthHeader } from "@/shared/utils.ts"
+import type { OAuthProviderConfig } from "@/@types/oauth.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -192,7 +194,67 @@ describe("getAccessToken API", () => {
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: createBasicAuthHeader("oauth_client_id", "oauth_client_secret"),
+            },
+            body: new URLSearchParams({
+                grant_type: "refresh_token",
+                refresh_token: oauthTokens.refreshToken!,
+            }),
+            signal: expect.any(AbortSignal),
+        })
+    })
+
+    test("refreshToken successfully refreshes tokens with credentials auth in refreshToken config", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const mockFetch = vi.fn()
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => oauthTokens,
+        })
+
+        vi.stubGlobal("fetch", mockFetch)
+
+        const encodedTokens = await jose.encodeJWT({
+            ...oauthTokens,
+            expiresAt: Math.floor(Date.now() / 1000) - 3600,
+        } as unknown as Record<string, unknown>)
+
+        const provider: OAuthProviderConfig = {
+            ...oauthCustomService,
+            refreshToken: {
+                url: "https://example.com/oauth/refresh_token",
+                authorization: { type: "credentials" },
+            },
+        }
+
+        const { api } = createAuth({
+            oauth: [provider],
+        })
+
+        const output = await api.getAccessToken("oauth-provider", {
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+        })
+        expect(output).toEqual({
+            success: true,
+            accessToken: oauthTokens.accessToken,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
             body: new URLSearchParams({
                 grant_type: "refresh_token",
                 refresh_token: oauthTokens.refreshToken!,

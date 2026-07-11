@@ -239,3 +239,15 @@ export const assertContentTypeResponse = (response: Response, logger?: InternalL
         throw new AuraAuthError({ code: "OAUTH_INVALID_CONTENT_TYPE" })
     }
 }
+
+export const isString = (value: unknown): value is string => {
+    return typeof value === "string"
+}
+
+export const isObject = (value: unknown): value is Record<string, any> => {
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+export const isRefreshTokenObject = (value: unknown): value is Exclude<OAuthProviderConfig["refreshToken"], string> => {
+    return isObject(value) && "url" in value
+}

@@ -33,6 +33,20 @@ const UserInfoConfigSchema = z.union([
     }),
 ])
 
+const RefreshTokenConfigSchema = z
+    .union([
+        string().url(),
+        object({
+            url: string().url(),
+            headers: z.record(string(), string()).optional(),
+            params: z.record(string(), string()).optional(),
+            authorization: object({
+                type: options(["basic", "credentials"]).optional(),
+            }).optional(),
+        }),
+    ])
+    .optional()
+
 const RevokeTokenConfigSchema = z
     .union([
         string().url(),
@@ -56,7 +70,7 @@ export const OAuthProviderCredentialsSchema = object({
     userInfo: UserInfoConfigSchema,
     /** @deprecated */
     responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
-    refreshToken: RevokeTokenConfigSchema,
+    refreshToken: RefreshTokenConfigSchema,
     clientId: string(),
     clientSecret: string(),
     revokeToken: RevokeTokenConfigSchema,
@@ -78,16 +92,8 @@ export const OAuthProviderConfigSchema = object({
     responseType: options(["code", "token", "id_token", "refresh_token"]).optional(),
     clientId: string(),
     clientSecret: string(),
-    revokeToken: z
-        .union([
-            string().url(),
-            object({
-                url: string().url(),
-                headers: z.record(string(), string()).optional(),
-                params: z.record(string(), string()).optional(),
-            }),
-        ])
-        .optional(),
+    refreshToken: RefreshTokenConfigSchema,
+    revokeToken: RevokeTokenConfigSchema,
     refreshWindow: number().optional(),
     profile: z.function().optional(),
 })
@@ -154,6 +160,7 @@ export const OAuthAccessTokenResponse = object({
     token_type: string().optional(),
     expires_in: number().optional(),
     refresh_token: string().optional(),
+    refresh_token_expires_in: number().optional(),
     scope: union([string().optional().or(nullable()), array(string()).optional()]),
 })
 
@@ -284,6 +291,7 @@ export const OIDCAccessTokenResponseSchema = object({
     token_type: string().optional(),
     expires_in: number().optional(),
     refresh_token: string().optional(),
+    refresh_token_expires_in: number().optional(),
     scope: union([string().optional().or(nullable()), array(string()).optional()]),
     id_token: string().optional(),
 })
@@ -330,7 +338,7 @@ export const IDTokenClaimsSchema = object({
 
 export const OAuthTokenPayloadSchema = object({
     accessToken: string(),
-    expiresAt: number(),
+    expiresAt: number().optional(),
     refreshToken: string().optional(),
     refreshTokenExpiresAt: number().optional(),
     idToken: string().optional(),
@@ -340,5 +348,5 @@ export const OAuthTokenPayloadSchema = object({
         .pipe(options(["Bearer"])),
     scopes: array(string()).or(string()),
     issuer: string().optional(),
-    issuedAt: number(),
+    issuedAt: number().optional(),
 })
