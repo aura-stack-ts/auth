@@ -51,10 +51,6 @@ const output = await api.isProviderConnected("github", {
 - CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
 - If the check itself fails (e.g. no valid session), `connected` resolves to `null` and `success` is `false` — distinct from `connected: false`, which means the check succeeded and simply found no connection.
 
-## Errors
-
-See the [Errors Reference](/docs/api-reference/errors) for `CsrfError` (missing or mismatched token) and `SessionError` (no active session).
-
 ## Usage
 
 ### Check a provider's connection status

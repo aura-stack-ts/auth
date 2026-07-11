@@ -21,15 +21,15 @@ const userInfo = await authClient.refreshUserInfo("github")
 
 ### Returns
 
-| Return Type                     | Description                                                       |
-| ------------------------------- | ----------------------------------------------------------------- |
-| `Promise<Session<DefaultUser>>` | Resolves to the refreshed session or `null` if the refresh fails. |
+| Return Type                   | Description |
+| ----------------------------- | ----------- | ------------------------------------------------------------------------------------ |
+| `Promise<Session<DefaultUser> | null>`      | Resolves to the refreshed session object on success or `null` when refreshing fails. |
 
 ## Behavior
 
 - Cookies are read automatically from the browser context — you don't need to handle them or CSRF tokens manually.
 - Uses the provider's existing access token to fetch fresh profile data and normalizes it into the session's `User` object, matching [`api.refreshUserInfo`](/docs/api-reference/server/api/refreshUserInfo#behavior)'s behavior.
-- If the refresh fails (invalid or expired access token, or the provider request fails), the `session` resolves to `null` or `session.user`
+- If the refresh fails (invalid or expired access token, or the provider request fails), the function returns `null`. On success it returns the refreshed session object.
 
 ## Usage
 

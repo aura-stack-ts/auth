@@ -1,21 +1,14 @@
 ---
-title: disConnectProvider
-description: Complete API reference for the api.disConnectProvider method, providing type-safe OAuth provider disconnection across all runtimes.
+title: disconnectProvider
+description: Complete API reference for the api.disconnectProvider method, providing type-safe OAuth provider disconnection across all runtimes.
 ---
 
-<Callout type="warning">
-  TODO — confirm before publishing: this method's name (`disConnectProvider`, with an internal capital `C`) breaks the
-  `lowerCamelCase` convention every other `api` method follows (`getAccessToken`, `isProviderConnected`, `revokeToken`, etc.).
-  This reads like a naming bug in the library itself rather than a docs issue — worth fixing at the source before v1.0.0, since
-  it's a public symbol name that would need a breaking change to correct later. Left as-is here pending confirmation.
-</Callout>
-
-The `api.disConnectProvider` method is the primary programmatic entry point for disconnecting an OAuth provider from the current session, without revoking its access token. This method runs on the server, so it requires you to pass the `request` or `headers` object from your server-side context.
+The `api.disconnectProvider` method is the primary programmatic entry point for disconnecting an OAuth provider from the current session, without revoking its access token. This method runs on the server, so it requires you to pass the `request` or `headers` object from your server-side context.
 
 ```ts title="disconnect-provider.ts" lineNumbers
 import { api } from "@/lib/auth"
 
-const output = await api.disConnectProvider("github", {
+const output = await api.disconnectProvider("github", {
   request: getRequest(),
 })
 ```
@@ -59,10 +52,6 @@ const output = await api.disConnectProvider("github", {
 - CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
 - If disconnection fails (the provider isn't connected to the current session), `success` is `false`.
 
-## Errors
-
-See the [Errors Reference](/docs/api-reference/errors) for `CsrfError` (missing or mismatched token) and provider-connection errors.
-
 ## Usage
 
 ### Disconnect a provider
@@ -70,7 +59,7 @@ See the [Errors Reference](/docs/api-reference/errors) for `CsrfError` (missing 
 ```ts title="disconnect-provider.ts" lineNumbers
 import { api } from "@/lib/auth"
 
-const { success } = await api.disConnectProvider("github", {
+const { success } = await api.disconnectProvider("github", {
   request: getRequest(),
 })
 ```
@@ -80,7 +69,7 @@ const { success } = await api.disConnectProvider("github", {
 ```tsx title="handle-failure.ts" lineNumbers
 import { api } from "@/lib/auth"
 
-const { success } = await api.disConnectProvider("github", {
+const { success } = await api.disconnectProvider("github", {
   request: getRequest(),
 })
 
@@ -94,7 +83,7 @@ if (!success) {
 ```ts title="skip-csrf.ts" lineNumbers
 import { api } from "@/lib/auth"
 
-const { success } = await api.disConnectProvider("github", {
+const { success } = await api.disconnectProvider("github", {
   request: getRequest(),
   skipCSRFCheck: true, // only if enforced elsewhere — see the warning above
 })

@@ -46,10 +46,6 @@ const output = await api.refreshUserInfo("github", {
 - CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
 - If the refresh fails (invalid or expired access token, or the provider request fails), `session` resolves to `null` and `success` is `false`.
 
-## Errors
-
-See the [Errors Reference](/docs/api-reference/errors) for `CsrfError` (missing or mismatched token) and provider-connection errors.
-
 ## Usage
 
 ### Refresh user info

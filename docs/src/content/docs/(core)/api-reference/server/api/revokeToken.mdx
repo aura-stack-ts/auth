@@ -19,9 +19,9 @@ const output = await api.revokeToken("github", {
 ```
 
 <Callout>
-  This method is a stronger alternative to `api.disConnectProvider`, which disconnects a provider from the current session without
+  This method is a stronger alternative to `api.disconnectProvider`, which disconnects a provider from the current session without
   revoking its access token. Use this method when you specifically need the token itself invalidated. See
-  [`api.disConnectProvider`](/docs/api-reference/server/api/disconnect-provider) for the softer alternative.
+  [`api.disconnectProvider`](/docs/api-reference/server/api/disconnect-provider) for the softer alternative.
 </Callout>
 
 ## Reference
@@ -56,10 +56,6 @@ const output = await api.revokeToken("github", {
 - Revocation success depends entirely on the provider's `revokeToken` endpoint configuration and whether the provider supports token revocation at all. If it doesn't, this method returns `success: false`.
 - CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
 - If revocation fails (no active token for the provider, or the provider rejects the request), `success` is `false`.
-
-## Errors
-
-See the [Errors Reference](/docs/api-reference/errors) for `CsrfError` (missing or mismatched token) and provider-connection errors.
 
 ## Usage
 

@@ -18,13 +18,12 @@ function createAuthClient<DefaultUser extends User = User, SignUpPayload extends
   signUp<Options extends SignUpOptions<Record<string, any>>>(options: Options): Promise<SignUpReturn<Options>>
   updateSession<Options extends UpdateSessionOptions<User>>(options: Options): Promise<UpdateSessionReturn<Options, User>>
   signOut<Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>>
-  // OAuth token management
-  getAccessToken(providerId: string): Promise<AccessTokenReturn>
-  getProviderTokens(providerId: string): Promise<ProviderTokensReturn>
-  isProviderConnected(providerId: string): Promise<ProviderConnectedReturn>
-  refreshUserInfo(providerId: string): Promise<RefreshUserInfoReturn<User>>
-  revokeToken(providerId: string): Promise<RevokeTokenReturn>
-  disconnectProvider(providerId: string): Promise<DisconnectProviderReturn>
+  getAccessToken(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<string | null>
+  getProviderTokens(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<GetProviderTokensReturn>
+  isProviderConnected(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean>
+  refreshUserInfo(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<Session<User> | null>
+  revokeToken(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean>
+  disconnectProvider(oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean>
 }
 ```
 

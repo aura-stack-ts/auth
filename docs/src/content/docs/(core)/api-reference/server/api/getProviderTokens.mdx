@@ -57,10 +57,6 @@ The method resolves the tokens in stages:
 
 - CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
 
-## Errors
-
-See the [Errors Reference](/docs/api-reference/errors) for `CsrfError` (missing or mismatched token) and provider-connection errors.
-
 ## Usage
 
 ### Get a provider's tokens

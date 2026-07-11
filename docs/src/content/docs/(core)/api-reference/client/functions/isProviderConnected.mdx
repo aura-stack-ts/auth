@@ -34,7 +34,7 @@ const connected = await authClient.isProviderConnected("github")
 
 - Cookies are read automatically from the browser context — you don't need to handle them or CSRF tokens manually.
 - On success, the method resolves to `true` or `false`. This does not throw for "not connected" — that's an expected outcome.
-- If the check itself fails (e.g. no valid session), the method resolves to `null` and `success` is `false` — distinct from `connected: false`.
+- If the check itself fails (e.g. no valid session), the method resolves to `false` rather than throwing an error. This is to avoid exposing session state to the client.
 
 ## Usage
 
