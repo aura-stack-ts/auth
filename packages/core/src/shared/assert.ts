@@ -244,6 +244,10 @@ export const isString = (value: unknown): value is string => {
     return typeof value === "string"
 }
 
+export const isObject = (value: unknown): value is Record<string, any> => {
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
 export const isRefreshTokenObject = (value: unknown): value is Exclude<OAuthProviderConfig["refreshToken"], string> => {
-    return typeof value === "object" && value !== null && "url" in value
+    return isObject(value) && "url" in value
 }

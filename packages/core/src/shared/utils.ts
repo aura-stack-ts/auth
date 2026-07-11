@@ -238,16 +238,15 @@ export const getStandardSession = async ({
 }
 
 export const transformToTokenPayload = (tokens: OAuthAccessTokenResponseType & { id_token?: string }) => {
+    const now = Math.floor(Date.now() / 1000)
     return {
         accessToken: tokens.access_token,
-        expiresAt: tokens.expires_in ? Math.floor(Date.now() / 1000) + tokens.expires_in : undefined,
+        expiresAt: tokens.expires_in ? now + tokens.expires_in : undefined,
         refreshToken: tokens.refresh_token,
-        refreshTokenExpiresAt: tokens.refresh_token_expires_in
-            ? Math.floor(Date.now() / 1000) + tokens.refresh_token_expires_in
-            : undefined,
+        refreshTokenExpiresAt: tokens.refresh_token_expires_in ? now + tokens.refresh_token_expires_in : undefined,
         idToken: tokens.id_token,
-        tokenType: tokens.token_type,
+        tokenType: tokens.token_type ?? "Bearer",
         scopes: isString(tokens.scope) ? [tokens.scope] : Array.isArray(tokens.scope) ? tokens.scope : [],
-        issuedAt: Math.floor(Date.now() / 1000),
+        issuedAt: now,
     }
 }

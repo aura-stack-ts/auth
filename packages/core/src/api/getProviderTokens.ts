@@ -14,20 +14,19 @@ import type {
     BuiltInOAuthProvider,
     RuntimeOAuthProvider,
 } from "@/@types/index.ts"
-import { isRefreshTokenObject } from "@/shared/assert.ts"
+import { isObject, isRefreshTokenObject } from "@/shared/assert.ts"
 
 export const refreshProviderToken = async (
     payload: OAuthTokenPayload,
     provider: RuntimeOAuthProvider
 ): Promise<OAuthTokenPayload> => {
-    if (!provider.refreshToken || (isRefreshTokenObject(provider.refreshToken) && !("url" in provider.refreshToken))) {
+    if (!provider.refreshToken || (isObject(provider.refreshToken) && !isRefreshTokenObject(provider.refreshToken))) {
         throw new AuraAuthError({ code: "OAUTH_INVALID_REFRESH_TOKEN_CONFIG" })
     }
     if (!payload.refreshToken) {
         throw new AuraAuthError({ code: "OAUTH_INVALID_REFRESH_TOKEN_CONFIG" })
     }
     const url = isRefreshTokenObject(provider.refreshToken) ? provider.refreshToken.url : provider.refreshToken
-    const basicAuth = createBasicAuthHeader(provider.clientId!, provider.clientSecret!)
 
     const isCredentialsAuth = isRefreshTokenObject(provider.refreshToken)
         ? provider.refreshToken.authorization?.type === "credentials"
@@ -36,7 +35,7 @@ export const refreshProviderToken = async (
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            ...(isCredentialsAuth ? {} : { Authorization: basicAuth }),
+            ...(isCredentialsAuth ? {} : { Authorization: createBasicAuthHeader(provider.clientId!, provider.clientSecret!) }),
             ...(typeof provider.refreshToken === "object" && provider.refreshToken.headers ? provider.refreshToken.headers : {}),
         },
         body: new URLSearchParams({
