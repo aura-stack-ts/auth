@@ -12,6 +12,7 @@ import type {
     Prettify,
     Identities,
 } from "@/@types/index.ts"
+import type { DatabaseAdapter } from "@/@types/adapter.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof identitySchema>
@@ -156,6 +157,20 @@ export type JWTConfig = Prettify<
     } & JWTConfigBase
 >
 
+export interface SessionStatefulConfig {
+    /**
+     * The session deletion strategy when a user is deleted. Defaults to "soft" (mark as deleted, keep for audit).
+     * - "soft": The user is marked as deleted, but the row is preserved in the database.
+     * - "hard": The user and all associated data (Accounts, Sessions, Devices, MfaCredentials) are permanently removed from the database.
+     */
+    deleteStrategy?: "soft" | "hard"
+    /**
+     * The maximum number of concurrent sessions allowed per user. If exceeded, the oldest session(s) will be revoked.
+     * If not set, there is no limit on concurrent sessions.
+     */
+    maxSessions?: number
+}
+
 /**
  * Stateless JWT strategy.
  * No database required. Tokens are self-contained and cannot be revoked
@@ -173,6 +188,12 @@ export type StatelessStrategyConfig = {
     jwt?: JWTConfig
 }
 
+export type StatefulStrategyConfig = {
+    strategy: "database"
+    adapter: DatabaseAdapter
+    session?: SessionStatefulConfig
+}
+
 /**
  * The session strategy. Determines which fields below are required.
  *
@@ -182,7 +203,7 @@ export type StatelessStrategyConfig = {
  *
  * @default "jwt"
  */
-export type SessionConfig = StatelessStrategyConfig
+export type SessionConfig = StatelessStrategyConfig | StatefulStrategyConfig
 
 /** Result of reading a stateless (JWT) session from a request: session payload and outgoing header mutations. */
 export interface GetStatelessSessionReturn<DefaultUser extends User = User> {
