@@ -24,14 +24,15 @@ import {
     isPEMFormattedKeyPairFromEnv,
     isSealedMode,
     isSignedMode,
+    isStatelessStrategy,
 } from "@/shared/assert.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { importPEMKeyPair } from "@/shared/crypto.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
 import type { User, SessionConfig, JWTKey, AsymmetricKeyPairFromEnv } from "@/@types/index.ts"
-import { AuraAuthError } from "./shared/errors.ts"
 
 const getJWTConfig = (config?: SessionConfig) => {
-    return config?.jwt
+    return isStatelessStrategy(config) ? config?.jwt : {}
 }
 
 export const getJWTClaims = (config?: SessionConfig) => {

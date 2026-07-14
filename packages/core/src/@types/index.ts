@@ -13,6 +13,8 @@ export type * from "@/@types/session.ts"
 export type * from "@/@types/utility.ts"
 export type * from "@/@types/api.ts"
 export type * from "@/identity/index.ts"
+export type * from "@/@types/entities.ts"
+export type * from "@/@types/adapter.ts"
 
 export type { Awaitable } from "@aura-stack/router/types"
 export type { TypedJWTPayload } from "@aura-stack/jose"

@@ -1,4 +1,5 @@
 import { AuraAuthError } from "@/shared/errors.ts"
+import { createStatefulStrategy } from "@/session/stateful.ts"
 import { createStatelessStrategy } from "@/session/stateless.ts"
 import type { Identities } from "@/identity/index.ts"
 import type { FromShapeToObject } from "@/@types/utility.ts"
@@ -17,7 +18,15 @@ export const createSessionStrategy = <Identity extends Identities>({
         case "jwt":
             return createStatelessStrategy({
                 jose,
-                config,
+                config: config as any,
+                cookies,
+                logger,
+                identity,
+            })
+        case "database":
+            return createStatefulStrategy({
+                config: config as any,
+                jose,
                 cookies,
                 logger,
                 identity,

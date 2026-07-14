@@ -10,6 +10,7 @@ import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import { createRateLimiterInstance } from "@/router/rate-limiter.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
+import { isStatelessStrategy } from "@/shared/assert.ts"
 
 export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>
@@ -60,7 +61,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
             skipValidation,
         },
         signUp: config?.signUp,
-        jwtManager: createJoseManager(config?.session?.jwt, jose),
+        jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
         rateLimiters: createRateLimiterInstance(config?.rateLimiter),
     } as InternalContext<Identity, SignUpSchema>
     ctx.sessionStrategy = createSessionStrategy<Identity>({
