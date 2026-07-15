@@ -111,7 +111,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 }
             }
 
-            const user = { sub: session.user.id, ...session.user, ...session.user.attributes }
+            const user = { ...session.user, ...session.user.attributes, sub: session.user.id }
             logger?.log("STATEFUL_USER_DATA_MERGED", {
                 structuredData: {
                     user_id: user.id,
@@ -327,6 +327,10 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 return { session: null, headers: cookieConfig.clear() }
             }
 
+            if (sessionByToken.status !== "active") {
+                return { session: null, headers: cookieConfig.clear() }
+            }
+
             logger?.log("STATEFUL_SESSION_EXPIRATION_CHECK", {
                 structuredData: {
                     session_id: sessionByToken.id,
@@ -458,12 +462,20 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
         })
     }
 
-    const destroySession = async (headers: Headers, _skipCSRFCheck: boolean = false) => {
+    const destroySession = async (headers: Headers, skipCSRFCheck: boolean = false) => {
         logger?.log("STATEFUL_DESTROY_SESSION_START", {
             structuredData: {
                 strategy: "stateful",
                 operation: "destroySession",
             },
+        })
+
+        await verifyCSRFToken({
+            headers,
+            cookies: cookies(),
+            logger,
+            jose: jose as JoseInstance,
+            skipCSRFCheck,
         })
 
         try {

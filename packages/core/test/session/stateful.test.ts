@@ -153,7 +153,7 @@ describe("Stateful Strategy", () => {
         })
 
         test("should return null session on adapter error", async () => {
-            const mock = vi.fn().mockResolvedValue(new Error("DB Error"))
+            const mock = vi.fn().mockRejectedValue(new Error("DB Error"))
             const { GET } = authInstance({
                 getSessionByToken: mock,
             })
@@ -506,7 +506,7 @@ describe("Stateful Strategy", () => {
                 redirect: false,
                 redirectURL: null,
             })
-            expect(revokeSessionMock).toHaveBeenCalled()
+            expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
         })
     })
 
