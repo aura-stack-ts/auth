@@ -15,6 +15,8 @@ import type {
     JWTPayloadWithToken,
     OAuthProviderConfig,
     SessionConfig,
+    StatefulStrategyConfig,
+    StatelessStrategyConfig,
 } from "@/@types/index.ts"
 import type { JWK } from "@aura-stack/jose/jose"
 
@@ -110,12 +112,20 @@ export const isTrustedOrigin = (url: string, trustedOrigins: string[]): boolean 
     return false
 }
 
+export const isStatelessStrategy = (config?: SessionConfig): config is StatelessStrategyConfig => {
+    return config?.strategy === "jwt" || config?.strategy === undefined
+}
+
+export const isStatefulStrategy = (config?: SessionConfig): config is StatefulStrategyConfig => {
+    return config?.strategy === "database"
+}
+
 /**
  * Extracts the JWT mode from a SessionConfig.
  * Defaults to "sealed" when no mode is specified.
  */
 const getJWTMode = (config?: SessionConfig): JWTMode => {
-    return config?.jwt?.mode ?? "sealed"
+    return isStatelessStrategy(config) ? (config?.jwt?.mode ?? "sealed") : "sealed"
 }
 
 export const isSignedMode = (config?: SessionConfig): config is { jwt: Extract<JWTConfig, { mode: "signed" }> } =>

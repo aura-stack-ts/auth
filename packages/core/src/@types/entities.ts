@@ -87,7 +87,7 @@ export interface SessionEntity {
     authenticatedWith: string
     status: SessionStatus
     mfaState: MFAState
-    sessionToken: string
+    tokenHash: string
     expiresAt: Date
     metadata: Record<string, unknown> | null
     lastActivityAt: Date

@@ -211,6 +211,8 @@ export interface GetStatelessSessionReturn<DefaultUser extends User = User> {
     headers: Headers
 }
 
+export type GetStatefulSessionReturn<DefaultUser extends User = User> = GetStatelessSessionReturn<DefaultUser>
+
 /**
  * Abstraction layer for session management.
  */
@@ -266,6 +268,14 @@ export interface CreateSessionStrategyOptions<Identity extends Identities> {
 /** Options specialized for the JWT-backed session strategy. */
 export interface JWTStrategyOptions<DefaultUser extends User = User> {
     config?: StatelessStrategyConfig
+    jose: JoseInstance<DefaultUser>
+    logger?: InternalLogger
+    cookies: () => InternalCookieStoreConfig
+    identity: SchemaRegistryContext
+}
+
+export interface DatabaseStrategyOptions<DefaultUser extends User = User> {
+    config: StatefulStrategyConfig
     jose: JoseInstance<DefaultUser>
     logger?: InternalLogger
     cookies: () => InternalCookieStoreConfig
