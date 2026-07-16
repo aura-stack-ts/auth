@@ -29,6 +29,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         const user = await signUp?.onCreateUser({
             payload,
         })
+        console.log("user", user)
         if (!user) {
             throw new AuraAuthError({ code: "USER_CREATION_FAILED" })
         }

@@ -164,6 +164,16 @@ export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any
                 }
             },
         },
+        signUp: {
+            onCreateUser: async ({ payload }) => {
+                return {
+                    sub: "user-123",
+                    name: payload.name,
+                    email: payload.email,
+                    image: payload.image,
+                }
+            },
+        },
     }
     const merged = merge(config, override ?? {})
     return createAuth(merged as AuthConfig<any, any>)

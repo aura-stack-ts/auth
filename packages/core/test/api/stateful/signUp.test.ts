@@ -1,7 +1,8 @@
-import { describe, test, expect, beforeEach, afterEach, vi } from "vitest"
+import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
-import { authInstance, jose } from "@test/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
+import { authInstance, jose, sessionPayload } from "@test/presets.ts"
+import type { User } from "@/index.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -36,14 +37,14 @@ vi.mock("@aura-stack/rate-limiter", async () => {
     }
 })
 
-describe("signInCredentials API", async () => {
+describe("signUp API", async () => {
     const csrfToken = await createCSRF(jose)
 
     const headers = {
         Cookie: `aura-auth.csrf_token=${csrfToken}`,
     }
 
-    test("success signIn flow", async () => {
+    test("success signUp flow", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
@@ -58,12 +59,9 @@ describe("signInCredentials API", async () => {
             createSession: createSessionMock,
         })
 
-        const output = await api.signInCredentials({
+        const output = await api.signUp({
             headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
+            payload: sessionPayload,
         })
         expect(output).toEqual({
             success: true,
@@ -73,10 +71,8 @@ describe("signInCredentials API", async () => {
             toResponse: expect.any(Function),
         })
         expect(spy).toHaveBeenCalledWith({
+            ...sessionPayload,
             sub: "user-123",
-            name: "johndoe",
-            email: "johndoe@example.com",
-            image: "https://example.com/image.jpg",
         })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -91,42 +87,7 @@ describe("signInCredentials API", async () => {
         })
     })
 
-    test("invalid authorize return", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
-        const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
-
-        const spy = vi.spyOn(registry, "parse")
-        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
-
-        const createSessionMock = vi.fn()
-
-        const { api } = authInstance({ createSession: createSessionMock }, { credentials: { authorize: () => null } })
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "wrongpassword",
-            },
-        })
-
-        expect(output).toEqual({
-            success: false,
-            redirect: false,
-            redirectURL: null,
-            error: {
-                code: "AUTH_CREDENTIALS_INVALID",
-                message: "The user's session couldn't be established with the provided credentials.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
-        })
-        expect(spy).not.toHaveBeenCalled()
-        expect(createSessionMock).not.toHaveBeenCalled()
-    })
-
-    test("invalid authorize by missing required fields", async () => {
+    test("invalid signUp.onCreateUser return", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
@@ -138,25 +99,60 @@ describe("signInCredentials API", async () => {
         const createSessionMock = vi.fn()
 
         const { api } = authInstance(
-            { createSession: createSessionMock },
             {
-                credentials: {
-                    authorize: () =>
+                createSession: createSessionMock,
+            },
+            { signUp: { onCreateUser: () => null } }
+        )
+        const output = await api.signUp({
+            headers,
+            payload: sessionPayload,
+        })
+        expect(output).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "USER_CREATION_FAILED",
+                message: "Failed to create user account with the provided metadata payload.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        console.log(spy.mock.calls)
+        expect(spy).not.toHaveBeenCalled()
+        expect(createSessionMock).not.toHaveBeenCalled()
+    })
+
+    test("invalid signUp.onCreateUser by missing required fields", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spy = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const createSessionMock = vi.fn()
+
+        const { api } = authInstance(
+            {
+                createSession: createSessionMock,
+            },
+            {
+                signUp: {
+                    onCreateUser: () =>
                         ({
                             name: "John Doe",
                             email: "johndoe@example.com",
-                        }) as any,
+                        }) as User,
                 },
             }
         )
-        const output = await api.signInCredentials({
+        const output = await api.signUp({
             headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
+            payload: sessionPayload,
         })
-
         expect(output).toEqual({
             success: false,
             redirect: false,
@@ -176,7 +172,7 @@ describe("signInCredentials API", async () => {
         expect(createSessionMock).not.toHaveBeenCalled()
     })
 
-    test("signIn without URL configuration", async () => {
+    test("signUp without URL configuration", async () => {
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -185,31 +181,30 @@ describe("signInCredentials API", async () => {
 
         const createSessionMock = vi.fn()
 
-        const { api } = authInstance({ createSession: createSessionMock })
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
+        const { api } = authInstance({
+            createSession: createSessionMock,
         })
 
+        const output = await api.signUp({
+            headers,
+            payload: sessionPayload,
+        })
         expect(output).toEqual({
             success: false,
             redirect: false,
             redirectURL: null,
+            headers: expect.any(Headers),
             error: {
                 code: "INVALID_AUTH_CONFIGURATION",
                 message: "The application context URL cannot be constructed. Set BASE_URL or provide proxy host headers.",
             },
-            headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
         expect(spy).not.toHaveBeenCalled()
         expect(createSessionMock).not.toHaveBeenCalled()
     })
 
-    test("signIn with redirect: true and redirectTo", async () => {
+    test("signUp with redirect: true and redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
@@ -224,12 +219,55 @@ describe("signInCredentials API", async () => {
             createSession: createSessionMock,
         })
 
-        const output = await api.signInCredentials({
+        const output = await api.signUp({
             headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
+            payload: sessionPayload,
+            redirect: true,
+            redirectTo: "/dashboard",
+        })
+        expect(output.headers.get("Location")).toBe("/dashboard")
+        expect(output).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(spy).toHaveBeenCalledWith({
+            ...sessionPayload,
+            sub: "user-123",
+        })
+        expect(createSessionMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
+        })
+    })
+
+    test("signUp with redirect: true and absolute redirectTo", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spy = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const createSessionMock = vi.fn()
+
+        const { api } = authInstance({
+            createSession: createSessionMock,
+        })
+
+        const output = await api.signUp({
+            headers,
+            payload: sessionPayload,
             redirect: true,
             redirectTo: "https://example.com/dashboard",
         })
@@ -242,10 +280,8 @@ describe("signInCredentials API", async () => {
             toResponse: expect.any(Function),
         })
         expect(spy).toHaveBeenCalledWith({
+            ...sessionPayload,
             sub: "user-123",
-            name: "johndoe",
-            email: "johndoe@example.com",
-            image: "https://example.com/image.jpg",
         })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -260,7 +296,7 @@ describe("signInCredentials API", async () => {
         })
     })
 
-    test("signIn with redirect: false and valid redirectTo", async () => {
+    test("signUp with redirect: false and valid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
@@ -275,14 +311,11 @@ describe("signInCredentials API", async () => {
             createSession: createSessionMock,
         })
 
-        const output = await api.signInCredentials({
+        const output = await api.signUp({
             headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
+            payload: sessionPayload,
             redirect: false,
-            redirectTo: "https://example.com/dashboard",
+            redirectTo: "/dashboard",
         })
         expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
@@ -292,11 +325,10 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
         expect(spy).toHaveBeenCalledWith({
+            ...sessionPayload,
             sub: "user-123",
-            name: "johndoe",
-            email: "johndoe@example.com",
-            image: "https://example.com/image.jpg",
         })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -311,7 +343,7 @@ describe("signInCredentials API", async () => {
         })
     })
 
-    test("signIn redirect: true and invalid redirectTo", async () => {
+    test("signUp redirect: true and invalid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
@@ -326,14 +358,11 @@ describe("signInCredentials API", async () => {
             createSession: createSessionMock,
         })
 
-        const output = await api.signInCredentials({
+        const output = await api.signUp({
             headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
+            payload: sessionPayload,
             redirect: true,
-            redirectTo: "https://malicious.com/phishing",
+            redirectTo: "https://malicious.com/dashboard",
         })
         expect(output.headers.get("Location")).toBe("/")
         expect(output).toEqual({
@@ -343,11 +372,10 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
         expect(spy).toHaveBeenCalledWith({
+            ...sessionPayload,
             sub: "user-123",
-            name: "johndoe",
-            email: "johndoe@example.com",
-            image: "https://example.com/image.jpg",
         })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -362,7 +390,7 @@ describe("signInCredentials API", async () => {
         })
     })
 
-    test("signIn with redirect: false and invalid redirectTo", async () => {
+    test("signUp redirect: false and invalid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
@@ -377,14 +405,11 @@ describe("signInCredentials API", async () => {
             createSession: createSessionMock,
         })
 
-        const output = await api.signInCredentials({
+        const output = await api.signUp({
             headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
+            payload: sessionPayload,
             redirect: false,
-            redirectTo: "https://malicious.com/phishing",
+            redirectTo: "https://malicious.com/dashboard",
         })
         expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
@@ -394,11 +419,10 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
         expect(spy).toHaveBeenCalledWith({
+            ...sessionPayload,
             sub: "user-123",
-            name: "johndoe",
-            email: "johndoe@example.com",
-            image: "https://example.com/image.jpg",
         })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
