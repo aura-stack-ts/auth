@@ -1,6 +1,16 @@
 import { createAuth } from "@/createAuth.ts"
 import type { JWTPayload } from "@/jose.ts"
-import type { OAuthProviderCredentials, OAuthTokenPayload, OpenIDProvider, User } from "@/@types/index.ts"
+import type {
+    AuthConfig,
+    DatabaseAdapter,
+    OAuthProviderCredentials,
+    OAuthTokenPayload,
+    OpenIDProvider,
+    SessionWithUserEntity,
+    User,
+    UserEntity,
+} from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
 
 export const oauthCustomService: OAuthProviderCredentials = {
     id: "oauth-provider",
@@ -67,6 +77,37 @@ export const sessionPayload: JWTPayload = {
     image: "https://example.com/image.jpg",
 }
 
+export const userEntity: UserEntity = {
+    id: "user-123",
+    name: "John Doe",
+    email: "john@example.com",
+    image: "https://example.com/image.jpg",
+    emailVerifiedAt: new Date(),
+    status: "active",
+    mfaEnabled: false,
+    mfaPreferredMethod: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    attributes: null,
+}
+
+export const sessionEntity: SessionWithUserEntity = {
+    id: "session-123",
+    userId: "user-123",
+    deviceId: null,
+    authenticatedWith: "credentials",
+    status: "active",
+    mfaState: "none",
+    tokenHash: "hashed-token",
+    expiresAt: new Date(Date.now() + 3600 * 1000),
+    metadata: null,
+    lastActivityAt: new Date(),
+    revokedAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    user: userEntity,
+}
+
 const auth = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile, openIDCustomProvider],
     logger: true,
@@ -99,6 +140,26 @@ export const {
     jose,
     api,
 } = auth
+
+export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any>>, override?: AuthConfig<any, any>) => {
+    const config: AuthConfig<any, any> = {
+        oauth: [],
+        session: {
+            strategy: "database",
+            adapter: adapter as any,
+        },
+        credentials: {
+            authorize: async ({ credentials }) => ({
+                sub: "user-123",
+                name: credentials.username,
+                email: credentials.password,
+                image: "https://example.com/image.jpg",
+            }),
+        },
+    }
+    const merged = merge(config, override ?? {})
+    return createAuth(merged as AuthConfig<any, any>)
+}
 
 const RSA256PublicKey = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv5eSIl71g3dyLEFYbv3B

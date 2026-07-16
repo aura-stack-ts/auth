@@ -105,13 +105,15 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                     },
                 })
                 await config.adapter.revokeSession(session.id, "user_logout")
+
                 return {
                     session: null,
-                    headers: new Headers(secureApiHeaders),
+                    headers: cookieConfig.clear(),
                 }
             }
 
-            const user = { ...session.user, ...session.user.attributes, sub: session.user.id }
+            const { attributes, ...userPayload } = session.user
+            const user = { ...userPayload, ...attributes, sub: session.user.id }
             logger?.log("STATEFUL_USER_DATA_MERGED", {
                 structuredData: {
                     user_id: user.id,
@@ -140,7 +142,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                     user: parsedUser as DefaultUser,
                     expires: session.expiresAt.toISOString(),
                 },
-                headers: new Headers(secureApiHeaders),
+                headers: cookieConfig.setCookie({ sessionToken }),
             }
         } catch (error) {
             logger?.log("STATEFUL_GET_SESSION_ERROR", {
@@ -151,7 +153,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             })
             return {
                 session: null,
-                headers: new Headers(secureApiHeaders),
+                headers: cookieConfig.clear(),
             }
         }
     }
