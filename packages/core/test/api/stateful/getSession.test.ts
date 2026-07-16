@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, afterEach } from "vitest"
 import { getSetCookie } from "@/cookie.ts"
-import { authInstance, sessionEntity, userEntity } from "@test/presets.ts"
+import { authInstance, sessionEntityWithUser, userEntity } from "@test/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 afterEach(() => {
@@ -63,7 +63,7 @@ describe("getSession", () => {
         const spy = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
-        const mock = vi.fn().mockResolvedValue(sessionEntity)
+        const mock = vi.fn().mockResolvedValue(sessionEntityWithUser)
 
         const { api } = authInstance({
             getSessionByToken: mock,
@@ -101,7 +101,7 @@ describe("getSession", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const sessionByTokenMock = vi.fn().mockResolvedValue({
-            ...sessionEntity,
+            ...sessionEntityWithUser,
             expiresAt: new Date(Date.now() - 1000),
         })
         const revokeSessionMock = vi.fn().mockResolvedValue(true)
@@ -139,7 +139,7 @@ describe("getSession", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const mock = vi.fn().mockResolvedValue({
-            ...sessionEntity,
+            ...sessionEntityWithUser,
             user: {
                 ...userEntity,
                 id: undefined,
@@ -185,7 +185,7 @@ describe("getSession", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const mock = vi.fn().mockResolvedValue({
-            ...sessionEntity,
+            ...sessionEntityWithUser,
             user: {
                 ...userEntity,
                 attributes: {

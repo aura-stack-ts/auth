@@ -216,8 +216,9 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             },
         })
 
+        const cryptoId = createSecretValue(32)
         const dbSession = await config.adapter.createSession({
-            id: crypto.randomUUID(),
+            id: cryptoId,
             userId: payload.sub as string,
             deviceId: null,
             authenticatedWith: "credentials",

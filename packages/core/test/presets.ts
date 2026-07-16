@@ -6,6 +6,7 @@ import type {
     OAuthProviderCredentials,
     OAuthTokenPayload,
     OpenIDProvider,
+    SessionEntity,
     SessionWithUserEntity,
     User,
     UserEntity,
@@ -91,7 +92,7 @@ export const userEntity: UserEntity = {
     attributes: null,
 }
 
-export const sessionEntity: SessionWithUserEntity = {
+export const sessionEntity: SessionEntity = {
     id: "session-123",
     userId: "user-123",
     deviceId: null,
@@ -105,6 +106,10 @@ export const sessionEntity: SessionWithUserEntity = {
     revokedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
+}
+
+export const sessionEntityWithUser: SessionWithUserEntity = {
+    ...sessionEntity,
     user: userEntity,
 }
 
@@ -141,7 +146,7 @@ export const {
     api,
 } = auth
 
-export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any>>, override?: AuthConfig<any, any>) => {
+export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any>>, override?: Partial<AuthConfig<any, any>>) => {
     const config: AuthConfig<any, any> = {
         oauth: [],
         session: {
@@ -149,12 +154,15 @@ export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any
             adapter: adapter as any,
         },
         credentials: {
-            authorize: async ({ credentials }) => ({
-                sub: "user-123",
-                name: credentials.username,
-                email: credentials.password,
-                image: "https://example.com/image.jpg",
-            }),
+            authorize: async ({ credentials }) => {
+                console.log("authorize called with credentials:", credentials)
+                return {
+                    sub: "user-123",
+                    name: credentials.username,
+                    email: `${credentials.username}@example.com`,
+                    image: "https://example.com/image.jpg",
+                }
+            },
         },
     }
     const merged = merge(config, override ?? {})
