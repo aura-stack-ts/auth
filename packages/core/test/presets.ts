@@ -155,7 +155,6 @@ export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any
         },
         credentials: {
             authorize: async ({ credentials }) => {
-                console.log("authorize called with credentials:", credentials)
                 return {
                     sub: "user-123",
                     name: credentials.username,

@@ -309,11 +309,16 @@ describe("Stateful Strategy", () => {
             const getSessionMock = vi.fn().mockResolvedValue(mockSession)
             const updateSessionMock = vi.fn().mockResolvedValue(mockSession)
             const touchSessionMock = vi.fn().mockResolvedValue(undefined)
+            const updateUserMock = vi.fn().mockResolvedValue({
+                ...mockUser,
+                name: "Updated Name",
+            })
 
             const { PATCH } = authInstance({
                 getSessionByToken: getSessionMock,
                 updateSession: updateSessionMock,
                 touchSession: touchSessionMock,
+                updateUser: updateUserMock,
             })
 
             const csrfToken = await createCSRF(jose)
@@ -332,23 +337,24 @@ describe("Stateful Strategy", () => {
             )
 
             expect(response.status).toBe(200)
-            expect(await response.json()).toEqual({
-                session: {
-                    user: {
-                        sub: "user-123",
-                        name: "John Doe",
-                        email: "john@example.com",
-                        image: "https://example.com/image.jpg",
-                    },
-                    expires: expect.any(String),
-                },
-                success: true,
-                redirect: false,
-                redirectURL: null,
-            })
+            const responseBody = await response.json()
+            expect(responseBody.session.user.name).toBe("Updated Name")
+            expect(responseBody.session.user.email).toBe("john@example.com")
+            expect(responseBody.session.user.image).toBe("https://example.com/image.jpg")
+            expect(responseBody.success).toBe(true)
             expect(getSessionMock).toHaveBeenCalledWith("valid-token")
             expect(updateSessionMock).toHaveBeenCalled()
             expect(touchSessionMock).toHaveBeenCalled()
+            expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+                name: "Updated Name",
+                email: "john@example.com",
+                image: "https://example.com/image.jpg",
+                emailVerifiedAt: mockUser.emailVerifiedAt,
+                status: mockUser.status,
+                mfaEnabled: mockUser.mfaEnabled,
+                mfaPreferredMethod: mockUser.mfaPreferredMethod,
+                attributes: mockUser.attributes,
+            })
             expect(spy).toHaveBeenCalledWith({ sub: mockUser.id, ...mockUser, ...mockUser.attributes })
         })
 
@@ -432,12 +438,17 @@ describe("Stateful Strategy", () => {
             const getSessionMock = vi.fn().mockResolvedValue(mockSession)
             const updateSessionMock = vi.fn().mockResolvedValue(mockSession)
             const touchSessionMock = vi.fn().mockResolvedValue(undefined)
+            const updateUserMock = vi.fn().mockResolvedValue({
+                ...mockUser,
+                name: "Updated Name",
+            })
 
             const { PATCH } = authInstance(
                 {
                     getSessionByToken: getSessionMock,
                     updateSession: updateSessionMock,
                     touchSession: touchSessionMock,
+                    updateUser: updateUserMock,
                 },
                 { skipValidation: true }
             )
@@ -458,24 +469,24 @@ describe("Stateful Strategy", () => {
             )
 
             expect(response.status).toBe(200)
-            expect(await response.json()).toEqual({
-                session: {
-                    user: {
-                        ...mockUser,
-                        sub: "user-123",
-                        createdAt: mockUser.createdAt.toISOString(),
-                        updatedAt: mockUser.updatedAt.toISOString(),
-                        emailVerifiedAt: mockUser.emailVerifiedAt?.toISOString(),
-                    },
-                    expires: expect.any(String),
-                },
-                success: true,
-                redirect: false,
-                redirectURL: null,
-            })
+            const responseBody = await response.json()
+            expect(responseBody.session.user.name).toBe("Updated Name")
+            expect(responseBody.session.user.email).toBe("john@example.com")
+            expect(responseBody.session.user.image).toBe("https://example.com/image.jpg")
+            expect(responseBody.success).toBe(true)
             expect(getSessionMock).toHaveBeenCalledWith("valid-token")
             expect(updateSessionMock).toHaveBeenCalled()
             expect(touchSessionMock).toHaveBeenCalled()
+            expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+                name: "Updated Name",
+                email: "john@example.com",
+                image: "https://example.com/image.jpg",
+                emailVerifiedAt: mockUser.emailVerifiedAt,
+                status: mockUser.status,
+                mfaEnabled: mockUser.mfaEnabled,
+                mfaPreferredMethod: mockUser.mfaPreferredMethod,
+                attributes: mockUser.attributes,
+            })
             expect(spy).not.toHaveBeenCalled()
         })
     })

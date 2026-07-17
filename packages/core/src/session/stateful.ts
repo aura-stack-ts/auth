@@ -251,7 +251,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
     const refreshSession = async (
         headers: Headers,
-        _session: DeepPartial<Session<DefaultUser>>,
+        session: DeepPartial<Session<DefaultUser>>,
         skipCSRFCheck: boolean = false
     ): Promise<{
         session: Session<DefaultUser> | null
@@ -359,21 +359,65 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 return { session: null, headers: cookieConfig.clear() }
             }
 
-            const user = { sub: sessionByToken.user.id, ...sessionByToken.user, ...sessionByToken.user.attributes }
+            const { attributes, ...spreadUser } = sessionByToken.user
+            const currentUser = { ...spreadUser, ...attributes, sub: sessionByToken.user.id }
             logger?.log("STATEFUL_USER_DATA_MERGED", {
                 structuredData: {
-                    user_id: user.id,
-                    has_attributes: Boolean(sessionByToken.user.attributes),
+                    user_id: currentUser.id,
+                    has_attributes: Boolean(attributes),
                 },
             })
 
-            const parsedUser = identity.skipValidation ? user : await identity.schemaRegistry.parse(user)
+            const parsedCurrentUser = identity.skipValidation ? currentUser : await identity.schemaRegistry.parse(currentUser)
             logger?.log("STATEFUL_USER_VALIDATION", {
                 structuredData: {
                     validation_skipped: identity.skipValidation || false,
-                    user_id: user.id,
+                    user_id: currentUser.id,
                 },
             })
+
+            const sessionPayload = identity.skipValidation
+                ? session.user
+                : await identity.schemaRegistry.parseAsPartial(session.user)
+
+            logger?.log("STATEFUL_SESSION_UPDATE_PAYLOAD", {
+                structuredData: {
+                    has_update_payload: Boolean(sessionPayload),
+                    user_id: currentUser.id,
+                },
+            })
+
+            const updatedUser = {
+                ...parsedCurrentUser,
+                ...sessionPayload,
+                sub: parsedCurrentUser.sub,
+            }
+
+            logger?.log("STATEFUL_USER_FIELDS_MERGED", {
+                structuredData: {
+                    user_id: updatedUser.id,
+                    fields_updated: Object.keys(sessionPayload || {}).join(","),
+                },
+            })
+
+            const validatedUser = identity.skipValidation ? updatedUser : await identity.schemaRegistry.parse(updatedUser)
+            logger?.log("STATEFUL_UPDATED_USER_VALIDATED", {
+                structuredData: {
+                    user_id: validatedUser.id,
+                    validation_skipped: identity.skipValidation || false,
+                },
+            })
+
+            if (sessionPayload && Object.keys(sessionPayload).length > 0) {
+                const { sub: _sub, ...userUpdateFields } = validatedUser
+                await config.adapter.updateUser(sessionByToken.userId, userUpdateFields as any)
+                logger?.log("STATEFUL_USER_UPDATED_IN_DB", {
+                    structuredData: {
+                        user_id: sessionByToken.userId,
+                        fields_updated: Object.keys(userUpdateFields).join(","),
+                    },
+                })
+            }
 
             const newExpiresAt = new Date(Date.now() + 60 * 60 * 24 * 15 * 1000)
             logger?.log("STATEFUL_SESSION_EXPIRATION_UPDATE", {
@@ -412,7 +456,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             })
 
             const updatedSession: Session<DefaultUser> = {
-                user: parsedUser as DefaultUser,
+                user: validatedUser as DefaultUser,
                 expires: newExpiresAt.toISOString(),
             }
 

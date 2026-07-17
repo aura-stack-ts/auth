@@ -119,7 +119,6 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        console.log(spy.mock.calls)
         expect(spy).not.toHaveBeenCalled()
         expect(createSessionMock).not.toHaveBeenCalled()
     })

@@ -2,6 +2,7 @@ import { createJoseInstance } from "@/jose.ts"
 import { createCookieStore } from "@/cookie.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createProxyLogger } from "@/shared/logger.ts"
+import { isStatelessStrategy } from "@/shared/assert.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
@@ -10,7 +11,6 @@ import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import { createRateLimiterInstance } from "@/router/rate-limiter.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
-import { isStatelessStrategy } from "@/shared/assert.ts"
 
 export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>
