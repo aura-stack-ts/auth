@@ -1,8 +1,8 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
-import { jose, POST } from "@test/presets.ts"
+import { authInstance, jose } from "@test/presets.ts"
 import { getSetCookie } from "@/cookie.ts"
-import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { createSchemaRegistry } from "@/validator/registry.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -47,7 +47,18 @@ describe("signInCredentials action", async () => {
     }
 
     test("success signIn flow", async () => {
-        const response = await POST(
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const createSessionMock = vi.fn()
+
+        const { handlers } = authInstance({
+            createSession: createSessionMock,
+        })
+        const response = await handlers.POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
                 headers,
@@ -63,25 +74,46 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
-        expect(decodedToken).toMatchObject({
-            sub: "1234567890",
-            email: "johndoe@example.com",
+
+        expect(spyParse).toHaveBeenCalledWith({
+            sub: "user-123",
             name: "johndoe",
+            email: "johndoe@example.com",
             image: "https://example.com/image.jpg",
+        })
+        expect(createSessionMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
         })
     })
 
     test("invalid credentials", async () => {
-        const {
-            handlers: { POST },
-        } = createAuth({
-            oauth: [],
-            credentials: {
-                authorize: () => null,
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const createSessionMock = vi.fn()
+
+        const { handlers } = authInstance(
+            {
+                createSession: createSessionMock,
             },
-        })
-        const response = await POST(
+            {
+                credentials: {
+                    authorize: () => null,
+                },
+            }
+        )
+        const response = await handlers.POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
                 headers,
@@ -97,22 +129,36 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
+
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(createSessionMock).not.toHaveBeenCalled()
     })
 
     test("invalid authorize by missing required fields", async () => {
-        const {
-            handlers: { POST },
-        } = createAuth({
-            oauth: [],
-            credentials: {
-                authorize: () =>
-                    ({
-                        name: "John Doe",
-                        email: "johndoe@example.com",
-                    }) as any,
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const createSessionMock = vi.fn()
+
+        const { handlers } = authInstance(
+            {
+                createSession: createSessionMock,
             },
-        })
-        const response = await POST(
+            {
+                credentials: {
+                    authorize: () =>
+                        ({
+                            name: "John Doe",
+                            email: "johndoe@example.com",
+                        }) as any,
+                },
+            }
+        )
+
+        const response = await handlers.POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
                 headers,
@@ -128,52 +174,28 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-    })
 
-    test("simulate hashing and verification", async () => {
-        const {
-            jose,
-            handlers: { POST },
-        } = createAuth({
-            oauth: [],
-            credentials: {
-                authorize: async (ctx) => {
-                    // Simulate password hashing and verification
-                    const hash = await ctx.deriveSecret(ctx.credentials.password, "salt")
-                    const isVerified = await ctx.verifySecret(ctx.credentials.password, hash)
-                    if (!isVerified) return null
-                    return {
-                        sub: "1234567890-abcdef",
-                        name: ctx.credentials.username,
-                    }
-                },
-            },
+        expect(spyParse).toHaveBeenCalledWith({
+            name: "John Doe",
+            email: "johndoe@example.com",
         })
-        const response = await POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
-                method: "POST",
-                headers,
-                body: JSON.stringify({
-                    username: "johndoe",
-                    password: "1234567890",
-                }),
-            })
-        )
-        expect(response.status).toBe(200)
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
-        expect(decodedToken).toMatchObject({
-            sub: "1234567890-abcdef",
-            name: "johndoe",
-        })
-        expect(await response.json()).toEqual({
-            success: true,
-            redirect: false,
-            redirectURL: null,
-        })
+        expect(createSessionMock).not.toHaveBeenCalled()
     })
 
     test("credentials with redirect: true (by default)", async () => {
-        const response = await POST(
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const createSessionMock = vi.fn()
+
+        const { handlers } = authInstance({
+            createSession: createSessionMock,
+        })
+
+        const response = await handlers.POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
                 headers,
@@ -190,17 +212,40 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
-        expect(decodedToken).toMatchObject({
-            sub: "1234567890",
+
+        expect(spyParse).toHaveBeenCalledWith({
+            sub: "user-123",
             name: "alice",
             email: "alice@example.com",
             image: "https://example.com/image.jpg",
         })
+        expect(createSessionMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
+        })
     })
 
     test("credentials with redirect: true and redirectTo", async () => {
-        const response = await POST(
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const createSessionMock = vi.fn()
+
+        const { handlers } = authInstance({
+            createSession: createSessionMock,
+        })
+
+        const response = await handlers.POST(
             new Request("http://localhost:3000/auth/signIn/credentials?redirectTo=/dashboard", {
                 method: "POST",
                 headers,
@@ -217,17 +262,40 @@ describe("signInCredentials action", async () => {
             redirect: true,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
-        expect(decodedToken).toMatchObject({
-            sub: "1234567890",
+
+        expect(spyParse).toHaveBeenCalledWith({
+            sub: "user-123",
             name: "alice",
             email: "alice@example.com",
             image: "https://example.com/image.jpg",
         })
+        expect(createSessionMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
+        })
     })
 
     test("credentials with redirect: false", async () => {
-        const response = await POST(
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const createSessionMock = vi.fn()
+
+        const { handlers } = authInstance({
+            createSession: createSessionMock,
+        })
+
+        const response = await handlers.POST(
             new Request("http://localhost:3000/auth/signIn/credentials?redirect=false", {
                 method: "POST",
                 headers,
@@ -244,17 +312,40 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
-        expect(decodedToken).toMatchObject({
-            sub: "1234567890",
+
+        expect(spyParse).toHaveBeenCalledWith({
+            sub: "user-123",
             name: "alice",
             email: "alice@example.com",
             image: "https://example.com/image.jpg",
         })
+        expect(createSessionMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
+        })
     })
 
     test("credentials with redirect: false and redirectTo", async () => {
-        const response = await POST(
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const createSessionMock = vi.fn()
+
+        const { handlers } = authInstance({
+            createSession: createSessionMock,
+        })
+
+        const response = await handlers.POST(
             new Request("http://localhost:3000/auth/signIn/credentials?redirect=false&redirectTo=/dashboard", {
                 method: "POST",
                 headers,
@@ -271,12 +362,23 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: "/dashboard",
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
-        expect(decodedToken).toMatchObject({
-            sub: "1234567890",
+
+        expect(spyParse).toHaveBeenCalledWith({
+            sub: "user-123",
             name: "alice",
             email: "alice@example.com",
             image: "https://example.com/image.jpg",
+        })
+        expect(createSessionMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
         })
     })
 })
