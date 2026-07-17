@@ -1,10 +1,9 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
-import { createAuthorizationURL } from "@/actions/signIn/authorization-url.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
-import { createRedirectTo, createRedirectURI, createSignInURL } from "@/actions/signIn/authorization.ts"
+import { createAuthorizationURL, createRedirectTo, createRedirectURI, createSignInURL } from "@/shared/utils/authorization.ts"
 import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
 
 /**

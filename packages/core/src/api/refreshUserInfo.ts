@@ -2,7 +2,6 @@ import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { getProviderTokens } from "./getProviderTokens.ts"
-import { getUserInfo } from "@/actions/callback/userinfo.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
 import { toUnionHeaders, getStandardSession } from "@/shared/utils.ts"
 import type {
@@ -13,6 +12,7 @@ import type {
     User,
     BuiltInOAuthProvider,
 } from "@/@types/index.ts"
+import { getUserInfo } from "@/shared/utils/oauth.ts"
 
 export const refreshUserInfo = async <DefaultUser extends User = User>(
     oauth: LiteralUnion<BuiltInOAuthProvider>,
