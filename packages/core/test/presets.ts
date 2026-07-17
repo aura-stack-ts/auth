@@ -148,7 +148,7 @@ export const {
 
 export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any>>, override?: Partial<AuthConfig<any, any>>) => {
     const config: AuthConfig<any, any> = {
-        oauth: [],
+        oauth: [oauthCustomService, oauthCustomServiceProfile, openIDCustomProvider],
         session: {
             strategy: "database",
             adapter: adapter as any,
@@ -175,7 +175,7 @@ export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any
         },
     }
     const merged = merge(config, override ?? {})
-    return createAuth(merged as AuthConfig<any, any>)
+    return createAuth(merged as any)
 }
 
 const RSA256PublicKey = `-----BEGIN PUBLIC KEY-----
