@@ -621,6 +621,30 @@ export const logMessages = {
         msgId: "STATEFUL_USER_UPDATED_IN_DB",
         message: "User updated in database with new fields",
     },
+    STATEFUL_USER_NOT_FOUND_CREATING: {
+        facility: 4,
+        severity: "debug",
+        msgId: "STATEFUL_USER_NOT_FOUND_CREATING",
+        message: "User not found, creating new user",
+    },
+    STATEFUL_USER_CREATED: {
+        facility: 4,
+        severity: "info",
+        msgId: "STATEFUL_USER_CREATED",
+        message: "User created in database",
+    },
+    STATEFUL_USER_FOUND_UPDATING: {
+        facility: 4,
+        severity: "debug",
+        msgId: "STATEFUL_USER_FOUND_UPDATING",
+        message: "User found, updating existing user",
+    },
+    STATEFUL_USER_UPDATED: {
+        facility: 4,
+        severity: "info",
+        msgId: "STATEFUL_USER_UPDATED",
+        message: "User updated in database",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

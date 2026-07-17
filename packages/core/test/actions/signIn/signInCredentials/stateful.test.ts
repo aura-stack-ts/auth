@@ -1,6 +1,5 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
 import { authInstance, jose } from "@test/presets.ts"
-import { getSetCookie } from "@/cookie.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
