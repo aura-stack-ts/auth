@@ -1,6 +1,7 @@
 import { getExpiredCookie } from "@/cookie.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
+import { handleApiError } from "@/shared/utils/api.ts"
 import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
 import type { FunctionAPIContext, GetSessionAPIOptions, GetSessionAPIReturn, User } from "@/@types/index.ts"
 
@@ -34,7 +35,16 @@ export const getSession = async <DefaultUser extends User = User>({
             toResponse: () => Response.json({ success: true, session }, { headers: newHeaders }),
         } as GetSessionAPIReturn<DefaultUser>
     } catch (error) {
+        const { code, message } = handleApiError(
+            error,
+            "GET_SESSION_FAILED",
+            "Failed to retrieve session. The session token may be missing, expired, or invalid."
+        )
         ctx?.logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
-        return unauthorized
+        return {
+            ...unauthorized,
+            error: { code, message },
+            toResponse: () => Response.json({ success: false, session: null }, { status: 401, headers }),
+        }
     }
 }

@@ -58,6 +58,7 @@ describe("getSession", () => {
             headers: {},
             success: false,
         })
+        expect(getSetCookie(session.headers, "aura-auth.session_token")).toBe("")
     })
 
     test("getSession with session token missing sub claim", async () => {

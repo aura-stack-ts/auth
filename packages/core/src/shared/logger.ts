@@ -597,6 +597,30 @@ export const logMessages = {
         msgId: "STATEFUL_DESTROY_SESSION_SUCCESS",
         message: "Stateful session destroyed successfully",
     },
+    STATEFUL_SESSION_UPDATE_PAYLOAD: {
+        facility: 4,
+        severity: "debug",
+        msgId: "STATEFUL_SESSION_UPDATE_PAYLOAD",
+        message: "Session update payload received and parsed",
+    },
+    STATEFUL_USER_FIELDS_MERGED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "STATEFUL_USER_FIELDS_MERGED",
+        message: "User fields merged with update payload",
+    },
+    STATEFUL_UPDATED_USER_VALIDATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "STATEFUL_UPDATED_USER_VALIDATED",
+        message: "Updated user data validated against schema",
+    },
+    STATEFUL_USER_UPDATED_IN_DB: {
+        facility: 4,
+        severity: "info",
+        msgId: "STATEFUL_USER_UPDATED_IN_DB",
+        message: "User updated in database with new fields",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

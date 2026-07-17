@@ -163,9 +163,9 @@ export const getFullSchema = <Identity extends Identities, Schema = EditableToSc
 }
 
 export const createSchemaRegistry = <Identity extends SchemaTypes>(config: InternalIdentityConfig<Identity>) => {
-    const schema = deriveSchema(config.schema ?? identitySchema, config.unknownKeys)
-    const schemaAsPartial = deriveSchema(config.schema ?? identitySchema, "partial")
-    const schemaWithJWT = deriveSchemaWithJWT(config.schema ?? identitySchema)
+    const schema = deriveSchema(config?.schema ?? identitySchema, config.unknownKeys)
+    const schemaAsPartial = deriveSchema(config?.schema ?? identitySchema, "partial")
+    const schemaWithJWT = deriveSchemaWithJWT(config?.schema ?? identitySchema)
     const oauthTokens = deriveSchema(OAuthTokenPayloadSchema)
 
     const validator = createValidator(schema)

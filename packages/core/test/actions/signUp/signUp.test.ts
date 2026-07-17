@@ -3,6 +3,8 @@ import { z } from "zod/v4"
 import { jose, POST } from "@test/presets.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { getSetCookie } from "@/cookie.ts"
+import { identitySchema } from "@/identity/zod.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -65,6 +67,13 @@ describe("signUp API", async () => {
             success: true,
             redirect: false,
             redirectURL: null,
+        })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "johndoe",
+            email: "john@example.com",
+            image: "https://example.com/image.jpg",
         })
     })
 
@@ -166,6 +175,67 @@ describe("signUp API", async () => {
             redirect: false,
             redirectURL: null,
         })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "john@example.com",
+            image: "https://example.com/image.jpg",
+        })
+    })
+
+    test("valid signUp.onCreateUser return with custom schema and identity.schema", async () => {
+        const { handlers } = createAuth({
+            oauth: [],
+            identity: {
+                // @ts-ignore @todo fix this type issue
+                schema: identitySchema.extend({
+                    role: z.string(),
+                }),
+            },
+            signUp: {
+                schema: z.object({
+                    name: z.string(),
+                    lastName: z.string(),
+                    email: z.string().email(),
+                    password: z.string(),
+                }),
+                onCreateUser: ({ payload }) => ({
+                    sub: "1234567890",
+                    email: payload.email,
+                    name: payload.name,
+                    image: "https://example.com/image.jpg",
+                    role: "user",
+                }),
+            },
+        })
+
+        const response = await handlers.POST(
+            new Request("https://example.com/auth/signUp", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    name: "John Doe",
+                    lastName: "Doe",
+                    email: "john@example.com",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "john@example.com",
+            image: "https://example.com/image.jpg",
+            role: "user",
+        })
     })
 
     test("signUp with redirect: true and redirectTo", async () => {
@@ -182,6 +252,13 @@ describe("signUp API", async () => {
             success: true,
             redirect: true,
             redirectURL: null,
+        })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "johndoe",
+            email: "john@example.com",
+            image: "https://example.com/image.jpg",
         })
     })
 
@@ -200,6 +277,13 @@ describe("signUp API", async () => {
             redirect: false,
             redirectURL: null,
         })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "johndoe",
+            email: "john@example.com",
+            image: "https://example.com/image.jpg",
+        })
     })
 
     test("signUp with redirect: false and redirectTo", async () => {
@@ -216,6 +300,13 @@ describe("signUp API", async () => {
             success: true,
             redirect: false,
             redirectURL: "/dashboard",
+        })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "johndoe",
+            email: "john@example.com",
+            image: "https://example.com/image.jpg",
         })
     })
 
@@ -234,6 +325,13 @@ describe("signUp API", async () => {
             redirect: true,
             redirectURL: null,
         })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "johndoe",
+            email: "john@example.com",
+            image: "https://example.com/image.jpg",
+        })
     })
 
     test("signUp with redirect: false and invalid redirectTo", async () => {
@@ -250,6 +348,13 @@ describe("signUp API", async () => {
             success: true,
             redirect: false,
             redirectURL: "/",
+        })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "johndoe",
+            email: "john@example.com",
+            image: "https://example.com/image.jpg",
         })
     })
 })

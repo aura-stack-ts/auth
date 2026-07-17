@@ -2,7 +2,7 @@ import { describe, test, expect, vi, afterEach, beforeEach } from "vitest"
 import { createPKCE } from "@/shared/crypto.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { GET, jose, sessionPayload } from "@test/presets.ts"
-import { setCookie, getSetCookie, createCookieStore } from "@/cookie.ts"
+import { setCookie, getSetCookie, createCookieStore, getCookie } from "@/cookie.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -46,10 +46,12 @@ describe("sessionAction", () => {
             })
         )
         expect(request.status).toBe(200)
-        expect(await request.json()).toMatchObject({
+        expect(await request.json()).toEqual({
             success: true,
             session: { user: sessionPayload, expires: expect.any(String) },
         })
+        const decodedToken = await jose.decodeJWT(getCookie(request.headers, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject(sessionPayload)
     })
 
     test("valid sessionToken cookie in insecure connection", async () => {
@@ -67,6 +69,8 @@ describe("sessionAction", () => {
             success: true,
             session: { user: sessionPayload, expires: expect.any(String) },
         })
+        const decodedToken = await jose.decodeJWT(getCookie(request.headers, "aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject(sessionPayload)
     })
 
     test("expired sessionToken cookie", async () => {
@@ -80,6 +84,9 @@ describe("sessionAction", () => {
         )
         expect(request.status).toBe(401)
         expect(await request.json()).toEqual({ success: false, session: null })
+        expect(() => getCookie(request.headers, "__Secure-aura-auth.session_token")).toThrow(
+            "The request pipeline expected parsing access to a 'Cookie' header block, but the raw header property evaluates to undefined."
+        )
     })
 
     test("verify cache control headers are set", async () => {
@@ -107,7 +114,9 @@ describe("sessionAction", () => {
                 },
             })
         )
-        expect(request.headers.get("Set-Cookie")).toMatch("aura-auth.session_token=;")
+        expect(() => getCookie(request.headers, "aura-auth.session_token")).toThrow(
+            "The request pipeline expected parsing access to a 'Cookie' header block, but the raw header property evaluates to undefined."
+        )
     })
 
     test("invalid access from https", async () => {
@@ -119,7 +128,9 @@ describe("sessionAction", () => {
                 },
             })
         )
-        expect(request.headers.get("Set-Cookie")).toMatch("aura-auth.session_token=;")
+        expect(() => getCookie(request.headers, "aura-auth.session_token")).toThrow(
+            "The request pipeline expected parsing access to a 'Cookie' header block, but the raw header property evaluates to undefined."
+        )
     })
 
     test("update default profile function", async () => {

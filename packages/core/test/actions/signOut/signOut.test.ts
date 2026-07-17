@@ -24,6 +24,7 @@ describe("signOut action", async () => {
             })
         )
         expect(response.status).toBe(403)
+        expect(response.headers.get("Location")).toBeNull()
         expect(await response.json()).toEqual({
             success: false,
             redirect: false,
@@ -41,6 +42,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(403)
+        expect(request.headers.get("Location")).toBeNull()
         expect(await request.json()).toEqual({
             success: false,
             redirect: false,
@@ -63,6 +65,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(403)
+        expect(request.headers.get("Location")).toBeNull()
         expect(await request.json()).toEqual({
             success: false,
             redirect: false,
@@ -188,6 +191,7 @@ describe("signOut action", async () => {
             })
         )
         expect(request.status).toBe(302)
+        expect(request.headers.get("Location")).toBe("/")
         expect(await request.json()).toEqual({
             success: true,
             redirect: true,
@@ -215,6 +219,7 @@ describe("signOut action", async () => {
             redirect: false,
             redirectURL: "/custom-logout-page",
         })
+        expect(request.headers).not.toHaveProperty("Location")
         expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
         expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
         expect(request.headers.get("Location")).toBeNull()

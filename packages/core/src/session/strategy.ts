@@ -25,8 +25,8 @@ export const createSessionStrategy = <Identity extends Identities>({
             })
         case "database":
             return createStatefulStrategy({
-                config: config as any,
                 jose,
+                config: config as any,
                 cookies,
                 logger,
                 identity,

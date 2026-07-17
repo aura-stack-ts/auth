@@ -55,10 +55,18 @@ describe("signInCredentials action", async () => {
                 }),
             })
         )
-        const data = await response.json()
         expect(response.status).toBe(200)
-        expect(data).toMatchObject({
+        expect(await response.json()).toEqual({
             success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            email: "johndoe@example.com",
+            name: "johndoe",
+            image: "https://example.com/image.jpg",
         })
     })
 
@@ -81,10 +89,11 @@ describe("signInCredentials action", async () => {
                 }),
             })
         )
-        const data = await response.json()
         expect(response.status).toBe(401)
-        expect(data).toMatchObject({
+        expect(await response.json()).toEqual({
             success: false,
+            redirect: false,
+            redirectURL: null,
         })
     })
 
@@ -111,9 +120,8 @@ describe("signInCredentials action", async () => {
                 } as any),
             })
         )
-        const data = await response.json()
         expect(response.status).toBe(500)
-        expect(data).toEqual({
+        expect(await response.json()).toEqual({
             success: false,
             redirect: false,
             redirectURL: null,
@@ -150,8 +158,8 @@ describe("signInCredentials action", async () => {
             })
         )
         expect(response.status).toBe(200)
-        const decoded = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
-        expect(decoded).toMatchObject({
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
             sub: "1234567890-abcdef",
             name: "johndoe",
         })
@@ -173,13 +181,19 @@ describe("signInCredentials action", async () => {
                 }),
             })
         )
-        // status code 200 because doesn't provide valid redirecToñ
         expect(response.status).toBe(200)
         expect(response.headers.get("Location")).toBeNull()
         expect(await response.json()).toEqual({
             success: true,
             redirect: false,
             redirectURL: null,
+        })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "alice",
+            email: "alice@example.com",
+            image: "https://example.com/image.jpg",
         })
     })
 
@@ -201,6 +215,13 @@ describe("signInCredentials action", async () => {
             redirect: true,
             redirectURL: null,
         })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "alice",
+            email: "alice@example.com",
+            image: "https://example.com/image.jpg",
+        })
     })
 
     test("credentials with redirect: false", async () => {
@@ -215,10 +236,18 @@ describe("signInCredentials action", async () => {
             })
         )
         expect(response.status).toBe(200)
+        expect(response.headers.get("Location")).toBeNull()
         expect(await response.json()).toEqual({
             success: true,
             redirect: false,
             redirectURL: null,
+        })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "alice",
+            email: "alice@example.com",
+            image: "https://example.com/image.jpg",
         })
     })
 
@@ -234,10 +263,18 @@ describe("signInCredentials action", async () => {
             })
         )
         expect(response.status).toBe(200)
+        expect(response.headers.get("Location")).toBeNull()
         expect(await response.json()).toEqual({
             success: true,
             redirect: false,
             redirectURL: "/dashboard",
+        })
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject({
+            sub: "1234567890",
+            name: "alice",
+            email: "alice@example.com",
+            image: "https://example.com/image.jpg",
         })
     })
 })
