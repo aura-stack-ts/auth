@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
-import { authInstance, jose } from "@test/presets.ts"
+import { authInstance, jose, userEntity } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
@@ -52,9 +52,15 @@ describe("signInCredentials action", async () => {
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
+        const updateUserMock = vi.fn()
         const createSessionMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const createUserMock = vi.fn().mockReturnValue(userEntity)
 
         const { handlers } = authInstance({
+            createUser: createUserMock,
+            updateUser: updateUserMock,
+            getUserById: getUserByIdMock,
             createSession: createSessionMock,
         })
         const response = await handlers.POST(
@@ -80,6 +86,14 @@ describe("signInCredentials action", async () => {
             email: "johndoe@example.com",
             image: "https://example.com/image.jpg",
         })
+        expect(createUserMock).toHaveBeenCalledWith({
+            id: "user-123",
+            email: "johndoe@example.com",
+            name: "johndoe",
+            image: "https://example.com/image.jpg",
+            attributes: {},
+        })
+        expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
@@ -100,10 +114,16 @@ describe("signInCredentials action", async () => {
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
+        const updateUserMock = vi.fn()
         const createSessionMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const createUserMock = vi.fn().mockReturnValue(userEntity)
 
         const { handlers } = authInstance(
             {
+                createUser: createUserMock,
+                updateUser: updateUserMock,
+                getUserById: getUserByIdMock,
                 createSession: createSessionMock,
             },
             {
@@ -131,6 +151,8 @@ describe("signInCredentials action", async () => {
 
         expect(spyParse).not.toHaveBeenCalled()
         expect(createSessionMock).not.toHaveBeenCalled()
+        expect(createUserMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
     })
 
     test("invalid authorize by missing required fields", async () => {
@@ -140,10 +162,16 @@ describe("signInCredentials action", async () => {
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
+        const updateUserMock = vi.fn()
         const createSessionMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const createUserMock = vi.fn().mockReturnValue(userEntity)
 
         const { handlers } = authInstance(
             {
+                createUser: createUserMock,
+                updateUser: updateUserMock,
+                getUserById: getUserByIdMock,
                 createSession: createSessionMock,
             },
             {
@@ -179,6 +207,8 @@ describe("signInCredentials action", async () => {
             email: "johndoe@example.com",
         })
         expect(createSessionMock).not.toHaveBeenCalled()
+        expect(createUserMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
     })
 
     test("credentials with redirect: true (by default)", async () => {
@@ -188,9 +218,15 @@ describe("signInCredentials action", async () => {
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
+        const updateUserMock = vi.fn()
         const createSessionMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const createUserMock = vi.fn().mockReturnValue(userEntity)
 
         const { handlers } = authInstance({
+            createUser: createUserMock,
+            updateUser: updateUserMock,
+            getUserById: getUserByIdMock,
             createSession: createSessionMock,
         })
 
@@ -218,6 +254,14 @@ describe("signInCredentials action", async () => {
             email: "alice@example.com",
             image: "https://example.com/image.jpg",
         })
+        expect(createUserMock).toHaveBeenCalledWith({
+            id: "user-123",
+            email: "alice@example.com",
+            name: "alice",
+            image: "https://example.com/image.jpg",
+            attributes: {},
+        })
+        expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
@@ -238,9 +282,15 @@ describe("signInCredentials action", async () => {
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
+        const updateUserMock = vi.fn()
         const createSessionMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const createUserMock = vi.fn().mockReturnValue(userEntity)
 
         const { handlers } = authInstance({
+            createUser: createUserMock,
+            updateUser: updateUserMock,
+            getUserById: getUserByIdMock,
             createSession: createSessionMock,
         })
 
@@ -268,6 +318,14 @@ describe("signInCredentials action", async () => {
             email: "alice@example.com",
             image: "https://example.com/image.jpg",
         })
+        expect(createUserMock).toHaveBeenCalledWith({
+            id: "user-123",
+            email: "alice@example.com",
+            name: "alice",
+            image: "https://example.com/image.jpg",
+            attributes: {},
+        })
+        expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
@@ -288,9 +346,15 @@ describe("signInCredentials action", async () => {
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
+        const updateUserMock = vi.fn()
         const createSessionMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const createUserMock = vi.fn().mockReturnValue(userEntity)
 
         const { handlers } = authInstance({
+            createUser: createUserMock,
+            updateUser: updateUserMock,
+            getUserById: getUserByIdMock,
             createSession: createSessionMock,
         })
 
@@ -318,6 +382,14 @@ describe("signInCredentials action", async () => {
             email: "alice@example.com",
             image: "https://example.com/image.jpg",
         })
+        expect(createUserMock).toHaveBeenCalledWith({
+            id: "user-123",
+            email: "alice@example.com",
+            name: "alice",
+            image: "https://example.com/image.jpg",
+            attributes: {},
+        })
+        expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
@@ -338,9 +410,15 @@ describe("signInCredentials action", async () => {
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
+        const updateUserMock = vi.fn()
         const createSessionMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const createUserMock = vi.fn().mockReturnValue(userEntity)
 
         const { handlers } = authInstance({
+            createUser: createUserMock,
+            updateUser: updateUserMock,
+            getUserById: getUserByIdMock,
             createSession: createSessionMock,
         })
 
@@ -368,6 +446,14 @@ describe("signInCredentials action", async () => {
             email: "alice@example.com",
             image: "https://example.com/image.jpg",
         })
+        expect(createUserMock).toHaveBeenCalledWith({
+            id: "user-123",
+            email: "alice@example.com",
+            name: "alice",
+            image: "https://example.com/image.jpg",
+            attributes: {},
+        })
+        expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
