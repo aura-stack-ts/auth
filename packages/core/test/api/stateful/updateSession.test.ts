@@ -308,7 +308,7 @@ describe("updateSession API", () => {
                 Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
-                user: payload,
+                user: payload as any,
             },
             skipCSRFCheck: true,
         })

@@ -12,6 +12,8 @@ beforeEach(() => {
 
 afterEach(() => {
     vi.unstubAllEnvs()
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
 })
 
 const payload = {

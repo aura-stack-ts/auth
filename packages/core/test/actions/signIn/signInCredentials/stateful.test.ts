@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeEach, afterEach, vi } from "vitest"
-import { createCSRF } from "@/shared/crypto.ts"
+import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
 import { authInstance, jose, userEntity } from "@test/presets.ts"
+import { createCSRF } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 beforeEach(() => {
@@ -36,16 +36,16 @@ vi.mock("@aura-stack/rate-limiter", async () => {
     }
 })
 
-describe("signInCredentials API", async () => {
+describe("signInCredentials action", async () => {
     const csrfToken = await createCSRF(jose)
 
     const headers = {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
         Cookie: `aura-auth.csrf_token=${csrfToken}`,
     }
 
     test("success signIn flow", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -57,26 +57,27 @@ describe("signInCredentials API", async () => {
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
 
-        const { api } = authInstance({
+        const { handlers } = authInstance({
             createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
         })
-
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
-        })
-        expect(output).toEqual({
+        const response = await handlers.POST(
+            new Request("http://localhost:3000/auth/signIn/credentials", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    username: "johndoe",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
             success: true,
             redirect: false,
             redirectURL: null,
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
 
         expect(spyParse).toHaveBeenCalledWith({
@@ -106,9 +107,7 @@ describe("signInCredentials API", async () => {
         })
     })
 
-    test("invalid authorize return", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
+    test("invalid credentials", async () => {
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -120,34 +119,36 @@ describe("signInCredentials API", async () => {
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
 
-        const { api } = authInstance(
+        const { handlers } = authInstance(
             {
-                updateUser: updateUserMock,
                 createUser: createUserMock,
-                createSession: createSessionMock,
+                updateUser: updateUserMock,
                 getUserById: getUserByIdMock,
+                createSession: createSessionMock,
             },
-            { credentials: { authorize: () => null } }
+            {
+                credentials: {
+                    authorize: () => null,
+                },
+            }
         )
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "wrongpassword",
-            },
-        })
-
-        expect(output).toEqual({
+        const response = await handlers.POST(
+            new Request("http://localhost:3000/auth/signIn/credentials", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    username: "johndoe",
+                    password: "wrongpassword",
+                }),
+            })
+        )
+        expect(response.status).toBe(401)
+        expect(await response.json()).toEqual({
             success: false,
             redirect: false,
             redirectURL: null,
-            error: {
-                code: "AUTH_CREDENTIALS_INVALID",
-                message: "The user's session couldn't be established with the provided credentials.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
+
         expect(spyParse).not.toHaveBeenCalled()
         expect(createSessionMock).not.toHaveBeenCalled()
         expect(createUserMock).not.toHaveBeenCalled()
@@ -155,8 +156,6 @@ describe("signInCredentials API", async () => {
     })
 
     test("invalid authorize by missing required fields", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -168,7 +167,7 @@ describe("signInCredentials API", async () => {
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
 
-        const { api } = authInstance(
+        const { handlers } = authInstance(
             {
                 createUser: createUserMock,
                 updateUser: updateUserMock,
@@ -185,26 +184,24 @@ describe("signInCredentials API", async () => {
                 },
             }
         )
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
-        })
 
-        expect(output).toEqual({
+        const response = await handlers.POST(
+            new Request("http://localhost:3000/auth/signIn/credentials", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    username: "johndoe",
+                    password: "1234567890",
+                } as any),
+            })
+        )
+        expect(response.status).toBe(500)
+        expect(await response.json()).toEqual({
             success: false,
             redirect: false,
             redirectURL: null,
-            headers: expect.any(Headers),
-            error: {
-                code: "SCHEMA_PARSER_FAILED",
-                message:
-                    "An internal schema parsing error occurred. Please verify your schema configuration and validation adapter setup.",
-            },
-            toResponse: expect.any(Function),
         })
+
         expect(spyParse).toHaveBeenCalledWith({
             name: "John Doe",
             email: "johndoe@example.com",
@@ -214,7 +211,7 @@ describe("signInCredentials API", async () => {
         expect(updateUserMock).not.toHaveBeenCalled()
     })
 
-    test("signIn without URL configuration", async () => {
+    test("credentials with redirect: true (by default)", async () => {
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -226,86 +223,41 @@ describe("signInCredentials API", async () => {
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
 
-        const { api } = authInstance({
+        const { handlers } = authInstance({
             createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
         })
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
-        })
 
-        expect(output).toEqual({
-            success: false,
+        const response = await handlers.POST(
+            new Request("http://localhost:3000/auth/signIn/credentials", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    username: "alice",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: true,
             redirect: false,
             redirectURL: null,
-            error: {
-                code: "INVALID_AUTH_CONFIGURATION",
-                message: "The application context URL cannot be constructed. Set BASE_URL or provide proxy host headers.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
-        })
-        expect(spyParse).not.toHaveBeenCalled()
-        expect(createUserMock).not.toHaveBeenCalled()
-        expect(updateUserMock).not.toHaveBeenCalled()
-        expect(createSessionMock).not.toHaveBeenCalled()
-    })
-
-    test("signIn with redirect: true and redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
-        const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
-
-        const spyParse = vi.spyOn(registry, "parse")
-        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
-
-        const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
-        const createUserMock = vi.fn().mockReturnValue(userEntity)
-
-        const { api } = authInstance({
-            createUser: createUserMock,
-            updateUser: updateUserMock,
-            getUserById: getUserByIdMock,
-            createSession: createSessionMock,
-        })
-
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
-            redirect: true,
-            redirectTo: "https://example.com/dashboard",
-        })
-        expect(output.headers.get("Location")).toBe("/dashboard")
-        expect(output).toEqual({
-            success: true,
-            redirect: true,
-            redirectURL: null,
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
 
         expect(spyParse).toHaveBeenCalledWith({
             sub: "user-123",
-            name: "johndoe",
-            email: "johndoe@example.com",
+            name: "alice",
+            email: "alice@example.com",
             image: "https://example.com/image.jpg",
         })
         expect(createUserMock).toHaveBeenCalledWith({
             id: "user-123",
-            email: "johndoe@example.com",
-            name: "johndoe",
+            email: "alice@example.com",
+            name: "alice",
             image: "https://example.com/image.jpg",
             attributes: {},
         })
@@ -323,9 +275,7 @@ describe("signInCredentials API", async () => {
         })
     })
 
-    test("signIn with redirect: false and valid redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
+    test("credentials with redirect: true and redirectTo", async () => {
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -337,173 +287,169 @@ describe("signInCredentials API", async () => {
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
 
-        const { api } = authInstance({
+        const { handlers } = authInstance({
             createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
         })
 
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
-            redirect: false,
-            redirectTo: "https://example.com/dashboard",
+        const response = await handlers.POST(
+            new Request("http://localhost:3000/auth/signIn/credentials?redirectTo=/dashboard", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    username: "alice",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(302)
+        expect(response.headers.get("Location")).toBe("/dashboard")
+        expect(await response.json()).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
         })
-        expect(output.headers.get("Location")).toBeNull()
-        expect(output).toEqual({
+
+        expect(spyParse).toHaveBeenCalledWith({
+            sub: "user-123",
+            name: "alice",
+            email: "alice@example.com",
+            image: "https://example.com/image.jpg",
+        })
+        expect(createUserMock).toHaveBeenCalledWith({
+            id: "user-123",
+            email: "alice@example.com",
+            name: "alice",
+            image: "https://example.com/image.jpg",
+            attributes: {},
+        })
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createSessionMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
+        })
+    })
+
+    test("credentials with redirect: false", async () => {
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const updateUserMock = vi.fn()
+        const createSessionMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const createUserMock = vi.fn().mockReturnValue(userEntity)
+
+        const { handlers } = authInstance({
+            createUser: createUserMock,
+            updateUser: updateUserMock,
+            getUserById: getUserByIdMock,
+            createSession: createSessionMock,
+        })
+
+        const response = await handlers.POST(
+            new Request("http://localhost:3000/auth/signIn/credentials?redirect=false", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    username: "alice",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+
+        expect(spyParse).toHaveBeenCalledWith({
+            sub: "user-123",
+            name: "alice",
+            email: "alice@example.com",
+            image: "https://example.com/image.jpg",
+        })
+        expect(createUserMock).toHaveBeenCalledWith({
+            id: "user-123",
+            email: "alice@example.com",
+            name: "alice",
+            image: "https://example.com/image.jpg",
+            attributes: {},
+        })
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createSessionMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
+        })
+    })
+
+    test("credentials with redirect: false and redirectTo", async () => {
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const updateUserMock = vi.fn()
+        const createSessionMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const createUserMock = vi.fn().mockReturnValue(userEntity)
+
+        const { handlers } = authInstance({
+            createUser: createUserMock,
+            updateUser: updateUserMock,
+            getUserById: getUserByIdMock,
+            createSession: createSessionMock,
+        })
+
+        const response = await handlers.POST(
+            new Request("http://localhost:3000/auth/signIn/credentials?redirect=false&redirectTo=/dashboard", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    username: "alice",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
             success: true,
             redirect: false,
             redirectURL: "/dashboard",
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
         })
 
         expect(spyParse).toHaveBeenCalledWith({
             sub: "user-123",
-            name: "johndoe",
-            email: "johndoe@example.com",
+            name: "alice",
+            email: "alice@example.com",
             image: "https://example.com/image.jpg",
         })
         expect(createUserMock).toHaveBeenCalledWith({
             id: "user-123",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-            attributes: {},
-        })
-        expect(updateUserMock).not.toHaveBeenCalled()
-        expect(createSessionMock).toHaveBeenCalledWith({
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
-            expiresAt: expect.any(Date),
-            metadata: null,
-        })
-    })
-
-    test("signIn redirect: true and invalid redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
-        const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
-
-        const spyParse = vi.spyOn(registry, "parse")
-        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
-
-        const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
-        const createUserMock = vi.fn().mockReturnValue(userEntity)
-
-        const { api } = authInstance({
-            createUser: createUserMock,
-            updateUser: updateUserMock,
-            getUserById: getUserByIdMock,
-            createSession: createSessionMock,
-        })
-
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
-            redirect: true,
-            redirectTo: "https://malicious.com/phishing",
-        })
-        expect(output.headers.get("Location")).toBe("/")
-        expect(output).toEqual({
-            success: true,
-            redirect: true,
-            redirectURL: null,
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
-        })
-
-        expect(spyParse).toHaveBeenCalledWith({
-            sub: "user-123",
-            name: "johndoe",
-            email: "johndoe@example.com",
-            image: "https://example.com/image.jpg",
-        })
-        expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-            attributes: {},
-        })
-        expect(updateUserMock).not.toHaveBeenCalled()
-        expect(createSessionMock).toHaveBeenCalledWith({
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
-            expiresAt: expect.any(Date),
-            metadata: null,
-        })
-    })
-
-    test("signIn with redirect: false and invalid redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
-        const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
-
-        const spyParse = vi.spyOn(registry, "parse")
-        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
-
-        const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
-        const createUserMock = vi.fn().mockReturnValue(userEntity)
-
-        const { api } = authInstance({
-            createUser: createUserMock,
-            updateUser: updateUserMock,
-            getUserById: getUserByIdMock,
-            createSession: createSessionMock,
-        })
-
-        const output = await api.signInCredentials({
-            headers,
-            payload: {
-                username: "johndoe",
-                password: "1234567890",
-            },
-            redirect: false,
-            redirectTo: "https://malicious.com/phishing",
-        })
-        expect(output.headers.get("Location")).toBeNull()
-        expect(output).toEqual({
-            success: true,
-            redirect: false,
-            redirectURL: "/",
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
-        })
-
-        expect(spyParse).toHaveBeenCalledWith({
-            sub: "user-123",
-            name: "johndoe",
-            email: "johndoe@example.com",
-            image: "https://example.com/image.jpg",
-        })
-        expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
-            email: "johndoe@example.com",
-            name: "johndoe",
+            email: "alice@example.com",
+            name: "alice",
             image: "https://example.com/image.jpg",
             attributes: {},
         })

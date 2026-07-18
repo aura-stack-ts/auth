@@ -12,6 +12,7 @@ import type {
     UserEntity,
 } from "@/@types/index.ts"
 import { merge } from "@/shared/utils.ts"
+import { getEnv } from "@/shared/env.ts"
 
 export const oauthCustomService: OAuthProviderCredentials = {
     id: "oauth-provider",
@@ -115,7 +116,7 @@ export const sessionEntityWithUser: SessionWithUserEntity = {
 
 const auth = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile, openIDCustomProvider],
-    logger: true,
+    logger: getEnv("CI") === "true" ? false : true,
     credentials: {
         authorize: async ({ credentials }) => {
             const { username } = credentials
@@ -148,7 +149,7 @@ export const {
 
 export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any>>, override?: Partial<AuthConfig<any, any>>) => {
     const config: AuthConfig<any, any> = {
-        oauth: [],
+        oauth: [oauthCustomService, oauthCustomServiceProfile, openIDCustomProvider],
         session: {
             strategy: "database",
             adapter: adapter as any,
@@ -175,7 +176,7 @@ export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any
         },
     }
     const merged = merge(config, override ?? {})
-    return createAuth(merged as AuthConfig<any, any>)
+    return createAuth(merged as any)
 }
 
 const RSA256PublicKey = `-----BEGIN PUBLIC KEY-----

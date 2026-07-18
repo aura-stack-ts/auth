@@ -3,7 +3,7 @@ import { createAuth } from "@/createAuth.ts"
 import { sessionPayload } from "@test/presets.ts"
 import { getSetCookie } from "@/cookie.ts"
 
-describe("Stateless Strategy (Integration)", () => {
+describe("session: stateless strategy", () => {
     beforeEach(() => {
         vi.unstubAllEnvs()
         vi.clearAllMocks()

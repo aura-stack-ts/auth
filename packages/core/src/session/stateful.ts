@@ -217,9 +217,53 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
         })
 
         const cryptoId = createSecretValue(32)
+        const { sub: userId, email, image, name, ...attributes } = payload
+
+        let user = await config.adapter.getUserById(userId as string)
+        if (!user) {
+            logger?.log("STATEFUL_USER_NOT_FOUND_CREATING", {
+                structuredData: {
+                    user_id: userId,
+                    reason: "user_not_found_creating_new",
+                },
+            })
+            user = await config.adapter.createUser({
+                id: userId as string,
+                name,
+                email,
+                image,
+                attributes,
+            })
+            logger?.log("STATEFUL_USER_CREATED", {
+                structuredData: {
+                    user_id: user.id,
+                    email: user.email || "",
+                },
+            })
+        } else {
+            logger?.log("STATEFUL_USER_FOUND_UPDATING", {
+                structuredData: {
+                    user_id: userId,
+                    reason: "user_exists_updating",
+                },
+            })
+            user = await config.adapter.updateUser(userId as string, {
+                name,
+                email,
+                image,
+                attributes,
+            })
+            logger?.log("STATEFUL_USER_UPDATED", {
+                structuredData: {
+                    user_id: user.id,
+                    email: user.email || "",
+                },
+            })
+        }
+
         const dbSession = await config.adapter.createSession({
             id: cryptoId,
-            userId: payload.sub as string,
+            userId: userId as string,
             deviceId: null,
             authenticatedWith: "credentials",
             status: "active",

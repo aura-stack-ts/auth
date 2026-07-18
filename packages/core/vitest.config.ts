@@ -25,6 +25,7 @@ export default defineConfig({
             "AURA_AUTH_OAUTH-PROVIDER_CLIENT_SECRET": "oauth_client_secret",
             "AURA_AUTH_OAUTH-PROFILE_CLIENT_ID": "oauth_profile_client_id",
             "AURA_AUTH_OAUTH-PROFILE_CLIENT_SECRET": "oauth_profile_client_secret",
+            AURA_AUTTH_LOGGER: process.env.CI === "true" ? "false" : "true",
         },
         typecheck: {
             include: ["test/**/*.test-d.ts"],

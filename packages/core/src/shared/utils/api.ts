@@ -2,7 +2,7 @@ import { HeadersBuilder } from "@aura-stack/router"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
-import { getBaseURL, getOriginURL, createRedirectTo } from "@/actions/signIn/authorization.ts"
+import { getBaseURL, getOriginURL, createRedirectTo } from "@/shared/utils/authorization.ts"
 import type {
     BuiltInOAuthProvider,
     LiteralUnion,
