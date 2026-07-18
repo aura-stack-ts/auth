@@ -41,6 +41,8 @@ jobs:
     name: Node.js
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      CI_LOGGER: "true"
 
     steps:
       - uses: actions/checkout@v4

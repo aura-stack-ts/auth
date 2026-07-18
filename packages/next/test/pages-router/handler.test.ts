@@ -18,10 +18,10 @@ const createHandler = async (reqOptions?: RequestOptions, resOptions?: ResponseO
 describe("toHandler", () => {
     test("unsupported method", async () => {
         const { res } = await createHandler({
-            method: "DELETE",
+            method: "TRACE",
         })
         expect(res.statusCode).toBe(405)
-        expect(res._getJSONData()).toEqual({ error: "Method DELETE Not Allowed" })
+        expect(res._getJSONData()).toEqual({ error: "Method TRACE Not Allowed" })
     })
 
     test("GET /auth/session - http connection", async () => {

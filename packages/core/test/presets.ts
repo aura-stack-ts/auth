@@ -12,6 +12,7 @@ import type {
     UserEntity,
 } from "@/@types/index.ts"
 import { merge } from "@/shared/utils.ts"
+import { getEnv } from "@/shared/env.ts"
 
 export const oauthCustomService: OAuthProviderCredentials = {
     id: "oauth-provider",
@@ -115,7 +116,7 @@ export const sessionEntityWithUser: SessionWithUserEntity = {
 
 const auth = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile, openIDCustomProvider],
-    logger: true,
+    logger: getEnv("CI") === "true" ? false : true,
     credentials: {
         authorize: async ({ credentials }) => {
             const { username } = credentials
