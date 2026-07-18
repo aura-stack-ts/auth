@@ -11,6 +11,7 @@ export const createSessionStrategy = <Identity extends Identities>({
     cookies,
     logger,
     identity,
+    oauth,
 }: CreateSessionStrategyOptions<Identity>): SessionStrategy<FromShapeToObject<Identity> & User> => {
     const strategy = config?.strategy ?? "jwt"
 
@@ -22,6 +23,7 @@ export const createSessionStrategy = <Identity extends Identities>({
                 cookies,
                 logger,
                 identity,
+                oauth,
             })
         case "database":
             return createStatefulStrategy({
@@ -30,6 +32,7 @@ export const createSessionStrategy = <Identity extends Identities>({
                 cookies,
                 logger,
                 identity,
+                oauth,
             })
         default:
             throw new AuraAuthError({ code: "INVALID_SESSION_STRATEGY" })

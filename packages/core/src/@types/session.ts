@@ -11,6 +11,7 @@ import type {
     FromShapeToObject,
     Prettify,
     Identities,
+    OAuthProviderRecord,
 } from "@/@types/index.ts"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
 
@@ -213,6 +214,10 @@ export interface GetStatelessSessionReturn<DefaultUser extends User = User> {
 
 export type GetStatefulSessionReturn<DefaultUser extends User = User> = GetStatelessSessionReturn<DefaultUser>
 
+export type GetProviderTokensStatefulReturn =
+    | { success: true; tokens: OAuthTokenPayload; headers: Headers }
+    | { success: false; tokens: null; error: { code: string; message: string }; headers: Headers; statusCode: number }
+
 /**
  * Abstraction layer for session management.
  */
@@ -229,14 +234,15 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      */
     createSession(session: User): Promise<string>
 
+    getProviderTokens(oauth: string, request: Request): Promise<GetProviderTokensStatefulReturn>
+
     /**
      * Attempt to refresh using the refresh token cookie.
      * Returns null session + cookie-clearing response on any failure.
      */
     refreshSession(
         headers: Headers,
-        session: DeepPartial<Session<DefaultUser>>,
-        skipCSRFCheck?: boolean
+        session: DeepPartial<Session<DefaultUser>>
     ): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
@@ -263,6 +269,7 @@ export interface CreateSessionStrategyOptions<Identity extends Identities> {
     cookies: () => InternalCookieStoreConfig
     logger?: InternalLogger
     identity: SchemaRegistryContext
+    oauth: OAuthProviderRecord
 }
 
 /** Options specialized for the JWT-backed session strategy. */
@@ -272,6 +279,7 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
     logger?: InternalLogger
     cookies: () => InternalCookieStoreConfig
     identity: SchemaRegistryContext
+    oauth: OAuthProviderRecord
 }
 
 export interface DatabaseStrategyOptions<DefaultUser extends User = User> {
@@ -280,6 +288,7 @@ export interface DatabaseStrategyOptions<DefaultUser extends User = User> {
     logger?: InternalLogger
     cookies: () => InternalCookieStoreConfig
     identity: SchemaRegistryContext
+    oauth: OAuthProviderRecord
 }
 
 /** Minimal token issue/verify surface used by session code paths. */

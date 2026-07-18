@@ -150,6 +150,7 @@ export const {
 export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any>>, override?: Partial<AuthConfig<any, any>>) => {
     const config: AuthConfig<any, any> = {
         oauth: [oauthCustomService, oauthCustomServiceProfile, openIDCustomProvider],
+        logger: true,
         session: {
             strategy: "database",
             adapter: adapter as any,
