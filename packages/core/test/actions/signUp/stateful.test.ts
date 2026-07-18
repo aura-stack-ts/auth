@@ -1,6 +1,5 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
 import { z } from "zod/v4"
-import { getSetCookie } from "@/cookie.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { identitySchema } from "@/identity/zod.ts"
 import { authInstance, jose, sessionPayload, userEntity } from "@test/presets.ts"
