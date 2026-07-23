@@ -486,7 +486,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     signUp?: SignUpConfig<DefaultUser, SignUpSchema>
     jwtManager: JWTManager<DefaultUser>
     rateLimiters: InferRules<Required<RateLimiterConfig>>
-    sessionStrategyMode: "jwt" | "database"
+    sessionConfig: SessionConfig
 }
 
 export interface SchemaRegistryContext {

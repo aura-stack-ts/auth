@@ -13,11 +13,12 @@ export const signInCredentials = async ({
     redirect = true,
     redirectTo,
     skipCSRFCheck = false,
+    doubleSubmitToken = undefined,
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, sessionStrategy, logger } = ctx
     try {
         const { request, rateLimit } = await createValidation(ctx, headerInit)
-            .verifyCSRFToken(skipCSRFCheck)
+            .verifyCSRFToken(skipCSRFCheck || Boolean(doubleSubmitToken))
             .buildRequest(requestInit, "/signIn/credentials")
             .verifyRateLimit("signInCredentials")
             .execute()

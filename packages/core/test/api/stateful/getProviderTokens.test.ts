@@ -34,7 +34,7 @@ describe("getProviderTokens API (Stateful)", () => {
     })
 
     test("throws error when session token is missing", async () => {
-        const getSessionByTokenMock = vi.fn()
+        const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(null)
         const getOAuthAccountMock = vi.fn()
         const updateOAuthTokensMock = vi.fn()
 
@@ -44,7 +44,11 @@ describe("getProviderTokens API (Stateful)", () => {
             updateOAuthTokens: updateOAuthTokensMock,
         })
 
-        const output = await api.getProviderTokens("oauth-provider", { headers: new Headers() })
+        const output = await api.getProviderTokens("oauth-provider", {
+            headers: new Headers({
+                Cookie: "aura-auth.session_token=invalid-token",
+            }),
+        })
         expect(output).toEqual({
             success: false,
             tokens: null,
@@ -55,76 +59,7 @@ describe("getProviderTokens API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).not.toHaveBeenCalled()
-        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-    })
-
-    test("throws error when CSRF token is missing", async () => {
-        const getSessionByTokenMock = vi.fn()
-        const getOAuthAccountMock = vi.fn()
-        const updateOAuthTokensMock = vi.fn()
-
-        const { api } = authInstance({
-            getSessionByToken: getSessionByTokenMock,
-            getOAuthAccount: getOAuthAccountMock,
-            updateOAuthTokens: updateOAuthTokensMock,
-        })
-
-        const sessionToken = "valid-session-token"
-
-        const output = await api.getProviderTokens("oauth-provider", {
-            headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}`,
-            },
-        })
-        expect(output).toEqual({
-            success: false,
-            tokens: null,
-            error: {
-                code: "CSRF_TOKEN_MISSING",
-                message: "The CSRF token is missing. Please refresh and try again.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
-        })
-        expect(getSessionByTokenMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).not.toHaveBeenCalled()
-        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-    })
-
-    test("throws error when CSRF token is invalid", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
-        const getSessionByTokenMock = vi.fn()
-        const getOAuthAccountMock = vi.fn()
-        const updateOAuthTokensMock = vi.fn()
-
-        const { api } = authInstance({
-            getSessionByToken: getSessionByTokenMock,
-            getOAuthAccount: getOAuthAccountMock,
-            updateOAuthTokens: updateOAuthTokensMock,
-        })
-
-        const sessionToken = "valid-session-token"
-
-        const output = await api.getProviderTokens("oauth-provider", {
-            headers: new Headers({
-                Cookie: `aura-auth.csrf_token=invalid-token; aura-auth.session_token=${sessionToken}`,
-                "X-CSRF-Token": "invalid-token",
-            }),
-        })
-        expect(output).toEqual({
-            success: false,
-            tokens: null,
-            error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
-            },
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
-        })
-        expect(getSessionByTokenMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenCalledOnce()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })

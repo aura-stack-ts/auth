@@ -149,23 +149,6 @@ export const verifySessionToken = async ({
     }
 }
 
-export const verifyPresentSessionValue = async ({
-    headers,
-    cookies,
-    logger,
-}: {
-    headers: Headers
-    cookies: InternalCookieStoreConfig
-    logger: InternalLogger | undefined
-}) => {
-    try {
-        return getCookie(headers, cookies.sessionToken.name)
-    } catch (cause) {
-        logger?.log("SESSION_NOT_FOUND")
-        throw new AuraAuthError({ code: "SESSION_NOT_FOUND", cause })
-    }
-}
-
 export const verifyCSRFToken = async ({
     headers,
     skipCSRFCheck,
