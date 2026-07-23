@@ -1,13 +1,9 @@
-import { afterEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 import { env } from "@/shared/env.ts"
 import { createSecretValue } from "@/shared/crypto.ts"
 import { exportPKCS8, exportSPKI, generateKeyPair } from "@aura-stack/jose/jose"
 
 describe("env", () => {
-    afterEach(() => {
-        vi.unstubAllEnvs()
-    })
-
     test("read AURA_AUTH_SECRET from environment", () => {
         const secret = createSecretValue()
         vi.stubEnv("AURA_AUTH_SECRET", secret!)

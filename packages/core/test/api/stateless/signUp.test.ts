@@ -1,17 +1,9 @@
-import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { getSetCookie } from "@/cookie.ts"
 import { api, jose } from "@test/presets.ts"
 import { createAuth } from "@/createAuth.ts"
-import type { User } from "@/index.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
-
-afterEach(() => {
-    vi.unstubAllEnvs()
-})
+import type { User } from "@/index.ts"
 
 const payload = {
     name: "johndoe",
@@ -19,29 +11,6 @@ const payload = {
     image: "https://example.com/image.jpg",
     password: "1234567890",
 }
-
-vi.mock("@aura-stack/rate-limiter", async () => {
-    const actual = await vi.importActual<typeof import("@aura-stack/rate-limiter")>("@aura-stack/rate-limiter")
-    return {
-        ...actual,
-        createRateLimiter: (...args: Parameters<typeof actual.createRateLimiter>) => {
-            const limiters = actual.createRateLimiter(...args)
-
-            for (const limiter of Object.values(limiters)) {
-                limiter.check = vi.fn().mockResolvedValue({
-                    ok: true,
-                    limit: Number.MAX_SAFE_INTEGER,
-                    remaining: Number.MAX_SAFE_INTEGER,
-                    resetAt: Date.now() + 60000,
-                    retryAfter: 0,
-                    toResponse: () => new Response(),
-                })
-            }
-
-            return limiters
-        },
-    }
-})
 
 describe("signUp API", async () => {
     const csrfToken = await createCSRF(jose)

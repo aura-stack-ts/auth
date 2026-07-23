@@ -1,14 +1,6 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, test, expect } from "vitest"
 import { GET } from "@test/presets.ts"
 import { setCookie } from "@/cookie.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
-
-afterEach(() => {
-    vi.unstubAllEnvs()
-})
 
 describe("csrfTokenAction", () => {
     test("generates a CSRF token and sets it in a cookie", async () => {

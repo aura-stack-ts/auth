@@ -22,11 +22,6 @@ const createJSONResponse = (body: unknown, status = 200) => {
     })
 }
 
-beforeEach(() => {
-    vi.clearAllMocks()
-    vi.unstubAllGlobals()
-})
-
 describe("createAuthClient", () => {
     beforeEach(() => {
         vi.clearAllMocks()

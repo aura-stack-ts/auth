@@ -6,13 +6,17 @@ import { base64url } from "@aura-stack/jose/jose"
 const SECRET_KEY = getRandomBytes(44)
 const SALT_KEY = getRandomBytes(44)
 
+/**
+ * Vitest configuration for the Aura Auth core package.
+ *
+ * @example
+ * pnpm test
+ * pnpm test --project core
+ * pnpm test --project rate-limiter
+ */
 export default defineConfig({
     test: {
         include: ["test/**/*.test.ts"],
-        coverage: {
-            provider: "v8",
-            enabled: true,
-        },
         unstubEnvs: true,
         env: {
             AURA_AUTH_SECRET: base64url.encode(SECRET_KEY),
@@ -31,11 +35,33 @@ export default defineConfig({
             include: ["test/**/*.test-d.ts"],
             enabled: false,
         },
-    },
-    resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@test": path.resolve(__dirname, "./test"),
-        },
+        projects: [
+            {
+                test: {
+                    name: "core",
+                    include: ["test/**/*.test.ts"],
+                    exclude: ["test/rate-limiter.test.ts"],
+                    setupFiles: ["./test/setup/vitest.setup.ts", "./test/setup/actions.setup.ts"],
+                },
+                resolve: {
+                    alias: {
+                        "@": path.resolve(__dirname, "./src"),
+                        "@test": path.resolve(__dirname, "./test"),
+                    },
+                },
+            },
+            {
+                test: {
+                    name: "rate-limiter",
+                    include: ["test/rate-limiter.test.ts"],
+                },
+                resolve: {
+                    alias: {
+                        "@": path.resolve(__dirname, "./src"),
+                        "@test": path.resolve(__dirname, "./test"),
+                    },
+                },
+            },
+        ],
     },
 })
