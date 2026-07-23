@@ -63,7 +63,6 @@ export const signInCredentials = async ({
                 ),
         } as SignInCredentialsAPIReturn
     } catch (error) {
-        console.error("CREDENTIALS_SIGN_IN_ERROR", error)
         const { code, message, statusCode } = handleApiError(
             error,
             "CREDENTIALS_SIGN_IN_ERROR",

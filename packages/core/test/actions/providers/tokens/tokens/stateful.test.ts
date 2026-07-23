@@ -172,7 +172,7 @@ describe("tokensAction (Stateful)", async () => {
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
-    test("should return 403 if OAuth account does not exist", async () => {
+    test("should return 401 if OAuth account does not exist", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)

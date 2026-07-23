@@ -242,7 +242,8 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      */
     refreshSession(
         headers: Headers,
-        session: DeepPartial<Session<DefaultUser>>
+        session: DeepPartial<Session<DefaultUser>>,
+        skipCSRFCheck: boolean
     ): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers

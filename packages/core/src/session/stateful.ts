@@ -661,7 +661,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                     "PROVIDER_TOKENS_ERROR",
                     "Failed to get provider tokens"
                 )
-                return { success: false, error: { code, message }, tokens: null, headers: request.headers, statusCode }
+                return { success: false, error: { code, message }, tokens: null, headers: cookieConfig.clear(), statusCode }
             }
 
             const sessionByToken = await config.adapter.getSessionByToken(sessionToken)
@@ -676,7 +676,20 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                     "PROVIDER_TOKENS_ERROR",
                     "Failed to get provider tokens"
                 )
-                return { success: false, error: { code, message }, tokens: null, headers: request.headers, statusCode }
+                return { success: false, error: { code, message }, tokens: null, headers: cookieConfig.clear(), statusCode }
+            }
+
+            const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
+            if (sessionByToken.status !== "active" || isExpired) {
+                if (isExpired) {
+                    await config.adapter.revokeSession(sessionByToken.id, "user_logout")
+                }
+                const { code, message, statusCode } = handleApiError(
+                    new AuraAuthError({ code: "SESSION_NOT_FOUND" }),
+                    "PROVIDER_TOKENS_ERROR",
+                    "Failed to get provider tokens"
+                )
+                return { success: false, error: { code, message }, tokens: null, headers: cookieConfig.clear(), statusCode }
             }
 
             logger?.log("STATEFUL_GET_PROVIDER_TOKENS_SESSION_FOUND", {

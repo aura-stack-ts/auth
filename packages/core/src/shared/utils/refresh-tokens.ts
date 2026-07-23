@@ -24,14 +24,23 @@ export const refreshProviderToken = async (
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            ...(isCredentialsAuth ? {} : { Authorization: createBasicAuthHeader(provider.clientId!, provider.clientSecret!) }),
-            ...(typeof provider.refreshToken === "object" && provider.refreshToken.headers ? provider.refreshToken.headers : {}),
+            ...(isCredentialsAuth || !provider.clientSecret
+                ? {}
+                : { Authorization: createBasicAuthHeader(provider.clientId!, provider.clientSecret!) }),
+            ...(isRefreshTokenObject(provider.refreshToken) && provider.refreshToken.headers
+                ? provider.refreshToken.headers
+                : {}),
         },
         body: new URLSearchParams({
             grant_type: "refresh_token",
             refresh_token: payload.refreshToken!,
-            ...(isCredentialsAuth ? { client_id: provider.clientId!, client_secret: provider.clientSecret! } : {}),
-            ...(typeof provider.refreshToken === "object" && provider.refreshToken.params ? provider.refreshToken.params : {}),
+            ...(isCredentialsAuth || !provider.clientSecret
+                ? {
+                      client_id: provider.clientId!,
+                      ...(provider.clientSecret ? { client_secret: provider.clientSecret } : {}),
+                  }
+                : {}),
+            ...(isRefreshTokenObject(provider.refreshToken) && provider.refreshToken.params ? provider.refreshToken.params : {}),
         }),
     })
     if (!response.ok) {
