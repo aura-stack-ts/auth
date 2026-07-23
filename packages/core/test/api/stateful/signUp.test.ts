@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
-import { authInstance, jose, sessionPayload, userEntity } from "@test/presets.ts"
+import { authInstance, jose, sessionEntityWithUser, sessionPayload, userEntity } from "@test/presets.ts"
 import type { User } from "@/index.ts"
 
 beforeEach(() => {
@@ -54,7 +54,7 @@ describe("signUp API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
 
@@ -252,9 +252,9 @@ describe("signUp API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -313,9 +313,9 @@ describe("signUp API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -374,9 +374,9 @@ describe("signUp API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -435,9 +435,9 @@ describe("signUp API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -496,9 +496,9 @@ describe("signUp API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { api } = authInstance({
             createUser: createUserMock,
