@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, vi, afterEach } from "vitest"
 import { z } from "zod/v4"
 import { createCSRF } from "@/shared/crypto.ts"
 import { identitySchema } from "@/identity/zod.ts"
-import { authInstance, jose, sessionPayload, userEntity } from "@test/presets.ts"
+import { authInstance, jose, sessionEntityWithUser, sessionPayload, userEntity } from "@test/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 beforeEach(() => {
@@ -55,9 +55,9 @@ describe("signUp API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createSession: createSessionMock,
@@ -116,7 +116,7 @@ describe("signUp API", async () => {
         const createUserMock = vi.fn()
         const updateUserMock = vi.fn().mockReturnValue(userEntity)
         const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
-        const createSessionMock = vi.fn()
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createSession: createSessionMock,
@@ -172,9 +172,9 @@ describe("signUp API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance(
             {
@@ -218,9 +218,9 @@ describe("signUp API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance(
             {
@@ -274,9 +274,9 @@ describe("signUp API", async () => {
 
     test("valid signUp.onCreateUser return with custom schema", async () => {
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance(
             {
@@ -346,9 +346,9 @@ describe("signUp API", async () => {
 
     test("valid signUp.onCreateUser return with custom schema and identity.schema", async () => {
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance(
             {
@@ -425,9 +425,9 @@ describe("signUp API", async () => {
 
     test("signUp with redirect: true and redirectTo", async () => {
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
@@ -475,9 +475,9 @@ describe("signUp API", async () => {
 
     test("signUp with redirect: false", async () => {
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
@@ -525,9 +525,9 @@ describe("signUp API", async () => {
 
     test("signUp with redirect: false and redirectTo", async () => {
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
@@ -575,9 +575,9 @@ describe("signUp API", async () => {
 
     test("signUp with redirect: true and invalid redirectTo", async () => {
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
@@ -625,9 +625,9 @@ describe("signUp API", async () => {
 
     test("signUp with redirect: false and invalid redirectTo", async () => {
         const updateUserMock = vi.fn()
-        const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createUser: createUserMock,

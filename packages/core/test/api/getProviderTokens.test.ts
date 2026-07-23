@@ -11,6 +11,8 @@ beforeEach(() => {
 
 afterEach(() => {
     vi.unstubAllEnvs()
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
 })
 
 describe("getProviderTokens API", () => {

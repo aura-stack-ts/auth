@@ -63,6 +63,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         signUp: config?.signUp,
         jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
         rateLimiters: createRateLimiterInstance(config?.rateLimiter),
+        sessionStrategyMode: isStatelessStrategy(config?.session) ? "jwt" : "database",
     } as InternalContext<Identity, SignUpSchema>
     ctx.sessionStrategy = createSessionStrategy<Identity>({
         cookies: () => ctx.cookies,
@@ -70,6 +71,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         config: config?.session,
         logger: ctx.logger,
         identity: ctx.identity,
+        oauth: ctx.oauth,
     })
     return ctx
 }

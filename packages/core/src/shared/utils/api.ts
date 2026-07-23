@@ -1,7 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
+import { verifyCSRFToken, verifyPresentSessionValue, verifySessionToken } from "@/shared/utils.ts"
 import { getBaseURL, getOriginURL, createRedirectTo } from "@/shared/utils/authorization.ts"
 import type {
     BuiltInOAuthProvider,
@@ -38,12 +38,20 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         },
         verifySession: () => {
             steps.push(async () => {
-                await verifySessionToken({
-                    headers: output.headers,
-                    cookies: ctx.cookies,
-                    jwt: ctx.jwtManager,
-                    logger: ctx.logger,
-                })
+                if (ctx.sessionStrategyMode === "database") {
+                    await verifyPresentSessionValue({
+                        headers: output.headers,
+                        cookies: ctx.cookies,
+                        logger: ctx.logger,
+                    })
+                } else {
+                    await verifySessionToken({
+                        headers: output.headers,
+                        cookies: ctx.cookies,
+                        jwt: ctx.jwtManager,
+                        logger: ctx.logger,
+                    })
+                }
             })
             return builder
         },
