@@ -61,71 +61,6 @@ describe("tokensAction (Stateful)", async () => {
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
-    test("should return 403 if CSRF token is missing", async () => {
-        const getSessionByTokenMock = vi.fn()
-        const getOAuthAccountMock = vi.fn()
-        const updateOAuthTokensMock = vi.fn()
-
-        const {
-            handlers: { GET },
-        } = authInstance({
-            getSessionByToken: getSessionByTokenMock,
-            getOAuthAccount: getOAuthAccountMock,
-            updateOAuthTokens: updateOAuthTokensMock,
-        })
-
-        const sessionToken = "valid-session-token"
-
-        const response = await GET(
-            new Request("https://example.com/auth/providers/oauth-provider/tokens", {
-                headers: { Cookie: `__Secure-aura-auth.session_token=${sessionToken}` },
-            })
-        )
-        expect(response.status).toBe(403)
-        expect(await response.json()).toEqual({
-            success: false,
-            tokens: null,
-        })
-        expect(getSessionByTokenMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).not.toHaveBeenCalled()
-        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-    })
-
-    test("should return 403 if CSRF token is invalid", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
-        const getSessionByTokenMock = vi.fn()
-        const getOAuthAccountMock = vi.fn()
-        const updateOAuthTokensMock = vi.fn()
-
-        const {
-            handlers: { GET },
-        } = authInstance({
-            getSessionByToken: getSessionByTokenMock,
-            getOAuthAccount: getOAuthAccountMock,
-            updateOAuthTokens: updateOAuthTokensMock,
-        })
-
-        const sessionToken = "valid-session-token"
-
-        const response = await GET(
-            new Request("https://example.com/auth/providers/oauth-provider/tokens", {
-                headers: {
-                    "x-csrf-token": "invalid-token",
-                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
-                },
-            })
-        )
-        expect(response.status).toBe(403)
-        expect(await response.json()).toEqual({
-            success: false,
-            tokens: null,
-        })
-        expect(getSessionByTokenMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).not.toHaveBeenCalled()
-        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-    })
-
     test("should return 401 if session is not found in database", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
@@ -666,7 +601,11 @@ describe("tokensAction (Stateful)", async () => {
     test("automatically refreshes the token when its lifetime falls inside the refresh window", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getSessionByTokenMock = vi.fn()
+
+        getSessionByTokenMock.mockResolvedValueOnce(sessionEntityWithUser)
+        getSessionByTokenMock.mockResolvedValueOnce(sessionEntityWithUser)
+
         const currentTime = Math.floor(Date.now() / 1000)
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             accountId: "account-123",

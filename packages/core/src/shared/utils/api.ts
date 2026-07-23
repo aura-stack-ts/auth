@@ -1,7 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { verifyCSRFToken, verifyPresentSessionValue, verifySessionToken } from "@/shared/utils.ts"
+import { verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
 import { getBaseURL, getOriginURL, createRedirectTo } from "@/shared/utils/authorization.ts"
 import type {
     BuiltInOAuthProvider,
@@ -9,7 +9,16 @@ import type {
     RouterGlobalContext,
     RateLimiterConfig,
     RuntimeOAuthProvider,
+    UpdateSessionAPIOptions,
+    SignInCredentialsAPIOptions,
+    SignUpAPIOptions,
+    RefreshUserInfoAPIOptions,
+    RevokeTokenAPIOptions,
+    DisconnectProviderAPIOptions,
+    SignOutAPIOptions,
 } from "@/@types/index.ts"
+import { isStatelessStrategy } from "../assert.ts"
+import { createCookieManager } from "@/session/cookie-manager.ts"
 
 export const createValidation = (ctx: RouterGlobalContext, headersInit?: HeadersInit) => {
     const headers = new Headers(headersInit)
@@ -38,19 +47,19 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         },
         verifySession: () => {
             steps.push(async () => {
-                if (ctx.sessionStrategyMode === "database") {
-                    await verifyPresentSessionValue({
-                        headers: output.headers,
-                        cookies: ctx.cookies,
-                        logger: ctx.logger,
-                    })
-                } else {
+                if (isStatelessStrategy(ctx.sessionConfig)) {
                     await verifySessionToken({
                         headers: output.headers,
                         cookies: ctx.cookies,
                         jwt: ctx.jwtManager,
                         logger: ctx.logger,
                     })
+                } else {
+                    const { sessionToken } = createCookieManager(() => ctx.cookies).getCookie(new Headers(headersInit))
+                    const session = await ctx.sessionConfig.adapter.getSessionByToken(sessionToken)
+                    if (!session) {
+                        throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
+                    }
                 }
             })
             return builder
@@ -143,5 +152,24 @@ export const resolveApiRedirect = async (
     return {
         redirect: shouldRedirectServer,
         redirectURL: redirectInit ? null : redirectURL,
+    }
+}
+
+export const assertDoubleSubmitToken = (
+    options:
+        | UpdateSessionAPIOptions
+        | SignInCredentialsAPIOptions
+        | SignUpAPIOptions
+        | RefreshUserInfoAPIOptions
+        | RevokeTokenAPIOptions
+        | DisconnectProviderAPIOptions
+        | SignOutAPIOptions
+) => {
+    if (options.doubleSubmitToken) {
+        options.skipCSRFCheck = false
+        options.headers = new Headers(options.headers)
+        options.headers.set("x-csrf-token", options.doubleSubmitToken)
+    } else {
+        options.skipCSRFCheck = true
     }
 }

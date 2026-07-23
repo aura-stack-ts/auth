@@ -25,7 +25,6 @@ export const tokensAction = (oauth: OAuthProviderRecord) => {
                 ctx: ctx.context,
                 request: ctx.request,
                 headers: ctx.request.headers,
-                skipCSRFCheck: false,
             })
             return toResponse()
         },

@@ -59,19 +59,24 @@ export const revokeToken = async (
         headers: headersInit,
         request: requestInit,
         skipCSRFCheck = false,
+        doubleSubmitToken = undefined,
         disconnect = false,
     }: FunctionAPIContext<RevokeTokenAPIOptions> & { disconnect?: boolean }
 ): Promise<RevokeTokenAPIReturn> => {
     const { cookies } = ctx
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
-            structuredData: { provider: oauth, operation: disconnect ? "disconnect" : "revoke", skipCSRFCheck },
+            structuredData: {
+                provider: oauth,
+                operation: disconnect ? "disconnect" : "revoke",
+                skipCSRFCheck: skipCSRFCheck || Boolean(doubleSubmitToken),
+            },
         })
 
         const { provider, headers, request, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
             .verifyOAuthProvider(oauth)
             .verifySession()
-            .verifyCSRFToken(skipCSRFCheck)
+            .verifyCSRFToken(skipCSRFCheck || Boolean(doubleSubmitToken))
             .buildRequest(requestInit, `/providers/${oauth}/tokens/revoke`)
             .verifyRateLimit("revokeToken")
             .execute()

@@ -13,11 +13,12 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     redirect = true,
     redirectTo,
     skipCSRFCheck = false,
+    doubleSubmitToken = undefined,
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
     const { signUp, cookies, sessionStrategy, logger } = ctx
     try {
         const { request, rateLimit } = await createValidation(ctx, headersInit)
-            .verifyCSRFToken(skipCSRFCheck)
+            .verifyCSRFToken(skipCSRFCheck || Boolean(doubleSubmitToken))
             .buildRequest(requestInit, "/signUp")
             .verifyRateLimit("signUp")
             .execute()

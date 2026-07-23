@@ -16,18 +16,24 @@ import { getUserInfo } from "@/shared/utils/oauth.ts"
 
 export const refreshUserInfo = async <DefaultUser extends User = User>(
     oauth: LiteralUnion<BuiltInOAuthProvider>,
-    { ctx, headers: headersInit, request: requestInit, skipCSRFCheck = false }: FunctionAPIContext<RefreshUserInfoAPIOptions>
+    {
+        ctx,
+        headers: headersInit,
+        request: requestInit,
+        skipCSRFCheck = false,
+        doubleSubmitToken = undefined,
+    }: FunctionAPIContext<RefreshUserInfoAPIOptions>
 ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
     const { cookies } = ctx
     try {
         ctx.logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
-            structuredData: { provider: oauth, skipCSRFCheck },
+            structuredData: { provider: oauth, skipCSRFCheck: skipCSRFCheck || Boolean(doubleSubmitToken) },
         })
 
         const { provider, headers, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
             .verifyOAuthProvider(oauth)
             .verifySession()
-            .verifyCSRFToken(skipCSRFCheck)
+            .verifyCSRFToken(skipCSRFCheck || Boolean(doubleSubmitToken))
             .buildRequest(requestInit, `/providers/${oauth}/user/refresh`)
             .verifyRateLimit("refreshUserInfo")
             .execute()
@@ -43,7 +49,6 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             ctx,
             request: requestInit,
             headers: headersInit,
-            skipCSRFCheck,
         })
         if (!success) {
             ctx.logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
