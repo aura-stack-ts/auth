@@ -1,33 +1,6 @@
-import { describe, test, expect, vi, beforeEach } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
 import { GET, jose, oauthTokens, sessionPayload } from "@test/presets.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
-
-vi.mock("@aura-stack/rate-limiter", async () => {
-    const actual = await vi.importActual<typeof import("@aura-stack/rate-limiter")>("@aura-stack/rate-limiter")
-    return {
-        ...actual,
-        createRateLimiter: (...args: Parameters<typeof actual.createRateLimiter>) => {
-            const limiters = actual.createRateLimiter(...args)
-
-            for (const limiter of Object.values(limiters)) {
-                limiter.check = vi.fn().mockResolvedValue({
-                    ok: true,
-                    limit: Number.MAX_SAFE_INTEGER,
-                    remaining: Number.MAX_SAFE_INTEGER,
-                    resetAt: Date.now() + 60000,
-                    retryAfter: 0,
-                    toResponse: () => new Response(),
-                })
-            }
-
-            return limiters
-        },
-    }
-})
 
 describe("connectedAction", () => {
     test("throws error when provider is not configured", async () => {

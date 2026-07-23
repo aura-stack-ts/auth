@@ -1,13 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { authInstance, jose, oauthCustomService, sessionEntityWithUser } from "@test/presets.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("tokensAction (Stateful)", async () => {
     test("should return 422 if the provider is not supported", async () => {

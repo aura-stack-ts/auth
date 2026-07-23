@@ -1,13 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { GET, jose, oauthCustomService, oauthTokens, sessionPayload } from "@test/presets.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("tokensAction", async () => {
     const { encodeJWT } = jose

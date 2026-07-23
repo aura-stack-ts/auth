@@ -1,11 +1,7 @@
-import { describe, test, expect, vi, beforeEach } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { getSetCookie } from "@/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
 import { api, oauthCustomService, openIDMetadata } from "@test/presets.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("signIn API", () => {
     test("throws error when provider is missing", async () => {

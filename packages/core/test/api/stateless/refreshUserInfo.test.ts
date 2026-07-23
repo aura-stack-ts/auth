@@ -1,12 +1,8 @@
-import { describe, test, expect, vi, beforeEach } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { api, jose, oauthCustomService, oauthTokens, sessionPayload } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("refreshUserInfo", () => {
     test("unsupported oauth provider", async () => {

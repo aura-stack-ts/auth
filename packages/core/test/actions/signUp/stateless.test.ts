@@ -1,14 +1,10 @@
-import { describe, test, expect, beforeEach, vi } from "vitest"
+import { describe, test, expect } from "vitest"
 import { z } from "zod/v4"
 import { jose, POST } from "@test/presets.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { identitySchema } from "@/identity/zod.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 const payload = {
     name: "johndoe",

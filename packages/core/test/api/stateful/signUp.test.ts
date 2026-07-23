@@ -1,12 +1,8 @@
-import { describe, test, expect, beforeEach, vi } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { authInstance, jose, sessionEntityWithUser, sessionPayload, userEntity } from "@test/presets.ts"
 import type { User } from "@/index.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("signUp API", async () => {
     const csrfToken = await createCSRF(jose)

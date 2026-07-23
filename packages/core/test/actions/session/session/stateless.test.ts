@@ -1,12 +1,8 @@
-import { describe, test, expect, vi, beforeEach } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { createPKCE } from "@/shared/crypto.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { GET, jose, sessionPayload } from "@test/presets.ts"
 import { setCookie, getSetCookie, createCookieStore, getCookie } from "@/cookie.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("sessionAction", () => {
     const { encodeJWT } = jose

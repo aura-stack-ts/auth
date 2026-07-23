@@ -1,11 +1,7 @@
-import { describe, test, expect, vi, beforeEach } from "vitest"
+import { describe, test, expect } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { GET, oauthCustomService } from "@test/presets.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("signIn action", () => {
     test("default signIn", async () => {

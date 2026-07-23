@@ -41,7 +41,7 @@ export default defineConfig({
                     name: "core",
                     include: ["test/**/*.test.ts"],
                     exclude: ["test/rate-limiter.test.ts"],
-                    setupFiles: ["./test/setup/vitest.setup.ts"],
+                    setupFiles: ["./test/setup/vitest.setup.ts", "./test/setup/actions.setup.ts"],
                 },
                 resolve: {
                     alias: {

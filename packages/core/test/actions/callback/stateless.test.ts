@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { GET, jose, oauthCustomService, openIDCustomProvider, openIDMetadata, RS256PEMFormat } from "@test/presets.ts"
 import { clearResolvedProviderCache } from "@/shared/oidc/resolve-provider.ts"
 import { clearJWKSCache } from "@/shared/oidc/jwks.ts"
@@ -7,10 +7,6 @@ import { createPKCE } from "@/shared/crypto.ts"
 import { setCookie, getSetCookie } from "@/cookie.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { createAuth } from "@/createAuth.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("callbackAction", () => {
     test("invalid endpoint", async () => {

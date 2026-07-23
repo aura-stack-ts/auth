@@ -1,11 +1,7 @@
-import { describe, test, expect, vi, beforeEach } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { jose, oauthCustomService, oauthTokens, POST, sessionPayload } from "@test/presets.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("Revoke Action", () => {
     test("throws error when provider is not configured", async () => {

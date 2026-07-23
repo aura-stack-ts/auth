@@ -1,14 +1,10 @@
-import { describe, test, expect, beforeEach, vi } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose, sessionPayload } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 import { getSetCookie } from "@/cookie.ts"
-
-beforeEach(() => {
-    vi.stubEnv("BASE_URL", undefined)
-})
 
 describe("updateSession API", () => {
     test("invalid session", async () => {

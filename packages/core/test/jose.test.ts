@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 import { createJoseInstance, encoder } from "@/jose.ts"
 import { createSecretValue, exportJWKKeyPair } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
