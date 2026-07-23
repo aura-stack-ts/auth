@@ -1,15 +1,9 @@
-import { describe, test, expect, vi, afterEach, beforeEach } from "vitest"
+import { describe, test, expect, vi, beforeEach } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
 import { GET, jose, oauthTokens, sessionPayload } from "@test/presets.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
-})
-
-afterEach(() => {
-    vi.unstubAllEnvs()
-    vi.restoreAllMocks()
-    vi.unstubAllGlobals()
 })
 
 vi.mock("@aura-stack/rate-limiter", async () => {

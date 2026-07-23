@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, afterEach, beforeEach } from "vitest"
+import { describe, test, expect, vi, beforeEach } from "vitest"
 import { authInstance, jose, oauthCustomService, sessionEntityWithUser } from "@test/presets.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
@@ -7,12 +7,6 @@ import { createCSRF } from "@/shared/crypto.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
-})
-
-afterEach(() => {
-    vi.unstubAllEnvs()
-    vi.restoreAllMocks()
-    vi.unstubAllGlobals()
 })
 
 describe("tokensAction (Stateful)", async () => {

@@ -1,20 +1,16 @@
-import { describe, test, expect, expectTypeOf, vi, afterEach } from "vitest"
-import { createIdentity, type InferUser, type UserFrom } from "@/identity/index.ts"
+import { describe, test, expect, expectTypeOf } from "vitest"
+import { z } from "zod/v4"
+import * as valibot from "valibot"
+import { Value } from "typebox/value"
+import { ArkErrors, type } from "arktype"
+import { createAuth } from "@/createAuth.ts"
+import { type Static, Type as Typebox } from "typebox"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
+import { createSchemaRegistry, deriveSchema } from "@/validator/registry.ts"
 import { identitySchema as UserIdentityArkType } from "@/identity/arktype.ts"
 import { identitySchema as UserIdentityTypeBox } from "@/identity/typebox.ts"
 import { identitySchema as UserIdentityValibot } from "@/identity/valibot.ts"
-import { z } from "zod/v4"
-import * as valibot from "valibot"
-import { createAuth } from "@/createAuth.ts"
-import { createSchemaRegistry, deriveSchema } from "@/validator/registry.ts"
-import { ArkErrors, type } from "arktype"
-import { type Static, Type as Typebox } from "typebox"
-import { Value } from "typebox/value"
-
-afterEach(() => {
-    vi.unstubAllEnvs()
-})
+import { createIdentity, type InferUser, type UserFrom } from "@/identity/index.ts"
 
 describe("createIdentity", () => {
     test("createIdentity with Zod schema", () => {

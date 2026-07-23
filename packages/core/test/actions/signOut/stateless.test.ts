@@ -1,13 +1,9 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, test, expect, vi, beforeEach } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
 import { POST, jose, sessionPayload } from "@test/presets.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
-})
-
-afterEach(() => {
-    vi.unstubAllEnvs()
 })
 
 describe("signOut action", async () => {

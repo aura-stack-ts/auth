@@ -12,10 +12,6 @@ beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
 })
 
-afterEach(() => {
-    vi.unstubAllEnvs()
-})
-
 describe("callbackAction", () => {
     test("invalid endpoint", async () => {
         const response = await GET(new Request("https://example.com/callback/invalid"))

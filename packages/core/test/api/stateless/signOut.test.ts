@@ -1,14 +1,10 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
-})
-
-afterEach(() => {
-    vi.unstubAllEnvs()
 })
 
 describe("signOut API", async () => {

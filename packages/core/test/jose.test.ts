@@ -22,10 +22,6 @@ beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
 })
 
-afterEach(() => {
-    vi.unstubAllEnvs()
-})
-
 describe("createJoseInstance", () => {
     test("createJoseInstance with default options", async () => {
         vi.stubEnv("AURA_AUTH_SALT", createSecretValue())
