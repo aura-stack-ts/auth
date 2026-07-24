@@ -1,8 +1,10 @@
 import { createAuth } from "@/createAuth.ts"
 import type { JWTPayload } from "@/jose.ts"
 import type {
+    AccountEntity,
     AuthConfig,
     DatabaseAdapter,
+    OAuthAccountEntity,
     OAuthProviderCredentials,
     OAuthTokenPayload,
     OpenIDProvider,
@@ -112,6 +114,24 @@ export const sessionEntity: SessionEntity = {
 export const sessionEntityWithUser: SessionWithUserEntity = {
     ...sessionEntity,
     user: userEntity,
+}
+
+export const oauthAccountEntity: OAuthAccountEntity = {
+    accountId: "account-123",
+    accessToken: "access-token",
+    refreshToken: "refresh-token",
+    idToken: "id-token",
+    tokenType: "Bearer",
+    scopes: "scope1 scope2",
+    issuer: "https://example.com",
+    accessTokenExpiresAt: new Date(Date.now() + 3600 * 1000),
+    refreshTokenExpiresAt: new Date(Date.now() + 7200 * 1000),
+    updatedAt: new Date(),
+}
+
+export const accountStatusEntity: Partial<AccountEntity> = {
+    id: "account-123",
+    status: "unlinked",
 }
 
 const auth = createAuth({
