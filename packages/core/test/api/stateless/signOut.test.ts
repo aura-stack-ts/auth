@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { api, jose } from "@test/presets.ts"
+import { api, jose, sessionPayload } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 
 describe("signOut API", async () => {
@@ -119,5 +119,101 @@ describe("signOut API", async () => {
         })
     })
 
-    test("")
+    test("signOut with doubleSubmitToken", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const output = await api.signOut({
+            headers: {
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+            redirect: false,
+            doubleSubmitToken: csrfToken,
+        })
+
+        expect(output).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signOut with invalid doubleSubmitToken", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const output = await api.signOut({
+            headers: {
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+            redirect: false,
+            doubleSubmitToken: "invalid-token",
+        })
+
+        expect(output).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signOut enables double-submit cookie manually", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const output = await api.signOut({
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+            redirect: false,
+            skipCSRFCheck: false,
+        })
+
+        expect(output).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signOut enables double-submit cookie manually and invalid token", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const output = await api.signOut({
+            headers: {
+                "X-CSRF-Token": "invalid-token",
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+            redirect: false,
+            skipCSRFCheck: false,
+        })
+
+        expect(output).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
 })

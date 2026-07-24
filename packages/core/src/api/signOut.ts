@@ -11,9 +11,9 @@ export const signOut = async ({
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
-    let responseHeaders = new Headers(headersInit)
+    let responseHeaders = new Headers(headersInit ?? requestInit?.headers)
     try {
-        responseHeaders = await ctx.sessionStrategy.destroySession(responseHeaders, skipCSRFCheck || Boolean(doubleSubmitToken))
+        responseHeaders = await ctx.sessionStrategy.destroySession(responseHeaders, skipCSRFCheck && !!doubleSubmitToken)
         const { request } = await createValidation(ctx, responseHeaders).buildRequest(requestInit, "/signOut").execute()
 
         const headersBuilder = new HeadersBuilder(responseHeaders)

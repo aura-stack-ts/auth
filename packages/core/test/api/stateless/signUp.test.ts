@@ -211,4 +211,98 @@ describe("signUp API", async () => {
             toResponse: expect.any(Function),
         })
     })
+
+    test("signUp with doubleSubmitToken", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const output = await api.signUp({
+            payload,
+            headers,
+            redirect: false,
+            redirectTo: "https://malicious.com/dashboard",
+            doubleSubmitToken: csrfToken,
+        })
+        expect(output.headers.get("Location")).toBeNull()
+        expect(output).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: "/",
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signUp with doubleSubmitToken with invalid value", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const output = await api.signUp({
+            payload,
+            headers,
+            redirect: false,
+            redirectTo: "https://malicious.com/dashboard",
+            doubleSubmitToken: "invalid-token",
+        })
+        expect(output.headers.get("Location")).toBeNull()
+        expect(output).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signUp enables double-submit cookie manually", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const newHeaders = new Headers(headers)
+        newHeaders.set("x-csrf-token", csrfToken)
+
+        const output = await api.signUp({
+            payload,
+            headers: newHeaders,
+            redirect: false,
+            redirectTo: "https://malicious.com/dashboard",
+            skipCSRFCheck: false,
+        })
+        expect(output.headers.get("Location")).toBeNull()
+        expect(output).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: "/",
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signUp enables double-submit cookie manually and invalid value", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const newHeaders = new Headers(headers)
+        newHeaders.set("x-csrf-token", "invalid-value")
+
+        const output = await api.signUp({
+            payload,
+            headers: newHeaders,
+            redirect: false,
+            redirectTo: "https://malicious.com/dashboard",
+            skipCSRFCheck: false,
+        })
+        expect(output.headers.get("Location")).toBeNull()
+        expect(output).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
 })

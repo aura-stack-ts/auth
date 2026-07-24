@@ -18,7 +18,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     const { signUp, cookies, sessionStrategy, logger } = ctx
     try {
         const { request, rateLimit } = await createValidation(ctx, headersInit)
-            .verifyCSRFToken(skipCSRFCheck || Boolean(doubleSubmitToken))
+            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .buildRequest(requestInit, "/signUp")
             .verifyRateLimit("signUp")
             .execute()

@@ -402,4 +402,73 @@ describe("updateSession API", () => {
         expect(decoded.exp).not.toEqual(attackerExpiration)
         expect(decoded.exp).toBeLessThanOrEqual(fifteenDaysFromNow)
     })
+
+    test("updateSession with doubleSubmitToken", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+        })
+
+        const csrfToken = await createCSRF(jose)
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: { user: { name: "Alice" } },
+            redirectTo: "/dashboard",
+            doubleSubmitToken: csrfToken,
+        })
+        expect(updated.headers.get("Location")).toBe("/dashboard")
+        expect(updated).toEqual({
+            session: {
+                user: {
+                    sub: "1234567890",
+                    name: "Alice",
+                    email: "johndoe@example.com",
+                },
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: true,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("updateSession with doubleSubmitToken and invalid value", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+        })
+
+        const csrfToken = await createCSRF(jose)
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: { user: { name: "Alice" } },
+            redirectTo: "/dashboard",
+            doubleSubmitToken: "invalid-token",
+        })
+        expect(updated.headers.get("Location")).toBe(null)
+        expect(updated).toEqual({
+            success: false,
+            session: null,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "UPDATE_SESSION_INVALID",
+                message: "Failed to update session parameters.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
 })

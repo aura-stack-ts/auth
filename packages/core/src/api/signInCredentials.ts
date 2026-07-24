@@ -18,7 +18,7 @@ export const signInCredentials = async ({
     const { cookies, credentials, sessionStrategy, logger } = ctx
     try {
         const { request, rateLimit } = await createValidation(ctx, headerInit)
-            .verifyCSRFToken(skipCSRFCheck || Boolean(doubleSubmitToken))
+            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .buildRequest(requestInit, "/signIn/credentials")
             .verifyRateLimit("signInCredentials")
             .execute()

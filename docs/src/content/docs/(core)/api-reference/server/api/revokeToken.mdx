@@ -35,11 +35,12 @@ const output = await api.revokeToken("github", {
 
 ### RevokeTokenAPIOptions
 
-| Option        | Type      | Default   | Description                                               |
-| ------------- | --------- | --------- | --------------------------------------------------------- |
-| request       | `Request` | undefined | The request object from the server-side context.          |
-| headers       | `Headers` | undefined | The headers object from the server-side context.          |
-| skipCSRFCheck | `boolean` | `false`   | Whether to skip CSRF token verification for this request. |
+| Option            | Type      | Default   | Description                                                                                                   |
+| ----------------- | --------- | --------- | ------------------------------------------------------------------------------------------------------------- |
+| request           | `Request` | undefined | The request object from the server-side context.                                                              |
+| headers           | `Headers` | undefined | The headers object from the server-side context.                                                              |
+| ~~skipCSRFCheck~~ | `boolean` | `false`   | ~~Deprecated~~. This option has been replaced by `doubleSubmitToken` and will be removed in a future release. |
+| doubleSubmitToken | `string`  | undefined | Optional CSRF token used to explicitly enable Double-Submit Cookie validation for server-side API functions.  |
 
 <Callout type="info">
   At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs.
@@ -54,7 +55,15 @@ const output = await api.revokeToken("github", {
 ## Behavior
 
 - Revocation success depends entirely on the provider's `revokeToken` endpoint configuration and whether the provider supports token revocation at all. If it doesn't, this method returns `success: false`.
-- CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
+- The `doubleSubmitToken` option enables Double-Submit Cookie validation when calling Aura Auth server-side API functions. By default, API functions execute in a trusted server environment, where browser-based CSRF attacks are not possible because requests originate from server-side code rather than from a user's browser. For that reason, Aura Auth performs the standard CSRF validation but skips the additional Double-Submit Cookie verification.
+
+  This option is intended for advanced scenarios where server-side requests should enforce the same CSRF guarantees as browser-initiated requests.
+
+  <Callout>
+    Providing `doubleSubmitToken` does not replace or disable CSRF protection. It enables the additional Double-Submit Cookie
+    validation on top of the standard CSRF checks already performed by Aura Auth.
+  </Callout>
+
 - If revocation fails (no active token for the provider, or the provider rejects the request), `success` is `false`.
 
 ## Usage
@@ -89,7 +98,21 @@ if (!success) {
 import { api } from "@/lib/auth"
 
 const { success } = await api.revokeToken("github", {
+  headers: {
+    "x-csrf-token": getCSRFTokenFromRequest(),
+  },
   request: getRequest(),
-  skipCSRFCheck: true, // only if enforced elsewhere — see the warning above
+  skipCSRFCheck: false, // only if enforced elsewhere — see the warning above
+})
+```
+
+### Enable Double-Submit Cookie CSRF protection
+
+```ts title="double-submit.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success } = await api.revokeToken("github", {
+  request: getRequest(),
+  doubleSubmitToken: getDoubleSubmitTokenFromRequest(),
 })
 ```

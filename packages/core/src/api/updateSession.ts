@@ -15,11 +15,10 @@ export const updateSession = async <DefaultUser extends User = User>({
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
     try {
-        console.log("double submit token:", skipCSRFCheck || Boolean(doubleSubmitToken))
         const { session, headers } = await ctx.sessionStrategy.refreshSession(
             new Headers(headersInit),
             sessionInit,
-            skipCSRFCheck || Boolean(doubleSubmitToken)
+            skipCSRFCheck && !!doubleSubmitToken
         )
         if (!session) {
             throw new AuraAuthError({ code: "UPDATE_SESSION_INVALID" })
@@ -63,7 +62,6 @@ export const updateSession = async <DefaultUser extends User = User>({
             },
         } as UpdateSessionAPIReturn<DefaultUser>
     } catch (error) {
-        console.error("Error in updateSession API:", error)
         const { code, message, statusCode } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
 
         const headers = new Headers(secureApiHeaders)

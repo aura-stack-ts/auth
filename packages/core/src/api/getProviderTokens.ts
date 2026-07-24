@@ -50,7 +50,6 @@ export const getProviderTokens = async (
             },
         }
     } catch (error) {
-        console.error("Error in getProviderTokens:", error)
         const { code, message, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
         const headers = toUnionHeaders(initialHeaders, secureApiHeaders)

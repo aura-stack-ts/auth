@@ -69,14 +69,14 @@ export const revokeToken = async (
             structuredData: {
                 provider: oauth,
                 operation: disconnect ? "disconnect" : "revoke",
-                skipCSRFCheck: skipCSRFCheck || Boolean(doubleSubmitToken),
+                skipCSRFCheck: skipCSRFCheck && !!doubleSubmitToken,
             },
         })
 
         const { provider, headers, request, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
             .verifyOAuthProvider(oauth)
             .verifySession()
-            .verifyCSRFToken(skipCSRFCheck || Boolean(doubleSubmitToken))
+            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .buildRequest(requestInit, `/providers/${oauth}/tokens/revoke`)
             .verifyRateLimit("revokeToken")
             .execute()

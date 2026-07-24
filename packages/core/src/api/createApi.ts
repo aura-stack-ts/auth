@@ -148,7 +148,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          */
         updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
             assertDoubleSubmitToken(options)
-            return updateSession<DefaultUser>({ ctx, skipCSRFCheck: true, ...options })
+            return updateSession<DefaultUser>({ ctx, ...options })
         },
         /**
          * Retrieves the access token for a specific OAuth provider on the server-side.
@@ -208,7 +208,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
             oauth: LiteralUnion<BuiltInOAuthProvider>,
             options?: RefreshUserInfoAPIOptions
         ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
-            assertDoubleSubmitToken(options || {})
+            assertDoubleSubmitToken(options ?? {})
             return refreshUserInfo<DefaultUser>(oauth, { ctx, ...options })
         },
         /**

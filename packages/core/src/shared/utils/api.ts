@@ -167,9 +167,13 @@ export const assertDoubleSubmitToken = (
 ) => {
     if (options.doubleSubmitToken) {
         options.skipCSRFCheck = false
-        options.headers = new Headers(options.headers)
+        options.headers = new Headers(options.headers ?? options.request?.headers ?? {})
         options.headers.set("x-csrf-token", options.doubleSubmitToken)
+        options.request?.headers.set("x-csrf-token", options.doubleSubmitToken)
     } else {
-        options.skipCSRFCheck = true
+        if (options.skipCSRFCheck === undefined || options.skipCSRFCheck === true) {
+            options.skipCSRFCheck = true
+            options.doubleSubmitToken = "token"
+        }
     }
 }
