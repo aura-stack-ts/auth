@@ -1,4 +1,4 @@
-import { getCookie } from "@/cookie.ts"
+import { getCookie, getExpiredCookie } from "@/cookie.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
@@ -18,6 +18,7 @@ import type {
     JoseInstance,
     GetProviderTokensStatefulReturn,
 } from "@/@types/index.ts"
+import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({
     config,
@@ -330,6 +331,31 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         }
     }
 
+    const revokeToken = async (oauthId: string, headers: Headers, disconnect: boolean): Promise<Headers> => {
+        const cookieName = `${cookies().accessToken.name}.${oauthId}`
+        const cookie = getCookie(headers, cookieName)
+        const provider = oauth[oauthId]
+
+        const decodedToken = await jwt.verifyToken(cookie)
+        const tokens = await identity.schemaRegistry.parseOAuthTokens(decodedToken)
+
+        if (!disconnect) {
+            logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
+                structuredData: { provider: oauthId, hasAccessToken: !!tokens.accessToken },
+            })
+
+            await revokeProviderToken(provider!, tokens.accessToken)
+
+            logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
+                structuredData: { provider: oauthId },
+            })
+        }
+        const builder = new HeadersBuilder(secureApiHeaders)
+            .setCookie(cookieName, "", getExpiredCookie(cookies().accessToken.attributes))
+            .toHeaders()
+        return toUnionHeaders(builder, headers)
+    }
+
     // JWT strategy: stateless tokens cannot be revoked server-side
     const revokeSession = async (_sessionId: string): Promise<void> => {}
 
@@ -339,5 +365,5 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         return cookieConfig.clear()
     }
 
-    return { getSession, createSession, getProviderTokens, refreshSession, revokeSession, destroySession }
+    return { getSession, createSession, getProviderTokens, refreshSession, revokeSession, revokeToken, destroySession }
 }

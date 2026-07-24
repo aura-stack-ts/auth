@@ -213,7 +213,7 @@ export const shouldRefresh = (payload: OAuthTokenPayload, refreshWindow: number)
 
 export const merge = (origin: Record<string, unknown>, source: Record<string, unknown>) => {
     for (const key in source) {
-        if (source[key] instanceof Object && key in origin) {
+        if (source[key] instanceof Object && !(source[key] instanceof Array) && key in origin) {
             Object.assign(source[key], merge(origin[key] as Record<string, unknown>, source[key] as Record<string, unknown>))
         }
     }
