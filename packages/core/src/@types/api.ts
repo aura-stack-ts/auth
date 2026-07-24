@@ -116,8 +116,26 @@ export interface APIOptionsWithSkipCSRFCheck {
      * The CSRF token is still required and validated to preserve request integrity.
      * Use this only for trusted server-side flows.
      * @default `false`
+     * @deprecated Use `doubleSubmitToken` to provide the CSRF token explicitly instead of skipping the check.
      */
     skipCSRFCheck?: boolean
+    /**
+     * Optional token used to perform Double-Submit Cookie validation.
+     *
+     * By default, server-side API functions skip the Double-Submit Cookie validation
+     * because they execute in a trusted server environment where the CSRF token is
+     * not directly available. Providing this value enables the same Double-Submit
+     * Cookie validation performed by the HTTP endpoints.
+     *
+     * Other CSRF protections remain enabled regardless of whether this option is
+     * provided.
+     *
+     * @example
+     * api.signOut({
+     *   doubleSubmitToken: "csrf-token-value",
+     * })
+     */
+    doubleSubmitToken?: string
 }
 
 /** Options to get the current session. */
@@ -323,8 +341,7 @@ export type SignUpReturn<Options extends SignUpOptions> = Options extends { redi
 /**
  * Programmatic options for `getProviderTokens` API.
  */
-export interface GetProviderTokensAPIOptions
-    extends Pick<APIOptionsWithRequest, "headers" | "request">, APIOptionsWithSkipCSRFCheck {}
+export interface GetProviderTokensAPIOptions extends Pick<APIOptionsWithRequest, "headers" | "request"> {}
 
 export type GetProviderTokensData = { success: true; tokens: OAuthTokenPayload } | { success: false; tokens: null }
 

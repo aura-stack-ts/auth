@@ -24,19 +24,14 @@ const output = await api.signOut({
 
 ### SignOutAPIOptions
 
-| Option        | Type      | Default   | Description                                                                                         |
-| ------------- | --------- | --------- | --------------------------------------------------------------------------------------------------- |
-| request       | `Request` | undefined | The request object from the server-side context.                                                    |
-| headers       | `Headers` | undefined | The headers object from the server-side context.                                                    |
-| redirect      | `boolean` | `true`    | Whether to redirect via the `Location` header (`true`) or return the result as an object (`false`). |
-| redirectTo    | `string`  | undefined | The URL to redirect to after sign-out completes.                                                    |
-| skipCSRFCheck | `boolean` | `false`   | Whether to skip CSRF token verification for this request. See the [warning](#behavior) below.       |
-
-<Callout type="info">
-  At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs. Per the [`POST
-  /auth/signOut` handler](/docs/api-reference/server/handlers#post-authsignout), a valid CSRF token must also be present (as a
-  cookie and, at the HTTP layer, the `X-CSRF-Token` header) unless `skipCSRFCheck` is set.
-</Callout>
+| Option            | Type      | Default   | Description                                                                                                   |
+| ----------------- | --------- | --------- | ------------------------------------------------------------------------------------------------------------- |
+| request           | `Request` | undefined | The request object from the server-side context.                                                              |
+| headers           | `Headers` | undefined | The headers object from the server-side context.                                                              |
+| redirect          | `boolean` | `true`    | Whether to redirect via the `Location` header (`true`) or return the result as an object (`false`).           |
+| redirectTo        | `string`  | undefined | The URL to redirect to after sign-out completes.                                                              |
+| ~~skipCSRFCheck~~ | `boolean` | `false`   | ~~Deprecated~~. This option has been replaced by `doubleSubmitToken` and will be removed in a future release. |
+| doubleSubmitToken | `string`  | undefined | Optional CSRF token used to explicitly enable Double-Submit Cookie validation for server-side API functions.  |
 
 ### Returns
 
@@ -46,7 +41,15 @@ const output = await api.signOut({
 
 ## Behavior
 
-- CSRF protection is verified by default, matching the [`signOut` HTTP handler](/docs/api-reference/server/handlers#post-authsignout)'s double-submit cookie check. Set `skipCSRFCheck: true` only if CSRF is enforced at a different layer.
+- The `doubleSubmitToken` option enables Double-Submit Cookie validation when calling Aura Auth server-side API functions. By default, API functions execute in a trusted server environment, where browser-based CSRF attacks are not possible because requests originate from server-side code rather than from a user's browser. For that reason, Aura Auth performs the standard CSRF validation but skips the additional Double-Submit Cookie verification.
+
+  This option is intended for advanced scenarios where server-side requests should enforce the same CSRF guarantees as browser-initiated requests.
+
+  <Callout>
+    Providing `doubleSubmitToken` does not replace or disable CSRF protection. It enables the additional Double-Submit Cookie
+    validation on top of the standard CSRF checks already performed by Aura Auth.
+  </Callout>
+
 - The return value depends on the `redirect` option:
   - **`redirect: true`** (default) — redirects to `redirectTo` (or the default post-sign-out URL) via the `Location` header.
   - **`redirect: false`** — resolves to an object with `redirectURL`, `redirect: false`, and `success`, letting you handle navigation yourself.
@@ -78,4 +81,16 @@ const output = await api.signOut({
 if (output.success) {
   redirect(output.redirectURL)
 }
+```
+
+### Enable Double-Submit Cookie CSRF protection
+
+```ts title="double-submit.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signOut({
+  headers: getHeaders(),
+  redirectTo: "/login",
+  doubleSubmitToken: getDoubleSubmitTokenFromRequest(),
+})
 ```

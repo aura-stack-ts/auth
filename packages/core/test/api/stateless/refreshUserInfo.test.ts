@@ -545,4 +545,184 @@ describe("refreshUserInfo", () => {
             },
         })
     })
+
+    test("refreshUserInfo with doubleSubmitToken", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const mockFetch = vi.fn()
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({ "Content-Type": "application/json" }),
+            json: async () => ({
+                id: "1234567890",
+                email: "john@example.com",
+                name: "John Doe",
+                image: "https://example.com/image.jpg",
+            }),
+        })
+        vi.stubGlobal("fetch", mockFetch)
+
+        const output = await api.refreshUserInfo("oauth-provider", {
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+            doubleSubmitToken: csrfToken,
+        })
+
+        expect(output).toEqual({
+            success: true,
+            session: {
+                sub: "1234567890",
+                email: "john@example.com",
+                name: "John Doe",
+                image: "https://example.com/image.jpg",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                Accept: "application/json",
+                Authorization: `Bearer ${oauthTokens.accessToken}`,
+            },
+            signal: expect.any(AbortSignal),
+        })
+    })
+
+    test("refreshUserInfo with doubleSubmitToken and invalid value", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const mockFetch = vi.fn()
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({ "Content-Type": "application/json" }),
+            json: async () => ({
+                id: "1234567890",
+                email: "john@example.com",
+                name: "John Doe",
+                image: "https://example.com/image.jpg",
+            }),
+        })
+        vi.stubGlobal("fetch", mockFetch)
+
+        const output = await api.refreshUserInfo("oauth-provider", {
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+            doubleSubmitToken: "invalid-token",
+        })
+
+        expect(output).toEqual({
+            success: false,
+            session: null,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    test("refreshUserInfo enables double-submit cookie manually", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const mockFetch = vi.fn()
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({ "Content-Type": "application/json" }),
+            json: async () => ({
+                id: "1234567890",
+                email: "john@example.com",
+                name: "John Doe",
+                image: "https://example.com/image.jpg",
+            }),
+        })
+        vi.stubGlobal("fetch", mockFetch)
+
+        const output = await api.refreshUserInfo("oauth-provider", {
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+            skipCSRFCheck: false,
+        })
+
+        expect(output).toEqual({
+            success: true,
+            session: {
+                sub: "1234567890",
+                email: "john@example.com",
+                name: "John Doe",
+                image: "https://example.com/image.jpg",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                Accept: "application/json",
+                Authorization: `Bearer ${oauthTokens.accessToken}`,
+            },
+            signal: expect.any(AbortSignal),
+        })
+    })
+
+    test("refreshUserInfo enables double-submit cookie manually and invalid token", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const mockFetch = vi.fn()
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({ "Content-Type": "application/json" }),
+            json: async () => ({
+                id: "1234567890",
+                email: "john@example.com",
+                name: "John Doe",
+                image: "https://example.com/image.jpg",
+            }),
+        })
+        vi.stubGlobal("fetch", mockFetch)
+
+        const output = await api.refreshUserInfo("oauth-provider", {
+            headers: {
+                "X-CSRF-Token": "invalid-token",
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+            skipCSRFCheck: false,
+        })
+
+        expect(output).toEqual({
+            success: false,
+            session: null,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(mockFetch).not.toHaveBeenCalled()
+    })
 })

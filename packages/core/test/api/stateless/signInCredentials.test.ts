@@ -222,4 +222,112 @@ describe("signInCredentials API", async () => {
             toResponse: expect.any(Function),
         })
     })
+
+    test("signInCredentials with doubleSubmitToken", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const signIn = await api.signInCredentials({
+            headers,
+            payload: {
+                username: "johndoe",
+                password: "1234567890",
+            },
+            doubleSubmitToken: csrfToken,
+        })
+        expect(signIn).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            redirect: false,
+            redirectURL: null,
+            toResponse: expect.any(Function),
+        })
+        const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
+        expect(decoded).toMatchObject({
+            sub: "1234567890",
+            email: "johndoe@example.com",
+            name: "johndoe",
+            image: "https://example.com/image.jpg",
+        })
+    })
+
+    test("signInCredentials with doubleSubmitToken and invalid value", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const signIn = await api.signInCredentials({
+            headers,
+            payload: {
+                username: "johndoe",
+                password: "1234567890",
+            },
+            doubleSubmitToken: "invalid-value",
+        })
+        expect(signIn).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("signInCredentials enables double-submit cookie manually", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const newHeaders = new Headers(headers)
+        newHeaders.set("x-csrf-token", csrfToken)
+
+        const signIn = await api.signInCredentials({
+            headers: newHeaders,
+            payload: {
+                username: "johndoe",
+                password: "1234567890",
+            },
+            skipCSRFCheck: false,
+        })
+        expect(signIn).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            redirect: false,
+            redirectURL: null,
+            toResponse: expect.any(Function),
+        })
+        const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
+        expect(decoded).toMatchObject({
+            sub: "1234567890",
+            email: "johndoe@example.com",
+            name: "johndoe",
+            image: "https://example.com/image.jpg",
+        })
+    })
+
+    test("signInCredentials enables double-submit cookie manually and invalid value", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const newHeaders = new Headers(headers)
+        newHeaders.set("x-csrf-token", "invalid-value")
+
+        const signIn = await api.signInCredentials({
+            headers: newHeaders,
+            payload: {
+                username: "johndoe",
+                password: "1234567890",
+            },
+            skipCSRFCheck: false,
+        })
+        expect(signIn).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
 })

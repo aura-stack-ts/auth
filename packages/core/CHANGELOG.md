@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `doubleSubmitToken` option to the APIs exposed by `createAuth().api`, allowing explicit Double-Submit Cookie validation for server-side requests. By default, Double-Submit Cookie validation is skipped in trusted server environments, while standard CSRF validation remains enabled. Supplying `doubleSubmitToken` enforces Double-Submit Cookie validation for the request. [#233](https://github.com/aura-stack-ts/auth/pull/233)
+
 - Added support for inferring OpenID Connect (OIDC) provider issuer slugs from environment variables. Issuer slugs can now be configured either through `provider.slugName` or an environment variable following the `PREFIX_SLUG_NAME` naming convention. [#225](https://github.com/aura-stack-ts/auth/pull/225)
 
 - Added the `isProviderConnected()` client API to `createAuthClient()`, providing a client-side interface for the `GET /providers/:provider` endpoint. The API checks whether an OAuth or OpenID Connect (OIDC) provider is currently connected to the active session. [#223](https://github.com/aura-stack-ts/auth/pull/223)
@@ -41,6 +43,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added the experimental `getProviderTokens()` API for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. To enable refresh token retrieval, the provider must be configured with the `refreshToken` option. [#212](https://github.com/aura-stack-ts/auth/pull/212)
 
 ### BREAKING CHANGES
+
+- Deprecated the `skipCSRFCheck` option in the APIs exposed by `createAuth().api`. Use `doubleSubmitToken` instead to explicitly enable Double-Submit Cookie validation. The previous option was misleading because it only disabled the Double-Submit Cookie check while standard CSRF validation continued to be performed. [#233](https://github.com/aura-stack-ts/auth/pull/233)
 
 - Reorganized identity schemas, types, and type guards into dedicated `/identity/:schema` entry points. As part of this change, schema-specific prefixes and suffixes (such as `Zod`) have been removed to provide a consistent API across all supported schema libraries. [#216](https://github.com/aura-stack-ts/auth/pull/216)
   - Renamed `UserIdentity` to `identitySchema` and moved it to `/identity/:schema`.

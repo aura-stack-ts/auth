@@ -41,7 +41,7 @@ describe("tokensAction", async () => {
                 headers: { Cookie: `__Secure-aura-auth.session_token=${sessionToken}` },
             })
         )
-        expect(response.status).toBe(403)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             tokens: null,
@@ -59,14 +59,14 @@ describe("tokensAction", async () => {
                 },
             })
         )
-        expect(response.status).toBe(403)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             tokens: null,
         })
     })
 
-    test("should return 403 if provider token doesn not exist", async () => {
+    test("should return 401 if provider token doesn not exist", async () => {
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -74,11 +74,11 @@ describe("tokensAction", async () => {
             new Request("https://example.com/auth/providers/oauth-provider/tokens", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Secure-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
-        expect(response.status).toBe(403)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             tokens: null,

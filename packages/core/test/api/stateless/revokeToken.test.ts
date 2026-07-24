@@ -452,4 +452,162 @@ describe("revokeToken", () => {
             })
         )
     })
+
+    test("revokeToken with doubleSubmitToken", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const mockFetch = vi.fn()
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+        })
+        vi.stubGlobal("fetch", mockFetch)
+
+        const output = await api.revokeToken("oauth-provider", {
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+            doubleSubmitToken: csrfToken,
+        })
+
+        expect(output).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const setCookieHeader = output.headers.get("set-cookie")
+        expect(setCookieHeader).toContain("aura-auth.access_token.oauth-provider=")
+        expect(setCookieHeader).toContain("Expires=")
+
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/revoke_token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: expect.stringContaining("Basic"),
+            },
+            body: expect.any(URLSearchParams),
+            signal: expect.any(AbortSignal),
+        })
+    })
+
+    test("revokeToken with doubleSubmitToken and invalid value", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const mockFetch = vi.fn()
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+        })
+        vi.stubGlobal("fetch", mockFetch)
+
+        const output = await api.revokeToken("oauth-provider", {
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+            doubleSubmitToken: "invalid-token",
+        })
+
+        expect(output).toEqual({
+            success: false,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const setCookieHeader = output.headers.get("set-cookie")
+        expect(setCookieHeader).toBeNull()
+        expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    test("revokeToken enables double-submit cookie manually", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const mockFetch = vi.fn()
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+        })
+        vi.stubGlobal("fetch", mockFetch)
+
+        const output = await api.revokeToken("oauth-provider", {
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+            skipCSRFCheck: false,
+        })
+
+        expect(output).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const setCookieHeader = output.headers.get("set-cookie")
+        expect(setCookieHeader).toContain("aura-auth.access_token.oauth-provider=")
+        expect(setCookieHeader).toContain("Expires=")
+
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/revoke_token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: expect.stringContaining("Basic"),
+            },
+            body: expect.any(URLSearchParams),
+            signal: expect.any(AbortSignal),
+        })
+    })
+
+    test("revokeToken enables double-submit cookie manually and invalid token", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const mockFetch = vi.fn()
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+        })
+        vi.stubGlobal("fetch", mockFetch)
+
+        const output = await api.revokeToken("oauth-provider", {
+            headers: {
+                "X-CSRF-Token": "invalid-token",
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+            skipCSRFCheck: false,
+        })
+
+        expect(output).toEqual({
+            success: false,
+            error: {
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const setCookieHeader = output.headers.get("set-cookie")
+        expect(setCookieHeader).toBeNull()
+        expect(mockFetch).not.toHaveBeenCalled()
+    })
 })

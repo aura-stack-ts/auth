@@ -11,14 +11,13 @@ import type {
 
 export const getProviderTokens = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
-    { ctx, request: requestInit, headers: headersInit, skipCSRFCheck = false }: FunctionAPIContext<GetProviderTokensAPIOptions>
+    { ctx, request: requestInit, headers: headersInit }: FunctionAPIContext<GetProviderTokensAPIOptions>
 ): Promise<GetProviderTokensAPIReturn> => {
     const initialHeaders = new Headers(headersInit ?? requestInit?.headers)
     try {
         const { request, rateLimit } = await createValidation(ctx, initialHeaders)
             .verifyOAuthProvider(oauth)
             .verifySession()
-            .verifyCSRFToken(skipCSRFCheck)
             .buildRequest(requestInit, `/providers/${oauth}/tokens`)
             .verifyRateLimit("getProviderTokens")
             .execute()
