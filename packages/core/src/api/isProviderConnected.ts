@@ -1,4 +1,3 @@
-import { getCookie } from "@/cookie.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
@@ -9,36 +8,18 @@ export const isProviderConnected = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, headers: headersInit, request: requestInit }: FunctionAPIContext<ProviderConnectedAPIOptions>
 ): Promise<ProviderConnectedAPIReturn> => {
-    const { cookies, jwtManager } = ctx
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: { provider: oauth, operation: "check_connection" },
         })
 
-        const { headers, request } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+        const { headers } = await createValidation(ctx, headersInit ?? requestInit?.headers)
             .verifyOAuthProvider(oauth)
             .verifySession()
             .buildRequest(requestInit, `/providers/${oauth}`)
             .execute()
 
-        const cookieName = `${cookies.accessToken.name}.${oauth}`
-        let cookieValue: string
-        try {
-            cookieValue = getCookie(request, cookieName)
-        } catch {
-            ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
-                structuredData: { provider: oauth, hasCookie: false },
-            })
-            return {
-                success: true,
-                connected: false,
-                headers,
-                toResponse: () => Response.json({ success: true, connected: false }, { status: 200, headers }),
-            }
-        }
-
-        const decodedToken = await jwtManager.verifyToken(cookieValue)
-        const connected = !!decodedToken
+        const connected = await ctx.sessionStrategy.isProviderConnected(oauth, headers)
 
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
             structuredData: { provider: oauth, connected },

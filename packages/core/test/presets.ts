@@ -129,9 +129,10 @@ export const oauthAccountEntity: OAuthAccountEntity = {
     updatedAt: new Date(),
 }
 
-export const accountStatusEntity: Partial<AccountEntity> = {
+export const accountEntity: Partial<AccountEntity> = {
     id: "account-123",
     status: "unlinked",
+    provider: "oauth-provider",
 }
 
 const auth = createAuth({

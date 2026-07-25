@@ -264,8 +264,15 @@ export interface SessionStrategy<DefaultUser extends User = User> {
 
     /**
      * Revoke the access token for a specific OAuth provider.
+     * @unstable This API is experimental and may change in future releases.
      */
     revokeToken(oauth: string, headers: Headers, disconnect: boolean): Promise<Headers>
+
+    /**
+     * Check if the user is connected to a specific OAuth provider.
+     * @unstable This API is experimental and may change in future releases.
+     */
+    isProviderConnected(oauth: string, headers: Headers): Promise<boolean>
 }
 
 /** Inputs for constructing a session strategy implementation for a given identity schema. */

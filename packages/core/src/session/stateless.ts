@@ -360,6 +360,27 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         return toUnionHeaders(builder, headers)
     }
 
+    const isProviderConnected = async (oauthId: string, headers: Headers): Promise<boolean> => {
+        const cookieName = `${cookies().accessToken.name}.${oauthId}`
+        let cookieValue: string
+        try {
+            cookieValue = getCookie(headers, cookieName)
+        } catch {
+            logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
+                structuredData: { provider: oauthId, hasCookie: false },
+            })
+            return false
+        }
+
+        try {
+            const decodedToken = await jwt.verifyToken(cookieValue)
+            return !!decodedToken
+        } catch (error) {
+            logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
+            return false
+        }
+    }
+
     // JWT strategy: stateless tokens cannot be revoked server-side
     const revokeSession = async (_sessionId: string): Promise<void> => {}
 
@@ -369,5 +390,14 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         return cookieConfig.clear()
     }
 
-    return { getSession, createSession, getProviderTokens, refreshSession, revokeSession, revokeToken, destroySession }
+    return {
+        getSession,
+        createSession,
+        getProviderTokens,
+        refreshSession,
+        revokeSession,
+        revokeToken,
+        isProviderConnected,
+        destroySession,
+    }
 }
