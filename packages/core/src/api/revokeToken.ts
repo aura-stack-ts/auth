@@ -52,7 +52,6 @@ export const revokeToken = async (
             },
         }
     } catch (error) {
-        console.error("Error revoking token:", error)
         const { code, message, statusCode } = handleApiError(
             error,
             "UNKNOWN_REVOKE_TOKEN_ERROR",

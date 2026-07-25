@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
-import { authInstance, jose, oauthCustomService, sessionEntityWithUser } from "@test/presets.ts"
+import { authInstance, jose, oauthAccountEntity, oauthCustomService, sessionEntityWithUser } from "@test/presets.ts"
 
 describe("revokeToken (Stateful)", () => {
     test("throws error when provider is not configured", async () => {
@@ -189,18 +189,7 @@ describe("revokeToken (Stateful)", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
-        const getOAuthAccountMock = vi.fn().mockResolvedValue({
-            accountId: "account-123",
-            accessToken: "access-token",
-            refreshToken: "refresh-token",
-            idToken: "id-token",
-            tokenType: "Bearer",
-            scopes: "scope1 scope2",
-            issuer: "https://example.com",
-            accessTokenExpiresAt: new Date(Date.now() + 3600 * 1000),
-            refreshTokenExpiresAt: new Date(Date.now() + 7200 * 1000),
-            updatedAt: new Date(),
-        })
+        const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const updateAccountStatusMock = vi.fn().mockResolvedValue({
             accountId: "account-123",
             status: "unlinked",

@@ -336,15 +336,19 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         const cookie = getCookie(headers, cookieName)
         const provider = oauth[oauthId]
 
-        const decodedToken = await jwt.verifyToken(cookie)
-        const tokens = await identity.schemaRegistry.parseOAuthTokens(decodedToken)
+        if (!provider) {
+            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
+        }
 
         if (!disconnect) {
+            const decodedToken = await jwt.verifyToken(cookie)
+            const tokens = await identity.schemaRegistry.parseOAuthTokens(decodedToken)
+
             logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
                 structuredData: { provider: oauthId, hasAccessToken: !!tokens.accessToken },
             })
 
-            await revokeProviderToken(provider!, tokens.accessToken)
+            await revokeProviderToken(provider, tokens.accessToken)
 
             logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
                 structuredData: { provider: oauthId },
