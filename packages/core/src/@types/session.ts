@@ -226,7 +226,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Read and validate the session from an incoming request.
      * Returns null if absent, invalid, or expired. Never throws on auth failure.
      */
-    getSession(request: Headers): Promise<GetStatelessSessionReturn<DefaultUser>>
+    getSession(headers: Headers): Promise<GetStatelessSessionReturn<DefaultUser>>
 
     /**
      * Create a session after successful authentication.
@@ -260,7 +260,12 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Destroy the session attached to this request (logout).
      * Returns a response that clears cookies.
      */
-    destroySession(request: Headers, skipCSRFCheck?: boolean): Promise<Headers>
+    destroySession(headers: Headers, skipCSRFCheck?: boolean): Promise<Headers>
+
+    /**
+     * Revoke the access token for a specific OAuth provider.
+     */
+    revokeToken(oauth: string, headers: Headers, disconnect: boolean): Promise<Headers>
 }
 
 /** Inputs for constructing a session strategy implementation for a given identity schema. */

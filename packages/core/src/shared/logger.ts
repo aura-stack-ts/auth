@@ -813,6 +813,12 @@ export const logMessages = {
         msgId: "STATELESS_GET_PROVIDER_TOKENS_ERROR",
         message: "Error occurred during stateless getProviderTokens",
     },
+    OAUTH_UNLINKED_ACCOUNT_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "OAUTH_UNLINKED_ACCOUNT_ERROR",
+        message: "Error occurred while unlinking OAuth account from user",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

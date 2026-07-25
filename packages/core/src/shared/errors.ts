@@ -129,6 +129,8 @@ export const AuraErrorCode = {
      * Database Errors
      */
     DATABASE_TOKEN_HASH_NOT_FOUND: "DATABASE_TOKEN_HASH_NOT_FOUND",
+
+    OAUTH_UNLINKED_ACCOUNT_ERROR: "OAUTH_UNLINKED_ACCOUNT_ERROR",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -898,6 +900,14 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "The session verification query completed successfully, but the database returned a nullish record matching the provided session token hash identifier reference.",
         userMessage: "The session was not found in the database. Please sign in again.",
+    },
+    OAUTH_UNLINKED_ACCOUNT_ERROR: {
+        type: "AUTH_FLOW",
+        statusCode: 400,
+        name: "OAuthError",
+        message:
+            "No linked connection exists between the selected OAuth provider and the active user session. The revocation or unlinking operation was aborted.",
+        userMessage: "The specified identity provider is not connected to your account.",
     },
 }
 

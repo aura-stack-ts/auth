@@ -1,56 +1,12 @@
-import { AuraAuthError } from "@/shared/errors.ts"
-import { HeadersBuilder } from "@aura-stack/router"
-import { fetchAsync } from "@/shared/fetch-async.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { getCookie, getExpiredCookie } from "@/cookie.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
-import { createBasicAuthHeader, toUnionHeaders } from "@/shared/utils.ts"
 import type {
     FunctionAPIContext,
     RevokeTokenAPIOptions,
     RevokeTokenAPIReturn,
     LiteralUnion,
     BuiltInOAuthProvider,
-    RuntimeOAuthProvider,
 } from "@/@types/index.ts"
-
-const revokeProviderToken = async (provider: RuntimeOAuthProvider, accessToken: string) => {
-    if (!provider.revokeToken || (typeof provider.revokeToken === "object" && !("url" in provider.revokeToken))) {
-        throw new AuraAuthError({ code: "OAUTH_INVALID_REVOKE_TOKEN_CONFIG" })
-    }
-    if (!accessToken) {
-        throw new AuraAuthError({ code: "INVALID_ACCESS_TOKEN" })
-    }
-    const { tokenHint: hintParam, ...extraParams } =
-        typeof provider.revokeToken === "object" && provider.revokeToken.params
-            ? provider.revokeToken.params
-            : ({} as Record<string, string>)
-    const tokenHint = hintParam ?? "access_token"
-
-    const url = typeof provider.revokeToken === "string" ? provider.revokeToken : provider.revokeToken.url
-    const basicAuth = createBasicAuthHeader(provider.clientId!, provider.clientSecret!)
-
-    const response = await fetchAsync(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: basicAuth,
-            ...(typeof provider.revokeToken === "object" && provider.revokeToken.headers ? provider.revokeToken.headers : {}),
-        },
-        body: new URLSearchParams({
-            token: accessToken,
-            token_type_hint: tokenHint,
-            ...extraParams,
-        }),
-    })
-    if (!response.ok) {
-        throw new AuraAuthError({ code: "OAUTH_INVALID_REVOKE_TOKEN_RESPONSE" })
-    }
-    if (response.status !== 200 && response.status !== 204) {
-        throw new AuraAuthError({ code: "OAUTH_INVALID_REVOKE_TOKEN_PROCESS" })
-    }
-    return true
-}
 
 export const revokeToken = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
@@ -63,7 +19,6 @@ export const revokeToken = async (
         disconnect = false,
     }: FunctionAPIContext<RevokeTokenAPIOptions> & { disconnect?: boolean }
 ): Promise<RevokeTokenAPIReturn> => {
-    const { cookies } = ctx
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
@@ -73,7 +28,7 @@ export const revokeToken = async (
             },
         })
 
-        const { provider, headers, request, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+        const { headers, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
             .verifyOAuthProvider(oauth)
             .verifySession()
             .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
@@ -88,33 +43,12 @@ export const revokeToken = async (
             return rateLimit as RevokeTokenAPIReturn
         }
 
-        const cookieName = `${cookies.accessToken.name}.${oauth}`
-        const cookie = getCookie(request, cookieName)
-
-        const decodedToken = await ctx.jwtManager.verifyToken(cookie)
-        const tokens = await ctx.identity.schemaRegistry.parseOAuthTokens(decodedToken)
-
-        if (!disconnect) {
-            ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
-                structuredData: { provider: oauth, hasAccessToken: !!tokens.accessToken },
-            })
-
-            await revokeProviderToken(provider!, tokens.accessToken)
-
-            ctx.logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
-                structuredData: { provider: oauth },
-            })
-        }
-
-        const builder = new HeadersBuilder(secureApiHeaders)
-            .setCookie(cookieName, "", getExpiredCookie(cookies.accessToken.attributes))
-            .toHeaders()
-        const newHeaders = toUnionHeaders(builder, headers)
+        const revokeHeaders = await ctx.sessionStrategy.revokeToken(oauth, headers, disconnect)
         return {
             success: true,
-            headers: newHeaders,
+            headers: revokeHeaders,
             toResponse: () => {
-                return Response.json({ success: true }, { status: 200, headers: newHeaders })
+                return Response.json({ success: true }, { status: 200, headers: revokeHeaders })
             },
         }
     } catch (error) {
