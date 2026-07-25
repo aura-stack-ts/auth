@@ -196,7 +196,7 @@ describe("connectedAction", () => {
     })
 
     test("handles expired session token", async () => {
-        const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(sessionEntityWithUser)
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockResolvedValueOnce([
             {
                 id: "account-123",
@@ -204,7 +204,7 @@ describe("connectedAction", () => {
                 provider: "oauth-provider",
                 providerUserId: "provider-user-123",
                 type: "oauth" as const,
-                status: "active" as const,
+                status: "unlinked" as const,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },

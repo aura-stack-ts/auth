@@ -989,6 +989,9 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
             const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
             if (sessionByToken.status !== "active" || isExpired) {
+                if (isExpired) {
+                    await config.adapter.revokeSession(sessionByToken.id, "user_logout")
+                }
                 logger?.log("AUTH_SESSION_INVALID", {
                     structuredData: {
                         reason: "session_expired_or_inactive",

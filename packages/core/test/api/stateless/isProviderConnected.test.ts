@@ -85,12 +85,8 @@ describe("isProviderConnected", () => {
         })
 
         expect(output).toEqual({
-            success: false,
+            success: true,
             connected: false,
-            error: {
-                code: "OAUTH_PROVIDER_CONNECTED_ERROR",
-                message: "",
-            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -115,12 +111,8 @@ describe("isProviderConnected", () => {
         })
 
         expect(output).toEqual({
-            success: false,
+            success: true,
             connected: false,
-            error: {
-                code: "OAUTH_PROVIDER_CONNECTED_ERROR",
-                message: "",
-            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })

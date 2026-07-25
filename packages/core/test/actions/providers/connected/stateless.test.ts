@@ -84,9 +84,9 @@ describe("connectedAction", () => {
             })
         )
 
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(200)
         expect(await response.json()).toEqual({
-            success: false,
+            success: true,
             connected: false,
         })
     })
@@ -111,9 +111,9 @@ describe("connectedAction", () => {
             })
         )
 
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(200)
         expect(await response.json()).toEqual({
-            success: false,
+            success: true,
             connected: false,
         })
     })

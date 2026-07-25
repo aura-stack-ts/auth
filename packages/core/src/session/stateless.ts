@@ -372,9 +372,13 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             return false
         }
 
-        const decodedToken = await jwt.verifyToken(cookieValue)
-        const connected = !!decodedToken
-        return connected
+        try {
+            const decodedToken = await jwt.verifyToken(cookieValue)
+            return !!decodedToken
+        } catch (error) {
+            logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
+            return false
+        }
     }
 
     // JWT strategy: stateless tokens cannot be revoked server-side
