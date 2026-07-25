@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
 import {
-    accountStatusEntity,
+    accountEntity,
     authInstance,
     jose,
     oauthAccountEntity,
@@ -207,7 +207,7 @@ describe("Revoke Action", () => {
     test("successfully revokes token", async () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountStatusEntity)
+        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountEntity)
 
         const {
             handlers: { POST },
@@ -261,7 +261,7 @@ describe("Revoke Action", () => {
     test("successfully revokes token with 204 status", async () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountStatusEntity)
+        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountEntity)
 
         const {
             handlers: { POST },
@@ -300,7 +300,7 @@ describe("Revoke Action", () => {
     test("handles network error during revocation", async () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountStatusEntity)
+        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountEntity)
 
         const {
             handlers: { POST },
@@ -336,7 +336,7 @@ describe("Revoke Action", () => {
     test("handles provider returning error response", async () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountStatusEntity)
+        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountEntity)
 
         const {
             handlers: { POST },
@@ -374,7 +374,7 @@ describe("Revoke Action", () => {
     test("handles provider returning unexpected status code", async () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountStatusEntity)
+        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountEntity)
         const {
             handlers: { POST },
         } = authInstance({
@@ -410,7 +410,7 @@ describe("Revoke Action", () => {
     test("handles malformed provider token cookie", async () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountStatusEntity)
+        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountEntity)
         const {
             handlers: { POST },
         } = authInstance({
@@ -444,7 +444,7 @@ describe("Revoke Action", () => {
             expiresAt: new Date(Date.now() - 3600 * 1000),
         })
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountStatusEntity)
+        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountEntity)
 
         const {
             handlers: { POST },
@@ -476,7 +476,7 @@ describe("Revoke Action", () => {
     test("handles provider with custom revoke token URL", async () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountStatusEntity)
+        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountEntity)
 
         const customRevokeService = {
             ...oauthCustomService,
@@ -524,7 +524,7 @@ describe("Revoke Action", () => {
     test("handles provider with custom revoke token config object", async () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountStatusEntity)
+        const updateAccountStatusMock = vi.fn().mockResolvedValue(accountEntity)
 
         const customRevokeService = {
             ...oauthCustomService,
