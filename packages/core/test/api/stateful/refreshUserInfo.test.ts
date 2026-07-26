@@ -529,6 +529,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
+            headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 email: "john@example.com",
                 name: "John Doe",
@@ -547,8 +548,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             success: false,
             session: null,
             error: {
-                code: "UNKNOWN_OAUTH_USER_INFO_ERROR",
-                message: "Failed to communicate clean state down to the user configuration data provider.",
+                code: "INVALID_USER_INFO",
+                message: "The provider profile identity map did not supply an immutable index key (id/sub/uid).",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

@@ -400,7 +400,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
             identity,
             sessionToken,
         })
-        const mergedHeaders = toUnionHeaders(newHeaders, headers)
+        const mergedHeaders = toUnionHeaders(newHeaders, secureApiHeaders)
         return { session, headers: mergedHeaders }
     }
 

@@ -40,7 +40,7 @@ export default defineConfig({
                 test: {
                     name: "core",
                     include: ["test/**/*.test.ts"],
-                    exclude: ["test/rate-limiter.test.ts", "test/actions/providers/user/refresh/stateless.test.ts"],
+                    exclude: ["test/rate-limiter.test.ts"],
                     setupFiles: ["./test/setup/vitest.setup.ts", "./test/setup/actions.setup.ts"],
                 },
                 resolve: {

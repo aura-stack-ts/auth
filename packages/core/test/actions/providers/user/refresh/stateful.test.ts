@@ -1,37 +1,98 @@
 import { describe, test, expect, vi } from "vitest"
-import { jose, oauthCustomService, oauthTokens, POST, sessionPayload } from "@test/presets.ts"
+import {
+    authInstance,
+    jose,
+    oauthAccountEntity,
+    oauthCustomService,
+    oauthTokens,
+    sessionEntityWithUser,
+    userEntity,
+} from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-import { createAuth } from "@/createAuth.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { createSchemaRegistry } from "@/validator/registry.ts"
 
 describe("refreshUserInfo action", () => {
     test("unsupported oauth provider", async () => {
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn()
+        const getOAuthAccountMock = vi.fn()
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn()
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
         const response = await POST(new Request("https://example.com/auth/unsupported/user/refresh", { method: "POST" }))
         expect(await response.json()).toEqual({
             code: "NOT_FOUND",
             type: "ROUTER_FLOW",
             message: "The requested route address cannot be found or is unavailable on this application endpoint server context.",
         })
-    })
 
-    test("invalid operation when the session token is missing", async () => {
-        const response = await POST(
-            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", { method: "POST" })
-        )
-        expect(await response.json()).toEqual({
-            success: false,
-            session: null,
-        })
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(spyParseAsPartial).not.toHaveBeenCalled()
+
+        expect(getSessionByTokenMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
     })
 
     test("throws error when CSRF token is missing", async () => {
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn()
+        const getOAuthAccountMock = vi.fn()
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn()
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
 
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                    Cookie: `aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -39,17 +100,54 @@ describe("refreshUserInfo action", () => {
             success: false,
             session: null,
         })
+
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(spyParseAsPartial).not.toHaveBeenCalled()
+
+        expect(getSessionByTokenMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
     })
 
     test("throws error when CSRF token is invalid", async () => {
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn()
+        const getOAuthAccountMock = vi.fn()
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn()
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
         const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-token-hash`,
                     "X-CSRF-Token": "invalid-token",
                 },
             })
@@ -58,18 +156,55 @@ describe("refreshUserInfo action", () => {
             success: false,
             session: null,
         })
+
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(spyParseAsPartial).not.toHaveBeenCalled()
+
+        expect(getSessionByTokenMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
     })
 
     test("throws error when provider token does not exist", async () => {
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn()
+        const getOAuthAccountMock = vi.fn()
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn()
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
         const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -77,21 +212,58 @@ describe("refreshUserInfo action", () => {
             success: false,
             session: null,
         })
+
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(spyParseAsPartial).not.toHaveBeenCalled()
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
     })
 
     test("successfully refreshes user info", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
 
-        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
-                ...sessionPayload,
+                id: "1234567890",
                 email: "john.updated@example.com",
+                name: "John Doe Updated",
+                image: "https://example.com/image-updated.jpg",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -101,7 +273,7 @@ describe("refreshUserInfo action", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -110,10 +282,12 @@ describe("refreshUserInfo action", () => {
             success: true,
             session: {
                 user: {
-                    ...sessionPayload,
+                    sub: "user-123",
                     email: "john.updated@example.com",
+                    name: "John Doe Updated",
+                    image: "https://example.com/image-updated.jpg",
                 },
-                expires: expect.any(Number),
+                expires: expect.any(String),
             },
         })
         expect(response.status).toBe(200)
@@ -126,38 +300,83 @@ describe("refreshUserInfo action", () => {
             },
             signal: expect.any(AbortSignal),
         })
-    })
 
-    test("handles getUserInfo network error gracefully", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, "valid-token-hash")
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, "valid-token-hash")
+        expect(revokeSessionMock).not.toHaveBeenCalled()
 
-        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
-
-        const mockFetch = vi.fn().mockRejectedValueOnce(new Error("Network connection lost"))
-        vi.stubGlobal("fetch", mockFetch)
-
-        const response = await POST(
-            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
-                },
-            })
-        )
-
-        expect(await response.json()).toEqual({
-            success: false,
-            session: null,
+        const { attributes, ...spreadUser } = userEntity
+        expect(spyParse).toHaveBeenNthCalledWith(1, {
+            ...spreadUser,
+            ...attributes,
+            sub: "user-123",
         })
+        expect(spyParseAsPartial).toHaveBeenCalledWith({
+            sub: "1234567890",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(spyParse).toHaveBeenNthCalledWith(2, {
+            sub: "user-123",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+
+        expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
+        })
+        expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
 
     test("handles getUserInfo invalid response from provider", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
 
-        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn()
+        const getOAuthAccountMock = vi.fn()
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn()
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: false,
@@ -170,7 +389,7 @@ describe("refreshUserInfo action", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -179,13 +398,48 @@ describe("refreshUserInfo action", () => {
             success: false,
             session: null,
         })
+
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(spyParseAsPartial).not.toHaveBeenCalled()
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
     })
 
     test("handles getUserInfo OAuth error response", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
 
-        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn()
+        const getOAuthAccountMock = vi.fn()
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn()
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -202,7 +456,7 @@ describe("refreshUserInfo action", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -211,16 +465,52 @@ describe("refreshUserInfo action", () => {
             success: false,
             session: null,
         })
+
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(spyParseAsPartial).not.toHaveBeenCalled()
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
     })
 
     test("handles getUserInfo missing required user fields", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
 
-        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn()
+        const getOAuthAccountMock = vi.fn()
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn()
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
+            headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 email: "john@example.com",
                 name: "John Doe",
@@ -233,7 +523,7 @@ describe("refreshUserInfo action", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -242,26 +532,63 @@ describe("refreshUserInfo action", () => {
             success: false,
             session: null,
         })
+
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(spyParseAsPartial).not.toHaveBeenCalled()
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
     })
 
     test("handles getProviderTokens failure", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
 
-        const encodedTokens = await jose.encodeJWT({
-            ...oauthTokens,
-            expiresAt: Math.floor(Date.now() / 1000) - 3600,
-        } as unknown as Record<string, unknown>)
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getOAuthAccountMock = vi.fn().mockResolvedValue({
+            ...oauthAccountEntity,
+            accessTokenExpiresAt: new Date(Date.now() - 3600 * 1000),
+        })
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
 
         const { refreshToken: _, ...spread } = oauthCustomService
-        const { handlers } = createAuth({ oauth: [spread] })
 
-        const response = await handlers.POST(
+        const {
+            handlers: { POST },
+        } = authInstance(
+            {
+                getSessionByToken: getSessionByTokenMock,
+                getOAuthAccount: getOAuthAccountMock,
+                revokeSession: revokeSessionMock,
+                updateOAuthTokens: updateOAuthTokensMock,
+                updateUser: updateUserMock,
+                updateSession: updateSessionMock,
+                touchSession: touchSessionMock,
+            },
+            { oauth: [spread] }
+        )
+
+        const csrfToken = await createCSRF(jose)
+
+        const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -270,17 +597,55 @@ describe("refreshUserInfo action", () => {
             success: false,
             session: null,
         })
+
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(spyParseAsPartial).not.toHaveBeenCalled()
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
     })
 
     test("handles expired access token with successful refresh", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
 
-        const encodedTokens = await jose.encodeJWT({
-            ...oauthTokens,
-            expiresAt: Math.floor(Date.now() / 1000) - 3600,
-        } as unknown as Record<string, unknown>)
+        const expiredOAuthAccount = {
+            ...oauthAccountEntity,
+            accessTokenExpiresAt: new Date(Date.now() - 3600 * 1000),
+        }
+
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getOAuthAccountMock = vi.fn().mockResolvedValue(expiredOAuthAccount)
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -293,8 +658,9 @@ describe("refreshUserInfo action", () => {
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 id: "1234567890",
-                ...sessionPayload,
                 email: "john.updated@example.com",
+                name: "John Doe Updated",
+                image: "https://example.com/image-updated.jpg",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -304,7 +670,7 @@ describe("refreshUserInfo action", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -313,26 +679,107 @@ describe("refreshUserInfo action", () => {
             success: true,
             session: {
                 user: {
-                    ...sessionPayload,
+                    sub: "user-123",
+                    name: "John Doe Updated",
                     email: "john.updated@example.com",
+                    image: "https://example.com/image-updated.jpg",
                 },
-                expires: expect.any(Number),
+                expires: expect.any(String),
             },
         })
         expect(mockFetch).toHaveBeenCalledTimes(2)
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, "valid-token-hash")
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(updateOAuthTokensMock).toHaveBeenCalledWith("oauth-provider", {
+            accountId: "account-123",
+            accessToken: "access-token",
+            refreshToken: "refresh-token",
+            idToken: "id-token",
+            tokenType: "Bearer",
+            scopes: "scope1 scope2",
+            accessTokenExpiresAt: expect.any(Date),
+            refreshTokenExpiresAt: expect.any(Date),
+        })
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, "valid-token-hash")
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+
+        const { attributes, ...spreadUser } = userEntity
+        expect(spyParse).toHaveBeenNthCalledWith(1, {
+            ...spreadUser,
+            ...attributes,
+            sub: "user-123",
+        })
+        expect(spyParseAsPartial).toHaveBeenCalledWith({
+            sub: "1234567890",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(spyParse).toHaveBeenNthCalledWith(2, {
+            sub: "user-123",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+
+        expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
+        })
+        expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
 
     test("handles invalid user info response with missing content type", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
 
-        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
-            headers: {
-                get: (name: string) => (name === "content-type" ? "text/html" : null),
-            },
+            headers: new Headers({
+                "Content-Type": "text/plain",
+            }),
             json: async () => ({
                 id: "1234567890",
                 email: "john@example.com",
@@ -345,7 +792,7 @@ describe("refreshUserInfo action", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -354,103 +801,58 @@ describe("refreshUserInfo action", () => {
             success: false,
             session: null,
         })
-    })
 
-    test("handles session token verification failure", async () => {
-        const csrfToken = await createCSRF(jose)
-        const invalidSessionToken = "invalid.session.token"
+        expect(spyParse).not.toHaveBeenCalled()
+        expect(spyParseAsPartial).not.toHaveBeenCalled()
 
-        const response = await POST(
-            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${invalidSessionToken}`,
-                },
-            })
-        )
-
-        expect(await response.json()).toEqual({
-            success: false,
-            session: null,
-        })
-    })
-
-    test("updates session cookie with new session token", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
-
-        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
-
-        const mockFetch = vi.fn()
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            headers: new Headers({ "Content-Type": "application/json" }),
-            json: async () => ({
-                ...sessionPayload,
-                id: "1234567890",
-                email: "john.updated@example.com",
-            }),
-        })
-        vi.stubGlobal("fetch", mockFetch)
-
-        const response = await POST(
-            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
-                },
-            })
-        )
-
-        expect(await response.json()).toEqual({
-            success: true,
-            session: {
-                user: {
-                    ...sessionPayload,
-                    email: "john.updated@example.com",
-                },
-                expires: expect.any(Number),
-            },
-        })
-        expect(response.headers.get("set-cookie")).toContain("aura-auth.session_token=")
-    })
-
-    test("handles malformed provider tokens cookie", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
-
-        const response = await POST(
-            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=malformed-token`,
-                },
-            })
-        )
-
-        expect(await response.json()).toEqual({
-            success: false,
-            session: null,
-        })
+        expect(getSessionByTokenMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
     })
 
     test("successfully refreshes with custom profile function", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
 
-        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const revokeSessionMock = vi.fn()
+        const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
-                ...sessionPayload,
                 id: "1234567890",
                 email: "john.updated@example.com",
+                name: "John Doe Updated",
+                image: "https://example.com/image-updated.jpg",
                 nickname: "johnny",
                 email_verified: true,
             }),
@@ -462,7 +864,7 @@ describe("refreshUserInfo action", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-profile=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -471,50 +873,61 @@ describe("refreshUserInfo action", () => {
             success: true,
             session: {
                 user: {
-                    ...sessionPayload,
+                    sub: "user-123",
+                    name: "John Doe Updated",
                     email: "john.updated@example.com",
+                    image: "https://example.com/image-updated.jpg",
                 },
-                expires: expect.any(Number),
+                expires: expect.any(String),
             },
         })
-    })
 
-    test("toResponse returns correct response on success", async () => {
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = await jose.encodeJWT(sessionPayload)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, "valid-token-hash")
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-profile")
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, "valid-token-hash")
+        expect(revokeSessionMock).not.toHaveBeenCalled()
 
-        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
-
-        const mockFetch = vi.fn()
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            headers: new Headers({ "Content-Type": "application/json" }),
-            json: async () => ({
-                ...sessionPayload,
-                email: "john.updated@example.com",
-            }),
+        const { attributes, ...spreadUser } = userEntity
+        expect(spyParse).toHaveBeenNthCalledWith(1, {
+            ...spreadUser,
+            ...attributes,
+            sub: "user-123",
         })
-        vi.stubGlobal("fetch", mockFetch)
-
-        const response = await POST(
-            new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
-                },
-            })
-        )
-
-        expect(await response.json()).toEqual({
-            success: true,
-            session: {
-                user: {
-                    ...sessionPayload,
-                    email: "john.updated@example.com",
-                },
-                expires: expect.any(Number),
-            },
+        expect(spyParseAsPartial).toHaveBeenCalledWith({
+            sub: "1234567890",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+            nickname: "johnny",
+            email_verified: true,
         })
+        expect(spyParse).toHaveBeenNthCalledWith(2, {
+            sub: "user-123",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+
+        expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
+            id: expect.any(String),
+            userId: "user-123",
+            deviceId: null,
+            authenticatedWith: "credentials",
+            status: "active",
+            mfaState: "none",
+            tokenHash: expect.any(String),
+            expiresAt: expect.any(Date),
+            metadata: null,
+        })
+        expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
 })
