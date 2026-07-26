@@ -1,9 +1,7 @@
-import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { getProviderTokens } from "./getProviderTokens.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
-import { toUnionHeaders, getStandardSession } from "@/shared/utils.ts"
 import type {
     FunctionAPIContext,
     RefreshUserInfoAPIOptions,
@@ -24,16 +22,16 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
         doubleSubmitToken = undefined,
     }: FunctionAPIContext<RefreshUserInfoAPIOptions>
 ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
-    const { cookies } = ctx
     try {
+        const doubleSubmitValidation = skipCSRFCheck && !!doubleSubmitToken
         ctx.logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
-            structuredData: { provider: oauth, skipCSRFCheck: skipCSRFCheck || Boolean(doubleSubmitToken) },
+            structuredData: { provider: oauth, skipCSRFCheck: doubleSubmitValidation },
         })
 
         const { provider, headers, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
             .verifyOAuthProvider(oauth)
             .verifySession()
-            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
+            .verifyCSRFToken(doubleSubmitValidation)
             .buildRequest(requestInit, `/providers/${oauth}/user/refresh`)
             .verifyRateLimit("refreshUserInfo")
             .execute()
@@ -78,21 +76,14 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             structuredData: { provider: oauth, userId: userInfo.sub },
         })
 
-        const sessionToken = await ctx.sessionStrategy.createSession(userInfo)
-        const newHeaders = new HeadersBuilder(headers)
-            .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
-            .toHeaders()
-
-        const mergedHeaders = toUnionHeaders(newHeaders, headers)
-
-        const session = await getStandardSession({
-            sessionToken,
-            jwt: ctx.jwtManager,
-            identity: ctx.identity,
-        })
+        const { session, headers: newHeaders } = await ctx.sessionStrategy.refreshUserInfo(
+            userInfo,
+            headers,
+            doubleSubmitValidation
+        )
         return {
             success: !!session,
-            headers: mergedHeaders,
+            headers: newHeaders,
             session: session,
             toResponse: () => {
                 return Response.json(
@@ -100,11 +91,12 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
                         success: !!session,
                         session,
                     },
-                    { headers: mergedHeaders, status: 200 }
+                    { headers: newHeaders, status: 200 }
                 )
             },
         } as RefreshUserInfoAPIReturn<DefaultUser>
     } catch (error) {
+        console.warn("Error refreshing user info:", error)
         const { code, message, statusCode } = handleApiError(
             error,
             "UNKNOWN_REFRESH_USER_INFO_ERROR",

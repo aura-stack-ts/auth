@@ -236,7 +236,7 @@ export const getStandardSession = async ({
     if (!userClaims.sub) return null
     return {
         user: userClaims,
-        expires: exp,
+        expires: new Date(exp * 1000).toISOString(),
     }
 }
 

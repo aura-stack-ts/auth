@@ -5,7 +5,7 @@ import { createAuth } from "@/createAuth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"
 
-describe("getProviderTokens API (Stateful)", () => {
+describe("getAccessToken API (Stateful)", () => {
     test("throws error when provider is missing", async () => {
         const getSessionByTokenMock = vi.fn()
         const getOAuthAccountMock = vi.fn()
@@ -17,10 +17,10 @@ describe("getProviderTokens API (Stateful)", () => {
             updateOAuthTokens: updateOAuthTokensMock,
         })
 
-        const output = await api.getProviderTokens("unsuppported", { headers: new Headers() })
+        const output = await api.getAccessToken("unsuppported", { headers: new Headers() })
         expect(output).toEqual({
             success: false,
-            tokens: null,
+            accessToken: null,
             error: {
                 code: "UNSUPPORTED_OAUTH_CONFIGURATION",
                 message: "The targeted OAuth provider has not been configured in the initialization parameters.",
@@ -44,14 +44,14 @@ describe("getProviderTokens API (Stateful)", () => {
             updateOAuthTokens: updateOAuthTokensMock,
         })
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: new Headers({
                 Cookie: "aura-auth.session_token=invalid-token",
             }),
         })
         expect(output).toEqual({
             success: false,
-            tokens: null,
+            accessToken: null,
             error: {
                 code: "SESSION_NOT_FOUND",
                 message: "The session token is not found. There is no active session.",
@@ -80,7 +80,7 @@ describe("getProviderTokens API (Stateful)", () => {
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -88,7 +88,7 @@ describe("getProviderTokens API (Stateful)", () => {
         })
         expect(output).toEqual({
             success: false,
-            tokens: null,
+            accessToken: null,
             error: {
                 code: "SESSION_NOT_FOUND",
                 message: "The session token is not found. There is no active session.",
@@ -117,7 +117,7 @@ describe("getProviderTokens API (Stateful)", () => {
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -125,7 +125,7 @@ describe("getProviderTokens API (Stateful)", () => {
         })
         expect(output).toEqual({
             success: false,
-            tokens: null,
+            accessToken: null,
             error: {
                 code: "COOKIE_INVALID_VALUE",
                 message: "Expected configuration cookie not found or contains an empty value.",
@@ -154,7 +154,7 @@ describe("getProviderTokens API (Stateful)", () => {
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -162,13 +162,7 @@ describe("getProviderTokens API (Stateful)", () => {
         })
         expect(output).toEqual({
             success: true,
-            tokens: expect.objectContaining({
-                accessToken: "access-token",
-                refreshToken: "refresh-token",
-                idToken: "id-token",
-                tokenType: "Bearer",
-                scopes: ["scope1", "scope2"],
-            }),
+            accessToken: "access-token",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -204,7 +198,7 @@ describe("getProviderTokens API (Stateful)", () => {
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -212,7 +206,7 @@ describe("getProviderTokens API (Stateful)", () => {
         })
         expect(output).toEqual({
             success: false,
-            tokens: null,
+            accessToken: null,
             error: {
                 code: "OAUTH_INVALID_REFRESH_TOKEN_CONFIG",
                 message:
@@ -262,7 +256,7 @@ describe("getProviderTokens API (Stateful)", () => {
 
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -270,13 +264,7 @@ describe("getProviderTokens API (Stateful)", () => {
         })
         expect(output).toEqual({
             success: true,
-            tokens: expect.objectContaining({
-                accessToken: "new-access-token",
-                refreshToken: "new-refresh-token",
-                idToken: "new-id-token",
-                expiresAt: expect.any(Number),
-                issuedAt: expect.any(Number),
-            }),
+            accessToken: "new-access-token",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -357,7 +345,7 @@ describe("getProviderTokens API (Stateful)", () => {
 
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -365,13 +353,7 @@ describe("getProviderTokens API (Stateful)", () => {
         })
         expect(output).toEqual({
             success: true,
-            tokens: expect.objectContaining({
-                accessToken: "new-access-token",
-                refreshToken: "new-refresh-token",
-                idToken: "new-id-token",
-                expiresAt: expect.any(Number),
-                issuedAt: expect.any(Number),
-            }),
+            accessToken: "new-access-token",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -427,7 +409,7 @@ describe("getProviderTokens API (Stateful)", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -436,7 +418,7 @@ describe("getProviderTokens API (Stateful)", () => {
 
         expect(output).toEqual({
             success: false,
-            tokens: null,
+            accessToken: null,
             error: {
                 code: "OAUTH_INVALID_REFRESH_TOKEN_RESPONSE",
                 message: "Your secure session renewal failed. Please sign in again to continue.",
@@ -470,7 +452,7 @@ describe("getProviderTokens API (Stateful)", () => {
         const mockFetch = vi.fn().mockRejectedValueOnce(new Error("Network connection lost"))
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -479,7 +461,7 @@ describe("getProviderTokens API (Stateful)", () => {
 
         expect(output).toEqual({
             success: false,
-            tokens: null,
+            accessToken: null,
             error: {
                 code: "PROVIDER_TOKENS_ERROR",
                 message: "Failed to get provider tokens",
@@ -513,7 +495,7 @@ describe("getProviderTokens API (Stateful)", () => {
         const mockFetch = vi.fn()
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -522,11 +504,7 @@ describe("getProviderTokens API (Stateful)", () => {
 
         expect(output).toEqual({
             success: true,
-            tokens: expect.objectContaining({
-                accessToken: "access-token",
-                refreshToken: "refresh-token",
-                expiresAt: currentTime + 600,
-            }),
+            accessToken: "access-token",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -570,7 +548,7 @@ describe("getProviderTokens API (Stateful)", () => {
         })
         vi.stubGlobal("fetch", mockFetch)
 
-        const output = await api.getProviderTokens("oauth-provider", {
+        const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-token-hash`,
@@ -579,11 +557,7 @@ describe("getProviderTokens API (Stateful)", () => {
 
         expect(output).toEqual({
             success: true,
-            tokens: expect.objectContaining({
-                accessToken: "brand-new-refreshed-token",
-                expiresAt: expect.any(Number),
-                issuedAt: expect.any(Number),
-            }),
+            accessToken: "brand-new-refreshed-token",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })

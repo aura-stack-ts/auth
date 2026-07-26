@@ -6,7 +6,14 @@ import { handleApiError } from "@/shared/utils/api.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
-import { verifyCSRFToken, getErrorName, verifySessionToken, shouldRefresh, toUnionHeaders } from "@/shared/utils.ts"
+import {
+    verifyCSRFToken,
+    getErrorName,
+    verifySessionToken,
+    shouldRefresh,
+    toUnionHeaders,
+    getStandardSession,
+} from "@/shared/utils.ts"
 import type {
     Session,
     SessionStrategy,
@@ -381,6 +388,22 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         }
     }
 
+    const refreshUserInfo = async (userInfo: TypedJWTPayload<DefaultUser>, headers: Headers) => {
+        const sessionToken = await createSession(userInfo)
+
+        const newHeaders = new HeadersBuilder(headers)
+            .setCookie(cookies().sessionToken.name, sessionToken, cookies().sessionToken.attributes)
+            .toHeaders()
+
+        const session = await getStandardSession({
+            jwt,
+            identity,
+            sessionToken,
+        })
+        const mergedHeaders = toUnionHeaders(newHeaders, secureApiHeaders)
+        return { session, headers: mergedHeaders }
+    }
+
     // JWT strategy: stateless tokens cannot be revoked server-side
     const revokeSession = async (_sessionId: string): Promise<void> => {}
 
@@ -398,6 +421,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         revokeSession,
         revokeToken,
         isProviderConnected,
+        refreshUserInfo,
         destroySession,
     }
 }

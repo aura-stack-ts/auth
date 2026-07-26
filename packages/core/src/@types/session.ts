@@ -273,6 +273,19 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * @unstable This API is experimental and may change in future releases.
      */
     isProviderConnected(oauth: string, headers: Headers): Promise<boolean>
+
+    /**
+     * Refresh the user info in the session.
+     * @unstable This API is experimental and may change in future releases.
+     */
+    refreshUserInfo(
+        user: Partial<DefaultUser>,
+        headers: Headers,
+        skipCSRFCheck?: boolean
+    ): Promise<{
+        session: Session<DefaultUser> | null
+        headers: Headers
+    }>
 }
 
 /** Inputs for constructing a session strategy implementation for a given identity schema. */
