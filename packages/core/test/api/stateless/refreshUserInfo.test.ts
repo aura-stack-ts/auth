@@ -109,10 +109,13 @@ describe("refreshUserInfo", () => {
         expect(output).toEqual({
             success: true,
             session: {
-                sub: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                user: {
+                    sub: "1234567890",
+                    email: "john@example.com",
+                    name: "John Doe",
+                    image: "https://example.com/image.jpg",
+                },
+                expires,
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
