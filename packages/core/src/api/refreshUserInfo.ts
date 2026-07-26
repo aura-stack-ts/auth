@@ -23,14 +23,15 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
     }: FunctionAPIContext<RefreshUserInfoAPIOptions>
 ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
     try {
+        const doubleSubmitValidation = skipCSRFCheck && !!doubleSubmitToken
         ctx.logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
-            structuredData: { provider: oauth, skipCSRFCheck: skipCSRFCheck && !!doubleSubmitToken },
+            structuredData: { provider: oauth, skipCSRFCheck: doubleSubmitValidation },
         })
 
         const { provider, headers, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
             .verifyOAuthProvider(oauth)
             .verifySession()
-            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
+            .verifyCSRFToken(doubleSubmitValidation)
             .buildRequest(requestInit, `/providers/${oauth}/user/refresh`)
             .verifyRateLimit("refreshUserInfo")
             .execute()
@@ -75,7 +76,11 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             structuredData: { provider: oauth, userId: userInfo.sub },
         })
 
-        const { session, headers: newHeaders } = await ctx.sessionStrategy.refreshUserInfo(userInfo, headers)
+        const { session, headers: newHeaders } = await ctx.sessionStrategy.refreshUserInfo(
+            userInfo,
+            headers,
+            doubleSubmitValidation
+        )
         return {
             success: !!session,
             headers: newHeaders,

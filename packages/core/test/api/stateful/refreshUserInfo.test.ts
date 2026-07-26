@@ -1,6 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
-import { authInstance, jose, oauthAccountEntity, sessionEntityWithUser } from "@test/presets.ts"
+import { authInstance, jose, oauthAccountEntity, sessionEntityWithUser, userEntity } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { createSchemaRegistry } from "@/validator/registry.ts"
 
 describe("refreshUserInfo API (Stateful)", () => {
     test("throws error when provider is missing", async () => {
@@ -235,22 +236,29 @@ describe("refreshUserInfo API (Stateful)", () => {
     test("successfully refreshes user info", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
-        const createUserMock = vi.fn()
-        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
             getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
-            getUserById: getUserByIdMock,
-            createUser: createUserMock,
-            createSession: createSessionMock,
             updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
         })
 
         const csrfToken = await createCSRF(jose)
@@ -262,9 +270,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                email: "john.updated@example.com",
+                name: "John Doe Updated",
+                image: "https://example.com/image-updated.jpg",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -276,28 +284,69 @@ describe("refreshUserInfo API (Stateful)", () => {
             },
         })
 
-        expect(output.success).toBe(true)
-        expect(output.session).not.toBeNull()
-        expect(output.headers).toBeInstanceOf(Headers)
-        expect(output.toResponse).toBeInstanceOf(Function)
+        expect(output).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe Updated",
+                    email: "john.updated@example.com",
+                    image: "https://example.com/image-updated.jpg",
+                },
+                expires: expect.any(String),
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        /**
+         * @todo Optimize the session token verification across multiple calls.
+         */
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
-        expect(getUserByIdMock).toHaveBeenCalled()
-        expect(createSessionMock).toHaveBeenCalledWith({
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+
+        const { attributes, ...spreadUser } = userEntity
+        expect(spyParse).toHaveBeenNthCalledWith(1, {
+            ...spreadUser,
+            ...attributes,
+            sub: "user-123",
+        })
+        expect(spyParseAsPartial).toHaveBeenCalledWith({
+            sub: "1234567890",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(spyParse).toHaveBeenNthCalledWith(2, {
+            sub: "user-123",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+
+        expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
             id: expect.any(String),
-            userId: "1234567890",
+            userId: "user-123",
             deviceId: null,
-            authenticatedWith: "oauth",
+            authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
             metadata: null,
         })
-        expect(updateUserMock).toHaveBeenCalled()
-
-        vi.unstubAllGlobals()
+        expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
 
     test("handles getUserInfo network error gracefully", async () => {
@@ -529,22 +578,29 @@ describe("refreshUserInfo API (Stateful)", () => {
             accessTokenExpiresAt: new Date(Date.now() - 3600 * 1000),
         }
 
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(expiredOAuthAccount)
+        const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
-        const createUserMock = vi.fn()
-        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
             getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
-            getUserById: getUserByIdMock,
-            createUser: createUserMock,
-            createSession: createSessionMock,
             updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
         })
 
         const csrfToken = await createCSRF(jose)
@@ -566,9 +622,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                email: "john.updated@example.com",
+                name: "John Doe Updated",
+                image: "https://example.com/image-updated.jpg",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -580,23 +636,75 @@ describe("refreshUserInfo API (Stateful)", () => {
             },
         })
 
-        expect(output.success).toBe(true)
-        expect(output.session).not.toBeNull()
-        expect(mockFetch).toHaveBeenCalledTimes(2)
-        expect(updateOAuthTokensMock).toHaveBeenCalled()
-        expect(createSessionMock).toHaveBeenCalledWith({
+        expect(output).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe Updated",
+                    email: "john.updated@example.com",
+                    image: "https://example.com/image-updated.jpg",
+                },
+                expires: expect.any(String),
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(updateOAuthTokensMock).toHaveBeenCalledWith("oauth-provider", {
+            accountId: "account-123",
+            accessToken: "new-access-token",
+            refreshToken: "new-refresh-token",
+            idToken: "id-token",
+            tokenType: "Bearer",
+            scopes: "scope1 scope2",
+            accessTokenExpiresAt: expect.any(Date),
+            refreshTokenExpiresAt: expect.any(Date),
+        })
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+
+        const { attributes, ...spreadUser } = userEntity
+        expect(spyParse).toHaveBeenNthCalledWith(1, {
+            ...spreadUser,
+            ...attributes,
+            sub: "user-123",
+        })
+        expect(spyParseAsPartial).toHaveBeenCalledWith({
+            sub: "1234567890",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(spyParse).toHaveBeenNthCalledWith(2, {
+            sub: "user-123",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+
+        expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
             id: expect.any(String),
-            userId: "1234567890",
+            userId: "user-123",
             deviceId: null,
-            authenticatedWith: "oauth",
+            authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
             metadata: null,
         })
-
-        vi.unstubAllGlobals()
+        expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
 
     test("handles invalid user info response with missing content type", async () => {
@@ -700,87 +808,32 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
     })
 
-    test("updates session cookie with new session token", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
-        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
-        const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
-        const createUserMock = vi.fn()
-        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
-        const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
-
-        const { api } = authInstance({
-            getSessionByToken: getSessionByTokenMock,
-            getOAuthAccount: getOAuthAccountMock,
-            updateOAuthTokens: updateOAuthTokensMock,
-            getUserById: getUserByIdMock,
-            createUser: createUserMock,
-            createSession: createSessionMock,
-            updateUser: updateUserMock,
-        })
-
-        const csrfToken = await createCSRF(jose)
-        const sessionToken = "valid-session-token"
-
-        const mockFetch = vi.fn()
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            headers: new Headers({ "Content-Type": "application/json" }),
-            json: async () => ({
-                id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
-            }),
-        })
-        vi.stubGlobal("fetch", mockFetch)
-
-        const output = await api.refreshUserInfo("oauth-provider", {
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
-            },
-        })
-
-        expect(output.success).toBe(true)
-        const setCookieHeader = output.headers.get("set-cookie")
-        expect(setCookieHeader).toContain("aura-auth.session_token=")
-        expect(createSessionMock).toHaveBeenCalledWith({
-            id: expect.any(String),
-            userId: "1234567890",
-            deviceId: null,
-            authenticatedWith: "oauth",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
-            expiresAt: expect.any(Date),
-            metadata: null,
-        })
-
-        vi.unstubAllGlobals()
-    })
-
     test("toResponse returns correct response on success", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
-        const createUserMock = vi.fn()
-        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
             getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
-            getUserById: getUserByIdMock,
-            createUser: createUserMock,
-            createSession: createSessionMock,
             updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
         })
 
         const csrfToken = await createCSRF(jose)
@@ -792,9 +845,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                email: "john.updated@example.com",
+                name: "John Doe Updated",
+                image: "https://example.com/image-updated.jpg",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -812,21 +865,62 @@ describe("refreshUserInfo API (Stateful)", () => {
         const json = await response.json()
         expect(json).toEqual({
             success: true,
-            session: expect.any(Object),
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe Updated",
+                    email: "john.updated@example.com",
+                    image: "https://example.com/image-updated.jpg",
+                },
+                expires: expect.any(String),
+            },
         })
-        expect(createSessionMock).toHaveBeenCalledWith({
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+
+        const { attributes, ...spreadUser } = userEntity
+        expect(spyParse).toHaveBeenNthCalledWith(1, {
+            ...spreadUser,
+            ...attributes,
+            sub: "user-123",
+        })
+        expect(spyParseAsPartial).toHaveBeenCalledWith({
+            sub: "1234567890",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(spyParse).toHaveBeenNthCalledWith(2, {
+            sub: "user-123",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+
+        expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
             id: expect.any(String),
-            userId: "1234567890",
+            userId: "user-123",
             deviceId: null,
-            authenticatedWith: "oauth",
+            authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
             metadata: null,
         })
-
-        vi.unstubAllGlobals()
+        expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
 
     test("handles token refresh failure", async () => {
@@ -893,22 +987,29 @@ describe("refreshUserInfo API (Stateful)", () => {
     test("handles doubleSubmitToken parameter", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
-        const createUserMock = vi.fn()
-        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
             getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
-            getUserById: getUserByIdMock,
-            createUser: createUserMock,
-            createSession: createSessionMock,
             updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
         })
 
         const csrfToken = await createCSRF(jose)
@@ -920,9 +1021,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                email: "john.updated@example.com",
+                name: "John Doe Updated",
+                image: "https://example.com/image-updated.jpg",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -934,21 +1035,66 @@ describe("refreshUserInfo API (Stateful)", () => {
             doubleSubmitToken: csrfToken,
         })
 
-        expect(output.success).toBe(true)
-        expect(output.session).not.toBeNull()
-        expect(createSessionMock).toHaveBeenCalledWith({
+        expect(output).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe Updated",
+                    email: "john.updated@example.com",
+                    image: "https://example.com/image-updated.jpg",
+                },
+                expires: expect.any(String),
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+
+        const { attributes, ...spreadUser } = userEntity
+        expect(spyParse).toHaveBeenNthCalledWith(1, {
+            ...spreadUser,
+            ...attributes,
+            sub: "user-123",
+        })
+        expect(spyParseAsPartial).toHaveBeenCalledWith({
+            sub: "1234567890",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(spyParse).toHaveBeenNthCalledWith(2, {
+            sub: "user-123",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+
+        expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
             id: expect.any(String),
-            userId: "1234567890",
+            userId: "user-123",
             deviceId: null,
-            authenticatedWith: "oauth",
+            authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
             metadata: null,
         })
-
-        vi.unstubAllGlobals()
+        expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
 
     test("handles invalid doubleSubmitToken parameter", async () => {
@@ -998,22 +1144,29 @@ describe("refreshUserInfo API (Stateful)", () => {
     test("handles skipCSRFCheck parameter", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spyParse = vi.spyOn(registry, "parse")
+        const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
-        const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
-        const createUserMock = vi.fn()
-        const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
             getOAuthAccount: getOAuthAccountMock,
+            revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
-            getUserById: getUserByIdMock,
-            createUser: createUserMock,
-            createSession: createSessionMock,
             updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
         })
 
         const sessionToken = "valid-session-token"
@@ -1025,9 +1178,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                email: "john.updated@example.com",
+                name: "John Doe Updated",
+                image: "https://example.com/image-updated.jpg",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -1039,19 +1192,65 @@ describe("refreshUserInfo API (Stateful)", () => {
             skipCSRFCheck: true,
         })
 
-        expect(output.success).toBe(true)
-        expect(output.session).not.toBeNull()
-        expect(createSessionMock).toHaveBeenCalledWith({
+        expect(output).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe Updated",
+                    email: "john.updated@example.com",
+                    image: "https://example.com/image-updated.jpg",
+                },
+                expires: expect.any(String),
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(revokeSessionMock).not.toHaveBeenCalled()
+
+        const { attributes, ...spreadUser } = userEntity
+        expect(spyParse).toHaveBeenNthCalledWith(1, {
+            ...spreadUser,
+            ...attributes,
+            sub: "user-123",
+        })
+        expect(spyParseAsPartial).toHaveBeenCalledWith({
+            sub: "1234567890",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(spyParse).toHaveBeenNthCalledWith(2, {
+            sub: "user-123",
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+            image: "https://example.com/image-updated.jpg",
+        })
+
+        expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
             id: expect.any(String),
-            userId: "1234567890",
+            userId: "user-123",
             deviceId: null,
-            authenticatedWith: "oauth",
+            authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
             metadata: null,
         })
-        vi.unstubAllGlobals()
+        expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
 })

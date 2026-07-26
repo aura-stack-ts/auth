@@ -1041,8 +1041,8 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
         }
     }
 
-    const refreshUserInfo = async (userInfo: TypedJWTPayload<DefaultUser>, headers: Headers) => {
-        return await refreshSession(headers, { user: userInfo })
+    const refreshUserInfo = async (userInfo: TypedJWTPayload<DefaultUser>, headers: Headers, skipCSRFCheck: boolean) => {
+        return await refreshSession(headers, { user: userInfo }, skipCSRFCheck)
     }
 
     return {

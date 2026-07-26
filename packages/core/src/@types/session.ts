@@ -280,7 +280,8 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      */
     refreshUserInfo(
         user: Partial<DefaultUser>,
-        headers: Headers
+        headers: Headers,
+        skipCSRFCheck?: boolean
     ): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
