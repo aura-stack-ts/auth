@@ -19,17 +19,61 @@
     "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm build && pnpm clean:cts"
   },
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues",
+    "email": "aurastackjs@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aura-stack-ts/auth"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/halvaradop"
+  },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/@aura-stack/jose"
   },
   "files": [
     "dist"
   ],
+  "keywords": [
+    "auth",
+    "session",
+    "authentication",
+    "jose",
+    "jwt",
+    "jws",
+    "jwe",
+    "jwk",
+    "crypto",
+    "cryptography",
+    "webcrypto",
+    "security",
+    "token",
+    "typescript",
+    "javascript",
+    "authentication",
+    "authorization",
+    "web-api",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura auth",
+    "aura-auth"
+  ],
+  "dependencies": {
+    "jose": "^6.1.2"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*",
+    "typescript": "catalog:typescript",
+    "vitest": "catalog:vitest"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -61,44 +105,5 @@
       "require": "./dist/crypto.cjs",
       "import": "./dist/crypto.js"
     }
-  },
-  "keywords": [
-    "auth",
-    "session",
-    "authentication",
-    "jose",
-    "jwt",
-    "jws",
-    "jwe",
-    "jwk",
-    "crypto",
-    "cryptography",
-    "webcrypto",
-    "security",
-    "token",
-    "typescript",
-    "javascript",
-    "authentication",
-    "authorization",
-    "web-api",
-    "aura-stack",
-    "aura-stack-ts",
-    "aura auth",
-    "aura-auth"
-  ],
-  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
-  "homepage": "https://aura-stack-auth.vercel.app",
-  "bugs": {
-    "url": "https://github.com/aura-stack-ts/auth/issues"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "jose": "^6.1.2"
-  },
-  "devDependencies": {
-    "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*",
-    "typescript": "catalog:typescript",
-    "vitest": "catalog:vitest"
   }
 }

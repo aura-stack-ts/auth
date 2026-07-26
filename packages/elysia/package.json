@@ -20,14 +20,61 @@
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js"
   },
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues",
+    "email": "aurastackjs@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/halvaradop"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/@aura-stack/elysia"
   },
   "sideEffects": false,
   "files": [
     "dist"
   ],
+  "keywords": [
+    "auth",
+    "oauth",
+    "oauth2",
+    "security",
+    "session",
+    "authentication",
+    "authorization",
+    "elysia",
+    "elysiajs",
+    "bun",
+    "middleware",
+    "typescript",
+    "javascript",
+    "web-api",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura auth",
+    "aura-auth"
+  ],
+  "dependencies": {
+    "@aura-stack/auth": "workspace:*"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*",
+    "elysia": "^1.2.22",
+    "vitest": "catalog:vitest"
+  },
+  "peerDependencies": {
+    "elysia": ">=1.0.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -69,44 +116,6 @@
       "import": "./dist/_core/cookies.js",
       "require": "./dist/_core/cookies.cjs"
     }
-  },
-  "keywords": [
-    "auth",
-    "oauth",
-    "oauth2",
-    "security",
-    "session",
-    "authentication",
-    "authorization",
-    "elysia",
-    "elysiajs",
-    "bun",
-    "middleware",
-    "typescript",
-    "javascript",
-    "web-api",
-    "aura-stack",
-    "aura-stack-ts",
-    "aura auth",
-    "aura-auth"
-  ],
-  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
-  "homepage": "https://aura-stack-auth.vercel.app",
-  "bugs": {
-    "url": "https://github.com/aura-stack-ts/auth/issues"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "@aura-stack/auth": "workspace:*"
-  },
-  "devDependencies": {
-    "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*",
-    "elysia": "^1.2.22",
-    "vitest": "catalog:vitest"
-  },
-  "peerDependencies": {
-    "elysia": ">=1.0.0"
   },
   "packageManager": "pnpm@10.15.0"
 }

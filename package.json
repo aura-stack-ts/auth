@@ -20,12 +20,21 @@
     "type-check:packages": "turbo run type-check --parallel --filter=./packages/*",
     "create:integration": "node packages/shared/scripts/integration.js"
   },
+  "homepage": "https://github.com/aura-stack-ts/auth#readme",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues",
+    "email": "aurastackjs@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aura-stack-js/auth.git"
+    "url": "git+https://github.com/aura-stack-ts/auth.git"
   },
-  "bugs": "https://github.com/aura-stack-js/auth/issues",
-  "homepage": "https://github.com/aura-stack-js/auth#readme",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/halvaradop"
+  },
   "keywords": [
     "authentication",
     "auth",
@@ -36,17 +45,6 @@
     "openid connect",
     "oidc"
   ],
-  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "catalog:node",
-    "@vitest/coverage-v8": "catalog:vitest",
-    "tsdown": "^0.21.10",
-    "turbo": "^2.9.18",
-    "typescript": "catalog:typescript",
-    "vitest": "catalog:vitest"
-  },
-  "packageManager": "pnpm@10.15.0",
   "workspaces": {
     "packages": [
       "packages/*",
@@ -116,6 +114,18 @@
       }
     }
   },
+  "dependencies": {
+    "oxfmt": "^0.51.0",
+    "oxlint": "^1.69.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:node",
+    "@vitest/coverage-v8": "catalog:vitest",
+    "tsdown": "^0.21.10",
+    "turbo": "^2.9.18",
+    "typescript": "catalog:typescript",
+    "vitest": "catalog:vitest"
+  },
   "overrides": {
     "dompurify": "^3.4.0",
     "file-type": "^21.3.2",
@@ -131,11 +141,8 @@
     "uuid": "^11.1.1",
     "qs": "^6.15.2"
   },
+  "packageManager": "pnpm@10.15.0",
   "engines": {
     "node": ">=22"
-  },
-  "dependencies": {
-    "oxfmt": "^0.51.0",
-    "oxlint": "^1.69.0"
   }
 }

@@ -18,14 +18,55 @@
     "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm clean:cts && pnpm build && pnpm clean:cts"
   },
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues",
+    "email": "aurastackjs@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/halvaradop"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/@aura-stack/device"
   },
   "sideEffects": false,
   "files": [
     "dist"
   ],
+  "keywords": [
+    "auth",
+    "oauth",
+    "oauth2",
+    "security",
+    "session",
+    "authentication",
+    "authorization",
+    "typescript",
+    "javascript",
+    "device authorization grant",
+    "device flow",
+    "device grant",
+    "device code",
+    "aura stack",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura stack ts"
+  ],
+  "dependencies": {
+    "valibot": "catalog:valibot"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -43,20 +84,5 @@
       "require": "./dist/providers/*.cjs"
     }
   },
-  "keywords": [],
-  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
-  "homepage": "https://aura-stack-auth.vercel.app",
-  "bugs": {
-    "url": "https://github.com/aura-stack-ts/auth/issues"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "valibot": "catalog:valibot"
-  },
-  "devDependencies": {
-    "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*"
-  },
-  "peerDependencies": {},
   "packageManager": "pnpm@10.15.0"
 }
