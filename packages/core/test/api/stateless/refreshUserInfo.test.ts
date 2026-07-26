@@ -91,10 +91,8 @@ describe("refreshUserInfo", () => {
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
-                id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                ...sessionPayload,
+                email: "john.updated@example.com",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -109,10 +107,11 @@ describe("refreshUserInfo", () => {
         expect(output).toEqual({
             success: true,
             session: {
-                sub: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                user: {
+                    ...sessionPayload,
+                    email: "john.updated@example.com",
+                },
+                expires: expect.any(Number),
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -324,10 +323,9 @@ describe("refreshUserInfo", () => {
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
+                ...sessionPayload,
                 id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                email: "john.updated@example.com",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -339,8 +337,18 @@ describe("refreshUserInfo", () => {
             },
         })
 
-        expect(output.success).toBe(true)
-        expect(output.session).not.toBeNull()
+        expect(output).toEqual({
+            success: true,
+            session: {
+                user: {
+                    ...sessionPayload,
+                    email: "john.updated@example.com",
+                },
+                expires: expect.any(Number),
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
         expect(mockFetch).toHaveBeenCalledTimes(2)
     })
 
@@ -419,10 +427,8 @@ describe("refreshUserInfo", () => {
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
-                id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                ...sessionPayload,
+                email: "john.updated@example.com",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -434,7 +440,18 @@ describe("refreshUserInfo", () => {
             },
         })
 
-        expect(output.success).toBe(true)
+        expect(output).toEqual({
+            success: true,
+            session: {
+                user: {
+                    ...sessionPayload,
+                    email: "john.updated@example.com",
+                },
+                expires: expect.any(Number),
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
         const setCookieHeader = output.headers.get("set-cookie")
         expect(setCookieHeader).toContain("aura-auth.session_token=")
     })
@@ -476,9 +493,7 @@ describe("refreshUserInfo", () => {
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
                 id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                ...sessionPayload,
                 nickname: "johnny",
                 email_verified: true,
             }),
@@ -495,10 +510,8 @@ describe("refreshUserInfo", () => {
         expect(output).toEqual({
             success: true,
             session: {
-                sub: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                user: sessionPayload,
+                expires: expect.any(Number),
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -517,10 +530,8 @@ describe("refreshUserInfo", () => {
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
-                id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                ...sessionPayload,
+                email: "john.updated@example.com",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -538,10 +549,11 @@ describe("refreshUserInfo", () => {
         expect(await response.json()).toEqual({
             success: true,
             session: {
-                sub: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                user: {
+                    ...sessionPayload,
+                    email: "john.updated@example.com",
+                },
+                expires: expect.any(Number),
             },
         })
     })
@@ -558,10 +570,8 @@ describe("refreshUserInfo", () => {
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
-                id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                ...sessionPayload,
+                email: "john.updated@example.com",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -576,10 +586,11 @@ describe("refreshUserInfo", () => {
         expect(output).toEqual({
             success: true,
             session: {
-                sub: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                user: {
+                    ...sessionPayload,
+                    email: "john.updated@example.com",
+                },
+                expires: expect.any(Number),
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -607,10 +618,8 @@ describe("refreshUserInfo", () => {
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
-                id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                ...sessionPayload,
+                email: "john.updated@example.com",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -647,10 +656,8 @@ describe("refreshUserInfo", () => {
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
-                id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                ...sessionPayload,
+                email: "john.updated@example.com",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -666,10 +673,11 @@ describe("refreshUserInfo", () => {
         expect(output).toEqual({
             success: true,
             session: {
-                sub: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                user: {
+                    ...sessionPayload,
+                    email: "john.updated@example.com",
+                },
+                expires: expect.any(Number),
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -697,10 +705,8 @@ describe("refreshUserInfo", () => {
             ok: true,
             headers: new Headers({ "Content-Type": "application/json" }),
             json: async () => ({
-                id: "1234567890",
-                email: "john@example.com",
-                name: "John Doe",
-                image: "https://example.com/image.jpg",
+                ...sessionPayload,
+                email: "john.updated@example.com",
             }),
         })
         vi.stubGlobal("fetch", mockFetch)

@@ -91,19 +91,19 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             identity: ctx.identity,
         })
         return {
-            success: true,
+            success: !!session,
             headers: mergedHeaders,
-            session,
+            session: session,
             toResponse: () => {
                 return Response.json(
                     {
+                        success: !!session,
                         session,
-                        success: true,
                     },
                     { headers: mergedHeaders, status: 200 }
                 )
             },
-        }
+        } as RefreshUserInfoAPIReturn<DefaultUser>
     } catch (error) {
         const { code, message, statusCode } = handleApiError(
             error,
