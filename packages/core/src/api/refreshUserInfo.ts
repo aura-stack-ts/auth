@@ -77,19 +77,19 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
 
         const { session, headers: newHeaders } = await ctx.sessionStrategy.refreshUserInfo(userInfo, headers)
         return {
-            success: true,
+            success: !!session,
             headers: newHeaders,
-            session: session as any,
+            session: session,
             toResponse: () => {
                 return Response.json(
                     {
+                        success: !!session,
                         session,
-                        success: true,
                     },
                     { headers: newHeaders, status: 200 }
                 )
             },
-        }
+        } as RefreshUserInfoAPIReturn<DefaultUser>
     } catch (error) {
         const { code, message, statusCode } = handleApiError(
             error,

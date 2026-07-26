@@ -1,7 +1,7 @@
-import { getCookie, getSetCookie } from "@/cookie.ts"
-import { createAuth } from "@/createAuth.ts"
-import { api, jose } from "@test/presets.ts"
 import { describe, test, expect } from "vitest"
+import { createAuth } from "@/createAuth.ts"
+import { getCookie, getSetCookie } from "@/cookie.ts"
+import { api, jose, sessionPayload } from "@test/presets.ts"
 
 describe("getSession", () => {
     test("getSession with no session token", async () => {
@@ -25,95 +25,91 @@ describe("getSession", () => {
     })
 
     test("getSession with valid session token", async () => {
-        const jwt = await jose.encodeJWT({
-            sub: "123",
-            name: "Alice",
-            email: "alice@example.com",
-        })
+        const jwt = await jose.encodeJWT(sessionPayload)
         const session = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}` },
         })
-        expect(session.session).toMatchObject({
-            user: {
-                sub: "123",
-                name: "Alice",
-                email: "alice@example.com",
+        expect(session).toEqual({
+            success: true,
+            session: {
+                user: sessionPayload,
+                expires: expect.any(String),
             },
-            expires: expect.any(String),
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
         })
     })
 
     test("getSession with expired session token", async () => {
         const jwt = await jose.encodeJWT({
-            sub: "123",
-            name: "Alice",
-            email: "",
+            ...sessionPayload,
             exp: Math.floor(Date.now() / 1000) - 60,
         })
         const session = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}` },
         })
-        expect(session).toMatchObject({
+        expect(session).toEqual({
             session: null,
-            headers: {},
             success: false,
+            error: {
+                code: "GET_SESSION_FAILED",
+                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
         })
         expect(getSetCookie(session.headers, "aura-auth.session_token")).toBe("")
     })
 
     test("getSession with session token missing sub claim", async () => {
-        const jwt = await jose.encodeJWT({
-            name: "Alice",
-            email: "alice@example.com",
-        })
+        const { sub: _, ...spreadSession } = sessionPayload
+        const jwt = await jose.encodeJWT(spreadSession)
         const session = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}` },
         })
-        expect(session).toMatchObject({
+        expect(session).toEqual({
             session: null,
-            headers: {},
             success: false,
+            error: {
+                code: "GET_SESSION_FAILED",
+                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
         })
     })
 
     test("getSession with extra claims in session token", async () => {
         const jwt = await jose.encodeJWT({
-            sub: "123",
-            name: "Alice",
-            email: "alice@example.com",
+            ...sessionPayload,
             role: "admin",
             permissions: ["read", "write"],
         })
         const session = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}` },
         })
-        expect(session.session).toMatchObject({
-            user: {
-                sub: "123",
-                name: "Alice",
-                email: "alice@example.com",
+        expect(session).toEqual({
+            success: true,
+            session: {
+                user: sessionPayload,
+                expires: expect.any(String),
             },
-            expires: expect.any(String),
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
         })
-        expect(session.session?.user).not.toHaveProperty("role")
-        expect(session.session?.user).not.toHaveProperty("permissions")
+        expect(session.session).not.toContainEqual({
+            role: "admin",
+            permissions: ["read", "write"],
+        })
         const decodeSession = await jose.decodeJWT(getCookie(session.headers, "aura-auth.session_token")!)
-        expect(decodeSession).toMatchObject({
-            sub: "123",
-            name: "Alice",
-            email: "alice@example.com",
-        })
-        expect(session.session?.user).not.toHaveProperty("role")
-        expect(session.session?.user).not.toHaveProperty("permissions")
+        expect(decodeSession).toMatchObject(sessionPayload)
     })
 
     test("getSession refreshes session token if exp is close", async () => {
         const auth = createAuth({ oauth: [], session: { jwt: { expirationStrategy: "rolling" } } })
 
         const jwt = await auth.jose.encodeJWT({
-            sub: "123",
-            name: "Alice",
-            email: "alice@example.com",
+            ...sessionPayload,
             iat: Math.floor(Date.now() / 1000) - 3600,
             exp: Math.floor(Date.now() / 1000) + 10,
             role: "admin",
@@ -122,23 +118,21 @@ describe("getSession", () => {
         const session = await auth.api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}` },
         })
-        expect(session.session).toMatchObject({
-            user: {
-                sub: "123",
-                name: "Alice",
-                email: "alice@example.com",
+        expect(session).toEqual({
+            success: true,
+            session: {
+                user: sessionPayload,
+                expires: expect.any(String),
             },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
         })
-        expect(session.session?.user).not.toHaveProperty("role")
-        expect(session.session?.user).not.toHaveProperty("permissions")
+        expect(session.session).not.toContainEqual({
+            role: "admin",
+            permissions: ["read", "write"],
+        })
 
         const decodeSession = await jose.decodeJWT(getSetCookie(session.headers, "aura-auth.session_token")!)
-        expect(decodeSession).toMatchObject({
-            sub: "123",
-            name: "Alice",
-            email: "alice@example.com",
-        })
-        expect(session.session?.user).not.toHaveProperty("role")
-        expect(session.session?.user).not.toHaveProperty("permissions")
+        expect(decodeSession).toMatchObject(sessionPayload)
     })
 })

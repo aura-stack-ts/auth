@@ -231,10 +231,13 @@ export const getStandardSession = async ({
 }) => {
     const claims = await jwt.verifyToken(sessionToken)
     const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
-    const { exp: _exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
+    const { exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
     const userClaims = await identity.schemaRegistry.parse(defaultPayload)
     if (!userClaims.sub) return null
-    return userClaims
+    return {
+        user: userClaims,
+        expires: exp,
+    }
 }
 
 export const transformToTokenPayload = (tokens: OAuthAccessTokenResponseType & { id_token?: string }) => {
