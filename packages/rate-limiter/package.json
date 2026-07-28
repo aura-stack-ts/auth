@@ -19,12 +19,24 @@
     "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm build && pnpm clean:cts"
   },
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues",
+    "email": "aurastackjs@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aura-stack-ts/auth"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/halvaradop"
+  },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "files": [
     "dist"
@@ -41,8 +53,17 @@
     "typescript",
     "javascript",
     "nodejs",
-    "edge-runtime"
+    "edge-runtime",
+    "aura stack",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura stack ts"
   ],
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*",
+    "vitest": "catalog:vitest"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -60,17 +81,6 @@
       "require": "./dist/algorithms/*/index.cjs"
     },
     "./types": "./dist/types.d.ts"
-  },
-  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
-  "homepage": "https://aura-stack-auth.vercel.app",
-  "bugs": {
-    "url": "https://github.com/aura-stack-ts/auth/issues"
-  },
-  "license": "MIT",
-  "devDependencies": {
-    "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*",
-    "vitest": "catalog:vitest"
   },
   "packageManager": "pnpm@10.15.0"
 }

@@ -19,18 +19,63 @@
     "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm build && pnpm clean:cts"
   },
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues",
+    "email": "aurastackjs@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aura-stack-ts/auth"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/halvaradop"
+  },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/@aura-stack/auth"
+    "registry": "https://registry.npmjs.org/"
   },
   "sideEffects": false,
   "files": [
     "dist"
   ],
+  "keywords": [
+    "auth",
+    "oauth",
+    "oauth2",
+    "security",
+    "session",
+    "authentication",
+    "authorization",
+    "typescript",
+    "javascript",
+    "node",
+    "bun",
+    "deno",
+    "edge",
+    "aura stack",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura stack ts"
+  ],
+  "dependencies": {
+    "@aura-stack/jose": "workspace:*",
+    "@aura-stack/rate-limiter": "workspace:*",
+    "@aura-stack/router": "^0.9.0",
+    "arktype": "^2.2.0",
+    "typebox": "^1.1.38",
+    "valibot": "catalog:valibot",
+    "zod": "catalog:zod-v4"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*",
+    "typescript": "catalog:typescript",
+    "vitest": "catalog:vitest"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -82,45 +127,5 @@
       "import": "./dist/shared/cookies.js",
       "require": "./dist/shared/cookies.cjs"
     }
-  },
-  "keywords": [
-    "auth",
-    "oauth",
-    "oauth2",
-    "security",
-    "session",
-    "authentication",
-    "authorization",
-    "typescript",
-    "javascript",
-    "node",
-    "bun",
-    "deno",
-    "edge",
-    "aura-stack",
-    "aura-stack-ts",
-    "aura auth",
-    "aura-auth"
-  ],
-  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
-  "homepage": "https://aura-stack-auth.vercel.app",
-  "bugs": {
-    "url": "https://github.com/aura-stack-ts/auth/issues"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "@aura-stack/jose": "workspace:*",
-    "@aura-stack/rate-limiter": "workspace:*",
-    "@aura-stack/router": "^0.9.0",
-    "arktype": "^2.2.0",
-    "typebox": "^1.1.38",
-    "valibot": "catalog:valibot",
-    "zod": "catalog:zod-v4"
-  },
-  "devDependencies": {
-    "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*",
-    "typescript": "catalog:typescript",
-    "vitest": "catalog:vitest"
   }
 }

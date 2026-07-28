@@ -96,7 +96,6 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             },
         } as RefreshUserInfoAPIReturn<DefaultUser>
     } catch (error) {
-        console.warn("Error refreshing user info:", error)
         const { code, message, statusCode } = handleApiError(
             error,
             "UNKNOWN_REFRESH_USER_INFO_ERROR",
