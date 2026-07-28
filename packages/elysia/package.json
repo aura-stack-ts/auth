@@ -37,7 +37,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/@aura-stack/elysia"
+    "registry": "https://registry.npmjs.org/"
   },
   "sideEffects": false,
   "files": [
