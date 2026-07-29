@@ -20,7 +20,7 @@ export type MFAState = "none" | "pending" | "completed" | "skipped"
 
 export type MFAMethod = "totp" | "webauthn_passkey" | "webauthn_security_key" | "sms" | "email" | "recovery_code"
 
-export type DeviceType = "desktop" | "mobile" | "tablet" | "unknown"
+export type DeviceType = "desktop" | "mobile" | "tablet" | "tv" | "bot" | "unknown"
 
 export type RevokeReason =
     | "user_logout"
@@ -154,6 +154,7 @@ export interface OAuthTransactionEntity {
     redirectTo: string | null
     userAgent: string | null
     fingerprint: string | null
+    deviceId: string | null
     createdAt: Date
     expiresAt: Date
     metadata: Record<string, unknown> | null
