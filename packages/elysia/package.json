@@ -9,7 +9,7 @@
     "build": "pnpm sync:modules && tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "test": "vitest --run",
+    "test": "vitest --run --project stateless",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
     "format": "oxfmt",

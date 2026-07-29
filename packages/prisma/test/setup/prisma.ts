@@ -14,14 +14,14 @@ export const adapter = prismaAdapter({
 
 export const resetDatabase = async () => {
     await prismaClient.$transaction([
-        prismaClient.user.deleteMany(),
         prismaClient.account.deleteMany(),
         prismaClient.oAuthAccount.deleteMany(),
         prismaClient.credentialAccount.deleteMany(),
         prismaClient.device.deleteMany(),
-        prismaClient.session.deleteMany(),
         prismaClient.mfaCredential.deleteMany(),
         prismaClient.oAuthTransaction.deleteMany(),
+        prismaClient.session.deleteMany(),
+        prismaClient.user.deleteMany(),
     ])
 }
 

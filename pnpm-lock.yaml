@@ -900,6 +900,9 @@ importers:
       '@aura-stack/auth':
         specifier: workspace:*
         version: link:../core
+      '@aura-stack/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@aura-stack/tsconfig':
         specifier: workspace:*
         version: link:../../configs/tsconfig
@@ -1003,7 +1006,11 @@ importers:
         specifier: catalog:react-router
         version: 7.15.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
 
-  packages/shared: {}
+  packages/shared:
+    devDependencies:
+      '@aura-stack/auth':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 

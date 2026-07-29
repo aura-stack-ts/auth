@@ -2872,7 +2872,13 @@
         ],
         "packageJson": {
           "dependencies": [
-            "npm:elysia@^1.2.22"
+            "npm:@prisma/adapter-pg@^7.9.1",
+            "npm:@prisma/client@^7.9.1",
+            "npm:@types/pg@^8.20.0",
+            "npm:dotenv@^17.4.2",
+            "npm:elysia@^1.2.22",
+            "npm:pg@^8.22.0",
+            "npm:prisma@^7.9.1"
           ]
         }
       },
@@ -2919,11 +2925,7 @@
       "packages/prisma": {
         "packageJson": {
           "dependencies": [
-            "npm:@prisma/adapter-pg@^7.9.1",
-            "npm:@prisma/client@^7.9.1",
             "npm:@types/pg@^8.20.0",
-            "npm:dotenv@^17.4.2",
-            "npm:pg@^8.22.0",
             "npm:prisma@^7.9.1"
           ]
         }

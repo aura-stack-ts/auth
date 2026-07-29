@@ -47,7 +47,8 @@
   "dependencies": {
     "@aura-stack/auth": "workspace:*",
     "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*"
+    "@aura-stack/tsdown-config": "workspace:*",
+    "@aura-stack/shared": "workspace:*"
   },
   "devDependencies": {
     "prisma": "^7.9.1",

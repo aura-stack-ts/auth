@@ -1,10 +1,12 @@
 {
-  "name": "shared",
+  "name": "@aura-stack/shared",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "license": "MIT",
-  "packageManager": "pnpm@10.15.0",
+  "devDependencies": {
+    "@aura-stack/auth": "workspace:*"
+  },
   "exports": {
     "./oauth": {
       "types": "./dist/oauth/index.d.ts",
@@ -30,6 +32,10 @@
       "types": "./dist/_core/shared.d.ts",
       "import": "./dist/_core/shared.js",
       "require": "./dist/_core/shared.cjs"
+    },
+    "./adapter": {
+      "import": "./src/adapter-suite.js"
     }
-  }
+  },
+  "packageManager": "pnpm@10.15.0"
 }

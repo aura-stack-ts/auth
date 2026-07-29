@@ -1,5 +1,5 @@
 import type { DatabaseAdapter } from "@aura-stack/auth/types"
-import type { PrismaClient, UserStatus } from "@/generated/prisma/client.js"
+import { type PrismaClient, UserStatus } from "@/generated/prisma/client.ts"
 import {
     appendRevokeReason,
     toAccount,
@@ -19,7 +19,6 @@ import {
     toUser,
     toUserStatus,
     toJson,
-    fromUserStatus,
 } from "@/lib/mappers.ts"
 import { setUndefinedToNull, stripNullishValues } from "@/lib/utils.ts"
 
@@ -41,23 +40,16 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
          * Users
          */
         createUser: async (input) => {
-            console.log("createUser input", input)
-            try {
-                const user = await client.user.create({
-                    data: {
-                        ...input,
-                        emailVerifiedAt: input.emailVerifiedAt ?? null,
-                        status: input.status ? toUserStatus(input.status) : undefined,
-                        mfaPreferredMethod: input.mfaPreferredMethod ? toMFAMethod(input.mfaPreferredMethod) : undefined,
-                        attributes: toJson(input.attributes),
-                    },
-                })
-                console.log("createUser output", user)
-                return toUser(user)
-            } catch (error) {
-                console.error("Error creating user:", error)
-                throw error
-            }
+            const user = await client.user.create({
+                data: {
+                    ...input,
+                    emailVerifiedAt: input.emailVerifiedAt ?? null,
+                    status: input.status ? toUserStatus(input.status) : undefined,
+                    mfaPreferredMethod: input.mfaPreferredMethod ? toMFAMethod(input.mfaPreferredMethod) : undefined,
+                    attributes: toJson(input.attributes),
+                },
+            })
+            return toUser(user)
         },
         getUserById: async (id) => {
             const user = await client.user.findUnique({ where: { id } })
@@ -91,7 +83,11 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             } else {
                 await client.user.update({
                     where: { id },
-                    data: { status: fromUserStatus("DELETED") as UserStatus },
+                    data: { status: UserStatus.DELETED, updatedAt: new Date() },
+                })
+                await client.session.updateManyAndReturn({
+                    where: { userId: id, status: "ACTIVE" },
+                    data: { status: "REVOKED", revokedAt: new Date() },
                 })
             }
         },
@@ -231,7 +227,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             return session ? toSessionWithUser(session) : null
         },
         getSessionById: async (id) => {
-            const session = await client.session.findUnique({ where: { id } })
+            const session = await client.session.findUnique({ where: { id, status: "ACTIVE" } })
             return session ? toSession(session) : null
         },
         listSessions: async (filter) => {
@@ -270,12 +266,13 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 return
             }
 
+            const revokedAt = new Date()
             await client.session.update({
                 where: { id },
                 data: {
                     status: "REVOKED",
-                    revokedAt: new Date(),
-                    metadata: toJson(appendRevokeReason(existing.metadata as Record<string, unknown> | null, reason, new Date())),
+                    revokedAt,
+                    metadata: toJson(appendRevokeReason(existing.metadata as Record<string, unknown> | null, reason, revokedAt)),
                 },
             })
         },

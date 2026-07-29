@@ -5,14 +5,18 @@ import { zod } from "@aura-stack/auth/identity/zod"
 import { PrismaPg } from "@prisma/adapter-pg"
 import { prismaAdapter } from "@aura-stack/prisma"
 import { PrismaClient } from "@/generated/prisma/client.ts"
-import { createSecretValue } from "@aura-stack/auth/crypto"
 
-const adapter = new PrismaPg({
+const adapterPg = new PrismaPg({
     connectionString: process.env.DATABASE_URL,
 })
 
 export const prismaClient = new PrismaClient({
-    adapter,
+    adapter: adapterPg,
+})
+
+export const adapter = prismaAdapter({
+    client: prismaClient as any,
+    deleteStrategy: "soft",
 })
 
 export const auth = createAuth({
@@ -20,11 +24,11 @@ export const auth = createAuth({
     basePath: "/api/auth",
     credentials: {
         authorize: ({ credentials }) => {
-            const sub = createSecretValue(16)
             const { username, password } = credentials
             if (password === "invalid") {
                 return null
             }
+            const sub = `credentials:${username}`
             return {
                 sub,
                 name: username,
@@ -40,8 +44,8 @@ export const auth = createAuth({
             email: zod.email(),
         }),
         onCreateUser: async ({ payload }) => {
-            const sub = createSecretValue(16)
             const { firstName, lastName, email } = payload
+            const sub = `credentials:${email}`
             return {
                 sub,
                 name: `${firstName} ${lastName}`,
@@ -52,29 +56,10 @@ export const auth = createAuth({
     },
     session: {
         strategy: "database",
-        adapter: prismaAdapter({
-            /**
-             * @todo fix types
-             */
-            client: prismaClient as any,
-            deleteStrategy: "soft",
-        }),
+        adapter,
     },
 })
 
 export const app = new Elysia()
 
 app.all("/api/auth/*", auth.toHandler)
-
-app.derive(auth.withAuth).get("/api/protected", ({ session }) => {
-    if (!session) {
-        return new Response(JSON.stringify({ message: "Unauthorized" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-        })
-    }
-    return {
-        message: "You have access to this protected resource.",
-        session,
-    }
-})

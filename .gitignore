@@ -199,5 +199,5 @@ packages/**/identity
 !packages/core/src/identity/
 !packages/core/src/identity/**
 
-/src/generated/prisma
-/generated/prisma
+**/src/generated/prisma
+**/generated/prisma
