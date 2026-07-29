@@ -1,0 +1,72 @@
+{
+  "name": "@aura-stack/prisma",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Prisma Database Adapter for Aura Auth authentication library",
+  "scripts": {
+    "dev": "tsdown --watch",
+    "generate": "prisma generate",
+    "build": "pnpm exec prisma generate && tsdown",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
+    "prepublishOnly": "pnpm clean:cts && pnpm build && pnpm clean:cts"
+  },
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues",
+    "email": "aurastackjs@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/halvaradop"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "keywords": [],
+  "dependencies": {
+    "@aura-stack/auth": "workspace:*"
+  },
+  "devDependencies": {
+    "prisma": "^7.9.1",
+    "@types/pg": "^8.20.0",
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*",
+    "@aura-stack/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "@aura-stack/auth": "workspace:*",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "dotenv": "^17.4.2",
+    "pg": "^8.22.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "packageManager": "pnpm@10.15.0"
+}

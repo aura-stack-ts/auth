@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { app, auth } from "./presets.ts"
+import { app, auth } from "@test/stateless/app.ts"
 import { createCSRF } from "@aura-stack/auth/crypto"
 
 describe("GET /api/auth/signIn/github", () => {

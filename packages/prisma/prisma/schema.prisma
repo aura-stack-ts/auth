@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// ---------------------------------------------------------------------------
+/// ENUMS
+/// ---------------------------------------------------------------------------
+enum UserStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+  DELETED
+}
+
+enum AccountType {
+  OAUTH
+  CREDENTIALS
+}
+
+enum AccountStatus {
+  ACTIVE
+  UNLINKED
+  SUSPENDED
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum MfaState {
+  NONE
+  PENDING
+  COMPLETED
+  SKIPPED
+}
+
+enum DeviceType {
+  DESKTOP
+  MOBILE
+  TABLET
+  TV
+  BOT
+  UNKNOWN
+}
+
+enum MfaType {
+  TOTP
+  EMAIL
+  SMS
+  WEBAUTHN_PASSKEY
+  WEBAUTHN_SECURITY_KEY
+  RECOVERY_CODE
+}
+
+/// ---------------------------------------------------------------------------
+/// USERS
+/// ---------------------------------------------------------------------------
+
+model User {
+  id                 String          @id @default(cuid())
+  name               String?
+  email              String?         @unique
+  image              String?
+  emailVerifiedAt    DateTime?
+  status             UserStatus      @default(ACTIVE)
+  mfaEnabled         Boolean         @default(false)
+  mfaPreferredMethod MfaType?
+  accounts           Account[]
+  sessions           Session[]
+  devices            Device[]
+  mfaCredentials     MfaCredential[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  attributes         Json?
+
+  @@index([status])
+}
+
+/// ---------------------------------------------------------------------------
+/// ACCOUNTS
+/// ---------------------------------------------------------------------------
+model Account {
+  id                String             @id @default(cuid())
+  userId            String
+  provider          String
+  providerUserId    String
+  type              AccountType
+  status            AccountStatus      @default(ACTIVE)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  oauthAccount      OAuthAccount?
+  credentialAccount CredentialAccount?
+  metadata          Json?
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@index([provider])
+  @@index([status])
+}
+
+/// ---------------------------------------------------------------------------
+/// OAUTH ACCOUNT
+/// ---------------------------------------------------------------------------
+model OAuthAccount {
+  accountId             String    @id
+  accessToken           String
+  refreshToken          String?
+  idToken               String?
+  tokenType             String?
+  scopes                String?
+  issuer                String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  updatedAt             DateTime  @updatedAt
+  account               Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+/// ---------------------------------------------------------------------------
+/// CREDENTIAL ACCOUNT
+/// ---------------------------------------------------------------------------
+
+model CredentialAccount {
+  accountId    String   @id
+  passwordHash String
+  updatedAt    DateTime @updatedAt
+  account      Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+/// ---------------------------------------------------------------------------
+/// DEVICES
+/// ---------------------------------------------------------------------------
+
+model Device {
+  id                String             @id @default(cuid())
+  userId            String
+  name              String?
+  type              DeviceType         @default(UNKNOWN)
+  platform          String?
+  browser           String?
+  userAgent         String?
+  fingerprint       String?
+  lastIp            String?
+  trusted           Boolean            @default(false)
+  firstSeenAt       DateTime           @default(now())
+  lastSeenAt        DateTime           @default(now())
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metadata          Json?
+  sessions          Session[]
+  oauthTransactions OAuthTransaction[]
+
+  @@index([userId])
+  @@index([fingerprint])
+  @@index([trusted])
+}
+
+/// ---------------------------------------------------------------------------
+/// SESSIONS
+/// ---------------------------------------------------------------------------
+
+model Session {
+  id                String        @id @default(cuid())
+  userId            String
+  deviceId          String?
+  authenticatedWith String
+  status            SessionStatus @default(ACTIVE)
+  mfaState          MfaState      @default(NONE)
+  tokenHash         String        @unique
+  expiresAt         DateTime
+  lastActivityAt    DateTime      @default(now())
+  revokedAt         DateTime?
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([expiresAt])
+  @@index([status])
+  @@index([revokedAt])
+}
+
+/// ---------------------------------------------------------------------------
+/// MFA CREDENTIALS
+/// ---------------------------------------------------------------------------
+model MfaCredential {
+  id             String    @id @default(cuid())
+  userId         String
+  type           MfaType
+  credentialData Json
+  isPrimary      Boolean   @default(false)
+  verifiedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  metadata       Json?
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+}
+
+/// ---------------------------------------------------------------------------
+/// OAUTH TRANSACTIONS
+/// ---------------------------------------------------------------------------
+
+model OAuthTransaction {
+  id           String   @id @default(cuid())
+  provider     String
+  state        String   @unique
+  nonce        String?
+  codeVerifier String?
+  redirectUri  String
+  redirectTo   String?
+  userAgent    String?
+  fingerprint  String?
+  deviceId     String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  device       Device?  @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@index([deviceId])
+  @@index([provider])
+  @@index([expiresAt])
+}
