@@ -1,13 +1,13 @@
 {
   "name": "@aura-stack/prisma",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "description": "Prisma Database Adapter for Aura Auth authentication library",
   "scripts": {
     "dev": "tsdown --watch",
     "generate": "prisma generate",
-    "build": "pnpm dlx prisma generate && tsdown",
+    "build": "pnpm exec prisma generate && tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "test": "vitest --run",
@@ -47,16 +47,18 @@
   "dependencies": {
     "@aura-stack/auth": "workspace:*",
     "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*",
-    "@prisma/adapter-pg": "^7.9.1",
-    "@prisma/client": "^7.9.1",
-    "@types/pg": "^8.20.0",
-    "dotenv": "^17.4.2",
-    "pg": "^8.22.0",
-    "prisma": "^7.9.1"
+    "@aura-stack/tsdown-config": "workspace:*"
+  },
+  "devDependencies": {
+    "prisma": "^7.9.1",
+    "@types/pg": "^8.20.0"
   },
   "peerDependencies": {
-    "@aura-stack/auth": "workspace:*"
+    "@aura-stack/auth": "workspace:*",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "dotenv": "^17.4.2",
+    "pg": "^8.22.0"
   },
   "exports": {
     ".": {

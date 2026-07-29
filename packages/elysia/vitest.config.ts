@@ -21,6 +21,33 @@ export default defineConfig({
             AURA_AUTH_GITHUB_CLIENT_ID: "test-github-client-id",
             AURA_AUTH_GITHUB_CLIENT_SECRET: "test-github-client-secret",
         },
+        projects: [
+            {
+                test: {
+                    name: "stateful",
+                    include: ["test/stateful/**/*.test.ts"],
+                    setupFiles: ["./test/stateful/setup.ts"],
+                },
+                resolve: {
+                    alias: {
+                        "@": path.resolve(__dirname, "./src"),
+                        "@test": path.resolve(__dirname, "./test"),
+                    },
+                },
+            },
+            {
+                test: {
+                    name: "stateless",
+                    include: ["test/stateless/**/*.test.ts"],
+                },
+                resolve: {
+                    alias: {
+                        "@": path.resolve(__dirname, "./src"),
+                        "@test": path.resolve(__dirname, "./test"),
+                    },
+                },
+            },
+        ],
     },
     resolve: {
         alias: {

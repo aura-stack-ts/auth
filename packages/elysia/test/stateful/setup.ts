@@ -1,16 +1,6 @@
 import "dotenv/config"
 import { afterAll, beforeEach } from "vitest"
-import { PrismaPg } from "@prisma/adapter-pg"
-import { PrismaClient } from "@/generated/prisma/client.ts"
-import { prismaAdapter } from "@/index.ts"
-
-const pgAdapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
-export const prismaClient = new PrismaClient({ adapter: pgAdapter })
-
-export const adapter = prismaAdapter({
-    client: prismaClient,
-    deleteStrategy: "soft",
-})
+import { prismaClient } from "@test/stateful/app"
 
 export const resetDatabase = async () => {
     await prismaClient.$transaction([

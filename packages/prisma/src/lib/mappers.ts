@@ -143,7 +143,7 @@ export const fromMFAStatus = (state: PrismaMfaState): MFAState => {
     }
 }
 
-export const toMFASatus = (state: MFAState): PrismaMfaState => {
+export const toMFAStatus = (state: MFAState): PrismaMfaState => {
     switch (state) {
         case "none":
             return "NONE"
@@ -332,8 +332,12 @@ export const toOAuthTransaction = (transaction: OAuthTransaction): OAuthTransact
     deviceId: transaction.deviceId,
 })
 
-export const appendRevokeReason = (metadata: Record<string, unknown> | null, reason: RevokeReason): Record<string, unknown> => ({
+export const appendRevokeReason = (
+    metadata: Record<string, unknown> | null,
+    reason: RevokeReason,
+    revokedAt: Date
+): Record<string, unknown> => ({
     ...(metadata ?? {}),
     revokeReason: reason,
-    revokedAt: new Date().toISOString(),
+    revokedAt: revokedAt.toISOString(),
 })
