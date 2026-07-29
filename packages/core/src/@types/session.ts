@@ -12,6 +12,7 @@ import type {
     Prettify,
     Identities,
     OAuthProviderRecord,
+    InternalContext,
 } from "@/@types/index.ts"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
 
@@ -286,6 +287,18 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         session: Session<DefaultUser> | null
         headers: Headers
     }>
+
+    signIn(
+        oauth: string,
+        request: Request,
+        redirectTo?: string
+    ): Promise<{
+        success: boolean
+        headers: Headers
+        signInURL: string
+    }>
+
+    oauthCallback(oauth: string, request: Request, { code, state }: { code: string; state: string }): Promise<Response>
 }
 
 /** Inputs for constructing a session strategy implementation for a given identity schema. */
@@ -296,10 +309,12 @@ export interface CreateSessionStrategyOptions<Identity extends Identities> {
     logger?: InternalLogger
     identity: SchemaRegistryContext
     oauth: OAuthProviderRecord
+    ctx: InternalContext<Identity, any>
 }
 
 /** Options specialized for the JWT-backed session strategy. */
 export interface JWTStrategyOptions<DefaultUser extends User = User> {
+    ctx: InternalContext<any, any>
     config?: StatelessStrategyConfig
     jose: JoseInstance<DefaultUser>
     logger?: InternalLogger
@@ -309,6 +324,7 @@ export interface JWTStrategyOptions<DefaultUser extends User = User> {
 }
 
 export interface DatabaseStrategyOptions<DefaultUser extends User = User> {
+    ctx: InternalContext<any, any>
     config: StatefulStrategyConfig
     jose: JoseInstance<DefaultUser>
     logger?: InternalLogger

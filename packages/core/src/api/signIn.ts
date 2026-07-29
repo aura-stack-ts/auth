@@ -1,9 +1,6 @@
-import { HeadersBuilder } from "@aura-stack/router"
-import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
+import { secureApiHeaders } from "@/shared/headers.ts"
+import { createSignInURL } from "@/shared/utils/authorization.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
-import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
-import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
-import { createAuthorizationURL, createRedirectTo, createRedirectURI, createSignInURL } from "@/shared/utils/authorization.ts"
 import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
 
 /**
@@ -14,7 +11,7 @@ export const signIn = async (
     { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions>
 ): Promise<SignInAPIReturn> => {
     try {
-        const { provider, request, rateLimit } = await createValidation(ctx, headersInit)
+        const { request, rateLimit } = await createValidation(ctx, headersInit)
             .verifyOAuthProvider(oauth)
             .buildRequest(requestInit, `/signIn/${oauth}`)
             .verifyRateLimit("signIn")
@@ -42,68 +39,17 @@ export const signIn = async (
             }
         }
 
-        const redirectURI = await createRedirectURI(request, oauth, ctx)
-        const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
+        const { success, signInURL, headers } = await ctx.sessionStrategy.signIn(oauth, request, redirectTo)
 
-        const isOIDC = isOIDCProvider(provider!)
-        ctx.logger?.log("SIGN_IN_PROVIDER_TYPE_DETECTED", {
-            structuredData: { oauth_provider: oauth, oidc: isOIDC },
-        })
-
-        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider!) : provider!
-
-        if (isOIDC) {
-            ctx.logger?.log("OIDC_PROVIDER_RESOLVED", {
-                structuredData: { oauth_provider: oauth, oidc: isOIDC },
-            })
-        }
-
-        let authorization: string
-        let state: string
-        let codeVerifier: string
-        let nonce: string | undefined
-
-        if (isOIDC) {
-            const result = await createOIDCAuthorizationURL(resolvedProvider, redirectURI, ctx)
-            authorization = result.authorization
-            state = result.state
-            codeVerifier = result.codeVerifier
-            nonce = result.nonce
-        } else {
-            const result = await createAuthorizationURL(resolvedProvider, redirectURI, ctx)
-            authorization = result.authorization
-            state = result.state
-            codeVerifier = result.codeVerifier
-        }
-
-        ctx?.logger?.log("SIGN_IN_INITIATED", {
-            structuredData: { oauth_provider: oauth, oidc: isOIDC },
-        })
-
-        const headersBuilder = new HeadersBuilder(cacheControl)
-            .setHeader("Location", authorization)
-            .setCookie(ctx.cookies.state.name, state, ctx.cookies.state.attributes)
-            .setCookie(ctx.cookies.redirectURI.name, redirectURI, ctx.cookies.redirectURI.attributes)
-            .setCookie(ctx.cookies.redirectTo.name, redirectToValue, ctx.cookies.redirectTo.attributes)
-            .setCookie(ctx.cookies.codeVerifier.name, codeVerifier, ctx.cookies.codeVerifier.attributes)
-
-        if (nonce) {
-            headersBuilder.setCookie(ctx.cookies.nonce.name, nonce, ctx.cookies.nonce.attributes)
-        }
-
-        const headersList = headersBuilder.toHeaders()
         return {
-            success: true,
+            success,
             redirect: true,
-            signInURL: authorization,
-            headers: headersList,
+            signInURL: signInURL,
+            headers: headers,
             toResponse: () => {
-                return Response.json(
-                    { success: true, redirect: true, signInURL: authorization },
-                    { status: 302, headers: headersList }
-                )
+                return Response.json({ success: true, redirect: true, signInURL: signInURL }, { status: 302, headers: headers })
             },
-        }
+        } as SignInAPIReturn
     } catch (error) {
         const { code, message } = handleApiError(error, "AUTH_SIGN_IN_FAILED", "An error occurred during the sign-in process.")
         return {

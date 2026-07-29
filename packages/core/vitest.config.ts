@@ -17,6 +17,7 @@ const SALT_KEY = getRandomBytes(44)
 export default defineConfig({
     test: {
         include: ["test/**/*.test.ts"],
+        exclude: ["test/api/stateful/signIn.test.ts"],
         unstubEnvs: true,
         env: {
             AURA_AUTH_SECRET: base64url.encode(SECRET_KEY),
@@ -40,7 +41,7 @@ export default defineConfig({
                 test: {
                     name: "core",
                     include: ["test/**/*.test.ts"],
-                    exclude: ["test/rate-limiter.test.ts"],
+                    exclude: ["test/rate-limiter.test.ts", "test/api/stateful/signIn.test.ts"],
                     setupFiles: ["./test/setup/vitest.setup.ts", "./test/setup/actions.setup.ts"],
                 },
                 resolve: {

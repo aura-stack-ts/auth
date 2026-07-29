@@ -261,3 +261,7 @@ export const isObject = (value: unknown): value is Record<string, any> => {
 export const isRefreshTokenObject = (value: unknown): value is Exclude<OAuthProviderConfig["refreshToken"], string> => {
     return isObject(value) && "url" in value
 }
+
+export const isResponse = (value: unknown): value is Response => {
+    return typeof Response !== "undefined" && value instanceof Response
+}

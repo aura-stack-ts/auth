@@ -111,6 +111,14 @@ export const getSetCookie = (response: Response | Headers, cookieName: string) =
     return parseSetCookie(strCookie).value
 }
 
+export const getOptionalCookie = (request: Request, cookieName: string): string | undefined => {
+    const cookies = request.headers.get("Cookie")
+    if (!cookies) {
+        return undefined
+    }
+    return parse(cookies)[cookieName]
+}
+
 /**
  * Defines the cookie configuration based on the request security and cookie options passed
  * in the Aura Auth configuration (`createAuth` function). This function ensures the correct
