@@ -34,7 +34,8 @@
       "require": "./dist/_core/shared.cjs"
     },
     "./adapter": {
-      "import": "./src/adapter-suite.js"
+      "import": "./src/adapter-suite.js",
+      "types": "./src/adapter-suite.ts"
     }
   },
   "packageManager": "pnpm@10.15.0"

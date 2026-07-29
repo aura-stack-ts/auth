@@ -438,11 +438,11 @@
       "version": "0.0.0",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
+      },
+      "devDependencies": {
         "@aura-stack/shared": "workspace:*",
         "@aura-stack/tsconfig": "workspace:*",
         "@aura-stack/tsdown-config": "workspace:*",
-      },
-      "devDependencies": {
         "@types/pg": "^8.20.0",
         "prisma": "^7.9.1",
       },

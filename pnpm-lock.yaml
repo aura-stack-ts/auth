@@ -900,15 +900,6 @@ importers:
       '@aura-stack/auth':
         specifier: workspace:*
         version: link:../core
-      '@aura-stack/shared':
-        specifier: workspace:*
-        version: link:../shared
-      '@aura-stack/tsconfig':
-        specifier: workspace:*
-        version: link:../../configs/tsconfig
-      '@aura-stack/tsdown-config':
-        specifier: workspace:*
-        version: link:../../configs/tsdown-config
       '@prisma/adapter-pg':
         specifier: ^7.9.1
         version: 7.9.1
@@ -922,6 +913,15 @@ importers:
         specifier: ^8.22.0
         version: 8.22.0
     devDependencies:
+      '@aura-stack/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsdown-config':
+        specifier: workspace:*
+        version: link:../../configs/tsdown-config
       '@types/pg':
         specifier: ^8.20.0
         version: 8.20.0

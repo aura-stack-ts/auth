@@ -81,14 +81,17 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             if (deleteStrategy === "hard") {
                 await client.user.delete({ where: { id } })
             } else {
-                await client.user.update({
-                    where: { id },
-                    data: { status: UserStatus.DELETED, updatedAt: new Date() },
-                })
-                await client.session.updateManyAndReturn({
-                    where: { userId: id, status: "ACTIVE" },
-                    data: { status: "REVOKED", revokedAt: new Date() },
-                })
+                const now = new Date()
+                await client.$transaction([
+                    client.user.update({
+                        where: { id },
+                        data: { status: UserStatus.DELETED, updatedAt: now },
+                    }),
+                    client.session.updateMany({
+                        where: { userId: id, status: "ACTIVE" },
+                        data: { status: "REVOKED", revokedAt: now },
+                    }),
+                ])
             }
         },
         /**

@@ -45,14 +45,14 @@
   ],
   "keywords": [],
   "dependencies": {
-    "@aura-stack/auth": "workspace:*",
-    "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*",
-    "@aura-stack/shared": "workspace:*"
+    "@aura-stack/auth": "workspace:*"
   },
   "devDependencies": {
     "prisma": "^7.9.1",
-    "@types/pg": "^8.20.0"
+    "@types/pg": "^8.20.0",
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*",
+    "@aura-stack/shared": "workspace:*"
   },
   "peerDependencies": {
     "@aura-stack/auth": "workspace:*",
