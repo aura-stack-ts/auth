@@ -257,7 +257,6 @@ describe("updateSession API", () => {
                 updateUser: updateUserMock,
             },
             {
-                logger: true,
                 identity: {
                     // @ts-ignore
                     schema: extendedIdentitySchema,

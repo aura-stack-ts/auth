@@ -1,6 +1,7 @@
 import "dotenv/config"
-import { afterAll, beforeEach } from "vitest"
+import { afterAll, beforeEach, vi } from "vitest"
 import { prismaClient } from "@test/stateful/app"
+import { afterEach } from "node:test"
 
 export const resetDatabase = async () => {
     await prismaClient.$transaction([
@@ -21,4 +22,8 @@ beforeEach(async () => {
 
 afterAll(async () => {
     await prismaClient.$disconnect()
+})
+
+afterEach(() => {
+    vi.unstubAllGlobals()
 })

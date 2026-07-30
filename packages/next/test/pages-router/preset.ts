@@ -3,7 +3,7 @@ import { createSecretValue } from "@aura-stack/react/crypto"
 
 export const auth = createAuth({
     oauth: [],
-    logger: true,
+    logger: process.env.CI === "true" ? false : true,
     credentials: {
         authorize: (ctx) => {
             const { username, password } = ctx.credentials
