@@ -22,6 +22,7 @@ export const adapter = prismaAdapter({
 export const auth = createAuth({
     oauth: ["github"],
     basePath: "/api/auth",
+    logger: true,
     credentials: {
         authorize: ({ credentials }) => {
             const { username, password } = credentials

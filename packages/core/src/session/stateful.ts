@@ -1105,9 +1105,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
         const userAgent = request.headers.get("user-agent") || null
         const fingerprint = request.headers.get("x-device-fingerprint") || null
-
         const deviceId = request.headers.get("x-device-id") || null
-
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
 
         await config.adapter.createOAuthTransaction({
