@@ -150,7 +150,7 @@ export interface OAuthTransactionEntity {
     state: string
     nonce: string | null
     codeVerifier: string | null
-    redirectUri: string
+    redirectURI: string
     redirectTo: string | null
     userAgent: string | null
     fingerprint: string | null

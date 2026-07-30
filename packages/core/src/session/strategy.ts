@@ -6,6 +6,7 @@ import type { FromShapeToObject } from "@/@types/utility.ts"
 import type { CreateSessionStrategyOptions, SessionStrategy, User } from "@/@types/session.ts"
 
 export const createSessionStrategy = <Identity extends Identities>({
+    ctx,
     config,
     jose,
     cookies,
@@ -18,6 +19,7 @@ export const createSessionStrategy = <Identity extends Identities>({
     switch (strategy) {
         case "jwt":
             return createStatelessStrategy({
+                ctx,
                 jose,
                 config: config as any,
                 cookies,
@@ -27,6 +29,7 @@ export const createSessionStrategy = <Identity extends Identities>({
             })
         case "database":
             return createStatefulStrategy({
+                ctx,
                 jose,
                 config: config as any,
                 cookies,

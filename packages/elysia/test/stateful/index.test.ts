@@ -1,12 +1,100 @@
-import { describe, test, expect } from "vitest"
-import { adapter, app, auth } from "@test/stateful/app"
+import { describe, test, expect, vi } from "vitest"
+import { adapter, app, auth, prismaClient } from "@test/stateful/app"
 import { createCSRF } from "@aura-stack/auth/crypto"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
+        expect(await prismaClient.oAuthTransaction.count()).toBe(0)
         const response = await app.handle(new Request("http://localhost/api/auth/signIn/github"))
         expect(response.status).toBe(302)
         expect(response.headers.get("location")).toMatch(/^https:\/\/github\.com\/login\/oauth\/authorize\?/)
+        const transaction = await prismaClient.oAuthTransaction.findFirst({
+            where: {
+                provider: "github",
+            },
+        })
+        expect(transaction?.provider).toBe("github")
+    })
+
+    test("handles GitHub OAuth callback and creates a session", async () => {
+        const mockFetch = vi.fn()
+
+        vi.stubGlobal("fetch", mockFetch)
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => ({
+                access_token: "access_token_123",
+                token_type: "bearer",
+                scope: "read:user",
+                expires_in: 3600,
+            }),
+        })
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => ({
+                id: 123456,
+                name: "John Doe",
+                login: "johndoe",
+                email: "john.doe@example.com",
+                avatar_url: "https://john.doe/avatar.png",
+            }),
+        })
+
+        await adapter.createOAuthTransaction({
+            id: "transaction-123",
+            provider: "github",
+            state: "state-123",
+            codeVerifier: "code-verifier-123",
+            redirectURI: "http://localhost/api/auth/signIn/github/callback",
+            createdAt: new Date(),
+            deviceId: null,
+            expiresAt: new Date(Date.now() + 60000),
+            nonce: null,
+            fingerprint: null,
+            metadata: null,
+            redirectTo: null,
+            userAgent: null,
+        })
+        await app.handle(
+            new Request("http://localhost:3000/api/auth/callback/github?code=valid-code&state=state-123", {
+                headers: {
+                    "User-Agent": "Mozilla/5.0",
+                },
+            })
+        )
+        expect(mockFetch).toHaveBeenNthCalledWith(1, "https://github.com/login/oauth/access_token", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                client_id: "test-github-client-id",
+                client_secret: "test-github-client-secret",
+                code: "valid-code",
+                redirect_uri: "http://localhost/api/auth/signIn/github/callback",
+                grant_type: "authorization_code",
+                code_verifier: "code-verifier-123",
+            }).toString(),
+            signal: expect.any(AbortSignal),
+        })
+        expect(mockFetch).toHaveBeenNthCalledWith(2, "https://api.github.com/user", {
+            method: "GET",
+            headers: {
+                "User-Agent": `Aura Auth/0.8.1`,
+                Accept: "application/json",
+                Authorization: "Bearer access_token_123",
+            },
+            signal: expect.any(AbortSignal),
+        })
     })
 })
 

@@ -135,7 +135,7 @@ CREATE TABLE "OAuthTransaction" (
     "state" TEXT NOT NULL,
     "nonce" TEXT,
     "codeVerifier" TEXT,
-    "redirectUri" TEXT NOT NULL,
+    "redirectURI" TEXT NOT NULL,
     "redirectTo" TEXT,
     "userAgent" TEXT,
     "fingerprint" TEXT,

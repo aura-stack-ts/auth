@@ -1,7 +1,7 @@
-import { getCookie, getExpiredCookie } from "@/cookie.ts"
+import { getCookie, getExpiredCookie, getOptionalCookie } from "@/cookie.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders } from "@/shared/headers.ts"
+import { cacheControl, secureApiHeaders } from "@/shared/headers.ts"
 import { handleApiError } from "@/shared/utils/api.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
@@ -13,6 +13,8 @@ import {
     shouldRefresh,
     toUnionHeaders,
     getStandardSession,
+    timingSafeEqual,
+    transformToTokenPayload,
 } from "@/shared/utils.ts"
 import type {
     Session,
@@ -26,8 +28,22 @@ import type {
     GetProviderTokensStatefulReturn,
 } from "@/@types/index.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
+import {
+    createAuthorizationURL,
+    createRedirectTo,
+    createRedirectURI,
+    getOriginURL,
+    getTrustedOrigins,
+} from "@/shared/utils/authorization.ts"
+import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
+import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
+import { createAccessToken, getUserInfo } from "@/shared/utils/oauth.ts"
+import { validateIDToken } from "@/shared/oidc/id-token.ts"
+import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
+import { createCSRF } from "@/shared/crypto.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>({
+    ctx,
     config,
     jose,
     logger,
@@ -404,6 +420,168 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         return { session, headers: mergedHeaders }
     }
 
+    const signIn = async (oauthId: string, request: Request, redirectTo?: string) => {
+        const provider = oauth[oauthId]
+        if (!provider) {
+            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
+        }
+
+        const redirectURI = await createRedirectURI(request, oauthId, ctx)
+        const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
+
+        const isOIDC = isOIDCProvider(provider)
+        logger?.log("SIGN_IN_PROVIDER_TYPE_DETECTED", {
+            structuredData: { oauth_provider: oauthId, oidc: isOIDC },
+        })
+
+        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider!) : provider!
+
+        if (isOIDC) {
+            logger?.log("OIDC_PROVIDER_RESOLVED", {
+                structuredData: { oauth_provider: oauthId, oidc: isOIDC },
+            })
+        }
+
+        let authorization: string
+        let state: string
+        let codeVerifier: string
+        let nonce: string | undefined
+
+        if (isOIDC) {
+            const result = await createOIDCAuthorizationURL(resolvedProvider, redirectURI, ctx)
+            authorization = result.authorization
+            state = result.state
+            codeVerifier = result.codeVerifier
+            nonce = result.nonce
+        } else {
+            const result = await createAuthorizationURL(resolvedProvider, redirectURI, ctx)
+            authorization = result.authorization
+            state = result.state
+            codeVerifier = result.codeVerifier
+        }
+
+        logger?.log("SIGN_IN_INITIATED", {
+            structuredData: { oauth_provider: oauthId, oidc: isOIDC },
+        })
+
+        const headersBuilder = new HeadersBuilder(cacheControl)
+            .setHeader("Location", authorization)
+            .setCookie(cookies().state.name, state, cookies().state.attributes)
+            .setCookie(cookies().redirectURI.name, redirectURI, cookies().redirectURI.attributes)
+            .setCookie(cookies().redirectTo.name, redirectToValue, cookies().redirectTo.attributes)
+            .setCookie(cookies().codeVerifier.name, codeVerifier, cookies().codeVerifier.attributes)
+
+        if (nonce) {
+            headersBuilder.setCookie(cookies().nonce.name, nonce, cookies().nonce.attributes)
+        }
+        return {
+            success: true,
+            signInURL: authorization,
+            headers: headersBuilder.toHeaders(),
+        }
+    }
+
+    const oauthCallback = async (oauthId: string, request: Request, { code, state }: { code: string; state: string }) => {
+        const { oauth: providers, cookies, jose, logger, trustedOrigins } = ctx
+
+        const oauthConfig = providers[oauthId]
+        const isOIDC = isOIDCProvider(oauthConfig)
+        const cookieState = getCookie(request, cookies.state.name)
+        const codeVerifier = getCookie(request, cookies.codeVerifier.name)
+        const cookieNonce = isOIDC ? getOptionalCookie(request, cookies.nonce.name) : undefined
+        const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
+        const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
+
+        const clearCookieHeaders = new HeadersBuilder(cacheControl)
+            .setCookie(cookies.state.name, "", getExpiredCookie(cookies.state.attributes))
+            .setCookie(cookies.redirectURI.name, "", getExpiredCookie(cookies.redirectURI.attributes))
+            .setCookie(cookies.redirectTo.name, "", getExpiredCookie(cookies.redirectTo.attributes))
+            .setCookie(cookies.codeVerifier.name, "", getExpiredCookie(cookies.codeVerifier.attributes))
+            .setCookie(cookies.nonce.name, "", getExpiredCookie(cookies.nonce.attributes))
+
+        if (!timingSafeEqual(cookieState, state)) {
+            logger?.log("MISMATCHING_STATE", {
+                structuredData: {
+                    oauth_provider: oauthId,
+                },
+            })
+            return Response.json(
+                {
+                    type: "PROTOCOL",
+                    code: "AUTH_MISMATCHING_STATE",
+                    message: "The provided state passed in the OAuth response does not match the stored token state.",
+                },
+                { headers: clearCookieHeaders.toHeaders(), status: 400 }
+            )
+        }
+
+        const resolvedConfig = isOIDC ? await resolveOpenIDProvider(oauthConfig) : oauthConfig
+
+        const accessToken = await createAccessToken(resolvedConfig, cookieRedirectURI, code, codeVerifier, logger)
+
+        if (isOIDC) {
+            if (!accessToken.id_token) {
+                throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
+            }
+            const { issuer, jwks_uri } = resolvedConfig.oidc!
+            if (!jwks_uri || !cookieNonce || !resolvedConfig.clientId) {
+                throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
+            }
+            await validateIDToken(accessToken.id_token, {
+                issuer,
+                clientId: resolvedConfig.clientId,
+                nonce: cookieNonce,
+                jwks_uri,
+            })
+        }
+
+        if (!isRelativeURL(cookieRedirectTo)) {
+            const origins = await getTrustedOrigins(request, trustedOrigins)
+            const requestOrigin = await getOriginURL(request, ctx)
+            let isValid = false
+            try {
+                isValid =
+                    origins.length > 0
+                        ? isTrustedOrigin(cookieRedirectTo, origins)
+                        : isSameOrigin(cookieRedirectTo, requestOrigin)
+            } catch {
+                isValid = false
+            }
+            if (!isValid) {
+                logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
+                    structuredData: {
+                        redirect_path: cookieRedirectTo,
+                        provider: oauthId,
+                        has_trusted_origins: origins.length > 0,
+                        request_origin: requestOrigin,
+                    },
+                })
+                throw new AuraAuthError({ code: "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED" })
+            }
+        }
+
+        const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
+        const session = await ctx.sessionStrategy.createSession(userInfo)
+        const csrfToken = await createCSRF(jose)
+        const tokenPayload = transformToTokenPayload(accessToken)
+        const providerToken = await ctx.jwtManager.createToken(tokenPayload)
+
+        logger?.log("OAUTH_CALLBACK_SUCCESS", {
+            structuredData: {
+                provider: oauthId,
+            },
+        })
+
+        const headers = clearCookieHeaders
+            .setHeader("Location", cookieRedirectTo)
+            .setCookie(cookies.sessionToken.name, session, cookies.sessionToken.attributes)
+            .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
+            .setCookie(`${cookies.accessToken.name}.${oauthId}`, providerToken, cookies.accessToken.attributes)
+            .toHeaders()
+
+        return Response.json({ oauth }, { status: 302, headers: headers })
+    }
+
     // JWT strategy: stateless tokens cannot be revoked server-side
     const revokeSession = async (_sessionId: string): Promise<void> => {}
 
@@ -423,5 +601,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         isProviderConnected,
         refreshUserInfo,
         destroySession,
+        signIn,
+        oauthCallback,
     }
 }

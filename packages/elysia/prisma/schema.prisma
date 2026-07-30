@@ -218,7 +218,7 @@ model OAuthTransaction {
   state        String   @unique
   nonce        String?
   codeVerifier String?
-  redirectUri  String
+  redirectURI  String
   redirectTo   String?
   userAgent    String?
   fingerprint  String?

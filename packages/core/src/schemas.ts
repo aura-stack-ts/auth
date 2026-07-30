@@ -350,3 +350,8 @@ export const OAuthTokenPayloadSchema = object({
     issuer: string().optional(),
     issuedAt: number().optional(),
 })
+
+export const SearchParamsCallbackSchema = object({
+    code: string("Missing code parameter in the OAuth authorization response."),
+    state: string("Missing state parameter in the OAuth authorization response."),
+})

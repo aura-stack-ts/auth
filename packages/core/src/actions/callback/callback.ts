@@ -1,16 +1,6 @@
 import { z } from "zod/v4"
-import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
-import { createCSRF } from "@/shared/crypto.ts"
-import { parse } from "@aura-stack/router/cookie"
-import { cacheControl } from "@/shared/headers.ts"
-import { AuraAuthError } from "@/shared/errors.ts"
-import { getCookie, getExpiredCookie } from "@/cookie.ts"
-import { validateIDToken } from "@/shared/oidc/id-token.ts"
-import { createAccessToken, getUserInfo } from "@/shared/utils/oauth.ts"
-import { timingSafeEqual, transformToTokenPayload } from "@/shared/utils.ts"
-import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
-import { getOriginURL, getTrustedOrigins } from "@/shared/utils/authorization.ts"
-import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
+import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { SearchParamsCallbackSchema } from "@/schemas.ts"
 import type { OAuthProviderRecord } from "@/@types/index.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
@@ -28,20 +18,9 @@ const callbackConfig = (oauth: OAuthProviderRecord) => {
                 ),
             }),
             // @ts-ignore
-            searchParams: z.object({
-                code: z.string("Missing code parameter in the OAuth authorization response."),
-                state: z.string("Missing state parameter in the OAuth authorization response."),
-            }),
+            searchParams: SearchParamsCallbackSchema,
         },
     })
-}
-
-const getOptionalCookie = (request: Request, cookieName: string): string | undefined => {
-    const cookies = request.headers.get("Cookie")
-    if (!cookies) {
-        return undefined
-    }
-    return parse(cookies)[cookieName]
 }
 
 export const callbackAction = (oauth: OAuthProviderRecord) => {
@@ -55,98 +34,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 searchParams: { code, state },
                 context,
             } = ctx
-            const { oauth: providers, cookies, jose, logger, trustedOrigins } = context
-
-            const oauthConfig = providers[oauth]
-            const isOIDC = isOIDCProvider(oauthConfig)
-            const cookieState = getCookie(request, cookies.state.name)
-            const codeVerifier = getCookie(request, cookies.codeVerifier.name)
-            const cookieNonce = isOIDC ? getOptionalCookie(request, cookies.nonce.name) : undefined
-            const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
-            const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
-
-            const clearCookieHeaders = new HeadersBuilder(cacheControl)
-                .setCookie(cookies.state.name, "", getExpiredCookie(cookies.state.attributes))
-                .setCookie(cookies.redirectURI.name, "", getExpiredCookie(cookies.redirectURI.attributes))
-                .setCookie(cookies.redirectTo.name, "", getExpiredCookie(cookies.redirectTo.attributes))
-                .setCookie(cookies.codeVerifier.name, "", getExpiredCookie(cookies.codeVerifier.attributes))
-                .setCookie(cookies.nonce.name, "", getExpiredCookie(cookies.nonce.attributes))
-
-            if (!timingSafeEqual(cookieState, state)) {
-                logger?.log("MISMATCHING_STATE", {
-                    structuredData: {
-                        oauth_provider: oauth,
-                    },
-                })
-                return Response.json(
-                    {
-                        type: "PROTOCOL",
-                        code: "AUTH_MISMATCHING_STATE",
-                        message: "The provided state passed in the OAuth response does not match the stored token state.",
-                    },
-                    { headers: clearCookieHeaders.toHeaders(), status: 400 }
-                )
-            }
-
-            const resolvedConfig = isOIDC ? await resolveOpenIDProvider(oauthConfig) : oauthConfig
-
-            const accessToken = await createAccessToken(resolvedConfig, cookieRedirectURI, code, codeVerifier, logger)
-
-            if (isOIDC) {
-                if (!accessToken.id_token) {
-                    throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
-                }
-                const { issuer, jwks_uri } = resolvedConfig.oidc!
-                if (!jwks_uri || !cookieNonce || !resolvedConfig.clientId) {
-                    throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
-                }
-                await validateIDToken(accessToken.id_token, {
-                    issuer,
-                    clientId: resolvedConfig.clientId,
-                    nonce: cookieNonce,
-                    jwks_uri,
-                })
-            }
-            const origins = await getTrustedOrigins(request, trustedOrigins)
-            const requestOrigin = await getOriginURL(request, context)
-
-            if (!isRelativeURL(cookieRedirectTo)) {
-                const isValid =
-                    origins.length > 0
-                        ? isTrustedOrigin(cookieRedirectTo, origins)
-                        : isSameOrigin(cookieRedirectTo, requestOrigin)
-                if (!isValid) {
-                    logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
-                        structuredData: {
-                            redirect_path: cookieRedirectTo,
-                            provider: oauth,
-                            has_trusted_origins: origins.length > 0,
-                            request_origin: requestOrigin,
-                        },
-                    })
-                    throw new AuraAuthError({ code: "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED" })
-                }
-            }
-
-            const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
-            const session = await context.sessionStrategy.createSession(userInfo)
-            const csrfToken = await createCSRF(jose)
-            const tokenPayload = transformToTokenPayload(accessToken)
-            const providerToken = await context.jwtManager.createToken(tokenPayload)
-
-            logger?.log("OAUTH_CALLBACK_SUCCESS", {
-                structuredData: {
-                    provider: oauth,
-                },
-            })
-
-            const headers = clearCookieHeaders
-                .setHeader("Location", cookieRedirectTo)
-                .setCookie(cookies.sessionToken.name, session, cookies.sessionToken.attributes)
-                .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
-                .setCookie(`${cookies.accessToken.name}.${oauth}`, providerToken, cookies.accessToken.attributes)
-                .toHeaders()
-            return Response.json({ oauth }, { status: 302, headers: headers })
+            return await context.sessionStrategy.oauthCallback(oauth, request, { code, state })
         },
         callbackConfig(oauth)
     )

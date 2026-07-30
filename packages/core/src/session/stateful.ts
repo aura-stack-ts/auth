@@ -5,7 +5,7 @@ import { handleApiError } from "@/shared/utils/api.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
-import { createHash, createSecretValue } from "@/shared/crypto.ts"
+import { createHash, createSecretValue, createCSRF } from "@/shared/crypto.ts"
 import type { JoseInstance } from "@/@types/index.ts"
 import type { DeepPartial } from "@/@types/utility.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
@@ -19,11 +19,23 @@ import type {
 } from "@/@types/session.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { getExpiredCookie } from "@/cookie.ts"
+import {
+    createAuthorizationURL,
+    createRedirectTo,
+    createRedirectURI,
+    getOriginURL,
+    getTrustedOrigins,
+} from "@/shared/utils/authorization.ts"
+import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
+import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
+import { createAccessToken, getUserInfo } from "@/shared/utils/oauth.ts"
+import { validateIDToken } from "@/shared/oidc/id-token.ts"
+import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
 
 export const createStatefulStrategy = <DefaultUser extends User = User>({
     config,
     cookies,
-    identity,
+    ctx,
     logger,
     jose,
     oauth,
@@ -134,10 +146,10 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 },
             })
 
-            const parsedUser = identity.skipValidation ? user : await identity.schemaRegistry.parse(user)
+            const parsedUser = ctx.identity.skipValidation ? user : await ctx.identity.schemaRegistry.parse(user)
             logger?.log("STATEFUL_USER_VALIDATION", {
                 structuredData: {
-                    validation_skipped: identity.skipValidation || false,
+                    validation_skipped: ctx.identity.skipValidation || false,
                     user_id: user.id,
                 },
             })
@@ -180,7 +192,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             },
         })
 
-        if (identity.skipValidation) {
+        if (ctx.identity.skipValidation) {
             logger?.log("IDENTITY_VALIDATION_DISABLED", {
                 structuredData: {
                     identity_validation_disabled: true,
@@ -188,10 +200,10 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             })
         }
 
-        const payload = identity.skipValidation ? session : await identity.schemaRegistry.parse(session)
+        const payload = ctx.identity.skipValidation ? session : await ctx.identity.schemaRegistry.parse(session)
         logger?.log("STATEFUL_PAYLOAD_VALIDATION", {
             structuredData: {
-                validation_skipped: identity.skipValidation || false,
+                validation_skipped: ctx.identity.skipValidation || false,
                 user_id: payload.sub || "",
                 has_email: Boolean(payload.email) || false,
             },
@@ -425,17 +437,19 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 },
             })
 
-            const parsedCurrentUser = identity.skipValidation ? currentUser : await identity.schemaRegistry.parse(currentUser)
+            const parsedCurrentUser = ctx.identity.skipValidation
+                ? currentUser
+                : await ctx.identity.schemaRegistry.parse(currentUser)
             logger?.log("STATEFUL_USER_VALIDATION", {
                 structuredData: {
-                    validation_skipped: identity.skipValidation || false,
+                    validation_skipped: ctx.identity.skipValidation || false,
                     user_id: currentUser.id,
                 },
             })
 
-            const sessionPayload = identity.skipValidation
+            const sessionPayload = ctx.identity.skipValidation
                 ? session.user
-                : await identity.schemaRegistry.parseAsPartial(session.user)
+                : await ctx.identity.schemaRegistry.parseAsPartial(session.user)
 
             logger?.log("STATEFUL_SESSION_UPDATE_PAYLOAD", {
                 structuredData: {
@@ -457,11 +471,11 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 },
             })
 
-            const validatedUser = identity.skipValidation ? updatedUser : await identity.schemaRegistry.parse(updatedUser)
+            const validatedUser = ctx.identity.skipValidation ? updatedUser : await ctx.identity.schemaRegistry.parse(updatedUser)
             logger?.log("STATEFUL_UPDATED_USER_VALIDATED", {
                 structuredData: {
                     user_id: validatedUser.id,
-                    validation_skipped: identity.skipValidation || false,
+                    validation_skipped: ctx.identity.skipValidation || false,
                 },
             })
 
@@ -1045,6 +1059,290 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
         return await refreshSession(headers, { user: userInfo }, skipCSRFCheck)
     }
 
+    const signIn = async (oauthId: string, request: Request, redirectTo?: string) => {
+        const provider = oauth[oauthId]
+        if (!provider) {
+            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
+        }
+
+        const redirectURI = await createRedirectURI(request, oauthId, ctx)
+        const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
+
+        const isOIDC = isOIDCProvider(provider)
+        logger?.log("SIGN_IN_PROVIDER_TYPE_DETECTED", {
+            structuredData: { oauth_provider: oauthId, oidc: isOIDC },
+        })
+
+        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider!) : provider!
+
+        if (isOIDC) {
+            logger?.log("OIDC_PROVIDER_RESOLVED", {
+                structuredData: { oauth_provider: oauthId, oidc: isOIDC },
+            })
+        }
+
+        let authorization: string
+        let state: string
+        let codeVerifier: string
+        let nonce: string | undefined
+
+        if (isOIDC) {
+            const result = await createOIDCAuthorizationURL(resolvedProvider, redirectURI, ctx)
+            authorization = result.authorization
+            state = result.state
+            codeVerifier = result.codeVerifier
+            nonce = result.nonce
+        } else {
+            const result = await createAuthorizationURL(resolvedProvider, redirectURI, ctx)
+            authorization = result.authorization
+            state = result.state
+            codeVerifier = result.codeVerifier
+        }
+
+        logger?.log("SIGN_IN_INITIATED", {
+            structuredData: { oauth_provider: oauthId, oidc: isOIDC },
+        })
+
+        const userAgent = request.headers.get("user-agent") || null
+        const fingerprint = request.headers.get("x-device-fingerprint") || null
+        const deviceId = request.headers.get("x-device-id") || null
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
+
+        await config.adapter.createOAuthTransaction({
+            id: crypto.randomUUID(),
+            provider: oauthId,
+            state,
+            nonce: nonce || null,
+            codeVerifier,
+            redirectURI: redirectURI,
+            redirectTo: redirectToValue,
+            userAgent,
+            fingerprint,
+            deviceId,
+            createdAt: new Date(),
+            expiresAt,
+            metadata: null,
+        })
+
+        const headers = new HeadersBuilder(secureApiHeaders).setHeader("Location", authorization).toHeaders()
+
+        return {
+            success: true,
+            signInURL: authorization,
+            headers,
+        }
+    }
+
+    const oauthCallback = async (oauthId: string, request: Request, { code, state }: { code: string; state: string }) => {
+        const oauthConfig = oauth[oauthId]
+        const isOIDC = isOIDCProvider(oauthConfig)
+
+        const transaction = await config.adapter.getOAuthTransactionByState(state)
+
+        if (!transaction) {
+            logger?.log("OAUTH_PROTOCOL_ERROR", {
+                structuredData: {
+                    oauth_provider: oauthId,
+                    state,
+                },
+            })
+            return Response.json(
+                {
+                    type: "PROTOCOL",
+                    code: "AUTH_MISMATCHING_STATE",
+                    message: "The provided state passed in the OAuth response does not match the stored token state.",
+                },
+                { status: 400 }
+            )
+        }
+
+        if (new Date() > transaction.expiresAt) {
+            logger?.log("OAUTH_PROTOCOL_ERROR", {
+                structuredData: {
+                    oauth_provider: oauthId,
+                    state,
+                    expires_at: transaction.expiresAt.toISOString(),
+                },
+            })
+            await config.adapter.deleteExpiredOAuthTransactions()
+            return Response.json(
+                {
+                    type: "PROTOCOL",
+                    code: "AUTH_TRANSACTION_EXPIRED",
+                    message: "The OAuth transaction has expired. Please try signing in again.",
+                },
+                { status: 400 }
+            )
+        }
+
+        if (transaction.provider !== oauthId) {
+            logger?.log("OAUTH_PROTOCOL_ERROR", {
+                structuredData: {
+                    expected_provider: transaction.provider,
+                    provided_provider: oauthId,
+                },
+            })
+            return Response.json(
+                {
+                    type: "PROTOCOL",
+                    code: "AUTH_PROVIDER_MISMATCH",
+                    message: "The OAuth provider does not match the stored transaction.",
+                },
+                { status: 400 }
+            )
+        }
+
+        await config.adapter.consumeOAuthTransaction(state)
+
+        const resolvedConfig = isOIDC ? await resolveOpenIDProvider(oauthConfig) : oauthConfig
+
+        if (!transaction.codeVerifier) {
+            throw new AuraAuthError({ code: "DATABASE_TOKEN_HASH_NOT_FOUND" as any })
+        }
+
+        const accessToken = await createAccessToken(
+            resolvedConfig,
+            transaction.redirectURI,
+            code,
+            transaction.codeVerifier,
+            logger
+        )
+
+        if (isOIDC) {
+            if (!accessToken.id_token) {
+                throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
+            }
+            const { issuer, jwks_uri } = resolvedConfig.oidc!
+            if (!jwks_uri || !transaction.nonce || !resolvedConfig.clientId) {
+                throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
+            }
+            await validateIDToken(accessToken.id_token as string, {
+                issuer,
+                clientId: resolvedConfig.clientId,
+                nonce: transaction.nonce,
+                jwks_uri,
+            })
+        }
+
+        if (transaction.redirectTo && !isRelativeURL(transaction.redirectTo)) {
+            const origins = await getTrustedOrigins(request, ctx.trustedOrigins)
+            const requestOrigin = await getOriginURL(request, ctx)
+            let isValid = false
+            try {
+                isValid =
+                    origins.length > 0
+                        ? isTrustedOrigin(transaction.redirectTo, origins)
+                        : isSameOrigin(transaction.redirectTo, requestOrigin)
+            } catch {
+                isValid = false
+            }
+            if (!isValid) {
+                logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
+                    structuredData: {
+                        redirect_path: transaction.redirectTo,
+                        provider: oauthId,
+                        has_trusted_origins: origins.length > 0,
+                        request_origin: requestOrigin,
+                    },
+                })
+                throw new AuraAuthError({ code: "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED" })
+            }
+        }
+
+        const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
+
+        if (!userInfo.email) {
+            throw new AuraAuthError({ code: "INVALID_USER_INFO" })
+        }
+        const user = await config.adapter.getUserByEmail(userInfo.email)
+        let userId: string
+
+        if (user) {
+            userId = user.id
+            const updateData: any = {}
+            if (userInfo.name) updateData.name = userInfo.name
+            if (userInfo.image) updateData.image = userInfo.image
+            await config.adapter.updateUser(userId, updateData)
+        } else {
+            const newUser = await config.adapter.createUser({
+                id: crypto.randomUUID(),
+                email: userInfo.email,
+                name: userInfo.name,
+                image: userInfo.image,
+                emailVerifiedAt: new Date(),
+                status: "active",
+                mfaEnabled: false,
+                mfaPreferredMethod: null,
+                attributes: {},
+            })
+            userId = newUser.id
+        }
+
+        const existingAccount = await config.adapter.getAccountByProvider(oauthId, userInfo.sub)
+        let accountId: string
+
+        if (existingAccount) {
+            accountId = existingAccount.id
+            await config.adapter.updateOAuthTokens(accountId, {
+                accessToken: accessToken.access_token,
+                refreshToken: accessToken.refresh_token || null,
+                idToken: accessToken.id_token || null,
+                tokenType: accessToken.token_type,
+                scopes: Array.isArray(accessToken.scope) ? accessToken.scope.join(" ") : accessToken.scope || null,
+                accessTokenExpiresAt: accessToken.expires_in ? new Date(Date.now() + accessToken.expires_in * 1000) : null,
+            })
+        } else {
+            const newAccount = await config.adapter.createAccount({
+                id: crypto.randomUUID(),
+                userId,
+                provider: oauthId,
+                providerUserId: userInfo.sub,
+                type: "oauth",
+                status: "active",
+            })
+            accountId = newAccount.id
+
+            await config.adapter.createOAuthAccount({
+                accountId,
+                accessToken: accessToken.access_token,
+                refreshToken: accessToken.refresh_token || null,
+                idToken: accessToken.id_token || null,
+                tokenType: accessToken.token_type,
+                scopes: Array.isArray(accessToken.scope) ? accessToken.scope.join(" ") : accessToken.scope || null,
+                accessTokenExpiresAt: accessToken.expires_in ? new Date(Date.now() + accessToken.expires_in * 1000) : null,
+            })
+        }
+
+        const sessionPayload: any = {
+            sub: userId,
+            email: userInfo.email || "",
+            name: userInfo.name || "",
+            image: userInfo.image || "",
+            attributes: {},
+        }
+
+        const session = await createSession(sessionPayload)
+
+        const csrfToken = await createCSRF(jose as any)
+
+        logger?.log("OAUTH_CALLBACK_SUCCESS", {
+            structuredData: {
+                provider: oauthId,
+                user_id: userId,
+            },
+        })
+
+        const headersBuilder = new HeadersBuilder()
+            .setCookie(cookies().sessionToken.name, session, cookies().sessionToken.attributes)
+            .setCookie(cookies().csrfToken.name, csrfToken, cookies().csrfToken.attributes)
+
+        const redirectTo = transaction.redirectTo || "/"
+
+        headersBuilder.setHeader("Location", redirectTo)
+
+        return Response.json({ oauth: oauthId }, { status: 302, headers: headersBuilder.toHeaders() })
+    }
+
     return {
         getSession,
         createSession,
@@ -1055,5 +1353,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
         getProviderTokens,
         isProviderConnected,
         refreshUserInfo,
+        signIn,
+        oauthCallback,
     }
 }
