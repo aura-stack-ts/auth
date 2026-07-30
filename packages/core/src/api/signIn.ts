@@ -44,10 +44,10 @@ export const signIn = async (
         return {
             success,
             redirect: true,
-            signInURL: signInURL,
-            headers: headers,
+            signInURL,
+            headers,
             toResponse: () => {
-                return Response.json({ success: true, redirect: true, signInURL: signInURL }, { status: 302, headers: headers })
+                return Response.json({ success, redirect: true, signInURL }, { status: 302, headers })
             },
         } as SignInAPIReturn
     } catch (error) {

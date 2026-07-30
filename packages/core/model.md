@@ -4,8 +4,8 @@ Users ||--o{ Accounts : "has"
 Users ||--o{ Sessions : "starts"
 Users ||--o{ Devices : "registers"
 Users ||--o{ MfaCredentials : "configures"
-Accounts ||--|| OAuthAccounts : "oauth"
-Accounts ||--|| CredentialAccounts : "credentials"
+Accounts ||--o| OAuthAccounts : "oauth"
+Accounts ||--o| CredentialAccounts : "credentials"
 Devices ||--o{ Sessions : "contains"
 Devices ||--o{ OAuthTransactions : "tracks"
 
@@ -96,7 +96,7 @@ OAuthTransactions {
     varchar state UK
     varchar nonce
     varchar codeVerifier
-    text redirectUri
+    text redirectURI
     text redirectTo
     varchar userAgent
     varchar fingerprint

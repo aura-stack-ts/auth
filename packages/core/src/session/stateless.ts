@@ -422,10 +422,14 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
 
     const signIn = async (oauthId: string, request: Request, redirectTo?: string) => {
         const provider = oauth[oauthId]
+        if (!provider) {
+            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
+        }
+
         const redirectURI = await createRedirectURI(request, oauthId, ctx)
         const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
 
-        const isOIDC = isOIDCProvider(provider!)
+        const isOIDC = isOIDCProvider(provider)
         logger?.log("SIGN_IN_PROVIDER_TYPE_DETECTED", {
             structuredData: { oauth_provider: oauthId, oidc: isOIDC },
         })
@@ -530,12 +534,19 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
                 jwks_uri,
             })
         }
-        const origins = await getTrustedOrigins(request, trustedOrigins)
-        const requestOrigin = await getOriginURL(request, ctx)
 
         if (!isRelativeURL(cookieRedirectTo)) {
-            const isValid =
-                origins.length > 0 ? isTrustedOrigin(cookieRedirectTo, origins) : isSameOrigin(cookieRedirectTo, requestOrigin)
+            const origins = await getTrustedOrigins(request, trustedOrigins)
+            const requestOrigin = await getOriginURL(request, ctx)
+            let isValid = false
+            try {
+                isValid =
+                    origins.length > 0
+                        ? isTrustedOrigin(cookieRedirectTo, origins)
+                        : isSameOrigin(cookieRedirectTo, requestOrigin)
+            } catch {
+                isValid = false
+            }
             if (!isValid) {
                 logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
                     structuredData: {

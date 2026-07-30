@@ -30,7 +30,7 @@ describe("signIn API (stateful)", () => {
             state: "state-value",
             nonce: null,
             codeVerifier: "code-verifier",
-            redirectUri: "https://example.com/auth/callback/oauth-provider",
+            redirectURI: "https://example.com/auth/callback/oauth-provider",
             redirectTo: null,
             userAgent: null,
             fingerprint: null,
@@ -53,7 +53,7 @@ describe("signIn API (stateful)", () => {
         expect(createOAuthTransactionMock).toHaveBeenCalledWith(
             expect.objectContaining({
                 provider: "oauth-provider",
-                redirectUri: "https://example.com/auth/callback/oauth-provider",
+                redirectURI: "https://example.com/auth/callback/oauth-provider",
                 state: expect.any(String),
                 codeVerifier: expect.any(String),
             })
@@ -69,7 +69,7 @@ describe("signIn API (stateful)", () => {
             state: "state-value",
             nonce: null,
             codeVerifier: "code-verifier",
-            redirectUri: "https://example.com/auth/callback/oauth-provider",
+            redirectURI: "https://example.com/auth/callback/oauth-provider",
             redirectTo: null,
             userAgent: null,
             fingerprint: null,
@@ -83,12 +83,13 @@ describe("signIn API (stateful)", () => {
             createOAuthTransaction: createOAuthTransactionMock,
         })
 
-        const signIn = await api.signIn("oauth-provider")
+        const signIn = await api.signIn("oauth-provider", {
+            request: new Request("https://example.com/auth/signIn/oauth-provider"),
+        })
         const response = signIn.toResponse()
         expect(response.status).toBe(302)
         const searchParams = new URL(response.headers.get("Location")!).searchParams
         expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
-
         expect(createOAuthTransactionMock).toHaveBeenCalled()
     })
 
@@ -101,7 +102,7 @@ describe("signIn API (stateful)", () => {
             state: "state-value",
             nonce: null,
             codeVerifier: "code-verifier",
-            redirectUri: "https://example.com/auth/callback/oauth-provider",
+            redirectURI: "https://example.com/auth/callback/oauth-provider",
             redirectTo: null,
             userAgent: null,
             fingerprint: null,
@@ -118,16 +119,14 @@ describe("signIn API (stateful)", () => {
         const response = await api.signIn("oauth-provider", {
             redirect: false,
         })
-        expect(response).toMatchObject({
+        expect(response).toEqual({
             success: true,
             redirect: false,
             signInURL: expect.any(String),
+            headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        expect(createOAuthTransactionMock).toHaveBeenCalled()
-
-        vi.unstubAllGlobals()
+        expect(createOAuthTransactionMock).not.toHaveBeenCalled()
     })
 
     test("signIn with valid redirectTo stores in OAuth transaction", async () => {
@@ -139,7 +138,7 @@ describe("signIn API (stateful)", () => {
             state: "state-value",
             nonce: null,
             codeVerifier: "code-verifier",
-            redirectUri: "https://example.com/auth/callback/oauth-provider",
+            redirectURI: "https://example.com/auth/callback/oauth-provider",
             redirectTo: "/dashboard",
             userAgent: null,
             fingerprint: null,
@@ -184,7 +183,7 @@ describe("signIn API (stateful)", () => {
             state: "state-value",
             nonce: "nonce-value",
             codeVerifier: "code-verifier",
-            redirectUri: "https://example.com/auth/callback/oidc-provider",
+            redirectURI: "https://example.com/auth/callback/oidc-provider",
             redirectTo: null,
             userAgent: null,
             fingerprint: null,

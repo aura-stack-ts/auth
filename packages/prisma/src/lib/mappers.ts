@@ -322,7 +322,7 @@ export const toOAuthTransaction = (transaction: OAuthTransaction): OAuthTransact
     state: transaction.state,
     nonce: transaction.nonce,
     codeVerifier: transaction.codeVerifier,
-    redirectUri: transaction.redirectUri,
+    redirectURI: transaction.redirectURI,
     redirectTo: transaction.redirectTo,
     userAgent: transaction.userAgent,
     fingerprint: transaction.fingerprint,

@@ -1061,11 +1061,14 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
     const signIn = async (oauthId: string, request: Request, redirectTo?: string) => {
         const provider = oauth[oauthId]
+        if (!provider) {
+            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
+        }
 
         const redirectURI = await createRedirectURI(request, oauthId, ctx)
         const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
 
-        const isOIDC = isOIDCProvider(provider!)
+        const isOIDC = isOIDCProvider(provider)
         logger?.log("SIGN_IN_PROVIDER_TYPE_DETECTED", {
             structuredData: { oauth_provider: oauthId, oidc: isOIDC },
         })
@@ -1100,14 +1103,12 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             structuredData: { oauth_provider: oauthId, oidc: isOIDC },
         })
 
-        // Store OAuth transaction in database
         const userAgent = request.headers.get("user-agent") || null
         const fingerprint = request.headers.get("x-device-fingerprint") || null
 
-        // Extract device ID from headers if available
         const deviceId = request.headers.get("x-device-id") || null
 
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
 
         await config.adapter.createOAuthTransaction({
             id: crypto.randomUUID(),
@@ -1115,7 +1116,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             state,
             nonce: nonce || null,
             codeVerifier,
-            redirectUri: redirectURI,
+            redirectURI: redirectURI,
             redirectTo: redirectToValue,
             userAgent,
             fingerprint,
@@ -1125,10 +1126,12 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             metadata: null,
         })
 
+        const headers = new HeadersBuilder(secureApiHeaders).setHeader("Location", authorization).toHeaders()
+
         return {
             success: true,
             signInURL: authorization,
-            headers: new Headers(secureApiHeaders),
+            headers,
         }
     }
 
@@ -1136,7 +1139,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
         const oauthConfig = oauth[oauthId]
         const isOIDC = isOIDCProvider(oauthConfig)
 
-        // Retrieve OAuth transaction from database
         const transaction = await config.adapter.getOAuthTransactionByState(state)
 
         if (!transaction) {
@@ -1156,7 +1158,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             )
         }
 
-        // Check if transaction has expired
         if (new Date() > transaction.expiresAt) {
             logger?.log("OAUTH_PROTOCOL_ERROR", {
                 structuredData: {
@@ -1176,7 +1177,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             )
         }
 
-        // Validate provider matches
         if (transaction.provider !== oauthId) {
             logger?.log("OAUTH_PROTOCOL_ERROR", {
                 structuredData: {
@@ -1194,7 +1194,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             )
         }
 
-        // Consume the transaction (delete it)
         await config.adapter.consumeOAuthTransaction(state)
 
         const resolvedConfig = isOIDC ? await resolveOpenIDProvider(oauthConfig) : oauthConfig
@@ -1205,7 +1204,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
         const accessToken = await createAccessToken(
             resolvedConfig,
-            transaction.redirectUri,
+            transaction.redirectURI,
             code,
             transaction.codeVerifier,
             logger
@@ -1227,14 +1226,18 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             })
         }
 
-        const origins = await getTrustedOrigins(request, ctx.trustedOrigins)
-        const requestOrigin = await getOriginURL(request, ctx)
-
         if (transaction.redirectTo && !isRelativeURL(transaction.redirectTo)) {
-            const isValid =
-                origins.length > 0
-                    ? isTrustedOrigin(transaction.redirectTo, origins)
-                    : isSameOrigin(transaction.redirectTo, requestOrigin)
+            const origins = await getTrustedOrigins(request, ctx.trustedOrigins)
+            const requestOrigin = await getOriginURL(request, ctx)
+            let isValid = false
+            try {
+                isValid =
+                    origins.length > 0
+                        ? isTrustedOrigin(transaction.redirectTo, origins)
+                        : isSameOrigin(transaction.redirectTo, requestOrigin)
+            } catch {
+                isValid = false
+            }
             if (!isValid) {
                 logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
                     structuredData: {
@@ -1250,20 +1253,19 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
         const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
 
-        // Create or update user and OAuth account in database
-        const userEmail = userInfo.email || ""
-        const user = await config.adapter.getUserByEmail(userEmail)
+        if (!userInfo.email) {
+            throw new AuraAuthError({ code: "INVALID_USER_INFO" })
+        }
+        const user = await config.adapter.getUserByEmail(userInfo.email)
         let userId: string
 
         if (user) {
             userId = user.id
-            // Update user with latest info from provider
             const updateData: any = {}
             if (userInfo.name) updateData.name = userInfo.name
             if (userInfo.image) updateData.image = userInfo.image
             await config.adapter.updateUser(userId, updateData)
         } else {
-            // Create new user
             const newUser = await config.adapter.createUser({
                 id: crypto.randomUUID(),
                 email: userInfo.email,
@@ -1278,7 +1280,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             userId = newUser.id
         }
 
-        // Create or update OAuth account
         const existingAccount = await config.adapter.getAccountByProvider(oauthId, userInfo.sub)
         let accountId: string
 
@@ -1293,7 +1294,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 accessTokenExpiresAt: accessToken.expires_in ? new Date(Date.now() + accessToken.expires_in * 1000) : null,
             })
         } else {
-            // Create account
             const newAccount = await config.adapter.createAccount({
                 id: crypto.randomUUID(),
                 userId,
@@ -1304,7 +1304,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             })
             accountId = newAccount.id
 
-            // Create OAuth account with tokens
             await config.adapter.createOAuthAccount({
                 accountId,
                 accessToken: accessToken.access_token,
@@ -1316,7 +1315,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             })
         }
 
-        // Create session
         const sessionPayload: any = {
             sub: userId,
             email: userInfo.email || "",
@@ -1327,7 +1325,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
         const session = await createSession(sessionPayload)
 
-        // Generate CSRF token
         const csrfToken = await createCSRF(jose as any)
 
         logger?.log("OAUTH_CALLBACK_SUCCESS", {
@@ -1337,12 +1334,10 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             },
         })
 
-        // Set session token and CSRF token cookies
         const headersBuilder = new HeadersBuilder()
             .setCookie(cookies().sessionToken.name, session, cookies().sessionToken.attributes)
             .setCookie(cookies().csrfToken.name, csrfToken, cookies().csrfToken.attributes)
 
-        // Redirect to the stored redirect URL or default
         const redirectTo = transaction.redirectTo || "/"
 
         headersBuilder.setHeader("Location", redirectTo)

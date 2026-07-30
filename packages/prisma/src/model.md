@@ -96,7 +96,7 @@ OAuthTransactions {
     varchar state UK
     varchar nonce
     varchar codeVerifier
-    text redirectUri
+    text redirectURI
     text redirectTo
     varchar userAgent
     varchar fingerprint
