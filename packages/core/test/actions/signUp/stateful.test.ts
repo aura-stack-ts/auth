@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { z } from "zod/v4"
 import { createCSRF } from "@/shared/crypto.ts"
 import { identitySchema } from "@/identity/zod.ts"
-import { authInstance, jose, sessionEntityWithUser, sessionPayload, userEntity } from "@test/presets.ts"
+import { authInstance, deviceEntity, jose, sessionEntityWithUser, sessionPayload, userEntity } from "@test/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 describe("signUp API", async () => {
@@ -24,12 +24,14 @@ describe("signUp API", async () => {
         const updateUserMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createSession: createSessionMock,
             createUser: createUserMock,
             updateUser: updateUserMock,
+            createDevice: createDeviceMock,
             getUserById: getUserByIdMock,
         })
 
@@ -63,7 +65,7 @@ describe("signUp API", async () => {
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
-            deviceId: null,
+            deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
@@ -83,12 +85,14 @@ describe("signUp API", async () => {
         const createUserMock = vi.fn()
         const updateUserMock = vi.fn().mockReturnValue(userEntity)
         const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createSession: createSessionMock,
             createUser: createUserMock,
             updateUser: updateUserMock,
+            createDevice: createDeviceMock,
             getUserById: getUserByIdMock,
         })
 
@@ -121,7 +125,7 @@ describe("signUp API", async () => {
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
-            deviceId: null,
+            deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
@@ -243,6 +247,7 @@ describe("signUp API", async () => {
         const updateUserMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance(
@@ -250,6 +255,7 @@ describe("signUp API", async () => {
                 createUser: createUserMock,
                 updateUser: updateUserMock,
                 getUserById: getUserByIdMock,
+                createDevice: createDeviceMock,
                 createSession: createSessionMock,
             },
             {
@@ -301,7 +307,7 @@ describe("signUp API", async () => {
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "1234567890",
-            deviceId: null,
+            deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
@@ -315,6 +321,7 @@ describe("signUp API", async () => {
         const updateUserMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance(
@@ -322,6 +329,7 @@ describe("signUp API", async () => {
                 createUser: createUserMock,
                 updateUser: updateUserMock,
                 getUserById: getUserByIdMock,
+                createDevice: createDeviceMock,
                 createSession: createSessionMock,
             },
             {
@@ -380,7 +388,7 @@ describe("signUp API", async () => {
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "1234567890",
-            deviceId: null,
+            deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
@@ -394,12 +402,14 @@ describe("signUp API", async () => {
         const updateUserMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
+            createDevice: createDeviceMock,
             createSession: createSessionMock,
         })
 
@@ -430,7 +440,7 @@ describe("signUp API", async () => {
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
-            deviceId: null,
+            deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
@@ -444,12 +454,14 @@ describe("signUp API", async () => {
         const updateUserMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
+            createDevice: createDeviceMock,
             createSession: createSessionMock,
         })
 
@@ -480,7 +492,7 @@ describe("signUp API", async () => {
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
-            deviceId: null,
+            deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
@@ -494,6 +506,7 @@ describe("signUp API", async () => {
         const updateUserMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
@@ -501,6 +514,7 @@ describe("signUp API", async () => {
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
+            createDevice: createDeviceMock,
         })
 
         const response = await handlers.POST(
@@ -530,7 +544,7 @@ describe("signUp API", async () => {
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
-            deviceId: null,
+            deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
@@ -544,12 +558,14 @@ describe("signUp API", async () => {
         const updateUserMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
+            createDevice: createDeviceMock,
             createSession: createSessionMock,
         })
 
@@ -580,7 +596,7 @@ describe("signUp API", async () => {
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
-            deviceId: null,
+            deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
@@ -594,6 +610,7 @@ describe("signUp API", async () => {
         const updateUserMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
@@ -601,6 +618,7 @@ describe("signUp API", async () => {
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
+            createDevice: createDeviceMock,
         })
 
         const response = await handlers.POST(
@@ -630,7 +648,7 @@ describe("signUp API", async () => {
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
-            deviceId: null,
+            deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",

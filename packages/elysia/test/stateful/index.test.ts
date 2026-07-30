@@ -1,6 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { adapter, app, auth, prismaClient } from "@test/stateful/app"
 import { createCSRF } from "@aura-stack/auth/crypto"
+import { parseSetCookie } from "@aura-stack/auth/cookies"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
@@ -63,13 +64,16 @@ describe("GET /api/auth/signIn/github", () => {
             redirectTo: null,
             userAgent: null,
         })
-        await app.handle(
+        const request = await app.handle(
             new Request("http://localhost:3000/api/auth/callback/github?code=valid-code&state=state-123", {
                 headers: {
                     "User-Agent": "Mozilla/5.0",
                 },
             })
         )
+        const sessionToken = request.headers.getSetCookie()?.find((cookie) => cookie.startsWith("aura-auth.session_token="))
+        expect(sessionToken).toBeDefined()
+
         expect(mockFetch).toHaveBeenNthCalledWith(1, "https://github.com/login/oauth/access_token", {
             method: "POST",
             headers: {
@@ -94,6 +98,26 @@ describe("GET /api/auth/signIn/github", () => {
                 Authorization: "Bearer access_token_123",
             },
             signal: expect.any(AbortSignal),
+        })
+
+        const parsed = parseSetCookie(sessionToken!)
+        const session = await app.handle(
+            new Request("http://localhost/api/auth/session", {
+                headers: { Cookie: `aura-auth.session_token=${parsed.value}` },
+            })
+        )
+        expect(session.status).toBe(200)
+        expect(await session.json()).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: expect.any(String),
+                    name: "John Doe",
+                    email: "john.doe@example.com",
+                    image: "https://john.doe/avatar.png",
+                },
+                expires: expect.any(String),
+            },
         })
     })
 })

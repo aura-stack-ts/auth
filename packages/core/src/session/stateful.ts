@@ -1,6 +1,6 @@
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { verifyCSRFToken, getErrorName, shouldRefresh, toUnionHeaders } from "@/shared/utils.ts"
+import { verifyCSRFToken, getErrorName, shouldRefresh, toUnionHeaders, getDeviceInfo, createFingerprint } from "@/shared/utils.ts"
 import { handleApiError } from "@/shared/utils/api.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
@@ -41,6 +41,25 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
     oauth,
 }: DatabaseStrategyOptions<DefaultUser>): SessionStrategy<DefaultUser> => {
     const cookieConfig = createCookieManager(cookies)
+
+    const createDevice = async (userId: string, request: Request) => {
+        const { userAgent, browser, platform, deviceType, ip, name } = getDeviceInfo(request)
+        const fingerprint = await createFingerprint(request)
+        return await config.adapter.createDevice({
+            userId,
+            userAgent,
+            browser,
+            platform,
+            type: deviceType,
+            name,
+            lastIp: ip,
+            fingerprint,
+            firstSeenAt: new Date(),
+            lastSeenAt: new Date(),
+            trusted: false,
+            metadata: null,
+        })
+    }
 
     const getSession = async (headers: Headers): Promise<GetStatefulSessionReturn<DefaultUser>> => {
         logger?.log("STATEFUL_GET_SESSION_START", {
@@ -183,7 +202,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
         }
     }
 
-    const createSession = async (session: TypedJWTPayload<DefaultUser>) => {
+    const createSession = async (session: TypedJWTPayload<DefaultUser>, request: Request) => {
         logger?.log("STATEFUL_CREATE_SESSION_START", {
             structuredData: {
                 strategy: "stateful",
@@ -286,10 +305,12 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             })
         }
 
+        const device = await createDevice(userId as string, request)
+
         const dbSession = await config.adapter.createSession({
             id: cryptoId,
             userId: userId as string,
-            deviceId: null,
+            deviceId: device.id,
             authenticatedWith: "credentials",
             status: "active",
             mfaState: "none",
@@ -1254,35 +1275,40 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
         if (!userInfo.email) {
             throw new AuraAuthError({ code: "INVALID_USER_INFO" })
         }
-        const user = await config.adapter.getUserByEmail(userInfo.email)
+
         let userId: string
+        const user = await config.adapter.getUserByEmail(userInfo.email)
 
         if (user) {
             userId = user.id
-            const updateData: any = {}
-            if (userInfo.name) updateData.name = userInfo.name
-            if (userInfo.image) updateData.image = userInfo.image
-            await config.adapter.updateUser(userId, updateData)
+            const { sub: _, name, email, image, ...attributes } = userInfo
+            await config.adapter.updateUser(userId, {
+                name,
+                email,
+                image,
+                attributes,
+            })
         } else {
+            const { email, image, name, ...attributes } = userInfo
             const newUser = await config.adapter.createUser({
                 id: crypto.randomUUID(),
-                email: userInfo.email,
-                name: userInfo.name,
-                image: userInfo.image,
+                email: email,
+                name: name,
+                image: image,
                 emailVerifiedAt: new Date(),
                 status: "active",
                 mfaEnabled: false,
                 mfaPreferredMethod: null,
-                attributes: {},
+                attributes: attributes,
             })
             userId = newUser.id
         }
 
-        const existingAccount = await config.adapter.getAccountByProvider(oauthId, userInfo.sub)
         let accountId: string
+        const account = await config.adapter.getAccountByProvider(oauthId, userInfo.sub)
 
-        if (existingAccount) {
-            accountId = existingAccount.id
+        if (account) {
+            accountId = account.id
             await config.adapter.updateOAuthTokens(accountId, {
                 accessToken: accessToken.access_token,
                 refreshToken: accessToken.refresh_token || null,
@@ -1290,6 +1316,9 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 tokenType: accessToken.token_type,
                 scopes: Array.isArray(accessToken.scope) ? accessToken.scope.join(" ") : accessToken.scope || null,
                 accessTokenExpiresAt: accessToken.expires_in ? new Date(Date.now() + accessToken.expires_in * 1000) : null,
+                refreshTokenExpiresAt: accessToken.refresh_token_expires_in
+                    ? new Date(Date.now() + accessToken.refresh_token_expires_in * 1000)
+                    : null,
             })
         } else {
             const newAccount = await config.adapter.createAccount({
@@ -1313,15 +1342,19 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
             })
         }
 
-        const sessionPayload: any = {
-            sub: userId,
-            email: userInfo.email || "",
-            name: userInfo.name || "",
-            image: userInfo.image || "",
-            attributes: {},
-        }
-
-        const session = await createSession(sessionPayload)
+        const device = await createDevice(userId, request)
+        const tokenHash = await createHash(crypto.randomUUID())
+        await config.adapter.createSession({
+            id: crypto.randomUUID(),
+            userId,
+            deviceId: device.id,
+            authenticatedWith: "oauth",
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            mfaState: "none",
+            status: "active",
+            tokenHash,
+            metadata: null,
+        })
 
         const csrfToken = await createCSRF(jose as any)
 
@@ -1333,12 +1366,9 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
         })
 
         const headersBuilder = new HeadersBuilder()
-            .setCookie(cookies().sessionToken.name, session, cookies().sessionToken.attributes)
+            .setHeader("Location", transaction.redirectTo || "/")
+            .setCookie(cookies().sessionToken.name, tokenHash, cookies().sessionToken.attributes)
             .setCookie(cookies().csrfToken.name, csrfToken, cookies().csrfToken.attributes)
-
-        const redirectTo = transaction.redirectTo || "/"
-
-        headersBuilder.setHeader("Location", redirectTo)
 
         return Response.json({ oauth: oauthId }, { status: 302, headers: headersBuilder.toHeaders() })
     }

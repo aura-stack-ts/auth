@@ -33,7 +33,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         if (!user) {
             throw new AuraAuthError({ code: "USER_CREATION_FAILED" })
         }
-        const sessionToken = await sessionStrategy.createSession(user)
+        const sessionToken = await sessionStrategy.createSession(user, request)
         const csrfToken = await createCSRF(ctx.jose)
         logger?.log("SIGN_UP_SUCCESS")
 

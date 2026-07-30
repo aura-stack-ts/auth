@@ -233,7 +233,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Create a session after successful authentication.
      * Signs the JWT / writes the DB row / sets cookies.
      */
-    createSession(session: User): Promise<string>
+    createSession(session: User, request: Request): Promise<string>
 
     getProviderTokens(oauth: string, request: Request): Promise<GetProviderTokensStatefulReturn>
 

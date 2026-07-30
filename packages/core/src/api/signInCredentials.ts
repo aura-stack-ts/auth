@@ -35,7 +35,7 @@ export const signInCredentials = async ({
         if (!session) {
             throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
         }
-        const sessionToken = await sessionStrategy.createSession(session)
+        const sessionToken = await sessionStrategy.createSession(session, request)
         const csrfToken = await createCSRF(ctx.jose)
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")
 
