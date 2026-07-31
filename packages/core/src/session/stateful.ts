@@ -743,7 +743,9 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 },
             })
 
-            const oauthAccount = await config.adapter.getOAuthAccount(oauthId)
+            const accounts = await config.adapter.getAccountsByUserId(sessionByToken.userId)
+            const getAccount = accounts.find((account) => account.provider === oauthId)
+            const oauthAccount = await config.adapter.getOAuthAccount(getAccount?.id ?? "")
             if (!oauthAccount) {
                 logger?.log("STATEFUL_GET_PROVIDER_TOKENS_OAUTH_ACCOUNT_NOT_FOUND", {
                     structuredData: {

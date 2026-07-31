@@ -346,8 +346,10 @@ export interface OAuthTokenPayload {
     accessToken: string
     /**
      * The expiration time of the access token, in seconds since the epoch (Unix time).
+     * @deprecated
      */
     expiresAt: number
+    accessTokenExpiresAt: number
     /**
      * The raw refresh token string issued by the OAuth provider, if applicable.
      */

@@ -206,6 +206,7 @@ export const verifyCSRFToken = async ({
 }
 
 export const shouldRefresh = (payload: OAuthTokenPayload, refreshWindow: number): boolean => {
+    if (!payload.accessTokenExpiresAt && !payload.refreshToken) return false
     const now = Math.floor(Date.now() / 1000)
     if (now >= payload.expiresAt) return true
     if (payload.expiresAt - now <= refreshWindow) return true
