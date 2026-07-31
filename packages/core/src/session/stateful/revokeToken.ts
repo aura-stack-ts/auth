@@ -7,7 +7,7 @@ import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
 import type { InternalStatefulContext } from "@/@types/session.ts"
 
 export const __revokeToken = ({ ctx, cookieConfig }: InternalStatefulContext) => {
-    const { oauth, logger, sessionConfig, cookies, jose } = ctx
+    const { oauth, logger, sessionConfig, cookies } = ctx
 
     return async (oauthId: string, headers: Headers, disconnect: boolean): Promise<Headers> => {
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {

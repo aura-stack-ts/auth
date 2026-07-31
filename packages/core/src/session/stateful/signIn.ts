@@ -6,7 +6,7 @@ import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/s
 import { HeadersBuilder } from "@aura-stack/router"
 import type { InternalStatefulContext } from "@/@types/session.ts"
 
-export const __signIn = ({ ctx, cookieConfig }: InternalStatefulContext) => {
+export const __signIn = ({ ctx }: InternalStatefulContext) => {
     const { logger, oauth, sessionConfig } = ctx
 
     return async (oauthId: string, request: Request, redirectTo?: string) => {

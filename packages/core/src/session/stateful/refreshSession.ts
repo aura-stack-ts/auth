@@ -3,8 +3,8 @@ import type { DeepPartial } from "@/@types/utility.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
 
-export const __refreshSession = <DefaultUser extends User>({ ctx, cookieConfig }: InternalStatefulContext) => {
-    const { logger, sessionConfig, jose, cookies } = ctx
+export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieConfig }: InternalStatefulContext) => {
+    const { logger, sessionConfig, jose } = ctx
 
     return async (
         headers: Headers,
@@ -50,7 +50,7 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookieConfig }
                 headers,
                 skipCSRFCheck,
                 jose,
-                cookies,
+                cookies: cookies(),
                 logger,
             })
 
@@ -229,6 +229,7 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookieConfig }
 
             return { session: updatedSession, headers: new Headers(secureApiHeaders) }
         } catch (error) {
+            console.error("Error refreshing session:", error)
             logger?.log("STATEFUL_REFRESH_SESSION_ERROR", {
                 structuredData: {
                     error_type: getErrorName(error),

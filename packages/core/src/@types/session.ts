@@ -386,5 +386,11 @@ export type CookieManager = ReturnType<typeof createCookieManager>
 
 export interface InternalStatefulContext {
     ctx: InternalContextForStateful
+    cookies: () => InternalCookieStoreConfig
+    cookieConfig: CookieManager
+}
+
+export interface InternalStatelessContext {
+    ctx: InternalContext<any, any>
     cookieConfig: CookieManager
 }

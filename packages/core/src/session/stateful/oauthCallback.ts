@@ -9,9 +9,9 @@ import type { InternalStatefulContext } from "@/@types/session.ts"
 import { createDevice as __createDevice } from "./utils.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 
-export const __oauthCallback = ({ ctx, cookieConfig }: InternalStatefulContext) => {
-    const { logger, jose, oauth, cookies, sessionConfig } = ctx
-    const createDevice = __createDevice({ ctx, cookieConfig })
+export const __oauthCallback = ({ ctx, cookies, cookieConfig }: InternalStatefulContext) => {
+    const { logger, jose, oauth, sessionConfig } = ctx
+    const createDevice = __createDevice({ ctx, cookies, cookieConfig })
 
     return async (oauthId: string, request: Request, { code, state }: { code: string; state: string }) => {
         const oauthConfig = oauth[oauthId]
@@ -234,8 +234,8 @@ export const __oauthCallback = ({ ctx, cookieConfig }: InternalStatefulContext) 
 
         const headersBuilder = new HeadersBuilder()
             .setHeader("Location", transaction.redirectTo || "/")
-            .setCookie(cookies.sessionToken.name, tokenHash, cookies.sessionToken.attributes)
-            .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
+            .setCookie(cookies().sessionToken.name, tokenHash, cookies().sessionToken.attributes)
+            .setCookie(cookies().csrfToken.name, csrfToken, cookies().csrfToken.attributes)
 
         return Response.json({ oauth: oauthId }, { status: 302, headers: headersBuilder.toHeaders() })
     }
