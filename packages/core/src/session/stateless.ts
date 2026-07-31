@@ -561,7 +561,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>({
         }
 
         const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
-        const session = await ctx.sessionStrategy.createSession(userInfo)
+        const session = await ctx.sessionStrategy.createSession(userInfo, request)
         const csrfToken = await createCSRF(jose)
         const tokenPayload = transformToTokenPayload(accessToken)
         const providerToken = await ctx.jwtManager.createToken(tokenPayload)

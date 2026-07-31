@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
-import { oauthCustomService, sessionEntityWithUser, userEntity, authInstance } from "@test/presets.ts"
+import { oauthCustomService, sessionEntityWithUser, userEntity, authInstance, deviceEntity } from "@test/presets.ts"
 import type { OAuthTransactionEntity } from "@/@types/entities.ts"
 
 describe("callbackAction (stateful)", () => {
@@ -248,7 +248,9 @@ describe("callbackAction (stateful)", () => {
             createdAt: new Date(),
             updatedAt: new Date(),
         })
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const {
             handlers: { GET },
@@ -265,6 +267,8 @@ describe("callbackAction (stateful)", () => {
                 createAccount: createAccountMock,
                 createOAuthAccount: createOAuthAccountMock,
                 createSession: createSessionMock,
+                createDevice: createDeviceMock,
+                getDeviceByFingerprint: getDeviceByFingerprintMock,
             },
             {
                 oauth: [oauthCustomService],
@@ -308,7 +312,9 @@ describe("callbackAction (stateful)", () => {
         expect(getUserByEmailMock).toHaveBeenCalledWith("john.doe@example.com")
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
             name: "John Doe",
+            email: "john.doe@example.com",
             image: "https://example.com/john-doe.jpg",
+            attributes: {},
         })
         expect(createUserMock).not.toHaveBeenCalled()
         expect(getAccountByProviderMock).toHaveBeenCalledWith("oauth-provider", "user_123")
@@ -324,14 +330,13 @@ describe("callbackAction (stateful)", () => {
             accountId: "account-123",
             accessToken: "access_123",
             accessTokenExpiresAt: null,
+            refreshTokenExpiresAt: null,
             refreshToken: null,
             idToken: null,
             tokenType: "Bearer",
             scopes: null,
         })
-
-        expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
-
+        expect(createDeviceMock).toHaveBeenCalled()
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
     })
@@ -414,7 +419,9 @@ describe("callbackAction (stateful)", () => {
             createdAt: new Date(),
             updatedAt: new Date(),
         })
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const {
             handlers: { GET },
@@ -429,6 +436,8 @@ describe("callbackAction (stateful)", () => {
                 createAccount: createAccountMock,
                 createOAuthAccount: createOAuthAccountMock,
                 createSession: createSessionMock,
+                createDevice: createDeviceMock,
+                getDeviceByFingerprint: getDeviceByFingerprintMock,
             },
             {
                 oauth: [oauthCustomService],

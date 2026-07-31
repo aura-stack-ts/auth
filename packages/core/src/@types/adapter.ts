@@ -87,11 +87,11 @@ export interface DevicesAdapter {
     /**
      * Device management methods.
      */
-    createDevice(input: Omit<DeviceEntity, "createdAt" | "updatedAt">): Promise<DeviceEntity>
+    createDevice(input: Omit<DeviceEntity, "id" | "createdAt" | "updatedAt">): Promise<DeviceEntity>
     getDeviceById(id: string): Promise<DeviceEntity | null>
     getDeviceByFingerprint(userId: string, fingerprint: string): Promise<DeviceEntity | null>
     getDevicesByUserId(userId: string): Promise<DeviceEntity[]>
-    updateDevice(id: string, input: Omit<DeviceEntity, "createdAt" | "updatedAt">): Promise<DeviceEntity>
+    updateDevice(id: string, input: Partial<Omit<DeviceEntity, "createdAt" | "updatedAt">>): Promise<DeviceEntity>
     trustDevice(id: string, trusted: boolean): Promise<DeviceEntity>
     deleteDevice(id: string): Promise<void>
 }

@@ -4,6 +4,7 @@ import type {
     AccountEntity,
     AuthConfig,
     DatabaseAdapter,
+    DeviceEntity,
     OAuthAccountEntity,
     OAuthProviderCredentials,
     OAuthTokenPayload,
@@ -133,6 +134,23 @@ export const accountEntity: Partial<AccountEntity> = {
     id: "account-123",
     status: "unlinked",
     provider: "oauth-provider",
+}
+
+export const deviceEntity: DeviceEntity = {
+    id: "device-123",
+    userId: userEntity.id,
+    userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    browser: "Chrome",
+    platform: "Windows",
+    name: "John's Laptop",
+    type: "desktop",
+    lastIp: "192.168.1.1",
+    fingerprint: "fingerprint-123",
+    firstSeenAt: new Date(),
+    lastSeenAt: new Date(),
+    trusted: false,
+    metadata: null,
 }
 
 const auth = createAuth({
