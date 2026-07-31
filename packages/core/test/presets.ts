@@ -8,6 +8,7 @@ import type {
     OAuthAccountEntity,
     OAuthProviderCredentials,
     OAuthTokenPayload,
+    OAuthTransactionEntity,
     OpenIDProvider,
     SessionEntity,
     SessionWithUserEntity,
@@ -50,7 +51,7 @@ export const openIDMetadata = {
     id_token_signing_alg_values_supported: ["RS256"],
 } as const
 
-export const oauthTokens: OAuthTokenPayload = {
+export const oauthTokens = {
     accessToken: "access-token",
     expiresAt: Math.floor(Date.now() / 1000) + 3600,
     refreshToken: "refresh-token",
@@ -58,7 +59,7 @@ export const oauthTokens: OAuthTokenPayload = {
     issuedAt: Math.floor(Date.now() / 1000),
     scopes: ["scope1", "scope2"],
     tokenType: "Bearer",
-}
+} as OAuthTokenPayload
 
 export const oauthCustomServiceProfile: OAuthProviderCredentials = {
     ...oauthCustomService,
@@ -132,7 +133,7 @@ export const oauthAccountEntity: OAuthAccountEntity = {
 
 export const accountEntity: Partial<AccountEntity> = {
     id: "account-123",
-    status: "unlinked",
+    status: "active",
     provider: "oauth-provider",
 }
 
@@ -150,6 +151,22 @@ export const deviceEntity: DeviceEntity = {
     firstSeenAt: new Date(),
     lastSeenAt: new Date(),
     trusted: false,
+    metadata: null,
+}
+
+export const oauthTransactionEntity: OAuthTransactionEntity = {
+    id: "transaction-123",
+    provider: "oauth-provider",
+    state: "abc",
+    nonce: null,
+    codeVerifier: "verifier_123",
+    redirectURI: "https://example.com/auth/callback/oauth-provider",
+    redirectTo: "/auth",
+    userAgent: null,
+    fingerprint: null,
+    deviceId: null,
+    createdAt: new Date(),
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     metadata: null,
 }
 

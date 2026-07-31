@@ -343,7 +343,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 where: { id },
                 data: {
                     ...stripped,
-                    type: toDeviceType(input.type),
+                    type: toDeviceType(input.type ?? "unknown"),
                     metadata: toJson(input.metadata),
                 },
             })

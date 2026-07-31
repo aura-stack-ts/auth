@@ -18,6 +18,8 @@ export default defineConfig({
             DEBUG: "1",
             AURA_AUTH_SECRET: SECRET_KEY,
             AURA_AUTH_SALT: SALT_KEY,
+            AURA_AUTH_GOOGLE_CLIENT_ID: "test-google-client-id",
+            AURA_AUTH_GOOGLE_CLIENT_SECRET: "test-google-client-secret",
             AURA_AUTH_GITHUB_CLIENT_ID: "test-github-client-id",
             AURA_AUTH_GITHUB_CLIENT_SECRET: "test-github-client-secret",
         },

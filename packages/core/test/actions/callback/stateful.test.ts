@@ -1,7 +1,14 @@
 import { describe, test, expect, vi } from "vitest"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
-import { oauthCustomService, sessionEntityWithUser, userEntity, authInstance, deviceEntity } from "@test/presets.ts"
-import type { OAuthTransactionEntity } from "@/@types/entities.ts"
+import {
+    oauthCustomService,
+    sessionEntityWithUser,
+    userEntity,
+    authInstance,
+    deviceEntity,
+    oauthTransactionEntity,
+    accountEntity,
+} from "@test/presets.ts"
 
 describe("callbackAction (stateful)", () => {
     test("invalid endpoint", async () => {
@@ -168,179 +175,6 @@ describe("callbackAction (stateful)", () => {
         })
     })
 
-    test("callback action workflow with existing user", async () => {
-        const mockFetch = vi.fn()
-
-        vi.stubGlobal("fetch", mockFetch)
-
-        const accessTokenMock = {
-            access_token: "access_123",
-            token_type: "Bearer",
-        }
-
-        const userInfoMock = {
-            id: "user_123",
-            email: "john.doe@example.com",
-            name: "John Doe",
-            picture: "https://example.com/john-doe.jpg",
-        }
-
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            headers: new Headers({
-                "Content-Type": "application/json",
-            }),
-            json: async () => accessTokenMock,
-        })
-
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            headers: new Headers({
-                "Content-Type": "application/json",
-            }),
-            json: async () => userInfoMock,
-        })
-
-        const transaction: OAuthTransactionEntity = {
-            id: "transaction-123",
-            provider: "oauth-provider",
-            state: "abc",
-            nonce: null,
-            codeVerifier: "verifier_123",
-            redirectURI: "https://example.com/auth/callback/oauth-provider",
-            redirectTo: "/auth",
-            userAgent: null,
-            fingerprint: null,
-            deviceId: null,
-            createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-            metadata: null,
-        }
-
-        const getOAuthTransactionByStateMock = vi.fn().mockResolvedValue(transaction)
-        const consumeOAuthTransactionMock = vi.fn().mockResolvedValue(transaction)
-        const deleteExpiredOAuthTransactionsMock = vi.fn().mockResolvedValue(1)
-        const createUserMock = vi.fn().mockResolvedValue(userEntity)
-        const getUserByEmailMock = vi.fn().mockResolvedValue(userEntity)
-        const updateUserMock = vi.fn().mockResolvedValue(userEntity)
-        const getUserByIdMock = vi.fn().mockResolvedValue(userEntity)
-        const getAccountByProviderMock = vi.fn().mockResolvedValue(null)
-        const createAccountMock = vi.fn().mockResolvedValue({
-            id: "account-123",
-            userId: userEntity.id,
-            provider: "oauth-provider",
-            providerUserId: "user_123",
-            type: "oauth",
-            status: "active",
-            metadata: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        })
-        const createOAuthAccountMock = vi.fn().mockResolvedValue({
-            accountId: "account-123",
-            accessToken: "access_123",
-            refreshToken: null,
-            idToken: null,
-            tokenType: "bearer",
-            scopes: null,
-            issuer: null,
-            accessTokenExpiresAt: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        })
-        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
-        const createSessionMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
-        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
-
-        const {
-            handlers: { GET },
-        } = authInstance(
-            {
-                getOAuthTransactionByState: getOAuthTransactionByStateMock,
-                consumeOAuthTransaction: consumeOAuthTransactionMock,
-                deleteExpiredOAuthTransactions: deleteExpiredOAuthTransactionsMock,
-                getUserByEmail: getUserByEmailMock,
-                createUser: createUserMock,
-                updateUser: updateUserMock,
-                getUserById: getUserByIdMock,
-                getAccountByProvider: getAccountByProviderMock,
-                createAccount: createAccountMock,
-                createOAuthAccount: createOAuthAccountMock,
-                createSession: createSessionMock,
-                createDevice: createDeviceMock,
-                getDeviceByFingerprint: getDeviceByFingerprintMock,
-            },
-            {
-                oauth: [oauthCustomService],
-            }
-        )
-
-        const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=auth_code_123&state=abc"))
-
-        expect(getOAuthTransactionByStateMock).toHaveBeenCalledWith("abc")
-        expect(getOAuthTransactionByStateMock).toHaveReturnedWith(Promise.resolve(transaction))
-        expect(deleteExpiredOAuthTransactionsMock).not.toHaveBeenCalled()
-        expect(consumeOAuthTransactionMock).toHaveBeenCalledWith("abc")
-
-        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams({
-                client_id: "oauth_client_id",
-                client_secret: "oauth_client_secret",
-                code: "auth_code_123",
-                redirect_uri: "https://example.com/auth/callback/oauth-provider",
-                grant_type: "authorization_code",
-                code_verifier: "verifier_123",
-            }).toString(),
-            signal: expect.any(AbortSignal),
-        })
-        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
-            method: "GET",
-            headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
-                Accept: "application/json",
-                Authorization: "Bearer access_123",
-            },
-            signal: expect.any(AbortSignal),
-        })
-        expect(fetch).toHaveBeenCalledTimes(2)
-
-        expect(getUserByEmailMock).toHaveBeenCalledWith("john.doe@example.com")
-        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
-            name: "John Doe",
-            email: "john.doe@example.com",
-            image: "https://example.com/john-doe.jpg",
-            attributes: {},
-        })
-        expect(createUserMock).not.toHaveBeenCalled()
-        expect(getAccountByProviderMock).toHaveBeenCalledWith("oauth-provider", "user_123")
-        expect(createAccountMock).toHaveBeenCalledWith({
-            id: expect.any(String),
-            userId: "user-123",
-            provider: "oauth-provider",
-            providerUserId: "user_123",
-            type: "oauth",
-            status: "active",
-        })
-        expect(createOAuthAccountMock).toHaveBeenCalledWith({
-            accountId: "account-123",
-            accessToken: "access_123",
-            accessTokenExpiresAt: null,
-            refreshTokenExpiresAt: null,
-            refreshToken: null,
-            idToken: null,
-            tokenType: "Bearer",
-            scopes: null,
-        })
-        expect(createDeviceMock).toHaveBeenCalled()
-        expect(response.status).toBe(302)
-        expect(response.headers.get("Location")).toBe("/auth")
-    })
-
     test("callback action workflow with new user creation", async () => {
         const mockFetch = vi.fn()
 
@@ -374,24 +208,8 @@ describe("callbackAction (stateful)", () => {
             json: async () => userInfoMock,
         })
 
-        const transaction = {
-            id: "transaction-123",
-            provider: "oauth-provider",
-            state: "abc",
-            nonce: null,
-            codeVerifier: "verifier_123",
-            redirectURI: "https://example.com/auth/callback/oauth-provider",
-            redirectTo: "/auth",
-            userAgent: null,
-            fingerprint: null,
-            deviceId: null,
-            createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-            metadata: null,
-        }
-
-        const getOAuthTransactionByStateMock = vi.fn().mockResolvedValue(transaction)
-        const consumeOAuthTransactionMock = vi.fn().mockResolvedValue(transaction)
+        const getOAuthTransactionByStateMock = vi.fn().mockResolvedValue(oauthTransactionEntity)
+        const consumeOAuthTransactionMock = vi.fn().mockResolvedValue(oauthTransactionEntity)
         const getUserByEmailMock = vi.fn().mockResolvedValue(null)
         const getUserByIdMock = vi.fn().mockResolvedValue(null)
         const createUserMock = vi.fn().mockResolvedValue(userEntity)
@@ -452,5 +270,322 @@ describe("callbackAction (stateful)", () => {
         expect(createAccountMock).toHaveBeenCalled()
         expect(createOAuthAccountMock).toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalled()
+    })
+
+    test("callback action workflow with existing user", async () => {
+        const mockFetch = vi.fn()
+
+        vi.stubGlobal("fetch", mockFetch)
+
+        const accessTokenMock = {
+            access_token: "access_123",
+            token_type: "Bearer",
+        }
+
+        const userInfoMock = {
+            id: "user_123",
+            email: "john.doe@example.com",
+            name: "John Doe",
+            picture: "https://example.com/john-doe.jpg",
+        }
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => accessTokenMock,
+        })
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => userInfoMock,
+        })
+
+        const getOAuthTransactionByStateMock = vi.fn().mockResolvedValue(oauthTransactionEntity)
+        const consumeOAuthTransactionMock = vi.fn().mockResolvedValue(oauthTransactionEntity)
+        const deleteExpiredOAuthTransactionsMock = vi.fn().mockResolvedValue(1)
+        const createUserMock = vi.fn().mockResolvedValue(userEntity)
+        const getUserByEmailMock = vi.fn().mockResolvedValue(userEntity)
+        const updateUserMock = vi.fn().mockResolvedValue(userEntity)
+        const getUserByIdMock = vi.fn().mockResolvedValue(userEntity)
+        const getAccountByProviderMock = vi.fn().mockResolvedValue(accountEntity)
+        const updatedOAuthTokensMock = vi.fn()
+        const createAccountMock = vi.fn().mockResolvedValue({
+            id: "account-123",
+            userId: userEntity.id,
+            provider: "oauth-provider",
+            providerUserId: "user_123",
+            type: "oauth",
+            status: "active",
+            metadata: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        })
+        const createOAuthAccountMock = vi.fn().mockResolvedValue({
+            accountId: "account-123",
+            accessToken: "access_123",
+            refreshToken: null,
+            idToken: null,
+            tokenType: "bearer",
+            scopes: null,
+            issuer: null,
+            accessTokenExpiresAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        })
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
+        const createSessionMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
+
+        const {
+            handlers: { GET },
+        } = authInstance(
+            {
+                getOAuthTransactionByState: getOAuthTransactionByStateMock,
+                consumeOAuthTransaction: consumeOAuthTransactionMock,
+                deleteExpiredOAuthTransactions: deleteExpiredOAuthTransactionsMock,
+                getUserByEmail: getUserByEmailMock,
+                createUser: createUserMock,
+                updateUser: updateUserMock,
+                getUserById: getUserByIdMock,
+                getAccountByProvider: getAccountByProviderMock,
+                updateOAuthTokens: updatedOAuthTokensMock,
+                createAccount: createAccountMock,
+                createOAuthAccount: createOAuthAccountMock,
+                createSession: createSessionMock,
+                createDevice: createDeviceMock,
+                getDeviceByFingerprint: getDeviceByFingerprintMock,
+            },
+            {
+                oauth: [oauthCustomService],
+            }
+        )
+
+        const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=auth_code_123&state=abc"))
+
+        expect(getOAuthTransactionByStateMock).toHaveBeenCalledWith("abc")
+        expect(getOAuthTransactionByStateMock).toHaveReturnedWith(Promise.resolve(oauthTransactionEntity))
+        expect(deleteExpiredOAuthTransactionsMock).not.toHaveBeenCalled()
+        expect(consumeOAuthTransactionMock).toHaveBeenCalledWith("abc")
+
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                client_id: "oauth_client_id",
+                client_secret: "oauth_client_secret",
+                code: "auth_code_123",
+                redirect_uri: "https://example.com/auth/callback/oauth-provider",
+                grant_type: "authorization_code",
+                code_verifier: "verifier_123",
+            }).toString(),
+            signal: expect.any(AbortSignal),
+        })
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                Accept: "application/json",
+                Authorization: "Bearer access_123",
+            },
+            signal: expect.any(AbortSignal),
+        })
+        expect(fetch).toHaveBeenCalledTimes(2)
+
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john.doe@example.com")
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            name: "John Doe",
+            email: "john.doe@example.com",
+            image: "https://example.com/john-doe.jpg",
+            attributes: {},
+        })
+        expect(createUserMock).not.toHaveBeenCalled()
+        expect(getAccountByProviderMock).toHaveBeenCalledWith("oauth-provider", "user_123")
+        expect(getAccountByProviderMock).toHaveReturnedWith(Promise.resolve(accountEntity))
+
+        expect(updatedOAuthTokensMock).toHaveBeenCalledWith("account-123", {
+            accessToken: "access_123",
+            refreshToken: null,
+            idToken: null,
+            tokenType: "Bearer",
+            scopes: null,
+            accessTokenExpiresAt: null,
+            refreshTokenExpiresAt: null,
+        })
+        expect(createAccountMock).not.toHaveBeenCalled()
+        expect(createOAuthAccountMock).not.toHaveBeenCalled()
+
+        expect(getDeviceByFingerprintMock).toHaveBeenCalled()
+        expect(createDeviceMock).toHaveBeenCalled()
+        expect(response.status).toBe(302)
+        expect(response.headers.get("Location")).toBe("/auth")
+    })
+
+    test("callback action workflow with existing user and same device", async () => {
+        const mockFetch = vi.fn()
+
+        vi.stubGlobal("fetch", mockFetch)
+
+        const accessTokenMock = {
+            access_token: "access_123",
+            token_type: "Bearer",
+        }
+
+        const userInfoMock = {
+            id: "user_123",
+            email: "john.doe@example.com",
+            name: "John Doe",
+            picture: "https://example.com/john-doe.jpg",
+        }
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => accessTokenMock,
+        })
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => userInfoMock,
+        })
+
+        const getOAuthTransactionByStateMock = vi.fn().mockResolvedValue(oauthTransactionEntity)
+        const consumeOAuthTransactionMock = vi.fn().mockResolvedValue(oauthTransactionEntity)
+        const deleteExpiredOAuthTransactionsMock = vi.fn().mockResolvedValue(1)
+        const createUserMock = vi.fn().mockResolvedValue(userEntity)
+        const getUserByEmailMock = vi.fn().mockResolvedValue(userEntity)
+        const updateUserMock = vi.fn().mockResolvedValue(userEntity)
+        const getUserByIdMock = vi.fn().mockResolvedValue(userEntity)
+        const getAccountByProviderMock = vi.fn().mockResolvedValue(accountEntity)
+        const updatedOAuthTokensMock = vi.fn()
+        const createAccountMock = vi.fn().mockResolvedValue({
+            id: "account-123",
+            userId: userEntity.id,
+            provider: "oauth-provider",
+            providerUserId: "user_123",
+            type: "oauth",
+            status: "active",
+            metadata: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        })
+        const createOAuthAccountMock = vi.fn().mockResolvedValue({
+            accountId: "account-123",
+            accessToken: "access_123",
+            refreshToken: null,
+            idToken: null,
+            tokenType: "bearer",
+            scopes: null,
+            issuer: null,
+            accessTokenExpiresAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        })
+        const createSessionMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(deviceEntity)
+        const updateDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
+        const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
+
+        const {
+            handlers: { GET },
+        } = authInstance(
+            {
+                getOAuthTransactionByState: getOAuthTransactionByStateMock,
+                consumeOAuthTransaction: consumeOAuthTransactionMock,
+                deleteExpiredOAuthTransactions: deleteExpiredOAuthTransactionsMock,
+                getUserByEmail: getUserByEmailMock,
+                createUser: createUserMock,
+                updateUser: updateUserMock,
+                getUserById: getUserByIdMock,
+                getAccountByProvider: getAccountByProviderMock,
+                updateOAuthTokens: updatedOAuthTokensMock,
+                createAccount: createAccountMock,
+                createOAuthAccount: createOAuthAccountMock,
+                createSession: createSessionMock,
+                updateDevice: updateDeviceMock,
+                createDevice: createDeviceMock,
+                getDeviceByFingerprint: getDeviceByFingerprintMock,
+            },
+            {
+                oauth: [oauthCustomService],
+            }
+        )
+
+        const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=auth_code_123&state=abc"))
+
+        expect(getOAuthTransactionByStateMock).toHaveBeenCalledWith("abc")
+        expect(getOAuthTransactionByStateMock).toHaveReturnedWith(Promise.resolve(oauthTransactionEntity))
+        expect(deleteExpiredOAuthTransactionsMock).not.toHaveBeenCalled()
+        expect(consumeOAuthTransactionMock).toHaveBeenCalledWith("abc")
+
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                client_id: "oauth_client_id",
+                client_secret: "oauth_client_secret",
+                code: "auth_code_123",
+                redirect_uri: "https://example.com/auth/callback/oauth-provider",
+                grant_type: "authorization_code",
+                code_verifier: "verifier_123",
+            }).toString(),
+            signal: expect.any(AbortSignal),
+        })
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                Accept: "application/json",
+                Authorization: "Bearer access_123",
+            },
+            signal: expect.any(AbortSignal),
+        })
+        expect(fetch).toHaveBeenCalledTimes(2)
+
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john.doe@example.com")
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            name: "John Doe",
+            email: "john.doe@example.com",
+            image: "https://example.com/john-doe.jpg",
+            attributes: {},
+        })
+        expect(createUserMock).not.toHaveBeenCalled()
+        expect(getAccountByProviderMock).toHaveBeenCalledWith("oauth-provider", "user_123")
+        expect(getAccountByProviderMock).toHaveReturnedWith(Promise.resolve(accountEntity))
+
+        expect(updatedOAuthTokensMock).toHaveBeenCalledWith("account-123", {
+            accessToken: "access_123",
+            refreshToken: null,
+            idToken: null,
+            tokenType: "Bearer",
+            scopes: null,
+            accessTokenExpiresAt: null,
+            refreshTokenExpiresAt: null,
+        })
+        expect(createAccountMock).not.toHaveBeenCalled()
+        expect(createOAuthAccountMock).not.toHaveBeenCalled()
+
+        expect(getDeviceByFingerprintMock).toHaveBeenCalledWith("user-123", expect.any(String))
+        expect(updateDeviceMock).toHaveBeenCalledWith("device-123", {
+            lastSeenAt: expect.any(Date),
+        })
+        expect(createDeviceMock).not.toHaveBeenCalled()
+        expect(response.status).toBe(302)
+        expect(response.headers.get("Location")).toBe("/auth")
     })
 })

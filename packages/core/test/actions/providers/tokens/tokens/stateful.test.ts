@@ -1,9 +1,10 @@
 import { describe, test, expect, vi } from "vitest"
-import { authInstance, jose, oauthCustomService, sessionEntityWithUser } from "@test/presets.ts"
+import { accountEntity, authInstance, jose, oauthCustomService, sessionEntityWithUser } from "@test/presets.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import type { DatabaseAdapter } from "@/@types/adapter.ts"
 
 describe("tokensAction (Stateful)", async () => {
     test("should return 422 if the provider is not supported", async () => {
@@ -101,6 +102,7 @@ describe("tokensAction (Stateful)", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(null)
         const updateOAuthTokensMock = vi.fn()
 
@@ -110,6 +112,7 @@ describe("tokensAction (Stateful)", async () => {
             getSessionByToken: getSessionByTokenMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
         })
 
         const csrfToken = await createCSRF(jose)
@@ -129,7 +132,8 @@ describe("tokensAction (Stateful)", async () => {
             tokens: null,
         })
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
@@ -137,6 +141,7 @@ describe("tokensAction (Stateful)", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             accountId: "account-123",
             accessToken: "access-token",
@@ -155,6 +160,7 @@ describe("tokensAction (Stateful)", async () => {
             handlers: { GET },
         } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -182,7 +188,8 @@ describe("tokensAction (Stateful)", async () => {
             }),
         })
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
@@ -190,6 +197,7 @@ describe("tokensAction (Stateful)", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             accountId: "account-123",
             accessToken: "access-token",
@@ -215,7 +223,8 @@ describe("tokensAction (Stateful)", async () => {
                     getSessionByToken: getSessionByTokenMock,
                     getOAuthAccount: getOAuthAccountMock,
                     updateOAuthTokens: updateOAuthTokensMock,
-                } as any,
+                    getAccountsByUserId: getAccountsByUserIdMock,
+                } as Partial<DatabaseAdapter> as DatabaseAdapter,
             },
         })
 
@@ -236,12 +245,17 @@ describe("tokensAction (Stateful)", async () => {
             success: false,
             tokens: null,
         })
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
     })
 
     test("refreshToken successfully refreshes tokens", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             accountId: "account-123",
             accessToken: "access-token",
@@ -271,6 +285,7 @@ describe("tokensAction (Stateful)", async () => {
             handlers: { GET },
         } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -322,6 +337,8 @@ describe("tokensAction (Stateful)", async () => {
             }),
             signal: expect.any(AbortSignal),
         })
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).toHaveBeenCalledWith(
             "oauth-provider",
             expect.objectContaining({
@@ -337,6 +354,7 @@ describe("tokensAction (Stateful)", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             accountId: "account-123",
             accessToken: "access-token",
@@ -378,9 +396,10 @@ describe("tokensAction (Stateful)", async () => {
                 strategy: "database",
                 adapter: {
                     getSessionByToken: getSessionByTokenMock,
+                    getAccountsByUserId: getAccountsByUserIdMock,
                     getOAuthAccount: getOAuthAccountMock,
                     updateOAuthTokens: updateOAuthTokensMock,
-                } as any,
+                } as Partial<DatabaseAdapter> as DatabaseAdapter,
             },
         })
 
@@ -432,6 +451,8 @@ describe("tokensAction (Stateful)", async () => {
             }),
             signal: expect.any(AbortSignal),
         })
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).toHaveBeenCalledWith(
             "oauth-provider",
             expect.objectContaining({
@@ -447,6 +468,7 @@ describe("tokensAction (Stateful)", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             accountId: "account-123",
             accessToken: "access-token",
@@ -465,6 +487,7 @@ describe("tokensAction (Stateful)", async () => {
             handlers: { GET },
         } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -493,6 +516,9 @@ describe("tokensAction (Stateful)", async () => {
             success: false,
             tokens: null,
         })
+        expect(mockFetch).toHaveBeenCalledTimes(1)
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
@@ -549,6 +575,7 @@ describe("tokensAction (Stateful)", async () => {
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const currentTime = Math.floor(Date.now() / 1000)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             accountId: "account-123",
             accessToken: "access-token",
@@ -567,6 +594,7 @@ describe("tokensAction (Stateful)", async () => {
             handlers: { GET },
         } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -607,6 +635,7 @@ describe("tokensAction (Stateful)", async () => {
         getSessionByTokenMock.mockResolvedValueOnce(sessionEntityWithUser)
 
         const currentTime = Math.floor(Date.now() / 1000)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             accountId: "account-123",
             accessToken: "access-token",
@@ -636,6 +665,7 @@ describe("tokensAction (Stateful)", async () => {
             handlers: { GET },
         } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -673,6 +703,8 @@ describe("tokensAction (Stateful)", async () => {
             }),
         })
         expect(mockFetch).toHaveBeenCalledTimes(1)
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).toHaveBeenCalledWith(
             "oauth-provider",
             expect.objectContaining({
