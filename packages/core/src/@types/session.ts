@@ -13,8 +13,10 @@ import type {
     Identities,
     OAuthProviderRecord,
     InternalContext,
+    InternalContextForStateful,
 } from "@/@types/index.ts"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
+import type { createCookieManager } from "@/session/cookie-manager.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof identitySchema>
@@ -378,4 +380,11 @@ export interface OAuthTokenPayload {
      * The time at which the token was issued, in seconds since the epoch (Unix time).
      */
     issuedAt: number
+}
+
+export type CookieManager = ReturnType<typeof createCookieManager>
+
+export interface InternalStatefulContext {
+    ctx: InternalContextForStateful
+    cookieConfig: CookieManager
 }

@@ -1,5 +1,5 @@
 import { AuraAuthError } from "@/shared/errors.ts"
-import { createStatefulStrategy } from "@/session/stateful.ts"
+import { createStatefulStrategy } from "@/session/stateful/stateful.ts"
 import { createStatelessStrategy } from "@/session/stateless.ts"
 import type { Identities } from "@/identity/index.ts"
 import type { FromShapeToObject } from "@/@types/utility.ts"
