@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { authInstance, jose, oauthAccountEntity, sessionEntityWithUser, userEntity } from "@test/presets.ts"
+import { accountEntity, authInstance, jose, oauthAccountEntity, sessionEntityWithUser, userEntity } from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
@@ -188,6 +188,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(null)
         const updateOAuthTokensMock = vi.fn()
         const getUserByIdMock = vi.fn()
@@ -197,6 +198,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
             getUserById: getUserByIdMock,
@@ -225,7 +227,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getUserByIdMock).not.toHaveBeenCalled()
         expect(createUserMock).not.toHaveBeenCalled()
@@ -244,6 +247,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
@@ -253,6 +257,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
@@ -306,7 +311,8 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
         expect(revokeSessionMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -353,6 +359,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
@@ -362,6 +369,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
             getUserById: getUserByIdMock,
@@ -393,14 +401,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        vi.unstubAllGlobals()
     })
 
     test("handles getUserInfo invalid response from provider", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
@@ -410,6 +417,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
             getUserById: getUserByIdMock,
@@ -444,14 +452,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        vi.unstubAllGlobals()
     })
 
     test("handles getUserInfo OAuth error response", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
@@ -461,6 +468,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
             getUserById: getUserByIdMock,
@@ -499,14 +507,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        vi.unstubAllGlobals()
     })
 
     test("handles getUserInfo missing required user fields", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
@@ -516,6 +523,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
             getUserById: getUserByIdMock,
@@ -554,8 +562,6 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        vi.unstubAllGlobals()
     })
 
     test("toResponse returns correct response on failure", async () => {
@@ -587,6 +593,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(expiredOAuthAccount)
         const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
@@ -596,6 +603,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
@@ -656,7 +664,8 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
         expect(revokeSessionMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).toHaveBeenCalledWith("oauth-provider", {
             accountId: "account-123",
             accessToken: "new-access-token",
@@ -712,6 +721,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
@@ -721,6 +731,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
             getUserById: getUserByIdMock,
@@ -762,14 +773,16 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        vi.unstubAllGlobals()
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
     })
 
     test("handles session token verification failure", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(null)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
         const getOAuthAccountMock = vi.fn()
         const updateOAuthTokensMock = vi.fn()
         const getUserByIdMock = vi.fn()
@@ -780,6 +793,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
             getOAuthAccount: getOAuthAccountMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             updateOAuthTokens: updateOAuthTokensMock,
             getUserById: getUserByIdMock,
             createUser: createUserMock,
@@ -820,6 +834,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
@@ -829,6 +844,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
@@ -881,7 +897,8 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
         expect(revokeSessionMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -933,6 +950,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         }
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(expiredOAuthAccount)
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const getUserByIdMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
@@ -942,6 +960,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
             getUserById: getUserByIdMock,
@@ -981,8 +1000,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        vi.unstubAllGlobals()
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
     })
 
     test("handles doubleSubmitToken parameter", async () => {
@@ -996,6 +1016,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
@@ -1005,6 +1026,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
@@ -1055,7 +1077,8 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
         expect(revokeSessionMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -1102,6 +1125,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
         const getOAuthAccountMock = vi.fn()
         const updateOAuthTokensMock = vi.fn()
         const getUserByIdMock = vi.fn()
@@ -1139,7 +1163,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
     test("handles skipCSRFCheck parameter", async () => {
@@ -1153,6 +1179,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
@@ -1162,6 +1189,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
@@ -1212,7 +1240,8 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
         expect(revokeSessionMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
         expect(revokeSessionMock).not.toHaveBeenCalled()

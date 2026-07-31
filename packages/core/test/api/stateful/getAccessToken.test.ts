@@ -1,9 +1,17 @@
 import { describe, test, expect, vi } from "vitest"
-import { authInstance, jose, oauthAccountEntity, oauthCustomService, sessionEntityWithUser } from "@test/presets.ts"
+import {
+    accountEntity,
+    authInstance,
+    jose,
+    oauthAccountEntity,
+    oauthCustomService,
+    sessionEntityWithUser,
+} from "@test/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"
+import type { DatabaseAdapter } from "@/@types/adapter.ts"
 
 describe("getAccessToken API (Stateful)", () => {
     test("throws error when provider is missing", async () => {
@@ -105,11 +113,13 @@ describe("getAccessToken API (Stateful)", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(null)
         const updateOAuthTokensMock = vi.fn()
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -134,7 +144,8 @@ describe("getAccessToken API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
@@ -142,11 +153,13 @@ describe("getAccessToken API (Stateful)", () => {
         vi.stubEnv("BASE_URL", "http://localhost:3000")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const updateOAuthTokensMock = vi.fn()
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -167,7 +180,8 @@ describe("getAccessToken API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
@@ -175,6 +189,7 @@ describe("getAccessToken API (Stateful)", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             ...oauthAccountEntity,
             accessTokenExpiresAt: new Date(Date.now() - 3600 * 1000),
@@ -189,9 +204,10 @@ describe("getAccessToken API (Stateful)", () => {
                 strategy: "database",
                 adapter: {
                     getSessionByToken: getSessionByTokenMock,
+                    getAccountsByUserId: getAccountsByUserIdMock,
                     getOAuthAccount: getOAuthAccountMock,
                     updateOAuthTokens: updateOAuthTokensMock,
-                } as any,
+                } as Partial<DatabaseAdapter> as DatabaseAdapter,
             },
         })
 
@@ -215,12 +231,16 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
     test("refreshToken successfully refreshes tokens", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             ...oauthAccountEntity,
             accessTokenExpiresAt: new Date(Date.now() - 3600 * 1000),
@@ -235,6 +255,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -281,6 +302,8 @@ describe("getAccessToken API (Stateful)", () => {
             }),
             signal: expect.any(AbortSignal),
         })
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).toHaveBeenCalledWith(
             "oauth-provider",
             expect.objectContaining({
@@ -296,6 +319,7 @@ describe("getAccessToken API (Stateful)", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             ...oauthAccountEntity,
             accessTokenExpiresAt: new Date(Date.now() - 3600 * 1000),
@@ -322,9 +346,10 @@ describe("getAccessToken API (Stateful)", () => {
                 strategy: "database",
                 adapter: {
                     getSessionByToken: getSessionByTokenMock,
+                    getAccountsByUserId: getAccountsByUserIdMock,
                     getOAuthAccount: getOAuthAccountMock,
                     updateOAuthTokens: updateOAuthTokensMock,
-                } as any,
+                } as Partial<DatabaseAdapter> as DatabaseAdapter,
             },
         })
 
@@ -371,6 +396,8 @@ describe("getAccessToken API (Stateful)", () => {
             }),
             signal: expect.any(AbortSignal),
         })
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).toHaveBeenCalledWith(
             "oauth-provider",
             expect.objectContaining({
@@ -386,6 +413,7 @@ describe("getAccessToken API (Stateful)", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             ...oauthAccountEntity,
             accessTokenExpiresAt: new Date(Date.now() - 3600 * 1000),
@@ -395,6 +423,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -426,6 +455,9 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(mockFetch).toHaveBeenCalledTimes(1)
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
@@ -477,6 +509,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const currentTime = Math.floor(Date.now() / 1000)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             ...oauthAccountEntity,
             accessTokenExpiresAt: new Date((currentTime + 600) * 1000),
@@ -486,6 +519,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -509,6 +543,8 @@ describe("getAccessToken API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(mockFetch).not.toHaveBeenCalled()
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
@@ -517,6 +553,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const currentTime = Math.floor(Date.now() / 1000)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             ...oauthAccountEntity,
             accessTokenExpiresAt: new Date((currentTime + 120) * 1000),
@@ -531,6 +568,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             updateOAuthTokens: updateOAuthTokensMock,
         })
@@ -562,6 +600,8 @@ describe("getAccessToken API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(mockFetch).toHaveBeenCalledTimes(1)
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).toHaveBeenCalledWith(
             "oauth-provider",
             expect.objectContaining({

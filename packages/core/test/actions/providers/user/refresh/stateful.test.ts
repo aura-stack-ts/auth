@@ -1,5 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import {
+    accountEntity,
     authInstance,
     jose,
     oauthAccountEntity,
@@ -234,6 +235,7 @@ describe("refreshUserInfo action", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
@@ -245,6 +247,7 @@ describe("refreshUserInfo action", () => {
             handlers: { POST },
         } = authInstance({
             getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             getOAuthAccount: getOAuthAccountMock,
             revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
@@ -305,7 +308,8 @@ describe("refreshUserInfo action", () => {
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, "valid-token-hash")
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, "valid-token-hash")
         expect(revokeSessionMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, "valid-token-hash")
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -554,6 +558,7 @@ describe("refreshUserInfo action", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             ...oauthAccountEntity,
             accessTokenExpiresAt: new Date(Date.now() - 3600 * 1000),
@@ -570,6 +575,7 @@ describe("refreshUserInfo action", () => {
             handlers: { POST },
         } = authInstance(
             {
+                getAccountsByUserId: getAccountsByUserIdMock,
                 getSessionByToken: getSessionByTokenMock,
                 getOAuthAccount: getOAuthAccountMock,
                 revokeSession: revokeSessionMock,
@@ -602,7 +608,8 @@ describe("refreshUserInfo action", () => {
         expect(spyParseAsPartial).not.toHaveBeenCalled()
 
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
@@ -626,6 +633,7 @@ describe("refreshUserInfo action", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(expiredOAuthAccount)
         const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
@@ -638,6 +646,7 @@ describe("refreshUserInfo action", () => {
         } = authInstance({
             getSessionByToken: getSessionByTokenMock,
             getOAuthAccount: getOAuthAccountMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
             updateUser: updateUserMock,
@@ -693,7 +702,8 @@ describe("refreshUserInfo action", () => {
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, "valid-token-hash")
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, "valid-token-hash")
         expect(revokeSessionMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-provider")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).toHaveBeenCalledWith("oauth-provider", {
             accountId: "account-123",
             accessToken: "access-token",
@@ -824,6 +834,12 @@ describe("refreshUserInfo action", () => {
 
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([
+            {
+                ...accountEntity,
+                provider: "oauth-profile",
+            },
+        ])
         const revokeSessionMock = vi.fn()
         const updateOAuthTokensMock = vi.fn().mockResolvedValue(oauthAccountEntity)
         const updateUserMock = vi.fn().mockResolvedValue(sessionEntityWithUser.user)
@@ -835,6 +851,7 @@ describe("refreshUserInfo action", () => {
         } = authInstance({
             getSessionByToken: getSessionByTokenMock,
             getOAuthAccount: getOAuthAccountMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
             revokeSession: revokeSessionMock,
             updateOAuthTokens: updateOAuthTokensMock,
             updateUser: updateUserMock,
@@ -886,7 +903,8 @@ describe("refreshUserInfo action", () => {
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, "valid-token-hash")
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, "valid-token-hash")
         expect(revokeSessionMock).not.toHaveBeenCalled()
-        expect(getOAuthAccountMock).toHaveBeenCalledWith("oauth-profile")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, "valid-token-hash")
         expect(revokeSessionMock).not.toHaveBeenCalled()

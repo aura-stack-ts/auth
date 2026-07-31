@@ -745,7 +745,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
             const accounts = await config.adapter.getAccountsByUserId(sessionByToken.userId)
             const getAccount = accounts.find((account) => account.provider === oauthId)
-            const oauthAccount = await config.adapter.getOAuthAccount(getAccount?.id ?? "")
+            const oauthAccount = getAccount ? await config.adapter.getOAuthAccount(getAccount?.id ?? "") : null
             if (!oauthAccount) {
                 logger?.log("STATEFUL_GET_PROVIDER_TOKENS_OAUTH_ACCOUNT_NOT_FOUND", {
                     structuredData: {
@@ -1164,8 +1164,11 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
     const oauthCallback = async (oauthId: string, request: Request, { code, state }: { code: string; state: string }) => {
         const oauthConfig = oauth[oauthId]
-        const isOIDC = isOIDCProvider(oauthConfig)
+        if (!oauthConfig) {
+            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
+        }
 
+        const isOIDC = isOIDCProvider(oauthConfig)
         const transaction = await config.adapter.getOAuthTransactionByState(state)
 
         if (!transaction) {
@@ -1317,7 +1320,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
 
         if (account) {
             accountId = account.id
-            await config.adapter.updateOAuthTokens(accountId, {
+            await config.adapter.updateOAuthTokens(account.id, {
                 accessToken: accessToken.access_token,
                 refreshToken: accessToken.refresh_token || null,
                 idToken: accessToken.id_token || null,
