@@ -144,7 +144,7 @@ describe("GET /api/auth/signIn/github", () => {
                 "Content-Type": "application/json",
             }),
             json: async () => ({
-                id: 123456,
+                id: "user-123",
                 name: "John Doe",
                 login: "johndoe",
                 email: "john.doe@example.com",
@@ -169,8 +169,9 @@ describe("GET /api/auth/signIn/github", () => {
         })
 
         const user = await adapter.createUser({
+            id: "user-123",
             name: "John Doe",
-            email: "johndoe@example.com",
+            email: "john.doe@example.com",
         })
 
         await adapter.createSession({
@@ -276,6 +277,8 @@ describe("GET /api/auth/signIn/github", () => {
             success: true,
             connected: true,
         })
+        const users = await prismaClient.user.findMany()
+        expect(users.length).toBe(1)
     })
 })
 

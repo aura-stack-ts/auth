@@ -133,7 +133,7 @@ export const oauthAccountEntity: OAuthAccountEntity = {
 
 export const accountEntity: Partial<AccountEntity> = {
     id: "account-123",
-    status: "unlinked",
+    status: "active",
     provider: "oauth-provider",
 }
 
