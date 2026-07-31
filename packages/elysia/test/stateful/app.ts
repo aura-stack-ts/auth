@@ -20,7 +20,7 @@ export const adapter = prismaAdapter({
 })
 
 export const auth = createAuth({
-    oauth: ["github"],
+    oauth: ["github", "google"],
     basePath: "/api/auth",
     logger: process.env.CI === "true" ? false : true,
     credentials: {
