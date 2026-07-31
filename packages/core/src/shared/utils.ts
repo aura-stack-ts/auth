@@ -280,8 +280,8 @@ export const getDeviceType = (userAgent: string, secChUaMobile: string | null): 
     if (secChUaMobile === "?1") return "mobile"
     if (!userAgent) return "unknown"
     if (/ipad|tablet/i.test(userAgent)) return "tablet"
-    if (/mobile|iphone|android/i.test(userAgent)) return "mobile"
     if (/tv|smarttv|hbbtv|appletv|googletv/i.test(userAgent)) return "tv"
+    if (/mobile|iphone|android/i.test(userAgent)) return "mobile"
     if (/bot|crawler|spider|crawling/i.test(userAgent)) return "bot"
     return "desktop"
 }

@@ -250,6 +250,7 @@ describe("callbackAction (stateful)", () => {
         })
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const {
             handlers: { GET },
@@ -267,6 +268,7 @@ describe("callbackAction (stateful)", () => {
                 createOAuthAccount: createOAuthAccountMock,
                 createSession: createSessionMock,
                 createDevice: createDeviceMock,
+                getDeviceByFingerprint: getDeviceByFingerprintMock,
             },
             {
                 oauth: [oauthCustomService],
@@ -328,6 +330,7 @@ describe("callbackAction (stateful)", () => {
             accountId: "account-123",
             accessToken: "access_123",
             accessTokenExpiresAt: null,
+            refreshTokenExpiresAt: null,
             refreshToken: null,
             idToken: null,
             tokenType: "Bearer",
@@ -418,6 +421,7 @@ describe("callbackAction (stateful)", () => {
         })
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const {
             handlers: { GET },
@@ -433,6 +437,7 @@ describe("callbackAction (stateful)", () => {
                 createOAuthAccount: createOAuthAccountMock,
                 createSession: createSessionMock,
                 createDevice: createDeviceMock,
+                getDeviceByFingerprint: getDeviceByFingerprintMock,
             },
             {
                 oauth: [oauthCustomService],

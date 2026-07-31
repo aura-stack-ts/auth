@@ -45,6 +45,12 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
     const createDevice = async (userId: string, request: Request) => {
         const { userAgent, browser, platform, deviceType, ip, name } = getDeviceInfo(request)
         const fingerprint = await createFingerprint(request)
+        const device = await config.adapter.getDeviceByFingerprint(userId, fingerprint)
+        if (device) {
+            await config.adapter.updateDevice(device.id, { lastSeenAt: new Date() })
+            return device
+        }
+
         return await config.adapter.createDevice({
             userId,
             userAgent,
@@ -1339,11 +1345,16 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
                 tokenType: accessToken.token_type,
                 scopes: Array.isArray(accessToken.scope) ? accessToken.scope.join(" ") : accessToken.scope || null,
                 accessTokenExpiresAt: accessToken.expires_in ? new Date(Date.now() + accessToken.expires_in * 1000) : null,
+                refreshTokenExpiresAt: accessToken.refresh_token_expires_in
+                    ? new Date(Date.now() + accessToken.refresh_token_expires_in * 1000)
+                    : null,
             })
         }
 
         const device = await createDevice(userId, request)
-        const tokenHash = await createHash(crypto.randomUUID())
+        const sessionToken = createSecretValue(64)
+        const tokenHash = await createHash(sessionToken)
+
         await config.adapter.createSession({
             id: crypto.randomUUID(),
             userId,

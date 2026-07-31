@@ -24,6 +24,7 @@ describe("signInCredentials API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -31,6 +32,7 @@ describe("signInCredentials API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signInCredentials({
@@ -240,6 +242,7 @@ describe("signInCredentials API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -247,6 +250,7 @@ describe("signInCredentials API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signInCredentials({
@@ -308,6 +312,7 @@ describe("signInCredentials API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -315,6 +320,7 @@ describe("signInCredentials API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signInCredentials({
@@ -376,6 +382,7 @@ describe("signInCredentials API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -383,6 +390,7 @@ describe("signInCredentials API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signInCredentials({
@@ -444,6 +452,7 @@ describe("signInCredentials API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -451,6 +460,7 @@ describe("signInCredentials API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signInCredentials({

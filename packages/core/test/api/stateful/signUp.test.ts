@@ -25,6 +25,7 @@ describe("signUp API", async () => {
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -32,6 +33,7 @@ describe("signUp API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signUp({
@@ -225,6 +227,7 @@ describe("signUp API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -232,6 +235,7 @@ describe("signUp API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signUp({
@@ -288,6 +292,7 @@ describe("signUp API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -295,6 +300,7 @@ describe("signUp API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signUp({
@@ -351,6 +357,7 @@ describe("signUp API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -358,6 +365,7 @@ describe("signUp API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signUp({
@@ -414,6 +422,7 @@ describe("signUp API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -421,6 +430,7 @@ describe("signUp API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signUp({
@@ -477,6 +487,7 @@ describe("signUp API", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
             createUser: createUserMock,
@@ -484,6 +495,7 @@ describe("signUp API", async () => {
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const output = await api.signUp({

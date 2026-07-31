@@ -24,6 +24,7 @@ describe("signInCredentials action", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
@@ -31,6 +32,7 @@ describe("signInCredentials action", async () => {
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
             createDevice: createDeviceMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
         const response = await handlers.POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
@@ -135,6 +137,7 @@ describe("signInCredentials action", async () => {
         const createSessionMock = vi.fn()
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance(
             {
@@ -142,6 +145,7 @@ describe("signInCredentials action", async () => {
                 updateUser: updateUserMock,
                 getUserById: getUserByIdMock,
                 createSession: createSessionMock,
+                getDeviceByFingerprint: getDeviceByFingerprintMock,
             },
             {
                 credentials: {
@@ -192,6 +196,7 @@ describe("signInCredentials action", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
@@ -199,6 +204,7 @@ describe("signInCredentials action", async () => {
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
             createDevice: createDeviceMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const response = await handlers.POST(
@@ -257,6 +263,7 @@ describe("signInCredentials action", async () => {
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
@@ -264,6 +271,7 @@ describe("signInCredentials action", async () => {
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
             createDevice: createDeviceMock,
         })
 
@@ -323,6 +331,7 @@ describe("signInCredentials action", async () => {
         const getUserByIdMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const { handlers } = authInstance({
@@ -331,6 +340,7 @@ describe("signInCredentials action", async () => {
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
             createDevice: createDeviceMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const response = await handlers.POST(
@@ -390,6 +400,7 @@ describe("signInCredentials action", async () => {
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
+        const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance({
             createUser: createUserMock,
@@ -397,6 +408,7 @@ describe("signInCredentials action", async () => {
             getUserById: getUserByIdMock,
             createSession: createSessionMock,
             createDevice: createDeviceMock,
+            getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
         const response = await handlers.POST(
