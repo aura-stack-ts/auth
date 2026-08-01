@@ -7,6 +7,7 @@ import { createSession } from "@/session/stateless/createSession.ts"
 import { destroySession } from "@/session/stateless/destroySession.ts"
 import { refreshSession } from "@/session/stateless/refreshSession.ts"
 import { refreshUserInfo } from "@/session/stateless/refreshUserInfo.ts"
+import { signInCredentials } from "@/session/stateless/signInCredentials.ts"
 import { getProviderTokens } from "@/session/stateless/getProviderTokens.ts"
 import { isProviderConnected } from "@/session/stateless/isProviderConnected.ts"
 import type { SessionStrategy, User, InternalStatelessContext } from "@/@types/index.ts"
@@ -21,17 +22,18 @@ export const createStatelessStrategy = <DefaultUser extends User = User>(
     }
 
     return {
-        getSession: getSession(ctx),
-        createSession: createSession(ctx),
-        getProviderTokens: getProviderTokens(ctx),
-        refreshSession: refreshSession(ctx),
         revokeSession,
-        revokeToken: revokeToken(ctx),
-        isProviderConnected: isProviderConnected(ctx),
-        refreshUserInfo: refreshUserInfo(ctx),
-        destroySession: destroySession(ctx),
         signIn: signIn(ctx),
-        oauthCallback: oauthCallback(ctx),
         signUp: signUp(ctx),
+        getSession: getSession(ctx),
+        revokeToken: revokeToken(ctx),
+        createSession: createSession(ctx),
+        oauthCallback: oauthCallback(ctx),
+        refreshSession: refreshSession(ctx),
+        destroySession: destroySession(ctx),
+        refreshUserInfo: refreshUserInfo(ctx),
+        getProviderTokens: getProviderTokens(ctx),
+        signInCredentials: signInCredentials(ctx),
+        isProviderConnected: isProviderConnected(ctx),
     }
 }

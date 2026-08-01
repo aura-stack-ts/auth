@@ -20,14 +20,12 @@ describe("signInCredentials API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
-        const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
-            createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
@@ -55,13 +53,6 @@ describe("signInCredentials API", async () => {
             name: "johndoe",
             email: "johndoe@example.com",
             image: "https://example.com/image.jpg",
-        })
-        expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-            attributes: {},
         })
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
@@ -238,14 +229,12 @@ describe("signInCredentials API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
-        const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
-            createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
@@ -277,13 +266,6 @@ describe("signInCredentials API", async () => {
             email: "johndoe@example.com",
             image: "https://example.com/image.jpg",
         })
-        expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-            attributes: {},
-        })
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -308,14 +290,12 @@ describe("signInCredentials API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
-        const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
-            createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
@@ -347,13 +327,6 @@ describe("signInCredentials API", async () => {
             email: "johndoe@example.com",
             image: "https://example.com/image.jpg",
         })
-        expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-            attributes: {},
-        })
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -378,14 +351,12 @@ describe("signInCredentials API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
-        const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
-            createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
@@ -417,13 +388,6 @@ describe("signInCredentials API", async () => {
             email: "johndoe@example.com",
             image: "https://example.com/image.jpg",
         })
-        expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-            attributes: {},
-        })
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -448,14 +412,12 @@ describe("signInCredentials API", async () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
-        const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { api } = authInstance({
-            createUser: createUserMock,
             updateUser: updateUserMock,
             getUserById: getUserByIdMock,
             createDevice: createDeviceMock,
@@ -486,13 +448,6 @@ describe("signInCredentials API", async () => {
             name: "johndoe",
             email: "johndoe@example.com",
             image: "https://example.com/image.jpg",
-        })
-        expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-            attributes: {},
         })
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({

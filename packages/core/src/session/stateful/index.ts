@@ -8,6 +8,7 @@ import { revokeSession } from "@/session/stateful/revokeSession.ts"
 import { destroySession } from "@/session/stateful/destroySession.ts"
 import { refreshSession } from "@/session/stateful/refreshSession.ts"
 import { refreshUserInfo } from "@/session/stateful/refreshUserInfo.ts"
+import { signInCredentials } from "@/session/stateful/signInCredentials.ts"
 import { getProviderTokens } from "@/session/stateful/getProviderTokens.ts"
 import { isProviderConnected } from "@/session/stateful/isProviderConnected.ts"
 import type { SessionStrategy, User, InternalStatefulContext } from "@/@types/index.ts"
@@ -16,17 +17,18 @@ export const createStatefulStrategy = <DefaultUser extends User = User>(
     ctx: InternalStatefulContext
 ): SessionStrategy<DefaultUser> => {
     return {
-        refreshUserInfo: refreshUserInfo(ctx),
+        signUp: signUp(ctx),
+        signIn: signIn(ctx),
         getSession: getSession(ctx),
-        createSession: createSession(ctx),
-        refreshSession: refreshSession(ctx),
-        revokeSession: revokeSession(ctx),
         revokeToken: revokeToken(ctx),
+        oauthCallback: oauthCallback(ctx),
+        createSession: createSession(ctx),
+        revokeSession: revokeSession(ctx),
         destroySession: destroySession(ctx),
+        refreshSession: refreshSession(ctx),
+        refreshUserInfo: refreshUserInfo(ctx),
+        signInCredentials: signInCredentials(ctx),
         getProviderTokens: getProviderTokens(ctx),
         isProviderConnected: isProviderConnected(ctx),
-        signIn: signIn(ctx),
-        oauthCallback: oauthCallback(ctx),
-        signUp: signUp(ctx),
     }
 }

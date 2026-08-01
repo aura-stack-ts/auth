@@ -837,6 +837,18 @@ export const logMessages = {
         msgId: "SIGN_UP_ERROR",
         message: "Error occurred during user sign-up process",
     },
+    STATEFUL_SIGN_IN_CREDENTIALS_START: {
+        facility: 4,
+        severity: "debug",
+        msgId: "STATEFUL_SIGN_IN_CREDENTIALS_START",
+        message: "Starting stateful sign-in with credentials",
+    },
+    STATEFUL_SIGN_IN_CREDENTIALS_SUCCESS: {
+        facility: 4,
+        severity: "info",
+        msgId: "STATEFUL_SIGN_IN_CREDENTIALS_SUCCESS",
+        message: "Stateful sign-in with credentials completed successfully",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

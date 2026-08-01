@@ -1,4 +1,5 @@
 import { AuraAuthError } from "@/shared/errors.ts"
+import { getErrorName } from "@/shared/utils.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
@@ -35,7 +36,7 @@ export const signInCredentials = async ({
         if (!session) {
             throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
         }
-        const sessionToken = await sessionStrategy.createSession(session, request)
+        const sessionToken = await sessionStrategy.signInCredentials(session, request)
         const csrfToken = await createCSRF(ctx.jose)
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")
 
@@ -70,6 +71,9 @@ export const signInCredentials = async ({
             "An error occurred during credentials sign-in.",
             401
         )
+        const error_type = getErrorName(error)
+        const error_code = error instanceof AuraAuthError ? error.code : "UNKNOWN_ERROR"
+        const error_message = error instanceof Error ? error.message : String(error)
         const headers = new Headers(secureApiHeaders)
         const invalidCredentials: SignInCredentialsAPIReturn = {
             success: false,
@@ -84,13 +88,23 @@ export const signInCredentials = async ({
         if (error instanceof AuraAuthError && error.code === "AUTH_CREDENTIALS_INVALID") {
             logger?.log("INVALID_CREDENTIALS", {
                 severity: "warning",
-                structuredData: { path: "/signIn/credentials" },
+                structuredData: {
+                    path: "/signIn/credentials",
+                    error_type,
+                    error_code,
+                    error_message,
+                },
             })
             return invalidCredentials
         }
         logger?.log("CREDENTIALS_SIGN_IN_FAILED", {
             severity: "error",
-            structuredData: { path: "/signIn/credentials" },
+            structuredData: {
+                path: "/signIn/credentials",
+                error_type,
+                error_code,
+                error_message,
+            },
         })
         return invalidCredentials
     }
