@@ -6,7 +6,7 @@ import { getExpiredCookie } from "@/cookie.ts"
 import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
 import type { InternalStatefulContext } from "@/@types/session.ts"
 
-export const __revokeToken = ({ ctx, cookieConfig }: InternalStatefulContext) => {
+export const __revokeToken = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { oauth, logger, sessionConfig, cookies } = ctx
 
     return async (oauthId: string, headers: Headers, disconnect: boolean): Promise<Headers> => {
@@ -19,7 +19,7 @@ export const __revokeToken = ({ ctx, cookieConfig }: InternalStatefulContext) =>
         })
 
         try {
-            const { sessionToken } = cookieConfig.getCookie(headers)
+            const { sessionToken } = cookieManager.getCookie(headers)
             if (!sessionToken) {
                 logger?.log("SESSION_TOKEN_MISSING", {
                     structuredData: {
@@ -59,7 +59,19 @@ export const __revokeToken = ({ ctx, cookieConfig }: InternalStatefulContext) =>
                 },
             })
 
-            const oauthAccount = await sessionConfig.adapter.getOAuthAccount(oauthId)
+            const accounts = await sessionConfig.adapter.getAccountsByUserId(sessionByToken.userId)
+            const account = accounts.find((account) => account.provider === oauthId)
+            if (!account) {
+                logger?.log("OAUTH_UNLINKED_ACCOUNT_ERROR", {
+                    structuredData: {
+                        provider: oauthId,
+                        reason: "oauth_account_not_found",
+                    },
+                })
+                throw new AuraAuthError({ code: "OAUTH_UNLINKED_ACCOUNT_ERROR" })
+            }
+
+            const oauthAccount = await sessionConfig.adapter.getOAuthAccount(account?.id)
             if (!oauthAccount) {
                 logger?.log("OAUTH_UNLINKED_ACCOUNT_ERROR", {
                     structuredData: {

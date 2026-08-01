@@ -1,12 +1,12 @@
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
-import { createDevice as __createDevice } from "./utils.ts"
+import { createDevice as __createDevice } from "@/session/stateful/utils.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { InternalStatefulContext, User } from "@/@types/index.ts"
 
-export const __createSession = <DefaultUser extends User>({ ctx, cookies, cookieConfig }: InternalStatefulContext) => {
+export const __createSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
-    const createDevice = __createDevice({ ctx, cookies, cookieConfig })
+    const createDevice = __createDevice({ ctx, cookies, cookieManager })
 
     return async (session: TypedJWTPayload<DefaultUser>, request: Request) => {
         logger?.log("STATEFUL_CREATE_SESSION_START", {
@@ -87,7 +87,7 @@ export const __createSession = <DefaultUser extends User>({ ctx, cookies, cookie
             logger?.log("STATEFUL_USER_CREATED", {
                 structuredData: {
                     user_id: user.id,
-                    email: user.email || "",
+                    has_email: Boolean(user.email),
                 },
             })
         } else {
@@ -106,7 +106,7 @@ export const __createSession = <DefaultUser extends User>({ ctx, cookies, cookie
             logger?.log("STATEFUL_USER_UPDATED", {
                 structuredData: {
                     user_id: user.id,
-                    email: user.email || "",
+                    has_email: Boolean(user.email),
                 },
             })
         }

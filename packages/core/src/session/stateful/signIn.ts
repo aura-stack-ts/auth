@@ -1,9 +1,11 @@
+import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
+import { createFingerprint, getDeviceInfo } from "@/shared/utils.ts"
+import { createDevice as __createDevice } from "@/session/stateful/utils.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/utils/authorization.ts"
-import { HeadersBuilder } from "@aura-stack/router"
 import type { InternalStatefulContext } from "@/@types/session.ts"
 
 export const __signIn = ({ ctx }: InternalStatefulContext) => {
@@ -23,7 +25,7 @@ export const __signIn = ({ ctx }: InternalStatefulContext) => {
             structuredData: { oauth_provider: oauthId, oidc: isOIDC },
         })
 
-        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider!) : provider!
+        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider) : provider
 
         if (isOIDC) {
             logger?.log("OIDC_PROVIDER_RESOLVED", {
@@ -53,9 +55,8 @@ export const __signIn = ({ ctx }: InternalStatefulContext) => {
             structuredData: { oauth_provider: oauthId, oidc: isOIDC },
         })
 
-        const userAgent = request.headers.get("user-agent") || null
-        const fingerprint = request.headers.get("x-device-fingerprint") || null
-        const deviceId = request.headers.get("x-device-id") || null
+        const { userAgent } = getDeviceInfo(request)
+        const fingerprint = await createFingerprint(request)
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
 
         await sessionConfig.adapter.createOAuthTransaction({
@@ -68,9 +69,9 @@ export const __signIn = ({ ctx }: InternalStatefulContext) => {
             redirectTo: redirectToValue,
             userAgent,
             fingerprint,
-            deviceId,
             createdAt: new Date(),
             expiresAt,
+            deviceId: null,
             metadata: null,
         })
 

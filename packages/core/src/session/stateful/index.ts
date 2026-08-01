@@ -16,19 +16,19 @@ export const createStatefulStrategy = <DefaultUser extends User = User>({
     cookies,
     ctx,
 }: DatabaseStrategyOptions<DefaultUser>): SessionStrategy<DefaultUser> => {
-    const cookieConfig = createCookieManager(cookies)
+    const cookieManager = createCookieManager(cookies)
 
     return {
-        refreshUserInfo: __refreshUserInfo({ ctx: ctx as any, cookies, cookieConfig }),
-        getSession: __getSession({ ctx: ctx as any, cookies, cookieConfig }),
-        createSession: __createSession({ ctx: ctx as any, cookies, cookieConfig }),
-        refreshSession: __refreshSession({ ctx: ctx as any, cookies, cookieConfig }),
-        revokeSession: __revokeSession({ ctx: ctx as any, cookies, cookieConfig }),
-        revokeToken: __revokeToken({ ctx: ctx as any, cookies, cookieConfig }),
-        destroySession: __destroySession({ ctx: ctx as any, cookies, cookieConfig }),
-        getProviderTokens: __getProviderTokens({ ctx: ctx as any, cookies, cookieConfig }),
-        isProviderConnected: __isProviderConnected({ ctx: ctx as any, cookies, cookieConfig }),
-        signIn: __signIn({ ctx: ctx as any, cookies, cookieConfig }),
-        oauthCallback: __oauthCallback({ ctx: ctx as any, cookies, cookieConfig }),
+        refreshUserInfo: __refreshUserInfo({ ctx: ctx as any, cookies, cookieManager }),
+        getSession: __getSession({ ctx: ctx as any, cookies, cookieManager }),
+        createSession: __createSession({ ctx: ctx as any, cookies, cookieManager }),
+        refreshSession: __refreshSession({ ctx: ctx as any, cookies, cookieManager }),
+        revokeSession: __revokeSession({ ctx: ctx as any, cookies, cookieManager }),
+        revokeToken: __revokeToken({ ctx: ctx as any, cookies, cookieManager }),
+        destroySession: __destroySession({ ctx: ctx as any, cookies, cookieManager }),
+        getProviderTokens: __getProviderTokens({ ctx: ctx as any, cookies, cookieManager }),
+        isProviderConnected: __isProviderConnected({ ctx: ctx as any, cookies, cookieManager }),
+        signIn: __signIn({ ctx: ctx as any, cookies, cookieManager }),
+        oauthCallback: __oauthCallback({ ctx: ctx as any, cookies, cookieManager }),
     }
 }

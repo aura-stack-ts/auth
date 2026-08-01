@@ -819,6 +819,12 @@ export const logMessages = {
         msgId: "OAUTH_UNLINKED_ACCOUNT_ERROR",
         message: "Error occurred while unlinking OAuth account from user",
     },
+    OAUTH_ACCOUNT_USER_MISMATCH: {
+        facility: 4,
+        severity: "error",
+        msgId: "OAUTH_ACCOUNT_USER_MISMATCH",
+        message: "OAuth account does not belong to the authenticated user",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

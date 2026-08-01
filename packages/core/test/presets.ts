@@ -135,6 +135,7 @@ export const accountEntity: Partial<AccountEntity> = {
     id: "account-123",
     status: "active",
     provider: "oauth-provider",
+    userId: "user-123",
 }
 
 export const deviceEntity: DeviceEntity = {

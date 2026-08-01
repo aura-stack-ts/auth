@@ -351,7 +351,7 @@ export interface OAuthTokenPayload {
      * @deprecated
      */
     expiresAt: number
-    accessTokenExpiresAt: number
+    accessTokenExpiresAt?: number
     /**
      * The raw refresh token string issued by the OAuth provider, if applicable.
      */
@@ -387,10 +387,10 @@ export type CookieManager = ReturnType<typeof createCookieManager>
 export interface InternalStatefulContext {
     ctx: InternalContextForStateful
     cookies: () => InternalCookieStoreConfig
-    cookieConfig: CookieManager
+    cookieManager: CookieManager
 }
 
 export interface InternalStatelessContext {
     ctx: InternalContext<any, any>
-    cookieConfig: CookieManager
+    cookieManager: CookieManager
 }

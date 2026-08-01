@@ -3,7 +3,7 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import type { GetStatefulSessionReturn, User, InternalStatefulContext } from "@/@types/index.ts"
 
-export const __getSession = <DefaultUser extends User>({ ctx, cookieConfig }: InternalStatefulContext) => {
+export const __getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
 
     return async (headers: Headers): Promise<GetStatefulSessionReturn<DefaultUser>> => {
@@ -15,7 +15,7 @@ export const __getSession = <DefaultUser extends User>({ ctx, cookieConfig }: In
         })
 
         try {
-            const { sessionToken } = cookieConfig.getCookie(headers)
+            const { sessionToken } = cookieManager.getCookie(headers)
 
             logger?.log("STATEFUL_SESSION_TOKEN_EXTRACTED", {
                 structuredData: {
@@ -82,7 +82,7 @@ export const __getSession = <DefaultUser extends User>({ ctx, cookieConfig }: In
                 })
                 return {
                     session: null,
-                    headers: new Headers(secureApiHeaders),
+                    headers: cookieManager.clear(),
                 }
             }
 
@@ -97,7 +97,7 @@ export const __getSession = <DefaultUser extends User>({ ctx, cookieConfig }: In
 
                 return {
                     session: null,
-                    headers: cookieConfig.clear(),
+                    headers: cookieManager.clear(),
                 }
             }
 
@@ -131,7 +131,7 @@ export const __getSession = <DefaultUser extends User>({ ctx, cookieConfig }: In
                     user: parsedUser as DefaultUser,
                     expires: session.expiresAt.toISOString(),
                 },
-                headers: cookieConfig.setCookie({ sessionToken }),
+                headers: cookieManager.setCookie({ sessionToken }),
             }
         } catch (error) {
             logger?.log("STATEFUL_GET_SESSION_ERROR", {
@@ -142,7 +142,7 @@ export const __getSession = <DefaultUser extends User>({ ctx, cookieConfig }: In
             })
             return {
                 session: null,
-                headers: cookieConfig.clear(),
+                headers: cookieManager.clear(),
             }
         }
     }

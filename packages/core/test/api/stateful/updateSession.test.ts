@@ -665,7 +665,7 @@ describe("updateSession API", () => {
                 image: "https://example.com/image.jpg",
             },
         })
-        expect(updated.headers.get("Set-Cookie")).toBeNull()
+        expect(updated.headers.get("Set-Cookie")).toContain("aura-auth.session_token=")
 
         expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
         expect(revokeSessionMock).not.toHaveBeenCalled()

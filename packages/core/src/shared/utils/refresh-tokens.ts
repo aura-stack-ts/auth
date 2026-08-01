@@ -52,7 +52,6 @@ export const refreshProviderToken = async (
     return {
         accessToken: data.access_token ?? payload.accessToken,
         expiresAt: now + (data.expires_in ?? 3600),
-        accessTokenExpiresAt: now + (data.expires_in ?? 3600),
         refreshToken: data.refresh_token ?? payload.refreshToken,
         refreshTokenExpiresAt: data.refresh_token_expires_in
             ? now + data.refresh_token_expires_in

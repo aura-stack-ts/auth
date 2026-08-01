@@ -704,7 +704,7 @@ describe("refreshUserInfo action", () => {
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
-        expect(updateOAuthTokensMock).toHaveBeenCalledWith("oauth-provider", {
+        expect(updateOAuthTokensMock).toHaveBeenCalledWith("account-123", {
             accountId: "account-123",
             accessToken: "access-token",
             refreshToken: "refresh-token",

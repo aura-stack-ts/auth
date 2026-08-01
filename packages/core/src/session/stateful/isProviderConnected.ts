@@ -1,7 +1,7 @@
 import type { InternalStatefulContext } from "@/@types/session.ts"
 import { getErrorName } from "@/shared/utils.ts"
 
-export const __isProviderConnected = ({ ctx, cookieConfig }: InternalStatefulContext) => {
+export const __isProviderConnected = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
 
     return async (oauthId: string, headers: Headers): Promise<boolean> => {
@@ -13,7 +13,7 @@ export const __isProviderConnected = ({ ctx, cookieConfig }: InternalStatefulCon
         })
 
         try {
-            const { sessionToken } = cookieConfig.getCookie(headers)
+            const { sessionToken } = cookieManager.getCookie(headers)
             if (!sessionToken) {
                 logger?.log("SESSION_TOKEN_MISSING", {
                     structuredData: {
@@ -36,7 +36,7 @@ export const __isProviderConnected = ({ ctx, cookieConfig }: InternalStatefulCon
             const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
             if (sessionByToken.status !== "active" || isExpired) {
                 if (isExpired) {
-                    await sessionConfig.adapter.revokeSession(sessionByToken.id, "user_logout")
+                    await sessionConfig.adapter.revokeSession(sessionByToken.id, "account_suspended")
                 }
                 logger?.log("AUTH_SESSION_INVALID", {
                     structuredData: {
@@ -76,6 +76,9 @@ export const __isProviderConnected = ({ ctx, cookieConfig }: InternalStatefulCon
 
             return isConnected
         } catch (error) {
+            /**
+             * @todo returns the error to the user in a structured way.
+             */
             logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
                 structuredData: {
                     provider: oauthId,

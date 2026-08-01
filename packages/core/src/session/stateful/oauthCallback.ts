@@ -9,9 +9,9 @@ import type { InternalStatefulContext } from "@/@types/session.ts"
 import { createDevice as __createDevice } from "./utils.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 
-export const __oauthCallback = ({ ctx, cookies, cookieConfig }: InternalStatefulContext) => {
+export const __oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, jose, oauth, sessionConfig } = ctx
-    const createDevice = __createDevice({ ctx, cookies, cookieConfig })
+    const createDevice = __createDevice({ ctx, cookies, cookieManager })
 
     return async (oauthId: string, request: Request, { code, state }: { code: string; state: string }) => {
         const oauthConfig = oauth[oauthId]
@@ -151,7 +151,7 @@ export const __oauthCallback = ({ ctx, cookies, cookieConfig }: InternalStateful
                 attributes,
             })
         } else {
-            const { email, image, name, ...attributes } = userInfo
+            const { sub: _sub, email, image, name, ...attributes } = userInfo
             const newUser = await sessionConfig.adapter.createUser({
                 id: crypto.randomUUID(),
                 email: email,
@@ -170,6 +170,11 @@ export const __oauthCallback = ({ ctx, cookies, cookieConfig }: InternalStateful
         const account = await sessionConfig.adapter.getAccountByProvider(oauthId, userInfo.sub)
 
         if (account) {
+            if (account.userId !== userId) {
+                logger?.log("OAUTH_ACCOUNT_USER_MISMATCH")
+                throw new AuraAuthError({ code: "OAUTH_ACCOUNT_USER_MISMATCH" })
+            }
+
             accountId = account.id
             await sessionConfig.adapter.updateOAuthTokens(account.id, {
                 accessToken: accessToken.access_token,

@@ -4,10 +4,15 @@ import { getErrorName, shouldRefresh } from "@/shared/utils.ts"
 import { handleApiError } from "@/shared/utils/api.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 
-export const __getProviderTokens = ({ ctx, cookieConfig }: InternalStatefulContext) => {
+export const __getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { oauth, logger, sessionConfig } = ctx
 
     return async (oauthId: string, request: Request): Promise<GetProviderTokensStatefulReturn> => {
+        const provider = oauth[oauthId]
+        if (!provider) {
+            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
+        }
+
         logger?.log("STATEFUL_GET_PROVIDER_TOKENS_START", {
             structuredData: {
                 strategy: "stateful",
@@ -17,7 +22,7 @@ export const __getProviderTokens = ({ ctx, cookieConfig }: InternalStatefulConte
         })
 
         try {
-            const { sessionToken } = cookieConfig.getCookie(new Headers(request.headers))
+            const { sessionToken } = cookieManager.getCookie(new Headers(request.headers))
             if (!sessionToken) {
                 logger?.log("STATEFUL_GET_PROVIDER_TOKENS_NO_SESSION", {
                     structuredData: {
@@ -29,7 +34,7 @@ export const __getProviderTokens = ({ ctx, cookieConfig }: InternalStatefulConte
                     "PROVIDER_TOKENS_ERROR",
                     "Failed to get provider tokens"
                 )
-                return { success: false, error: { code, message }, tokens: null, headers: cookieConfig.clear(), statusCode }
+                return { success: false, error: { code, message }, tokens: null, headers: cookieManager.clear(), statusCode }
             }
 
             const sessionByToken = await sessionConfig.adapter.getSessionByToken(sessionToken)
@@ -44,7 +49,7 @@ export const __getProviderTokens = ({ ctx, cookieConfig }: InternalStatefulConte
                     "PROVIDER_TOKENS_ERROR",
                     "Failed to get provider tokens"
                 )
-                return { success: false, error: { code, message }, tokens: null, headers: cookieConfig.clear(), statusCode }
+                return { success: false, error: { code, message }, tokens: null, headers: cookieManager.clear(), statusCode }
             }
 
             const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
@@ -57,7 +62,7 @@ export const __getProviderTokens = ({ ctx, cookieConfig }: InternalStatefulConte
                     "PROVIDER_TOKENS_ERROR",
                     "Failed to get provider tokens"
                 )
-                return { success: false, error: { code, message }, tokens: null, headers: cookieConfig.clear(), statusCode }
+                return { success: false, error: { code, message }, tokens: null, headers: cookieManager.clear(), statusCode }
             }
 
             logger?.log("STATEFUL_GET_PROVIDER_TOKENS_SESSION_FOUND", {
@@ -79,7 +84,7 @@ export const __getProviderTokens = ({ ctx, cookieConfig }: InternalStatefulConte
                     },
                 })
                 const { code, message, statusCode } = handleApiError(
-                    new AuraAuthError({ code: "COOKIE_INVALID_VALUE" }),
+                    new AuraAuthError({ code: "OAUTH_UNLINKED_ACCOUNT_ERROR" }),
                     "PROVIDER_TOKENS_ERROR",
                     "Failed to get provider tokens"
                 )
@@ -114,17 +119,6 @@ export const __getProviderTokens = ({ ctx, cookieConfig }: InternalStatefulConte
                 },
             })
 
-            const provider = oauth?.[oauthId]
-            if (!provider) {
-                logger?.log("STATEFUL_GET_PROVIDER_TOKENS_PROVIDER_NOT_FOUND", {
-                    structuredData: {
-                        oauth_id: oauthId,
-                        reason: "provider_not_configured",
-                    },
-                })
-                return { success: true, tokens: tokens as any, headers: request.headers }
-            }
-
             const refreshWindow = provider.refreshWindow ?? 300
             const needsRefresh = shouldRefresh(tokens as any, refreshWindow)
 
@@ -154,7 +148,7 @@ export const __getProviderTokens = ({ ctx, cookieConfig }: InternalStatefulConte
                         },
                     })
 
-                    await sessionConfig.adapter.updateOAuthTokens(oauthId, {
+                    await sessionConfig.adapter.updateOAuthTokens(getAccount?.id as string, {
                         accountId: oauthAccount.accountId,
                         accessToken: refreshedTokens.accessToken,
                         refreshToken: refreshedTokens.refreshToken,

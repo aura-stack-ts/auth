@@ -1,9 +1,9 @@
-import type { InternalStatefulContext, Session, User } from "@/@types/session.ts"
-import type { DeepPartial } from "@/@types/utility.ts"
-import { secureApiHeaders } from "@/shared/headers.ts"
 import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
+import { createHash, createSecretValue } from "@/shared/crypto.ts"
+import type { DeepPartial } from "@/@types/utility.ts"
+import type { InternalStatefulContext, Session, User } from "@/@types/session.ts"
 
-export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieConfig }: InternalStatefulContext) => {
+export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig, jose } = ctx
 
     return async (
@@ -23,7 +23,7 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cooki
         })
 
         try {
-            const { sessionToken } = cookieConfig.getCookie(headers)
+            const { sessionToken } = cookieManager.getCookie(headers)
             logger?.log("STATEFUL_SESSION_TOKEN_EXTRACTED", {
                 structuredData: {
                     has_token: Boolean(sessionToken),
@@ -37,7 +37,7 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cooki
                         reason: "no_session_token_in_cookie",
                     },
                 })
-                return { session: null, headers: cookieConfig.clear() }
+                return { session: null, headers: cookieManager.clear() }
             }
 
             logger?.log("STATEFUL_CSRF_VERIFICATION_START", {
@@ -66,7 +66,7 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cooki
                         reason: "csrf_token_invalid",
                     },
                 })
-                return { session: null, headers: cookieConfig.clear() }
+                return { session: null, headers: cookieManager.clear() }
             }
 
             const sessionByToken = await sessionConfig.adapter.getSessionByToken(sessionToken)
@@ -84,11 +84,11 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cooki
                         reason: "session_not_found_or_no_user",
                     },
                 })
-                return { session: null, headers: cookieConfig.clear() }
+                return { session: null, headers: cookieManager.clear() }
             }
 
             if (sessionByToken.status !== "active") {
-                return { session: null, headers: cookieConfig.clear() }
+                return { session: null, headers: cookieManager.clear() }
             }
 
             logger?.log("STATEFUL_SESSION_EXPIRATION_CHECK", {
@@ -113,7 +113,7 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cooki
                         reason: "session_expired",
                     },
                 })
-                return { session: null, headers: cookieConfig.clear() }
+                return { session: null, headers: cookieManager.clear() }
             }
 
             const { attributes, ...spreadUser } = sessionByToken.user
@@ -227,7 +227,9 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cooki
                 },
             })
 
-            return { session: updatedSession, headers: new Headers(secureApiHeaders) }
+            const secretValue = createSecretValue(64)
+            const tokenHash = await createHash(secretValue)
+            return { session: updatedSession, headers: cookieManager.setCookie({ sessionToken: tokenHash }) }
         } catch (error) {
             console.error("Error refreshing session:", error)
             logger?.log("STATEFUL_REFRESH_SESSION_ERROR", {
@@ -236,7 +238,7 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cooki
                     error_message: error instanceof Error ? error.message : String(error),
                 },
             })
-            return { session: null, headers: cookieConfig.clear() }
+            return { session: null, headers: cookieManager.clear() }
         }
     }
 }

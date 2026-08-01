@@ -1,7 +1,7 @@
 import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
 import type { InternalStatefulContext } from "@/@types/session.ts"
 
-export const __destroySession = ({ ctx, cookieConfig }: InternalStatefulContext) => {
+export const __destroySession = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig, cookies, jose } = ctx
 
     return async (headers: Headers, skipCSRFCheck: boolean = false) => {
@@ -21,7 +21,7 @@ export const __destroySession = ({ ctx, cookieConfig }: InternalStatefulContext)
         })
 
         try {
-            const { sessionToken } = cookieConfig.getCookie(headers)
+            const { sessionToken } = cookieManager.getCookie(headers)
             logger?.log("STATEFUL_SESSION_TOKEN_EXTRACTED", {
                 structuredData: {
                     has_token: Boolean(sessionToken),
@@ -70,7 +70,7 @@ export const __destroySession = ({ ctx, cookieConfig }: InternalStatefulContext)
             throw error
         }
 
-        const clearedHeaders = cookieConfig.clear()
+        const clearedHeaders = cookieManager.clear()
         logger?.log("STATEFUL_DESTROY_SESSION_SUCCESS", {
             structuredData: {
                 cookies_cleared: true,
