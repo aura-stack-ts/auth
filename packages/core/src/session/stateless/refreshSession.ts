@@ -35,8 +35,10 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cooki
             const claims = await jwt.verifyToken(sessionToken)
             const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
 
-            const { exp, mexp, iat } = parsedClaims
-            const defaultPayload = identity.skipValidation ? parsedClaims : await identity.schemaRegistry.parse(parsedClaims)
+            const { exp, mexp, iat, ...claimsWithoutJWTFields } = parsedClaims
+            const defaultPayload = identity.skipValidation
+                ? claimsWithoutJWTFields
+                : await identity.schemaRegistry.parse(claimsWithoutJWTFields)
             const { sub } = defaultPayload
             const sessionPayload = identity.skipValidation
                 ? session.user

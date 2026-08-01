@@ -170,7 +170,6 @@ export const verifyCSRFToken = async ({
         csrfToken = getCookie(headers, cookies.csrfToken.name)
     } catch (cause) {
         logger?.log("CSRF_TOKEN_MISSING")
-        console.error("CSRF token missing:", headers, cookies)
         throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
     }
     logger?.log("CSRF_TOKEN_REQUESTED", {

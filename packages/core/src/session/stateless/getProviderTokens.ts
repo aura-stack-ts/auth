@@ -4,7 +4,7 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { handleApiError } from "@/shared/utils/api.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
-import { getErrorName, shouldRefresh, toUnionHeaders } from "@/shared/utils.ts"
+import { getErrorName, shouldRefresh } from "@/shared/utils.ts"
 import type { GetProviderTokensStatefulReturn, InternalStatelessContext } from "@/@types/session.ts"
 
 export const __getProviderTokens = ({ ctx, cookies }: InternalStatelessContext) => {
@@ -114,7 +114,6 @@ export const __getProviderTokens = ({ ctx, cookies }: InternalStatelessContext) 
                     const builder = new HeadersBuilder(secureApiHeaders)
                         .setCookie(cookieName, encodedTokens, cookies().accessToken.attributes)
                         .toHeaders()
-                    const newHeaders = toUnionHeaders(builder, request.headers)
 
                     logger?.log("STATELESS_GET_PROVIDER_TOKENS_COOKIE_UPDATED", {
                         structuredData: {
@@ -126,7 +125,7 @@ export const __getProviderTokens = ({ ctx, cookies }: InternalStatelessContext) 
                     return {
                         success: true,
                         tokens: refreshedTokens,
-                        headers: newHeaders,
+                        headers: builder,
                     }
                 } catch (refreshError) {
                     logger?.log("STATELESS_GET_PROVIDER_TOKENS_REFRESH_ERROR", {

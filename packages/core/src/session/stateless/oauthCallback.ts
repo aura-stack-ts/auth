@@ -16,6 +16,10 @@ export const __oauthCallback = ({ ctx }: InternalStatelessContext) => {
         const { oauth: providers, cookies, jose, logger, trustedOrigins } = ctx
 
         const oauthConfig = providers[oauthId]
+        if (!oauthConfig) {
+            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
+        }
+
         const isOIDC = isOIDCProvider(oauthConfig)
         const cookieState = getCookie(request, cookies.state.name)
         const codeVerifier = getCookie(request, cookies.codeVerifier.name)

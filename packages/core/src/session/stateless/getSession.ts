@@ -1,26 +1,7 @@
 import { getErrorName } from "@/shared/utils.ts"
+import { secureApiHeaders } from "@/shared/headers.ts"
+import { updateExpires } from "@/shared/utils/session-strategy.ts"
 import type { GetStatelessSessionReturn, InternalStatelessContext, Session, User } from "@/@types/session.ts"
-
-const updateExpires = ({ exp, maxAge, strategy }: { exp: number | undefined; maxAge: number; strategy: string }): Date | null => {
-    if (!exp) return null
-    const now = Math.floor(Date.now() / 1000)
-    switch (strategy) {
-        case "fixed":
-        case "absolute":
-            return null
-        case "rolling":
-            return new Date((now + maxAge) * 1000)
-        case "sliding": {
-            const threshold = maxAge * 0.25
-            if (exp - now < threshold) {
-                return new Date((now + maxAge) * 1000)
-            }
-            return null
-        }
-        default:
-            return null
-    }
-}
 
 export const __getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatelessContext) => {
     const { logger, identity, jwtManager, sessionConfig } = ctx
@@ -29,7 +10,7 @@ export const __getSession = <DefaultUser extends User>({ ctx, cookieManager }: I
     const strategy = sessionConfig?.jwt?.expirationStrategy ?? "absolute"
 
     return async (headers: Headers): Promise<GetStatelessSessionReturn<DefaultUser>> => {
-        const newHeaders = new Headers()
+        const newHeaders = new Headers(secureApiHeaders)
         try {
             const { sessionToken } = cookieManager.getCookie(headers)
             if (!sessionToken) return { session: null, headers: newHeaders }
@@ -37,7 +18,7 @@ export const __getSession = <DefaultUser extends User>({ ctx, cookieManager }: I
             const claims = await jwtManager.verifyToken(sessionToken)
             const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
             const { exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
-            const userClaims = await identity.schemaRegistry.parse(defaultPayload)
+            const userClaims = identity.skipValidation ? defaultPayload : await identity.schemaRegistry.parse(defaultPayload)
             if (!userClaims.sub) return { session: null, headers: newHeaders }
 
             const session: Session<DefaultUser> = {

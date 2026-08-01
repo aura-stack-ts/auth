@@ -1,5 +1,4 @@
 import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
-import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import type { DeepPartial } from "@/@types/utility.ts"
 import type { InternalStatefulContext, Session, User } from "@/@types/session.ts"
 
@@ -227,11 +226,8 @@ export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cooki
                 },
             })
 
-            const secretValue = createSecretValue(64)
-            const tokenHash = await createHash(secretValue)
-            return { session: updatedSession, headers: cookieManager.setCookie({ sessionToken: tokenHash }) }
+            return { session: updatedSession, headers: cookieManager.setCookie({ sessionToken }) }
         } catch (error) {
-            console.error("Error refreshing session:", error)
             logger?.log("STATEFUL_REFRESH_SESSION_ERROR", {
                 structuredData: {
                     error_type: getErrorName(error),
