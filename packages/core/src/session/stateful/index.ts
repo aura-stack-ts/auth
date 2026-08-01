@@ -9,6 +9,7 @@ import { refreshSession } from "@/session/stateful/refreshSession.ts"
 import { refreshUserInfo } from "@/session/stateful/refreshUserInfo.ts"
 import { getProviderTokens } from "@/session/stateful/getProviderTokens.ts"
 import { isProviderConnected } from "@/session/stateful/isProviderConnected.ts"
+import { signUp } from "@/session/stateful/signUp.ts"
 import type { SessionStrategy, User, InternalStatefulContext } from "@/@types/index.ts"
 
 export const createStatefulStrategy = <DefaultUser extends User = User>(
@@ -26,5 +27,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>(
         isProviderConnected: isProviderConnected(ctx),
         signIn: signIn(ctx),
         oauthCallback: oauthCallback(ctx),
+        signUp: signUp(ctx),
     }
 }

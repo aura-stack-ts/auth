@@ -4,6 +4,7 @@ import { secureApiHeaders } from "@/shared/headers.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext, SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
+import { getErrorName } from "@/shared/utils.ts"
 
 export const signUp = async <Payload extends Record<string, unknown> = Record<string, unknown>>({
     ctx,
@@ -33,7 +34,8 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         if (!user) {
             throw new AuraAuthError({ code: "USER_CREATION_FAILED" })
         }
-        const sessionToken = await sessionStrategy.createSession(user, request)
+
+        const sessionToken = await sessionStrategy.signUp(user, request)
         const csrfToken = await createCSRF(ctx.jose)
         logger?.log("SIGN_UP_SUCCESS")
 
@@ -67,6 +69,12 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             },
         } as SignUpAPIReturn
     } catch (error) {
+        logger?.log("SIGN_UP_ERROR", {
+            structuredData: {
+                error_type: getErrorName(error),
+                error_message: error instanceof Error ? error.message : String(error),
+            },
+        })
         const { code, message, statusCode } = handleApiError(error, "SIGN_UP_ERROR", "An error occurred during sign-up.")
 
         return {

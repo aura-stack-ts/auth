@@ -132,6 +132,7 @@ export const AuraErrorCode = {
     OAUTH_UNLINKED_ACCOUNT_ERROR: "OAUTH_UNLINKED_ACCOUNT_ERROR",
     OAUTH_ACCOUNT_USER_MISMATCH: "OAUTH_ACCOUNT_USER_MISMATCH",
     MISSING_ADAPTER_IN_STATEFUL_STRATEGY: "MISSING_ADAPTER_IN_STATEFUL_STRATEGY",
+    EMAIL_ALREADY_REGISTERED: "EMAIL_ALREADY_REGISTERED",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -926,6 +927,14 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
             "Initialization aborted: The 'database' session strategy was selected, but no database adapter was provided in the configuration settings. Stateful session management requires an adapter instance to execute database operations.",
         userMessage:
             "Internal library configuration error. Database session strategy requires an adapter instance to be configured.",
+    },
+    EMAIL_ALREADY_REGISTERED: {
+        type: "AUTH_FLOW",
+        statusCode: 409,
+        name: "AuthError",
+        message:
+            "The registration request was rejected because the provided email address is already associated with an existing user record in the system.",
+        userMessage: "This email address is already registered. Please sign in or use a different email.",
     },
 }
 
