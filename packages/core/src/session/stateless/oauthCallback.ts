@@ -9,9 +9,9 @@ import { getCookie, getExpiredCookie, getOptionalCookie } from "@/cookie.ts"
 import { getOriginURL, getTrustedOrigins } from "@/shared/utils/authorization.ts"
 import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
-import type { InternalStatelessContext } from "@/@types/session.ts"
+import type { InternalStatelessContext } from "@/@types/index.ts"
 
-export const __oauthCallback = ({ ctx }: InternalStatelessContext) => {
+export const oauthCallback = ({ ctx }: InternalStatelessContext) => {
     return async (oauthId: string, request: Request, { code, state }: { code: string; state: string }) => {
         const { oauth: providers, cookies, jose, logger, trustedOrigins } = ctx
 

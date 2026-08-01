@@ -1,9 +1,9 @@
 import { getErrorName } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { updateExpires } from "@/shared/utils/session-strategy.ts"
-import type { GetStatelessSessionReturn, InternalStatelessContext, Session, User } from "@/@types/session.ts"
+import type { GetStatelessSessionReturn, InternalStatelessContext, Session, User } from "@/@types/index.ts"
 
-export const __getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatelessContext) => {
+export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatelessContext) => {
     const { logger, identity, jwtManager, sessionConfig } = ctx
 
     const maxAge = sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15

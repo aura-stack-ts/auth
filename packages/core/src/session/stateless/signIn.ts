@@ -4,9 +4,9 @@ import { cacheControl } from "@/shared/headers.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/utils/authorization.ts"
-import type { InternalStatelessContext } from "@/@types/session.ts"
+import type { InternalStatelessContext } from "@/@types/index.ts"
 
-export const __signIn = ({ ctx, cookies }: InternalStatelessContext) => {
+export const signIn = ({ ctx, cookies }: InternalStatelessContext) => {
     const { oauth, logger } = ctx
 
     return async (oauthId: string, request: Request, redirectTo?: string) => {

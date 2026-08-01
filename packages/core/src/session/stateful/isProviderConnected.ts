@@ -1,7 +1,7 @@
 import { getErrorName } from "@/shared/utils.ts"
-import type { InternalStatefulContext } from "@/@types/session.ts"
+import type { InternalStatefulContext } from "@/@types/index.ts"
 
-export const __isProviderConnected = ({ ctx, cookieManager }: InternalStatefulContext) => {
+export const isProviderConnected = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
 
     return async (oauthId: string, headers: Headers): Promise<boolean> => {

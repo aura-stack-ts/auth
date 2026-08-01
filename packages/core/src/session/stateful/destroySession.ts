@@ -1,7 +1,7 @@
 import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
-import type { InternalStatefulContext } from "@/@types/session.ts"
+import type { InternalStatefulContext } from "@/@types/index.ts"
 
-export const __destroySession = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
+export const destroySession = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig, jose } = ctx
 
     return async (headers: Headers, skipCSRFCheck: boolean = false) => {

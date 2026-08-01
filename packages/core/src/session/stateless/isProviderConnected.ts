@@ -1,8 +1,8 @@
 import { getCookie } from "@/cookie.ts"
 import { getErrorName } from "@/shared/utils.ts"
-import type { InternalStatelessContext } from "@/@types/session.ts"
+import type { InternalStatelessContext } from "@/@types/index.ts"
 
-export const __isProviderConnected = ({ ctx, cookies }: InternalStatelessContext) => {
+export const isProviderConnected = ({ ctx, cookies }: InternalStatelessContext) => {
     const { logger, jwtManager: jwt } = ctx
 
     return async (oauthId: string, headers: Headers): Promise<boolean> => {

@@ -1,5 +1,5 @@
 import { createFingerprint, getDeviceInfo } from "@/shared/utils.ts"
-import type { InternalStatefulContext } from "@/@types/session.ts"
+import type { InternalStatefulContext } from "@/@types/index.ts"
 
 export const createDevice = ({ ctx: { sessionConfig } }: InternalStatefulContext) => {
     return async (userId: string, request: Request) => {

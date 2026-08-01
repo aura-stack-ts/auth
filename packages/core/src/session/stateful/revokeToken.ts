@@ -4,9 +4,9 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
 import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
-import type { InternalStatefulContext } from "@/@types/session.ts"
+import type { InternalStatefulContext } from "@/@types/index.ts"
 
-export const __revokeToken = ({ ctx, cookieManager }: InternalStatefulContext) => {
+export const revokeToken = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { oauth, logger, sessionConfig, cookies } = ctx
 
     return async (oauthId: string, headers: Headers, disconnect: boolean): Promise<Headers> => {

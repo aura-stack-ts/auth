@@ -1,7 +1,7 @@
 import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { InternalStatelessContext, User } from "@/@types/session.ts"
+import type { InternalStatelessContext, User } from "@/@types/index.ts"
 
-export const __createSession = <DefaultUser extends User>({ ctx }: InternalStatelessContext) => {
+export const createSession = <DefaultUser extends User>({ ctx }: InternalStatelessContext) => {
     const { logger, identity, jwtManager } = ctx
     return async (session: TypedJWTPayload<DefaultUser>) => {
         if (identity.skipValidation) {

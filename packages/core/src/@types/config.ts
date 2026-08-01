@@ -15,13 +15,14 @@ import type {
     OAuthProviderCredentials,
     OAuthProviderRecord,
     JWTKey,
-    JWTManager,
     SessionConfig,
     SessionStrategy,
     User,
     Awaitable,
     StatefulStrategyConfig,
     StatelessStrategyConfig,
+    TypedJWTPayload,
+    CookieManager,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
@@ -540,6 +541,30 @@ export type InternalContext<Identity extends Identities, SignUpSchema extends Sc
 
 export type InternalContextForStateful = Omit<InternalContext<any, any>, "sessionConfig"> & {
     sessionConfig: StatefulStrategyConfig
+}
+
+/** Inputs for constructing a session strategy implementation for a given identity schema. */
+export interface CreateSessionStrategyOptions<Identity extends Identities> {
+    ctx: InternalContext<Identity, any>
+    cookies: () => InternalCookieStoreConfig
+}
+
+export interface InternalStatefulContext {
+    ctx: InternalContextForStateful
+    cookies: () => InternalCookieStoreConfig
+    cookieManager: CookieManager
+}
+
+export interface InternalStatelessContext {
+    ctx: InternalContextForStateless
+    cookies: () => InternalCookieStoreConfig
+    cookieManager: CookieManager
+}
+
+/** Minimal token issue/verify surface used by session code paths. */
+export type JWTManager<DefaultUser extends User = User> = {
+    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
+    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }
 
 export type InternalContextForStateless = Omit<InternalContext<any, any>, "sessionConfig"> & {

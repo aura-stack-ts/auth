@@ -4,7 +4,7 @@ import { createDevice as __createDevice } from "@/shared/utils/session-strategy.
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { InternalStatefulContext, User } from "@/@types/index.ts"
 
-export const __createSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
+export const createSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
     const createDevice = __createDevice({ ctx, cookies, cookieManager })
 

@@ -4,9 +4,9 @@ import { toUnionHeaders } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { getCookie, getExpiredCookie } from "@/cookie.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
-import type { InternalStatelessContext } from "@/@types/session.ts"
+import type { InternalStatelessContext } from "@/@types/index.ts"
 
-export const __revokeToken = ({ ctx, cookies }: InternalStatelessContext) => {
+export const revokeToken = ({ ctx, cookies }: InternalStatelessContext) => {
     const { logger, identity, jwtManager: jwt, oauth } = ctx
 
     return async (oauthId: string, headers: Headers, disconnect: boolean): Promise<Headers> => {

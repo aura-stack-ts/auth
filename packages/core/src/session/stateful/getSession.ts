@@ -3,7 +3,7 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import type { GetStatefulSessionReturn, User, InternalStatefulContext } from "@/@types/index.ts"
 
-export const __getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
+export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
 
     return async (headers: Headers): Promise<GetStatefulSessionReturn<DefaultUser>> => {

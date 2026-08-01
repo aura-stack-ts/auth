@@ -1,8 +1,8 @@
 import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
 import type { DeepPartial } from "@/@types/utility.ts"
-import type { InternalStatefulContext, Session, User } from "@/@types/session.ts"
+import type { InternalStatefulContext, Session, User } from "@/@types/index.ts"
 
-export const __refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
+export const refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig, jose } = ctx
 
     return async (

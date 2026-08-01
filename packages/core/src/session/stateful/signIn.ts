@@ -5,9 +5,9 @@ import { createFingerprint, getDeviceInfo } from "@/shared/utils.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/utils/authorization.ts"
-import type { InternalStatefulContext } from "@/@types/session.ts"
+import type { InternalStatefulContext } from "@/@types/index.ts"
 
-export const __signIn = ({ ctx }: InternalStatefulContext) => {
+export const signIn = ({ ctx }: InternalStatefulContext) => {
     const { logger, oauth, sessionConfig } = ctx
 
     return async (oauthId: string, request: Request, redirectTo?: string) => {
