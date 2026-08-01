@@ -282,6 +282,11 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * @unstable This API is experimental and may change in future releases.
      */
     signUp(payload: Record<string, unknown>, request: Request): Promise<string>
+    /**
+     * Sign in a user with the given credentials and request. Returns the session token on success.
+     * @unstable This API is experimental and may change in future releases.
+     */
+    signInCredentials(payload: Record<string, unknown>, request: Request, redirectTo?: string): Promise<string>
     signIn(
         oauth: string,
         request: Request,

@@ -360,6 +360,13 @@ describe("POST /api/auth/signIn/credentials", () => {
     test("returns 200 and a session cookie when valid credentials are provided", async () => {
         const csrfToken = await createCSRF(auth.jose)
 
+        await adapter.createUser({
+            id: "credentials:valid",
+            name: "John Doe",
+            email: "johndoe@example.com",
+            image: "https://johndoe.example.com/avatar.png",
+        })
+
         const response = await app.handle(
             new Request("http://localhost/api/auth/signIn/credentials", {
                 method: "POST",
@@ -379,6 +386,25 @@ describe("POST /api/auth/signIn/credentials", () => {
             redirectURL: null,
         })
         expect(response.headers.get("set-cookie")).toBeDefined()
+        const sessionToken = response.headers.getSetCookie()?.find((cookie) => cookie.startsWith("aura-auth.session_token="))
+        const parsed = parseSetCookie(sessionToken!).value
+        const session = await app.handle(
+            new Request("http://localhost/api/auth/session", {
+                headers: { Cookie: `aura-auth.session_token=${parsed}` },
+            })
+        )
+        expect(await session.json()).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: "credentials:valid",
+                    name: "John Doe",
+                    email: "johndoe@example.com",
+                    image: "https://johndoe.example.com/avatar.png",
+                },
+                expires: expect.any(String),
+            },
+        })
     })
 })
 
@@ -725,7 +751,7 @@ describe("GET /api/auth/getProviderTokens", () => {
             })
         )
 
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(400)
         const body = await response.json()
         expect(body).toMatchObject({
             success: false,
