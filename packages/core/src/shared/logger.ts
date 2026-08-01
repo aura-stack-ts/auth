@@ -831,6 +831,12 @@ export const logMessages = {
         msgId: "STATELESS_REVOKE_SESSION_NOOP",
         message: "Stateless session revocation is a no-op (no server-side state to revoke)",
     },
+    SIGN_UP_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "SIGN_UP_ERROR",
+        message: "Error occurred during user sign-up process",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

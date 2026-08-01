@@ -1,4 +1,5 @@
 import { signIn } from "@/session/stateful/signIn.ts"
+import { signUp } from "@/session/stateful/signUp.ts"
 import { getSession } from "@/session/stateful/getSession.ts"
 import { revokeToken } from "@/session/stateful/revokeToken.ts"
 import { createSession } from "@/session/stateful/createSession.ts"
@@ -26,5 +27,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>(
         isProviderConnected: isProviderConnected(ctx),
         signIn: signIn(ctx),
         oauthCallback: oauthCallback(ctx),
+        signUp: signUp(ctx),
     }
 }

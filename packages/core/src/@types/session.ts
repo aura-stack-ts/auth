@@ -277,6 +277,11 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         headers: Headers
     }>
 
+    /**
+     * Sign up a new user with the given payload and request. Returns the session token on success.
+     * @unstable This API is experimental and may change in future releases.
+     */
+    signUp(payload: Record<string, unknown>, request: Request): Promise<string>
     signIn(
         oauth: string,
         request: Request,
