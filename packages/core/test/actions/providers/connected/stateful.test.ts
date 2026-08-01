@@ -89,7 +89,9 @@ describe("connectedAction", () => {
             connected: false,
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledTimes(2)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
     })
 

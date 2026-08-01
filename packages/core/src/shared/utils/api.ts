@@ -57,6 +57,9 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                     })
                 } else {
                     const { sessionToken } = createCookieManager(() => ctx.cookies).getCookie(new Headers(headersInit))
+                    if (!sessionToken) {
+                        throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
+                    }
                     const tokenHash = await createHash(sessionToken)
                     const session = await ctx.sessionConfig.adapter.getSessionByToken(tokenHash)
                     if (!session) {
