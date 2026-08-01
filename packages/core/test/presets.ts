@@ -135,6 +135,7 @@ export const accountEntity: Partial<AccountEntity> = {
     id: "account-123",
     status: "active",
     provider: "oauth-provider",
+    userId: "user-123",
 }
 
 export const deviceEntity: DeviceEntity = {
@@ -209,7 +210,7 @@ export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any
         logger: getEnv("CI") === "true" ? false : true,
         session: {
             strategy: "database",
-            adapter: adapter as any,
+            adapter: adapter ?? ({} as any),
         },
         credentials: {
             authorize: async ({ credentials }) => {

@@ -137,8 +137,8 @@ describe("getAccessToken API (Stateful)", () => {
             success: false,
             accessToken: null,
             error: {
-                code: "COOKIE_INVALID_VALUE",
-                message: "Expected configuration cookie not found or contains an empty value.",
+                code: "OAUTH_UNLINKED_ACCOUNT_ERROR",
+                message: "The specified identity provider is not connected to your account.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -304,15 +304,16 @@ describe("getAccessToken API (Stateful)", () => {
         })
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
-        expect(updateOAuthTokensMock).toHaveBeenCalledWith(
-            "oauth-provider",
-            expect.objectContaining({
-                accountId: "account-123",
-                accessToken: "new-access-token",
-                refreshToken: "new-refresh-token",
-                idToken: "new-id-token",
-            })
-        )
+        expect(updateOAuthTokensMock).toHaveBeenCalledWith("account-123", {
+            accountId: "account-123",
+            accessToken: "new-access-token",
+            refreshToken: "new-refresh-token",
+            idToken: "new-id-token",
+            scopes: "scope1 scope2",
+            tokenType: "Bearer",
+            accessTokenExpiresAt: expect.any(Date),
+            refreshTokenExpiresAt: expect.any(Date),
+        })
     })
 
     test("refreshToken successfully refreshes tokens with credentials auth in refreshToken config", async () => {
@@ -398,15 +399,16 @@ describe("getAccessToken API (Stateful)", () => {
         })
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
-        expect(updateOAuthTokensMock).toHaveBeenCalledWith(
-            "oauth-provider",
-            expect.objectContaining({
-                accountId: "account-123",
-                accessToken: "new-access-token",
-                refreshToken: "new-refresh-token",
-                idToken: "new-id-token",
-            })
-        )
+        expect(updateOAuthTokensMock).toHaveBeenCalledWith("account-123", {
+            accountId: "account-123",
+            accessToken: "new-access-token",
+            refreshToken: "new-refresh-token",
+            idToken: "new-id-token",
+            scopes: "scope1 scope2",
+            tokenType: "Bearer",
+            accessTokenExpiresAt: expect.any(Date),
+            refreshTokenExpiresAt: expect.any(Date),
+        })
     })
 
     test("refreshToken fails when OAuth provider returns an error", async () => {
@@ -602,14 +604,15 @@ describe("getAccessToken API (Stateful)", () => {
         expect(mockFetch).toHaveBeenCalledTimes(1)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
-        expect(updateOAuthTokensMock).toHaveBeenCalledWith(
-            "oauth-provider",
-            expect.objectContaining({
-                accountId: "account-123",
-                accessToken: "brand-new-refreshed-token",
-                refreshToken: "new-refresh-token",
-                idToken: "new-id-token",
-            })
-        )
+        expect(updateOAuthTokensMock).toHaveBeenCalledWith("account-123", {
+            accountId: "account-123",
+            accessToken: "brand-new-refreshed-token",
+            refreshToken: "new-refresh-token",
+            idToken: "new-id-token",
+            scopes: "scope1 scope2",
+            tokenType: "Bearer",
+            accessTokenExpiresAt: expect.any(Date),
+            refreshTokenExpiresAt: expect.any(Date),
+        })
     })
 })

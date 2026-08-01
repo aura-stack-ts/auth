@@ -1,0 +1,11 @@
+import { refreshSession as __refreshSession } from "@/session/stateful/refreshSession.ts"
+import type { InternalStatefulContext, User } from "@/@types/index.ts"
+
+export const refreshUserInfo = <DefaultUser extends User>(ctx: InternalStatefulContext) => {
+    const refreshSession = __refreshSession(ctx)
+
+    return async (userInfo: Partial<DefaultUser>, headers: Headers, skipCSRFCheck?: boolean) => {
+        const value = await refreshSession(headers, { user: userInfo }, skipCSRFCheck)
+        return value as any
+    }
+}

@@ -666,7 +666,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
-        expect(updateOAuthTokensMock).toHaveBeenCalledWith("oauth-provider", {
+        expect(updateOAuthTokensMock).toHaveBeenCalledWith("account-123", {
             accountId: "account-123",
             accessToken: "new-access-token",
             refreshToken: "new-refresh-token",

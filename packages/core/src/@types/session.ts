@@ -1,20 +1,9 @@
 import { identitySchema } from "@/identity/zod.ts"
 import type { JWK } from "@aura-stack/jose/jose"
 import type { infer as Infer } from "zod/v4/core"
-import type { TypedJWTPayload } from "@aura-stack/jose"
-import type {
-    InternalCookieStoreConfig,
-    InternalLogger,
-    JoseInstance,
-    SchemaRegistryContext,
-    DeepPartial,
-    FromShapeToObject,
-    Prettify,
-    Identities,
-    OAuthProviderRecord,
-    InternalContext,
-} from "@/@types/index.ts"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
+import type { DeepPartial, Prettify } from "@/@types/index.ts"
+import type { createCookieManager } from "@/session/cookie-manager.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof identitySchema>
@@ -301,44 +290,6 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     oauthCallback(oauth: string, request: Request, { code, state }: { code: string; state: string }): Promise<Response>
 }
 
-/** Inputs for constructing a session strategy implementation for a given identity schema. */
-export interface CreateSessionStrategyOptions<Identity extends Identities> {
-    config?: SessionConfig
-    jose: JoseInstance<FromShapeToObject<Identity> & User>
-    cookies: () => InternalCookieStoreConfig
-    logger?: InternalLogger
-    identity: SchemaRegistryContext
-    oauth: OAuthProviderRecord
-    ctx: InternalContext<Identity, any>
-}
-
-/** Options specialized for the JWT-backed session strategy. */
-export interface JWTStrategyOptions<DefaultUser extends User = User> {
-    ctx: InternalContext<any, any>
-    config?: StatelessStrategyConfig
-    jose: JoseInstance<DefaultUser>
-    logger?: InternalLogger
-    cookies: () => InternalCookieStoreConfig
-    identity: SchemaRegistryContext
-    oauth: OAuthProviderRecord
-}
-
-export interface DatabaseStrategyOptions<DefaultUser extends User = User> {
-    ctx: InternalContext<any, any>
-    config: StatefulStrategyConfig
-    jose: JoseInstance<DefaultUser>
-    logger?: InternalLogger
-    cookies: () => InternalCookieStoreConfig
-    identity: SchemaRegistryContext
-    oauth: OAuthProviderRecord
-}
-
-/** Minimal token issue/verify surface used by session code paths. */
-export type JWTManager<DefaultUser extends User = User> = {
-    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
-    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
-}
-
 export interface OAuthTokenPayload {
     /**
      * The raw access token string issued by the OAuth provider.
@@ -349,7 +300,7 @@ export interface OAuthTokenPayload {
      * @deprecated
      */
     expiresAt: number
-    accessTokenExpiresAt: number
+    accessTokenExpiresAt?: number
     /**
      * The raw refresh token string issued by the OAuth provider, if applicable.
      */
@@ -379,3 +330,5 @@ export interface OAuthTokenPayload {
      */
     issuedAt: number
 }
+
+export type CookieManager = ReturnType<typeof createCookieManager>
