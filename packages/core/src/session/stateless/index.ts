@@ -1,4 +1,5 @@
 import { signIn } from "@/session/stateless/signIn.ts"
+import { signUp } from "@/session/stateless/signUp.ts"
 import { getSession } from "@/session/stateless/getSession.ts"
 import { revokeToken } from "@/session/stateless/revokeToken.ts"
 import { oauthCallback } from "@/session/stateless/oauthCallback.ts"
@@ -31,5 +32,6 @@ export const createStatelessStrategy = <DefaultUser extends User = User>(
         destroySession: destroySession(ctx),
         signIn: signIn(ctx),
         oauthCallback: oauthCallback(ctx),
+        signUp: signUp(ctx),
     }
 }

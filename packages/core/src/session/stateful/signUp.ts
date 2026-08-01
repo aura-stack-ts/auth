@@ -3,6 +3,9 @@ import { createHash, createSecretValue, hashPassword } from "@/shared/crypto.ts"
 import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
 import type { InternalStatefulContext } from "@/@types/config.ts"
 
+/**
+ * @todo Add transaction support for the signUp process to ensure atomicity and rollback in case of errors.
+ */
 export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
     const createDevice = __createDevice({ ctx, cookies, cookieManager })
@@ -26,7 +29,6 @@ export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext)
         /**
          * @todo fix wrong logic from identity.schema (User schema) and signUp.schema (SignUpPayload schema)
          */
-        console.log("payload: ", payload)
         const { password } = payload
         const validatedPayload = ctx.identity.skipValidation ? payload : await ctx.identity.schemaRegistry.parse(payload)
         logger?.log("STATEFUL_PAYLOAD_VALIDATION", {
@@ -36,7 +38,8 @@ export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext)
             },
         })
 
-        const { sub: _sub, email, name, image, ...attributes } = validatedPayload
+        const { sub: _sub, email: rawEmail, name, image, ...attributes } = validatedPayload
+        const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : rawEmail
 
         if (email) {
             const getEmail = await sessionConfig.adapter.getUserByEmail(email)
@@ -73,9 +76,11 @@ export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext)
             status: "active",
         })
 
-        console.log("password: ", password)
-        if (password) {
-            const passwordHash = await hashPassword(password as string)
+        if (password !== undefined && password !== null) {
+            if (typeof password !== "string" || password.length === 0) {
+                throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
+            }
+            const passwordHash = await hashPassword(password)
             await sessionConfig.adapter.createCredentialAccount({
                 accountId: account.id,
                 passwordHash,

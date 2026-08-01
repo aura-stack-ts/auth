@@ -366,7 +366,7 @@ describe("signUp API", async () => {
         })
         expect(createCredentialsAccountMock).toHaveBeenCalledWith({
             accountId: "account-123",
-            passwordHash: expect.any(String),
+            passwordHash: expect.stringMatching(/^pbkdf2-sha256:\d+:[\w-]+:[\w-]+$/),
         })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),

@@ -2,7 +2,15 @@ import { describe, test, expect, vi } from "vitest"
 import { z } from "zod/v4"
 import { createCSRF } from "@/shared/crypto.ts"
 import { identitySchema } from "@/identity/zod.ts"
-import { authInstance, deviceEntity, jose, sessionEntityWithUser, sessionPayload, userEntity } from "@test/presets.ts"
+import {
+    accountEntity,
+    authInstance,
+    deviceEntity,
+    jose,
+    sessionEntityWithUser,
+    sessionPayload,
+    userEntity,
+} from "@test/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 describe("signUp API", async () => {
@@ -21,19 +29,22 @@ describe("signUp API", async () => {
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
-        const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const getUserByEmailMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createAccountMock = vi.fn().mockReturnValue({
+            ...accountEntity,
+            provider: "credentials",
+        })
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance({
-            createSession: createSessionMock,
+            getUserByEmail: getUserByEmailMock,
             createUser: createUserMock,
-            updateUser: updateUserMock,
+            createAccount: createAccountMock,
+            createSession: createSessionMock,
             createDevice: createDeviceMock,
-            getUserById: getUserByIdMock,
             getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
@@ -56,14 +67,26 @@ describe("signUp API", async () => {
             ...sessionPayload,
             sub: "user-123",
         })
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
-            email: "john@example.com",
+            id: expect.any(String),
             name: "John Doe",
+            email: "john@example.com",
             image: "https://example.com/image.jpg",
             attributes: {},
+            status: "active",
+            mfaEnabled: false,
+            mfaPreferredMethod: null,
+            emailVerifiedAt: null,
         })
-        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createAccountMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: expect.any(String),
+            provider: "credentials",
+            providerUserId: expect.any(String),
+            type: "credentials",
+            status: "active",
+        })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
@@ -84,19 +107,22 @@ describe("signUp API", async () => {
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
+        const getUserByEmailMock = vi.fn().mockReturnValue(userEntity)
         const createUserMock = vi.fn()
-        const updateUserMock = vi.fn().mockReturnValue(userEntity)
-        const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
+        const createAccountMock = vi.fn().mockReturnValue({
+            ...accountEntity,
+            provider: "credentials",
+        })
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance({
-            createSession: createSessionMock,
+            getUserByEmail: getUserByEmailMock,
             createUser: createUserMock,
-            updateUser: updateUserMock,
+            createAccount: createAccountMock,
+            createSession: createSessionMock,
             createDevice: createDeviceMock,
-            getUserById: getUserByIdMock,
             getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
 
@@ -108,9 +134,9 @@ describe("signUp API", async () => {
             })
         )
 
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(409)
         expect(await response.json()).toEqual({
-            success: true,
+            success: false,
             redirect: false,
             redirectURL: null,
         })
@@ -119,24 +145,11 @@ describe("signUp API", async () => {
             ...sessionPayload,
             sub: "user-123",
         })
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createUserMock).not.toHaveBeenCalled()
-        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
-            email: "john@example.com",
-            name: "John Doe",
-            image: "https://example.com/image.jpg",
-            attributes: {},
-        })
-        expect(createSessionMock).toHaveBeenCalledWith({
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: "device-123",
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
-            expiresAt: expect.any(Date),
-            metadata: null,
-        })
+        expect(createAccountMock).not.toHaveBeenCalled()
+        expect(createSessionMock).not.toHaveBeenCalled()
+        expect(createDeviceMock).not.toHaveBeenCalled()
     })
 
     test("invalid signUp.onCreateUser return", async () => {
@@ -248,18 +261,21 @@ describe("signUp API", async () => {
     })
 
     test("valid signUp.onCreateUser return with custom schema", async () => {
-        const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const getUserByEmailMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createAccountMock = vi.fn().mockReturnValue({
+            ...accountEntity,
+            provider: "credentials",
+        })
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance(
             {
+                getUserByEmail: getUserByEmailMock,
                 createUser: createUserMock,
-                updateUser: updateUserMock,
-                getUserById: getUserByIdMock,
+                createAccount: createAccountMock,
                 createDevice: createDeviceMock,
                 createSession: createSessionMock,
                 getDeviceByFingerprint: getDeviceByFingerprintMock,
@@ -301,18 +317,29 @@ describe("signUp API", async () => {
             redirectURL: null,
         })
 
-        expect(getUserByIdMock).toHaveBeenCalledWith("1234567890")
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createUserMock).toHaveBeenCalledWith({
-            id: "1234567890",
+            id: expect.any(String),
             name: "John Doe",
             email: "john@example.com",
             image: "https://example.com/image.jpg",
             attributes: {},
+            status: "active",
+            mfaEnabled: false,
+            mfaPreferredMethod: null,
+            emailVerifiedAt: null,
         })
-        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createAccountMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: expect.any(String),
+            provider: "credentials",
+            providerUserId: expect.any(String),
+            type: "credentials",
+            status: "active",
+        })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
-            userId: "1234567890",
+            userId: "user-123",
             deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
@@ -324,18 +351,21 @@ describe("signUp API", async () => {
     })
 
     test("valid signUp.onCreateUser return with custom schema and identity.schema", async () => {
-        const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const getUserByEmailMock = vi.fn().mockReturnValue(null)
         const createUserMock = vi.fn().mockReturnValue(userEntity)
+        const createAccountMock = vi.fn().mockReturnValue({
+            ...accountEntity,
+            provider: "credentials",
+        })
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance(
             {
+                getUserByEmail: getUserByEmailMock,
                 createUser: createUserMock,
-                updateUser: updateUserMock,
-                getUserById: getUserByIdMock,
+                createAccount: createAccountMock,
                 createDevice: createDeviceMock,
                 createSession: createSessionMock,
                 getDeviceByFingerprint: getDeviceByFingerprintMock,
@@ -383,19 +413,31 @@ describe("signUp API", async () => {
             redirect: false,
             redirectURL: null,
         })
-        expect(getUserByIdMock).toHaveBeenCalledWith("1234567890")
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createUserMock).toHaveBeenCalledWith({
-            id: "1234567890",
+            id: expect.any(String),
             name: "John Doe",
             email: "john@example.com",
             image: "https://example.com/image.jpg",
             attributes: {
                 role: "user",
             },
+            status: "active",
+            mfaEnabled: false,
+            mfaPreferredMethod: null,
+            emailVerifiedAt: null,
+        })
+        expect(createAccountMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: expect.any(String),
+            provider: "credentials",
+            providerUserId: expect.any(String),
+            type: "credentials",
+            status: "active",
         })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
-            userId: "1234567890",
+            userId: "user-123",
             deviceId: "device-123",
             authenticatedWith: "credentials",
             status: "active",
@@ -407,17 +449,20 @@ describe("signUp API", async () => {
     })
 
     test("signUp with redirect: true and redirectTo", async () => {
-        const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const getUserByEmailMock = vi.fn().mockReturnValue(null)
+        const createAccountMock = vi.fn().mockReturnValue({
+            ...accountEntity,
+            provider: "credentials",
+        })
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance({
+            getUserByEmail: getUserByEmailMock,
             createUser: createUserMock,
-            updateUser: updateUserMock,
-            getUserById: getUserByIdMock,
+            createAccount: createAccountMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
             getDeviceByFingerprint: getDeviceByFingerprintMock,
@@ -438,15 +483,26 @@ describe("signUp API", async () => {
             redirectURL: null,
         })
 
-        expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
+            id: expect.any(String),
             name: "John Doe",
             email: "john@example.com",
             image: "https://example.com/image.jpg",
             attributes: {},
+            status: "active",
+            mfaEnabled: false,
+            mfaPreferredMethod: null,
+            emailVerifiedAt: null,
         })
-        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createAccountMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: expect.any(String),
+            provider: "credentials",
+            providerUserId: expect.any(String),
+            type: "credentials",
+            status: "active",
+        })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
@@ -461,17 +517,20 @@ describe("signUp API", async () => {
     })
 
     test("signUp with redirect: false", async () => {
-        const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const getUserByEmailMock = vi.fn().mockReturnValue(null)
+        const createAccountMock = vi.fn().mockReturnValue({
+            ...accountEntity,
+            provider: "credentials",
+        })
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance({
+            getUserByEmail: getUserByEmailMock,
             createUser: createUserMock,
-            updateUser: updateUserMock,
-            getUserById: getUserByIdMock,
+            createAccount: createAccountMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
             getDeviceByFingerprint: getDeviceByFingerprintMock,
@@ -492,15 +551,26 @@ describe("signUp API", async () => {
             redirectURL: null,
         })
 
-        expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
+            id: expect.any(String),
             name: "John Doe",
             email: "john@example.com",
             image: "https://example.com/image.jpg",
             attributes: {},
+            status: "active",
+            mfaEnabled: false,
+            mfaPreferredMethod: null,
+            emailVerifiedAt: null,
         })
-        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createAccountMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: expect.any(String),
+            provider: "credentials",
+            providerUserId: expect.any(String),
+            type: "credentials",
+            status: "active",
+        })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
@@ -515,17 +585,20 @@ describe("signUp API", async () => {
     })
 
     test("signUp with redirect: false and redirectTo", async () => {
-        const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const getUserByEmailMock = vi.fn().mockReturnValue(null)
+        const createAccountMock = vi.fn().mockReturnValue({
+            ...accountEntity,
+            provider: "credentials",
+        })
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance({
+            getUserByEmail: getUserByEmailMock,
             createUser: createUserMock,
-            updateUser: updateUserMock,
-            getUserById: getUserByIdMock,
+            createAccount: createAccountMock,
             createSession: createSessionMock,
             createDevice: createDeviceMock,
             getDeviceByFingerprint: getDeviceByFingerprintMock,
@@ -546,15 +619,26 @@ describe("signUp API", async () => {
             redirectURL: "/dashboard",
         })
 
-        expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
+            id: expect.any(String),
             name: "John Doe",
             email: "john@example.com",
             image: "https://example.com/image.jpg",
             attributes: {},
+            status: "active",
+            mfaEnabled: false,
+            mfaPreferredMethod: null,
+            emailVerifiedAt: null,
         })
-        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createAccountMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: expect.any(String),
+            provider: "credentials",
+            providerUserId: expect.any(String),
+            type: "credentials",
+            status: "active",
+        })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
@@ -569,17 +653,20 @@ describe("signUp API", async () => {
     })
 
     test("signUp with redirect: true and invalid redirectTo", async () => {
-        const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const getUserByEmailMock = vi.fn().mockReturnValue(null)
+        const createAccountMock = vi.fn().mockReturnValue({
+            ...accountEntity,
+            provider: "credentials",
+        })
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getDeviceByFingerprintMock = vi.fn().mockReturnValue(null)
 
         const { handlers } = authInstance({
+            getUserByEmail: getUserByEmailMock,
             createUser: createUserMock,
-            updateUser: updateUserMock,
-            getUserById: getUserByIdMock,
+            createAccount: createAccountMock,
             createDevice: createDeviceMock,
             createSession: createSessionMock,
             getDeviceByFingerprint: getDeviceByFingerprintMock,
@@ -600,15 +687,26 @@ describe("signUp API", async () => {
             redirectURL: null,
         })
 
-        expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
+            id: expect.any(String),
             name: "John Doe",
             email: "john@example.com",
             image: "https://example.com/image.jpg",
             attributes: {},
+            status: "active",
+            mfaEnabled: false,
+            mfaPreferredMethod: null,
+            emailVerifiedAt: null,
         })
-        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createAccountMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: expect.any(String),
+            provider: "credentials",
+            providerUserId: expect.any(String),
+            type: "credentials",
+            status: "active",
+        })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",
@@ -623,8 +721,11 @@ describe("signUp API", async () => {
     })
 
     test("signUp with redirect: false and invalid redirectTo", async () => {
-        const updateUserMock = vi.fn()
-        const getUserByIdMock = vi.fn().mockReturnValue(null)
+        const getUserByEmailMock = vi.fn().mockReturnValue(null)
+        const createAccountMock = vi.fn().mockReturnValue({
+            ...accountEntity,
+            provider: "credentials",
+        })
         const createUserMock = vi.fn().mockReturnValue(userEntity)
         const createDeviceMock = vi.fn().mockResolvedValue(deviceEntity)
         const createSessionMock = vi.fn().mockReturnValue(sessionEntityWithUser)
@@ -632,8 +733,8 @@ describe("signUp API", async () => {
 
         const { handlers } = authInstance({
             createUser: createUserMock,
-            updateUser: updateUserMock,
-            getUserById: getUserByIdMock,
+            getUserByEmail: getUserByEmailMock,
+            createAccount: createAccountMock,
             createSession: createSessionMock,
             createDevice: createDeviceMock,
             getDeviceByFingerprint: getDeviceByFingerprintMock,
@@ -654,15 +755,26 @@ describe("signUp API", async () => {
             redirectURL: "/",
         })
 
-        expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createUserMock).toHaveBeenCalledWith({
-            id: "user-123",
+            id: expect.any(String),
             name: "John Doe",
             email: "john@example.com",
             image: "https://example.com/image.jpg",
             attributes: {},
+            status: "active",
+            mfaEnabled: false,
+            mfaPreferredMethod: null,
+            emailVerifiedAt: null,
         })
-        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createAccountMock).toHaveBeenCalledWith({
+            id: expect.any(String),
+            userId: expect.any(String),
+            provider: "credentials",
+            providerUserId: expect.any(String),
+            type: "credentials",
+            status: "active",
+        })
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
             userId: "user-123",

@@ -1,10 +1,10 @@
-import { createCSRF } from "@/shared/crypto.ts"
 import { HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders } from "@/shared/headers.ts"
+import { createCSRF } from "@/shared/crypto.ts"
+import { getErrorName } from "@/shared/utils.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
+import { secureApiHeaders } from "@/shared/headers.ts"
 import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext, SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
-import { getErrorName } from "@/shared/utils.ts"
 
 export const signUp = async <Payload extends Record<string, unknown> = Record<string, unknown>>({
     ctx,
@@ -72,6 +72,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         logger?.log("SIGN_UP_ERROR", {
             structuredData: {
                 error_type: getErrorName(error),
+                error_code: error instanceof AuraAuthError ? error.code : "UNKNOWN_ERROR",
                 error_message: error instanceof Error ? error.message : String(error),
             },
         })

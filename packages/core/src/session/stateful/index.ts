@@ -1,4 +1,5 @@
 import { signIn } from "@/session/stateful/signIn.ts"
+import { signUp } from "@/session/stateful/signUp.ts"
 import { getSession } from "@/session/stateful/getSession.ts"
 import { revokeToken } from "@/session/stateful/revokeToken.ts"
 import { createSession } from "@/session/stateful/createSession.ts"
@@ -9,7 +10,6 @@ import { refreshSession } from "@/session/stateful/refreshSession.ts"
 import { refreshUserInfo } from "@/session/stateful/refreshUserInfo.ts"
 import { getProviderTokens } from "@/session/stateful/getProviderTokens.ts"
 import { isProviderConnected } from "@/session/stateful/isProviderConnected.ts"
-import { signUp } from "@/session/stateful/signUp.ts"
 import type { SessionStrategy, User, InternalStatefulContext } from "@/@types/index.ts"
 
 export const createStatefulStrategy = <DefaultUser extends User = User>(
