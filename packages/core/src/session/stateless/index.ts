@@ -13,7 +13,11 @@ import type { SessionStrategy, User, InternalStatelessContext } from "@/@types/i
 export const createStatelessStrategy = <DefaultUser extends User = User>(
     ctx: InternalStatelessContext
 ): SessionStrategy<DefaultUser> => {
-    const revokeSession = async (_sessionId: string): Promise<void> => {}
+    const revokeSession = async (_sessionId: string): Promise<void> => {
+        ctx.ctx.logger?.log("STATELESS_REVOKE_SESSION_NOOP", {
+            structuredData: { strategy: "stateless", reason: "no_server_side_session_record" },
+        })
+    }
 
     return {
         getSession: getSession(ctx),

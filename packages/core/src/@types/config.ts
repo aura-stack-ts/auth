@@ -549,17 +549,14 @@ export interface CreateSessionStrategyOptions<Identity extends Identities> {
     cookies: () => InternalCookieStoreConfig
 }
 
-export interface InternalStatefulContext {
-    ctx: InternalContextForStateful
+export interface InternalSessionContext<Ctx> {
+    ctx: Ctx
     cookies: () => InternalCookieStoreConfig
     cookieManager: CookieManager
 }
 
-export interface InternalStatelessContext {
-    ctx: InternalContextForStateless
-    cookies: () => InternalCookieStoreConfig
-    cookieManager: CookieManager
-}
+export type InternalStatefulContext = InternalSessionContext<InternalContextForStateful>
+export type InternalStatelessContext = InternalSessionContext<InternalContextForStateless>
 
 /** Minimal token issue/verify surface used by session code paths. */
 export type JWTManager<DefaultUser extends User = User> = {

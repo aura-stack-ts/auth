@@ -210,7 +210,7 @@ export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any
         logger: getEnv("CI") === "true" ? false : true,
         session: {
             strategy: "database",
-            adapter: adapter as any,
+            adapter: adapter ?? ({} as any),
         },
         credentials: {
             authorize: async ({ credentials }) => {

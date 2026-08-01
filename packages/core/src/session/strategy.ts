@@ -11,6 +11,7 @@ import type {
     InternalStatelessContext,
 } from "@/@types/index.ts"
 import { createCookieManager } from "./cookie-manager.ts"
+import { isStatelessStrategy } from "@/shared/assert.ts"
 
 export const createSessionStrategy = <Identity extends Identities>(
     config: CreateSessionStrategyOptions<Identity>
@@ -18,6 +19,11 @@ export const createSessionStrategy = <Identity extends Identities>(
     const strategy = config?.ctx?.sessionConfig?.strategy ?? "jwt"
     const cookieManager = createCookieManager(config.cookies)
     const ctx = { ...config, cookieManager }
+
+    console.log("isStateles: ", isStatelessStrategy(config?.ctx?.sessionConfig))
+    if (!isStatelessStrategy(config?.ctx?.sessionConfig) && !config?.ctx?.sessionConfig?.adapter) {
+        throw new AuraAuthError({ code: "MISSING_ADAPTER_IN_STATEFUL_STRATEGY" })
+    }
 
     switch (strategy) {
         case "jwt":

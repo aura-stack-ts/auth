@@ -129,9 +129,9 @@ export const AuraErrorCode = {
      * Database Errors
      */
     DATABASE_TOKEN_HASH_NOT_FOUND: "DATABASE_TOKEN_HASH_NOT_FOUND",
-
     OAUTH_UNLINKED_ACCOUNT_ERROR: "OAUTH_UNLINKED_ACCOUNT_ERROR",
     OAUTH_ACCOUNT_USER_MISMATCH: "OAUTH_ACCOUNT_USER_MISMATCH",
+    MISSING_ADAPTER_IN_STATEFUL_STRATEGY: "MISSING_ADAPTER_IN_STATEFUL_STRATEGY",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -917,6 +917,15 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "Identity linkage assertion failed. The target OAuth account record is bound to a different user identifier than the currently authenticated session user.",
         userMessage: "This identity provider account is already linked to a different user.",
+    },
+    MISSING_ADAPTER_IN_STATEFUL_STRATEGY: {
+        type: "INTERNAL",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "Initialization aborted: The 'database' session strategy was selected, but no database adapter was provided in the configuration settings. Stateful session management requires an adapter instance to execute database operations.",
+        userMessage:
+            "Internal library configuration error. Database session strategy requires an adapter instance to be configured.",
     },
 }
 
