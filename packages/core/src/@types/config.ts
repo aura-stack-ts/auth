@@ -21,6 +21,7 @@ import type {
     User,
     Awaitable,
     StatefulStrategyConfig,
+    StatelessStrategyConfig,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
@@ -539,6 +540,10 @@ export type InternalContext<Identity extends Identities, SignUpSchema extends Sc
 
 export type InternalContextForStateful = Omit<InternalContext<any, any>, "sessionConfig"> & {
     sessionConfig: StatefulStrategyConfig
+}
+
+export type InternalContextForStateless = Omit<InternalContext<any, any>, "sessionConfig"> & {
+    sessionConfig: StatelessStrategyConfig
 }
 
 export interface OnCreateUserContext<Schema extends SchemaTypes> {

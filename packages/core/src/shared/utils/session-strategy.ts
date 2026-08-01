@@ -27,3 +27,32 @@ export const createDevice = ({ ctx: { sessionConfig } }: InternalStatefulContext
         })
     }
 }
+
+export const updateExpires = ({
+    exp,
+    maxAge,
+    strategy,
+}: {
+    exp: number | undefined
+    maxAge: number
+    strategy: string
+}): Date | null => {
+    if (!exp) return null
+    const now = Math.floor(Date.now() / 1000)
+    switch (strategy) {
+        case "fixed":
+        case "absolute":
+            return null
+        case "rolling":
+            return new Date((now + maxAge) * 1000)
+        case "sliding": {
+            const threshold = maxAge * 0.25
+            if (exp - now < threshold) {
+                return new Date((now + maxAge) * 1000)
+            }
+            return null
+        }
+        default:
+            return null
+    }
+}

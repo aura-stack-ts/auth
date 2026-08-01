@@ -1,8 +1,8 @@
-import type { GetProviderTokensStatefulReturn, InternalStatefulContext } from "@/@types/session.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
-import { getErrorName, shouldRefresh } from "@/shared/utils.ts"
 import { handleApiError } from "@/shared/utils/api.ts"
+import { getErrorName, shouldRefresh } from "@/shared/utils.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
+import type { GetProviderTokensStatefulReturn, InternalStatefulContext } from "@/@types/session.ts"
 
 export const __getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { oauth, logger, sessionConfig } = ctx

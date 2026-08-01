@@ -14,6 +14,7 @@ import type {
     OAuthProviderRecord,
     InternalContext,
     InternalContextForStateful,
+    InternalContextForStateless,
 } from "@/@types/index.ts"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
 import type { createCookieManager } from "@/session/cookie-manager.ts"
@@ -391,6 +392,7 @@ export interface InternalStatefulContext {
 }
 
 export interface InternalStatelessContext {
-    ctx: InternalContext<any, any>
+    ctx: InternalContextForStateless
+    cookies: () => InternalCookieStoreConfig
     cookieManager: CookieManager
 }

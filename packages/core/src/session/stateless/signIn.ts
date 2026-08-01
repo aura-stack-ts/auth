@@ -1,14 +1,13 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/shared/errors.ts"
-import { secureApiHeaders } from "@/shared/headers.ts"
-import { createFingerprint, getDeviceInfo } from "@/shared/utils.ts"
+import { cacheControl } from "@/shared/headers.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/utils/authorization.ts"
-import type { InternalStatefulContext } from "@/@types/session.ts"
+import type { InternalStatelessContext } from "@/@types/session.ts"
 
-export const __signIn = ({ ctx }: InternalStatefulContext) => {
-    const { logger, oauth, sessionConfig } = ctx
+export const __signIn = ({ ctx, cookies }: InternalStatelessContext) => {
+    const { oauth, logger } = ctx
 
     return async (oauthId: string, request: Request, redirectTo?: string) => {
         const provider = oauth[oauthId]
@@ -24,7 +23,7 @@ export const __signIn = ({ ctx }: InternalStatefulContext) => {
             structuredData: { oauth_provider: oauthId, oidc: isOIDC },
         })
 
-        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider) : provider
+        const resolvedProvider = isOIDC ? await resolveOpenIDProvider(provider!) : provider!
 
         if (isOIDC) {
             logger?.log("OIDC_PROVIDER_RESOLVED", {
@@ -54,32 +53,20 @@ export const __signIn = ({ ctx }: InternalStatefulContext) => {
             structuredData: { oauth_provider: oauthId, oidc: isOIDC },
         })
 
-        const { userAgent } = getDeviceInfo(request)
-        const fingerprint = await createFingerprint(request)
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
+        const headersBuilder = new HeadersBuilder(cacheControl)
+            .setHeader("Location", authorization)
+            .setCookie(cookies().state.name, state, cookies().state.attributes)
+            .setCookie(cookies().redirectURI.name, redirectURI, cookies().redirectURI.attributes)
+            .setCookie(cookies().redirectTo.name, redirectToValue, cookies().redirectTo.attributes)
+            .setCookie(cookies().codeVerifier.name, codeVerifier, cookies().codeVerifier.attributes)
 
-        await sessionConfig.adapter.createOAuthTransaction({
-            id: crypto.randomUUID(),
-            provider: oauthId,
-            state,
-            nonce: nonce || null,
-            codeVerifier,
-            redirectURI: redirectURI,
-            redirectTo: redirectToValue,
-            userAgent,
-            fingerprint,
-            createdAt: new Date(),
-            expiresAt,
-            deviceId: null,
-            metadata: null,
-        })
-
-        const headers = new HeadersBuilder(secureApiHeaders).setHeader("Location", authorization).toHeaders()
-
+        if (nonce) {
+            headersBuilder.setCookie(cookies().nonce.name, nonce, cookies().nonce.attributes)
+        }
         return {
             success: true,
             signInURL: authorization,
-            headers,
+            headers: headersBuilder.toHeaders(),
         }
     }
 }

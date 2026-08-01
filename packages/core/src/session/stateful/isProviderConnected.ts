@@ -1,5 +1,5 @@
-import type { InternalStatefulContext } from "@/@types/session.ts"
 import { getErrorName } from "@/shared/utils.ts"
+import type { InternalStatefulContext } from "@/@types/session.ts"
 
 export const __isProviderConnected = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
