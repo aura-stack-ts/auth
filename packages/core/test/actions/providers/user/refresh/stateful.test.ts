@@ -9,7 +9,7 @@ import {
     sessionEntityWithUser,
     userEntity,
 } from "@test/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
@@ -217,7 +217,8 @@ describe("refreshUserInfo action", () => {
         expect(spyParse).not.toHaveBeenCalled()
         expect(spyParseAsPartial).not.toHaveBeenCalled()
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -257,6 +258,7 @@ describe("refreshUserInfo action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -304,14 +306,14 @@ describe("refreshUserInfo action", () => {
             signal: expect.any(AbortSignal),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, "valid-token-hash")
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity
@@ -381,6 +383,7 @@ describe("refreshUserInfo action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: false,
@@ -406,7 +409,7 @@ describe("refreshUserInfo action", () => {
         expect(spyParse).not.toHaveBeenCalled()
         expect(spyParseAsPartial).not.toHaveBeenCalled()
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -444,6 +447,7 @@ describe("refreshUserInfo action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -473,7 +477,7 @@ describe("refreshUserInfo action", () => {
         expect(spyParse).not.toHaveBeenCalled()
         expect(spyParseAsPartial).not.toHaveBeenCalled()
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -511,6 +515,7 @@ describe("refreshUserInfo action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -540,7 +545,7 @@ describe("refreshUserInfo action", () => {
         expect(spyParse).not.toHaveBeenCalled()
         expect(spyParseAsPartial).not.toHaveBeenCalled()
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -588,6 +593,7 @@ describe("refreshUserInfo action", () => {
         )
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
@@ -607,7 +613,7 @@ describe("refreshUserInfo action", () => {
         expect(spyParse).not.toHaveBeenCalled()
         expect(spyParseAsPartial).not.toHaveBeenCalled()
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -655,6 +661,7 @@ describe("refreshUserInfo action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -698,9 +705,9 @@ describe("refreshUserInfo action", () => {
         })
         expect(mockFetch).toHaveBeenCalledTimes(2)
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, "valid-token-hash")
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -714,7 +721,7 @@ describe("refreshUserInfo action", () => {
             accessTokenExpiresAt: expect.any(Date),
             refreshTokenExpiresAt: expect.any(Date),
         })
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity
@@ -899,14 +906,15 @@ describe("refreshUserInfo action", () => {
             },
         })
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, "valid-token-hash")
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, "valid-token-hash")
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, "valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, "valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity

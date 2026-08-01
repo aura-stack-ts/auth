@@ -19,6 +19,7 @@ import type {
 } from "@/@types/index.ts"
 import { isStatelessStrategy } from "../assert.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
+import { createHash } from "../crypto.ts"
 
 export const createValidation = (ctx: RouterGlobalContext, headersInit?: HeadersInit) => {
     const headers = new Headers(headersInit)
@@ -56,7 +57,8 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                     })
                 } else {
                     const { sessionToken } = createCookieManager(() => ctx.cookies).getCookie(new Headers(headersInit))
-                    const session = await ctx.sessionConfig.adapter.getSessionByToken(sessionToken)
+                    const tokenHash = await createHash(sessionToken)
+                    const session = await ctx.sessionConfig.adapter.getSessionByToken(tokenHash)
                     if (!session) {
                         throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
                     }

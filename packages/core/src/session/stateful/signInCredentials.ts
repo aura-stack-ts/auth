@@ -40,14 +40,14 @@ export const signInCredentials = ({ ctx, cookies, cookieManager }: InternalState
 
         const device = await createDevice(user.id, request)
 
-        const secretValue = createSecretValue(64)
+        const sessionToken = createSecretValue(64)
         logger?.log("STATEFUL_TOKEN_GENERATED", {
             structuredData: {
-                token_length: secretValue.length,
+                token_length: sessionToken.length,
             },
         })
 
-        const tokenHash = await createHash(secretValue)
+        const tokenHash = await createHash(sessionToken)
         logger?.log("STATEFUL_TOKEN_HASHED", {
             structuredData: {
                 hash_length: tokenHash.length,
@@ -91,6 +91,6 @@ export const signInCredentials = ({ ctx, cookies, cookieManager }: InternalState
             },
         })
 
-        return tokenHash
+        return sessionToken
     }
 }

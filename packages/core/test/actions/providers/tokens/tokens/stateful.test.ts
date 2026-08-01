@@ -3,7 +3,7 @@ import { accountEntity, authInstance, jose, oauthCustomService, sessionEntityWit
 import { createAuth } from "@/createAuth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
 
 describe("tokensAction (Stateful)", async () => {
@@ -93,7 +93,8 @@ describe("tokensAction (Stateful)", async () => {
             success: false,
             tokens: null,
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
@@ -131,7 +132,8 @@ describe("tokensAction (Stateful)", async () => {
             success: false,
             tokens: null,
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -187,7 +189,8 @@ describe("tokensAction (Stateful)", async () => {
                 scopes: ["scope1", "scope2"],
             }),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -248,7 +251,8 @@ describe("tokensAction (Stateful)", async () => {
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
     })
 
     test("refreshToken successfully refreshes tokens", async () => {

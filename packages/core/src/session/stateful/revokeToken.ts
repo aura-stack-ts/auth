@@ -5,6 +5,7 @@ import { secureApiHeaders } from "@/shared/headers.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
 import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
 import type { InternalStatefulContext } from "@/@types/index.ts"
+import { createHash } from "@/shared/crypto.ts"
 
 export const revokeToken = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { oauth, logger, sessionConfig, cookies } = ctx
@@ -29,7 +30,8 @@ export const revokeToken = ({ ctx, cookieManager }: InternalStatefulContext) => 
                 throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
             }
 
-            const sessionByToken = await sessionConfig.adapter.getSessionByToken(sessionToken)
+            const tokenHash = await createHash(sessionToken)
+            const sessionByToken = await sessionConfig.adapter.getSessionByToken(tokenHash)
             if (!sessionByToken || !sessionByToken.user) {
                 logger?.log("AUTH_SESSION_INVALID", {
                     structuredData: {

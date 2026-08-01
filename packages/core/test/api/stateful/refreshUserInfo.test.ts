@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { accountEntity, authInstance, jose, oauthAccountEntity, sessionEntityWithUser, userEntity } from "@test/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 describe("refreshUserInfo API (Stateful)", () => {
@@ -128,7 +128,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getUserByIdMock).not.toHaveBeenCalled()
@@ -175,7 +176,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getUserByIdMock).not.toHaveBeenCalled()
@@ -226,7 +228,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -307,14 +310,15 @@ describe("refreshUserInfo API (Stateful)", () => {
         /**
          * @todo Optimize the session token verification across multiple calls.
          */
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity
@@ -660,9 +664,10 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -676,7 +681,7 @@ describe("refreshUserInfo API (Stateful)", () => {
             accessTokenExpiresAt: expect.any(Date),
             refreshTokenExpiresAt: expect.any(Date),
         })
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity
@@ -773,7 +778,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
     })
@@ -893,14 +899,15 @@ describe("refreshUserInfo API (Stateful)", () => {
             },
         })
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity
@@ -1000,7 +1007,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
     })
@@ -1073,14 +1081,15 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity
@@ -1236,14 +1245,15 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity

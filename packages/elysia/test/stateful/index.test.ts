@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { adapter, app, auth, prismaClient } from "@test/stateful/app"
-import { createCSRF } from "@aura-stack/auth/crypto"
+import { createCSRF, createHash } from "@aura-stack/auth/crypto"
 import { parseSetCookie } from "@aura-stack/auth/cookies"
 
 describe("GET /api/auth/signIn/github", () => {
@@ -144,7 +144,7 @@ describe("GET /api/auth/signIn/github", () => {
                 "Content-Type": "application/json",
             }),
             json: async () => ({
-                id: "user-123",
+                id: "user-1234",
                 name: "John Doe",
                 login: "johndoe",
                 email: "john.doe@example.com",
@@ -174,6 +174,7 @@ describe("GET /api/auth/signIn/github", () => {
             email: "john.doe@example.com",
         })
 
+        const tokenHash = await createHash("valid-token-hash")
         await adapter.createSession({
             id: "session-123",
             userId: user.id,
@@ -183,7 +184,7 @@ describe("GET /api/auth/signIn/github", () => {
             metadata: null,
             mfaState: "none",
             status: "active",
-            tokenHash: "valid-token-hash",
+            tokenHash,
         })
 
         const account = await adapter.createAccount({
@@ -207,8 +208,6 @@ describe("GET /api/auth/signIn/github", () => {
                 },
             })
         )
-        const sessionToken = request.headers.getSetCookie()?.find((cookie) => cookie.startsWith("aura-auth.session_token="))
-        expect(sessionToken).toBeDefined()
 
         expect(mockFetch).toHaveBeenNthCalledWith(1, "https://github.com/login/oauth/access_token", {
             method: "POST",
@@ -235,6 +234,9 @@ describe("GET /api/auth/signIn/github", () => {
             },
             signal: expect.any(AbortSignal),
         })
+
+        const sessionToken = request.headers.getSetCookie()?.find((cookie) => cookie.startsWith("aura-auth.session_token="))
+        expect(sessionToken).toBeDefined()
 
         const parsed = parseSetCookie(sessionToken!)
         const session = await app.handle(
@@ -299,11 +301,12 @@ describe("GET /api/auth/session", () => {
             email: "john@example.com",
             image: "https://jhon.doe/avatar.png",
         })
+        const tokenHash = await createHash("token-hash-123")
         const session = await adapter.createSession({
             id: "session-123",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-123",
+            tokenHash,
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",
@@ -424,11 +427,12 @@ describe("POST /api/auth/signOut", () => {
             email: "signout@example.com",
             status: "active",
         })
+        const tokenHash = await createHash("token-hash-to-revoke")
         const session = await adapter.createSession({
             id: "session-signout-123",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-to-revoke",
+            tokenHash,
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",
@@ -622,11 +626,12 @@ describe("POST /api/auth/updateSession", () => {
             name: "Update Session User",
             email: "updatesession@example.com",
         })
+        const tokenHash = await createHash("token-hash-update")
         await adapter.createSession({
             id: "session-update-123",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-update",
+            tokenHash,
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",
@@ -731,11 +736,12 @@ describe("GET /api/auth/getProviderTokens", () => {
             name: "No Provider User",
             email: "noprovider@example.com",
         })
+        const tokenHash = await createHash("token-hash-noprovider")
         await adapter.createSession({
             id: "session-noprovider",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-noprovider",
+            tokenHash,
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",
@@ -771,11 +777,12 @@ describe("GET /api/auth/isProviderConnected", () => {
             name: "Not Connected User",
             email: "notconnected@example.com",
         })
+        const tokenHash = await createHash("token-hash-notconnected")
         await adapter.createSession({
             id: "session-notconnected",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-notconnected",
+            tokenHash,
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",
@@ -1077,11 +1084,13 @@ describe("Multiple concurrent sessions", () => {
             email: "multisession@example.com",
         })
 
+        const tokenHash1 = await createHash("token-hash-multi-1")
+        const tokenHash2 = await createHash("token-hash-multi-2")
         await adapter.createSession({
             id: "session-multi-1",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-multi-1",
+            tokenHash: tokenHash1,
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",
@@ -1093,7 +1102,7 @@ describe("Multiple concurrent sessions", () => {
             id: "session-multi-2",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-multi-2",
+            tokenHash: tokenHash2,
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",

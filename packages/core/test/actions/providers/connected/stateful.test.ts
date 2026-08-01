@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { accountEntity, authInstance, jose, oauthTokens, sessionEntityWithUser, sessionPayload } from "@test/presets.ts"
 
 describe("connectedAction", () => {
@@ -73,6 +73,7 @@ describe("connectedAction", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const response = await GET(
             new Request("https://example.com/auth/providers/oauth-provider", {
@@ -88,7 +89,7 @@ describe("connectedAction", () => {
             connected: false,
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
     })
 
@@ -107,6 +108,7 @@ describe("connectedAction", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const response = await GET(
             new Request("https://example.com/auth/providers/oauth-provider", {
@@ -123,7 +125,7 @@ describe("connectedAction", () => {
             connected: true,
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith(sessionEntityWithUser.userId)
     })
 

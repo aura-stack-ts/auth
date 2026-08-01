@@ -7,7 +7,7 @@ import {
     oauthCustomService,
     sessionEntityWithUser,
 } from "@test/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"
@@ -104,7 +104,8 @@ describe("getProviderTokens API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
@@ -143,7 +144,8 @@ describe("getProviderTokens API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -185,7 +187,8 @@ describe("getProviderTokens API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -237,7 +240,8 @@ describe("getProviderTokens API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()

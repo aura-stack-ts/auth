@@ -1,6 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { authInstance, jose, sessionEntityWithUser, sessionPayload, userEntity } from "@test/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createHash } from "@/shared/crypto.ts"
 
 describe("sessionAction", () => {
     const { encodeJWT } = jose
@@ -92,7 +93,8 @@ describe("sessionAction", () => {
             },
         })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const hash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(hash)
         expect(sessionByTokenMock).toHaveReturnedWith(Promise.resolve(sessionEntityWithUser))
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
@@ -133,7 +135,8 @@ describe("sessionAction", () => {
             },
         })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const hash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(hash)
         expect(sessionByTokenMock).toHaveReturnedWith(Promise.resolve(sessionEntityWithUser))
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
@@ -167,7 +170,8 @@ describe("sessionAction", () => {
         expect(request.status).toBe(401)
         expect(await request.json()).toEqual({ success: false, session: null })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("expired-token-hash")
+        const hash = await createHash("expired-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(hash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
         expect(spy).not.toHaveBeenCalled()
     })

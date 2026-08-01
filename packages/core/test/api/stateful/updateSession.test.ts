@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { z } from "zod/v4"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 import { authInstance, jose, sessionEntityWithUser, userEntity } from "@test/presets.ts"
@@ -102,7 +102,8 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -186,7 +187,8 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -298,7 +300,8 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntityWithAttributes
@@ -392,7 +395,8 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -477,7 +481,8 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -566,7 +571,8 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -667,7 +673,8 @@ describe("updateSession API", () => {
         })
         expect(updated.headers.get("Set-Cookie")).toContain("aura-auth.session_token=")
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
