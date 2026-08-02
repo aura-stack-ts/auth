@@ -67,11 +67,13 @@ describe("getSession (Stateful)", () => {
                 name: "Expired Session User",
                 email: "expired@example.com",
             })
+            const sessionToken = "token-hash-expired"
+            const tokenHash = await createHash(sessionToken)
             await adapter.createSession({
                 id: "session-expired",
                 userId: user.id,
                 authenticatedWith: "credentials",
-                tokenHash: "token-hash-expired",
+                tokenHash,
                 expiresAt: new Date(Date.now() - 1000),
                 status: "active",
                 mfaState: "none",
@@ -82,7 +84,7 @@ describe("getSession (Stateful)", () => {
             const response = await app.handle(
                 new Request("http://localhost:3000/api/auth/session", {
                     headers: {
-                        Cookie: "aura-auth.session_token=token-hash-expired",
+                        Cookie: `aura-auth.session_token=${sessionToken}`,
                     },
                 })
             )
@@ -99,11 +101,13 @@ describe("getSession (Stateful)", () => {
                 name: "Revoked Session User",
                 email: "revoked@example.com",
             })
+            const sessionToken = "token-hash-revoked"
+            const tokenHash = await createHash(sessionToken)
             await adapter.createSession({
                 id: "session-revoked",
                 userId: user.id,
                 authenticatedWith: "credentials",
-                tokenHash: "token-hash-revoked",
+                tokenHash,
                 expiresAt: new Date(Date.now() + 3600000),
                 status: "revoked",
                 mfaState: "none",
@@ -114,7 +118,7 @@ describe("getSession (Stateful)", () => {
             const response = await app.handle(
                 new Request("http://localhost:3000/api/auth/session", {
                     headers: {
-                        Cookie: "aura-auth.session_token=token-hash-revoked",
+                        Cookie: `aura-auth.session_token=${sessionToken}`,
                     },
                 })
             )
@@ -167,7 +171,7 @@ describe("getSession (Stateful)", () => {
             })
         })
 
-        test("returns 401 for revoked session", async () => {
+        test("returns 401 for revoked session by admin", async () => {
             const user = await adapter.createUser({
                 name: "Deleted User",
                 email: "deleteduser@example.com",
@@ -195,7 +199,7 @@ describe("getSession (Stateful)", () => {
              * When `deleteStrategy` is set to `soft`, the session is not deleted from the database
              * but is marked as revoked. This allows for auditing and tracking of session revocations without losing historical data.
              */
-            expect(await prismaClient.session.findUnique({ where: { id: session.id } })).haveOwnProperty("status", "REVOKED")
+            expect(await prismaClient.session.findUnique({ where: { id: session.id } })).toHaveProperty("status", "REVOKED")
 
             const response = await app.handle(
                 new Request("http://localhost:3000/api/auth/session", {

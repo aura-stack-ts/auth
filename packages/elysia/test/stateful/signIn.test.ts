@@ -2,6 +2,7 @@ import { adapter, app, prismaClient } from "@test/stateful/app"
 import { describe, test, expect, vi } from "vitest"
 import { createHash } from "@aura-stack/auth/crypto"
 import { parseSetCookie } from "@aura-stack/auth/cookies"
+import { getSessionToken } from "@test/utils"
 
 describe("signIn (Stateful)", () => {
     test("redirects to GitHub's OAuth page", async () => {
@@ -64,15 +65,15 @@ describe("signIn (Stateful)", () => {
             redirectTo: null,
             userAgent: null,
         })
-        const request = await app.handle(
+        const response = await app.handle(
             new Request("http://localhost:3000/api/auth/callback/github?code=valid-code&state=state-123", {
                 headers: {
                     "User-Agent": "Mozilla/5.0",
                 },
             })
         )
-        const sessionToken = request.headers.getSetCookie()?.find((cookie) => cookie.startsWith("aura-auth.session_token="))
-        expect(sessionToken).toBeDefined()
+        const { cookie, tokenValue } = getSessionToken(response)
+        expect(cookie).toBeDefined()
 
         expect(mockFetch).toHaveBeenNthCalledWith(1, "https://github.com/login/oauth/access_token", {
             method: "POST",
@@ -100,10 +101,9 @@ describe("signIn (Stateful)", () => {
             signal: expect.any(AbortSignal),
         })
 
-        const parsed = parseSetCookie(sessionToken!)
         const session = await app.handle(
             new Request("http://localhost:3000/api/auth/session", {
-                headers: { Cookie: `aura-auth.session_token=${parsed.value}` },
+                headers: { Cookie: `aura-auth.session_token=${tokenValue}` },
             })
         )
         expect(session.status).toBe(200)

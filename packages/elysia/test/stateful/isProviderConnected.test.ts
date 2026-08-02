@@ -47,7 +47,7 @@ describe("isProviderConnected (Stateful)", () => {
         })
     })
 
-    test("returns false when provider is not connected", async () => {
+    test("returns false when the user has only a credentials account", async () => {
         const user = await adapter.createUser({
             name: "John Doe",
             email: "john.doe@example.com",

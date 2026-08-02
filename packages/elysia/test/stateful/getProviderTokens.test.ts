@@ -41,12 +41,12 @@ describe("getProviderTokens (Stateful)", () => {
         const response = await app.handle(
             new Request("http://localhost:3000/api/auth/providers/github/tokens", {
                 headers: {
-                    Cookie: "aura-auth.session_token=token-hash-noprovider",
+                    Cookie: `aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
 
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(400)
         const body = await response.json()
         expect(body).toMatchObject({
             success: false,

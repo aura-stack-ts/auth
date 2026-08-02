@@ -4,7 +4,7 @@ import { adapter, app, auth } from "@test/stateful/app"
 import { createCSRF, createHash } from "@aura-stack/auth/crypto"
 
 describe("signOut (Stateful)", () => {
-    test("returns 401 or clears session when no active session cookie is present", async () => {
+    test("returns 403 or clears session when no active session cookie is present", async () => {
         const response = await app.handle(
             new Request("http://localhost:3000/api/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
@@ -69,11 +69,13 @@ describe("signOut (Stateful)", () => {
             name: "CSRF Mismatch User",
             email: "csrfmismatch@example.com",
         })
+        const sessionToken = "token-hash-csrf-mismatch"
+        const tokenHash = await createHash(sessionToken)
         await adapter.createSession({
             id: "session-csrf-mismatch",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-csrf-mismatch",
+            tokenHash,
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",
@@ -88,7 +90,7 @@ describe("signOut (Stateful)", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.session_token=token-hash-csrf-mismatch; aura-auth.csrf_token=different-token`,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=different-token`,
                 },
             })
         )

@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { createCSRF } from "@aura-stack/auth/crypto"
+import { createCSRF, createHash } from "@aura-stack/auth/crypto"
 import { adapter, app, auth } from "@test/stateful/app"
 
 describe("disconnectProvider (Stateful)", () => {
@@ -40,11 +40,13 @@ describe("disconnectProvider (Stateful)", () => {
             name: "Disconnect Fail User",
             email: "disconnectfail@example.com",
         })
+        const sessionToken = "token-hash-disconnect"
+        const tokenHash = await createHash(sessionToken)
         await adapter.createSession({
             id: "session-disconnect-fail",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-disconnect",
+            tokenHash,
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",
@@ -59,12 +61,12 @@ describe("disconnectProvider (Stateful)", () => {
                 method: "DELETE",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.session_token=token-hash-disconnect; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
             })
         )
 
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(400)
         expect(await response.json()).toEqual({ success: false })
     })
 })

@@ -3,7 +3,7 @@ import { adapter, app, auth } from "@test/stateful/app"
 import { createCSRF, createHash } from "@aura-stack/auth/crypto"
 
 describe("updateSession (Stateful)", () => {
-    test("returns 404 when no session cookie is present", async () => {
+    test("returns 400 when no session cookie is present", async () => {
         const csrfToken = await createCSRF(auth.jose)
 
         const response = await app.handle(
@@ -32,7 +32,7 @@ describe("updateSession (Stateful)", () => {
         })
     })
 
-    test("returns 404 when session cookie is invalid", async () => {
+    test("returns 400 when session cookie is invalid", async () => {
         const csrfToken = await createCSRF(auth.jose)
 
         const response = await app.handle(
