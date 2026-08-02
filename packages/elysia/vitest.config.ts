@@ -5,10 +5,14 @@ import { defineConfig } from "vitest/config"
 const SECRET_KEY = crypto.randomBytes(32).toString("base64")
 const SALT_KEY = crypto.randomBytes(32).toString("base64")
 
+const alias = {
+    "@": path.resolve(__dirname, "./src"),
+    "@test": path.resolve(__dirname, "./test"),
+}
+
 export default defineConfig({
     test: {
         globals: true,
-        include: ["test/**/*.test.ts"],
         coverage: {
             provider: "v8",
             enabled: true,
@@ -28,13 +32,14 @@ export default defineConfig({
                 test: {
                     name: "stateful",
                     include: ["test/stateful/**/*.test.ts"],
-                    setupFiles: ["./test/stateful/setup.ts"],
+                    setupFiles: ["test/stateful/setup.ts"],
+                    fileParallelism: false,
+                    sequence: {
+                        concurrent: false,
+                    },
                 },
                 resolve: {
-                    alias: {
-                        "@": path.resolve(__dirname, "./src"),
-                        "@test": path.resolve(__dirname, "./test"),
-                    },
+                    alias,
                 },
             },
             {
@@ -43,18 +48,12 @@ export default defineConfig({
                     include: ["test/stateless/**/*.test.ts"],
                 },
                 resolve: {
-                    alias: {
-                        "@": path.resolve(__dirname, "./src"),
-                        "@test": path.resolve(__dirname, "./test"),
-                    },
+                    alias,
                 },
             },
         ],
     },
     resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@test": path.resolve(__dirname, "./test"),
-        },
+        alias,
     },
 })

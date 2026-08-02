@@ -2,6 +2,7 @@ import "dotenv/config"
 import { Elysia } from "elysia"
 import { createAuth } from "@/createAuth"
 import { zod } from "@aura-stack/auth/identity/zod"
+import { github } from "@aura-stack/auth/oauth/github"
 import { PrismaPg } from "@prisma/adapter-pg"
 import { prismaAdapter } from "@aura-stack/prisma"
 import { PrismaClient } from "@/generated/prisma/client.ts"
@@ -19,8 +20,15 @@ export const adapter = prismaAdapter({
     deleteStrategy: "soft",
 })
 
+const githubWithRevoke = github({
+    id: "github-with-revoke",
+    revokeToken: "https://api.github.com/oauth/revoke",
+    clientId: "test-github-with-revoke-client-id",
+    clientSecret: "test-github-with-revoke-client-secret",
+})
+
 export const auth = createAuth({
-    oauth: ["github", "google"],
+    oauth: ["github", "google", githubWithRevoke],
     basePath: "/api/auth",
     logger: process.env.CI === "true" ? false : true,
     credentials: {
