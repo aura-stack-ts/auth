@@ -239,7 +239,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
 
         const headersBuilder = new HeadersBuilder()
             .setHeader("Location", transaction.redirectTo || "/")
-            .setCookie(cookies().sessionToken.name, tokenHash, cookies().sessionToken.attributes)
+            .setCookie(cookies().sessionToken.name, sessionToken, cookies().sessionToken.attributes)
             .setCookie(cookies().csrfToken.name, csrfToken, cookies().csrfToken.attributes)
 
         return Response.json({ oauth: oauthId }, { status: 302, headers: headersBuilder.toHeaders() })

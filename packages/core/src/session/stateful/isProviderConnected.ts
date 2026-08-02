@@ -1,5 +1,6 @@
 import { getErrorName } from "@/shared/utils.ts"
 import type { InternalStatefulContext } from "@/@types/index.ts"
+import { createHash } from "@/shared/crypto.ts"
 
 export const isProviderConnected = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
@@ -23,7 +24,8 @@ export const isProviderConnected = ({ ctx, cookieManager }: InternalStatefulCont
                 return false
             }
 
-            const sessionByToken = await sessionConfig.adapter.getSessionByToken(sessionToken)
+            const tokenHash = await createHash(sessionToken)
+            const sessionByToken = await sessionConfig.adapter.getSessionByToken(tokenHash)
             if (!sessionByToken || !sessionByToken.user) {
                 logger?.log("AUTH_SESSION_INVALID", {
                     structuredData: {

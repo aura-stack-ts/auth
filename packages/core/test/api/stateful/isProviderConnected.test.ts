@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { authInstance, jose, sessionEntityWithUser } from "@test/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 
 describe("isProviderConnected (Stateful)", () => {
     test("throws error when provider is not configured", async () => {
@@ -45,7 +45,8 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
     })
 
@@ -80,7 +81,8 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
     })
 
@@ -114,7 +116,8 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
     })
 
@@ -144,7 +147,8 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith(sessionEntityWithUser.userId)
     })
 
@@ -185,7 +189,8 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith(sessionEntityWithUser.userId)
     })
 
@@ -226,7 +231,8 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith(sessionEntityWithUser.userId)
     })
 
@@ -267,7 +273,8 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith(sessionEntityWithUser.userId)
     })
 

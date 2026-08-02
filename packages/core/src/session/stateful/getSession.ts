@@ -1,4 +1,5 @@
 import { getErrorName } from "@/shared/utils.ts"
+import { createHash } from "@/shared/crypto.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import type { GetStatefulSessionReturn, User, InternalStatefulContext } from "@/@types/index.ts"
@@ -36,7 +37,8 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
                 }
             }
 
-            const session = await sessionConfig.adapter.getSessionByToken(sessionToken)
+            const tokenHash = await createHash(sessionToken)
+            const session = await sessionConfig.adapter.getSessionByToken(tokenHash)
             logger?.log("STATEFUL_SESSION_DB_LOOKUP", {
                 structuredData: {
                     session_found: Boolean(session),

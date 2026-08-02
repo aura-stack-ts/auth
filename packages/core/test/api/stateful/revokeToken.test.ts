@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import {
     accountEntity,
     authInstance,
@@ -154,7 +154,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
     })
@@ -192,7 +193,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -239,7 +241,8 @@ describe("revokeToken (Stateful)", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -306,7 +309,8 @@ describe("revokeToken (Stateful)", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -361,7 +365,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -418,7 +423,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -475,7 +481,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -535,7 +542,8 @@ describe("revokeToken (Stateful)", () => {
             success: true,
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -602,7 +610,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith(expiredSession.id, "user_logout")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -647,7 +656,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
     })
@@ -853,7 +863,8 @@ describe("revokeToken (Stateful)", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -967,7 +978,8 @@ describe("revokeToken (Stateful)", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionToken)
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")

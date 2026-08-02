@@ -3,6 +3,7 @@ import { handleApiError } from "@/shared/utils/api.ts"
 import { getErrorName, shouldRefresh } from "@/shared/utils.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import type { GetProviderTokensStatefulReturn, InternalStatefulContext } from "@/@types/index.ts"
+import { createHash } from "@/shared/crypto.ts"
 
 export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { oauth, logger, sessionConfig } = ctx
@@ -37,7 +38,8 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
                 return { success: false, error: { code, message }, tokens: null, headers: cookieManager.clear(), statusCode }
             }
 
-            const sessionByToken = await sessionConfig.adapter.getSessionByToken(sessionToken)
+            const tokenHash = await createHash(sessionToken)
+            const sessionByToken = await sessionConfig.adapter.getSessionByToken(tokenHash)
             if (!sessionByToken || !sessionByToken.user) {
                 logger?.log("STATEFUL_GET_PROVIDER_TOKENS_SESSION_INVALID", {
                     structuredData: {

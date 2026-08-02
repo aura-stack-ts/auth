@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { authInstance, jose, sessionEntityWithUser } from "@test/presets.ts"
 
 describe("signOut API", async () => {
@@ -57,7 +57,8 @@ describe("signOut API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 
@@ -86,7 +87,8 @@ describe("signOut API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 
@@ -116,7 +118,8 @@ describe("signOut API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 
@@ -146,7 +149,8 @@ describe("signOut API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 })

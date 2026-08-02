@@ -1,6 +1,7 @@
 import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
 import type { DeepPartial } from "@/@types/utility.ts"
 import type { InternalStatefulContext, Session, User } from "@/@types/index.ts"
+import { createHash } from "@/shared/crypto.ts"
 
 export const refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig, jose } = ctx
@@ -68,7 +69,8 @@ export const refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieM
                 return { session: null, headers: cookieManager.clear() }
             }
 
-            const sessionByToken = await sessionConfig.adapter.getSessionByToken(sessionToken)
+            const tokenHash = await createHash(sessionToken)
+            const sessionByToken = await sessionConfig.adapter.getSessionByToken(tokenHash)
             logger?.log("STATEFUL_SESSION_DB_LOOKUP", {
                 structuredData: {
                     session_found: Boolean(sessionByToken),

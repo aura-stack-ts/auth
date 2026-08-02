@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import {
     accountEntity,
     authInstance,
@@ -162,7 +162,8 @@ describe("Revoke Action", () => {
         expect(response.status).toBe(401)
         expect(await response.json()).toEqual({ success: false })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
     })
@@ -186,6 +187,7 @@ describe("Revoke Action", () => {
         )
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/tokens/revoke", {
@@ -199,7 +201,7 @@ describe("Revoke Action", () => {
         expect(response.status).toBe(401)
         expect(await response.json()).toEqual({ success: false })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
     })
@@ -220,6 +222,7 @@ describe("Revoke Action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -255,7 +258,7 @@ describe("Revoke Action", () => {
             body: expect.any(URLSearchParams),
             signal: expect.any(AbortSignal),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -277,6 +280,7 @@ describe("Revoke Action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -297,7 +301,7 @@ describe("Revoke Action", () => {
 
         expect(response.status).toBe(200)
         expect(await response.json()).toEqual({ success: true })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -319,6 +323,7 @@ describe("Revoke Action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
 
@@ -336,7 +341,7 @@ describe("Revoke Action", () => {
         )
 
         expect(await response.json()).toEqual({ success: false })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -377,7 +382,8 @@ describe("Revoke Action", () => {
 
         expect(await response.json()).toEqual({ success: false })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -398,6 +404,7 @@ describe("Revoke Action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
             status: 201,
@@ -416,7 +423,7 @@ describe("Revoke Action", () => {
 
         expect(await response.json()).toEqual({ success: false })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -437,6 +444,7 @@ describe("Revoke Action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/tokens/revoke", {
@@ -450,7 +458,7 @@ describe("Revoke Action", () => {
 
         expect(await response.json()).toEqual({ success: false })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -473,6 +481,7 @@ describe("Revoke Action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/tokens/revoke", {
@@ -486,7 +495,7 @@ describe("Revoke Action", () => {
 
         expect(await response.json()).toEqual({ success: false })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
     })
@@ -515,6 +524,7 @@ describe("Revoke Action", () => {
         )
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -536,7 +546,7 @@ describe("Revoke Action", () => {
         expect(await response.json()).toEqual({ success: true })
         expect(mockFetch).toHaveBeenCalledWith("https://custom.example.com/revoke", expect.any(Object))
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -574,6 +584,7 @@ describe("Revoke Action", () => {
         )
 
         const csrfToken = await createCSRF(jose)
+        const tokenHash = await createHash("valid-token-hash")
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -596,7 +607,7 @@ describe("Revoke Action", () => {
         expect(await response.json()).toEqual({
             success: true,
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")

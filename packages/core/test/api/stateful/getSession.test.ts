@@ -2,6 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { getSetCookie } from "@/cookie.ts"
 import { authInstance, sessionEntityWithUser, userEntity } from "@test/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createHash } from "@/shared/crypto.ts"
 
 describe("getSession", () => {
     test("getSession with no session token", async () => {
@@ -58,7 +59,8 @@ describe("getSession", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(mock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(mock).toHaveBeenCalledWith(tokenHash)
         const { attributes: _, ...spreadPayload } = userEntity
         expect(spy).toHaveBeenCalledWith({ sub: userEntity.id, ...spreadPayload })
         expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("valid-token-hash")
@@ -95,7 +97,8 @@ describe("getSession", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(sessionByTokenMock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
         expect(spy).not.toHaveBeenCalled()
         expect(getSetCookie(output.headers, "aura-auth.csrf_token")).toBe("")
@@ -136,7 +139,8 @@ describe("getSession", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(mock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(mock).toHaveBeenCalledWith(tokenHash)
         const { attributes: _, ...spreadPayload } = userEntity
         expect(spy).toHaveBeenCalledWith({
             ...spreadPayload,
@@ -188,7 +192,8 @@ describe("getSession", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(mock).toHaveBeenCalledWith("valid-token-hash")
+        const tokenHash = await createHash("valid-token-hash")
+        expect(mock).toHaveBeenCalledWith(tokenHash)
         const { attributes: _, ...spreadPayload } = userEntity
         expect(spy).toHaveBeenCalledWith({
             ...spreadPayload,
