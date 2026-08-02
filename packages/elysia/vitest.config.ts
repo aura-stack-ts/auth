@@ -1,14 +1,36 @@
 import path from "path"
 import crypto from "crypto"
-import { defineConfig } from "vitest/config"
+import { defineConfig, TestProjectConfiguration } from "vitest/config"
 
 const SECRET_KEY = crypto.randomBytes(32).toString("base64")
 const SALT_KEY = crypto.randomBytes(32).toString("base64")
 
+const alias = {
+    "@": path.resolve(__dirname, "./src"),
+    "@test": path.resolve(__dirname, "./test"),
+}
+
+const statefulProject =
+    process.env.CI === "true"
+        ? {}
+        : ({
+              test: {
+                  name: "stateful",
+                  include: ["test/stateful/**/*.test.ts"],
+                  setupFiles: ["test/stateful/setup.ts"],
+                  fileParallelism: false,
+                  sequence: {
+                      concurrent: false,
+                  },
+              },
+              resolve: {
+                  alias,
+              },
+          } as TestProjectConfiguration)
+
 export default defineConfig({
     test: {
         globals: true,
-        include: ["test/**/*.test.ts"],
         coverage: {
             provider: "v8",
             enabled: true,
@@ -24,37 +46,20 @@ export default defineConfig({
             AURA_AUTH_GITHUB_CLIENT_SECRET: "test-github-client-secret",
         },
         projects: [
-            {
-                test: {
-                    name: "stateful",
-                    include: ["test/stateful/**/*.test.ts"],
-                    setupFiles: ["./test/stateful/setup.ts"],
-                },
-                resolve: {
-                    alias: {
-                        "@": path.resolve(__dirname, "./src"),
-                        "@test": path.resolve(__dirname, "./test"),
-                    },
-                },
-            },
+            statefulProject,
             {
                 test: {
                     name: "stateless",
                     include: ["test/stateless/**/*.test.ts"],
+                    exclude: ["test/stateful/**/*.test.ts"],
                 },
                 resolve: {
-                    alias: {
-                        "@": path.resolve(__dirname, "./src"),
-                        "@test": path.resolve(__dirname, "./test"),
-                    },
+                    alias,
                 },
             },
         ],
     },
     resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@test": path.resolve(__dirname, "./test"),
-        },
+        alias,
     },
 })
