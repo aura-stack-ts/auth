@@ -6,8 +6,8 @@ import type { GetStatelessSessionReturn, InternalStatelessContext, Session, User
 export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatelessContext) => {
     const { logger, identity, jwtManager, sessionConfig } = ctx
 
-    const maxAge = sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
-    const strategy = sessionConfig?.jwt?.expirationStrategy ?? "absolute"
+    const maxAge = sessionConfig?.maxAge ?? sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = sessionConfig?.expirationStrategy ?? sessionConfig?.jwt?.expirationStrategy ?? "absolute"
 
     return async (headers: Headers): Promise<GetStatelessSessionReturn<DefaultUser>> => {
         const newHeaders = new Headers(secureApiHeaders)

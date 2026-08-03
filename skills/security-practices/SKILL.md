@@ -188,17 +188,20 @@ Aura Auth currently uses JWT strategy (`session.strategy: "jwt"`).
 Baseline secure template:
 
 ```ts
-session: {
-  strategy: "jwt",
-  jwt: {
-    mode: "sealed",
+createAuth({
+  oauth: [],
+  session: {
+    strategy: "jwt",
+    jwt: {
+      mode: "sealed",
+      issuer: "https://auth.example.com",
+      audience: ["https://api.example.com"],
+    },
     maxAge: 60 * 60 * 24 * 7,
-    issuer: "https://auth.example.com",
-    audience: ["https://api.example.com"],
     maxExpiration: 60 * 60 * 24 * 30,
     expirationStrategy: "absolute",
   },
-}
+})
 ```
 
 ## JWT mode analysis and recommendation

@@ -123,6 +123,7 @@ export type JWTConfig = Prettify<
     {
         /**
          * Token lifetime.
+         * @deprecated Use `session.maxAge` instead. This will be removed in a future release.
          */
         maxAge?: number
         /**
@@ -139,10 +140,12 @@ export type JWTConfig = Prettify<
          * Maximum absolute session duration in seconds.
          * Required for "absolute" and "sliding" strategies.
          * Enforced via jose's maxTokenAge against the iat claim.
+         * @deprecated Use `session.maxDuration` instead. This will be removed in a future release.
          */
         maxExpiration?: number
         /**
          * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
+         * @deprecated Use `session.expirationStrategy` instead. This will be removed in a future release.
          */
         expirationStrategy?: JWTExpirationStrategy
     } & JWTConfigBase
@@ -162,6 +165,31 @@ export interface SessionStatefulConfig {
     maxSessions?: number
 }
 
+export interface SessionConfigBase {
+    /**
+     * Session time to live (TTL) in seconds. Determines how long a session is valid before it expires.
+     * If not set, the default is 15 days (60 * 60 * 24 * 15).
+     * @default 1296000 (15 days)
+     */
+    maxAge?: number
+    /**
+     * Maximum absolute session duration in seconds.
+     * Required for "absolute" and "sliding" strategies.
+     * Enforced via jose's maxTokenAge against the iat claim.
+     */
+    maxDuration?: number
+    /**
+     * The session expiration strategy. Determines how the session's lifetime is calculated and enforced.
+     * - "fixed": The session expires after a fixed duration from the time of creation.
+     * - "rolling": The session expiration is extended on each request, up to the maximum age.
+     * - "absolute": The session has a hard expiration time, regardless of activity.
+     * - "sliding": The session expiration is extended on each request, but cannot exceed the maximum expiration time.
+     *
+     * @default "fixed"
+     */
+    expirationStrategy?: JWTExpirationStrategy
+}
+
 /**
  * Stateless JWT strategy.
  * No database required. Tokens are self-contained and cannot be revoked
@@ -170,19 +198,29 @@ export interface SessionStatefulConfig {
  * @example
  * {
  *   strategy: "jwt",
- *   jwt: { mode: "sealed", maxAge: "15m", issuer: "https://auth.example.com" },
- *   refreshToken: { enabled: true, maxAge: "7d" },
+ *   jwt: { mode: "sealed", issuer: "https://auth.example.com" },
  * }
  */
-export type StatelessStrategyConfig = {
+export interface StatelessStrategyConfig extends SessionConfigBase {
     strategy?: "jwt"
     jwt?: JWTConfig
 }
 
-export type StatefulStrategyConfig = {
+/**
+ * Stateful database strategy.
+ * Database required. Every request hits the DB to validate the session.
+ *
+ * @example
+ * {
+ *   strategy: "database",
+ *   adapter: prismaAdapter({ client: prismaClient }),
+ *   database: { deleteStrategy: "soft", maxSessions: 5 },
+ * }
+ */
+export interface StatefulStrategyConfig extends SessionConfigBase {
     strategy: "database"
     adapter: DatabaseAdapter
-    session?: SessionStatefulConfig
+    database?: SessionStatefulConfig
 }
 
 /**

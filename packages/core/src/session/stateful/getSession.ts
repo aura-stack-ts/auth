@@ -3,9 +3,12 @@ import { createHash } from "@/shared/crypto.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import type { GetStatefulSessionReturn, User, InternalStatefulContext } from "@/@types/index.ts"
+import { updateExpires } from "@/shared/utils/session-strategy.ts"
 
 export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
+    const maxAge = ctx.sessionConfig.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = ctx.sessionConfig.expirationStrategy ?? "absolute"
 
     return async (headers: Headers): Promise<GetStatefulSessionReturn<DefaultUser>> => {
         logger?.log("STATEFUL_GET_SESSION_START", {
@@ -127,6 +130,19 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
                     expires_at: session.expiresAt.toISOString(),
                 },
             })
+
+            const expiresAt = updateExpires({
+                exp: Math.floor(session.expiresAt.getTime() / 1000),
+                maxAge,
+                strategy,
+            })
+            if (expiresAt) {
+                const now = new Date()
+                await sessionConfig.adapter.updateSession(session.id, {
+                    expiresAt,
+                    lastActivityAt: now,
+                })
+            }
 
             return {
                 session: {

@@ -48,7 +48,7 @@ describe("session: stateless strategy", () => {
         test("always updates expiration upon access", async () => {
             const { handlers, jose } = createAuth({
                 oauth: [],
-                session: { jwt: { expirationStrategy: "rolling", maxAge: 3600 } },
+                session: { maxAge: 3600, jwt: { expirationStrategy: "rolling" } },
                 logger: false,
             })
             const { GET } = handlers
@@ -88,7 +88,7 @@ describe("session: stateless strategy", () => {
         test("updates only when within 25% threshold", async () => {
             const { handlers, jose } = createAuth({
                 oauth: [],
-                session: { jwt: { expirationStrategy: "sliding", maxAge: 3600 } }, // threshold is 900 seconds
+                session: { maxAge: 3600, jwt: { expirationStrategy: "sliding" } }, // threshold is 900 seconds
                 logger: false,
             })
             const { GET } = handlers
@@ -125,7 +125,7 @@ describe("session: stateless strategy", () => {
         test("enforces strict cut-off even if rolling strategy extends standard exp", async () => {
             const { handlers, jose } = createAuth({
                 oauth: [],
-                session: { jwt: { expirationStrategy: "rolling", maxAge: 3600 } },
+                session: { maxAge: 3600, jwt: { expirationStrategy: "rolling" } },
                 logger: false,
             })
             const { GET } = handlers

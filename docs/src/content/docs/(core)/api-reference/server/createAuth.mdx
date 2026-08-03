@@ -93,7 +93,7 @@ export const auth = createAuth({
 
 ### `session`
 
-Defines the session management strategy. How user sessions are stored and maintained across requests. Aura Auth currently supports the `jwt` (stateless) strategy.
+Defines the session behavior and management strategy. How user sessions are stored and maintained across requests. Aura Auth currently supports the `jwt` (stateless) strategy.
 
 ```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
@@ -102,15 +102,15 @@ export const auth = createAuth({
   oauth: [],
   session: {
     strategy: "jwt",
+    maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     jwt: {
       mode: "sealed",
-      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     },
   },
 })
 ```
 
-For the full list of `jwt` options (`mode`, `maxAge`, `issuer`, `audience`, `maxExpiration`, `expirationStrategy`) and guidance on choosing between them, see [Session Strategies](/docs/configuration/session-strategies).
+For the full list of `jwt` (`mode`, `issuer`, `audience`, etc.) and `maxAge`, `maxDuration`, `expirationStrategy` options and guidance on choosing between them, see [Session Strategies](/docs/configuration/session-strategies).
 
 ### `baseURL`
 

@@ -12,9 +12,9 @@ export const auth = createAuth({
   oauth: [],
   session: {
     strategy: "jwt",
+    maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     jwt: {
       mode: "sealed",
-      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     },
   },
 })
@@ -26,14 +26,14 @@ The `jwt` session strategy is the stateless option: it uses a JSON Web Token to 
 
 ### Options
 
-| Option               | Type                                  | Required                  | Description                                                                                                                                 |
-| -------------------- | ------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mode`               | `"sealed" \| "signed" \| "encrypted"` | No (default `"sealed"`)   | Determines how the JWT is protected. See [Choosing a mode](#choosing-a-mode) below.                                                         |
-| `maxAge`             | `number` (seconds)                    | Yes                       | Maximum age of the JWT. After this period, the token expires and the user must re-authenticate.                                             |
-| `issuer`             | `string`                              | No                        | Sets the `iss` claim on the JWT, identifying the issuer of the token. Useful for additional validation on the client or server.             |
-| `audience`           | `string`                              | No                        | Sets the `aud` claim on the JWT, identifying the intended audience. Useful for restricting token usage to specific clients or services.     |
-| `maxExpiration`      | `number` (seconds)                    | No                        | A hard ceiling on token expiration that persists even if the token is refreshed, preventing indefinitely-valid tokens.                      |
-| `expirationStrategy` | `"absolute" \| "rolling"`             | No (default `"absolute"`) | `absolute` expires the token a fixed time after issuance. `rolling` extends the expiration on each request, keeping active users signed in. |
+| Option                   | Type                                  | Required                  | Description                                                                                                                                                 |
+| ------------------------ | ------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode`                   | `"sealed" \| "signed" \| "encrypted"` | No (default `"sealed"`)   | Determines how the JWT is protected. See [Choosing a mode](#choosing-a-mode) below.                                                                         |
+| `issuer`                 | `string`                              | No                        | Sets the `iss` claim on the JWT, identifying the issuer of the token. Useful for additional validation on the client or server.                             |
+| `audience`               | `string`                              | No                        | Sets the `aud` claim on the JWT, identifying the intended audience. Useful for restricting token usage to specific clients or services.                     |
+| ~~`maxAge`~~             | `number` (seconds)                    | Yes                       | ~~Deprecated~~. Maximum age of the JWT. After this period, the token expires and the user must re-authenticate.                                             |
+| ~~`maxExpiration`~~      | `number` (seconds)                    | No                        | ~~Deprecated~~. A hard ceiling on token expiration that persists even if the token is refreshed, preventing indefinitely-valid tokens.                      |
+| ~~`expirationStrategy`~~ | `"absolute" \| "rolling"`             | No (default `"absolute"`) | ~~Deprecated~~. `absolute` expires the token a fixed time after issuance. `rolling` extends the expiration on each request, keeping active users signed in. |
 
 ### Choosing a mode
 
@@ -50,9 +50,6 @@ export const auth = createAuth({
     strategy: "jwt",
     jwt: {
       mode: "sealed",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      maxExpiration: 60 * 60 * 24 * 30, // hard ceiling: 30 days
-      expirationStrategy: "rolling",
     },
   },
 })
@@ -63,3 +60,56 @@ export const auth = createAuth({
   the ability to revoke a session server-side before its `maxAge` expires, track this on the roadmap rather than working around it
   with a short `maxAge`.
 </Callout>
+
+## `maxAge`
+
+The `maxAge` option defines the session's lifetime in seconds. After this period, the session expires and the user must re-authenticate. The default is 15 days (60 \* 60 \* 24 \* 15 seconds).
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+  },
+})
+```
+
+## `maxDuration`
+
+The `maxDuration` option defines the maximum lifetime of a session in seconds, regardless of activity. After this period, the session expires and the user must re-authenticate.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "jwt",
+    maxDuration: 60 * 60 * 24 * 30, // 30 days
+  },
+})
+```
+
+## `expirationStrategy`
+
+The `expirationStrategy` option defines the renewal policy for the session/session expiration strategy. Determines how the session's lifetime is calculated and enforced
+
+- `fixed`: The session expires after a fixed duration from the time of creation.
+- `rolling`: The session expiration is extended on each request, up to the maximum age.
+- `absolute`: The session has a hard expiration time, regardless of activity.
+- `sliding`: The session expiration is extended on each request, but cannot exceed the maximum expiration time.
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "jwt",
+    expirationStrategy: "rolling",
+  },
+})
+```

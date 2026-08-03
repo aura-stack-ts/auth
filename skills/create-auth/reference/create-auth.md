@@ -52,9 +52,9 @@ createAuth({
   oauth: [],
   session: {
     strategy: "jwt",
+    maxAge: 60 * 60 * 24 * 7,
     jwt: {
       mode: "sealed",
-      maxAge: 60 * 60 * 24 * 7,
     },
   },
 })
@@ -159,13 +159,16 @@ Unless requested otherwise:
 Recommend:
 
 ```ts
-session: {
+createAuth({
+  oauth: [],
+  session: {
     strategy: "jwt",
+    maxAge: 60 * 60 * 24 * 7,
     jwt: {
-        mode: "sealed",
-        maxAge: 60 * 60 * 24 * 7
-    }
-}
+      mode: "sealed",
+    },
+  },
+})
 ```
 
 Only recommend signed or encrypted JWTs if the user explicitly needs them.
