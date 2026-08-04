@@ -162,4 +162,7 @@ export type OAuthProviderRecord<DefaultUser extends User = User> = Record<
     RuntimeOAuthProvider<any, DefaultUser>
 >
 
+/**
+ * @internal
+ */
 export type CustomUserInfoFunction = Extract<OAuthProviderConfig["userInfo"], { request: (context: AccessTokenContext) => any }>

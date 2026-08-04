@@ -19,10 +19,10 @@ export type * from "@/@types/adapter.ts"
 export type { Awaitable } from "@aura-stack/router/types"
 export type { TypedJWTPayload } from "@aura-stack/jose"
 
-export type { IdentityShape as ZodIdentitySchema } from "@/identity/zod.ts"
-export type { IdentityShape as ArkTypeIdentitySchema } from "@/identity/arktype.ts"
-export type { IdentityShape as TypeboxIdentitySchema } from "@/identity/typebox.ts"
-export type { IdentityShape as ValibotIdentitySchema } from "@/identity/valibot.ts"
+export type { IdentityShape as ZodIdentitySchema, IsZod } from "@/identity/zod.ts"
+export type { IdentityShape as ArkTypeIdentitySchema, IsArkType } from "@/identity/arktype.ts"
+export type { IdentityShape as TypeboxIdentitySchema, IsTypeBox } from "@/identity/typebox.ts"
+export type { IdentityShape as ValibotIdentitySchema, IsValibot } from "@/identity/valibot.ts"
 
 /**
  * JWT payload structure that includes a mandatory `token` field used to verify CSRF Tokens
@@ -44,6 +44,9 @@ export type AuthClientOptions = Prettify<
     }
 >
 
+/**
+ * @internal
+ */
 export type InternalExpirationResult =
     | { action: "no_change" }
     | { action: "extend"; expiresAt: Date }

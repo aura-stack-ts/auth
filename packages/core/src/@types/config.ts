@@ -327,6 +327,9 @@ export type CookieName =
 /** Resolved cookie names and serialization attributes for each logical auth cookie. */
 export type CookieStoreConfig = Record<CookieName, { name?: string; attributes?: CookieStrategyAttributes }>
 
+/**
+ * @internal
+ */
 export type InternalCookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
 
 export interface CookieConfig {
@@ -391,7 +394,10 @@ export type AuthAPI<DefaultUser extends User = User, SignUpSchema extends Schema
 /** JWT and crypto helpers bound to the configured identity schema (sign, verify, claims). */
 export type JoseInstance<DefaultUser extends User = User> = ReturnType<typeof createJoseInstance<DefaultUser>>
 
-/** Normalized internal logger with resolved level and structured log function. */
+/**
+ * Normalized internal logger with resolved level and structured log function.
+ * @internal
+ */
 export interface InternalLogger {
     level: LogLevel
     log: typeof createLogEntry
@@ -423,6 +429,7 @@ export interface IdentityConfig<Identity extends Identities> {
 /**
  * Identity validation settings used when building session strategy and OAuth profile mapping.
  * Controls the Zod schema and how unknown keys are handled on user objects.
+ * @internal
  */
 export interface InternalIdentityConfig<Schema extends SchemaTypes = typeof identitySchema> {
     schema?: Schema
@@ -472,6 +479,7 @@ export interface CredentialsConfig<Identity extends Identities> {
 /**
  * Runtime context passed into auth actions and API handlers: OAuth map, cookies, JWT, session strategy, trusted origins, etc.
  * This is the fully resolved configuration surface after `createAuth` initializes defaults.
+ * @internal
  */
 export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>> {
     oauth: OAuthProviderRecord
@@ -492,6 +500,9 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     sessionConfig: SessionConfig
 }
 
+/**
+ * @internal
+ */
 export interface SchemaRegistryContext {
     schemaRegistry: ReturnType<typeof createSchemaRegistry>
     skipValidation?: boolean
@@ -528,6 +539,7 @@ export interface AuthInstance<DefaultUser extends User = User, SignUpSchema exte
 
 /**
  * Extended context used inside the library with both secure and standard cookie materializations.
+ * @internal
  */
 export type InternalContext<Identity extends Identities, SignUpSchema extends SchemaTypes> = RouterGlobalContext<
     FromShapeToObject<Identity>,
@@ -539,23 +551,38 @@ export type InternalContext<Identity extends Identities, SignUpSchema extends Sc
     }
 }
 
+/**
+ * @internal
+ */
 export type InternalContextForStateful = Omit<InternalContext<any, any>, "sessionConfig"> & {
     sessionConfig: StatefulStrategyConfig
 }
 
-/** Inputs for constructing a session strategy implementation for a given identity schema. */
+/**
+ * Inputs for constructing a session strategy implementation for a given identity schema.
+ * @internal
+ */
 export interface CreateSessionStrategyOptions<Identity extends Identities> {
     ctx: InternalContext<Identity, any>
     cookies: () => InternalCookieStoreConfig
 }
 
+/**
+ * @internal
+ */
 export interface InternalSessionContext<Ctx> {
     ctx: Ctx
     cookies: () => InternalCookieStoreConfig
     cookieManager: CookieManager
 }
 
+/**
+ * @internal
+ */
 export type InternalStatefulContext = InternalSessionContext<InternalContextForStateful>
+/**
+ * @internal
+ */
 export type InternalStatelessContext = InternalSessionContext<InternalContextForStateless>
 
 /** Minimal token issue/verify surface used by session code paths. */
@@ -564,6 +591,9 @@ export type JWTManager<DefaultUser extends User = User> = {
     verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }
 
+/**
+ * @internal
+ */
 export type InternalContextForStateless = Omit<InternalContext<any, any>, "sessionConfig"> & {
     sessionConfig: StatelessStrategyConfig
 }
