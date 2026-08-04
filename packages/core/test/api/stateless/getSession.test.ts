@@ -106,7 +106,7 @@ describe("getSession", () => {
     })
 
     test("getSession refreshes session token if exp is close", async () => {
-        const auth = createAuth({ oauth: [], session: { jwt: { expirationStrategy: "rolling" } } })
+        const auth = createAuth({ oauth: [], session: { expirationStrategy: "rolling" } })
 
         const jwt = await auth.jose.encodeJWT({
             ...sessionPayload,

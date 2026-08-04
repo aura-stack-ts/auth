@@ -76,7 +76,7 @@ export interface SessionsAdapter {
     listSessions(filter: Pick<SessionEntity, "userId" | "status" | "deviceId">): Promise<SessionEntity[]>
     updateSession(
         id: string,
-        input: Omit<SessionEntity, "createdAt" | "updatedAt" | "lastActivityAt" | "revokedAt">
+        input: Partial<Omit<SessionEntity, "createdAt" | "updatedAt" | "revokedAt">>
     ): Promise<SessionEntity>
     touchSession(id: string, lastActivityAt: Date): Promise<void>
     revokeSession(id: string, reason: RevokeReason): Promise<void>

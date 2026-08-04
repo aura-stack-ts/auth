@@ -265,3 +265,11 @@ export const isRefreshTokenObject = (value: unknown): value is Exclude<OAuthProv
 export const isResponse = (value: unknown): value is Response => {
     return typeof Response !== "undefined" && value instanceof Response
 }
+
+export const isNullOrUndefined = (value: unknown): value is null | undefined => {
+    return value === null || value === undefined
+}
+
+export const isInvalidSlidingThreshold = (value: unknown): value is number => {
+    return typeof value === "number" && (Number.isNaN(value) || value < 0 || value > 1)
+}

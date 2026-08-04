@@ -1,13 +1,19 @@
 import { getErrorName } from "@/shared/utils.ts"
+import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { updateExpires } from "@/shared/utils/session-strategy.ts"
+import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
+import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
 import type { GetStatelessSessionReturn, InternalStatelessContext, Session, User } from "@/@types/index.ts"
 
 export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatelessContext) => {
     const { logger, identity, jwtManager, sessionConfig } = ctx
 
-    const maxAge = sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
-    const strategy = sessionConfig?.jwt?.expirationStrategy ?? "absolute"
+    const maxAge = sessionConfig?.maxAge ?? sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = sessionConfig?.expirationStrategy ?? sessionConfig?.jwt?.expirationStrategy ?? "absolute"
+    const slidingThreshold = sessionConfig?.slidingThreshold
+    if (isInvalidSlidingThreshold(slidingThreshold)) {
+        throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
+    }
 
     return async (headers: Headers): Promise<GetStatelessSessionReturn<DefaultUser>> => {
         const newHeaders = new Headers(secureApiHeaders)
@@ -26,11 +32,19 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
                 expires: parsedClaims.exp ? new Date(exp * 1000).toISOString() : "",
             }
 
-            const expiresAt = updateExpires({ exp, maxAge, strategy })
-            if (!expiresAt) {
-                return { session: { expires: session.expires, user: userClaims }, headers }
+            const calc = calcStatelessExpiration({
+                exp,
+                maxAge,
+                strategy,
+                slidingThreshold,
+            })
+            if (calc.action === "invalid") {
+                return { session: null, headers: newHeaders }
             }
-
+            if (calc.action === "no_change" || calc.action === "touch") {
+                return { session, headers }
+            }
+            const expiresAt = calc.expiresAt
             const issuedAt = strategy === "absolute" ? parsedClaims.iat : Math.floor(Date.now() / 1000)
             const newSessionToken = await jwtManager.createToken({
                 ...userClaims,

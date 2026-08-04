@@ -849,6 +849,12 @@ export const logMessages = {
         msgId: "STATEFUL_SIGN_IN_CREDENTIALS_SUCCESS",
         message: "Stateful sign-in with credentials completed successfully",
     },
+    STATEFUL_SESSION_RENEWAL_FAILED: {
+        facility: 4,
+        severity: "error",
+        msgId: "STATEFUL_SESSION_RENEWAL_FAILED",
+        message: "Error occurred during stateful session renewal",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {

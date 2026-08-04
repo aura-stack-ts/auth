@@ -116,13 +116,19 @@ export type JWTSealedMode = {
 /** Discriminated union of JWT wire format: signed JWS, encrypted JWE, or nested sealed (JWS in JWE). */
 export type JWTConfigBase = JWTSignedMode | JWTEncryptedMode | JWTSealedMode
 
-/** How session/JWT lifetime is enforced relative to `iat`, absolute caps, and sliding windows. */
-export type JWTExpirationStrategy = "fixed" | "rolling" | "absolute" | "sliding"
+export type ExpirationStrategy = "fixed" | "rolling" | "absolute" | "sliding"
+
+/**
+ * How session/JWT lifetime is enforced relative to `iat`, absolute caps, and sliding windows.
+ * @deprecated Use `ExpirationStrategy` instead. This will be removed in a future release.
+ */
+export type JWTExpirationStrategy = ExpirationStrategy
 
 export type JWTConfig = Prettify<
     {
         /**
          * Token lifetime.
+         * @deprecated Use `session.maxAge` instead. This will be removed in a future release.
          */
         maxAge?: number
         /**
@@ -139,10 +145,12 @@ export type JWTConfig = Prettify<
          * Maximum absolute session duration in seconds.
          * Required for "absolute" and "sliding" strategies.
          * Enforced via jose's maxTokenAge against the iat claim.
+         * @deprecated Use `session.maxDuration` instead. This will be removed in a future release.
          */
         maxExpiration?: number
         /**
          * Policy for renewing or capping token lifetime (pairs with `maxExpiration` where applicable).
+         * @deprecated Use `session.expirationStrategy` instead. This will be removed in a future release.
          */
         expirationStrategy?: JWTExpirationStrategy
     } & JWTConfigBase
@@ -160,6 +168,41 @@ export interface SessionStatefulConfig {
      * If not set, there is no limit on concurrent sessions.
      */
     maxSessions?: number
+    /**
+     * Defines the minimum interval (in seconds) between session "touches" (updates to lastActivityAt) to reduce database writes.
+     */
+    touchInterval?: number
+}
+
+export interface SessionConfigBase {
+    /**
+     * Session time to live (TTL) in seconds. Determines how long a session is valid before it expires.
+     * If not set, the default is 15 days (60 * 60 * 24 * 15).
+     * @default 1296000 (15 days)
+     */
+    maxAge?: number
+    /**
+     * Maximum absolute session duration in seconds.
+     * Required for "absolute" and "sliding" strategies.
+     * Enforced via jose's maxTokenAge against the iat claim.
+     */
+    maxDuration?: number
+    /**
+     * The session expiration strategy. Determines how the session's lifetime is calculated and enforced.
+     * - "fixed": The session expires after a fixed duration from the time of creation.
+     * - "rolling": The session expiration is extended on each request, up to the maximum age.
+     * - "absolute": The session has a hard expiration time, regardless of activity.
+     * - "sliding": The session expiration is extended on each request, but cannot exceed the maximum expiration time.
+     *
+     * @default "absolute"
+     */
+    expirationStrategy?: ExpirationStrategy
+    /**
+     * The sliding threshold percentage p for the `"sliding"` expiration strategy. Determines when the
+     * session expiration is extended based on the remaining time.
+     * @default 0.5 (50%)
+     */
+    slidingThreshold?: number
 }
 
 /**
@@ -170,18 +213,32 @@ export interface SessionStatefulConfig {
  * @example
  * {
  *   strategy: "jwt",
- *   jwt: { mode: "sealed", maxAge: "15m", issuer: "https://auth.example.com" },
- *   refreshToken: { enabled: true, maxAge: "7d" },
+ *   jwt: { mode: "sealed", issuer: "https://auth.example.com" },
  * }
  */
-export type StatelessStrategyConfig = {
+export interface StatelessStrategyConfig extends SessionConfigBase {
     strategy?: "jwt"
     jwt?: JWTConfig
 }
 
-export type StatefulStrategyConfig = {
+/**
+ * Stateful database strategy.
+ * Database required. Every request hits the DB to validate the session.
+ *
+ * @example
+ * {
+ *   strategy: "database",
+ *   adapter: prismaAdapter({ client: prismaClient }),
+ *   database: { deleteStrategy: "soft", maxSessions: 5 },
+ * }
+ */
+export interface StatefulStrategyConfig extends SessionConfigBase {
     strategy: "database"
     adapter: DatabaseAdapter
+    database?: SessionStatefulConfig
+    /**
+     * @deprecated Use `database` instead. This will be removed in a future release.
+     */
     session?: SessionStatefulConfig
 }
 

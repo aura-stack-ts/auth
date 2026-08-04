@@ -2,10 +2,19 @@ import { getErrorName } from "@/shared/utils.ts"
 import { createHash } from "@/shared/crypto.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
+import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
+import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
 import type { GetStatefulSessionReturn, User, InternalStatefulContext } from "@/@types/index.ts"
 
 export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
+    const maxAge = sessionConfig?.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = sessionConfig?.expirationStrategy ?? "absolute"
+    const slidingThreshold = sessionConfig?.slidingThreshold
+    const touchThreshold = sessionConfig?.database?.touchInterval ?? 5 * 60 * 1000
+    if (isInvalidSlidingThreshold(slidingThreshold)) {
+        throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
+    }
 
     return async (headers: Headers): Promise<GetStatefulSessionReturn<DefaultUser>> => {
         logger?.log("STATEFUL_GET_SESSION_START", {
@@ -128,10 +137,34 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
                 },
             })
 
+            const now = Date.now()
+            let effectiveExpiresAt = session.expiresAt
+            const calc = calcStatefulExpiration({
+                now,
+                maxAge,
+                strategy,
+                expiresAt: session.expiresAt,
+                createdAt: session.createdAt,
+                maxDuration: sessionConfig.maxDuration,
+                slidingThreshold,
+            })
+            if (calc.action === "extend") {
+                await sessionConfig.adapter.updateSession(session.id, {
+                    expiresAt: calc.expiresAt,
+                    lastActivityAt: new Date(),
+                })
+                effectiveExpiresAt = calc.expiresAt
+            }
+            if (calc.action === "touch") {
+                const lastActivityAt = session.lastActivityAt.getTime()
+                if (verifyDebounceLastActivity(now, lastActivityAt, touchThreshold)) {
+                    await sessionConfig.adapter.touchSession(session.id, new Date(now))
+                }
+            }
             return {
                 session: {
                     user: parsedUser as DefaultUser,
-                    expires: session.expiresAt.toISOString(),
+                    expires: effectiveExpiresAt.toISOString(),
                 },
                 headers: cookieManager.setCookie({ sessionToken }),
             }
