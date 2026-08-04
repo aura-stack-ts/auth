@@ -271,5 +271,5 @@ export const isNullOrUndefined = (value: unknown): value is null | undefined => 
 }
 
 export const isInvalidSlidingThreshold = (value: unknown): value is number => {
-    return typeof value === "number" && (value < 0 || value > 1)
+    return typeof value === "number" && (Number.isNaN(value) || value < 0 || value > 1)
 }

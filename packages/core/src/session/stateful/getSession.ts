@@ -11,6 +11,7 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
     const maxAge = sessionConfig?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = sessionConfig?.expirationStrategy ?? "absolute"
     const slidingThreshold = sessionConfig?.slidingThreshold
+    const touchThreshold = sessionConfig?.database?.touchInterval ?? 5 * 60 * 1000
     if (isInvalidSlidingThreshold(slidingThreshold)) {
         throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
     }
@@ -156,7 +157,7 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
             }
             if (calc.action === "touch") {
                 const lastActivityAt = session.lastActivityAt.getTime()
-                if (verifyDebounceLastActivity(now, lastActivityAt)) {
+                if (verifyDebounceLastActivity(now, lastActivityAt, touchThreshold)) {
                     await sessionConfig.adapter.touchSession(session.id, new Date(now))
                 }
             }

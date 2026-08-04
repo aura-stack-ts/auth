@@ -149,7 +149,7 @@ export const calcStatelessExpiration = ({
     now = Date.now(),
 }: {
     exp: number | undefined | null
-    maxAge: number // seconds
+    maxAge: number
     strategy: ExpirationStrategy
     slidingThreshold?: number
     now?: number
