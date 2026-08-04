@@ -1,10 +1,6 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/createApi.ts"
-import { createLogEntry } from "@/shared/logger.ts"
-import { createSchemaRegistry } from "@/validator/registry.ts"
-import { identitySchema } from "@/identity/zod.ts"
 import type {
-    InferSchema,
     OpenIDProvider,
     BuiltInOAuthProvider,
     Identities,
@@ -13,20 +9,16 @@ import type {
     FromShapeToObject,
     Prettify,
     OAuthProviderCredentials,
-    OAuthProviderRecord,
     JWTKey,
     SessionConfig,
-    SessionStrategy,
     User,
     Awaitable,
-    StatefulStrategyConfig,
-    StatelessStrategyConfig,
     TypedJWTPayload,
-    CookieManager,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { InferRules, RateLimiterRule, RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter/types"
+import type { CredentialsConfigContext, OnCreateUserContext } from "@/@types/internal.ts"
+import type { RateLimiterRule, RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter/types"
 
 /**
  * Main configuration interface for Aura Auth.
@@ -327,8 +319,6 @@ export type CookieName =
 /** Resolved cookie names and serialization attributes for each logical auth cookie. */
 export type CookieStoreConfig = Record<CookieName, { name?: string; attributes?: CookieStrategyAttributes }>
 
-export type InternalCookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
-
 export interface CookieConfig {
     /**
      * Prefix to be added to all cookie names. By default "aura-stack".
@@ -359,7 +349,7 @@ export type Severity = "emergency" | "alert" | "critical" | "error" | "warning" 
 /**
  * @see https://datatracker.ietf.org/doc/html/rfc5424
  */
-export type SyslogOptions = {
+export interface SyslogOptions {
     facility: 4 | 10
     severity: Severity
     timestamp?: string
@@ -391,12 +381,6 @@ export type AuthAPI<DefaultUser extends User = User, SignUpSchema extends Schema
 /** JWT and crypto helpers bound to the configured identity schema (sign, verify, claims). */
 export type JoseInstance<DefaultUser extends User = User> = ReturnType<typeof createJoseInstance<DefaultUser>>
 
-/** Normalized internal logger with resolved level and structured log function. */
-export interface InternalLogger {
-    level: LogLevel
-    log: typeof createLogEntry
-}
-
 export interface IdentityConfig<Identity extends Identities> {
     /**
      * Skip schema validation for session data, JWT payloads, and OAuth profiles.
@@ -420,40 +404,10 @@ export interface IdentityConfig<Identity extends Identities> {
     unknownKeys: "passthrough" | "strict" | "strip"
 }
 
-/**
- * Identity validation settings used when building session strategy and OAuth profile mapping.
- * Controls the Zod schema and how unknown keys are handled on user objects.
- */
-export interface InternalIdentityConfig<Schema extends SchemaTypes = typeof identitySchema> {
-    schema?: Schema
-    schemaAsPartial?: Schema
-    skipValidation?: boolean
-    unknownKeys?: "passthrough" | "strict" | "strip"
-}
-
 /** Payload sent to the credentials sign-in endpoint (username/password flow). */
 export interface CredentialsPayload {
     username: string
     password: string
-}
-
-/**
- * Context provided to the credentials provider's authorize function.
- * It includes the credentials sent by the user and hashing utilities.
- */
-export interface CredentialsConfigContext<T> {
-    /**
-     * User-provided credentials (e.g., email, password).
-     */
-    credentials: T
-    /**
-     * Hashes a password using the internal hashing algorithm (PBKDF2).
-     */
-    deriveSecret: (password: string, salt?: string, iterations?: number) => Promise<string>
-    /**
-     * Verifies a password against a hashed value.
-     */
-    verifySecret: (password: string, hashedPassword: string) => Promise<boolean>
 }
 
 /**
@@ -468,41 +422,6 @@ export interface CredentialsConfig<Identity extends Identities> {
      */
     authorize: (ctx: CredentialsConfigContext<CredentialsPayload>) => Awaitable<FromShapeToObject<Identity> | null>
 }
-
-/**
- * Runtime context passed into auth actions and API handlers: OAuth map, cookies, JWT, session strategy, trusted origins, etc.
- * This is the fully resolved configuration surface after `createAuth` initializes defaults.
- */
-export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>> {
-    oauth: OAuthProviderRecord
-    credentials?: CredentialsConfig<any>
-    cookies: InternalCookieStoreConfig
-    jose: JoseInstance<DefaultUser>
-    secret?: JWTKey
-    baseURL?: string
-    basePath: string
-    trustedProxyHeaders: boolean
-    trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
-    logger?: InternalLogger
-    sessionStrategy: SessionStrategy<DefaultUser>
-    identity: SchemaRegistryContext
-    signUp?: SignUpConfig<DefaultUser, SignUpSchema>
-    jwtManager: JWTManager<DefaultUser>
-    rateLimiters: InferRules<Required<RateLimiterConfig>>
-    sessionConfig: SessionConfig
-}
-
-export interface SchemaRegistryContext {
-    schemaRegistry: ReturnType<typeof createSchemaRegistry>
-    skipValidation?: boolean
-    unknownKeys: "passthrough" | "strict" | "strip"
-}
-
-/**
- * Internal runtime configuration used within Aura Auth after initialization.
- * All optional fields from AuthConfig are resolved to their default values.
- */
-export type AuthRuntimeConfig<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser>
 
 export type Handlers = {
     [method in "GET" | "POST" | "PATCH" | "DELETE" | "ALL"]: (request: Request) => Response | Promise<Response>
@@ -526,50 +445,10 @@ export interface AuthInstance<DefaultUser extends User = User, SignUpSchema exte
     handlers: Handlers
 }
 
-/**
- * Extended context used inside the library with both secure and standard cookie materializations.
- */
-export type InternalContext<Identity extends Identities, SignUpSchema extends SchemaTypes> = RouterGlobalContext<
-    FromShapeToObject<Identity>,
-    SignUpSchema
-> & {
-    cookieConfig: {
-        secure: InternalCookieStoreConfig
-        standard: InternalCookieStoreConfig
-    }
-}
-
-export type InternalContextForStateful = Omit<InternalContext<any, any>, "sessionConfig"> & {
-    sessionConfig: StatefulStrategyConfig
-}
-
-/** Inputs for constructing a session strategy implementation for a given identity schema. */
-export interface CreateSessionStrategyOptions<Identity extends Identities> {
-    ctx: InternalContext<Identity, any>
-    cookies: () => InternalCookieStoreConfig
-}
-
-export interface InternalSessionContext<Ctx> {
-    ctx: Ctx
-    cookies: () => InternalCookieStoreConfig
-    cookieManager: CookieManager
-}
-
-export type InternalStatefulContext = InternalSessionContext<InternalContextForStateful>
-export type InternalStatelessContext = InternalSessionContext<InternalContextForStateless>
-
 /** Minimal token issue/verify surface used by session code paths. */
 export type JWTManager<DefaultUser extends User = User> = {
     createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
     verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
-}
-
-export type InternalContextForStateless = Omit<InternalContext<any, any>, "sessionConfig"> & {
-    sessionConfig: StatelessStrategyConfig
-}
-
-export interface OnCreateUserContext<Schema extends SchemaTypes> {
-    payload: InferSchema<Schema>
 }
 
 /**

@@ -1,11 +1,11 @@
 import { HeadersBuilder } from "@aura-stack/router"
+import { createHash } from "@/shared/crypto.ts"
 import { getExpiredCookie } from "@/cookie.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
 import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
-import type { InternalStatefulContext } from "@/@types/index.ts"
-import { createHash } from "@/shared/crypto.ts"
+import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const revokeToken = ({ ctx, cookieManager }: InternalStatefulContext) => {
     const { oauth, logger, sessionConfig, cookies } = ctx

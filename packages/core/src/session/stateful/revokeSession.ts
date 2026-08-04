@@ -1,5 +1,5 @@
 import { AuraAuthError } from "@/shared/errors.ts"
-import type { InternalStatefulContext } from "@/@types/index.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const revokeSession = ({ ctx }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx

@@ -3,7 +3,8 @@ import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { handleApiError } from "@/shared/utils/api.ts"
 import { getErrorName, toUnionHeaders } from "@/shared/utils.ts"
-import type { FunctionAPIContext, GetSessionAPIOptions, GetSessionAPIReturn, User } from "@/@types/index.ts"
+import type { FunctionAPIContext } from "@/@types/internal.ts"
+import type { GetSessionAPIOptions, GetSessionAPIReturn, User } from "@/@types/index.ts"
 
 export const getSession = async <DefaultUser extends User = User>({
     ctx,

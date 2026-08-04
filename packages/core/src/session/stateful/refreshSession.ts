@@ -1,7 +1,8 @@
+import { createHash } from "@/shared/crypto.ts"
 import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
 import type { DeepPartial } from "@/@types/utility.ts"
-import type { InternalStatefulContext, Session, User } from "@/@types/index.ts"
-import { createHash } from "@/shared/crypto.ts"
+import type { Session, User } from "@/@types/index.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig, jose } = ctx

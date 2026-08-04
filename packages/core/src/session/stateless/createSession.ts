@@ -1,5 +1,6 @@
 import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { InternalStatelessContext, User } from "@/@types/index.ts"
+import type { User } from "@/@types/index.ts"
+import type { InternalStatelessContext } from "@/@types/internal.ts"
 
 export const createSession = <DefaultUser extends User>({ ctx }: InternalStatelessContext) => {
     const { logger, identity, jwtManager } = ctx

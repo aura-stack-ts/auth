@@ -1,7 +1,7 @@
 import z from "zod/v4"
 import { getProviderTokens } from "@/api/getProviderTokens.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import type { OAuthProviderRecord } from "@/@types/oauth.ts"
+import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const tokensConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig({

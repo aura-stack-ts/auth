@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext } from "@/@types/config.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const signInCredentials = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx

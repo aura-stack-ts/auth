@@ -4,15 +4,8 @@ import { createHash, verifyCSRF } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isString, isValidURL } from "@/shared/assert.ts"
-import type {
-    InternalCookieStoreConfig,
-    InternalLogger,
-    JoseInstance,
-    SchemaRegistryContext,
-    JWTManager,
-    OAuthTokenPayload,
-    OAuthAccessTokenResponseType,
-} from "@/@types/index.ts"
+import type { JoseInstance, JWTManager, OAuthTokenPayload, OAuthAccessTokenResponseType } from "@/@types/index.ts"
+import type { InternalCookieStoreConfig, InternalLogger, SchemaRegistryContext } from "@/@types/internal.ts"
 import type { DeviceType } from "@/@types/entities.ts"
 
 export const AURA_AUTH_VERSION = "0.8.1"

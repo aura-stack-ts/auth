@@ -1,6 +1,6 @@
+import type { CredentialsPayload } from "@/@types/config.ts"
 import type { OAuthTokenPayload, Session, User } from "@/@types/session.ts"
-import type { CredentialsPayload, RouterGlobalContext } from "@/@types/config.ts"
-import type { AuthResponse, DeepPartial, Prettify, RequiredKeys } from "@/@types/utility.ts"
+import type { AuthResponse, DeepPartial, RequiredKeys } from "@/@types/utility.ts"
 
 /**
  * Canonical return shape for server/programmatic API functions.
@@ -21,16 +21,6 @@ type AuthActionAPIReturn<Body extends object, ErrorCodes = any> =
           error: { code: ErrorCodes; message: string }
           toResponse: () => AuthResponse<Exclude<Body, { success: true }>>
       })
-
-/**
- * Utility to merge the internal router global context (`ctx`) with per-function options.
- * Used by implementation-level API functions in `src/api/*`.
- */
-export type FunctionAPIContext<Options extends object = {}> = Prettify<
-    {
-        ctx: RouterGlobalContext
-    } & Options
->
 
 export interface OptionsWithRedirectTo {
     /**

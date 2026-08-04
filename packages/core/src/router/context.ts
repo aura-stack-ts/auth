@@ -10,7 +10,8 @@ import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
 import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import { createRateLimiterInstance } from "@/router/rate-limiter.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
-import type { AuthConfig, InternalContext, FromShapeToObject } from "@/@types/index.ts"
+import type { AuthConfig, FromShapeToObject } from "@/@types/index.ts"
+import type { InternalContext } from "@/@types/internal.ts"
 
 export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>

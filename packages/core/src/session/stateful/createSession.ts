@@ -2,7 +2,8 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { InternalStatefulContext, User } from "@/@types/index.ts"
+import type { User } from "@/@types/index.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const createSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx

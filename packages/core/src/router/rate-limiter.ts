@@ -1,5 +1,6 @@
 import { createRateLimiter, type RateLimiterRule } from "@aura-stack/rate-limiter"
-import type { RateLimiterConfig, RouterGlobalContext } from "@/@types/config.ts"
+import type { RateLimiterConfig } from "@/@types/config.ts"
+import type { RouterGlobalContext } from "@/@types/internal.ts"
 
 export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
     const getLimitKey = (request: Request, action: string): string => {

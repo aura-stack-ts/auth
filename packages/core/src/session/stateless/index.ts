@@ -10,7 +10,8 @@ import { refreshUserInfo } from "@/session/stateless/refreshUserInfo.ts"
 import { signInCredentials } from "@/session/stateless/signInCredentials.ts"
 import { getProviderTokens } from "@/session/stateless/getProviderTokens.ts"
 import { isProviderConnected } from "@/session/stateless/isProviderConnected.ts"
-import type { SessionStrategy, User, InternalStatelessContext } from "@/@types/index.ts"
+import type { SessionStrategy, User } from "@/@types/index.ts"
+import type { InternalStatelessContext } from "@/@types/internal.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>(
     ctx: InternalStatelessContext

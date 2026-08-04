@@ -1,7 +1,6 @@
 import type { infer as Infer } from "zod"
 import type { User } from "@/@types/session.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
-import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/schemas.ts"
 
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
@@ -152,14 +151,3 @@ export type OAuthProvider<
     Profile extends object = Record<string, any>,
     DefaultUser extends User = User,
 > = OAuthProviderCredentials<Profile, DefaultUser>
-
-/**
- * Lookup table of configured OAuth providers keyed by built-in id or custom id.
- * Values are full credential configs used at runtime for authorize/token/userinfo.
- */
-export type OAuthProviderRecord<DefaultUser extends User = User> = Record<
-    LiteralUnion<BuiltInOAuthProvider>,
-    RuntimeOAuthProvider<any, DefaultUser>
->
-
-export type CustomUserInfoFunction = Extract<OAuthProviderConfig["userInfo"], { request: (context: AccessTokenContext) => any }>

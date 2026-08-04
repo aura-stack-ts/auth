@@ -1,16 +1,16 @@
 import { AuraAuthError } from "@/shared/errors.ts"
+import { getUserInfo } from "@/shared/utils/oauth.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { getProviderTokens } from "./getProviderTokens.ts"
+import { getProviderTokens } from "@/api/getProviderTokens.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
+import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
-    FunctionAPIContext,
     RefreshUserInfoAPIOptions,
     RefreshUserInfoAPIReturn,
     LiteralUnion,
     User,
     BuiltInOAuthProvider,
 } from "@/@types/index.ts"
-import { getUserInfo } from "@/shared/utils/oauth.ts"
 
 export const refreshUserInfo = async <DefaultUser extends User = User>(
     oauth: LiteralUnion<BuiltInOAuthProvider>,

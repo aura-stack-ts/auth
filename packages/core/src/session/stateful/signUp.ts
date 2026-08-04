@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createHash, createSecretValue, hashPassword } from "@/shared/crypto.ts"
 import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext } from "@/@types/config.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 /**
  * @todo Add transaction support for the signUp process to ensure atomicity and rollback in case of errors.

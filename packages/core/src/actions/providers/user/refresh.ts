@@ -1,7 +1,7 @@
 import { z } from "zod/v4"
 import { refreshUserInfo } from "@/api/refreshUserInfo.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import type { OAuthProviderRecord } from "@/@types/oauth.ts"
+import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 export const refreshConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig({

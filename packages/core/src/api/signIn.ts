@@ -1,7 +1,8 @@
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { createSignInURL } from "@/shared/utils/authorization.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
-import type { BuiltInOAuthProvider, FunctionAPIContext, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
+import type { FunctionAPIContext } from "@/@types/internal.ts"
+import type { BuiltInOAuthProvider, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
 
 /**
  * Initiates the sign-in flow on the server. Called when the client invokes the `signIn` API function.
