@@ -2,13 +2,18 @@ import { getErrorName } from "@/shared/utils.ts"
 import { createHash } from "@/shared/crypto.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
+import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
 import type { GetStatefulSessionReturn, User, InternalStatefulContext } from "@/@types/index.ts"
 
 export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
-    const maxAge = ctx.sessionConfig.maxAge ?? 60 * 60 * 24 * 15
-    const strategy = ctx.sessionConfig.expirationStrategy ?? "absolute"
+    const maxAge = sessionConfig?.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = sessionConfig?.expirationStrategy ?? "absolute"
+    const slidingThreshold = sessionConfig?.slidingThreshold
+    if (isInvalidSlidingThreshold(slidingThreshold)) {
+        throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
+    }
 
     return async (headers: Headers): Promise<GetStatefulSessionReturn<DefaultUser>> => {
         logger?.log("STATEFUL_GET_SESSION_START", {
@@ -134,11 +139,13 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
             const now = Date.now()
             let effectiveExpiresAt = session.expiresAt
             const calc = calcStatefulExpiration({
+                now,
                 maxAge,
                 strategy,
                 expiresAt: session.expiresAt,
                 createdAt: session.createdAt,
                 maxDuration: sessionConfig.maxDuration,
+                slidingThreshold,
             })
             if (calc.action === "extend") {
                 await sessionConfig.adapter.updateSession(session.id, {

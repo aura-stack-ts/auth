@@ -133,6 +133,11 @@ export const AuraErrorCode = {
     OAUTH_ACCOUNT_USER_MISMATCH: "OAUTH_ACCOUNT_USER_MISMATCH",
     MISSING_ADAPTER_IN_STATEFUL_STRATEGY: "MISSING_ADAPTER_IN_STATEFUL_STRATEGY",
     EMAIL_ALREADY_REGISTERED: "EMAIL_ALREADY_REGISTERED",
+
+    /**
+     * Session Configuration Errors
+     */
+    INVALID_SLIDING_THRESHOLD_CONFIG_VALUE: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -935,6 +940,14 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "The registration request was rejected because the provided email address is already associated with an existing user record in the system.",
         userMessage: "This email address is already registered. Please sign in or use a different email.",
+    },
+    INVALID_SLIDING_THRESHOLD_CONFIG_VALUE: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "Initialization aborted: The 'slidingThreshold' configuration value must be a floating-point number between 0 and 1 (inclusive), representing a percentage fraction of the total session lifespan.",
+        userMessage: "Internal library configuration error. The sliding session threshold must be a number between 0 and 1.",
     },
 }
 

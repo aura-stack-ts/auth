@@ -269,3 +269,7 @@ export const isResponse = (value: unknown): value is Response => {
 export const isNullOrUndefined = (value: unknown): value is null | undefined => {
     return value === null || value === undefined
 }
+
+export const isInvalidSlidingThreshold = (value: unknown): value is number => {
+    return typeof value === "number" && (value < 0 || value > 1)
+}

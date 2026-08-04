@@ -119,6 +119,16 @@ describe("session: stateless strategy", () => {
             const expectedExp = new Date(Date.now() + 3600 * 1000).toISOString()
             expect(body.session.expires).toBe(expectedExp)
         })
+
+        test("invalid sliding threshold", () => {
+            expect(() =>
+                createAuth({
+                    oauth: [],
+                    session: { maxAge: 3600, expirationStrategy: "sliding", slidingThreshold: -1 },
+                    logger: false,
+                })
+            ).toThrow()
+        })
     })
 
     describe("JWT Max Expiration (mexp)", () => {

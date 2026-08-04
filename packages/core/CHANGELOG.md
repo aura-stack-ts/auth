@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `slidingThreshold` option, which defines the remaining lifetime percentage at which a session expiration is automatically refreshed. Supported by both `jwt` and `database` session strategies. Added the `touchInterval` option for the `database` session strategy, which specifies the minimum interval between activity updates to avoid unnecessary database writes. [#248](https://github.com/aura-stack-ts/auth/pull/248)
+
 - Added the `doubleSubmitToken` option to the APIs exposed by `createAuth().api`, allowing explicit Double-Submit Cookie validation for server-side requests. By default, Double-Submit Cookie validation is skipped in trusted server environments, while standard CSRF validation remains enabled. Supplying `doubleSubmitToken` enforces Double-Submit Cookie validation for the request. [#233](https://github.com/aura-stack-ts/auth/pull/233)
 
 - Added support for inferring OpenID Connect (OIDC) provider issuer slugs from environment variables. Issuer slugs can now be configured either through `provider.slugName` or an environment variable following the `PREFIX_SLUG_NAME` naming convention. [#225](https://github.com/aura-stack-ts/auth/pull/225)

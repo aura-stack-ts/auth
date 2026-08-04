@@ -126,8 +126,8 @@ export const calcExpiration = ({
             }
         }
         case "sliding": {
-            const thresholdMs = maxAge * slidingThreshold
-            if (remaining < thresholdMs) {
+            const threshold = maxAge * slidingThreshold
+            if (remaining < threshold) {
                 const candidateMs = now + maxAge
                 return {
                     action: "extend",

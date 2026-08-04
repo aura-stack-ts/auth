@@ -168,6 +168,10 @@ export interface SessionStatefulConfig {
      * If not set, there is no limit on concurrent sessions.
      */
     maxSessions?: number
+    /**
+     * Defines the minimum interval (in seconds) between session "touches" (updates to lastActivityAt) to reduce database writes.
+     */
+    touchInterval?: number
 }
 
 export interface SessionConfigBase {
@@ -192,7 +196,13 @@ export interface SessionConfigBase {
      *
      * @default "absolute"
      */
-    expirationStrategy?: JWTExpirationStrategy
+    expirationStrategy?: ExpirationStrategy
+    /**
+     * The sliding threshold percentage p for the `"sliding"` expiration strategy. Determines when the
+     * session expiration is extended based on the remaining time.
+     * @default 0.5 (50%)
+     */
+    slidingThreshold?: number
 }
 
 /**
