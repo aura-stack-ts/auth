@@ -1,6 +1,6 @@
 import { getErrorName } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { updateExpires } from "@/shared/utils/session-strategy.ts"
+import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
 import type { GetStatelessSessionReturn, InternalStatelessContext, Session, User } from "@/@types/index.ts"
 
 export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatelessContext) => {
@@ -26,11 +26,15 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
                 expires: parsedClaims.exp ? new Date(exp * 1000).toISOString() : "",
             }
 
-            const expiresAt = updateExpires({ exp, maxAge, strategy })
-            if (!expiresAt) {
-                return { session: { expires: session.expires, user: userClaims }, headers }
+            const calc = calcStatelessExpiration({
+                exp,
+                maxAge,
+                strategy,
+            })
+            if (calc.action === "no_change" || calc.action === "invalid" || calc.action === "touch") {
+                return { session, headers }
             }
-
+            const expiresAt = calc.expiresAt
             const issuedAt = strategy === "absolute" ? parsedClaims.iat : Math.floor(Date.now() / 1000)
             const newSessionToken = await jwtManager.createToken({
                 ...userClaims,

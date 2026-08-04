@@ -116,8 +116,13 @@ export type JWTSealedMode = {
 /** Discriminated union of JWT wire format: signed JWS, encrypted JWE, or nested sealed (JWS in JWE). */
 export type JWTConfigBase = JWTSignedMode | JWTEncryptedMode | JWTSealedMode
 
-/** How session/JWT lifetime is enforced relative to `iat`, absolute caps, and sliding windows. */
-export type JWTExpirationStrategy = "fixed" | "rolling" | "absolute" | "sliding"
+export type ExpirationStrategy = "fixed" | "rolling" | "absolute" | "sliding"
+
+/**
+ * How session/JWT lifetime is enforced relative to `iat`, absolute caps, and sliding windows.
+ * @deprecated Use `ExpirationStrategy` instead. This will be removed in a future release.
+ */
+export type JWTExpirationStrategy = ExpirationStrategy
 
 export type JWTConfig = Prettify<
     {
@@ -185,7 +190,7 @@ export interface SessionConfigBase {
      * - "absolute": The session has a hard expiration time, regardless of activity.
      * - "sliding": The session expiration is extended on each request, but cannot exceed the maximum expiration time.
      *
-     * @default "fixed"
+     * @default "absolute"
      */
     expirationStrategy?: JWTExpirationStrategy
 }
@@ -221,6 +226,10 @@ export interface StatefulStrategyConfig extends SessionConfigBase {
     strategy: "database"
     adapter: DatabaseAdapter
     database?: SessionStatefulConfig
+    /**
+     * @deprecated Use `database` instead. This will be removed in a future release.
+     */
+    session?: SessionStatefulConfig
 }
 
 /**

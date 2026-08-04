@@ -265,3 +265,7 @@ export const isRefreshTokenObject = (value: unknown): value is Exclude<OAuthProv
 export const isResponse = (value: unknown): value is Response => {
     return typeof Response !== "undefined" && value instanceof Response
 }
+
+export const isNullOrUndefined = (value: unknown): value is null | undefined => {
+    return value === null || value === undefined
+}

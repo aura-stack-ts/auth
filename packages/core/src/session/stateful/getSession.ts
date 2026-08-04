@@ -2,8 +2,8 @@ import { getErrorName } from "@/shared/utils.ts"
 import { createHash } from "@/shared/crypto.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
+import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
 import type { GetStatefulSessionReturn, User, InternalStatefulContext } from "@/@types/index.ts"
-import { updateExpires } from "@/shared/utils/session-strategy.ts"
 
 export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
@@ -131,23 +131,32 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
                 },
             })
 
-            const expiresAt = updateExpires({
-                exp: Math.floor(session.expiresAt.getTime() / 1000),
+            const now = Date.now()
+            let effectiveExpiresAt = session.expiresAt
+            const calc = calcStatefulExpiration({
                 maxAge,
                 strategy,
+                expiresAt: session.expiresAt,
+                createdAt: session.createdAt,
+                maxDuration: sessionConfig.maxDuration,
             })
-            if (expiresAt) {
-                const now = new Date()
+            if (calc.action === "extend") {
                 await sessionConfig.adapter.updateSession(session.id, {
-                    expiresAt,
-                    lastActivityAt: now,
+                    expiresAt: calc.expiresAt,
+                    lastActivityAt: new Date(),
                 })
+                effectiveExpiresAt = calc.expiresAt
             }
-
+            if (calc.action === "touch") {
+                const lastActivityAt = session.lastActivityAt.getTime()
+                if (verifyDebounceLastActivity(now, lastActivityAt)) {
+                    await sessionConfig.adapter.touchSession(session.id, new Date(now))
+                }
+            }
             return {
                 session: {
                     user: parsedUser as DefaultUser,
-                    expires: session.expiresAt.toISOString(),
+                    expires: effectiveExpiresAt.toISOString(),
                 },
                 headers: cookieManager.setCookie({ sessionToken }),
             }

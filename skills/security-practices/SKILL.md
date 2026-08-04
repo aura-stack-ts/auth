@@ -46,7 +46,7 @@ Cover all critical security topics:
 5. `trustedOrigins` strategy (static, dynamic, wildcard).
 6. Secure `session` strategy design with JWT best practices.
 7. JWT mode analysis (`sealed`, `signed`, `encrypted`) and app-fit recommendation.
-8. `issuer`, `audience`, `maxExpiration`, `maxAge`, and `expirationStrategy` guidance.
+8. `issuer`, `audience`, `maxDuration`, `maxAge`, and `expirationStrategy` guidance.
 
 ## Instructions
 
@@ -198,7 +198,7 @@ createAuth({
       audience: ["https://api.example.com"],
     },
     maxAge: 60 * 60 * 24 * 7,
-    maxExpiration: 60 * 60 * 24 * 30,
+    maxDuration: 60 * 60 * 24 * 30,
     expirationStrategy: "absolute",
   },
 })
@@ -227,21 +227,21 @@ Decision rule:
 
 - Choose `sealed` unless there is a clear interoperability/performance requirement.
 
-## issuer, audience, maxExpiration, and expiration design
+## issuer, audience, maxDuration, and expiration design
 
 - `issuer`: set canonical auth issuer URL.
 - `audience`: set explicit service audience(s); avoid overly broad audiences.
 - `maxAge`: session lifetime per token.
-- `maxExpiration`: absolute cap to prevent indefinite extension.
+- `maxDuration`: absolute cap to prevent indefinite extension.
 - `expirationStrategy`:
   - `absolute`: hard stop after max window (security-first default).
   - `rolling`: extends active sessions; use with strict caps and monitoring.
   - `fixed`: fixed TTL from issuance; no rolling extension.
-  - `sliding`: refreshes validity window with activity, bounded by `maxExpiration`.
+  - `sliding`: refreshes validity window with activity, bounded by `maxDuration`.
 
 Best-practice defaults:
 
-- consumer web app: `sealed`, 7d maxAge, absolute 30d maxExpiration.
+- consumer web app: `sealed`, 7d maxAge, absolute 30d maxDuration.
 - high-risk admin app: `sealed`, shorter maxAge (8-24h), strict audience, absolute expiration.
 - machine-oriented internal service: evaluate signed vs sealed based on confidentiality requirements.
 
@@ -290,7 +290,7 @@ Use this exact structure:
 4. `trustedProxyHeaders` is enabled only in trusted-proxy deployments.
 5. `trustedOrigins` blocks untrusted redirects/origins.
 6. JWT mode choice is justified and documented.
-7. `issuer`, `audience`, `maxAge`, and `maxExpiration` are explicitly set.
+7. `issuer`, `audience`, `maxAge`, and `maxDuration` are explicitly set.
 8. Expiration strategy aligns with business risk and compliance.
 
 ## Guardrails

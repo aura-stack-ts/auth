@@ -26,14 +26,14 @@ The `jwt` session strategy is the stateless option: it uses a JSON Web Token to 
 
 ### Options
 
-| Option                   | Type                                  | Required                  | Description                                                                                                                                                 |
-| ------------------------ | ------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mode`                   | `"sealed" \| "signed" \| "encrypted"` | No (default `"sealed"`)   | Determines how the JWT is protected. See [Choosing a mode](#choosing-a-mode) below.                                                                         |
-| `issuer`                 | `string`                              | No                        | Sets the `iss` claim on the JWT, identifying the issuer of the token. Useful for additional validation on the client or server.                             |
-| `audience`               | `string`                              | No                        | Sets the `aud` claim on the JWT, identifying the intended audience. Useful for restricting token usage to specific clients or services.                     |
-| ~~`maxAge`~~             | `number` (seconds)                    | Yes                       | ~~Deprecated~~. Maximum age of the JWT. After this period, the token expires and the user must re-authenticate.                                             |
-| ~~`maxExpiration`~~      | `number` (seconds)                    | No                        | ~~Deprecated~~. A hard ceiling on token expiration that persists even if the token is refreshed, preventing indefinitely-valid tokens.                      |
-| ~~`expirationStrategy`~~ | `"absolute" \| "rolling"`             | No (default `"absolute"`) | ~~Deprecated~~. `absolute` expires the token a fixed time after issuance. `rolling` extends the expiration on each request, keeping active users signed in. |
+| Option                   | Type                                              | Required                  | Description                                                                                                                                                 |
+| ------------------------ | ------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode`                   | `"sealed" \| "signed" \| "encrypted"`             | No (default `"sealed"`)   | Determines how the JWT is protected. See [Choosing a mode](#choosing-a-mode) below.                                                                         |
+| `issuer`                 | `string`                                          | No                        | Sets the `iss` claim on the JWT, identifying the issuer of the token. Useful for additional validation on the client or server.                             |
+| `audience`               | `string`                                          | No                        | Sets the `aud` claim on the JWT, identifying the intended audience. Useful for restricting token usage to specific clients or services.                     |
+| ~~`maxAge`~~             | `number` (seconds)                                | Yes                       | ~~Deprecated~~. Maximum age of the JWT. After this period, the token expires and the user must re-authenticate.                                             |
+| ~~`maxExpiration`~~      | `number` (seconds)                                | No                        | ~~Deprecated~~. A hard ceiling on token expiration that persists even if the token is refreshed, preventing indefinitely-valid tokens.                      |
+| ~~`expirationStrategy`~~ | `"absolute" \| "rolling" \| "fixed" \| "sliding"` | No (default `"absolute"`) | ~~Deprecated~~. `absolute` expires the token a fixed time after issuance. `rolling` extends the expiration on each request, keeping active users signed in. |
 
 ### Choosing a mode
 
