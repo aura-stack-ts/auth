@@ -1,6 +1,6 @@
 import { getCookie } from "@/cookie.ts"
 import { getErrorName } from "@/shared/utils.ts"
-import type { InternalStatelessContext } from "@/@types/index.ts"
+import type { InternalStatelessContext } from "@/@types/internal.ts"
 
 export const isProviderConnected = ({ ctx, cookies }: InternalStatelessContext) => {
     const { logger, jwtManager: jwt } = ctx

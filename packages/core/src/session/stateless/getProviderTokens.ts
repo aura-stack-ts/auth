@@ -3,9 +3,10 @@ import { getCookie } from "@/cookie.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { handleApiError } from "@/shared/utils/api.ts"
-import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import { getErrorName, shouldRefresh } from "@/shared/utils.ts"
-import type { GetProviderTokensStatefulReturn, InternalStatelessContext } from "@/@types/index.ts"
+import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
+import type { InternalStatelessContext } from "@/@types/internal.ts"
+import type { GetProviderTokensStatefulReturn } from "@/@types/index.ts"
 
 export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext) => {
     const { oauth, logger, identity, jwtManager: jwt } = ctx

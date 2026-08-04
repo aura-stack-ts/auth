@@ -1,7 +1,7 @@
 import { z } from "zod/v4"
 import { revokeToken } from "@/api/revokeToken.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import type { OAuthProviderRecord } from "@/@types/oauth.ts"
+import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const revokeConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig({

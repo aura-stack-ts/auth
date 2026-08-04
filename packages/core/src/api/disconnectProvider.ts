@@ -1,8 +1,8 @@
 import { revokeToken } from "@/api/revokeToken.ts"
+import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
     DisconnectProviderAPIOptions,
     DisconnectProviderAPIReturn,
-    FunctionAPIContext,
     LiteralUnion,
     BuiltInOAuthProvider,
 } from "@/@types/index.ts"

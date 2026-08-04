@@ -1,6 +1,6 @@
 import type { User } from "@/@types/session.ts"
 import type { GetRouteParams } from "@aura-stack/router/types"
-import type { RevokeTokenParams, RevokeTokenTokenHint } from "./oauth.ts"
+import type { RevokeTokenParams, RevokeTokenTokenHint } from "@/@types/oauth.ts"
 
 /**
  * @link https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata

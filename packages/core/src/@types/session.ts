@@ -23,11 +23,6 @@ export interface CryptoSecret {
     encrypt: CryptoKey | CryptoKeyPair | JWK | JsonWebKey | AsymmetricKeyPair
 }
 
-export interface AsymmetricKeyPairFromEnv {
-    publicKey: string
-    privateKey: string
-}
-
 export interface AsymmetricKeyPair {
     publicKey: CryptoKey | JWK
     privateKey: CryptoKey | JWK

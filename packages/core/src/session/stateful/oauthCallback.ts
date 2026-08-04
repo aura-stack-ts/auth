@@ -7,7 +7,7 @@ import { getOriginURL, getTrustedOrigins } from "@/shared/utils/authorization.ts
 import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
 import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
-import type { InternalStatefulContext } from "@/@types/index.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, jose, oauth, sessionConfig } = ctx

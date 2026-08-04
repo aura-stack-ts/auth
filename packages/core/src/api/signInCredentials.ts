@@ -4,7 +4,8 @@ import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
 import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
-import type { FunctionAPIContext, SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
+import type { FunctionAPIContext } from "@/@types/internal.ts"
+import type { SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
 
 export const signInCredentials = async ({
     ctx,

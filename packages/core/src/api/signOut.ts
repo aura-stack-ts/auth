@@ -1,6 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
-import type { FunctionAPIContext, SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
+import type { FunctionAPIContext } from "@/@types/internal.ts"
+import type { SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
 
 export const signOut = async ({
     ctx,

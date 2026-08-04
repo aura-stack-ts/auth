@@ -11,7 +11,8 @@ import { refreshUserInfo } from "@/session/stateful/refreshUserInfo.ts"
 import { signInCredentials } from "@/session/stateful/signInCredentials.ts"
 import { getProviderTokens } from "@/session/stateful/getProviderTokens.ts"
 import { isProviderConnected } from "@/session/stateful/isProviderConnected.ts"
-import type { SessionStrategy, User, InternalStatefulContext } from "@/@types/index.ts"
+import type { SessionStrategy, User } from "@/@types/index.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const createStatefulStrategy = <DefaultUser extends User = User>(
     ctx: InternalStatefulContext

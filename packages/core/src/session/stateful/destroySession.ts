@@ -1,6 +1,6 @@
-import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
-import type { InternalStatefulContext } from "@/@types/index.ts"
 import { createHash } from "@/shared/crypto.ts"
+import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const destroySession = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig, jose } = ctx

@@ -3,7 +3,8 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
-import type { GetStatelessSessionReturn, InternalStatelessContext, Session, User } from "@/@types/index.ts"
+import type { GetStatelessSessionReturn, Session, User } from "@/@types/index.ts"
+import type { InternalStatelessContext } from "@/@types/internal.ts"
 
 export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatelessContext) => {
     const { logger, identity, jwtManager, sessionConfig } = ctx

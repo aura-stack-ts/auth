@@ -1,7 +1,7 @@
 import { z } from "zod/v4"
 import { isProviderConnected } from "@/api/isProviderConnected.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import type { OAuthProviderRecord } from "@/@types/oauth.ts"
+import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const connectedConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig({

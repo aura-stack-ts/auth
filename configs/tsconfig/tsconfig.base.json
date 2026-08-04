@@ -22,8 +22,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "verbatimModuleSyntax": true,
-    "allowImportingTsExtensions": true,
-    "stripInternal": true
+    "allowImportingTsExtensions": true
   },
   "include": ["src"],
   "exclude": ["node_modules"]

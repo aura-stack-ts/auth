@@ -2,8 +2,8 @@ import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { RedirectOptionsSchema } from "@/schemas.ts"
 import { updateSession } from "@/api/updateSession.ts"
 import { getFullSchema } from "@/validator/registry.ts"
-import type { SchemaRegistryContext } from "@/@types/config.ts"
 import type { Identities } from "@/identity/index.ts"
+import type { SchemaRegistryContext } from "@/@types/internal.ts"
 
 export const config = <Identity extends Identities>(identity: SchemaRegistryContext) => {
     return createEndpointConfig({

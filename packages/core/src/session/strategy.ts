@@ -1,17 +1,10 @@
 import { AuraAuthError } from "@/shared/errors.ts"
+import { isStatelessStrategy } from "@/shared/assert.ts"
+import { createCookieManager } from "@/session/cookie-manager.ts"
 import { createStatefulStrategy } from "@/session/stateful/index.ts"
 import { createStatelessStrategy } from "@/session/stateless/index.ts"
-import type {
-    SessionStrategy,
-    User,
-    CreateSessionStrategyOptions,
-    FromShapeToObject,
-    Identities,
-    InternalStatefulContext,
-    InternalStatelessContext,
-} from "@/@types/index.ts"
-import { createCookieManager } from "./cookie-manager.ts"
-import { isStatelessStrategy } from "@/shared/assert.ts"
+import type { SessionStrategy, User, FromShapeToObject, Identities } from "@/@types/index.ts"
+import type { CreateSessionStrategyOptions, InternalStatefulContext, InternalStatelessContext } from "@/@types/internal.ts"
 
 export const createSessionStrategy = <Identity extends Identities>(
     config: CreateSessionStrategyOptions<Identity>

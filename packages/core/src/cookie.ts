@@ -1,7 +1,8 @@
 import { env } from "@/shared/env.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
-import type { CookieConfig, InternalLogger, InternalCookieStoreConfig } from "@/@types/index.ts"
+import type { CookieConfig } from "@/@types/index.ts"
+import type { InternalLogger, InternalCookieStoreConfig } from "@/@types/internal.ts"
 
 /**
  * Prefix for all cookies set by Aura Auth.

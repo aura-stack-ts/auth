@@ -1,7 +1,7 @@
 import { z } from "zod/v4"
 import { disconnectProvider } from "@/api/disconnectProvider.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import type { OAuthProviderRecord } from "@/@types/oauth.ts"
+import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const disconnectConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig({

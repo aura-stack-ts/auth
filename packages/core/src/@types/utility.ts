@@ -1,6 +1,6 @@
 import { Type } from "arktype"
+import type { InferSchema, Prettify } from "@aura-stack/router"
 import type { IsZod } from "@/identity/zod.ts"
-import type { InferSchema } from "@aura-stack/router"
 import type { IsArkType } from "@/identity/arktype.ts"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
@@ -11,8 +11,7 @@ import type { IdentityShape as ValibotIdentitySchema } from "@/identity/valibot.
 import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer, ZodOptional } from "zod/v4"
 import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
 
-/** Expands intersection types into a single flat object type for readable editor hints. */
-export type Prettify<T> = { [K in keyof T]: T[K] }
+export type { Prettify }
 
 /**
  * A string that must be one of the literals in `T`, or any other string (`U`).

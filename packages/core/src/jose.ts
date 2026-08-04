@@ -29,7 +29,8 @@ import {
 import { AuraAuthError } from "@/shared/errors.ts"
 import { importPEMKeyPair } from "@/shared/crypto.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
-import type { User, SessionConfig, JWTKey, AsymmetricKeyPairFromEnv } from "@/@types/index.ts"
+import type { User, SessionConfig, JWTKey } from "@/@types/index.ts"
+import type { AsymmetricKeyPairFromEnv } from "@/@types/internal.ts"
 
 const getJWTConfig = (config?: SessionConfig) => {
     return isStatelessStrategy(config) ? config?.jwt : {}

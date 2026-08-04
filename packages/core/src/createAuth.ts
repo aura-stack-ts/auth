@@ -24,11 +24,11 @@ import type {
     AuthConfig,
     AuthInstance,
     FromShapeToObject,
-    SchemaRegistryContext,
     SignUpConfig,
     EditableShape,
     ZodIdentitySchema,
 } from "@/@types/index.ts"
+import type { SchemaRegistryContext } from "@/@types/internal.ts"
 
 const createInternalConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>

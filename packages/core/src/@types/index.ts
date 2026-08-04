@@ -43,12 +43,3 @@ export type AuthClientOptions = Prettify<
         baseURL?: string
     }
 >
-
-/**
- * @internal
- */
-export type InternalExpirationResult =
-    | { action: "no_change" }
-    | { action: "extend"; expiresAt: Date }
-    | { action: "touch" }
-    | { action: "invalid" }

@@ -1,7 +1,7 @@
 import { z } from "zod/v4"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
 import { SearchParamsCallbackSchema } from "@/schemas.ts"
-import type { OAuthProviderRecord } from "@/@types/index.ts"
+import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
     // @ts-ignore

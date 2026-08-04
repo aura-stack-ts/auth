@@ -1,5 +1,5 @@
 import { verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
-import type { InternalStatelessContext } from "@/@types/index.ts"
+import type { InternalStatelessContext } from "@/@types/internal.ts"
 
 export const destroySession = ({ ctx, cookies, cookieManager }: InternalStatelessContext) => {
     const { logger, jose, jwtManager } = ctx

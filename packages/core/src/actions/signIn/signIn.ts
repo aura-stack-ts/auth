@@ -2,7 +2,7 @@ import { z } from "zod/v4"
 import { signIn } from "@/api/signIn.ts"
 import { RedirectOptionsSchema } from "@/schemas.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import type { OAuthProviderRecord } from "@/@types/index.ts"
+import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const signInConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig("/signIn/:oauth", {

@@ -1,9 +1,10 @@
 import { isJWTPayloadWithToken } from "@/shared/assert.ts"
 import { equals, timingSafeEqual } from "@/shared/utils.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
-import type { AsymmetricKeyPairFromEnv, AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
+import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
+import type { JoseInstance, User } from "@/@types/index.ts"
+import type { AuthRuntimeConfig, AsymmetricKeyPairFromEnv } from "@/@types/internal.ts"
 
 export { generateKeyPair as createKeyPair } from "@aura-stack/jose/jose"
 

@@ -1,7 +1,8 @@
 import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
 import { updateExpires } from "@/shared/utils/session-strategy.ts"
 import type { DeepPartial } from "@/@types/utility.ts"
-import type { InternalStatelessContext, Session, User } from "@/@types/index.ts"
+import type { Session, User } from "@/@types/index.ts"
+import type { InternalStatelessContext } from "@/@types/internal.ts"
 
 export const refreshSession = <DefaultUser extends User = User>({ ctx, cookies, cookieManager }: InternalStatelessContext) => {
     const { logger, jose, jwtManager: jwt, identity, sessionConfig } = ctx

@@ -1,8 +1,8 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { createValidation, handleApiError } from "@/shared/utils/api.ts"
+import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
-    FunctionAPIContext,
     GetProviderTokensAPIOptions,
     GetProviderTokensAPIReturn,
     LiteralUnion,

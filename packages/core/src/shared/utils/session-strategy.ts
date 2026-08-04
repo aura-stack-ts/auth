@@ -1,6 +1,7 @@
 import { isNullOrUndefined } from "@/shared/assert.ts"
 import { createFingerprint, getDeviceInfo } from "@/shared/utils.ts"
-import type { ExpirationStrategy, InternalExpirationResult, InternalStatefulContext } from "@/@types/index.ts"
+import type { ExpirationStrategy } from "@/@types/index.ts"
+import type { InternalExpirationResult, InternalStatefulContext } from "@/@types/internal.ts"
 
 /** Default sliding threshold: extend when less than 25% of maxAge remains. */
 export const DEFAULT_SLIDING_THRESHOLD_RATIO = 0.25

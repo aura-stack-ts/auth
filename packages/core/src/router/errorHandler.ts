@@ -1,6 +1,6 @@
 import { isAuraAuthError } from "@/shared/errors.ts"
 import { isAuraRouterError, isAuraRouterValidationError, type RouterConfig } from "@aura-stack/router"
-import type { InternalLogger } from "@/@types/index.ts"
+import type { InternalLogger } from "@/@types/internal.ts"
 
 export const createErrorHandler = (logger?: InternalLogger): RouterConfig["onError"] => {
     return (error) => {

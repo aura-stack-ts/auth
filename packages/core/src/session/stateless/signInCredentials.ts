@@ -1,5 +1,6 @@
 import { createSession as __createSession } from "@/session/stateless/createSession.ts"
-import type { InternalStatelessContext, TypedJWTPayload, User } from "@/@types/index.ts"
+import type { TypedJWTPayload, User } from "@/@types/index.ts"
+import type { InternalStatelessContext } from "@/@types/internal.ts"
 
 export const signInCredentials = <DefaultUser extends User = User>(ctx: InternalStatelessContext) => {
     const createSession = __createSession<DefaultUser>(ctx)

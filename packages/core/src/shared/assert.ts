@@ -3,13 +3,13 @@ import { Type as TypeboxType } from "typebox"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { equals, patternToRegex } from "@/shared/utils.ts"
 import type { ZodObject, ZodTypeAny } from "zod"
+import type { JWK } from "@aura-stack/jose/jose"
 import type { BaseSchema, ObjectSchema } from "valibot"
+import type { InternalLogger, AsymmetricKeyPairFromEnv } from "@/@types/internal.ts"
 import type {
     AccessTokenContext,
     AsymmetricKeyPair,
-    AsymmetricKeyPairFromEnv,
     CryptoSecret,
-    InternalLogger,
     JWTConfig,
     JWTMode,
     JWTPayloadWithToken,
@@ -18,7 +18,6 @@ import type {
     StatefulStrategyConfig,
     StatelessStrategyConfig,
 } from "@/@types/index.ts"
-import type { JWK } from "@aura-stack/jose/jose"
 
 export const isFalsy = (value: unknown): boolean => {
     return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)

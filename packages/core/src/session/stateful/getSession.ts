@@ -4,7 +4,8 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
-import type { GetStatefulSessionReturn, User, InternalStatefulContext } from "@/@types/index.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { GetStatefulSessionReturn, User } from "@/@types/index.ts"
 
 export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
     const { logger, sessionConfig } = ctx
