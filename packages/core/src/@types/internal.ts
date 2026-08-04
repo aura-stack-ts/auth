@@ -72,7 +72,7 @@ export interface InternalIdentityConfig<Schema extends SchemaTypes = typeof iden
  * This is the fully resolved configuration surface after `createAuth` initializes defaults.
  */
 export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>> {
-    oauth: OAuthProviderRecord
+    oauth: OAuthProviderRecord<DefaultUser>
     credentials?: CredentialsConfig<any>
     cookies: InternalCookieStoreConfig
     jose: JoseInstance<DefaultUser>
