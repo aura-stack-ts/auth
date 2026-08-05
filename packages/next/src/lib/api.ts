@@ -8,6 +8,8 @@ import type {
     NextSignOutReturn,
     NextUpdateSessionOptions,
     NextUpdateSessionReturn,
+    NextAPI,
+    NextSignUpReturn,
 } from "@/@types/api"
 import type {
     GetSessionAPIOptions,
@@ -18,6 +20,11 @@ import type {
     SignInCredentialsAPIOptions,
     GetProviderTokensAPIOptions,
     AccessTokenAPIOptions,
+    SignUpAPIOptions,
+    RefreshUserInfoAPIOptions,
+    RevokeTokenAPIOptions,
+    DisconnectProviderAPIOptions,
+    ProviderConnectedAPIOptions,
 } from "@aura-stack/react/types"
 
 /**
@@ -127,6 +134,63 @@ export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<D
             return redirect(out.redirectURL)
         }
         return out as NextSignOutReturn<Options>
+    }
+}
+
+export const signUp = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends SignUpAPIOptions>(options: Options): Promise<NextSignUpReturn<Options>> => {
+        const signUp = await api.signUp({
+            headers: await headers(),
+            ...options,
+            redirect: !!options.redirect,
+        })
+        await setCookies(signUp.headers)
+        if (signUp.success && signUp.redirectURL) {
+            return redirect(signUp.redirectURL)
+        }
+        return signUp as NextSignUpReturn<Options>
+    }
+}
+
+export const refreshUserInfo = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends RefreshUserInfoAPIOptions>(oauth: LiteralUnion<BuiltInOAuthProvider>, options?: Options) => {
+        const refresh = await api.refreshUserInfo(oauth, {
+            headers: await headers(),
+            ...options,
+        })
+        await setCookies(refresh.headers)
+        return refresh
+    }
+}
+
+export const revokeToken = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends RevokeTokenAPIOptions>(oauth: LiteralUnion<BuiltInOAuthProvider>, options?: Options) => {
+        const revoke = await api.revokeToken(oauth, {
+            headers: await headers(),
+            ...options,
+        })
+        await setCookies(revoke.headers)
+        return revoke
+    }
+}
+
+export const disconnectProvider = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends DisconnectProviderAPIOptions>(oauth: LiteralUnion<BuiltInOAuthProvider>, options?: Options) => {
+        const disconnect = await api.disconnectProvider(oauth, {
+            headers: await headers(),
+            ...options,
+        })
+        await setCookies(disconnect.headers)
+        return disconnect
+    }
+}
+
+export const isProviderConnected = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ProviderConnectedAPIOptions>(oauth: LiteralUnion<BuiltInOAuthProvider>, options?: Options) => {
+        return await api.isProviderConnected(oauth, {
+            headers: await headers(),
+            ...options,
+        })
     }
 }
 
@@ -245,5 +309,86 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * })
          */
         signOut: signOut<DefaultUser>(config),
-    }
+        /**
+         * Signs up a new user on the server-side. It requires a `payload` with the necessary information for
+         * user creation and a callback function configured in `signUp.onCreateUser` to handle the actual user
+         * creation logic.
+         *
+         * @param options - Options for the API call, including the sign-up payload, headers, and redirect behavior.
+         * @returns The object returned by the API call {@link SignUpAPIReturn}
+         * @example
+         * import { headers } from "next/headers"
+         *
+         * const response = await api.signUp({
+         *   payload: {
+         *     name: "John",
+         *     email: "john.doe@example.com",
+         *     password: "1234567890"
+         *   },
+         *   redirectTo: "/dashboard",
+         *   headers: await headers()
+         * })
+         */
+        signUp: signUp<DefaultUser>(config),
+        /**
+         * Refreshes user information from the OAuth provider on the server-side. It retrieves the latest
+         * user information from the provider and updates the session accordingly.
+         *
+         * @param oauth - The OAuth provider to refresh user information from (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Optional parameters for the refresh operation, including headers.
+         * @returns The object returned by the API call {@link RefreshUserInfoAPIReturn}
+         * @example
+         * import { headers } from "next/headers"
+         *
+         * const response = await api.refreshUserInfo("github", {
+         *   headers: await headers()
+         * })
+         */
+        refreshUserInfo: refreshUserInfo<DefaultUser>(config),
+        /**
+         * Revokes the OAuth provider token on the server-side. It invalidates the access token for the specified
+         * provider.
+         *
+         * @param oauth - The OAuth provider to revoke the token for (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Optional parameters for the revoke operation, including headers.
+         * @returns The object returned by the API call {@link RevokeTokenAPIReturn}
+         * @example
+         * import { headers } from "next/headers"
+         *
+         * const response = await api.revokeToken("github", {
+         *   headers: await headers()
+         * })
+         */
+        revokeToken: revokeToken<DefaultUser>(config),
+        /**
+         * Disconnects the OAuth provider on the server-side. It revokes the access token and removes the provider
+         * connection from the user's session.
+         *
+         * @param oauth - The OAuth provider to disconnect (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Optional parameters for the disconnect operation, including headers.
+         * @returns The object returned by the API call {@link DisconnectProviderAPIReturn}
+         * @example
+         * import { headers } from "next/headers"
+         *
+         * const response = await api.disconnectProvider("github", {
+         *   headers: await headers()
+         * })
+         */
+        disconnectProvider: disconnectProvider<DefaultUser>(config),
+        /**
+         * Checks if the OAuth provider is connected on the server-side. It returns a boolean indicating whether
+         * the user has an active connection with the specified provider.
+         *
+         * @param oauth - The OAuth provider to check connection status for (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Optional parameters for the check operation, including headers.
+         * @returns The object returned by the API call {@link ProviderConnectedAPIReturn}
+         * @example
+         * import { headers } from "next/headers"
+         *
+         * const { connected } = await api.isProviderConnected("github", {
+         *   headers: await headers()
+         * })
+         */
+        isProviderConnected: isProviderConnected<DefaultUser>(config),
+    } satisfies NextAPI<DefaultUser>
 }
