@@ -19,6 +19,16 @@ import type {
     GetProviderTokensAPIReturn,
     AccessTokenAPIOptions,
     AccessTokenAPIReturn,
+    SignUpAPIOptions,
+    SignUpAPIReturn,
+    RefreshUserInfoAPIOptions,
+    RefreshUserInfoAPIReturn,
+    RevokeTokenAPIOptions,
+    RevokeTokenAPIReturn,
+    DisconnectProviderAPIOptions,
+    DisconnectProviderAPIReturn,
+    ProviderConnectedAPIOptions,
+    ProviderConnectedAPIReturn,
 } from "@aura-stack/react/types"
 import type { BuiltInOAuthProvider, LiteralUnion } from "@aura-stack/react/types"
 
@@ -78,6 +88,22 @@ export type ReactRouterUpdateSessionReturn<
     ? UpdateSessionAPIReturn<DefaultUser>
     : Response
 
+export type ReactRouterSignUpAPIOptions = Prettify<SignUpAPIOptions & { request: Request }>
+
+export type ReactRouterSignUpReturn<Options extends ReactRouterSignUpAPIOptions> = Options extends {
+    redirect: false
+}
+    ? SignUpAPIReturn
+    : Response
+
+export type ReactRouterRefreshUserInfoAPIOptions = Prettify<RefreshUserInfoAPIOptions & { request: Request }>
+
+export type ReactRouterRevokeTokenAPIOptions = Prettify<RevokeTokenAPIOptions & { request: Request }>
+
+export type ReactRouterDisconnectProviderAPIOptions = Prettify<DisconnectProviderAPIOptions & { request: Request }>
+
+export type ReactRouterProviderConnectedAPIOptions = Prettify<ProviderConnectedAPIOptions & { request: Request }>
+
 export interface ReactRouterAPI<DefaultUser extends User = User> {
     getSession: (options: GetSessionAPIOptions) => Promise<Session<DefaultUser> | null>
     signIn: <Options extends ReactRouterSignInAPIOptions>(
@@ -93,4 +119,21 @@ export interface ReactRouterAPI<DefaultUser extends User = User> {
     getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensAPIReturn>
     getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: AccessTokenAPIOptions) => Promise<AccessTokenAPIReturn>
     signOut: <Options extends ReactRouterSignOutAPIOptions>(options: Options) => Promise<ReactRouterSignOutReturn<Options>>
+    signUp: <Options extends ReactRouterSignUpAPIOptions>(options: Options) => Promise<ReactRouterSignUpReturn<Options>>
+    refreshUserInfo: <Options extends ReactRouterRefreshUserInfoAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<RefreshUserInfoAPIReturn>
+    revokeToken: <Options extends ReactRouterRevokeTokenAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<RevokeTokenAPIReturn>
+    disconnectProvider: <Options extends ReactRouterDisconnectProviderAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<DisconnectProviderAPIReturn>
+    isProviderConnected: <Options extends ReactRouterProviderConnectedAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<ProviderConnectedAPIReturn>
 }
