@@ -428,9 +428,10 @@ export const useRevokeToken = () => {
     const { execute, isPending } = useAsyncAction()
 
     const revokeToken = useCallback(
-        (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<void> => {
+        (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
             return execute(async () => {
-                await client.revokeToken(oauth)
+                const success = await client.revokeToken(oauth)
+                return success
             })
         },
         [client, execute]
@@ -468,9 +469,10 @@ export const useDisconnectProvider = () => {
     const { execute, isPending } = useAsyncAction()
 
     const disconnectProvider = useCallback(
-        (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<void> => {
+        (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
             return execute(async () => {
-                await client.disconnectProvider(oauth)
+                const success = await client.disconnectProvider(oauth)
+                return success
             })
         },
         [client, execute]
