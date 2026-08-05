@@ -129,10 +129,10 @@ export const signUp = <DefaultUser extends User = User>({ api }: AuthInstance<De
 export const refreshUserInfo = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async <Options extends ReactRouterRefreshUserInfoAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: Options
-    ): Promise<RefreshUserInfoAPIReturn> => {
+        options: Options
+    ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
         const refresh = await api.refreshUserInfo(oauth, {
-            headers: options?.request.headers,
+            headers: options.request.headers,
             ...options,
         })
         return refresh
@@ -142,10 +142,10 @@ export const refreshUserInfo = <DefaultUser extends User = User>({ api }: AuthIn
 export const revokeToken = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async <Options extends ReactRouterRevokeTokenAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: Options
+        options: Options
     ): Promise<RevokeTokenAPIReturn> => {
         const revoke = await api.revokeToken(oauth, {
-            headers: options?.request.headers,
+            headers: options.request.headers,
             ...options,
         })
         return revoke
@@ -155,10 +155,10 @@ export const revokeToken = <DefaultUser extends User = User>({ api }: AuthInstan
 export const disconnectProvider = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async <Options extends ReactRouterDisconnectProviderAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: Options
+        options: Options
     ): Promise<DisconnectProviderAPIReturn> => {
         const disconnect = await api.disconnectProvider(oauth, {
-            headers: options?.request.headers,
+            headers: options.request.headers,
             ...options,
         })
         return disconnect
@@ -168,10 +168,10 @@ export const disconnectProvider = <DefaultUser extends User = User>({ api }: Aut
 export const isProviderConnected = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async <Options extends ReactRouterProviderConnectedAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: Options
+        options: Options
     ): Promise<ProviderConnectedAPIReturn> => {
         const connected = await api.isProviderConnected(oauth, {
-            headers: options?.request.headers,
+            headers: options.request.headers,
             ...options,
         })
         return connected
@@ -345,7 +345,7 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * user information from the provider and updates the session accordingly.
          *
          * @param oauth - The OAuth provider to refresh user information from (e.g., "github", "gitlab", "bitbucket").
-         * @param options - Optional parameters for the refresh operation, including headers and redirect behavior.
+         * @param options - Optional parameters for the refresh operation, including headers and request object.
          * @returns The object returned by the API call {@link ReactRouterRefreshUserInfoReturn}
          * @example
          * export const action = async ({ request }) => {
@@ -360,7 +360,7 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * provider, effectively disconnecting the user from that provider.
          *
          * @param oauth - The OAuth provider to revoke the token for (e.g., "github", "gitlab", "bitbucket").
-         * @param options - Optional parameters for the revoke operation, including headers and redirect behavior.
+         * @param options - Optional parameters for the revoke operation, including headers and request object.
          * @returns The object returned by the API call {@link ReactRouterRevokeTokenReturn}
          * @example
          * export const action = async ({ request }) => {
@@ -375,7 +375,7 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * connection from the user's session.
          *
          * @param oauth - The OAuth provider to disconnect (e.g., "github", "gitlab", "bitbucket").
-         * @param options - Optional parameters for the disconnect operation, including headers and redirect behavior.
+         * @param options - Optional parameters for the disconnect operation, including headers and request object.
          * @returns The object returned by the API call {@link ReactRouterDisconnectProviderReturn}
          * @example
          * export const action = async ({ request }) => {
@@ -390,7 +390,7 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * the user has an active connection with the specified provider.
          *
          * @param oauth - The OAuth provider to check connection status for (e.g., "github", "gitlab", "bitbucket").
-         * @param options - Optional parameters for the check operation, including headers and redirect behavior.
+         * @param options - Optional parameters for the check operation, including headers and request object.
          * @returns The object returned by the API call {@link ReactRouterProviderConnectedReturn}
          * @example
          * export const loader = async ({ request }) => {

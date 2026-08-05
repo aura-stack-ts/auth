@@ -122,18 +122,18 @@ export interface ReactRouterAPI<DefaultUser extends User = User> {
     signUp: <Options extends ReactRouterSignUpAPIOptions>(options: Options) => Promise<ReactRouterSignUpReturn<Options>>
     refreshUserInfo: <Options extends ReactRouterRefreshUserInfoAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: Options
-    ) => Promise<RefreshUserInfoAPIReturn>
+        options: Options
+    ) => Promise<RefreshUserInfoAPIReturn<DefaultUser>>
     revokeToken: <Options extends ReactRouterRevokeTokenAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: Options
+        options: Options
     ) => Promise<RevokeTokenAPIReturn>
     disconnectProvider: <Options extends ReactRouterDisconnectProviderAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: Options
+        options: Options
     ) => Promise<DisconnectProviderAPIReturn>
     isProviderConnected: <Options extends ReactRouterProviderConnectedAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
-        options?: Options
+        options: Options
     ) => Promise<ProviderConnectedAPIReturn>
 }

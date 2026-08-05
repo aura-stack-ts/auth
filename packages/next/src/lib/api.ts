@@ -347,7 +347,7 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
         refreshUserInfo: refreshUserInfo<DefaultUser>(config),
         /**
          * Revokes the OAuth provider token on the server-side. It invalidates the access token for the specified
-         * provider, effectively disconnecting the user from that provider.
+         * provider.
          *
          * @param oauth - The OAuth provider to revoke the token for (e.g., "github", "gitlab", "bitbucket").
          * @param options - Optional parameters for the revoke operation, including headers.
