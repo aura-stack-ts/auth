@@ -8,7 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.3.0] - 2026-08-05
+
 ### Added
+
+- Added the `api.revokeToken()`, `api.disconnectProvider()`, `api.isProviderConnected()`, and `api.refreshUserInfo()` APIs with built-in support for React Router request handlers. The APIs provide seamless server-side integrations for OAuth and OpenID Connect (OIDC) token management, provider connectivity, and user profile synchronization. [#251](https://github.com/aura-stack-ts/auth/pull/251)
 
 - Re-exported the `useRevokeToken()`, `useDisconnectProvider()`, `useIsProviderConnected()`, and `useRefreshUserInfo()` hooks from `@aura-stack/react`, making them available directly from this package. Each hook exposes its corresponding API function and an `isPending` state, providing React integrations for OAuth and OpenID Connect (OIDC) token management, provider connectivity, and user profile synchronization. [#250](https://github.com/aura-stack-ts/auth/pull/250)
 

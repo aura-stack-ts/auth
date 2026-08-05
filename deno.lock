@@ -13,8 +13,11 @@
     "jsr:@std/media-types@1": "1.1.0",
     "jsr:@std/path@1": "1.1.4",
     "jsr:@supabase/functions-js@2": "2.98.0",
+    "npm:@aura-stack/auth@~0.8.1": "0.8.1_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5",
     "npm:@aura-stack/router@0.9": "0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5",
+    "npm:@prisma/adapter-pg@7.9.1": "7.9.1",
     "npm:@prisma/adapter-pg@^7.9.1": "7.9.1",
+    "npm:@prisma/client@7.9.1": "7.9.1_prisma@7.9.1__react@19.2.3_react@19.2.3",
     "npm:@prisma/client@^7.9.1": "7.9.1_prisma@7.9.1__react@19.2.3_react@19.2.3",
     "npm:@types/pg@^8.20.0": "8.20.0",
     "npm:@types/supertest@^7.2.0": "7.2.0",
@@ -31,6 +34,7 @@
     "npm:oxfmt@0.51": "0.51.0",
     "npm:oxlint@^1.69.0": "1.70.0",
     "npm:path-to-regexp@^6.3.0": "1.9.0",
+    "npm:pg@^8.20.0": "8.22.0",
     "npm:pg@^8.22.0": "8.22.0",
     "npm:prisma@^7.9.1": "7.9.1_react@19.2.3",
     "npm:react-router@^7.12.0": "7.13.0_react@19.2.3",
@@ -116,6 +120,27 @@
     "@ark/util@0.56.0": {
       "integrity": "sha512-BghfRC8b9pNs3vBoDJhcta0/c1J1rsoS1+HgVUreMFPdhz/CRAKReAu57YEllNaSy98rWAdY1gE+gFup7OXpgA=="
     },
+    "@aura-stack/auth@0.8.1_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5": {
+      "integrity": "sha512-Rv+/EJ7/UaOQBk02+kpKZABvT0OJBWvymgS82WNRdH0p9fv/D8wAa2D1EbHoN3ojZL+8wga9z1RJZ9fgZMbf7A==",
+      "dependencies": [
+        "@aura-stack/jose",
+        "@aura-stack/rate-limiter",
+        "@aura-stack/router@0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5",
+        "arktype",
+        "typebox",
+        "valibot@1.4.2",
+        "zod"
+      ]
+    },
+    "@aura-stack/jose@0.6.0": {
+      "integrity": "sha512-wt1Jg6S42x1s9nqftvTBPXK/iYQX6Ihn01Oo5PO3i5ULW+QJNZFww6udicqzXKAFMu5rmez4e8L9qf/sx6uJaA==",
+      "dependencies": [
+        "jose"
+      ]
+    },
+    "@aura-stack/rate-limiter@0.1.0": {
+      "integrity": "sha512-Vd/frSd2TAPRCBYrh+W66A6tiUtNpMJ3RFszmslwVMnfMir+EnVdRn6+e8wDCTirkCFyYo20Al8W42z8it+xLA=="
+    },
     "@aura-stack/router@0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5": {
       "integrity": "sha512-8yX9GJCAvyUMNawpNB8bCwQL+9ZLYFtsm6+btcj78XegtZ83uv6Ye16MKNhyadaCN5gA8OKAVAAKORzxq22dXg==",
       "dependencies": [
@@ -129,6 +154,22 @@
         "arktype",
         "typebox",
         "valibot@1.4.0",
+        "zod"
+      ]
+    },
+    "@aura-stack/router@0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5": {
+      "integrity": "sha512-8yX9GJCAvyUMNawpNB8bCwQL+9ZLYFtsm6+btcj78XegtZ83uv6Ye16MKNhyadaCN5gA8OKAVAAKORzxq22dXg==",
+      "dependencies": [
+        "arktype",
+        "cookie@1.1.1",
+        "typebox",
+        "valibot@1.4.2",
+        "zod"
+      ],
+      "optionalPeers": [
+        "arktype",
+        "typebox",
+        "valibot@1.4.2",
         "zod"
       ]
     },
@@ -2923,9 +2964,15 @@
         }
       },
       "packages/prisma": {
+        "dependencies": [
+          "npm:@prisma/adapter-pg@7.9.1",
+          "npm:@prisma/client@7.9.1",
+          "npm:pg@^8.20.0"
+        ],
         "packageJson": {
           "dependencies": [
             "npm:@types/pg@^8.20.0",
+            "npm:dotenv@^17.4.2",
             "npm:prisma@^7.9.1"
           ]
         }
