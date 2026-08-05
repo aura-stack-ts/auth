@@ -1,15 +1,22 @@
 {
   "name": "@aura-stack/prisma",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
   },
   "imports": {
-    "@/": "./src/"
+    "@/": "./src/",
+    "pg": "npm:pg@^8.20.0",
+    "@prisma/adapter-pg": "npm:@prisma/adapter-pg@7.9.1",
+    "@prisma/client": "npm:@prisma/client@7.9.1",
+    "@aura-stack/auth": "npm:@aura-stack/auth@0.9.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
   },
   "publish": {
-    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
-  },
-  "exclude": ["dist", "node_modules"]
+    "include": ["src/**/*.ts", "src/generated", "README.md", "CHANGELOG.md"],
+    "exclude": ["node_modules", "dist", "!src/generated"]
+  }
 }

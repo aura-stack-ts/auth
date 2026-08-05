@@ -250,8 +250,8 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 where: { id },
                 data: {
                     ...stripped,
-                    status: toSessionStatus(input.status),
-                    mfaState: toMFAStatus(input.mfaState),
+                    status: toSessionStatus(input?.status ?? "active"),
+                    mfaState: toMFAStatus(input?.mfaState ?? "none"),
                     metadata: toJson(input.metadata),
                 },
             })
