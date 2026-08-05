@@ -1,5 +1,5 @@
 "use client"
-import type { User } from "@aura-stack/auth"
+import type { Session, User } from "@aura-stack/auth"
 import { use, useCallback, useTransition } from "react"
 import { AuthContext, broadcast } from "@/context.tsx"
 import type {
@@ -397,6 +397,167 @@ export const useAccessToken = () => {
     )
 
     return { getAccessToken, isPending } as const
+}
+
+/**
+ * Revokes the OAuth access token for a given provider. It revokes the token by calling
+ * the provider's token revocation endpoint, if available.
+ *
+ * > **NOTE**: The token revocation process is a hard operation, if you do not want to revoke
+ * the token, but just disconnect the provider from the user, you can use `useDisconnectProvider` hook.
+ *
+ * @returns An object containing the revokeToken function and a isPending state
+ * @example
+ * import { useEffect } from "react"
+ *
+ * const Page = () => {
+ *   const { revokeToken, isPending } = useRevokeToken()
+ *
+ *   const handleRevoke = async () => {
+ *     const success = await revokeToken("spotify")
+ *     if (success) {
+ *       console.log("Token revoked successfully")
+ *     } else {
+ *       console.log("Failed to revoke token")
+ *     }
+ *   }
+ * }
+ */
+export const useRevokeToken = () => {
+    const { client } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const revokeToken = useCallback(
+        (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<void> => {
+            return execute(async () => {
+                await client.revokeToken(oauth)
+            })
+        },
+        [client, execute]
+    )
+
+    return { revokeToken, isPending } as const
+}
+
+/**
+ * Disconnets the OAuth provider with the current user, removing the association between the
+ * user's account and the OAuth provider. This action does not revoke the OAuth token, but it
+ * removes the link between the user's account and the provider, effectively "disconnecting" the provider.
+ *
+ * > **NOTE**: For a complete disconnection, you may want to use `useRevokeToken` hook.
+ *
+ * @returns An object containing the disconnectProvider function and a isPending state
+ * @example
+ * import { useEffect } from "react"
+ *
+ * const Page = () => {
+ *   const { disconnectProvider, isPending } = useDisconnectProvider()
+ *
+ *   const handleDisconnect = async () => {
+ *     const success = await disconnectProvider("spotify")
+ *     if (success) {
+ *       console.log("Provider disconnected successfully")}
+ *     } else {
+ *      console.log("Failed to disconnect provider")
+ *     }
+ *   }
+ * }
+ */
+export const useDisconnectProvider = () => {
+    const { client } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const disconnectProvider = useCallback(
+        (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<void> => {
+            return execute(async () => {
+                await client.disconnectProvider(oauth)
+            })
+        },
+        [client, execute]
+    )
+
+    return { disconnectProvider, isPending } as const
+}
+
+/**
+ * Verifies if the OAuth provider is connected with the current user.
+ *
+ * @returns An object containing the isProviderConnected function and a isPending state
+ * @example
+ * import { useEffect } from "react"
+ *
+ * const Page = () => {
+ *   const { isProviderConnected, isPending } = useIsProviderConnected()
+ *
+ *   const handleCheckConnection = async () => {
+ *     const connected = await isProviderConnected("spotify")
+ *     if (connected) {
+ *       console.log("Provider is connected")
+ *     } else {
+ *       console.log("Provider is not connected")
+ *     }
+ *   }
+ * }
+ */
+export const useIsProviderConnected = () => {
+    const { client } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const isProviderConnected = useCallback(
+        (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
+            return execute(async () => {
+                const connected = await client.isProviderConnected(oauth)
+                return connected
+            })
+        },
+        [client, execute]
+    )
+
+    return { isProviderConnected, isPending } as const
+}
+
+/**
+ * Fetches the `/userinfo` endpoint of the OAuth provider to refresh the user's information.
+ *
+ * @returns An object containing the refreshUserInfo function and a isPending state
+ * @example
+ * import { useEffect } from "react"
+ *
+ * const Page = () => {
+ *   const { isProviderConnected } = useIsProviderConnected("google")
+ *   const { refreshUserInfo, isPending } = useRefreshUserInfo()
+ *
+ *   useEffect(() => {
+ *     const fetchUserInfo = async () => {
+ *       const connected = await isProviderConnected()
+ *       if (connected) {
+ *         const session = await refreshUserInfo("google")
+ *         if (session) {
+ *           console.log("User info refreshed:", session.user)
+ *         } else {
+ *           console.log("Failed to refresh user info")
+ *         }
+ *       }
+ *     }
+ *   }, [])
+ * }
+ */
+export const useRefreshUserInfo = <DefaultUser extends User = User>() => {
+    const { client } = useAssertContext<DefaultUser>()
+    const { execute, isPending } = useAsyncAction()
+
+    const refreshUserInfo = useCallback(
+        (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<Session<DefaultUser> | null> => {
+            return execute(async () => {
+                const session = await client.refreshUserInfo(oauth)
+                broadcast({ type: "session:sync" })
+                return session
+            })
+        },
+        [client, execute]
+    )
+
+    return { refreshUserInfo, isPending } as const
 }
 
 /**

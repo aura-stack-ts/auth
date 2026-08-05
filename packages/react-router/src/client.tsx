@@ -9,6 +9,10 @@ export {
     useSignUp,
     useProviderTokens,
     useAccessToken,
+    useDisconnectProvider,
+    useRevokeToken,
+    useIsProviderConnected,
+    useRefreshUserInfo,
     type AuthClientOptions,
 } from "@aura-stack/react"
 export { AuthProvider, type AuthProviderProps } from "@/context"

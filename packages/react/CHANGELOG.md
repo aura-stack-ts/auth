@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added React hooks for managing OAuth and OpenID Connect (OIDC) provider integrations, exposing the corresponding client APIs in a React-friendly interface: [#250](https://github.com/aura-stack-ts/auth/pull/250)
+  - `useRevokeToken()` revokes the provider's access token.
+  - `useDisconnectProvider()` disconnects the provider from the current user session without revoking its tokens.
+  - `useIsProviderConnected()` checks whether the current session is connected to a provider.
+  - `useRefreshUserInfo()` synchronizes the authenticated user's profile with the provider's `userinfo` endpoint.
+
 - Added the `useAccessToken()` hook, a simplified React API for retrieving the provider `accessToken` as a `string | null` after a successful OAuth or OpenID Connect (OIDC) sign-in. The hook exposes `getAccessToken()` and `isPending`, and internally communicates with the `GET /providers/:provider/tokens` endpoint. [#218](https://github.com/aura-stack-ts/auth/pull/218)
 
 ---

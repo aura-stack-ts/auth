@@ -24,6 +24,11 @@ export const createMockClient = () =>
         }),
         signUp: vi.fn().mockResolvedValue({ redirectURL: "/welcome" }),
         getProviderTokens: vi.fn().mockResolvedValue(providerTokens),
+        getAccessToken: vi.fn().mockResolvedValue("mock-token-string"),
+        isProviderConnected: vi.fn().mockResolvedValue(true),
+        revokeToken: vi.fn().mockResolvedValue(undefined),
+        disconnectProvider: vi.fn().mockResolvedValue(undefined),
+        refreshUserInfo: vi.fn().mockResolvedValue(mockSession),
     }) as Partial<AuthClientInstance> as AuthClientInstance
 
 export const wrapper = ({ children, client, initialSession, redirect }: AuthProviderProps) => (
