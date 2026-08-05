@@ -1,3 +1,4 @@
 {
-  "workspace": ["packages/**", "!packages/integration", "configs/**", "apps/oak", "apps/deno", "apps/supabase/**"]
+  "workspace": ["packages/**", "!packages/integration", "configs/**", "apps/oak", "apps/deno", "apps/supabase/**"],
+  "nodeModulesDir": "auto"
 }

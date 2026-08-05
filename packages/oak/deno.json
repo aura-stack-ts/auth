@@ -1,12 +1,14 @@
 {
-  "name": "@aura-stack/integration",
+  "name": "@aura-stack/oak",
   "version": "0.0.0",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
   },
   "imports": {
-    "@/": "./src/"
+    "@/": "./src/",
+    "@std/assert": "jsr:@std/assert@^1.0.19",
+    "@oak/oak": "jsr:@oak/oak@^17.2.0"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -37,7 +39,7 @@
     "./oauth/x": "./src/oauth/x.ts"
   },
   "publish": {
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/_core", "src/oauth", "src/identity", "README.md", "CHANGELOG.md"],
+    "include": ["src/**/*.ts", "src/_core", "src/oauth", "src/identity", "README.md", "CHANGELOG.md"],
     "exclude": ["dist", "node_modules"]
   }
 }

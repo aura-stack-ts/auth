@@ -112,6 +112,7 @@ overrides:
   fumadocs-core>path-to-regexp: ^8.4.0
   express>path-to-regexp: ^0.1.13
   launch-editor>shell-quote: ^1.8.4
+  '@oak/oak>path-to-regexp': ^6.3.0
 
 importers:
 
@@ -894,6 +895,19 @@ importers:
       react-dom:
         specifier: catalog:react
         version: 19.2.4(react@19.2.4)
+
+  packages/oak:
+    dependencies:
+      '@aura-stack/auth':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsdown-config':
+        specifier: workspace:*
+        version: link:../../configs/tsdown-config
 
   packages/prisma:
     dependencies:
