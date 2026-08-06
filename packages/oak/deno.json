@@ -4,7 +4,9 @@
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts",
-    "test": "deno test --allow-env --allow-net --no-check"
+    "test": "deno test --allow-env --allow-net --no-check",
+    "test:coverage": "deno test --allow-env --allow-net --no-check --coverage=coverage",
+    "test:filter": "deno test --allow-env --allow-net --no-check --filter"
   },
   "imports": {
     "@/": "./src/",

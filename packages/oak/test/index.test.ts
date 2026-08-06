@@ -1,4 +1,4 @@
-import { equal, assertNotEquals, assertExists } from "@std/assert"
+import { equal, assertNotEquals, assertObjectMatch, assertExists } from "@std/assert"
 import { app, jose } from "./app.ts"
 import { createCSRF } from "@aura-stack/auth/crypto"
 import type { JWTPayload } from "@aura-stack/jose/jose"
@@ -34,9 +34,7 @@ Deno.test("signIn to GitHub with redirect=false", async () => {
     equal(response.status, 200)
 
     const body = await response.json()
-    equal(body.success, true)
-    equal(body.redirect, false)
-    assertExists(body.signInURL)
+    assertObjectMatch(body, { success: true, redirect: false, signInURL: "http://localhost:3000/api/auth/signIn/github?" })
 })
 
 Deno.test("signIn to GitHub with custom redirectTo", async () => {
@@ -52,10 +50,15 @@ Deno.test("signIn with invalid provider", async () => {
 })
 
 Deno.test("signInCredentials with valid credentials", async () => {
+    const csrfToken = await createCSRFToken()
     const response = await handler(
         new Request("http://localhost:3000/api/auth/signIn/credentials", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                "X-CSRF-Token": csrfToken,
+            },
             body: JSON.stringify({
                 username: "testuser",
                 password: "validpassword",
@@ -64,16 +67,19 @@ Deno.test("signInCredentials with valid credentials", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 200)
-
-    const body = await response.json()
-    equal(body.success, true)
+    assertObjectMatch(await response.json(), { success: true, redirect: false, redirectURL: null })
 })
 
 Deno.test("signInCredentials with invalid credentials", async () => {
+    const csrfToken = await createCSRFToken()
     const response = await handler(
         new Request("http://localhost:3000/api/auth/signIn/credentials", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                "X-CSRF-Token": csrfToken,
+            },
             body: JSON.stringify({
                 username: "testuser",
                 password: "invalid",
@@ -82,20 +88,31 @@ Deno.test("signInCredentials with invalid credentials", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 401)
+    assertObjectMatch(await response.json(), { success: false, redirect: false, redirectURL: null })
 })
 
 Deno.test("signInCredentials with missing fields", async () => {
+    const csrfToken = await createCSRFToken()
     const response = await handler(
         new Request("http://localhost:3000/api/auth/signIn/credentials", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                "X-CSRF-Token": csrfToken,
+            },
             body: JSON.stringify({
                 username: "testuser",
             }),
         })
     )
     assertNotEquals(response, undefined)
-    equal(response.status, 400)
+    equal(response.status, 422)
+    assertObjectMatch(await response.json(), {
+        code: "UNPROCESSABLE_ENTITY",
+        type: "VALIDATION",
+        message: "The request body or parameter schema layout contains input format errors.",
+    })
 })
 
 Deno.test("signUp with valid data", async () => {
@@ -118,9 +135,7 @@ Deno.test("signUp with valid data", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 200)
-
-    const body = await response.json()
-    equal(body.success, true)
+    assertObjectMatch(await response.json(), { success: true, redirect: false, redirectURL: null })
 })
 
 Deno.test("signUp with invalid data", async () => {
@@ -142,7 +157,12 @@ Deno.test("signUp with invalid data", async () => {
         })
     )
     assertNotEquals(response, undefined)
-    equal(response.status, 400)
+    equal(response.status, 422)
+    assertObjectMatch(await response.json(), {
+        code: "UNPROCESSABLE_ENTITY",
+        type: "VALIDATION",
+        message: "The request body or parameter schema layout contains input format errors.",
+    })
 })
 
 Deno.test("signUp with missing fields", async () => {
@@ -153,7 +173,7 @@ Deno.test("signUp with missing fields", async () => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Cookie: `aura-auth.aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
                 "X-CSRF-Token": csrfToken,
             },
             body: JSON.stringify({
@@ -162,50 +182,65 @@ Deno.test("signUp with missing fields", async () => {
         })
     )
     assertNotEquals(response, undefined)
-    equal(response.status, 400)
+    equal(response.status, 422)
+    assertObjectMatch(await response.json(), {
+        code: "UNPROCESSABLE_ENTITY",
+        type: "VALIDATION",
+        message: "The request body or parameter schema layout contains input format errors.",
+    })
 })
 
 Deno.test("signOut with valid session", async () => {
     const sessionToken = await createSessionToken(sessionPayload)
+    const csrfToken = await createCSRFToken()
 
     const response = await handler(
-        new Request("http://localhost:3000/api/auth/signOut", {
+        new Request("http://localhost:3000/api/auth/signOut?token_type_hint=session_token", {
             method: "POST",
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                "X-CSRF-Token": csrfToken,
             },
         })
     )
     assertNotEquals(response, undefined)
     equal(response.status, 202)
 
-    const body = await response.json()
-    equal(body.success, true)
+    assertObjectMatch(await response.json(), { success: true, redirect: false, redirectURL: null })
 })
 
 Deno.test("signOut with redirect=true", async () => {
+    const csrfToken = await createCSRFToken()
     const sessionToken = await createSessionToken(sessionPayload)
 
     const response = await handler(
-        new Request("http://localhost:3000/api/auth/signOut?redirect=true", {
+        new Request("http://localhost:3000/api/auth/signOut?redirect=true&token_type_hint=session_token", {
             method: "POST",
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                "X-CSRF-Token": csrfToken,
             },
         })
     )
     assertNotEquals(response, undefined)
     equal(response.status, 302)
+    assertObjectMatch(await response.json(), { success: true, redirect: false, redirectURL: null })
 })
 
 Deno.test("signOut without session", async () => {
+    const csrfToken = await createCSRFToken()
     const response = await handler(
-        new Request("http://localhost:3000/api/auth/signOut", {
+        new Request("http://localhost:3000/api/auth/signOut?token_type_hint=session_token", {
             method: "POST",
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                "X-CSRF-Token": csrfToken,
+            },
         })
     )
     assertNotEquals(response, undefined)
     equal(response.status, 202)
+    assertObjectMatch(await response.json(), { success: false, redirect: false, redirectURL: null })
 })
 
 Deno.test("getSession with valid session", async () => {
@@ -219,18 +254,17 @@ Deno.test("getSession with valid session", async () => {
     assertNotEquals(response, undefined)
     equal(response.status, 200)
 
-    const body = await response.json()
-    console.log("Session response body:", body)
+    assertObjectMatch(await response.json(), {
+        success: true,
+        session: { user: sessionPayload },
+    })
 })
 
 Deno.test("getSession without session", async () => {
     const response = await handler(new Request("http://localhost:3000/api/auth/session"))
     assertNotEquals(response, undefined)
     equal(response.status, 401)
-
-    const body = await response.json()
-    equal(body.success, false)
-    equal(body.session, null)
+    assertObjectMatch(await response.json(), { success: false, session: null })
 })
 
 Deno.test("getSession with invalid session", async () => {
@@ -240,10 +274,7 @@ Deno.test("getSession with invalid session", async () => {
         })
     )
     equal(response.status, 401)
-
-    const body = await response.json()
-    equal(body.success, false)
-    equal(body.session, null)
+    assertObjectMatch(await response.json(), { success: false, session: null })
 })
 
 Deno.test("updateSession with valid session", async () => {
@@ -254,7 +285,7 @@ Deno.test("updateSession with valid session", async () => {
         new Request("http://localhost:3000/api/auth/session", {
             method: "PATCH",
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 "X-CSRF-Token": csrfToken,
                 "Content-Type": "application/json",
             },
@@ -265,9 +296,12 @@ Deno.test("updateSession with valid session", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 200)
-
-    const body = await response.json()
-    equal(body, { sucess: true, redirect: false, redirectURL: null, session: { user: sessionPayload } })
+    assertObjectMatch(await response.json(), {
+        success: true,
+        redirect: false,
+        redirectURL: null,
+        session: { user: sessionPayload },
+    })
 })
 
 Deno.test("updateSession without session", async () => {
@@ -288,6 +322,7 @@ Deno.test("updateSession without session", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 401)
+    assertObjectMatch(await response.json(), { success: false, redirect: false, redirectURL: null, session: null })
 })
 
 Deno.test("updateSession with redirect=true", async () => {
@@ -309,6 +344,12 @@ Deno.test("updateSession with redirect=true", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 302)
+    assertObjectMatch(await response.json(), {
+        success: true,
+        redirect: false,
+        redirectURL: null,
+        session: { user: sessionPayload },
+    })
 })
 
 Deno.test("getCSRFToken", async () => {
@@ -346,15 +387,14 @@ Deno.test("isProviderConnected with valid session", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 200)
-
-    const body = await response.json()
-    assertExists(body.connected !== undefined)
+    assertObjectMatch(await response.json(), { success: true, connected: false })
 })
 
 Deno.test("isProviderConnected without session", async () => {
     const response = await handler(new Request("http://localhost:3000/api/auth/providers/github"))
     assertNotEquals(response, undefined)
     equal(response.status, 401)
+    assertObjectMatch(await response.json(), { success: false, connected: false })
 })
 
 Deno.test("isProviderConnected with invalid provider", async () => {
@@ -367,6 +407,17 @@ Deno.test("isProviderConnected with invalid provider", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 404)
+    assertObjectMatch(await response.json(), {
+        code: "UNPROCESSABLE_ENTITY",
+        type: "VALIDATION",
+        message: "The request body or parameter schema layout contains input format errors.",
+        details: {
+            oauth: {
+                code: "invalid_value",
+                message: "The OAuth provider is not supported or invalid.",
+            },
+        },
+    })
 })
 
 Deno.test("getProviderTokens with valid session", async () => {
@@ -379,9 +430,7 @@ Deno.test("getProviderTokens with valid session", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 200)
-
-    const body = await response.json()
-    assertExists(body.tokens !== undefined || body.error !== undefined)
+    assertObjectMatch(await response.json(), { success: false })
 })
 
 Deno.test("getProviderTokens without session", async () => {
@@ -404,7 +453,8 @@ Deno.test("revokeToken with valid session", async () => {
         })
     )
     assertNotEquals(response, undefined)
-    assertExists([200, 401].includes(response.status))
+    equal(response.status, 200)
+    assertObjectMatch(await response.json(), { success: false })
 })
 
 Deno.test("revokeToken without session", async () => {
@@ -421,6 +471,7 @@ Deno.test("revokeToken without session", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 401)
+    assertObjectMatch(await response.json(), { success: false })
 })
 
 Deno.test("refreshUserInfo with valid session", async () => {
@@ -437,7 +488,8 @@ Deno.test("refreshUserInfo with valid session", async () => {
         })
     )
     assertNotEquals(response, undefined)
-    assertExists([200, 401].includes(response.status))
+    equal(response.status, 200)
+    assertObjectMatch(await response.json(), { success: false })
 })
 
 Deno.test("refreshUserInfo without session", async () => {
@@ -454,6 +506,7 @@ Deno.test("refreshUserInfo without session", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 401)
+    assertObjectMatch(await response.json(), { success: false })
 })
 
 Deno.test("disconnectProvider with valid session", async () => {
@@ -470,7 +523,8 @@ Deno.test("disconnectProvider with valid session", async () => {
         })
     )
     assertNotEquals(response, undefined)
-    assertExists([200, 401].includes(response.status))
+    equal(response.status, 200)
+    assertObjectMatch(await response.json(), { success: false })
 })
 
 Deno.test("disconnectProvider without session", async () => {
@@ -487,6 +541,7 @@ Deno.test("disconnectProvider without session", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 401)
+    assertObjectMatch(await response.json(), { success: false })
 })
 
 Deno.test("disconnectProvider with invalid provider", async () => {
@@ -504,4 +559,15 @@ Deno.test("disconnectProvider with invalid provider", async () => {
     )
     assertNotEquals(response, undefined)
     equal(response.status, 404)
+    assertObjectMatch(await response.json(), {
+        code: "UNPROCESSABLE_ENTITY",
+        type: "VALIDATION",
+        message: "The request body or parameter schema layout contains input format errors.",
+        details: {
+            oauth: {
+                code: "invalid_value",
+                message: "The OAuth provider is not supported or invalid.",
+            },
+        },
+    })
 })
