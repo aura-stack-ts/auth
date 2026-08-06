@@ -1,6 +1,6 @@
-import { createAuth as createAuthBasic, type AuthConfig } from "@aura-stack/auth"
 import { toHandler } from "@/lib/handler"
 import { withAuth } from "@/lib/with-auth"
+import { createAuth as createAuthBasic, type AuthConfig } from "@aura-stack/auth"
 import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/auth/identity"
 
 /**

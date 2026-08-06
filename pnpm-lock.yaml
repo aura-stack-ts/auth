@@ -112,7 +112,6 @@ overrides:
   fumadocs-core>path-to-regexp: ^8.4.0
   express>path-to-regexp: ^0.1.13
   launch-editor>shell-quote: ^1.8.4
-  '@oak/oak>path-to-regexp': ^6.3.0
 
 importers:
 
@@ -901,6 +900,9 @@ importers:
       '@aura-stack/auth':
         specifier: workspace:*
         version: link:../core
+      path-to-regexp:
+        specifier: 6.3.0
+        version: 6.3.0
     devDependencies:
       '@aura-stack/tsconfig':
         specifier: workspace:*

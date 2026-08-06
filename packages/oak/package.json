@@ -1,9 +1,9 @@
 {
   "name": "@aura-stack/oak",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
   "type": "module",
-  "description": "Integration for Aura Stack authentication library",
+  "description": "Oak for Aura Stack authentication library",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "pnpm sync:modules && tsdown",
@@ -42,7 +42,8 @@
   ],
   "keywords": [],
   "dependencies": {
-    "@aura-stack/auth": "workspace:*"
+    "@aura-stack/auth": "workspace:*",
+    "path-to-regexp": "6.3.0"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",

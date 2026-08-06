@@ -1,10 +1,12 @@
 import { toHandler } from "@/lib/handler.ts"
 import { withAuth } from "@/lib/with-auth.ts"
 import { type AuthConfig, createAuth as createAuthInstance } from "@aura-stack/auth"
-import type { Identities } from "@aura-stack/auth/identity"
+import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/auth/identity"
 
-export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>) => {
-    const auth = createAuthInstance<Identity>(config)
+export const createAuth = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+    config: AuthConfig<Identity, SignUpSchema>
+) => {
+    const auth = createAuthInstance<Identity, SignUpSchema>(config)
     return {
         ...auth,
         /**
@@ -26,6 +28,6 @@ export const createAuth = <Identity extends Identities>(config: AuthConfig<Ident
          *     }
          * })
          */
-        withAuth: withAuth(auth),
+        withAuth: withAuth<FromShapeToObject<Identity>>(auth),
     }
 }

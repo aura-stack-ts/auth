@@ -1,4 +1,4 @@
-# Changelog - `@aura-stack/integration`
+# Changelog - `@aura-stack/oak`
 
 All notable changes to this project will be documented in this file.
 
@@ -10,4 +10,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-### Changed
+- Introduced a seamless Oak integration package that encapsulates the core authentication logic into middleware and handlers for session management and authentication flows. [#253](https://github.com/aura-stack-ts/auth/pull/253)

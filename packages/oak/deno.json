@@ -3,10 +3,12 @@
   "version": "0.0.0",
   "license": "MIT",
   "tasks": {
-    "dev": "deno run --watch src/index.ts"
+    "dev": "deno run --watch src/index.ts",
+    "test": "deno test --allow-env --allow-net --no-check"
   },
   "imports": {
     "@/": "./src/",
+    "path-to-regexp": "npm:path-to-regexp@^6.3.0",
     "@std/assert": "jsr:@std/assert@^1.0.19",
     "@oak/oak": "jsr:@oak/oak@^17.2.0"
   },
