@@ -1,12 +1,18 @@
 {
-  "name": "@aura-stack/integration",
+  "name": "@aura-stack/oak",
   "version": "0.0.0",
   "license": "MIT",
   "tasks": {
-    "dev": "deno run --watch src/index.ts"
+    "dev": "deno run --watch src/index.ts",
+    "test": "deno test --allow-env --allow-net --no-check",
+    "test:coverage": "deno test --allow-env --allow-net --no-check --coverage=coverage",
+    "test:filter": "deno test --allow-env --allow-net --no-check --filter"
   },
   "imports": {
-    "@/": "./src/"
+    "@/": "./src/",
+    "path-to-regexp": "npm:path-to-regexp@^6.3.0",
+    "@std/assert": "jsr:@std/assert@^1.0.19",
+    "@oak/oak": "jsr:@oak/oak@^17.2.0"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -37,7 +43,7 @@
     "./oauth/x": "./src/oauth/x.ts"
   },
   "publish": {
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/_core", "src/oauth", "src/identity", "README.md", "CHANGELOG.md"],
+    "include": ["src/**/*.ts", "src/_core", "src/oauth", "src/identity", "README.md", "CHANGELOG.md"],
     "exclude": ["dist", "node_modules"]
   }
 }

@@ -895,6 +895,22 @@ importers:
         specifier: catalog:react
         version: 19.2.4(react@19.2.4)
 
+  packages/oak:
+    dependencies:
+      '@aura-stack/auth':
+        specifier: workspace:*
+        version: link:../core
+      path-to-regexp:
+        specifier: 6.3.0
+        version: 6.3.0
+    devDependencies:
+      '@aura-stack/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/tsconfig
+      '@aura-stack/tsdown-config':
+        specifier: workspace:*
+        version: link:../../configs/tsdown-config
+
   packages/prisma:
     dependencies:
       '@aura-stack/auth':

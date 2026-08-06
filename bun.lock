@@ -328,7 +328,7 @@
     },
     "packages/elysia": {
       "name": "@aura-stack/elysia",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
       },
@@ -351,7 +351,7 @@
     },
     "packages/express": {
       "name": "@aura-stack/express",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
       },
@@ -370,7 +370,7 @@
     },
     "packages/hono": {
       "name": "@aura-stack/hono",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
       },
@@ -411,7 +411,7 @@
     },
     "packages/next": {
       "name": "@aura-stack/next",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "dependencies": {
         "@aura-stack/react": "workspace:*",
       },
@@ -433,9 +433,20 @@
         "react-dom": ">=19.0.0",
       },
     },
+    "packages/oak": {
+      "name": "@aura-stack/oak",
+      "version": "0.0.0",
+      "dependencies": {
+        "@aura-stack/auth": "workspace:*",
+      },
+      "devDependencies": {
+        "@aura-stack/tsconfig": "workspace:*",
+        "@aura-stack/tsdown-config": "workspace:*",
+      },
+    },
     "packages/prisma": {
       "name": "@aura-stack/prisma",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@aura-stack/shared": "workspace:*",
         "@aura-stack/tsconfig": "workspace:*",
@@ -462,7 +473,7 @@
     },
     "packages/react": {
       "name": "@aura-stack/react",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
       },
@@ -483,7 +494,7 @@
     },
     "packages/react-router": {
       "name": "@aura-stack/react-router",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "dependencies": {
         "@aura-stack/react": "workspace:*",
       },
@@ -638,6 +649,8 @@
     "@aura-stack/jose": ["@aura-stack/jose@workspace:packages/jose"],
 
     "@aura-stack/next": ["@aura-stack/next@workspace:packages/next"],
+
+    "@aura-stack/oak": ["@aura-stack/oak@workspace:packages/oak"],
 
     "@aura-stack/prisma": ["@aura-stack/prisma@workspace:packages/prisma"],
 

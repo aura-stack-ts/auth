@@ -157,7 +157,7 @@ export const { handlers, jose, api } = auth
 
 <Tab value="Backend">
 
-<Tabs items={["Elysia", "Hono", "Express"]} persist groupId="framework-id">
+<Tabs items={["Elysia", "Hono", "Express", "Oak"]} persist groupId="framework-id">
 
 <Tab value="Elysia">
 
@@ -191,6 +191,20 @@ export const { toHandler, withAuth, jose, api } = auth
 
 ```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/express"
+
+export const auth = createAuth({
+  oauth: ["github", "gitlab", "bitbucket"],
+})
+
+export const { toHandler, withAuth, jose, api } = auth
+```
+
+</Tab>
+
+<Tab value="Oak">
+
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/oak"
 
 export const auth = createAuth({
   oauth: ["github", "gitlab", "bitbucket"],
@@ -306,7 +320,7 @@ export default defineEventHandler(async (event) => {
 
 <Tab value="Backend">
 
-<Tabs items={["Elysia", "Hono", "Express"]} persist groupId="framework-id">
+<Tabs items={["Elysia", "Hono", "Express", "Oak"]} persist groupId="framework-id">
 
 <Tab value="Elysia">
 
@@ -342,7 +356,7 @@ export default app
 
 ```ts title="src/index.ts" lineNumbers
 import express, { type Express } from "express"
-import { toHandler, withAuth } from "@/lib/auth.js"
+import { toHandler } from "@/lib/auth.js"
 
 const app: Express = express()
 
@@ -352,6 +366,23 @@ app.use(express.urlencoded({ extended: true }))
 app.all("/api/auth/*", toHandler)
 
 app.listen(PORT)
+```
+
+</Tab>
+
+<Tab value="Oak">
+
+```ts title="src/index.ts" lineNumbers
+import { Application, Router } from "@oak/oak"
+import { toHandler } from "@/lib/auth.ts"
+
+const router = new Router()
+const app = new Application()
+
+router.all("/api/auth/(.*)", toHandler)
+
+app.use(router.routes())
+await app.listen({ port: 3000 })
 ```
 
 </Tab>
