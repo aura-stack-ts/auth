@@ -11,7 +11,7 @@
     "format:check": "oxfmt --check"
   },
   "dependencies": {
-    "@aura-stack/react": "workspace:*",
+    "@aura-stack/tanstack-start": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
