@@ -49,7 +49,8 @@
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*"
+    "@aura-stack/tsdown-config": "workspace:*",
+    "vitest": "catalog:vitest"
   },
   "peerDependencies": {
     "@tanstack/react-start": ">=1.0.0",
