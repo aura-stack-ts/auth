@@ -1,9 +1,9 @@
 {
-  "name": "@aura-stack/integration",
+  "name": "@aura-stack/tanstack-start",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Integration for Aura Stack authentication library",
+  "description": "Tanstack Start for Aura Stack authentication library",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "pnpm sync:modules && tsdown",
@@ -45,13 +45,16 @@
   ],
   "keywords": [],
   "dependencies": {
-    "@aura-stack/auth": "workspace:*"
+    "@aura-stack/react": "workspace:*"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*"
   },
-  "peerDependencies": {},
+  "peerDependencies": {
+    "@tanstack/react-start": ">=1.0.0",
+    "@tanstack/react-router": ">=1.0.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
