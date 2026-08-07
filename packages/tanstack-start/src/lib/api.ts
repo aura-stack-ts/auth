@@ -24,8 +24,9 @@ import type {
     TanstackStartIsProviderConnectedOptions,
     TanstackStartIsProviderConnectedReturn,
 } from "@/@types/api.ts"
-import type { AuthInstance, User } from "@aura-stack/auth"
+import type { AuthInstance, Session, User } from "@aura-stack/auth"
 import type { InferSchema, RemoveIndexSignature, SchemaTypes, Wrap } from "@aura-stack/react/types"
+import type { zod } from "@/identity/zod"
 
 export const getSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return createServerFn({
@@ -37,7 +38,7 @@ export const getSession = <DefaultUser extends User = User>({ api }: AuthInstanc
         })
         if (!session.success) return null
         return session.session
-    }) as OptionalFetcher<undefined, undefined, Promise<DefaultUser | null>>
+    }) as OptionalFetcher<undefined, undefined, Promise<Session<DefaultUser> | null>>
 }
 
 export const signIn = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
@@ -199,7 +200,7 @@ export const isProviderConnected = <DefaultUser extends User = User>({ api }: Au
         })
 }
 
-export const api = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = SchemaTypes>(
+export const api = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>(
     config: AuthInstance<DefaultUser, SignUpSchema>
 ) => {
     return {

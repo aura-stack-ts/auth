@@ -3,12 +3,12 @@ import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
 import { useServerFn } from "@tanstack/react-start"
 import { Button } from "@/components/ui/button"
 import { EditProfile } from "@/components/edit-profile"
-import { getSession, signInCredentialsFn, signInFn, signOutFn, updateSessionFn } from "@/lib/auth-server"
+import { api } from "@/lib/auth"
 
 export const Route = createFileRoute("/server")({
     component: AuthServerPage,
     loader: async () => {
-        const session = await getSession()
+        const session = await api.getSession()
         return { session }
     },
 })
@@ -17,15 +17,15 @@ function AuthServerPage() {
     const router = useRouter()
     const { session } = Route.useLoaderData()
 
-    const signIn = useServerFn(signInFn)
-    const signOut = useServerFn(signOutFn)
-    const signInCredentials = useServerFn(signInCredentialsFn)
-    const updateSession = useServerFn(updateSessionFn)
+    const signIn = useServerFn(api.signIn)
+    const signOut = useServerFn(api.signOut)
+    const signInCredentials = useServerFn(api.signInCredentials)
+    const updateSession = useServerFn(api.updateSession)
 
     const isAuthenticated = Boolean(session && session.user)
 
     const handleSignIn = async (provider: string) => {
-        await signIn({ data: { provider } })
+        await signIn({ data: { providerId: provider } })
     }
 
     const handleSignOut = async () => {
@@ -41,8 +41,10 @@ function AuthServerPage() {
 
         await signInCredentials({
             data: {
-                username,
-                password,
+                payload: {
+                    username,
+                    password,
+                },
             },
         })
         await router.invalidate()
@@ -51,8 +53,12 @@ function AuthServerPage() {
     const handleUpdateSession = async (formData: FormData) => {
         await updateSession({
             data: {
-                username: formData.get("username") ? (formData.get("username") as string) : undefined,
-                email: formData.get("email") ? (formData.get("email") as string) : undefined,
+                session: {
+                    user: {
+                        name: formData.get("username") ? (formData.get("username") as string) : undefined,
+                        email: formData.get("email") ? (formData.get("email") as string) : undefined,
+                    },
+                },
             },
         })
         await router.invalidate()
@@ -64,8 +70,8 @@ function AuthServerPage() {
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-white">Aura Auth + TanStack Start Server Components</h1>
                     <p className="mt-2 text-base text-white/70 max-w-3xl">
-                        Official TanStack Start demo to showcase @aura-stack/react authentication library with server functions
-                        and route loaders for Server Side Rendering (SSR), for Client-Side Rendering (CSR) visit{" "}
+                        Official TanStack Start demo to showcase @aura-stack/tanstack-start authentication library with server
+                        functions and route loaders for Server Side Rendering (SSR), for Client-Side Rendering (CSR) visit{" "}
                         <Link className="text-white underline underline-offset-2" to="/client">
                             here
                         </Link>
@@ -152,6 +158,7 @@ function AuthServerPage() {
                                         type="text"
                                         id="username"
                                         name="username"
+                                        aria-label="Username"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -163,6 +170,7 @@ function AuthServerPage() {
                                         type="password"
                                         id="password"
                                         name="password"
+                                        aria-label="Password"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>

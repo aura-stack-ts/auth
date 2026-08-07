@@ -203,6 +203,7 @@
       "name": "tanstack-start",
       "dependencies": {
         "@aura-stack/react": "workspace:*",
+        "@aura-stack/tanstack-start": "workspace:*",
         "@hookform/resolvers": "^5.2.2",
         "@radix-ui/react-label": "^2.1.8",
         "@radix-ui/react-slot": "^1.2.4",
@@ -530,6 +531,11 @@
       "devDependencies": {
         "@aura-stack/tsconfig": "workspace:*",
         "@aura-stack/tsdown-config": "workspace:*",
+        "@types/react": "catalog:react",
+        "@types/react-dom": "catalog:react",
+        "react": "catalog:react",
+        "react-dom": "catalog:react",
+        "vitest": "catalog:vitest",
       },
       "peerDependencies": {
         "@tanstack/react-router": ">=1.0.0",

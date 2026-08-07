@@ -1,11 +1,12 @@
 import { useState } from "react"
 import { Link } from "@tanstack/react-router"
 import { Menu, X } from "lucide-react"
-import { useAuth } from "@aura-stack/react"
+import { useAuthActions, useSession } from "@aura-stack/tanstack-start/client"
 import { Button } from "@/components/ui/button"
 
 export const Header = () => {
-    const { status, isPending, signOut, signIn } = useAuth()
+    const { status } = useSession()
+    const { isPending, signOut, signIn } = useAuthActions()
     const isAuthenticated = status === "authenticated"
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 

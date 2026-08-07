@@ -50,7 +50,11 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*",
-    "vitest": "catalog:vitest"
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "vitest": "catalog:vitest",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react"
   },
   "peerDependencies": {
     "@tanstack/react-start": ">=1.0.0",
@@ -61,6 +65,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.cjs"
     },
     "./oauth": {
       "types": "./dist/oauth/index.d.ts",

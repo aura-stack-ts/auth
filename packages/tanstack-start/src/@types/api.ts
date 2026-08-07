@@ -16,7 +16,6 @@ import type {
     DisconnectProviderAPIOptions,
     ProviderConnectedAPIOptions,
 } from "@aura-stack/react/types"
-import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/react/identity"
 import type {
     SignInAPIReturn,
     SignInCredentialsAPIReturn,
@@ -30,11 +29,6 @@ import type {
     DisconnectProviderAPIReturn,
     ProviderConnectedAPIReturn,
 } from "@aura-stack/react/types"
-
-export type TanstackStartInstance<
-    Identity extends Identities = Identities,
-    SignUpSchema extends SchemaTypes = SchemaTypes,
-> = AuthInstance<FromShapeToObject<Identity>, SignUpSchema>
 
 export type TanstackStartSignInOptions = Prettify<
     Omit<SignInAPIOptions, "headers" | "request"> & { providerId: LiteralUnion<BuiltInOAuthProvider> }

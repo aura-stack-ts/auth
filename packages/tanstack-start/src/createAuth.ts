@@ -2,6 +2,7 @@ import { api } from "@/lib/api.ts"
 import { createAuth as createAuthInstance } from "@aura-stack/react/server"
 import type { AuthConfig } from "@aura-stack/react/types"
 import type { zod } from "@aura-stack/react/identity/zod"
+import type { TanstackStartInstance } from "@/@types/index"
 import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/react/identity"
 
 /**
@@ -25,7 +26,7 @@ import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/rea
  */
 export const createAuth = <Identity extends Identities, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>(
     config: AuthConfig<Identity, SignUpSchema>
-) => {
+): TanstackStartInstance<Identity, SignUpSchema> => {
     const auth = createAuthInstance<Identity, SignUpSchema>(config)
     return {
         /**

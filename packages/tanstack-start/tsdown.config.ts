@@ -5,6 +5,7 @@ export default defineConfig({
     ...tsdownConfig,
     entry: [
         "src/index.ts",
+        "src/client.tsx",
         "src/identity.ts",
         "src/identity/*.ts",
         "src/oauth/index.ts",
