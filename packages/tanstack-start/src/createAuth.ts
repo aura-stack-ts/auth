@@ -1,6 +1,7 @@
 import { api } from "@/lib/api.ts"
 import { createAuth as createAuthInstance } from "@aura-stack/react/server"
 import type { AuthConfig } from "@aura-stack/react/types"
+import type { zod } from "@aura-stack/react/identity/zod"
 import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/react/identity"
 
 /**
@@ -22,7 +23,7 @@ import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/rea
  *   }
  * })
  */
-export const createAuth = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+export const createAuth = <Identity extends Identities, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>(
     config: AuthConfig<Identity, SignUpSchema>
 ) => {
     const auth = createAuthInstance<Identity, SignUpSchema>(config)
@@ -37,7 +38,7 @@ export const createAuth = <Identity extends Identities, SignUpSchema extends Sch
          * These functions can be used in server functions to handle authentication requests.
          * They automatically handle request headers and provide a simplified interface for common auth operations.
          */
-        api: api<FromShapeToObject<Identity>>(auth),
+        api: api<FromShapeToObject<Identity>, SignUpSchema>(auth),
         /**
          * The handlers object contains the HTTP request handlers.
          */

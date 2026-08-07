@@ -1,7 +1,7 @@
 {
   "name": "@aura-stack/tanstack-start",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "description": "Tanstack Start for Aura Stack authentication library",
   "scripts": {
@@ -18,7 +18,7 @@
     "clean": "rm -rf dist src/_core src/oauth",
     "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm clean:cts && pnpm build && pnpm clean:cts",
-    "sync:modules": "node ../shared/scripts/modules.js"
+    "sync:modules": "node ../shared/scripts/modules.js --from react"
   },
   "homepage": "https://aura-stack-auth.vercel.app",
   "bugs": {
@@ -72,14 +72,14 @@
       "require": "./dist/oauth/*.cjs"
     },
     "./identity": {
-      "types": "./dist/_core/identity.d.ts",
-      "import": "./dist/_core/identity.js",
-      "require": "./dist/_core/identity.cjs"
+      "types": "./dist/identity.d.ts",
+      "import": "./dist/identity.js",
+      "require": "./dist/identity.cjs"
     },
     "./identity/*": {
-      "types": "./dist/_core/identity/*.d.ts",
-      "import": "./dist/_core/identity/*.js",
-      "require": "./dist/_core/identity/*.cjs"
+      "types": "./dist/identity/*.d.ts",
+      "import": "./dist/identity/*.js",
+      "require": "./dist/identity/*.cjs"
     },
     "./crypto": {
       "types": "./dist/_core/crypto.d.ts",
@@ -95,7 +95,8 @@
       "types": "./dist/_core/cookies.d.ts",
       "import": "./dist/_core/cookies.js",
       "require": "./dist/_core/cookies.cjs"
-    }
+    },
+    "./types": "./dist/@types/index.d.ts"
   },
   "packageManager": "pnpm@10.15.0"
 }

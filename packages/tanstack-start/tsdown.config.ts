@@ -9,7 +9,6 @@ export default defineConfig({
         "src/identity/*.ts",
         "src/oauth/index.ts",
         "src/oauth/*.ts",
-        "src/_core/identity.ts",
         "src/_core/crypto.ts",
         "src/_core/shared.ts",
         "src/_core/cookies.ts",

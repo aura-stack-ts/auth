@@ -1,1 +1,2 @@
 export { createAuth } from "@/createAuth.ts"
+export type { User, Session, AuthConfig, AuthInstance } from "@aura-stack/react/types"

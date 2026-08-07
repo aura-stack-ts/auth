@@ -1,3 +1,5 @@
+import { createServerFn, type OptionalFetcher } from "@tanstack/react-start"
+import { getRequest, getRequestHeaders } from "@tanstack/react-start/server"
 import type {
     TanstackStartSignInCredentialsOptions,
     TanstackStartSignInCredentialsReturn,
@@ -21,10 +23,9 @@ import type {
     TanstackStartDisconnectProviderReturn,
     TanstackStartIsProviderConnectedOptions,
     TanstackStartIsProviderConnectedReturn,
-} from "@/@types/index.ts"
+} from "@/@types/api.ts"
 import type { AuthInstance, User } from "@aura-stack/auth"
-import { createServerFn, type OptionalFetcher } from "@tanstack/react-start"
-import { getRequest, getRequestHeaders } from "@tanstack/react-start/server"
+import type { InferSchema, RemoveIndexSignature, SchemaTypes, Wrap } from "@aura-stack/react/types"
 
 export const getSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return createServerFn({
@@ -94,18 +95,24 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
         })
 }
 
-export const signUp = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return createServerFn({ method: "POST" })
-        .validator((data: TanstackStartSignUpOptions) => data)
-        .handler<Promise<TanstackStartSignUpReturn>>(async ({ data }) => {
-            const output = await api.signUp({
-                ...data,
-                headers: getRequestHeaders(),
-                request: getRequest(),
+export const signUp = <DefaultUser extends User = User, T extends Record<string, any> = Record<string, any>>({
+    api,
+}: AuthInstance<DefaultUser>) => {
+    return (
+        createServerFn({ method: "POST" })
+            // @ts-ignore
+            .validator((data: TanstackStartSignUpOptions<T>) => data)
+            .handler<Promise<TanstackStartSignUpReturn>>(async ({ data }) => {
+                const output = await api.signUp<T>({
+                    ...data,
+                    payload: data.payload as T,
+                    headers: getRequestHeaders(),
+                    request: getRequest(),
+                })
+                const { headers: _h, toResponse: _t, ...spread } = output
+                return spread
             })
-            const { headers: _h, toResponse: _t, ...spread } = output
-            return spread
-        })
+    )
 }
 
 export const getProviderTokens = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
@@ -136,17 +143,6 @@ export const getAccessToken = <DefaultUser extends User = User>({ api }: AuthIns
         })
 }
 
-createServerFn({
-    method: "GET",
-}).handler(() => {
-    return {
-        name: "jose",
-        data: {
-            id: 1,
-        },
-    }
-})
-
 export const refreshUserInfo = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return createServerFn({ method: "POST" })
         .validator((data: TanstackStartRefreshUserInfoOptions) => data)
@@ -158,7 +154,7 @@ export const refreshUserInfo = <DefaultUser extends User = User>({ api }: AuthIn
             })
             const { headers: _h, toResponse: _t, ...spread } = output
             return spread
-        }) as OptionalFetcher<any, any, Promise<TanstackStartRefreshUserInfoReturn<DefaultUser>>>
+        }) as OptionalFetcher<undefined, any, Promise<TanstackStartRefreshUserInfoReturn<DefaultUser>>>
 }
 
 export const revokeToken = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
@@ -203,17 +199,19 @@ export const isProviderConnected = <DefaultUser extends User = User>({ api }: Au
         })
 }
 
-export const api = <DefaultUser extends User = User>(config: AuthInstance<DefaultUser>) => {
+export const api = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = SchemaTypes>(
+    config: AuthInstance<DefaultUser, SignUpSchema>
+) => {
     return {
         getSession: getSession<DefaultUser>(config),
         signIn: signIn(config),
         signInCredentials: signInCredentials(config),
         signOut: signOut(config),
-        updateSession: updateSession(config),
-        signUp: signUp(config),
+        updateSession: updateSession<DefaultUser>(config),
+        signUp: signUp<DefaultUser, Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>>(config),
         getProviderTokens: getProviderTokens(config),
         getAccessToken: getAccessToken(config),
-        refreshUserInfo: refreshUserInfo(config),
+        refreshUserInfo: refreshUserInfo<DefaultUser>(config),
         revokeToken: revokeToken(config),
         disconnectProvider: disconnectProvider(config),
         isProviderConnected: isProviderConnected(config),
