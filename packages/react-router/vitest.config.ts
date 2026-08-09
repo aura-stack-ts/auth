@@ -8,11 +8,16 @@ export default defineConfig({
         globals: true,
         clearMocks: true,
         restoreMocks: true,
+        typecheck: {
+            enabled: true,
+            include: ["test/**/*.test-d.ts"],
+            exclude: ["test/**/*.test.ts"],
+        },
     },
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@test": path.resolve(__dirname, "./test"),
+            "@": path.resolve(import.meta.dirname, "./src"),
+            "@test": path.resolve(import.meta.dirname, "./test"),
         },
     },
 })
