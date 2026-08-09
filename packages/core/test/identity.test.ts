@@ -5,12 +5,28 @@ import { Value } from "typebox/value"
 import { ArkErrors, type } from "arktype"
 import { createAuth } from "@/createAuth.ts"
 import { type Static, Type as Typebox } from "typebox"
-import { identitySchema as UserIdentity } from "@/identity/zod.ts"
+import { zod, identitySchema, identitySchema as UserIdentity, type IdentityShape } from "@/identity/zod.ts"
 import { createSchemaRegistry, deriveSchema } from "@/validator/registry.ts"
 import { identitySchema as UserIdentityArkType } from "@/identity/arktype.ts"
 import { identitySchema as UserIdentityTypeBox } from "@/identity/typebox.ts"
 import { identitySchema as UserIdentityValibot } from "@/identity/valibot.ts"
-import { createIdentity, type InferUser, type UserFrom } from "@/identity/index.ts"
+import {
+    createIdentity,
+    type FromShapeToObject,
+    type Identities,
+    type InferSession,
+    type InferUser,
+    type UserFrom,
+} from "@/identity/index.ts"
+import type { Session, User } from "@/index.ts"
+import type { InferSignUp, Wrap } from "@/@types/utility.ts"
+import type {
+    GetSessionAPIReturn,
+    RefreshUserInfoAPIReturn,
+    SignUpAPIOptions,
+    SignUpAPIReturn,
+    UpdateSessionAPIOptions,
+} from "@/@types/api.ts"
 
 describe("createIdentity", () => {
     test("createIdentity with Zod schema", () => {
@@ -557,6 +573,100 @@ describe("createSchemaRegistry", () => {
                 unknownKeys: "strict",
             })
             await expect(parse(payload)).rejects.toThrow()
+        })
+    })
+})
+
+describe("createAuth", () => {
+    describe("with custom identity", async () => {
+        const auth = createAuth({
+            oauth: [],
+            identity: {
+                schema: identitySchema.extend({
+                    role: zod.string(),
+                    nickname: zod.string().optional(),
+                }),
+            },
+        })
+        const { api } = auth
+        type Identity = FromShapeToObject<IdentityShape & { role: zod.ZodString; nickname: zod.ZodOptional<zod.ZodString> }>
+
+        test("Infer Types", () => {
+            expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<Wrap<InferUser<typeof auth>>>()
+            expectTypeOf<InferSession<typeof auth>>().toEqualTypeOf<Session<Wrap<Identity>>>()
+            expectTypeOf<InferSignUp<typeof auth>>().toEqualTypeOf<{}>()
+        })
+
+        test("api.getSession", () => {
+            expectTypeOf<Awaited<ReturnType<typeof api.getSession>>>().toEqualTypeOf<GetSessionAPIReturn<Identity>>()
+        })
+
+        test("api.updateSession", () => {
+            expectTypeOf<Parameters<typeof api.updateSession>[0]>().toEqualTypeOf<UpdateSessionAPIOptions<Identity>>()
+        })
+
+        test("api.refreshUserInfo", () => {
+            expectTypeOf<ReturnType<typeof api.refreshUserInfo>>().toEqualTypeOf<Promise<RefreshUserInfoAPIReturn<Identity>>>()
+        })
+
+        test("api.signUp", () => {
+            expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<SignUpAPIOptions<Record<string, any>>>()
+            expectTypeOf(api.signUp).toEqualTypeOf<
+                <Payload extends Record<string, any> = {}>(options: SignUpAPIOptions<Payload>) => Promise<SignUpAPIReturn>
+            >()
+        })
+    })
+
+    describe("with custom identity and sign up schema", () => {
+        const auth = createAuth({
+            oauth: [],
+            signUp: {
+                schema: zod.object({
+                    nickname: zod.string(),
+                    email: zod.email(),
+                    password: zod.string().min(8),
+                }),
+                onCreateUser: () => null,
+            },
+        })
+        const { api } = auth
+        type Identity = FromShapeToObject<Identities>
+
+        test("InferUser", () => {
+            expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<User>()
+            expectTypeOf<InferSession<typeof auth>>().toEqualTypeOf<Session<User>>()
+            expectTypeOf<InferSignUp<typeof auth>>().toEqualTypeOf<{
+                nickname: string
+                email: string
+                password: string
+            }>()
+        })
+
+        test("api.getSession", () => {
+            expectTypeOf<Awaited<ReturnType<typeof api.getSession>>>().toEqualTypeOf<GetSessionAPIReturn<Identity>>()
+        })
+
+        test("api.updateSession", () => {
+            expectTypeOf<Parameters<typeof api.updateSession>[0]>().toEqualTypeOf<UpdateSessionAPIOptions<Identity>>()
+        })
+
+        test("api.refreshUserInfo", () => {
+            expectTypeOf<ReturnType<typeof api.refreshUserInfo>>().toEqualTypeOf<Promise<RefreshUserInfoAPIReturn<Identity>>>()
+        })
+
+        test("api.signUp", () => {
+            expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<SignUpAPIOptions<Record<string, any>>>()
+            expectTypeOf(api.signUp).toEqualTypeOf<
+                <
+                    Payload extends Record<string, any> = {
+                        nickname: string
+                        email: string
+                        password: string
+                    },
+                >(
+                    options: SignUpAPIOptions<Payload>
+                ) => Promise<SignUpAPIReturn>
+            >()
         })
     })
 })

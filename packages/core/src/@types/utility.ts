@@ -124,7 +124,8 @@ export type Wrap<T> = T extends any ? { [K in keyof T]: T[K] } : never
  *
  * type User = InferUser<typeof auth>
  */
-export type InferUser<Config extends AuthInstance> = Config extends AuthInstance<infer Identity> ? Prettify<Identity> : User
+export type InferUser<Config extends AuthInstance> =
+    Config extends AuthInstance<infer Identity> ? Prettify<Merge<Identity, {}>> : User
 
 /**
  * Infers the session type from an {@link AuthInstance} config.
@@ -139,7 +140,7 @@ export type InferUser<Config extends AuthInstance> = Config extends AuthInstance
  *
  * type Session = InferSession<typeof auth>
  */
-export type InferSession<Config extends AuthInstance> = Prettify<Session<Wrap<InferUser<Config>>>>
+export type InferSession<Config extends AuthInstance> = Prettify<Session<InferUser<Config>>>
 
 /**
  * Infers the user type from a Zod identity schema, or falls back to {@link User}.
