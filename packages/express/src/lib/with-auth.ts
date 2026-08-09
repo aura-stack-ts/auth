@@ -1,6 +1,8 @@
 import { toWebRequest } from "@/lib/handler.ts"
 import type { RequestHandler } from "express"
 import type { AuthInstance, User, Session } from "@aura-stack/auth"
+import type { zod } from "@/identity/zod.ts"
+import type { SchemaTypes } from "@aura-stack/auth/identity"
 
 export type LocalsWithSession<DefaultUser extends User = User> = {
     session?: Session<DefaultUser> | null
@@ -16,9 +18,9 @@ export type LocalsWithSession<DefaultUser extends User = User> = {
  *   res.json({ session: res.locals.session })
  * })
  */
-export const withAuth = <DefaultUser extends User = User>({
+export const withAuth = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>({
     api,
-}: AuthInstance<DefaultUser>): RequestHandler<any, any, any, any, LocalsWithSession<DefaultUser>> => {
+}: AuthInstance<DefaultUser, SignUpSchema>): RequestHandler<any, any, any, any, LocalsWithSession<DefaultUser>> => {
     return async (req, res, next) => {
         try {
             const webRequest = toWebRequest(req)
