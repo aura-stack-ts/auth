@@ -1,11 +1,11 @@
-import { api } from "@/lib/auth"
+import { core } from "@/lib/auth"
 import { redirect } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { getRequest, getRequestHeaders } from "@tanstack/react-start/server"
 
 export const getSession = createServerFn({ method: "GET" }).handler(async () => {
     try {
-        const session = await api.getSession({
+        const session = await core.api.getSession({
             headers: getRequestHeaders(),
         })
         if (!session.success) return null
@@ -17,7 +17,7 @@ export const getSession = createServerFn({ method: "GET" }).handler(async () => 
 })
 
 export const signOutFn = createServerFn({ method: "POST" }).handler(async () => {
-    const response = await api
+    const response = await core.api
         .signOut({
             headers: getRequestHeaders(),
         })
@@ -29,14 +29,14 @@ export const signOutFn = createServerFn({ method: "POST" }).handler(async () => 
 })
 
 export const signInFn = createServerFn({ method: "POST" })
-    .inputValidator((data: { provider: string }) => {
+    .validator((data: { provider: string }) => {
         if (!data || typeof data.provider !== "string" || !data.provider.trim()) {
             throw new Error("provider must be a non-empty string")
         }
         return data
     })
     .handler(async ({ data }) => {
-        const response = await api
+        const response = await core.api
             .signIn(data.provider, {
                 request: getRequest(),
                 redirect: false,
@@ -51,14 +51,14 @@ export const signInFn = createServerFn({ method: "POST" })
     })
 
 export const signInCredentialsFn = createServerFn({ method: "POST" })
-    .inputValidator((data: { username: string; password: string }) => {
+    .validator((data: { username: string; password: string }) => {
         if (!data || typeof data.username !== "string" || typeof data.password !== "string") {
             throw new Error("credentials payload is invalid")
         }
         return data
     })
     .handler(async ({ data }) => {
-        const response = await api
+        const response = await core.api
             .signInCredentials({
                 payload: {
                     username: data.username,
@@ -84,7 +84,7 @@ export const signInCredentialsFn = createServerFn({ method: "POST" })
     })
 
 export const updateSessionFn = createServerFn({ method: "POST" })
-    .inputValidator((data: { username?: string; email?: string }) => {
+    .validator((data: { username?: string; email?: string }) => {
         if (!data || typeof data !== "object") {
             throw new Error("update session payload is invalid")
         }
@@ -97,7 +97,7 @@ export const updateSessionFn = createServerFn({ method: "POST" })
         return data
     })
     .handler(async ({ data }) => {
-        const response = await api
+        const response = await core.api
             .updateSession({
                 session: {
                     user: {

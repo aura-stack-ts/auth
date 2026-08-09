@@ -7,6 +7,7 @@ export const getRouter = () => {
         context: {},
         scrollRestoration: true,
         defaultPreloadStaleTime: 0,
+        defaultNotFoundComponent: () => <div>404 Not Found</div>,
     })
     return router
 }

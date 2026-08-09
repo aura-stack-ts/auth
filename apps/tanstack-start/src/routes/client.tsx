@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
-import { useAuth } from "@aura-stack/react"
 import { Button } from "@/components/ui/button"
 import { EditProfile } from "@/components/edit-profile"
+import { useAuthActions, useSession } from "@aura-stack/tanstack-start/client"
 import type { SyntheticEvent } from "react"
 
 export const Route = createFileRoute("/client")({
@@ -10,7 +10,8 @@ export const Route = createFileRoute("/client")({
 })
 
 function AuthClientPage() {
-    const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
+    const { isPending, signIn, signOut, signInCredentials, updateSession } = useAuthActions()
+    const { session, status } = useSession()
     const isAuthenticated = status === "authenticated"
 
     const handleSignInCredentials = async (event: SyntheticEvent<HTMLFormElement>) => {
@@ -50,8 +51,8 @@ function AuthClientPage() {
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-white">Aura Auth + TanStack Start Client Components</h1>
                     <p className="mt-2 text-base text-white/70 max-w-3xl">
-                        Official TanStack Start demo to showcase @aura-stack/react authentication library with Client Side
-                        Rendering (CSR), for Server-Side Rendering (SSR) visit{" "}
+                        Official TanStack Start demo to showcase @aura-stack/tanstack-start authentication library with Client
+                        Side Rendering (CSR), for Server-Side Rendering (SSR) visit{" "}
                         <Link className="text-white underline underline-offset-2" to="/server">
                             here
                         </Link>
@@ -132,7 +133,7 @@ function AuthClientPage() {
                                 <span className="w-full h-px block absolute top-1/2 bg-white/40" />
                                 <span className="px-2 relative z-10 bg-black">Or continue with</span>
                             </p>
-                            <form className="w-full text-start" onSubmit={handleSignInCredentials}>
+                            <form className="w-full text-start" onSubmit={handleSignInCredentials} method="POST">
                                 <div>
                                     <label className="font-medium block" htmlFor="username">
                                         Username
@@ -141,6 +142,7 @@ function AuthClientPage() {
                                         type="text"
                                         id="username"
                                         name="username"
+                                        aria-label="Username"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -152,6 +154,7 @@ function AuthClientPage() {
                                         type="password"
                                         id="password"
                                         name="password"
+                                        aria-label="Password"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>

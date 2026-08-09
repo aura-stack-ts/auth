@@ -1,4 +1,4 @@
-import { createAuthClient } from "@aura-stack/react"
+import { createAuthClient } from "@aura-stack/tanstack-start/client"
 
 export const authClient = createAuthClient({
     basePath: "/api/auth",

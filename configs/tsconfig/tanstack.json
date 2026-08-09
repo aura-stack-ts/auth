@@ -2,7 +2,7 @@
   "extends": "./bundler.json",
   "compilerOptions": {
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "noUncheckedSideEffectImports": true
   }
 }

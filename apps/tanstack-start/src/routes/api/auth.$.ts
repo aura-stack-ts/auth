@@ -13,6 +13,9 @@ export const Route = createFileRoute("/api/auth/$")({
             PATCH: async ({ request }) => {
                 return await handlers.PATCH(request)
             },
+            DELETE: async ({ request }) => {
+                return await handlers.DELETE(request)
+            },
         },
     },
 })

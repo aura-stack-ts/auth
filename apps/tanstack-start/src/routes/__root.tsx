@@ -37,7 +37,7 @@ function RootDocument({ children }: PropsWithChildren) {
             <head>
                 <HeadContent />
             </head>
-            <body className="bg-[url(/pattern-dot.svg)]">
+            <body>
                 <AuthProvider>
                     <Header />
                     {children}

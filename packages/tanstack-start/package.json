@@ -1,9 +1,9 @@
 {
-  "name": "@aura-stack/integration",
+  "name": "@aura-stack/tanstack-start",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
   "type": "module",
-  "description": "Integration for Aura Stack authentication library",
+  "description": "Tanstack Start for Aura Stack authentication library",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "pnpm sync:modules && tsdown",
@@ -18,7 +18,7 @@
     "clean": "rm -rf dist src/_core src/oauth",
     "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm clean:cts && pnpm build && pnpm clean:cts",
-    "sync:modules": "node ../shared/scripts/modules.js"
+    "sync:modules": "node ../shared/scripts/modules.js --from react"
   },
   "homepage": "https://aura-stack-auth.vercel.app",
   "bugs": {
@@ -45,18 +45,33 @@
   ],
   "keywords": [],
   "dependencies": {
-    "@aura-stack/auth": "workspace:*"
+    "@aura-stack/react": "workspace:*"
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*"
+    "@aura-stack/tsdown-config": "workspace:*",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "vitest": "catalog:vitest",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react"
   },
-  "peerDependencies": {},
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0",
+    "@tanstack/react-start": ">=1.0.0",
+    "@tanstack/react-router": ">=1.0.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.cjs"
     },
     "./oauth": {
       "types": "./dist/oauth/index.d.ts",
@@ -92,7 +107,8 @@
       "types": "./dist/_core/cookies.d.ts",
       "import": "./dist/_core/cookies.js",
       "require": "./dist/_core/cookies.cjs"
-    }
+    },
+    "./types": "./dist/@types/index.d.ts"
   },
   "packageManager": "pnpm@10.15.0"
 }

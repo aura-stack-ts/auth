@@ -1,6 +1,6 @@
-import type { FormEvent } from "react"
-import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
+import { type FormEvent } from "react"
 import { useServerFn } from "@tanstack/react-start"
+import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 import { EditProfile } from "@/components/edit-profile"
 import { getSession, signInCredentialsFn, signInFn, signOutFn, updateSessionFn } from "@/lib/auth-server"
@@ -25,7 +25,7 @@ function AuthServerPage() {
     const isAuthenticated = Boolean(session && session.user)
 
     const handleSignIn = async (provider: string) => {
-        await signIn({ data: { provider } })
+        await signIn({ data: { provider: provider } })
     }
 
     const handleSignOut = async () => {
@@ -64,8 +64,8 @@ function AuthServerPage() {
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-white">Aura Auth + TanStack Start Server Components</h1>
                     <p className="mt-2 text-base text-white/70 max-w-3xl">
-                        Official TanStack Start demo to showcase @aura-stack/react authentication library with server functions
-                        and route loaders for Server Side Rendering (SSR), for Client-Side Rendering (CSR) visit{" "}
+                        Official TanStack Start demo to showcase @aura-stack/tanstack-start authentication library with server
+                        functions and route loaders for Server Side Rendering (SSR), for Client-Side Rendering (CSR) visit{" "}
                         <Link className="text-white underline underline-offset-2" to="/client">
                             here
                         </Link>
@@ -75,7 +75,7 @@ function AuthServerPage() {
             <section className="mt-8 max-w-lg mx-auto border bg-black">
                 {isAuthenticated ? (
                     <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {session?.user?.image ? (
+                        {/* {session?.user?.image ? (
                             <img
                                 className="rounded-full"
                                 src={session.user.image}
@@ -89,7 +89,7 @@ function AuthServerPage() {
                                     {session?.user?.name?.[0] || "?"}
                                 </span>
                             </span>
-                        )}
+                        )} */}
                         <div className="flex items-center justify-between">
                             <div className="mt-2">
                                 <p className="text-lg font-medium text-white">{session?.user?.name}</p>
@@ -152,6 +152,7 @@ function AuthServerPage() {
                                         type="text"
                                         id="username"
                                         name="username"
+                                        aria-label="Username"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -163,6 +164,7 @@ function AuthServerPage() {
                                         type="password"
                                         id="password"
                                         name="password"
+                                        aria-label="Password"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>

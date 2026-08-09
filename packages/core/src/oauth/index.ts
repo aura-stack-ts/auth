@@ -92,7 +92,11 @@ const defineOAuthEnvironment = (oauth: string) => {
         clientSecret: getEnv(`${oauth.replace("-", "_").toUpperCase()}_CLIENT_SECRET`),
     })
     if (!loadEnvs.success) {
-        throw new AuraAuthError({ code: "INVALID_ENVIRONMENT_CONFIGURATION", cause: loadEnvs.error })
+        throw new AuraAuthError({
+            code: "INVALID_ENVIRONMENT_CONFIGURATION",
+            message: `The framework cannot resolve ${oauth.toUpperCase()} environment credentials for the current provider target. Make sure target system secret variables are configured properly.`,
+            cause: loadEnvs.error,
+        })
     }
     return loadEnvs.data
 }
