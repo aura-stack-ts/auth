@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
-import { useAuthActions, useSession } from "@aura-stack/tanstack-start/client"
 import { Button } from "@/components/ui/button"
 import { EditProfile } from "@/components/edit-profile"
+import { useAuthActions, useSession } from "@aura-stack/tanstack-start/client"
 import type { SyntheticEvent } from "react"
 
 export const Route = createFileRoute("/client")({
@@ -133,7 +133,7 @@ function AuthClientPage() {
                                 <span className="w-full h-px block absolute top-1/2 bg-white/40" />
                                 <span className="px-2 relative z-10 bg-black">Or continue with</span>
                             </p>
-                            <form className="w-full text-start" onSubmit={handleSignInCredentials}>
+                            <form className="w-full text-start" onSubmit={handleSignInCredentials} method="POST">
                                 <div>
                                     <label className="font-medium block" htmlFor="username">
                                         Username

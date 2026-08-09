@@ -1,9 +1,10 @@
-import { api } from "@/lib/api.ts"
+import { api } from "@/lib/api.functions"
 import { createAuth as createAuthInstance } from "@aura-stack/react/server"
 import type { AuthConfig } from "@aura-stack/react/types"
 import type { zod } from "@aura-stack/react/identity/zod"
 import type { TanstackStartInstance } from "@/@types/index"
 import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/react/identity"
+import { createServerFn } from "@tanstack/react-start"
 
 /**
  * Create an auth instance built on top of the Aura Stack Auth library,
@@ -28,7 +29,14 @@ export const createAuth = <Identity extends Identities, SignUpSchema extends Sch
     config: AuthConfig<Identity, SignUpSchema>
 ): TanstackStartInstance<Identity, SignUpSchema> => {
     const auth = createAuthInstance<Identity, SignUpSchema>(config)
+
+    const __unstable_fn = createServerFn({ method: "GET" }).handler(async () => {
+        console.log("[server] __unstable_fn called")
+        return "This is an unstable function. It is not intended for production use and may be removed or changed in future versions."
+    })
+
     return {
+        __unstable_fn,
         /**
          * The core auth instance. It can be used to advanced use cases, such as creating custom behaviors.
          * For most use cases, the `api` property should be sufficient, as it provides a higher-level API for common authentication tasks.

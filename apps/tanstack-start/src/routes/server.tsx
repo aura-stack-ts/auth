@@ -1,14 +1,14 @@
-import type { FormEvent } from "react"
-import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
+import { type FormEvent } from "react"
 import { useServerFn } from "@tanstack/react-start"
+import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 import { EditProfile } from "@/components/edit-profile"
-import { api } from "@/lib/auth"
+import { getSession, signInCredentialsFn, signInFn, signOutFn, updateSessionFn } from "@/lib/auth-server"
 
 export const Route = createFileRoute("/server")({
     component: AuthServerPage,
     loader: async () => {
-        const session = await api.getSession()
+        const session = await getSession()
         return { session }
     },
 })
@@ -17,15 +17,15 @@ function AuthServerPage() {
     const router = useRouter()
     const { session } = Route.useLoaderData()
 
-    const signIn = useServerFn(api.signIn)
-    const signOut = useServerFn(api.signOut)
-    const signInCredentials = useServerFn(api.signInCredentials)
-    const updateSession = useServerFn(api.updateSession)
+    const signIn = useServerFn(signInFn)
+    const signOut = useServerFn(signOutFn)
+    const signInCredentials = useServerFn(signInCredentialsFn)
+    const updateSession = useServerFn(updateSessionFn)
 
     const isAuthenticated = Boolean(session && session.user)
 
     const handleSignIn = async (provider: string) => {
-        await signIn({ data: { providerId: provider } })
+        await signIn({ data: { provider: provider } })
     }
 
     const handleSignOut = async () => {
@@ -41,10 +41,8 @@ function AuthServerPage() {
 
         await signInCredentials({
             data: {
-                payload: {
-                    username,
-                    password,
-                },
+                username,
+                password,
             },
         })
         await router.invalidate()
@@ -53,12 +51,8 @@ function AuthServerPage() {
     const handleUpdateSession = async (formData: FormData) => {
         await updateSession({
             data: {
-                session: {
-                    user: {
-                        name: formData.get("username") ? (formData.get("username") as string) : undefined,
-                        email: formData.get("email") ? (formData.get("email") as string) : undefined,
-                    },
-                },
+                username: formData.get("username") ? (formData.get("username") as string) : undefined,
+                email: formData.get("email") ? (formData.get("email") as string) : undefined,
             },
         })
         await router.invalidate()
@@ -81,7 +75,7 @@ function AuthServerPage() {
             <section className="mt-8 max-w-lg mx-auto border bg-black">
                 {isAuthenticated ? (
                     <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {session?.user?.image ? (
+                        {/* {session?.user?.image ? (
                             <img
                                 className="rounded-full"
                                 src={session.user.image}
@@ -95,7 +89,7 @@ function AuthServerPage() {
                                     {session?.user?.name?.[0] || "?"}
                                 </span>
                             </span>
-                        )}
+                        )} */}
                         <div className="flex items-center justify-between">
                             <div className="mt-2">
                                 <p className="text-lg font-medium text-white">{session?.user?.name}</p>

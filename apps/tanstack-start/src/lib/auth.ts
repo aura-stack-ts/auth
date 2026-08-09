@@ -1,14 +1,7 @@
 import { createAuth } from "@aura-stack/tanstack-start"
 import { createSecretValue } from "@aura-stack/tanstack-start/crypto"
-import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/tanstack-start/oauth"
 
-export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[]
-
-export const {
-    handlers,
-    api,
-    core: { jose },
-} = createAuth({
+export const auth = createAuth({
     oauth: ["github", "google", "gitlab"],
     basePath: "/api/auth",
     credentials: {
@@ -24,3 +17,4 @@ export const {
         },
     },
 })
+export const { handlers, api, core, __unstable_fn } = auth

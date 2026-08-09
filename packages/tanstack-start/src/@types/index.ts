@@ -187,6 +187,10 @@ type SignUp<SignUpSchema extends SchemaTypes = zod.ZodObject<any>> = RequiredFet
 >
 
 export type TanstackStartInstance<Identity extends Identities = Identities, SignUpSchema extends SchemaTypes = SchemaTypes> = {
+    __unstable_fn: OptionalFetcher<undefined, undefined, Promise<string>>
+    /**
+     *
+     */
     core: AuthInstance<FromShapeToObject<Identity>, SignUpSchema>
     api: {
         getSession: GetSession<Identity>

@@ -1,0 +1,116 @@
+import { core } from "@/lib/auth"
+import { redirect } from "@tanstack/react-router"
+import { createServerFn } from "@tanstack/react-start"
+import { getRequest, getRequestHeaders } from "@tanstack/react-start/server"
+
+export const getSession = createServerFn({ method: "GET" }).handler(async () => {
+    try {
+        const session = await core.api.getSession({
+            headers: getRequestHeaders(),
+        })
+        if (!session.success) return null
+        return session.session as any
+    } catch (error) {
+        console.error("[error:server] getSession", error)
+        return null
+    }
+})
+
+export const signOutFn = createServerFn({ method: "POST" }).handler(async () => {
+    const response = await core.api
+        .signOut({
+            headers: getRequestHeaders(),
+        })
+        .catch((error) => {
+            console.error("[error:server] signOut", error)
+            return null
+        })
+    throw redirect({ to: "/", headers: response?.headers, reloadDocument: true })
+})
+
+export const signInFn = createServerFn({ method: "POST" })
+    .validator((data: { provider: string }) => {
+        if (!data || typeof data.provider !== "string" || !data.provider.trim()) {
+            throw new Error("provider must be a non-empty string")
+        }
+        return data
+    })
+    .handler(async ({ data }) => {
+        const response = await core.api
+            .signIn(data.provider, {
+                request: getRequest(),
+                redirect: false,
+            })
+            .catch((error) => {
+                console.error("[error:server] signIn", error)
+                return null
+            })
+        throw redirect({
+            href: response?.signInURL ?? "/",
+        })
+    })
+
+export const signInCredentialsFn = createServerFn({ method: "POST" })
+    .validator((data: { username: string; password: string }) => {
+        if (!data || typeof data.username !== "string" || typeof data.password !== "string") {
+            throw new Error("credentials payload is invalid")
+        }
+        return data
+    })
+    .handler(async ({ data }) => {
+        const response = await core.api
+            .signInCredentials({
+                payload: {
+                    username: data.username,
+                    password: data.password,
+                },
+                request: getRequest(),
+                headers: getRequestHeaders(),
+                redirectTo: "/server",
+            })
+            .catch((error) => {
+                console.error("[error:server] signInCredentials", error)
+                return null
+            })
+
+        if (response?.redirectURL) {
+            throw redirect({
+                href: response.redirectURL,
+                headers: response.headers,
+            })
+        }
+
+        return null
+    })
+
+export const updateSessionFn = createServerFn({ method: "POST" })
+    .validator((data: { username?: string; email?: string }) => {
+        if (!data || typeof data !== "object") {
+            throw new Error("update session payload is invalid")
+        }
+        if (data.username !== undefined && typeof data.username !== "string") {
+            throw new Error("username must be a string")
+        }
+        if (data.email !== undefined && typeof data.email !== "string") {
+            throw new Error("email must be a string")
+        }
+        return data
+    })
+    .handler(async ({ data }) => {
+        const response = await core.api
+            .updateSession({
+                session: {
+                    user: {
+                        name: data.username,
+                        email: data.email,
+                    },
+                },
+                headers: getRequestHeaders(),
+            })
+            .catch((error) => {
+                console.error("[error:server] updateSession", error)
+                return null
+            })
+
+        return { success: Boolean(response?.success) }
+    })
