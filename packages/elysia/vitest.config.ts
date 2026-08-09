@@ -6,13 +6,18 @@ const SECRET_KEY = crypto.randomBytes(32).toString("base64")
 const SALT_KEY = crypto.randomBytes(32).toString("base64")
 
 const alias = {
-    "@": path.resolve(__dirname, "./src"),
-    "@test": path.resolve(__dirname, "./test"),
+    "@": path.resolve(import.meta.dirname, "./src"),
+    "@test": path.resolve(import.meta.dirname, "./test"),
 }
 
 export default defineConfig({
     test: {
         globals: true,
+        typecheck: {
+            enabled: true,
+            include: ["test/**/*.test-d.ts"],
+            exclude: ["test/**/*.test.ts"],
+        },
         coverage: {
             provider: "v8",
             enabled: true,

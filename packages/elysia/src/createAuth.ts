@@ -1,14 +1,20 @@
 import { toHandler } from "@/lib/handler"
 import { withAuth } from "@/lib/with-auth"
 import { createAuth as createAuthBasic, type AuthConfig } from "@aura-stack/auth"
+import { zod } from "@aura-stack/auth/identity/zod"
+import type { EditableShape, ZodIdentitySchema } from "@aura-stack/auth/types"
 import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/auth/identity"
+import type { ElysiaInstance } from "./@types"
 
 /**
  * Creates an Aura Auth instance with Elysia-specific utilities.
  */
-export const createAuth = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+export const createAuth = <
+    Identity extends Identities = EditableShape<ZodIdentitySchema>,
+    SignUpSchema extends SchemaTypes = zod.ZodObject<any>,
+>(
     config: AuthConfig<Identity, SignUpSchema>
-) => {
+): ElysiaInstance<Identity, SignUpSchema> => {
     const auth = createAuthBasic<Identity, SignUpSchema>(config)
 
     return {
