@@ -42,7 +42,8 @@
     "./oauth/spotify": "./src/oauth/spotify.ts",
     "./oauth/strava": "./src/oauth/strava.ts",
     "./oauth/twitch": "./src/oauth/twitch.ts",
-    "./oauth/x": "./src/oauth/x.ts"
+    "./oauth/x": "./src/oauth/x.ts",
+    "./types": "./src/@types/index.ts"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/_core", "src/oauth", "src/identity", "README.md", "CHANGELOG.md"],

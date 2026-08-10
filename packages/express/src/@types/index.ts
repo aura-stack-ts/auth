@@ -5,6 +5,8 @@ import type { LocalsWithSession } from "@/lib/with-auth.ts"
 import type { InferSchema, SchemaTypes } from "@aura-stack/auth/identity"
 import type { Prettify, RemoveIndexSignature } from "@aura-stack/auth/types"
 
+export type * from "@aura-stack/auth/types"
+
 /**
  * The ExpressInstance type represents the shape of the object returned by the `createAuth`
  * function in the Express integration of Aura Auth. It was implemented due to errors related

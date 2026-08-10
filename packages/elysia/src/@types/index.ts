@@ -3,6 +3,11 @@ import type { WithAuthContext } from "@/lib/with-auth"
 import type { zod } from "@aura-stack/auth/identity/zod"
 import type { AuthInstance, InferSchema, Prettify, RemoveIndexSignature, SchemaTypes, User } from "@aura-stack/auth/types"
 
+/**
+ * Re-exports all types from the `@aura-stack/auth/types` module, which includes the core types used in Aura Auth.
+ */
+export type * from "@aura-stack/auth/types"
+
 export interface ElysiaInstance<
     DefaultUser extends User = User,
     SignUpSchema extends SchemaTypes = zod.ZodObject<any>,
