@@ -3,6 +3,7 @@
  *
  * These conditional types describe return values when `redirect()` is used (which never returns in Next.js).
  */
+import type { zod } from "@aura-stack/react/identity/zod"
 import type {
     Prettify,
     SignInAPIOptions,
@@ -26,6 +27,12 @@ import type {
     DisconnectProviderAPIReturn,
     ProviderConnectedAPIReturn,
     RefreshUserInfoAPIReturn,
+    SchemaTypes,
+    Wrap,
+    RemoveIndexSignature,
+    InferSchema,
+    GetSessionAPIOptions,
+    Session,
 } from "@aura-stack/react/types"
 
 /**
@@ -84,8 +91,8 @@ export type NextSignUpReturn<Options extends SignUpAPIOptions> = Options extends
       ? never
       : SignUpAPIReturn
 
-export interface NextAPI<DefaultUser extends User = User> {
-    getSession: (options?: any) => Promise<any>
+export interface NextAPI<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>> {
+    getSession: (options?: GetSessionAPIOptions) => Promise<Session<DefaultUser> | null>
     signIn: <Options extends SignInAPIOptions>(
         provider: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
@@ -97,11 +104,13 @@ export interface NextAPI<DefaultUser extends User = User> {
     getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: any) => Promise<any>
     getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: any) => Promise<any>
     signOut: <Options extends SignOutAPIOptions>(options?: Partial<Options>) => Promise<NextSignOutReturn<Options>>
-    signUp: <Options extends SignUpAPIOptions>(options: Options) => Promise<NextSignUpReturn<Options>>
+    signUp: <Options extends SignUpAPIOptions<Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>>>(
+        options: Options
+    ) => Promise<NextSignUpReturn<Options>>
     refreshUserInfo: <Options extends RefreshUserInfoAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
-    ) => Promise<RefreshUserInfoAPIReturn>
+    ) => Promise<RefreshUserInfoAPIReturn<DefaultUser>>
     revokeToken: <Options extends RevokeTokenAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options

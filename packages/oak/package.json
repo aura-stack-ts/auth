@@ -12,7 +12,7 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist src/_core src/oauth",
+    "clean": "rm -rf dist src/_core src/oauth src/identity",
     "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm clean:cts && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js"
@@ -47,7 +47,8 @@
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*"
+    "@aura-stack/tsdown-config": "workspace:*",
+    "vitest": "catalog:vitest"
   },
   "peerDependencies": {},
   "exports": {

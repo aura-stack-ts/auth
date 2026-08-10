@@ -1,4 +1,6 @@
 import type { RouteParams, RouterContext } from "@oak/oak"
+import type { zod } from "@aura-stack/auth/identity/zod"
+import type { SchemaTypes } from "@aura-stack/auth/types"
 import type { AuthInstance, User } from "@aura-stack/auth"
 
 export const toSetHeaders = <Route extends string>(ctx: RouterContext<Route>, headers: Headers) => {
@@ -12,7 +14,9 @@ const isRedirect = (response: Response) => {
     return location !== null && response.status >= 300 && response.status < 400
 }
 
-export const toHandler = <DefaultUser extends User = User>(config: AuthInstance<DefaultUser>) => {
+export const toHandler = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>(
+    config: AuthInstance<DefaultUser, SignUpSchema>
+) => {
     return async <Route extends string>(ctx: RouterContext<Route, RouteParams<Route>>) => {
         const handler = config.handlers[ctx.request.method as keyof typeof config.handlers]
         if (!handler) {

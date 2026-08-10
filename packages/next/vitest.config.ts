@@ -1,13 +1,14 @@
 import path from "path"
+import crypto from "crypto"
 import { defineConfig } from "vitest/config"
-import { createSecretValue } from "@aura-stack/react/crypto"
 
-const SECRET_KEY = createSecretValue(44)
-const SALT_KEY = createSecretValue(44)
+const SECRET_KEY = crypto.randomBytes(32).toString("base64url")
+const SALT_KEY = crypto.randomBytes(32).toString("base64url")
 
 export default defineConfig({
     test: {
         include: ["test/**/*.test.ts", "test/**/*.test.tsx"],
+        exclude: ["test/**/*.test-d.ts"],
         environment: "node",
         clearMocks: true,
         restoreMocks: true,
@@ -21,14 +22,15 @@ export default defineConfig({
             AURA_AUTH_SALT: SALT_KEY,
         },
         typecheck: {
-            include: ["test/**/*.test-d.ts"],
             enabled: false,
+            include: ["test/**/*.test-d.ts"],
+            exclude: ["test/**/*.test.ts", "test/**/*.test.tsx"],
         },
     },
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@test": path.resolve(__dirname, "./test"),
+            "@": path.resolve(import.meta.dirname, "./src"),
+            "@test": path.resolve(import.meta.dirname, "./test"),
         },
     },
 })

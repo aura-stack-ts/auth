@@ -6,10 +6,12 @@
     "dev": "deno run --watch src/index.ts",
     "test": "deno test --allow-env --allow-net --no-check",
     "test:coverage": "deno test --allow-env --allow-net --no-check --coverage=coverage",
-    "test:filter": "deno test --allow-env --allow-net --no-check --filter"
+    "test:filter": "deno test --allow-env --allow-net --no-check --filter",
+    "test:types": "deno test --allow-env --allow-net --no-check test/types.test-d.ts"
   },
   "imports": {
     "@/": "./src/",
+    "@std/testing": "jsr:@std/testing@^1.0.20",
     "path-to-regexp": "npm:path-to-regexp@^6.3.0",
     "@std/assert": "jsr:@std/assert@^1.0.19",
     "@oak/oak": "jsr:@oak/oak@^17.2.0"

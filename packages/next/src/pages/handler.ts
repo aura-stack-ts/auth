@@ -1,4 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next"
+import type { SchemaTypes } from "@/@types/index"
+import type { zod } from "@aura-stack/react/identity/zod"
 import type { AuthInstance, User } from "@aura-stack/react"
 
 const getBaseURL = (request: NextApiRequest) => {
@@ -31,7 +33,9 @@ export const setResponseHeaders = (res: NextApiResponse, headers: Headers) => {
  *
  * export default toHandler(handlers)
  */
-export const toHandler = <DefaultUser extends User = User>(handlers: AuthInstance<DefaultUser>["handlers"]) => {
+export const toHandler = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>({
+    handlers,
+}: AuthInstance<DefaultUser, SignUpSchema>) => {
     return async (req: NextApiRequest, res: NextApiResponse) => {
         const method = req.method ?? "GET"
         const handler = handlers[method as keyof typeof handlers]

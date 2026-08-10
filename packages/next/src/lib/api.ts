@@ -25,7 +25,9 @@ import type {
     RevokeTokenAPIOptions,
     DisconnectProviderAPIOptions,
     ProviderConnectedAPIOptions,
+    SchemaTypes,
 } from "@aura-stack/react/types"
+import type { zod } from "@aura-stack/react/identity/zod"
 
 /**
  * Internal helper to sync Set-Cookie headers from Aura Auth to Next.js cookie store.
@@ -194,7 +196,9 @@ export const isProviderConnected = <DefaultUser extends User = User>({ api }: Au
     }
 }
 
-export const api = <DefaultUser extends User = User>(config: AuthInstance<DefaultUser>) => {
+export const api = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>(
+    config: AuthInstance<DefaultUser, SignUpSchema>
+) => {
     return {
         /**
          * Retrieves the current session data from the server-side.
@@ -390,5 +394,5 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * })
          */
         isProviderConnected: isProviderConnected<DefaultUser>(config),
-    } satisfies NextAPI<DefaultUser>
+    } satisfies NextAPI<DefaultUser, SignUpSchema>
 }

@@ -15,6 +15,7 @@ import type {
     ReactRouterDisconnectProviderAPIOptions,
     ReactRouterProviderConnectedAPIOptions,
 } from "@/@types/api"
+import type { zod } from "@aura-stack/react/identity/zod"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type {
     AccessTokenAPIOptions,
@@ -28,6 +29,10 @@ import type {
     RevokeTokenAPIReturn,
     DisconnectProviderAPIReturn,
     ProviderConnectedAPIReturn,
+    SchemaTypes,
+    Wrap,
+    RemoveIndexSignature,
+    InferSchema,
 } from "@aura-stack/react/types"
 
 export const getSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
@@ -113,9 +118,15 @@ export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<D
     }
 }
 
-export const signUp = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
-    return async <Options extends ReactRouterSignUpAPIOptions>(options: Options): Promise<ReactRouterSignUpReturn<Options>> => {
-        const signUp = await api.signUp({
+type Infer<T> = Wrap<RemoveIndexSignature<InferSchema<T>>> & Record<string, any>
+
+export const signUp = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>({
+    api,
+}: AuthInstance<DefaultUser, SignUpSchema>) => {
+    return async <Options extends ReactRouterSignUpAPIOptions<Infer<SignUpSchema>>>(
+        options: Options
+    ): Promise<ReactRouterSignUpReturn<Options>> => {
+        const signUp = await api.signUp<Infer<SignUpSchema>>({
             headers: options.request.headers,
             ...options,
         })
@@ -178,7 +189,9 @@ export const isProviderConnected = <DefaultUser extends User = User>({ api }: Au
     }
 }
 
-export const api = <DefaultUser extends User = User>(config: AuthInstance<DefaultUser>) => {
+export const api = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>(
+    config: AuthInstance<DefaultUser, SignUpSchema>
+) => {
     return {
         /**
          * Retrieves the current session data from the server-side.
@@ -339,7 +352,7 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          *   })
          * }
          */
-        signUp: signUp<DefaultUser>(config),
+        signUp: signUp<DefaultUser, SignUpSchema>(config),
         /**
          * Refreshes user information from the OAuth provider on the server-side. It retrieves the latest
          * user information from the provider and updates the session accordingly.
@@ -401,5 +414,5 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * }
          */
         isProviderConnected: isProviderConnected<DefaultUser>(config),
-    } satisfies ReactRouterAPI<DefaultUser>
+    } satisfies ReactRouterAPI<DefaultUser, SignUpSchema>
 }

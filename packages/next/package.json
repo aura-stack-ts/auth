@@ -14,8 +14,9 @@
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
+    "test:types": "vitest --run --typecheck.only",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist src/_core src/oauth",
+    "clean": "rm -rf dist src/_core src/oauth src/identity",
     "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js --from react"
@@ -80,7 +81,8 @@
     "next": "catalog:next",
     "node-mocks-http": "^1.17.2",
     "react": "catalog:react",
-    "react-dom": "catalog:react"
+    "react-dom": "catalog:react",
+    "vitest": "catalog:vitest"
   },
   "peerDependencies": {
     "next": ">=16.0.0",

@@ -29,6 +29,10 @@ import type {
     DisconnectProviderAPIReturn,
     ProviderConnectedAPIOptions,
     ProviderConnectedAPIReturn,
+    SchemaTypes,
+    Wrap,
+    RemoveIndexSignature,
+    InferSchema,
 } from "@aura-stack/react/types"
 import type { BuiltInOAuthProvider, LiteralUnion } from "@aura-stack/react/types"
 
@@ -88,7 +92,9 @@ export type ReactRouterUpdateSessionReturn<
     ? UpdateSessionAPIReturn<DefaultUser>
     : Response
 
-export type ReactRouterSignUpAPIOptions = Prettify<SignUpAPIOptions & { request: Request }>
+export type ReactRouterSignUpAPIOptions<Payload extends Record<string, any> = Record<string, any>> = Prettify<
+    SignUpAPIOptions<Payload> & { request: Request }
+>
 
 export type ReactRouterSignUpReturn<Options extends ReactRouterSignUpAPIOptions> = Options extends {
     redirect: false
@@ -104,7 +110,7 @@ export type ReactRouterDisconnectProviderAPIOptions = Prettify<DisconnectProvide
 
 export type ReactRouterProviderConnectedAPIOptions = Prettify<ProviderConnectedAPIOptions & { request: Request }>
 
-export interface ReactRouterAPI<DefaultUser extends User = User> {
+export interface ReactRouterAPI<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = SchemaTypes> {
     getSession: (options: GetSessionAPIOptions) => Promise<Session<DefaultUser> | null>
     signIn: <Options extends ReactRouterSignInAPIOptions>(
         providerId: LiteralUnion<BuiltInOAuthProvider>,
@@ -119,7 +125,9 @@ export interface ReactRouterAPI<DefaultUser extends User = User> {
     getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<GetProviderTokensAPIReturn>
     getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: AccessTokenAPIOptions) => Promise<AccessTokenAPIReturn>
     signOut: <Options extends ReactRouterSignOutAPIOptions>(options: Options) => Promise<ReactRouterSignOutReturn<Options>>
-    signUp: <Options extends ReactRouterSignUpAPIOptions>(options: Options) => Promise<ReactRouterSignUpReturn<Options>>
+    signUp: <Options extends ReactRouterSignUpAPIOptions<Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>>>(
+        options: Options
+    ) => Promise<ReactRouterSignUpReturn<Options>>
     refreshUserInfo: <Options extends ReactRouterRefreshUserInfoAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options: Options

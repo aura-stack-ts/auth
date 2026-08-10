@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed type inference for `signUp.schema` across authentication instances. The configured Zod, Valibot, TypeBox, or ArkType schema is now correctly propagated through the auth instance. Updated `InferUser`, `InferSession`, and `InferSignUp` to correctly derive their types from the corresponding auth instance. [#256](https://github.com/aura-stack-ts/auth/pull/256)
+
 ---
 
 ## [0.3.0] - 2026-08-05

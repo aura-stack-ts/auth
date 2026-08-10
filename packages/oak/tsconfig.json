@@ -2,9 +2,10 @@
   "extends": "@aura-stack/tsconfig/tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@test/*": ["./test/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]
 }

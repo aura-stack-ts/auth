@@ -4,15 +4,21 @@ import { defineConfig } from "vitest/config"
 export default defineConfig({
     test: {
         include: ["test/**/*.test.tsx", "test/**/*.test.ts"],
+        exclude: ["test/**/*.test-d.ts"],
         environment: "jsdom",
         globals: true,
         clearMocks: true,
         restoreMocks: true,
+        typecheck: {
+            enabled: false,
+            include: ["test/**/*.test-d.ts"],
+            exclude: ["test/**/*.test.ts"],
+        },
     },
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@test": path.resolve(__dirname, "./test"),
+            "@": path.resolve(import.meta.dirname, "./src"),
+            "@test": path.resolve(import.meta.dirname, "./test"),
         },
     },
 })
