@@ -1,9 +1,9 @@
 import path from "path"
+import crypto from "crypto"
 import { defineConfig } from "vitest/config"
-import { createSecretValue } from "@aura-stack/react/crypto"
 
-const SECRET_KEY = createSecretValue(44)
-const SALT_KEY = createSecretValue(44)
+const SECRET_KEY = crypto.randomBytes(32).toString("base64url")
+const SALT_KEY = crypto.randomBytes(32).toString("base64url")
 
 export default defineConfig({
     test: {
@@ -21,14 +21,15 @@ export default defineConfig({
             AURA_AUTH_SALT: SALT_KEY,
         },
         typecheck: {
+            enabled: true,
             include: ["test/**/*.test-d.ts"],
-            enabled: false,
+            exclude: ["test/**/*.test.ts", "test/**/*.test.tsx"],
         },
     },
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@test": path.resolve(__dirname, "./test"),
+            "@": path.resolve(import.meta.dirname, "./src"),
+            "@test": path.resolve(import.meta.dirname, "./test"),
         },
     },
 })

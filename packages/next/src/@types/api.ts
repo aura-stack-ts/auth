@@ -3,6 +3,7 @@
  *
  * These conditional types describe return values when `redirect()` is used (which never returns in Next.js).
  */
+import type { zod } from "@/identity/zod"
 import type {
     Prettify,
     SignInAPIOptions,
@@ -26,6 +27,10 @@ import type {
     DisconnectProviderAPIReturn,
     ProviderConnectedAPIReturn,
     RefreshUserInfoAPIReturn,
+    SchemaTypes,
+    Wrap,
+    RemoveIndexSignature,
+    InferSchema,
 } from "@aura-stack/react/types"
 
 /**
@@ -84,7 +89,7 @@ export type NextSignUpReturn<Options extends SignUpAPIOptions> = Options extends
       ? never
       : SignUpAPIReturn
 
-export interface NextAPI<DefaultUser extends User = User> {
+export interface NextAPI<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>> {
     getSession: (options?: any) => Promise<any>
     signIn: <Options extends SignInAPIOptions>(
         provider: LiteralUnion<BuiltInOAuthProvider>,
@@ -97,7 +102,9 @@ export interface NextAPI<DefaultUser extends User = User> {
     getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: any) => Promise<any>
     getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: any) => Promise<any>
     signOut: <Options extends SignOutAPIOptions>(options?: Partial<Options>) => Promise<NextSignOutReturn<Options>>
-    signUp: <Options extends SignUpAPIOptions>(options: Options) => Promise<NextSignUpReturn<Options>>
+    signUp: <Options extends SignUpAPIOptions<Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>>>(
+        options: Options
+    ) => Promise<NextSignUpReturn<Options>>
     refreshUserInfo: <Options extends RefreshUserInfoAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
