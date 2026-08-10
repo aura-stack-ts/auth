@@ -9,6 +9,10 @@
     "build": "pnpm sync:modules && tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "test:types": "vitest --run --typecheck.only",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
@@ -47,7 +51,8 @@
   },
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*"
+    "@aura-stack/tsdown-config": "workspace:*",
+    "vitest": "catalog:vitest"
   },
   "peerDependencies": {},
   "exports": {

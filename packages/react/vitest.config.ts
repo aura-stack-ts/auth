@@ -6,6 +6,11 @@ export default defineConfig({
         include: ["test/**/*.test.tsx", "test/**/*.test.ts"],
         environment: "jsdom",
         globals: true,
+        typecheck: {
+            enabled: true,
+            include: ["test/**/*.test-d.ts"],
+            exclude: ["test/**/*.test.ts", "test/**/*.test.tsx"],
+        },
     },
     resolve: {
         alias: {

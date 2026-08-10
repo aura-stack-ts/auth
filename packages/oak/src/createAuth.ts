@@ -2,10 +2,11 @@ import { toHandler } from "@/lib/handler.ts"
 import { withAuth } from "@/lib/with-auth.ts"
 import { type AuthConfig, createAuth as createAuthInstance } from "@aura-stack/auth"
 import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/auth/identity"
+import type { OakInstance } from "@/types/index.ts"
 
 export const createAuth = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config: AuthConfig<Identity, SignUpSchema>
-) => {
+): OakInstance<FromShapeToObject<Identity>, SignUpSchema> => {
     const auth = createAuthInstance<Identity, SignUpSchema>(config)
     return {
         ...auth,
@@ -16,7 +17,7 @@ export const createAuth = <Identity extends Identities, SignUpSchema extends Sch
          * @example
          * router.all("/api/auth/(.*)", auth.toHandler)
          */
-        toHandler: toHandler(auth),
+        toHandler: toHandler<FromShapeToObject<Identity>, SignUpSchema>(auth),
         /**
          * Middleware to be used with Oak's `.use()` to inject the session into the context.
          *
@@ -28,6 +29,6 @@ export const createAuth = <Identity extends Identities, SignUpSchema extends Sch
          *     }
          * })
          */
-        withAuth: withAuth<FromShapeToObject<Identity>>(auth),
+        withAuth: withAuth<FromShapeToObject<Identity>, SignUpSchema>(auth),
     }
 }

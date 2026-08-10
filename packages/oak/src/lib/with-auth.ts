@@ -1,5 +1,6 @@
+import type { zod } from "@/identity/zod.ts"
 import type { Session, User } from "@aura-stack/auth"
-import type { AuthInstance } from "@aura-stack/auth/types"
+import type { AuthInstance, SchemaTypes } from "@aura-stack/auth/types"
 import type { Next, RouteParams, RouterContext } from "@oak/oak"
 
 export interface WithAuthContext<DefaultUser extends User = User> {
@@ -12,7 +13,9 @@ export type RouterContextWithAuth<
     DefaultUser extends User = User,
 > = RouterContext<Route, Params, WithAuthContext<DefaultUser>>
 
-export const withAuth = <DefaultUser extends User = User>(config: AuthInstance<DefaultUser>) => {
+export const withAuth = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>(
+    config: AuthInstance<DefaultUser, SignUpSchema>
+) => {
     return async <Route extends string>(ctx: RouterContextWithAuth<Route, RouteParams<Route>, DefaultUser>, next: Next) => {
         try {
             const session = await config.api.getSession({

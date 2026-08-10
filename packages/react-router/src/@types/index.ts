@@ -16,3 +16,5 @@ export interface ReactRouterInstance<DefaultUser extends User = User, SignUpSche
     core: AuthInstance<DefaultUser, SignUpSchema>
     handlers: Handlers
 }
+
+export type { InferSession, InferUser, InferSignUp } from "@/identity/index"
