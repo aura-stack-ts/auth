@@ -26,6 +26,7 @@ describe("createAuth", () => {
             },
         })
         const { api } = auth
+
         type Identity = FromShapeToObject<IdentityShape & { role: zod.ZodString; nickname: zod.ZodOptional<zod.ZodString> }>
 
         test("Infer Types", () => {

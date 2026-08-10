@@ -1,17 +1,18 @@
 import { describe, expectTypeOf, test } from "vitest"
 import { createAuth } from "@/createAuth"
 import { zod, identitySchema, type IdentityShape } from "@aura-stack/auth/identity/zod"
-import type { FromShapeToObject, Identities, InferSession, InferUser, InferSignUp } from "@/identity"
-import {
-    type DeepPartial,
-    type ReactRouterSignUpAPIOptions,
-    type ReactRouterSignUpReturn,
-    type ReactRouterUpdateSessionAPIOptions,
-    type ReactRouterUpdateSessionReturn,
-    type RefreshUserInfoAPIReturn,
-    type Session,
-    type User,
-    type Wrap,
+import type { FromShapeToObject, Identities, InferSession, InferUser } from "@/identity"
+import type {
+    DeepPartial,
+    ReactRouterSignUpAPIOptions,
+    ReactRouterSignUpReturn,
+    ReactRouterUpdateSessionAPIOptions,
+    ReactRouterUpdateSessionReturn,
+    RefreshUserInfoAPIReturn,
+    Session,
+    User,
+    Wrap,
+    InferSignUp,
 } from "@/@types"
 
 describe("createAuth", () => {

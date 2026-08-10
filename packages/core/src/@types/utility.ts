@@ -124,8 +124,14 @@ export type Wrap<T> = T extends any ? { [K in keyof T]: T[K] } : never
  *
  * type User = InferUser<typeof auth>
  */
-export type InferUser<Config extends AuthInstance> =
-    Config extends AuthInstance<infer Identity> ? Prettify<Merge<Identity, {}>> : User
+export type InferUser<Config> =
+    Config extends AuthInstance<infer Identity>
+        ? Prettify<Merge<Identity, {}>>
+        : Config extends { core: infer Core }
+          ? Core extends AuthInstance<infer Identity>
+              ? Prettify<Merge<Identity, {}>>
+              : User
+          : User
 
 /**
  * Infers the session type from an {@link AuthInstance} config.
@@ -140,7 +146,7 @@ export type InferUser<Config extends AuthInstance> =
  *
  * type Session = InferSession<typeof auth>
  */
-export type InferSession<Config extends AuthInstance> = Prettify<Session<InferUser<Config>>>
+export type InferSession<Config> = Prettify<Session<InferUser<Config>>>
 
 /**
  * Infers the user type from a Zod identity schema, or falls back to {@link User}.
@@ -188,9 +194,9 @@ export type SessionFrom<T extends SchemaTypes> = Wrap<Session<Merge<UserFrom<T>,
  *
  * type SignUp = InferSignUp<typeof auth>
  */
-export type InferSignUp<Config extends AuthInstance> =
+export type InferSignUp<Config> =
     Config extends AuthInstance<infer _, infer SignUpSchema>
-        ? Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>
+        ? Prettify<Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>>
         : Record<string, any>
 
 export type RemoveIndexSignature<T> = {

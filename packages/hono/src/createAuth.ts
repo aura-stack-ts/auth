@@ -11,7 +11,7 @@ export const createAuth = <
     SignUpSchema extends SchemaTypes = zod.ZodObject<any>,
 >(
     config: AuthConfig<Identity, SignUpSchema>
-): HonoInstance<Identity, SignUpSchema> => {
+): HonoInstance<FromShapeToObject<Identity>, SignUpSchema> => {
     const auth = createAuthBasic<Identity, SignUpSchema>(config)
 
     return {

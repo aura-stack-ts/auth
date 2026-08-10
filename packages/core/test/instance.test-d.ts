@@ -27,7 +27,7 @@ describe("createAuth", () => {
         type Identity = FromShapeToObject<IdentityShape & { role: zod.ZodString; nickname: zod.ZodOptional<zod.ZodString> }>
 
         test("Infer Types", () => {
-            expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<Wrap<InferUser<typeof auth>>>()
+            expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<Wrap<Identity>>()
             expectTypeOf<InferSession<typeof auth>>().toEqualTypeOf<Session<Wrap<Identity>>>()
             expectTypeOf<InferSignUp<typeof auth>>().toEqualTypeOf<{}>()
         })

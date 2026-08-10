@@ -1,7 +1,7 @@
 import type { zod } from "@/identity/zod.ts"
 import type { RouterContextWithAuth } from "@/lib/with-auth.ts"
 import type { AuthInstance, User } from "@aura-stack/auth"
-import type { SchemaTypes } from "@aura-stack/auth/types"
+import type { InferSchema, Prettify, RemoveIndexSignature, SchemaTypes, Wrap } from "@aura-stack/auth/types"
 import type { RouteParams, RouterContext, Next } from "@oak/oak"
 
 export interface OakInstance<
@@ -15,4 +15,5 @@ export interface OakInstance<
     ) => Promise<any>
 }
 
-export type { InferUser, InferSession, InferSignUp } from "@/identity/index.ts"
+export type InferSignUp<T> =
+    T extends OakInstance<infer _, infer SignUpSchema> ? Prettify<Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>> : never

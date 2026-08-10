@@ -5,28 +5,12 @@ import { Value } from "typebox/value"
 import { ArkErrors, type } from "arktype"
 import { createAuth } from "@/createAuth.ts"
 import { type Static, Type as Typebox } from "typebox"
-import { zod, identitySchema, identitySchema as UserIdentity, type IdentityShape } from "@/identity/zod.ts"
+import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 import { createSchemaRegistry, deriveSchema } from "@/validator/registry.ts"
 import { identitySchema as UserIdentityArkType } from "@/identity/arktype.ts"
 import { identitySchema as UserIdentityTypeBox } from "@/identity/typebox.ts"
 import { identitySchema as UserIdentityValibot } from "@/identity/valibot.ts"
-import {
-    createIdentity,
-    type FromShapeToObject,
-    type Identities,
-    type InferSession,
-    type InferUser,
-    type UserFrom,
-} from "@/identity/index.ts"
-import type { Session, User } from "@/index.ts"
-import type { InferSignUp, Wrap } from "@/@types/utility.ts"
-import type {
-    GetSessionAPIReturn,
-    RefreshUserInfoAPIReturn,
-    SignUpAPIOptions,
-    SignUpAPIReturn,
-    UpdateSessionAPIOptions,
-} from "@/@types/api.ts"
+import { createIdentity, type InferUser, type UserFrom } from "@/identity/index.ts"
 
 describe("createIdentity", () => {
     test("createIdentity with Zod schema", () => {

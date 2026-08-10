@@ -12,7 +12,7 @@ export const createAuth = <
     SignUpSchema extends SchemaTypes = zod.ZodObject<any>,
 >(
     config: AuthConfig<Identity, SignUpSchema>
-): ExpressInstance<Identity, SignUpSchema> => {
+): ExpressInstance<FromShapeToObject<Identity>, SignUpSchema> => {
     const auth = createBasicAuth<Identity, SignUpSchema>(config)
     return {
         ...auth,

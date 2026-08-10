@@ -1,16 +1,16 @@
 import { createAuth as createAuthInstance } from "@aura-stack/react/server"
 import { api } from "@/lib/api"
+import type { zod } from "@/identity/zod"
 import type { AuthConfig } from "@aura-stack/react"
 import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/react/identity"
-import type { zod } from "@/identity/zod"
-import type { EditableShape, NextInstance, ZodIdentitySchema } from "@/@types/index"
+import type { EditableShape, NextAppInstance, ZodIdentitySchema } from "@/@types/index"
 
 export const createAuth = <
     Identity extends Identities = EditableShape<ZodIdentitySchema>,
     SignUpSchema extends SchemaTypes = zod.ZodObject<any>,
 >(
     config: AuthConfig<Identity, SignUpSchema>
-): NextInstance<FromShapeToObject<Identity>, SignUpSchema> => {
+): NextAppInstance<FromShapeToObject<Identity>, SignUpSchema> => {
     const auth = createAuthInstance<Identity, SignUpSchema>(config)
 
     return {
