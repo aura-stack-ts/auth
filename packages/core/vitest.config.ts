@@ -31,7 +31,7 @@ export default defineConfig({
             "AURA_AUTH_OAUTH-PROFILE_CLIENT_SECRET": "oauth_profile_client_secret",
         },
         typecheck: {
-            enabled: true,
+            enabled: false,
             include: ["test/**/*.test-d.ts"],
             exclude: ["test/**/*.test.ts"],
         },

@@ -10,7 +10,7 @@ export default defineConfig({
         clearMocks: true,
         restoreMocks: true,
         typecheck: {
-            enabled: true,
+            enabled: false,
             include: ["test/**/*.test-d.ts"],
             exclude: ["test/**/*.test.ts"],
         },

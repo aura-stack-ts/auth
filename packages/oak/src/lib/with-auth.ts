@@ -1,7 +1,7 @@
-import type { zod } from "@/identity/zod.ts"
-import type { Session, User } from "@aura-stack/auth"
-import type { AuthInstance, SchemaTypes } from "@aura-stack/auth/types"
 import type { Next, RouteParams, RouterContext } from "@oak/oak"
+import type { Session, User } from "@aura-stack/auth"
+import type { zod } from "@aura-stack/auth/identity/zod"
+import type { AuthInstance, SchemaTypes } from "@aura-stack/auth/types"
 
 export interface WithAuthContext<DefaultUser extends User = User> {
     session: Session<DefaultUser> | null

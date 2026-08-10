@@ -1,8 +1,8 @@
-import type { zod } from "@/identity/zod.ts"
-import type { RouterContextWithAuth } from "@/lib/with-auth.ts"
-import type { AuthInstance, User } from "@aura-stack/auth"
-import type { InferSchema, Prettify, RemoveIndexSignature, SchemaTypes, Wrap } from "@aura-stack/auth/types"
 import type { RouteParams, RouterContext, Next } from "@oak/oak"
+import type { zod } from "@aura-stack/auth/identity/zod"
+import type { AuthInstance, User } from "@aura-stack/auth"
+import type { RouterContextWithAuth } from "@/lib/with-auth.ts"
+import type { InferSchema, Prettify, RemoveIndexSignature, SchemaTypes, Wrap } from "@aura-stack/auth/types"
 
 export interface OakInstance<
     DefaultUser extends User = User,

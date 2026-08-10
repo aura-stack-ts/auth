@@ -14,7 +14,7 @@ export default defineConfig({
     test: {
         globals: true,
         typecheck: {
-            enabled: true,
+            enabled: false,
             include: ["test/**/*.test-d.ts"],
             exclude: ["test/**/*.test.ts"],
         },

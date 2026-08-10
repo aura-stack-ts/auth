@@ -1,7 +1,7 @@
 import { describe, expectTypeOf, test } from "vitest"
 import { createAuth } from "@/createAuth"
-import { zod, identitySchema, type IdentityShape } from "@aura-stack/auth/identity/zod"
-import type { FromShapeToObject, Identities, InferSession, InferUser } from "@/identity"
+import { zod, identitySchema, type IdentityShape } from "@aura-stack/react/identity/zod"
+import type { FromShapeToObject, Identities, InferSession, InferUser } from "@aura-stack/react/identity"
 import type {
     DeepPartial,
     ReactRouterSignUpAPIOptions,
@@ -13,7 +13,7 @@ import type {
     User,
     Wrap,
     InferSignUp,
-} from "@/@types"
+} from "@/@types/index"
 
 describe("createAuth", () => {
     describe("with custom identity", async () => {

@@ -1,7 +1,7 @@
 import type { RouteParams, RouterContext } from "@oak/oak"
-import type { AuthInstance, User } from "@aura-stack/auth"
-import type { zod } from "@/identity/zod.ts"
+import type { zod } from "@aura-stack/auth/identity/zod"
 import type { SchemaTypes } from "@aura-stack/auth/types"
+import type { AuthInstance, User } from "@aura-stack/auth"
 
 export const toSetHeaders = <Route extends string>(ctx: RouterContext<Route>, headers: Headers) => {
     for (const [key, value] of headers.entries()) {

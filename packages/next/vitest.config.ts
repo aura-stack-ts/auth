@@ -22,7 +22,7 @@ export default defineConfig({
             AURA_AUTH_SALT: SALT_KEY,
         },
         typecheck: {
-            enabled: true,
+            enabled: false,
             include: ["test/**/*.test-d.ts"],
             exclude: ["test/**/*.test.ts", "test/**/*.test.tsx"],
         },

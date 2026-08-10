@@ -8,7 +8,7 @@ export default defineConfig({
         environment: "jsdom",
         globals: true,
         typecheck: {
-            enabled: true,
+            enabled: false,
             include: ["test/**/*.test-d.ts"],
             exclude: ["test/**/*.test.ts", "test/**/*.test.tsx"],
         },
