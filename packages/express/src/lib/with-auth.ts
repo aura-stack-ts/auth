@@ -1,8 +1,8 @@
 import { toWebRequest } from "@/lib/handler.ts"
 import type { RequestHandler } from "express"
-import type { AuthInstance, User, Session } from "@aura-stack/auth"
-import type { zod } from "@/identity/zod.ts"
+import type { zod } from "@aura-stack/auth/identity/zod"
 import type { SchemaTypes } from "@aura-stack/auth/identity"
+import type { AuthInstance, User, Session } from "@aura-stack/auth"
 
 export type LocalsWithSession<DefaultUser extends User = User> = {
     session?: Session<DefaultUser> | null

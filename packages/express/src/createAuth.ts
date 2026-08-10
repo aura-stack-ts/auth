@@ -2,7 +2,7 @@ import { createAuth as createBasicAuth, type AuthConfig } from "@aura-stack/auth
 import { withAuth } from "@/lib/with-auth.ts"
 import { toExpressHandler } from "@/lib/handler.ts"
 import type { Request, Response } from "express"
-import type { zod } from "@/identity/zod.ts"
+import type { zod } from "@aura-stack/auth/identity/zod"
 import type { ExpressInstance } from "@/@types/index.ts"
 import type { EditableShape, ZodIdentitySchema } from "@aura-stack/auth/types"
 import type { Identities, FromShapeToObject, SchemaTypes } from "@aura-stack/auth/identity"

@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory"
 import type { AuthInstance, Session, User } from "@aura-stack/auth"
-import type { SchemaTypes } from "@/identity"
-import type { zod } from "@/identity/zod"
+import type { zod } from "@aura-stack/auth/identity/zod"
+import type { SchemaTypes } from "@aura-stack/auth/identity"
 
 export type EnvWithSession<DefaultUser extends User = User> = {
     session?: Session<DefaultUser> | null

@@ -1,7 +1,7 @@
-import type { zod } from "@/identity/zod"
-import type { WithAuthContext } from "@/lib/with-auth"
-import type { AuthInstance, InferSchema, Prettify, RemoveIndexSignature, SchemaTypes, User } from "@aura-stack/auth/types"
 import type { Context } from "elysia"
+import type { WithAuthContext } from "@/lib/with-auth"
+import type { zod } from "@aura-stack/auth/identity/zod"
+import type { AuthInstance, InferSchema, Prettify, RemoveIndexSignature, SchemaTypes, User } from "@aura-stack/auth/types"
 
 export interface ElysiaInstance<
     DefaultUser extends User = User,

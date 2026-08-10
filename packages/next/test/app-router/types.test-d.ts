@@ -1,8 +1,8 @@
 import { describe, expectTypeOf, test } from "vitest"
 import { createAuth } from "@/createAuth"
-import { zod, identitySchema, type IdentityShape } from "@aura-stack/auth/identity/zod"
-import type { FromShapeToObject } from "@aura-stack/auth/identity"
-import type { Identities, RefreshUserInfoAPIReturn, Session, SignUpAPIOptions, User, Wrap } from "@aura-stack/auth/types"
+import { zod, identitySchema, type IdentityShape } from "@aura-stack/react/identity/zod"
+import type { FromShapeToObject } from "@aura-stack/react/identity"
+import type { Identities, RefreshUserInfoAPIReturn, Session, SignUpAPIOptions, User, Wrap } from "@aura-stack/react/types"
 import type {
     InferSignUp,
     InferSession,

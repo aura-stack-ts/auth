@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next"
+import type { SchemaTypes } from "@/@types/index"
+import type { zod } from "@aura-stack/react/identity/zod"
 import type { AuthInstance, User } from "@aura-stack/react"
-import type { SchemaTypes } from "@/@types"
-import type { zod } from "@/identity/zod"
 
 const getBaseURL = (request: NextApiRequest) => {
     const protocol = request.headers["x-forwarded-proto"] ?? "http"

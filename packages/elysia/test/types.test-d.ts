@@ -11,8 +11,8 @@ import type {
     SignUpAPIOptions,
     SignUpAPIReturn,
 } from "@aura-stack/auth/types"
-import type { FromShapeToObject, Identities, InferSession, InferUser } from "@aura-stack/auth/identity"
 import type { InferSignUp } from "@/@types"
+import type { FromShapeToObject, Identities, InferSession, InferUser } from "@aura-stack/auth/identity"
 
 describe("createAuth", () => {
     describe("with custom identity", async () => {

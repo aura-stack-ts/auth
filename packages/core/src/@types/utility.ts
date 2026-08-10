@@ -125,10 +125,10 @@ export type Wrap<T> = T extends any ? { [K in keyof T]: T[K] } : never
  * type User = InferUser<typeof auth>
  */
 export type InferUser<Config> =
-    Config extends AuthInstance<infer Identity>
+    Config extends AuthInstance<infer Identity, infer _>
         ? Prettify<Merge<Identity, {}>>
         : Config extends { core: infer Core }
-          ? Core extends AuthInstance<infer Identity>
+          ? Core extends AuthInstance<infer Identity, infer _>
               ? Prettify<Merge<Identity, {}>>
               : User
           : User

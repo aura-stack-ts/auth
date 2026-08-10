@@ -1,9 +1,9 @@
 import { createAuth as createAuthInstance } from "@aura-stack/react/server"
 import { api } from "@/lib/api"
-import type { zod } from "@/identity/zod"
 import type { AuthConfig } from "@aura-stack/react"
-import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/react/identity"
+import type { zod } from "@aura-stack/react/identity/zod"
 import type { EditableShape, NextAppInstance, ZodIdentitySchema } from "@/@types/index"
+import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/react/identity"
 
 export const createAuth = <
     Identity extends Identities = EditableShape<ZodIdentitySchema>,

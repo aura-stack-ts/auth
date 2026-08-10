@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import type { zod } from "@/identity/zod"
+import type { zod } from "@aura-stack/react/identity/zod"
 import type { NextAPI } from "@/@types/api"
 import type {
     AuthInstance,

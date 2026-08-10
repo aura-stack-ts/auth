@@ -1,10 +1,10 @@
 import { createAuth as createAuthBasic, type AuthConfig } from "@aura-stack/auth"
 import { toHandler } from "@/lib/handler"
 import { withAuth } from "@/lib/with-auth"
-import type { Identities, FromShapeToObject, SchemaTypes } from "@aura-stack/auth/identity"
-import type { zod } from "@/identity/zod"
 import type { HonoInstance } from "@/@types/index"
+import type { zod } from "@aura-stack/auth/identity/zod"
 import type { EditableShape, ZodIdentitySchema } from "@aura-stack/auth/types"
+import type { Identities, FromShapeToObject, SchemaTypes } from "@aura-stack/auth/identity"
 
 export const createAuth = <
     Identity extends Identities = EditableShape<ZodIdentitySchema>,

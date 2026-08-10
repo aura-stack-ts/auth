@@ -15,7 +15,7 @@ import type {
     ReactRouterDisconnectProviderAPIOptions,
     ReactRouterProviderConnectedAPIOptions,
 } from "@/@types/api"
-import type { zod } from "@/identity/zod"
+import type { zod } from "@aura-stack/react/identity/zod"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
 import type {
     AccessTokenAPIOptions,

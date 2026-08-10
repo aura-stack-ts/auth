@@ -1,6 +1,6 @@
 import type { Request, RequestHandler, Response } from "express"
 import type { AuthInstance, User } from "@aura-stack/auth"
-import type { zod } from "@/identity/zod.ts"
+import type { zod } from "@aura-stack/auth/identity/zod"
 import type { LocalsWithSession } from "@/lib/with-auth.ts"
 import type { InferSchema, SchemaTypes } from "@aura-stack/auth/identity"
 import type { Prettify, RemoveIndexSignature } from "@aura-stack/auth/types"

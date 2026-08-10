@@ -3,7 +3,7 @@
  *
  * These conditional types describe return values when `redirect()` is used (which never returns in Next.js).
  */
-import type { zod } from "@/identity/zod"
+import type { zod } from "@aura-stack/react/identity/zod"
 import type {
     Prettify,
     SignInAPIOptions,

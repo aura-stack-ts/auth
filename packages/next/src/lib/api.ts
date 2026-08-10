@@ -27,7 +27,7 @@ import type {
     ProviderConnectedAPIOptions,
     SchemaTypes,
 } from "@aura-stack/react/types"
-import type { zod } from "@/identity/zod"
+import type { zod } from "@aura-stack/react/identity/zod"
 
 /**
  * Internal helper to sync Set-Cookie headers from Aura Auth to Next.js cookie store.
