@@ -8,6 +8,7 @@ const SALT_KEY = crypto.randomBytes(32).toString("base64url")
 export default defineConfig({
     test: {
         include: ["test/**/*.test.ts", "test/**/*.test.tsx"],
+        exclude: ["test/**/*.test-d.ts"],
         environment: "node",
         clearMocks: true,
         restoreMocks: true,
