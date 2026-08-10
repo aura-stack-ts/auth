@@ -1,10 +1,15 @@
 import { toHandler } from "@/lib/handler.ts"
 import { withAuth } from "@/lib/with-auth.ts"
 import { type AuthConfig, createAuth as createAuthInstance } from "@aura-stack/auth"
-import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/auth/identity"
+import type { zod } from "@aura-stack/auth/identity/zod"
 import type { OakInstance } from "@/types/index.ts"
+import type { EditableShape, ZodIdentitySchema } from "@aura-stack/auth/types"
+import type { FromShapeToObject, Identities, SchemaTypes } from "@aura-stack/auth/identity"
 
-export const createAuth = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+export const createAuth = <
+    Identity extends Identities = EditableShape<ZodIdentitySchema>,
+    SignUpSchema extends SchemaTypes = zod.ZodObject<any>,
+>(
     config: AuthConfig<Identity, SignUpSchema>
 ): OakInstance<FromShapeToObject<Identity>, SignUpSchema> => {
     const auth = createAuthInstance<Identity, SignUpSchema>(config)

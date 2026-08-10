@@ -122,7 +122,7 @@ type Infer<T> = Wrap<RemoveIndexSignature<InferSchema<T>>> & Record<string, any>
 
 export const signUp = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>({
     api,
-}: AuthInstance<DefaultUser>) => {
+}: AuthInstance<DefaultUser, SignUpSchema>) => {
     return async <Options extends ReactRouterSignUpAPIOptions<Infer<SignUpSchema>>>(
         options: Options
     ): Promise<ReactRouterSignUpReturn<Options>> => {

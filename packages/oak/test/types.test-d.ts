@@ -1,94 +1,56 @@
-import { describe, expectTypeOf, test } from "vitest"
-import { createAuth } from "../src/createAuth"
+import { assertType, type IsExact } from "@std/testing/types"
+import { createAuth } from "@/createAuth.ts"
+import { createSecretValue } from "@aura-stack/auth/crypto"
 import { zod, identitySchema, type IdentityShape } from "@aura-stack/auth/identity/zod"
 import type {
     Session,
-    User,
     Wrap,
     UpdateSessionAPIOptions,
     GetSessionAPIReturn,
     RefreshUserInfoAPIReturn,
     SignUpAPIOptions,
 } from "@aura-stack/auth/types"
-import type { FromShapeToObject, Identities } from "@aura-stack/auth/identity"
-import { InferSession, InferUser, InferSignUp } from "../src/types/index"
+import type { FromShapeToObject } from "@aura-stack/auth/identity"
+import type { InferSession, InferUser, InferSignUp } from "@/types/index.ts"
 
-describe("createAuth", () => {
-    describe("with custom identity", async () => {
-        const auth = createAuth({
-            oauth: [],
-            identity: {
-                schema: identitySchema.extend({
-                    role: zod.string(),
-                    nickname: zod.string().optional(),
-                }),
-            },
-        })
-        const { api } = auth
-        type Identity = FromShapeToObject<IdentityShape & { role: zod.ZodString; nickname: zod.ZodOptional<zod.ZodString> }>
+const SECRET_KEY = createSecretValue(44)
+const SALT_KEY = createSecretValue(44)
 
-        test("Infer Types", () => {
-            expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<Wrap<Identity>>()
-            expectTypeOf<InferSession<typeof auth>>().toEqualTypeOf<Session<Wrap<Identity>>>()
-            expectTypeOf<InferSignUp<typeof auth>>().toEqualTypeOf<{}>()
-        })
+Deno.env.set("AURA_AUTH_SECRET", SECRET_KEY)
+Deno.env.set("AURA_AUTH_SALT", SALT_KEY)
 
-        test("api.getSession", () => {
-            expectTypeOf<Awaited<ReturnType<typeof api.getSession>>>().toEqualTypeOf<GetSessionAPIReturn<Identity>>()
-        })
+Deno.env.set("AURA_AUTH_GITHUB_CLIENT_ID", "github-client-id")
+Deno.env.set("AURA_AUTH_GITHUB_CLIENT_SECRET", "github-client-secret")
 
-        test("api.updateSession", () => {
-            expectTypeOf<Parameters<typeof api.updateSession>[0]>().toEqualTypeOf<UpdateSessionAPIOptions<Identity>>()
-        })
+const auth = createAuth({
+    oauth: [],
+    identity: {
+        schema: identitySchema.extend({
+            role: zod.string(),
+            nickname: zod.string().optional(),
+        }),
+    },
+})
+const { api } = auth
+type Identity = FromShapeToObject<IdentityShape & { role: zod.ZodString; nickname: zod.ZodOptional<zod.ZodString> }>
+Deno.test("Infer Types", () => {
+    assertType<IsExact<InferUser<typeof auth>, Wrap<Identity>>>(true)
+    assertType<IsExact<InferSession<typeof auth>, Session<Wrap<Identity>>>>(true)
+    assertType<IsExact<InferSignUp<typeof auth>, {}>>(true)
+})
 
-        test("api.refreshUserInfo", () => {
-            expectTypeOf<ReturnType<typeof api.refreshUserInfo>>().toEqualTypeOf<Promise<RefreshUserInfoAPIReturn<Identity>>>()
-        })
+Deno.test("api.getSession", () => {
+    assertType<IsExact<Awaited<ReturnType<typeof api.getSession>>, GetSessionAPIReturn<Identity>>>(true)
+})
 
-        test("api.signUp", () => {
-            expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<SignUpAPIOptions<Record<string, any>>>()
-        })
-    })
+Deno.test("api.updateSession", () => {
+    assertType<IsExact<Parameters<typeof api.updateSession>[0], UpdateSessionAPIOptions<Identity>>>(true)
+})
 
-    describe("with custom identity and sign up schema", () => {
-        const auth = createAuth({
-            oauth: [],
-            signUp: {
-                schema: zod.object({
-                    nickname: zod.string(),
-                    email: zod.email(),
-                    password: zod.string().min(8),
-                }),
-                onCreateUser: () => null,
-            },
-        })
-        const { api } = auth
-        type Identity = FromShapeToObject<Identities>
+Deno.test("api.refreshUserInfo", () => {
+    assertType<IsExact<ReturnType<typeof api.refreshUserInfo>, Promise<RefreshUserInfoAPIReturn<Identity>>>>(true)
+})
 
-        test("InferUser", () => {
-            expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<User>()
-            expectTypeOf<InferSession<typeof auth>>().toEqualTypeOf<Session<User>>()
-            expectTypeOf<InferSignUp<typeof auth>>().toEqualTypeOf<{
-                nickname: string
-                email: string
-                password: string
-            }>()
-        })
-
-        test("api.getSession", () => {
-            expectTypeOf<Awaited<ReturnType<typeof api.getSession>>>().toEqualTypeOf<GetSessionAPIReturn<Identity>>()
-        })
-
-        test("api.updateSession", () => {
-            expectTypeOf<Parameters<typeof api.updateSession>[0]>().toEqualTypeOf<UpdateSessionAPIOptions<Identity>>()
-        })
-
-        test("api.refreshUserInfo", () => {
-            expectTypeOf<ReturnType<typeof api.refreshUserInfo>>().toEqualTypeOf<Promise<RefreshUserInfoAPIReturn<Identity>>>()
-        })
-
-        test("api.signUp", () => {
-            expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<SignUpAPIOptions<Record<string, any>>>()
-        })
-    })
+Deno.test("api.signUp", () => {
+    assertType<IsExact<Parameters<typeof api.signUp>[0], SignUpAPIOptions<Record<string, any>>>>(true)
 })

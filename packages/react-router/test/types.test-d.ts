@@ -4,6 +4,8 @@ import { zod, identitySchema, type IdentityShape } from "@aura-stack/auth/identi
 import type { FromShapeToObject, Identities, InferSession, InferUser, InferSignUp } from "@/identity"
 import {
     type DeepPartial,
+    type ReactRouterSignUpAPIOptions,
+    type ReactRouterSignUpReturn,
     type ReactRouterUpdateSessionAPIOptions,
     type ReactRouterUpdateSessionReturn,
     type RefreshUserInfoAPIReturn,
@@ -67,6 +69,11 @@ describe("createAuth", () => {
                 skipCSRFCheck?: boolean | undefined
                 doubleSubmitToken?: string | undefined
             }>()
+            expectTypeOf(api.signUp).toEqualTypeOf<
+                <Options extends ReactRouterSignUpAPIOptions<InferSignUp<typeof auth>>>(
+                    options: Options
+                ) => Promise<ReactRouterSignUpReturn<Options>>
+            >()
         })
     })
 
@@ -134,6 +141,11 @@ describe("createAuth", () => {
                 skipCSRFCheck?: boolean | undefined
                 doubleSubmitToken?: string | undefined
             }>()
+            expectTypeOf(api.signUp).toEqualTypeOf<
+                <Options extends ReactRouterSignUpAPIOptions<InferSignUp<typeof auth>>>(
+                    options: Options
+                ) => Promise<ReactRouterSignUpReturn<Options>>
+            >()
         })
     })
 })

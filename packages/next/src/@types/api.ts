@@ -31,6 +31,8 @@ import type {
     Wrap,
     RemoveIndexSignature,
     InferSchema,
+    GetSessionAPIOptions,
+    Session,
 } from "@aura-stack/react/types"
 
 /**
@@ -90,7 +92,7 @@ export type NextSignUpReturn<Options extends SignUpAPIOptions> = Options extends
       : SignUpAPIReturn
 
 export interface NextAPI<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>> {
-    getSession: (options?: any) => Promise<any>
+    getSession: (options?: GetSessionAPIOptions) => Promise<Session<DefaultUser> | null>
     signIn: <Options extends SignInAPIOptions>(
         provider: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
@@ -108,7 +110,7 @@ export interface NextAPI<DefaultUser extends User = User, SignUpSchema extends S
     refreshUserInfo: <Options extends RefreshUserInfoAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
-    ) => Promise<RefreshUserInfoAPIReturn>
+    ) => Promise<RefreshUserInfoAPIReturn<DefaultUser>>
     revokeToken: <Options extends RevokeTokenAPIOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options

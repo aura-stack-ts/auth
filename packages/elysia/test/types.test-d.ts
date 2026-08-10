@@ -9,6 +9,7 @@ import type {
     GetSessionAPIReturn,
     RefreshUserInfoAPIReturn,
     SignUpAPIOptions,
+    SignUpAPIReturn,
 } from "@aura-stack/auth/types"
 import type { FromShapeToObject, Identities, InferSession, InferUser } from "@aura-stack/auth/identity"
 import type { InferSignUp } from "@/@types"
@@ -47,6 +48,11 @@ describe("createAuth", () => {
 
         test("api.signUp", () => {
             expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<SignUpAPIOptions<Record<string, any>>>()
+            expectTypeOf(api.signUp).toEqualTypeOf<
+                <Payload extends Record<string, any> = InferSignUp<typeof auth>>(
+                    options: SignUpAPIOptions<Payload>
+                ) => Promise<SignUpAPIReturn>
+            >()
         })
     })
 
@@ -89,6 +95,11 @@ describe("createAuth", () => {
 
         test("api.signUp", () => {
             expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<SignUpAPIOptions<Record<string, any>>>()
+            expectTypeOf(api.signUp).toEqualTypeOf<
+                <Payload extends Record<string, any> = InferSignUp<typeof auth>>(
+                    options: SignUpAPIOptions<Payload>
+                ) => Promise<SignUpAPIReturn>
+            >()
         })
     })
 })

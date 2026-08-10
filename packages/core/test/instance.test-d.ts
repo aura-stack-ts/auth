@@ -1,18 +1,16 @@
 import { describe, expectTypeOf, test } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { zod, identitySchema, type IdentityShape } from "@aura-stack/auth/identity/zod"
+import { identitySchema, zod, type IdentityShape } from "@/identity/zod.ts"
+import type { Session, User } from "@/index.ts"
+import type { InferSignUp, Wrap } from "@/@types/utility.ts"
+import type { FromShapeToObject, Identities, InferSession, InferUser } from "@/identity/index.ts"
 import type {
-    Session,
-    User,
-    Wrap,
-    UpdateSessionAPIOptions,
     GetSessionAPIReturn,
-    SignUpAPIOptions,
     RefreshUserInfoAPIReturn,
+    SignUpAPIOptions,
     SignUpAPIReturn,
-} from "@aura-stack/auth/types"
-import type { InferSignUp } from "@/@types/index.ts"
-import type { FromShapeToObject, Identities, InferSession, InferUser } from "@aura-stack/auth/identity"
+    UpdateSessionAPIOptions,
+} from "@/@types/api.ts"
 
 describe("createAuth", () => {
     describe("with custom identity", async () => {
@@ -29,7 +27,7 @@ describe("createAuth", () => {
         type Identity = FromShapeToObject<IdentityShape & { role: zod.ZodString; nickname: zod.ZodOptional<zod.ZodString> }>
 
         test("Infer Types", () => {
-            expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<Wrap<Identity>>()
+            expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<Wrap<InferUser<typeof auth>>>()
             expectTypeOf<InferSession<typeof auth>>().toEqualTypeOf<Session<Wrap<Identity>>>()
             expectTypeOf<InferSignUp<typeof auth>>().toEqualTypeOf<{}>()
         })

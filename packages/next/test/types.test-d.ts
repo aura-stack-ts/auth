@@ -1,9 +1,16 @@
 import { describe, expectTypeOf, test } from "vitest"
 import { createAuth } from "@/createAuth"
 import { zod, identitySchema, type IdentityShape } from "@aura-stack/auth/identity/zod"
-import type { Session, User, Wrap } from "@aura-stack/auth/types"
 import type { FromShapeToObject } from "@aura-stack/auth/identity"
-import type { InferSignUp, InferSession, InferUser } from "@/@types"
+import type { Identities, RefreshUserInfoAPIReturn, Session, SignUpAPIOptions, User, Wrap } from "@aura-stack/auth/types"
+import type {
+    InferSignUp,
+    InferSession,
+    InferUser,
+    NextUpdateSessionOptions,
+    NextUpdateSessionReturn,
+    NextSignUpReturn,
+} from "@/@types"
 
 describe("createAuth", () => {
     describe("with custom identity", async () => {
@@ -16,6 +23,7 @@ describe("createAuth", () => {
                 }),
             },
         })
+        const { api } = auth
         type Identity = FromShapeToObject<IdentityShape & { role: zod.ZodString; nickname: zod.ZodOptional<zod.ZodString> }>
 
         test("Infer Types", () => {
@@ -24,21 +32,30 @@ describe("createAuth", () => {
             expectTypeOf<InferSignUp<typeof auth>>().toEqualTypeOf<{}>()
         })
 
-        //test("api.getSession", () => {
-        //    expectTypeOf<Awaited<ReturnType<typeof api.getSession>>>().toEqualTypeOf<GetSessionAPIReturn<Identity>>()
-        //})
-        //
-        //test("api.updateSession", () => {
-        //    expectTypeOf<Parameters<typeof api.updateSession>[0]>().toEqualTypeOf<UpdateSessionAPIOptions<Identity>>()
-        //})
-        //
-        //test("api.refreshUserInfo", () => {
-        //    expectTypeOf<ReturnType<typeof api.refreshUserInfo>>().toEqualTypeOf<Promise<RefreshUserInfoAPIReturn<Identity>>>()
-        //})
+        test("api.getSession", () => {
+            expectTypeOf<Awaited<ReturnType<typeof api.getSession>>>().toEqualTypeOf<Session<Identity> | null>()
+        })
 
-        //test("api.signUp", () => {
-        //    expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<SignUpAPIOptions<Record<string, any>>>()
-        //})
+        test("api.updateSession", () => {
+            expectTypeOf(api.updateSession).toEqualTypeOf<
+                <Options extends NextUpdateSessionOptions<Identity>>(
+                    options: Options
+                ) => Promise<NextUpdateSessionReturn<Options, Identity>>
+            >()
+        })
+
+        test("api.refreshUserInfo", () => {
+            expectTypeOf<ReturnType<typeof api.refreshUserInfo>>().toEqualTypeOf<Promise<RefreshUserInfoAPIReturn<Identity>>>()
+        })
+
+        test("api.signUp", () => {
+            expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<SignUpAPIOptions<InferSignUp<typeof auth>>>()
+            expectTypeOf(api.signUp).toEqualTypeOf<
+                <Options extends SignUpAPIOptions<InferSignUp<typeof auth>>>(
+                    options: Options
+                ) => Promise<NextSignUpReturn<Options>>
+            >()
+        })
     })
 
     describe("with custom identity and sign up schema", () => {
@@ -53,7 +70,8 @@ describe("createAuth", () => {
                 onCreateUser: () => null,
             },
         })
-        //type Identity = FromShapeToObject<Identities>
+        const { api } = auth
+        type Identity = FromShapeToObject<Identities>
 
         test("InferUser", () => {
             expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<User>()
@@ -65,20 +83,35 @@ describe("createAuth", () => {
             }>()
         })
 
-        //test("api.getSession", () => {
-        //    expectTypeOf<Awaited<ReturnType<typeof api.getSession>>>().toEqualTypeOf<GetSessionAPIReturn<Identity>>()
-        //})
-        //
-        //test("api.updateSession", () => {
-        //    expectTypeOf<Parameters<typeof api.updateSession>[0]>().toEqualTypeOf<UpdateSessionAPIOptions<Identity>>()
-        //})
-        //
-        //test("api.refreshUserInfo", () => {
-        //    expectTypeOf<ReturnType<typeof api.refreshUserInfo>>().toEqualTypeOf<Promise<RefreshUserInfoAPIReturn<Identity>>>()
-        //})
+        test("api.getSession", () => {
+            expectTypeOf<Awaited<ReturnType<typeof api.getSession>>>().toEqualTypeOf<Session<Identity> | null>()
+        })
 
-        //test("api.signUp", () => {
-        //    expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<SignUpAPIOptions<Record<string, any>>>()
-        //})
+        test("api.updateSession", () => {
+            expectTypeOf(api.updateSession).toEqualTypeOf<
+                <Options extends NextUpdateSessionOptions<Identity>>(
+                    options: Options
+                ) => Promise<NextUpdateSessionReturn<Options, Identity>>
+            >()
+        })
+
+        test("api.refreshUserInfo", () => {
+            expectTypeOf<ReturnType<typeof api.refreshUserInfo>>().toEqualTypeOf<Promise<RefreshUserInfoAPIReturn<Identity>>>()
+        })
+
+        test("api.signUp", () => {
+            expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<
+                SignUpAPIOptions<{
+                    nickname: string
+                    email: string
+                    password: string
+                }>
+            >()
+            expectTypeOf(api.signUp).toEqualTypeOf<
+                <Options extends SignUpAPIOptions<InferSignUp<typeof auth>>>(
+                    options: Options
+                ) => Promise<NextSignUpReturn<Options>>
+            >()
+        })
     })
 })
