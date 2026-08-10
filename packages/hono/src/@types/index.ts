@@ -4,6 +4,8 @@ import type { Prettify } from "@aura-stack/jose"
 import type { EnvWithSession } from "@/lib/with-auth"
 import type { SchemaTypes, AuthInstance, RemoveIndexSignature, InferSchema, User } from "@aura-stack/auth/types"
 
+export type * from "@aura-stack/auth/types"
+
 export interface HonoInstance<
     DefaultUser extends User = User,
     SignUpSchema extends SchemaTypes = zod.ZodObject<any>,

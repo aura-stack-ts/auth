@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added the `/types` entry point to re-export the public types from `@aura-stack/auth` and expose the integration-specific `HonoInstance` type. [#257](https://github.com/aura-stack-ts/auth/pull/257)
+
+### Fixed
+
+- Fixed type inference for `signUp.schema` and `identity.schema` across authentication instances. The configured Zod, Valibot, TypeBox, or ArkType schema is now correctly propagated through the auth instance. Updated `InferUser`, `InferSession`, and `InferSignUp` to correctly derive their types from the corresponding auth instance. [#256](https://github.com/aura-stack-ts/auth/pull/256)
+
 ---
 
 ## [0.3.0] - 2026-08-05
