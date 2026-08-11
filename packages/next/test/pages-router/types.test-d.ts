@@ -25,7 +25,7 @@ describe("createAuth", () => {
         })
     })
 
-    describe("with custom identity and sign up schema", () => {
+    describe("with sign up schema", () => {
         const auth = createAuth({
             oauth: [],
             signUp: {
@@ -40,6 +40,36 @@ describe("createAuth", () => {
         test("InferUser", () => {
             expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<User>()
             expectTypeOf<InferSession<typeof auth>>().toEqualTypeOf<Session<User>>()
+            expectTypeOf<InferSignUp<typeof auth>>().toEqualTypeOf<{
+                nickname: string
+                email: string
+                password: string
+            }>()
+        })
+    })
+
+    describe("with custom identity and sign up schema", () => {
+        const auth = createAuth({
+            oauth: [],
+            identity: {
+                schema: identitySchema.extend({
+                    role: zod.string(),
+                    nickname: zod.string().optional(),
+                }),
+            },
+            signUp: {
+                schema: zod.object({
+                    nickname: zod.string(),
+                    email: zod.email(),
+                    password: zod.string().min(8),
+                }),
+                onCreateUser: () => null,
+            },
+        })
+        type Identity = FromShapeToObject<IdentityShape & { role: zod.ZodString; nickname: zod.ZodOptional<zod.ZodString> }>
+        test("InferUser", () => {
+            expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<Wrap<Identity>>()
+            expectTypeOf<InferSession<typeof auth>>().toEqualTypeOf<Session<Wrap<Identity>>>()
             expectTypeOf<InferSignUp<typeof auth>>().toEqualTypeOf<{
                 nickname: string
                 email: string

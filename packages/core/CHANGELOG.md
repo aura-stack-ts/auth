@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed identity type inference when both `identity.schema` and `signUp.schema` are configured in `createAuth()`. The auth instance's `User` identity type is now inferred exclusively from `identity.schema`, falling back to the default `ZodIdentitySchema` when no identity schema is provided. [#259](https://github.com/aura-stack-ts/auth/pull/259)
+
 ---
 
 ## [0.9.0] - 2026-08-05

@@ -14,6 +14,8 @@ import type {
     User,
     Awaitable,
     TypedJWTPayload,
+    ZodIdentitySchema,
+    EditableShape,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
@@ -24,7 +26,10 @@ import type { RateLimiterRule, RateLimiterConfig as RaterLimiterBaseConfig } fro
  * Main configuration interface for Aura Auth.
  * This is the user-facing configuration object passed to `createAuth()`.
  */
-export type AuthConfig<Identity extends Identities, SignUpSchema extends SchemaTypes = ZodObject<any>> = {
+export type AuthConfig<
+    Identity extends Identities = EditableShape<ZodIdentitySchema>,
+    SignUpSchema extends SchemaTypes = ZodObject<any>,
+> = {
     /**
      * OAuth providers available in the authentication and authorization flows. It provides a type-inference
      * for the OAuth providers that are supported by Aura Stack Auth; alternatively, you can provide a custom
@@ -455,7 +460,10 @@ export type JWTManager<DefaultUser extends User = User> = {
  * Configuration for the signUp process, including the schema for validation
  * and required callback for user creation.
  */
-export interface SignUpConfig<Identity extends Identities, SignUpSchema extends SchemaTypes> {
+export interface SignUpConfig<
+    Identity extends Identities = EditableShape<ZodIdentitySchema>,
+    SignUpSchema extends SchemaTypes = ZodObject<any>,
+> {
     /**
      * Optional schema for validating the sign-up payload. It supports any
      * Zod, Arktype, Valibot or Typebox schema.
@@ -465,9 +473,7 @@ export interface SignUpConfig<Identity extends Identities, SignUpSchema extends 
      * Callback function that is called when a new user signs up. It receives the validated
      * sign-up payload and must handle the user creation.
      */
-    onCreateUser: (
-        context: OnCreateUserContext<SignUpSchema>
-    ) => Promise<FromShapeToObject<Identity> | null> | FromShapeToObject<Identity> | null
+    onCreateUser: (context: OnCreateUserContext<SignUpSchema>) => Awaitable<FromShapeToObject<NoInfer<Identity>> | null>
 }
 
 // #region Rate Limiter

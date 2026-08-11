@@ -30,7 +30,10 @@ import type {
 } from "@/@types/index.ts"
 import type { SchemaRegistryContext } from "@/@types/internal.ts"
 
-const createInternalConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+const createInternalConfig = <
+    const Identity extends Identities = EditableShape<ZodIdentitySchema>,
+    const SignUpSchema extends SchemaTypes = ZodObject<any>,
+>(
     config?: AuthConfig<Identity, SignUpSchema>
 ): RouterConfig => {
     const context = createContext<Identity, SignUpSchema>(config)
@@ -48,7 +51,10 @@ const createInternalConfig = <Identity extends Identities, SignUpSchema extends 
     }
 }
 
-export const createAuthInstance = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+export const createAuthInstance = <
+    const Identity extends Identities = EditableShape<ZodIdentitySchema>,
+    const SignUpSchema extends SchemaTypes = ZodObject<any>,
+>(
     authConfig: AuthConfig<Identity, SignUpSchema>
 ) => {
     const config = createInternalConfig<Identity, SignUpSchema>(authConfig)
@@ -87,20 +93,13 @@ export const createAuthInstance = <Identity extends Identities, SignUpSchema ext
  * @returns Authentication instance with handlers to be used in the server
  * @example
  * const auth = createAuth({
- *   oauth: ["github", {
- *     id: "custom-oauth",
- *     name: "custom-oauth",
- *     authorize: {
- *       url: "https://custom-oauth.com/oauth/authorize",
- *       params: { responseType: "code", scope: "profile email" },
- *     },
- *     accessToken: "https://custom-oauth.com/oauth/token",
- *     userInfo: "https://custom-oauth.com/api/userinfo",
- *     clientId: process.env.AURA_AUTH_CUSTOM_OAUTH_CLIENT_ID!,
- *     clientSecret: process.env.AURA_AUTH_CUSTOM_OAUTH_CLIENT_SECRET!,
- *   }]
+ *   oauth: ["github"],
+ *   session: {
+ *     strategy: "jwt",
+ *   }
  * })
  */
+
 export const createAuth = <
     Identity extends Identities = EditableShape<ZodIdentitySchema>,
     SignUpSchema extends SchemaTypes = ZodObject<any>,
