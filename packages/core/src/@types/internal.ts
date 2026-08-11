@@ -17,14 +17,12 @@ import type {
     CookieStrategyAttributes,
     CredentialsConfig,
     JoseInstance,
-    JWTManager,
     LogLevel,
     RateLimiterConfig,
     SignUpConfig,
     TrustedOrigin,
 } from "@/@types/config.ts"
 import type {
-    CookieManager,
     JWTKey,
     SessionConfig,
     SessionStrategy,
@@ -33,6 +31,9 @@ import type {
     User,
 } from "@/@types/session.ts"
 import type { OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/schemas.ts"
+import type { JWTPayload } from "@/jose.ts"
+import type { TypedJWTPayload } from "@aura-stack/jose"
+import type { createCookieManager } from "@/session/cookie-manager.ts"
 
 // #region API
 /**
@@ -138,12 +139,6 @@ export type InternalExpirationResult =
 export type CustomUserInfoFunction = Extract<OAuthProviderConfig["userInfo"], { request: (context: AccessTokenContext) => any }>
 
 /**
- * Internal runtime configuration used within Aura Auth after initialization.
- * All optional fields from AuthConfig are resolved to their default values.
- */
-export type AuthRuntimeConfig<DefaultUser extends User = User> = RouterGlobalContext<DefaultUser>
-
-/**
  * Context provided to the credentials provider's authorize function.
  * It includes the credentials sent by the user and hashing utilities.
  */
@@ -164,6 +159,12 @@ export interface CredentialsConfigContext<T> {
 
 export interface OnCreateUserContext<Schema extends SchemaTypes> {
     payload: InferSchema<Schema>
+}
+
+/** Minimal token issue/verify surface used by session code paths. */
+export type JWTManager<DefaultUser extends User = User> = {
+    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
+    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }
 
 // #region Session
@@ -196,3 +197,11 @@ export type OAuthProviderRecord<DefaultUser extends User = User> = Record<
     LiteralUnion<BuiltInOAuthProvider>,
     RuntimeOAuthProvider<any, DefaultUser>
 >
+
+// #region Jose
+/**
+ * JWT payload structure that includes a mandatory `token` field used to verify CSRF Tokens
+ */
+export type JWTPayloadWithToken = JWTPayload & { token: string }
+
+export type CookieManager = ReturnType<typeof createCookieManager>

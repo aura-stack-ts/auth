@@ -41,15 +41,21 @@ export const createAuthClient = <
         ...options,
     })
 
-    const getCSRFToken = async (): Promise<string | null> => {
+    const getCSRFToken = async (): Promise<string> => {
         try {
             const response = await client.get("/csrfToken")
-            if (!response.ok) return null
+            if (!response.ok) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
             const data: { csrfToken?: string } = await response.json()
-            return data.csrfToken ?? null
+            const token = data.csrfToken
+            if (!token) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
+            return token
         } catch (error) {
             console.error("Error fetching CSRF token:", error)
-            return null
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause: error })
         }
     }
 
@@ -135,9 +141,6 @@ export const createAuthClient = <
     ): Promise<SignInCredentialsReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
             const { redirectTo } = options ?? {}
             const response = await client.post("/signIn/credentials", {
                 body: options.payload,
@@ -179,9 +182,6 @@ export const createAuthClient = <
     const signUp = async <Options extends SignUpOptions<SignUpPayload>>(options: Options): Promise<SignUpReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
             const { redirectTo } = options ?? {}
             // @ts-ignore
             const response = await client.post("/signUp", {
@@ -226,9 +226,6 @@ export const createAuthClient = <
     ): Promise<UpdateSessionReturn<Options, DefaultUser>> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
             const { session, redirectTo } = options ?? {}
             if (!session) {
                 return { success: false, session: null } as UpdateSessionReturn<Options, DefaultUser>
@@ -288,10 +285,6 @@ export const createAuthClient = <
     const getProviderTokens = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<GetProviderTokensReturn> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
-
             const response = await client.get("/providers/:oauth/tokens", {
                 params: {
                     oauth,
@@ -354,9 +347,6 @@ export const createAuthClient = <
     const refreshUserInfo = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<Session<DefaultUser> | null> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
             const response = await client.post("/providers/:oauth/user/refresh", {
                 params: { oauth },
                 headers: {
@@ -389,9 +379,6 @@ export const createAuthClient = <
     const revokeToken = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
             const response = await client.post("/providers/:oauth/tokens/revoke", {
                 params: { oauth },
                 headers: {
@@ -424,9 +411,6 @@ export const createAuthClient = <
     const disconnectProvider = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
             const response = await client.delete("/providers/:oauth", {
                 params: { oauth },
                 headers: {
@@ -482,10 +466,6 @@ export const createAuthClient = <
     const signOut = async <Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-            }
-
             const response = await client.post("/signOut", {
                 searchParams: {
                     redirectTo: options?.redirectTo,

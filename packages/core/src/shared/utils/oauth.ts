@@ -10,14 +10,13 @@ import {
     OIDCAccessTokenResponseSchema,
     OIDCUserInfoSchema,
 } from "@/schemas.ts"
+import type { AccessTokenContext, User } from "@/@types/index.ts"
 import type {
     RuntimeOAuthProvider,
+    InternalLogger,
     OAuthAccessTokenResponseType,
-    AccessTokenContext,
     OIDCAccessTokenResponseType,
-    User,
-} from "@/@types/index.ts"
-import type { InternalLogger } from "@/@types/internal.ts"
+} from "@/@types/internal.ts"
 
 /**
  * Make a request to the OAuth provider to the token endpoint to exchange the authorization code provided

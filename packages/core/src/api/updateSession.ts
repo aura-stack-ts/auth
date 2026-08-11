@@ -1,7 +1,7 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
@@ -63,7 +63,8 @@ export const updateSession = async <DefaultUser extends User = User>({
             },
         } as UpdateSessionAPIReturn<DefaultUser>
     } catch (error) {
-        const { code, message, statusCode } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
+        errorToLogMessage(error, "UPDATE_SESSION_INVALID", ctx.logger)
+        const { errors, statusCode } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
 
         const headers = new Headers(secureApiHeaders)
         return {
@@ -72,7 +73,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             success: false,
             redirect: false,
             redirectURL: null,
-            error: { code, message },
+            error: errors,
             toResponse: () => {
                 return Response.json(
                     { success: false, session: null, redirect: false, redirectURL: null },

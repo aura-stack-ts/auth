@@ -1,5 +1,6 @@
 import { AuraAuthError } from "@/shared/errors.ts"
-import type { JoseInstance, User, JWTConfig, JWTManager } from "@/@types/index.ts"
+import type { JWTManager } from "@/@types/internal.ts"
+import type { JoseInstance, User, JWTConfig } from "@/@types/index.ts"
 
 export const createJoseManager = <DefaultUser extends User = User>(
     config: JWTConfig | undefined,

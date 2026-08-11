@@ -1,6 +1,6 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { createValidation, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
     GetProviderTokensAPIOptions,
@@ -50,13 +50,14 @@ export const getProviderTokens = async (
             },
         }
     } catch (error) {
-        const { code, message, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
+        errorToLogMessage(error, "GET_PROVIDER_TOKENS_ERROR", ctx.logger)
+        const { errors, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
         const headers = toUnionHeaders(initialHeaders, secureApiHeaders)
         return {
             success: false,
             tokens: null,
-            error: { code, message },
+            error: errors,
             headers,
             toResponse: () => Response.json({ success: false, tokens: null }, { status: statusCode, headers }),
         }

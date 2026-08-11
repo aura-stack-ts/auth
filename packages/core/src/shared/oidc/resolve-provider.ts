@@ -1,7 +1,7 @@
+import { setDynamicParams } from "@/oauth/index.ts"
 import { discoveryMetadata } from "@/shared/oidc/discovery.ts"
 import type { OpenIDProvider } from "@/@types/oidc.ts"
-import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
-import { setDynamicParams } from "@/oauth/index.ts"
+import type { RuntimeOAuthProvider } from "@/@types/internal.ts"
 
 const DEFAULT_OIDC_SCOPE = "openid profile email"
 

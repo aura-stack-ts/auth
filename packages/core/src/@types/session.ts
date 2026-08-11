@@ -3,7 +3,6 @@ import type { JWK } from "@aura-stack/jose/jose"
 import type { infer as Infer } from "zod/v4/core"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
 import type { DeepPartial, Prettify } from "@/@types/index.ts"
-import type { createCookieManager } from "@/session/cookie-manager.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof identitySchema>
@@ -392,5 +391,3 @@ export interface OAuthTokenPayload {
      */
     issuedAt: number
 }
-
-export type CookieManager = ReturnType<typeof createCookieManager>

@@ -4,13 +4,12 @@ import { isStatelessStrategy } from "@/shared/assert.ts"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
+import { getErrorName, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
 import { getBaseURL, getOriginURL, createRedirectTo } from "@/shared/utils/authorization.ts"
 import type {
     BuiltInOAuthProvider,
     LiteralUnion,
     RateLimiterConfig,
-    RuntimeOAuthProvider,
     UpdateSessionAPIOptions,
     SignInCredentialsAPIOptions,
     SignUpAPIOptions,
@@ -19,7 +18,8 @@ import type {
     DisconnectProviderAPIOptions,
     SignOutAPIOptions,
 } from "@/@types/index.ts"
-import type { RouterGlobalContext } from "@/@types/internal.ts"
+import type { InternalLogger, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
+import type { LOG_MESSAGES } from "../logger.ts"
 
 export const createValidation = (ctx: RouterGlobalContext, headersInit?: HeadersInit) => {
     const headers = new Headers(headersInit)
@@ -132,7 +132,7 @@ export const handleApiError = (error: unknown, defaultCode: string, defaultMessa
         message = error.userMessage
         statusCode = error.statusCode
     }
-    return { code, message, statusCode }
+    return { code, message, errors: { code, message }, statusCode }
 }
 
 export const resolveApiRedirect = async (
@@ -181,4 +181,14 @@ export const assertDoubleSubmitToken = (
             options.doubleSubmitToken = "token"
         }
     }
+}
+
+export const errorToLogMessage = (error: unknown, key: keyof typeof LOG_MESSAGES, logger?: InternalLogger) => {
+    logger?.log(key, {
+        structuredData: {
+            error_type: getErrorName(error),
+            error_code: error instanceof AuraAuthError ? error.code : "UNKNOWN_ERROR",
+            error_message: error instanceof Error ? error.message : String(error),
+        },
+    })
 }

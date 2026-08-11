@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/shared/errors.ts"
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
-import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
+import type { RuntimeOAuthProvider } from "@/@types/internal.ts"
 
 export const revokeProviderToken = async (provider: RuntimeOAuthProvider, accessToken: string) => {
     if (!provider.revokeToken || (typeof provider.revokeToken === "object" && !("url" in provider.revokeToken))) {

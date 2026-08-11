@@ -4,11 +4,17 @@ import { createHash, verifyCSRF } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isString, isValidURL } from "@/shared/assert.ts"
-import type { JoseInstance, JWTManager, OAuthTokenPayload, OAuthAccessTokenResponseType } from "@/@types/index.ts"
-import type { InternalCookieStoreConfig, InternalLogger, SchemaRegistryContext } from "@/@types/internal.ts"
 import type { DeviceType } from "@/@types/entities.ts"
+import type { JoseInstance, OAuthTokenPayload } from "@/@types/index.ts"
+import type {
+    InternalCookieStoreConfig,
+    InternalLogger,
+    SchemaRegistryContext,
+    OAuthAccessTokenResponseType,
+    JWTManager,
+} from "@/@types/internal.ts"
 
-export const AURA_AUTH_VERSION = "0.8.1"
+export const AURA_AUTH_VERSION = "0.9.0"
 
 export const equals = (a: string | number | undefined | null, b: string | number | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
