@@ -4,7 +4,6 @@ import { builtInOAuthProviders, type BuiltInOAuthProvider } from "@aura-stack/au
 export const oauth = Object.keys(builtInOAuthProviders) as BuiltInOAuthProvider[]
 
 export const { handlers, jose, api } = createAuth({
-    oauth,
+    oauth: ["github", "gitlab", "bitbucket"],
     basePath: "/api/auth",
-    trustedProxyHeaders: true,
 })

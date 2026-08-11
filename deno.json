@@ -1,4 +1,5 @@
 {
-  "workspace": ["packages/**", "!packages/integration", "configs/**", "apps/oak", "apps/deno", "apps/supabase/**"],
-  "nodeModulesDir": "auto"
+  "workspace": ["packages/oak", "apps/oak", "apps/deno", "apps/supabase/**"],
+  "nodeModulesDir": "auto",
+  "allowScripts": ["npm:@prisma/engines@7.9.1", "npm:prisma@7.9.1", "npm:sharp@0.34.5"]
 }
