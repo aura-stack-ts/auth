@@ -1,7 +1,6 @@
 /**
  * Public type entry for `@aura-stack/auth` and `@aura-stack/auth/types`: configuration, session, OAuth, API results, and utilities.
  */
-import type { JWTPayload } from "@/jose.ts"
 import type { Prettify } from "@/@types/utility.ts"
 import type { ClientOptions } from "@aura-stack/router"
 import type { createAuthInstance } from "@/createAuth.ts"
@@ -23,11 +22,6 @@ export type { IdentityShape as ZodIdentitySchema, IsZod } from "@/identity/zod.t
 export type { IdentityShape as ArkTypeIdentitySchema, IsArkType } from "@/identity/arktype.ts"
 export type { IdentityShape as TypeboxIdentitySchema, IsTypeBox } from "@/identity/typebox.ts"
 export type { IdentityShape as ValibotIdentitySchema, IsValibot } from "@/identity/valibot.ts"
-
-/**
- * JWT payload structure that includes a mandatory `token` field used to verify CSRF Tokens
- */
-export type JWTPayloadWithToken = JWTPayload & { token: string }
 
 /**
  * HTTP route handlers exposed by the auth instance (`GET`, `POST`, `PATCH`, `ALL`) for mounting on your app router.

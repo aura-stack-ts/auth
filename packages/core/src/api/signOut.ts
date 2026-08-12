@@ -1,5 +1,11 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import {
+    createValidation,
+    errorToLogMessage,
+    handleApiError,
+    resolveApiRedirect,
+    toStandardizedHeaders,
+} from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
 
@@ -12,7 +18,7 @@ export const signOut = async ({
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
-    let responseHeaders = new Headers(headersInit ?? requestInit?.headers)
+    let responseHeaders = toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
     try {
         responseHeaders = await ctx.sessionStrategy.destroySession(responseHeaders, skipCSRFCheck && !!doubleSubmitToken)
         const { request } = await createValidation(ctx, responseHeaders).buildRequest(requestInit, "/signOut").execute()
@@ -40,13 +46,14 @@ export const signOut = async ({
             },
         } as SignOutAPIReturn
     } catch (error) {
-        const { code, message, statusCode } = handleApiError(error, "SIGN_OUT_FAILED", "Failed to sign-out session")
+        errorToLogMessage(error, "SIGN_OUT_FAILED", ctx.logger)
+        const { errors, statusCode } = handleApiError(error, "SIGN_OUT_FAILED", "Failed to sign-out session")
         return {
             success: false,
             headers: responseHeaders,
             redirect: false,
             redirectURL: null,
-            error: { code, message },
+            error: errors,
             toResponse: () => {
                 return Response.json(
                     {

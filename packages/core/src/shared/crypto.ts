@@ -4,7 +4,7 @@ import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
 import type { JoseInstance, User } from "@/@types/index.ts"
-import type { AuthRuntimeConfig, AsymmetricKeyPairFromEnv } from "@/@types/internal.ts"
+import type { AsymmetricKeyPairFromEnv, RouterGlobalContext } from "@/@types/internal.ts"
 
 export { generateKeyPair as createKeyPair } from "@aura-stack/jose/jose"
 
@@ -44,7 +44,7 @@ export const createPKCE = async (verifier?: string) => {
  * @param csrfCookie - Optional existing CSRF cookie to verify and reuse
  * @returns Signed CSRF token
  */
-export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: string) => {
+export const createCSRF = async (jose: RouterGlobalContext["jose"], csrfCookie?: string) => {
     try {
         if (csrfCookie) {
             await jose.verifyJWS(csrfCookie)

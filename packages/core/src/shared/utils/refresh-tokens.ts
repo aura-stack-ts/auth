@@ -3,7 +3,7 @@ import { fetchAsync } from "@/shared/fetch-async.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import { isObject, isRefreshTokenObject } from "@/shared/assert.ts"
 import type { OAuthTokenPayload } from "@/@types/session.ts"
-import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
+import type { RuntimeOAuthProvider } from "@/@types/internal.ts"
 
 export const refreshProviderToken = async (
     payload: OAuthTokenPayload,

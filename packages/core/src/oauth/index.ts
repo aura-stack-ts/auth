@@ -3,8 +3,9 @@
  *
  * This modules re-exports OAuth providers available in Aura Auth to be used in the Auth instance configuration.
  */
-import { type LiteralUnion, type RuntimeOAuthProvider } from "@/@types/index.ts"
+import type { LiteralUnion } from "@/@types/index.ts"
 import type { OpenIDProvider } from "@/@types/oidc.ts"
+import type { RuntimeOAuthProvider } from "@/@types/internal.ts"
 import { getEnv } from "@/shared/env.ts"
 import { github } from "@/oauth/github.ts"
 import { bitbucket } from "@/oauth/bitbucket.ts"
@@ -26,10 +27,10 @@ import { hubspot } from "@/oauth/hubspot.ts"
 import { google } from "@/oauth/google.ts"
 import { huggingface } from "@/oauth/huggingface.ts"
 import { authentik } from "@/oauth/authentik.ts"
-import { OAuthEnvSchema, OAuthProviderCredentialsSchema, OpenIDProviderSchema } from "@/schemas.ts"
+import { isFalsy } from "@/shared/assert.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createOpenIDPlaceholder } from "@/shared/oidc/resolve-provider.ts"
-import { isFalsy } from "@/shared/assert.ts"
+import { OAuthEnvSchema, OAuthProviderCredentialsSchema, OpenIDProviderSchema } from "@/schemas.ts"
 
 export * from "@/oauth/github.ts"
 export * from "@/oauth/bitbucket.ts"

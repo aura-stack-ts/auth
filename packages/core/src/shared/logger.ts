@@ -7,7 +7,7 @@ import type { InternalLogger } from "@/@types/internal.ts"
  * Log message definitions organized by category.
  * Each message includes facility, severity, msgId, and default message.
  */
-export const logMessages = {
+export const LOG_MESSAGES = {
     ROUTER_INTERNAL_ERROR: {
         facility: 10,
         severity: "error",
@@ -856,10 +856,61 @@ export const logMessages = {
         msgId: "STATEFUL_SESSION_RENEWAL_FAILED",
         message: "Error occurred during stateful session renewal",
     },
+    ACCESS_TOKEN_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "ACCESS_TOKEN_ERROR",
+        message: "Error occurred while generating or validating access token",
+    },
+    GET_PROVIDER_TOKENS_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "GET_PROVIDER_TOKENS_ERROR",
+        message: "Error occurred while retrieving provider tokens",
+    },
+    OAUTH_PROVIDER_CONNECTED_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "OAUTH_PROVIDER_CONNECTED_ERROR",
+        message: "Error occurred while connecting OAuth provider to user account",
+    },
+    REFRESH_USER_INFO_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "REFRESH_USER_INFO_ERROR",
+        message: "Error occurred while refreshing user information from provider",
+    },
+    REVOKE_TOKEN_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "REVOKE_TOKEN_ERROR",
+        message: "Error occurred while revoking OAuth token from provider",
+    },
+    AUTH_SIGN_IN_FAILED: {
+        facility: 4,
+        severity: "error",
+        msgId: "AUTH_SIGN_IN_FAILED",
+        message: "Authentication sign-in process failed",
+    },
+    SIGN_OUT_FAILED: {
+        facility: 4,
+        severity: "error",
+        msgId: "SIGN_OUT_FAILED",
+        message: "Sign-out process failed",
+    },
+    UPDATE_SESSION_INVALID: {
+        facility: 4,
+        severity: "error",
+        msgId: "UPDATE_SESSION_INVALID",
+        message: "Session update failed due to invalid session state",
+    },
 } as const
 
-export const createLogEntry = <T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>): SyslogOptions => {
-    const message = logMessages[key]
+export const createLogEntry = <T extends keyof typeof LOG_MESSAGES>(
+    key: T,
+    overrides?: Partial<SyslogOptions>
+): SyslogOptions => {
+    const message = LOG_MESSAGES[key]
     return {
         ...message,
         timestamp: new Date().toISOString(),
@@ -918,7 +969,7 @@ export const createLogger = (logger?: Required<Logger>): InternalLogger | undefi
 
     return {
         level,
-        log<T extends keyof typeof logMessages>(key: T, overrides?: Partial<SyslogOptions>) {
+        log<T extends keyof typeof LOG_MESSAGES>(key: T, overrides?: Partial<SyslogOptions>) {
             const entry = createLogEntry(key, overrides)
             if (!allowedSeverities.includes(entry.severity)) return entry
             logger.log({

@@ -1,24 +1,7 @@
-import type { infer as Infer } from "zod"
 import type { User } from "@/@types/session.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
-import type { OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/schemas.ts"
 
 export type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-
-export type OAuthAccessTokenResponseType = Infer<typeof OAuthAccessTokenResponse>
-export type OIDCAccessTokenResponseType = Infer<typeof OIDCAccessTokenResponseSchema>
-
-export type OIDCProviderContext = {
-    issuer: string
-    jwks_uri?: string
-}
-
-export type RuntimeOAuthProvider<
-    Profile extends object = Record<string, any>,
-    DefaultUser extends User = User,
-> = OAuthProviderCredentials<Profile, DefaultUser> & {
-    oidc?: OIDCProviderContext
-}
 
 export type AccessTokenContext = {
     /**

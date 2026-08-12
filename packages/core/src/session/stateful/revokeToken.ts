@@ -84,7 +84,7 @@ export const revokeToken = ({ ctx, cookieManager }: InternalStatefulContext) => 
                 throw new AuraAuthError({ code: "OAUTH_UNLINKED_ACCOUNT_ERROR" })
             }
 
-            const provider = oauth?.[oauthId]
+            const provider = oauth[oauthId]
             if (!provider) {
                 logger?.log("INVALID_OAUTH_CONFIGURATION", {
                     structuredData: {

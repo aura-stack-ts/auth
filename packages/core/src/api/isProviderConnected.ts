@@ -1,5 +1,5 @@
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { createValidation, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation, errorToLogMessage, handleApiError, toStandardizedHeaders } from "@/shared/utils/api.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -14,7 +14,7 @@ export const isProviderConnected = async (
             structuredData: { provider: oauth, operation: "check_connection" },
         })
 
-        const { headers } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+        const { headers } = await createValidation(ctx, toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {}))
             .verifyOAuthProvider(oauth)
             .verifySession()
             .buildRequest(requestInit, `/providers/${oauth}`)
@@ -33,17 +33,14 @@ export const isProviderConnected = async (
             toResponse: () => Response.json({ success: true, connected }, { status: 200, headers }),
         }
     } catch (error) {
-        const { code, message, statusCode } = handleApiError(error, "OAUTH_PROVIDER_CONNECTED_ERROR", "")
-
-        ctx.logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
-            structuredData: { provider: oauth, code, errorType: error?.constructor?.name ?? "Unknown" },
-        })
+        errorToLogMessage(error, "OAUTH_PROVIDER_CONNECTED_ERROR", ctx.logger)
+        const { errors, statusCode } = handleApiError(error, "OAUTH_PROVIDER_CONNECTED_ERROR", "")
 
         const headers = new Headers(secureApiHeaders)
         return {
             success: false,
             connected: false,
-            error: { code, message },
+            error: errors,
             headers,
             toResponse: () => {
                 return Response.json({ success: false, connected: false }, { status: statusCode, headers })

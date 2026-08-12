@@ -1,7 +1,7 @@
-import { createAuthorizationURL } from "@/shared/utils/authorization.ts"
 import { createSecretValue } from "@/shared/crypto.ts"
-import type { RuntimeOAuthProvider } from "@/@types/oauth.ts"
+import { createAuthorizationURL } from "@/shared/utils/authorization.ts"
 import type { GlobalContext } from "@aura-stack/router"
+import type { RuntimeOAuthProvider } from "@/@types/internal.ts"
 
 export const createOIDCAuthorizationURL = async (oauth: RuntimeOAuthProvider, redirectURI: string, ctx?: GlobalContext) => {
     const nonce = createSecretValue()

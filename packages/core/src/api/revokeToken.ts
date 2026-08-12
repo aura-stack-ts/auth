@@ -1,5 +1,5 @@
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { createValidation, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation, errorToLogMessage, handleApiError, toStandardizedHeaders } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { RevokeTokenAPIOptions, RevokeTokenAPIReturn, LiteralUnion, BuiltInOAuthProvider } from "@/@types/index.ts"
 
@@ -23,7 +23,10 @@ export const revokeToken = async (
             },
         })
 
-        const { headers, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+        const { headers, rateLimit } = await createValidation(
+            ctx,
+            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
+        )
             .verifyOAuthProvider(oauth)
             .verifySession()
             .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
@@ -47,18 +50,16 @@ export const revokeToken = async (
             },
         }
     } catch (error) {
-        const { code, message, statusCode } = handleApiError(
+        errorToLogMessage(error, "REVOKE_TOKEN_ERROR", ctx.logger)
+        const { errors, statusCode } = handleApiError(
             error,
             "UNKNOWN_REVOKE_TOKEN_ERROR",
             "Failed to revoke token for the OAuth provider"
         )
-        ctx.logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
-            structuredData: { provider: oauth, code, errorType: error?.constructor?.name ?? "Unknown" },
-        })
         const headers = new Headers(secureApiHeaders)
         return {
             success: false,
-            error: { code, message },
+            error: errors,
             headers,
             toResponse: () => {
                 return Response.json({ success: false }, { status: statusCode, headers })

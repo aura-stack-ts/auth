@@ -1,9 +1,14 @@
 import { AuraAuthError } from "@/shared/errors.ts"
-import { getErrorName } from "@/shared/utils.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
-import { createValidation, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import {
+    createValidation,
+    errorToLogMessage,
+    handleApiError,
+    resolveApiRedirect,
+    toStandardizedHeaders,
+} from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
 
@@ -19,7 +24,10 @@ export const signInCredentials = async ({
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, sessionStrategy, logger } = ctx
     try {
-        const { request, rateLimit } = await createValidation(ctx, headerInit)
+        const { request, rateLimit } = await createValidation(
+            ctx,
+            toStandardizedHeaders(headerInit ?? requestInit?.headers ?? {})
+        )
             .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .buildRequest(requestInit, "/signIn/credentials")
             .verifyRateLimit("signInCredentials")
@@ -66,15 +74,10 @@ export const signInCredentials = async ({
                 ),
         } as SignInCredentialsAPIReturn
     } catch (error) {
-        const { code, message, statusCode } = handleApiError(
-            error,
-            "CREDENTIALS_SIGN_IN_ERROR",
-            "An error occurred during credentials sign-in.",
-            401
-        )
-        const error_type = getErrorName(error)
-        const error_code = error instanceof AuraAuthError ? error.code : "UNKNOWN_ERROR"
-        const error_message = error instanceof Error ? error.message : String(error)
+        const {
+            errors: { code, message },
+            statusCode,
+        } = handleApiError(error, "CREDENTIALS_SIGN_IN_ERROR", "An error occurred during credentials sign-in.", 401)
         const headers = new Headers(secureApiHeaders)
         const invalidCredentials: SignInCredentialsAPIReturn = {
             success: false,
@@ -87,26 +90,10 @@ export const signInCredentials = async ({
             },
         }
         if (error instanceof AuraAuthError && error.code === "AUTH_CREDENTIALS_INVALID") {
-            logger?.log("INVALID_CREDENTIALS", {
-                severity: "warning",
-                structuredData: {
-                    path: "/signIn/credentials",
-                    error_type,
-                    error_code,
-                    error_message,
-                },
-            })
+            errorToLogMessage(error, "INVALID_CREDENTIALS", logger)
             return invalidCredentials
         }
-        logger?.log("CREDENTIALS_SIGN_IN_FAILED", {
-            severity: "error",
-            structuredData: {
-                path: "/signIn/credentials",
-                error_type,
-                error_code,
-                error_message,
-            },
-        })
+        errorToLogMessage(error, "CREDENTIALS_SIGN_IN_FAILED", logger)
         return invalidCredentials
     }
 }

@@ -13,7 +13,6 @@ import type {
     SessionConfig,
     User,
     Awaitable,
-    TypedJWTPayload,
     ZodIdentitySchema,
     EditableShape,
 } from "@/@types/index.ts"
@@ -448,12 +447,6 @@ export interface AuthInstance<DefaultUser extends User = User, SignUpSchema exte
      * HTTP handlers for mounting on a router or server.
      */
     handlers: Handlers
-}
-
-/** Minimal token issue/verify surface used by session code paths. */
-export type JWTManager<DefaultUser extends User = User> = {
-    createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
-    verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
 }
 
 /**

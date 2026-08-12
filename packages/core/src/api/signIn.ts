@@ -1,6 +1,6 @@
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { createSignInURL } from "@/shared/utils/authorization.ts"
-import { createValidation, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation, errorToLogMessage, handleApiError, toStandardizedHeaders } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { BuiltInOAuthProvider, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
 
@@ -12,7 +12,10 @@ export const signIn = async (
     { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions>
 ): Promise<SignInAPIReturn> => {
     try {
-        const { request, rateLimit } = await createValidation(ctx, headersInit)
+        const { request, rateLimit } = await createValidation(
+            ctx,
+            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
+        )
             .verifyOAuthProvider(oauth)
             .buildRequest(requestInit, `/signIn/${oauth}`)
             .verifyRateLimit("signIn")
@@ -52,12 +55,13 @@ export const signIn = async (
             },
         } as SignInAPIReturn
     } catch (error) {
-        const { code, message } = handleApiError(error, "AUTH_SIGN_IN_FAILED", "An error occurred during the sign-in process.")
+        errorToLogMessage(error, "AUTH_SIGN_IN_FAILED", ctx.logger)
+        const { errors } = handleApiError(error, "AUTH_SIGN_IN_FAILED", "An error occurred during the sign-in process.")
         return {
             success: false,
             redirect: false,
             signInURL: null,
-            error: { code, message },
+            error: errors,
             headers: new Headers(secureApiHeaders),
             toResponse: () => {
                 return Response.json(
@@ -65,7 +69,7 @@ export const signIn = async (
                         success: false,
                         redirect: false,
                         signInURL: null,
-                        error: { code, message },
+                        error: errors,
                     },
                     { status: 500, headers: secureApiHeaders }
                 )

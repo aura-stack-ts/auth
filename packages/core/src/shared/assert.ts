@@ -5,14 +5,13 @@ import { equals, patternToRegex } from "@/shared/utils.ts"
 import type { ZodObject, ZodTypeAny } from "zod"
 import type { JWK } from "@aura-stack/jose/jose"
 import type { BaseSchema, ObjectSchema } from "valibot"
-import type { InternalLogger, AsymmetricKeyPairFromEnv } from "@/@types/internal.ts"
+import type { InternalLogger, AsymmetricKeyPairFromEnv, JWTPayloadWithToken } from "@/@types/internal.ts"
 import type {
     AccessTokenContext,
     AsymmetricKeyPair,
     CryptoSecret,
     JWTConfig,
     JWTMode,
-    JWTPayloadWithToken,
     OAuthProviderConfig,
     SessionConfig,
     StatefulStrategyConfig,
@@ -271,4 +270,8 @@ export const isNullOrUndefined = (value: unknown): value is null | undefined => 
 
 export const isInvalidSlidingThreshold = (value: unknown): value is number => {
     return typeof value === "number" && (Number.isNaN(value) || value < 0 || value > 1)
+}
+
+export const isHeadersInit = (value: unknown): value is HeadersInit => {
+    return typeof value === "object" && value !== null && (value instanceof Headers || Array.isArray(value) || isObject(value))
 }

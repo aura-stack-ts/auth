@@ -1,8 +1,7 @@
 import { createRouter, type RouterConfig } from "@aura-stack/router"
 import { createAuthAPI } from "@/api/createApi.ts"
 import { createContext } from "@/router/context.ts"
-import { isSecureConnection } from "@/shared/utils.ts"
-import { createErrorHandler } from "@/router/errorHandler.ts"
+import { onErrorHook, onRequestHook } from "@/router/hooks.ts"
 import {
     signInAction,
     signInCredentialsAction,
@@ -39,15 +38,11 @@ const createInternalConfig = <
     const context = createContext<Identity, SignUpSchema>(config)
     return {
         basePath: config?.basePath ?? "/auth",
-        onError: createErrorHandler(context.logger),
         context: context as unknown as RouterConfig["context"],
-        use: [
-            (ctx) => {
-                const useSecure = isSecureConnection(ctx.request, ctx.context.trustedProxyHeaders)
-                ctx.context.cookies = useSecure ? context.cookieConfig.secure : context.cookieConfig.standard
-                return ctx
-            },
-        ],
+        hooks: {
+            onRequest: onRequestHook,
+            onError: onErrorHook,
+        },
     }
 }
 
