@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added predefined header support to the `headers` option of API functions exposed by `createAuth().api`. The option now accepts `Headers`, `HeadersInit`, or `RequestHeaders`, with `RequestHeaders` providing a typed set of standard HTTP headers such as `authorization`, `content-type`, and others. [#260](https://github.com/aura-stack-ts/auth/pull/260)
+
 ### Fixed
 
 - Fixed identity type inference when both `identity.schema` and `signUp.schema` are configured in `createAuth()`. The auth instance's `User` identity type is now inferred exclusively from `identity.schema`, falling back to the default `ZodIdentitySchema` when no identity schema is provided. [#259](https://github.com/aura-stack-ts/auth/pull/259)

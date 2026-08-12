@@ -2,7 +2,7 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { getUserInfo } from "@/shared/utils/oauth.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { getProviderTokens } from "@/api/getProviderTokens.ts"
-import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation, errorToLogMessage, handleApiError, toStandardizedHeaders } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
     RefreshUserInfoAPIOptions,
@@ -28,7 +28,10 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             structuredData: { provider: oauth, skipCSRFCheck: doubleSubmitValidation },
         })
 
-        const { provider, headers, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+        const { provider, headers, rateLimit } = await createValidation(
+            ctx,
+            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
+        )
             .verifyOAuthProvider(oauth)
             .verifySession()
             .verifyCSRFToken(doubleSubmitValidation)

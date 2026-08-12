@@ -1,6 +1,7 @@
 import type { CredentialsPayload } from "@/@types/config.ts"
 import type { OAuthTokenPayload, Session, User } from "@/@types/session.ts"
 import type { AuthResponse, DeepPartial, RequiredKeys } from "@/@types/utility.ts"
+import type { RequestHeaders } from "@aura-stack/router/types"
 
 /**
  * Canonical return shape for server/programmatic API functions.
@@ -96,7 +97,7 @@ export interface APIOptionsWithRequest {
      * or load balancer, or when the URL is built from headers instead of the `Request` object.
      * This option requires enabling the `trustedProxyHeaders` option in the global configuration.
      */
-    headers?: HeadersInit
+    headers?: HeadersInit | RequestHeaders
 }
 
 export interface APIOptionsWithSkipCSRFCheck {
@@ -131,7 +132,7 @@ export interface APIOptionsWithSkipCSRFCheck {
 /** Options to get the current session. */
 export interface GetSessionAPIOptions {
     /** The headers containing the `session_token` cookie */
-    headers: HeadersInit
+    headers: HeadersInit | RequestHeaders
 }
 
 /** Programmatic `getSession` result with session payload and `toResponse()` metadata. */

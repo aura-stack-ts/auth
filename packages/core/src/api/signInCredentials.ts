@@ -2,7 +2,13 @@ import { AuraAuthError } from "@/shared/errors.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/headers.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/shared/crypto.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import {
+    createValidation,
+    errorToLogMessage,
+    handleApiError,
+    resolveApiRedirect,
+    toStandardizedHeaders,
+} from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
 
@@ -18,7 +24,10 @@ export const signInCredentials = async ({
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, sessionStrategy, logger } = ctx
     try {
-        const { request, rateLimit } = await createValidation(ctx, headerInit)
+        const { request, rateLimit } = await createValidation(
+            ctx,
+            toStandardizedHeaders(headerInit ?? requestInit?.headers ?? {})
+        )
             .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .buildRequest(requestInit, "/signIn/credentials")
             .verifyRateLimit("signInCredentials")

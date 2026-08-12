@@ -1,5 +1,5 @@
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation, errorToLogMessage, handleApiError, toStandardizedHeaders } from "@/shared/utils/api.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -14,7 +14,7 @@ export const isProviderConnected = async (
             structuredData: { provider: oauth, operation: "check_connection" },
         })
 
-        const { headers } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+        const { headers } = await createValidation(ctx, toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {}))
             .verifyOAuthProvider(oauth)
             .verifySession()
             .buildRequest(requestInit, `/providers/${oauth}`)

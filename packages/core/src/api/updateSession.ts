@@ -1,7 +1,13 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import {
+    createValidation,
+    errorToLogMessage,
+    handleApiError,
+    resolveApiRedirect,
+    toStandardizedHeaders,
+} from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
@@ -17,7 +23,7 @@ export const updateSession = async <DefaultUser extends User = User>({
 }: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
     try {
         const { session, headers } = await ctx.sessionStrategy.refreshSession(
-            new Headers(headersInit),
+            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {}),
             sessionInit,
             skipCSRFCheck && !!doubleSubmitToken
         )

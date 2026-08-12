@@ -1,6 +1,6 @@
 import { createHash } from "@/shared/crypto.ts"
-import { HeadersBuilder } from "@aura-stack/router"
-import { isStatelessStrategy } from "@/shared/assert.ts"
+import { HeadersBuilder, type RequestHeaders } from "@aura-stack/router"
+import { isHeadersInit, isStatelessStrategy } from "@/shared/assert.ts"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
@@ -160,6 +160,14 @@ export const resolveApiRedirect = async (
     }
 }
 
+export const toStandardizedHeaders = (headers: Headers | HeadersInit | RequestHeaders): Headers => {
+    return isHeadersInit(headers)
+        ? new Headers(headers)
+        : headers instanceof Headers
+          ? headers
+          : new Headers(headers as Record<string, string>)
+}
+
 export const assertDoubleSubmitToken = (
     options:
         | UpdateSessionAPIOptions
@@ -172,7 +180,7 @@ export const assertDoubleSubmitToken = (
 ) => {
     if (options.doubleSubmitToken) {
         options.skipCSRFCheck = false
-        options.headers = new Headers(options.headers ?? options.request?.headers ?? {})
+        options.headers = new Headers(toStandardizedHeaders(options.headers || {}))
         options.headers.set("x-csrf-token", options.doubleSubmitToken)
         options.request?.headers.set("x-csrf-token", options.doubleSubmitToken)
     } else {
@@ -188,7 +196,7 @@ export const errorToLogMessage = (error: unknown, key: keyof typeof LOG_MESSAGES
         structuredData: {
             error_type: getErrorName(error),
             error_code: error instanceof AuraAuthError ? error.code : "UNKNOWN_ERROR",
-            error_message: error instanceof Error ? error.message : String(error),
+            error_message: error instanceof AuraAuthError ? error.message : String(error),
         },
     })
 }

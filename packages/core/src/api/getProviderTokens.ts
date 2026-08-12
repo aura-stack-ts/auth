@@ -1,6 +1,6 @@
 import { toUnionHeaders } from "@/shared/utils.ts"
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation, errorToLogMessage, handleApiError, toStandardizedHeaders } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
     GetProviderTokensAPIOptions,
@@ -13,7 +13,7 @@ export const getProviderTokens = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, request: requestInit, headers: headersInit }: FunctionAPIContext<GetProviderTokensAPIOptions>
 ): Promise<GetProviderTokensAPIReturn> => {
-    const initialHeaders = new Headers(headersInit ?? requestInit?.headers)
+    const initialHeaders = toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
     try {
         const { request, rateLimit } = await createValidation(ctx, initialHeaders)
             .verifyOAuthProvider(oauth)

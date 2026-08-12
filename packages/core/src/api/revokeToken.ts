@@ -1,5 +1,5 @@
 import { secureApiHeaders } from "@/shared/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation, errorToLogMessage, handleApiError, toStandardizedHeaders } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { RevokeTokenAPIOptions, RevokeTokenAPIReturn, LiteralUnion, BuiltInOAuthProvider } from "@/@types/index.ts"
 
@@ -23,7 +23,10 @@ export const revokeToken = async (
             },
         })
 
-        const { headers, rateLimit } = await createValidation(ctx, headersInit ?? requestInit?.headers)
+        const { headers, rateLimit } = await createValidation(
+            ctx,
+            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
+        )
             .verifyOAuthProvider(oauth)
             .verifySession()
             .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
