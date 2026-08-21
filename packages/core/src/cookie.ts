@@ -112,8 +112,8 @@ export const getSetCookie = (response: Response | Headers, cookieName: string) =
     return parseSetCookie(strCookie).value
 }
 
-export const getOptionalCookie = (request: Request, cookieName: string): string | undefined => {
-    const cookies = request.headers.get("Cookie")
+export const getOptionalCookie = (request: Request | Headers, cookieName: string): string | undefined => {
+    const cookies = request instanceof Request ? request.headers.get("Cookie") : request.get("Cookie")
     if (!cookies) {
         return undefined
     }

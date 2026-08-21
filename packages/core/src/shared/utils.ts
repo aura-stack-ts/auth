@@ -161,19 +161,22 @@ export const verifyCSRFToken = async ({
     cookies,
     logger,
     jose,
+    csrfTokenValue,
 }: {
     headers: Headers
     skipCSRFCheck: boolean
     cookies: InternalCookieStoreConfig
     logger: InternalLogger | undefined
     jose: JoseInstance
+    csrfTokenValue?: string
 }): Promise<boolean> => {
-    let csrfToken = null
+    let csrfToken = csrfTokenValue || null
     const header = headers.get("X-CSRF-Token")
 
     try {
-        csrfToken = getCookie(headers, cookies.csrfToken.name)
+        csrfToken = csrfToken || getCookie(headers, cookies.csrfToken.name)
     } catch (cause) {
+        console.log("CSRF_TOKEN_MISSING in cookie retrieval", cause)
         logger?.log("CSRF_TOKEN_MISSING")
         throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
     }

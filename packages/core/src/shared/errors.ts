@@ -138,6 +138,7 @@ export const AuraErrorCode = {
      * Session Configuration Errors
      */
     INVALID_SLIDING_THRESHOLD_CONFIG_VALUE: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE",
+    INVALID_CSRF_TOKEN: "INVALID_CSRF_TOKEN",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -948,6 +949,14 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "Initialization aborted: The 'slidingThreshold' configuration value must be a floating-point number between 0 and 1 (inclusive), representing a percentage fraction of the total session lifespan.",
         userMessage: "Internal library configuration error. The sliding session threshold must be a number between 0 and 1.",
+    },
+    INVALID_CSRF_TOKEN: {
+        type: "INTERNAL",
+        statusCode: 403,
+        name: "CsrfError",
+        message:
+            "CSRF security verification failed. The provided anti-CSRF token does not match the token embedded in the secure session cookie context or failed cryptographic validation.",
+        userMessage: "Security verification failed. Invalid or missing CSRF token.",
     },
 }
 

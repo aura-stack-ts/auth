@@ -12,7 +12,6 @@ export const getSession = async <DefaultUser extends User = User>({
 }: FunctionAPIContext<GetSessionAPIOptions>): Promise<GetSessionAPIReturn<DefaultUser>> => {
     const headers = new HeadersBuilder(secureApiHeaders)
         .setCookie(ctx.cookies.sessionToken.name, "", getExpiredCookie(ctx.cookies.sessionToken.attributes))
-        .setCookie(ctx.cookies.csrfToken.name, "", getExpiredCookie(ctx.cookies.csrfToken.attributes))
         .toHeaders()
     const unauthorizedError = {
         code: "GET_SESSION_FAILED",
@@ -45,7 +44,7 @@ export const getSession = async <DefaultUser extends User = User>({
         return {
             ...unauthorized,
             error: errors,
-            toResponse: () => Response.json({ success: false, session: null }, { status: 401, headers }),
+            toResponse: () => Response.json({ success: false, session: null }, { status: 401 }),
         }
     }
 }

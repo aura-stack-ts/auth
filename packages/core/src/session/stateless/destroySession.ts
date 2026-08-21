@@ -6,6 +6,6 @@ export const destroySession = ({ ctx, cookies, cookieManager }: InternalStateles
     return async (headers: Headers, skipCSRFCheck: boolean = false) => {
         await verifyCSRFToken({ headers, skipCSRFCheck, cookies: cookies(), logger, jose })
         await verifySessionToken({ headers, cookies: cookies(), jwt: jwtManager, logger })
-        return cookieManager.clear()
+        return cookieManager.clearAll()
     }
 }
