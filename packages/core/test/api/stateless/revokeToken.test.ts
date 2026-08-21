@@ -45,8 +45,8 @@ describe("revokeToken", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "CSRF_TOKEN_MISSING",
-                message: "The CSRF token is missing. Please refresh and try again.",
+                code: "COOKIE_INVALID_VALUE",
+                message: "Expected configuration cookie not found or contains an empty value.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

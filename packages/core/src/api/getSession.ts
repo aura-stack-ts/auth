@@ -44,7 +44,7 @@ export const getSession = async <DefaultUser extends User = User>({
         return {
             ...unauthorized,
             error: errors,
-            toResponse: () => Response.json({ success: false, session: null }, { status: 401 }),
+            toResponse: () => Response.json({ success: false, session: null }, { status: 401, headers }),
         }
     }
 }

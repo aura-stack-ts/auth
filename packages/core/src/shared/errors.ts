@@ -951,7 +951,7 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         userMessage: "Internal library configuration error. The sliding session threshold must be a number between 0 and 1.",
     },
     INVALID_CSRF_TOKEN: {
-        type: "INTERNAL",
+        type: "AUTH_FLOW",
         statusCode: 403,
         name: "CsrfError",
         message:

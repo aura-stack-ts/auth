@@ -1,6 +1,6 @@
 import { HeadersBuilder, type RequestHeaders } from "@aura-stack/router"
 import { getOptionalCookie } from "@/cookie.ts"
-import { createCSRF, createHash } from "@/shared/crypto.ts"
+import { assertCSRFTokenCookie, createCSRF, createHash } from "@/shared/crypto.ts"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
@@ -73,6 +73,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         verifyCSRFToken: (skipCSRFCheck: boolean) => {
             steps.push(async () => {
                 const existingCSRFToken = getOptionalCookie(output.headers, ctx.cookies.csrfToken.name)
+                assertCSRFTokenCookie(ctx.jose, existingCSRFToken)
                 const csrfTokenValue = await createCSRF(ctx.jose, existingCSRFToken)
                 await verifyCSRFToken({
                     headers: output.headers,
