@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed CSRF token management across API functions. CSRF tokens are now generated and validated directly by API functions for sensitive operations, including `signOut`, `signInCredentials`, and `signUp`. The `/session` endpoint no longer manages or revokes CSRF tokens; each protected operation is now responsible for handling its own CSRF token lifecycle. [#261](https://github.com/aura-stack-ts/auth/pull/261)
+
 - Fixed identity type inference when both `identity.schema` and `signUp.schema` are configured in `createAuth()`. The auth instance's `User` identity type is now inferred exclusively from `identity.schema`, falling back to the default `ZodIdentitySchema` when no identity schema is provided. [#259](https://github.com/aura-stack-ts/auth/pull/259)
 
 ---
