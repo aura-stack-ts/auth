@@ -72,7 +72,7 @@ export const destroySession = ({ ctx, cookies, cookieManager }: InternalStateful
             throw error
         }
 
-        const clearedHeaders = cookieManager.clear()
+        const clearedHeaders = cookieManager.clearAll()
         logger?.log("STATEFUL_DESTROY_SESSION_SUCCESS", {
             structuredData: {
                 cookies_cleared: true,

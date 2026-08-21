@@ -101,7 +101,8 @@ describe("getSession", () => {
         expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
         expect(spy).not.toHaveBeenCalled()
-        expect(getSetCookie(output.headers, "aura-auth.csrf_token")).toBe("")
+        console.log("value: ")
+        expect(() => getSetCookie(output.headers, "aura-auth.csrf_token")).toThrow()
         expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("")
     })
 
@@ -148,7 +149,7 @@ describe("getSession", () => {
             sub: undefined,
             name: undefined,
         })
-        expect(getSetCookie(output.headers, "aura-auth.csrf_token")).toBe("")
+        expect(() => getSetCookie(output.headers, "aura-auth.csrf_token")).toThrow()
         expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("")
     })
 

@@ -28,8 +28,8 @@ export const signInCredentials = async ({
             ctx,
             toStandardizedHeaders(headerInit ?? requestInit?.headers ?? {})
         )
-            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .buildRequest(requestInit, "/signIn/credentials")
+            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .verifyRateLimit("signInCredentials")
             .execute()
 

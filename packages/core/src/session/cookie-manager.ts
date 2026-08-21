@@ -19,9 +19,16 @@ export const createCookieManager = (store: () => InternalCookieStoreConfig) => {
 
     const clear = () => {
         return new HeadersBuilder(secureApiHeaders)
+            .setCookie(store().sessionToken.name, "", getExpiredCookie(store().sessionToken.attributes))
+            .toHeaders()
+    }
+
+    const clearAll = () => {
+        return new HeadersBuilder(secureApiHeaders)
             .setCookie(store().csrfToken.name, "", getExpiredCookie(store().csrfToken.attributes))
             .setCookie(store().sessionToken.name, "", getExpiredCookie(store().sessionToken.attributes))
             .toHeaders()
     }
-    return { getCookie, setCookie, clear }
+
+    return { getCookie, setCookie, clear, clearAll }
 }

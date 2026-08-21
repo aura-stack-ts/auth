@@ -38,6 +38,16 @@ export const createPKCE = async (verifier?: string) => {
     return { codeVerifier, codeChallenge, method: "S256" }
 }
 
+export const assertCSRFTokenCookie = async (jose: RouterGlobalContext["jose"], cookie?: string) => {
+    try {
+        if (cookie) {
+            await jose.verifyJWS(cookie)
+        }
+    } catch (error) {
+        throw new AuraAuthError({ code: "INVALID_CSRF_TOKEN", cause: error })
+    }
+}
+
 /**
  * Creates a CSRF token to be used in OAuth flows to prevent cross-site request forgery attacks.
  *

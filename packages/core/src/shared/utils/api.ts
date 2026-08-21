@@ -1,9 +1,10 @@
-import { createHash } from "@/shared/crypto.ts"
 import { HeadersBuilder, type RequestHeaders } from "@aura-stack/router"
-import { isHeadersInit, isStatelessStrategy } from "@/shared/assert.ts"
+import { getOptionalCookie } from "@/cookie.ts"
+import { assertCSRFTokenCookie, createCSRF, createHash } from "@/shared/crypto.ts"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
+import { isHeadersInit, isStatelessStrategy } from "@/shared/assert.ts"
 import { getErrorName, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
 import { getBaseURL, getOriginURL, createRedirectTo } from "@/shared/utils/authorization.ts"
 import type {
@@ -19,7 +20,7 @@ import type {
     SignOutAPIOptions,
 } from "@/@types/index.ts"
 import type { InternalLogger, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
-import type { LOG_MESSAGES } from "../logger.ts"
+import type { LOG_MESSAGES } from "@/shared/logger.ts"
 
 export const createValidation = (ctx: RouterGlobalContext, headersInit?: HeadersInit) => {
     const headers = new Headers(headersInit)
@@ -71,12 +72,16 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         },
         verifyCSRFToken: (skipCSRFCheck: boolean) => {
             steps.push(async () => {
+                const existingCSRFToken = getOptionalCookie(output.headers, ctx.cookies.csrfToken.name)
+                assertCSRFTokenCookie(ctx.jose, existingCSRFToken)
+                const csrfTokenValue = await createCSRF(ctx.jose, existingCSRFToken)
                 await verifyCSRFToken({
                     headers: output.headers,
                     cookies: ctx.cookies,
                     jose: ctx.jose,
                     logger: ctx.logger,
                     skipCSRFCheck,
+                    csrfTokenValue,
                 })
             })
             return builder
