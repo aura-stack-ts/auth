@@ -8,9 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.3.1] - 2026-08-22
+
 ### Added
 
 - Added the `NextAppInstance` type to expose the auth instance type for Next.js App Router integration. [#257](https://github.com/aura-stack-ts/auth/pull/257)
+
+### Changed
+
+- Updated the `@aura-stack/react` dependency to `v0.3.1`. [#262](https://github.com/aura-stack-ts/auth/pull/262)
 
 ### Fixed
 

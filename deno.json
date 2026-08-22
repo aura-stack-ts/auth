@@ -5,10 +5,5 @@
   "compilerOptions": {
     "strict": false,
     "strictNullChecks": false
-  },
-  "lint": {
-    "rules": {
-      "exclude": ["no-slow-types"]
-    }
   }
 }

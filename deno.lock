@@ -21,6 +21,7 @@
     "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/testing@^1.0.20": "1.0.20",
     "jsr:@supabase/functions-js@2": "2.112.1",
+    "npm:@aura-stack/auth@0.9.0": "0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5",
     "npm:@aura-stack/router@0.9": "0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5",
     "npm:@prisma/adapter-pg@7.9.1": "7.9.1",
     "npm:@prisma/adapter-pg@^7.9.1": "7.9.1",
@@ -155,6 +156,27 @@
     "@ark/util@0.56.0": {
       "integrity": "sha512-BghfRC8b9pNs3vBoDJhcta0/c1J1rsoS1+HgVUreMFPdhz/CRAKReAu57YEllNaSy98rWAdY1gE+gFup7OXpgA=="
     },
+    "@aura-stack/auth@0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5": {
+      "integrity": "sha512-iawYP9ngp7WAazN5mMDg/8p0vcjpj91FSRiGqZzf7uur5HZFypTf5YYSEAwdI4pSwiMN2fDFsZnIGmu2t+gOAQ==",
+      "dependencies": [
+        "@aura-stack/jose",
+        "@aura-stack/rate-limiter",
+        "@aura-stack/router@0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5",
+        "arktype",
+        "typebox",
+        "valibot@1.4.2",
+        "zod"
+      ]
+    },
+    "@aura-stack/jose@0.6.0": {
+      "integrity": "sha512-wt1Jg6S42x1s9nqftvTBPXK/iYQX6Ihn01Oo5PO3i5ULW+QJNZFww6udicqzXKAFMu5rmez4e8L9qf/sx6uJaA==",
+      "dependencies": [
+        "jose"
+      ]
+    },
+    "@aura-stack/rate-limiter@0.1.1": {
+      "integrity": "sha512-DWA2u97BZpMMu2MRlEQV7+R992KjY911yg+kajU7+mVIBaxkdKBfZRLxHQ7pR/INos+WIjqGRsJ34awccVUo1g=="
+    },
     "@aura-stack/router@0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5": {
       "integrity": "sha512-8yX9GJCAvyUMNawpNB8bCwQL+9ZLYFtsm6+btcj78XegtZ83uv6Ye16MKNhyadaCN5gA8OKAVAAKORzxq22dXg==",
       "dependencies": [
@@ -168,6 +190,22 @@
         "arktype",
         "typebox",
         "valibot@1.4.0",
+        "zod"
+      ]
+    },
+    "@aura-stack/router@0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5": {
+      "integrity": "sha512-8yX9GJCAvyUMNawpNB8bCwQL+9ZLYFtsm6+btcj78XegtZ83uv6Ye16MKNhyadaCN5gA8OKAVAAKORzxq22dXg==",
+      "dependencies": [
+        "arktype",
+        "cookie@1.1.1",
+        "typebox",
+        "valibot@1.4.2",
+        "zod"
+      ],
+      "optionalPeers": [
+        "arktype",
+        "typebox",
+        "valibot@1.4.2",
         "zod"
       ]
     },
