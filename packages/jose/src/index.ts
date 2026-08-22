@@ -121,8 +121,14 @@ export const decodeJWT = async <Payload extends JWTPayload>(
 }
 
 type CreateJWTReturnType<Payload extends JWTPayload> = {
-    encodeJWT: (payload: TypedJWTPayload<Partial<Payload>>, options?: EncodeJWTOptions) => Promise<string>
-    decodeJWT: (token: string, options?: DecodeJWTOptions) => Promise<TypedJWTPayload<Payload>>
+    encodeJWT: <EncodePayload extends JWTPayload = Payload>(
+        payload: TypedJWTPayload<Partial<EncodePayload>>,
+        options?: EncodeJWTOptions
+    ) => Promise<string>
+    decodeJWT: <DecodePayload extends JWTPayload = Payload>(
+        token: string,
+        options?: DecodeJWTOptions
+    ) => Promise<TypedJWTPayload<DecodePayload>>
 }
 
 /**

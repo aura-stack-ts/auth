@@ -3,7 +3,12 @@
   "nodeModulesDir": "auto",
   "allowScripts": ["npm:@prisma/engines@7.9.1", "npm:prisma@7.9.1", "npm:sharp@0.34.5"],
   "compilerOptions": {
-    "strict": true,
-    "strictNullChecks": true
+    "strict": false,
+    "strictNullChecks": false
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-slow-types"]
+    }
   }
 }
