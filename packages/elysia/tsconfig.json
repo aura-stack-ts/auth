@@ -1,5 +1,5 @@
 {
-  "extends": "../../configs/tsconfig/bun.json",
+  "extends": "@aura-stack/tsconfig/bun.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
