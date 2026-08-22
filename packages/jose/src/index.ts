@@ -76,7 +76,7 @@ export const encodeJWT = async <Payload extends JWTPayload>(
     token: TypedJWTPayload<Partial<Payload>>,
     secret: JWTSecretInput | DerivedKeyInput,
     options?: EncodeJWTOptions
-) => {
+): Promise<string> => {
     try {
         const { encode } = getSecrets(secret)
         const { jweSecret, jwsSecret } = encode
@@ -120,6 +120,11 @@ export const decodeJWT = async <Payload extends JWTPayload>(
     }
 }
 
+type CreateJWTReturnType<Payload extends JWTPayload> = {
+    encodeJWT: (payload: TypedJWTPayload<Partial<Payload>>, options?: EncodeJWTOptions) => Promise<string>
+    decodeJWT: (token: string, options?: DecodeJWTOptions) => Promise<TypedJWTPayload<Payload>>
+}
+
 /**
  * Create a JWT handler with encode and decode methods to `signJWS/encryptJWE` and `verifyJWS/decryptJWE`
  * JWT tokens. The JWTs are signed and verified using JWS and encrypted and decrypted using JWE. It
@@ -129,7 +134,7 @@ export const decodeJWT = async <Payload extends JWTPayload>(
  * @param options - Optional algorithm configuration for signing and encryption
  * @returns JWT handler object with `signJWS/encryptJWE` and `verifyJWS/decryptJWE` methods
  */
-export const createJWT = <Payload extends JWTPayload>(secret: JWTSecretInput | DerivedKeyInput) => {
+export const createJWT = <Payload extends JWTPayload>(secret: JWTSecretInput | DerivedKeyInput): CreateJWTReturnType<Payload> => {
     return {
         encodeJWT: async <EncodePayload extends JWTPayload = Payload>(
             payload: TypedJWTPayload<Partial<EncodePayload>>,

@@ -70,7 +70,7 @@ export const encryptJWE = async <Payload extends JWTPayload>(
  * @param options - Optional encryption options (e.g. algorithm, encryption method)
  * @returns Encrypted JWT string in compact serialization format
  */
-export const encryptCompactJWE = async (payload: string, secret: SecretInput, options?: JWEHeaderParameters) => {
+export const encryptCompactJWE = async (payload: string, secret: SecretInput, options?: JWEHeaderParameters): Promise<string> => {
     try {
         if (isFalsy(payload)) {
             throw new InvalidPayloadError("The payload must be a non-empty string")
@@ -137,7 +137,7 @@ export const decryptJWE = async <Payload extends JWTPayload>(
  * @param options - Additional JWT decryption options
  * @returns Decrypted JWT payload string
  */
-export const decryptCompactJWE = async (token: string, secret: SecretInput, options?: DecryptOptions) => {
+export const decryptCompactJWE = async (token: string, secret: SecretInput, options?: DecryptOptions): Promise<string> => {
     try {
         if (isFalsy(token)) {
             throw new InvalidPayloadError("The token must be a non-empty string")
@@ -159,6 +159,17 @@ export const decryptCompactJWE = async (token: string, secret: SecretInput, opti
     }
 }
 
+type CreateJWEReturnType<Payload extends JWTPayload> = {
+    encryptJWE: <Encrypted extends JWTPayload = Payload>(
+        payload: TypedJWTPayload<Partial<Encrypted>>,
+        options?: JWEHeaderParameters
+    ) => Promise<string>
+    decryptJWE: <Decrypted extends JWTPayload = Payload>(
+        payload: string,
+        options?: JWTDecryptOptions
+    ) => Promise<TypedJWTPayload<Decrypted>>
+}
+
 /**
  * Creates a `JWE (JSON Web Encryption)` encrypter and decrypter. It implements the `encryptJWE`
  * and `decryptJWE` functions of the module.
@@ -166,7 +177,7 @@ export const decryptCompactJWE = async (token: string, secret: SecretInput, opti
  * @param secret - Secret key used for encrypting and decrypting the JWE
  * @returns encryptJWE and decryptJWE functions
  */
-export const createJWE = <Payload extends JWTPayload>(secret: JWTSecretInput) => {
+export const createJWE = <Payload extends JWTPayload>(secret: JWTSecretInput): CreateJWEReturnType<Payload> => {
     const encryptSecret = isAsymmetricKeyPair(secret) ? secret.publicKey : secret
     const decryptSecret = isAsymmetricKeyPair(secret) ? secret.privateKey : secret
 
@@ -180,13 +191,18 @@ export const createJWE = <Payload extends JWTPayload>(secret: JWTSecretInput) =>
     }
 }
 
+type CreateCompactJWEReturnType = {
+    encryptCompactJWE: (payload: string, options?: JWEHeaderParameters) => Promise<string>
+    decryptCompactJWE: (payload: string, options?: DecryptOptions) => Promise<string>
+}
+
 /**
  * Creates a `Compact JWE (JSON Web Encryption)` encrypter and decrypter using compact serialization. It implements the
  * `encryptCompactJWE` and `decryptCompactJWE` functions.
  * @param secret - Secret key used for encrypting and decrypting the JWE
  * @returns encryptCompactJWE and decryptCompactJWE functions
  */
-export const createCompactJWE = (secret: JWTSecretInput) => {
+export const createCompactJWE = (secret: JWTSecretInput): CreateCompactJWEReturnType => {
     const encryptSecret = isAsymmetricKeyPair(secret) ? secret.publicKey : secret
     const decryptSecret = isAsymmetricKeyPair(secret) ? secret.privateKey : secret
 

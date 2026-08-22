@@ -1,12 +1,13 @@
-import { isAsymmetricKeyPair, isJWKKey, isObject } from "@/assert.ts"
-import { InvalidSecretError } from "@/errors.ts"
 import { encoder } from "@/crypto.ts"
+import { InvalidSecretError } from "@/errors.ts"
+import { isAsymmetricKeyPair, isJWKKey, isObject } from "@/assert.ts"
 import type { DerivedKeyInput, JWTSecretInput, SecretInput } from "@/index.ts"
+import type { JWK } from "jose"
 
 export const MIN_SECRET_ENTROPY_PER_CHAR = 4
 export const MIN_SECRET_ENTROPY_BITS = 128
 
-export const assertSecretEntropy = (secret: string) => {
+export const assertSecretEntropy = (secret: string): void => {
     const charFreq = new Map<string, number>()
     for (const char of secret) {
         if (!charFreq.has(char)) {
@@ -35,7 +36,7 @@ export const assertSecretEntropy = (secret: string) => {
  * @param secret - The secret as a string or Uint8Array
  * @returns The secret in Uint8Array format
  */
-export const createSecret = (secret: SecretInput, length: number = 32) => {
+export const createSecret = (secret: SecretInput, length: number = 32): Uint8Array | CryptoKey | JWK => {
     if (!secret) throw new InvalidSecretError("Secret is required")
     if (typeof secret === "string") {
         const encoded = encoder.encode(secret)
@@ -83,7 +84,18 @@ const getJWESecrets = (secret: JWTSecretInput) => {
     }
 }
 
-export const getSecrets = (secret: JWTSecretInput | DerivedKeyInput) => {
+type GetSecretsReturnType = {
+    encode: {
+        jwsSecret: SecretInput
+        jweSecret: SecretInput
+    }
+    decode: {
+        jwsSecret: SecretInput
+        jweSecret: SecretInput
+    }
+}
+
+export const getSecrets = (secret: JWTSecretInput | DerivedKeyInput): GetSecretsReturnType => {
     const isDerived = isObject(secret) && "sign" in secret && "encrypt" in secret
     const jwsSource = isDerived ? secret.sign : secret
     const jweSource = isDerived ? secret.encrypt : secret
