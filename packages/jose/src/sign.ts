@@ -84,6 +84,17 @@ export const verifyJWS = async <Payload extends JWTPayload>(
     }
 }
 
+type CreateJWSReturnType<Payload extends JWTPayload> = {
+    signJWS: <SignPayload extends JWTPayload = Payload>(
+        payload: TypedJWTPayload<Partial<SignPayload>>,
+        options?: JWTHeaderParameters
+    ) => Promise<string>
+    verifyJWS: <VerifyPayload extends JWTPayload = Payload>(
+        payload: string,
+        verifyOptions?: JWTVerifyOptions
+    ) => Promise<TypedJWTPayload<VerifyPayload>>
+}
+
 /*
  * Create a JWS (JSON Web Signature) signer and verifier. It implements the `signJWS`
  * and `verifyJWS` functions of the module.
@@ -92,7 +103,7 @@ export const verifyJWS = async <Payload extends JWTPayload>(
  * @param options - Optional signing options (e.g. algorithm)
  * @returns signJWS and verifyJWS functions
  */
-export const createJWS = <Payload extends JWTPayload>(secret: JWTSecretInput) => {
+export const createJWS = <Payload extends JWTPayload>(secret: JWTSecretInput): CreateJWSReturnType<Payload> => {
     const isAsymmetric = isAsymmetricKeyPair(secret)
     const signSecret = isAsymmetric ? secret.privateKey : secret
     const verifySecret = isAsymmetric ? secret.publicKey : secret

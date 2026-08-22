@@ -48,7 +48,7 @@
     "typebox": "npm:typebox@1.1.38"
   },
   "publish": {
-    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
-  },
-  "exclude": ["dist", "node_modules"]
+    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"],
+    "exclude": ["dist", "node_modules"]
+  }
 }

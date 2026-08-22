@@ -71,8 +71,7 @@
   "devDependencies": {
     "@aura-stack/tsconfig": "workspace:*",
     "@aura-stack/tsdown-config": "workspace:*",
-    "typescript": "catalog:typescript",
-    "vitest": "catalog:vitest"
+    "typescript": "catalog:typescript"
   },
   "exports": {
     ".": {
