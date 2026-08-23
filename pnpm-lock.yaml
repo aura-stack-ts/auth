@@ -494,6 +494,9 @@ importers:
       '@types/react-dom':
         specifier: catalog:react
         version: 19.2.3(@types/react@19.2.14)
+      shadcn:
+        specifier: ^4.19.0
+        version: 4.19.0(typescript@5.9.3)
       tailwindcss:
         specifier: catalog:tailwindcss
         version: 4.1.18
