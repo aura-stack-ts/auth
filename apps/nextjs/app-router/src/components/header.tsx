@@ -21,7 +21,7 @@ export const Header = () => {
     }
 
     return (
-        <header className="fixed top-0 w-full z-50 border-b border-muted bg-black/80 backdrop-blur-md">
+        <header className="fixed top-0 w-full z-50 border-b border-muted backdrop-blur-md">
             <nav className="w-11/12 max-w-6xl mx-auto py-4">
                 <div className="flex items-center justify-between">
                     <Link href="/" className="text-xl font-semibold text-white">
@@ -61,6 +61,9 @@ export const Header = () => {
                     )}
                     {isAuthenticated && (
                         <div className="hidden md:flex items-center gap-x-2">
+                            <Button variant="outline" size="sm">
+                                <Link href="/client/profile">Profile</Link>
+                            </Button>
                             <Button variant="outline" size="sm" onClick={handleSignOut}>
                                 Sign Out
                             </Button>
@@ -78,7 +81,7 @@ export const Header = () => {
                 </div>
             </nav>
             {mobileMenuOpen && (
-                <div className="md:hidden bg-black/95 backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]">
+                <div className="md:hidden backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]">
                     <div className="px-6 py-4 flex flex-col gap-4">
                         <Link
                             href="https://aura-stack-auth.vercel.app/docs/introduction"
