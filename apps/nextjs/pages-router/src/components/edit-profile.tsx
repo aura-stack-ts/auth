@@ -1,5 +1,8 @@
+"use client"
 import { useState } from "react"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 
 export const EditProfile = ({ action }: { action: (formData: FormData) => void | Promise<void> }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -11,7 +14,8 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
 
     return (
         <section>
-            <div className="mt-4 pt-4 flex items-center justify-between gap-x-4 border-t">
+            <Separator />
+            <div className="pt-6 flex items-center justify-between gap-x-4">
                 <div>
                     <label className="font-medium block" htmlFor="signout">
                         Edit Profile
@@ -33,29 +37,33 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
                         <label className="font-medium block" htmlFor="username">
                             Username
                         </label>
-                        <input
+                        <Input
                             type="text"
                             id="username"
                             name="username"
-                            className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
+                            aria-label="Username"
+                            autoComplete="username"
+                            aria-autocomplete="list"
+                            className="w-full h-9 mt-1 font-medium"
                         />
                     </div>
                     <div className="mt-4">
                         <label className="font-medium block" htmlFor="email">
                             Email
                         </label>
-                        <input
+                        <Input
                             type="email"
                             id="email"
                             name="email"
-                            className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
+                            aria-label="Email"
+                            autoComplete="email"
+                            aria-autocomplete="list"
+                            className="w-full h-9 mt-1 font-medium"
                         />
                     </div>
-                    <div className="grid grid-cols-2 gap-x-4">
-                        <Button className="w-full mt-6" variant="default" type="submit">
-                            Edit
-                        </Button>
-                        <Button className="w-full mt-6" variant="secondary" type="button" onClick={() => setIsOpen(false)}>
+                    <div className="mt-6 grid grid-cols-2 gap-x-4">
+                        <Button type="submit">Edit</Button>
+                        <Button variant="destructive" type="button" onClick={() => setIsOpen(false)}>
                             Cancel
                         </Button>
                     </div>
