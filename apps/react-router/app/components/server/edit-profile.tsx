@@ -1,17 +1,13 @@
 import { useState } from "react"
+import { Form } from "react-router"
 import { Button } from "~/components/ui/button"
 
-export const EditProfile = ({ action }: { action: (formData: FormData) => void | Promise<void> }) => {
+export const EditProfile = () => {
     const [isOpen, setIsOpen] = useState(false)
-
-    const updateSession = async (formData: FormData) => {
-        await action(formData)
-        setIsOpen(false)
-    }
 
     return (
         <section>
-            <div className="mt-4 pt-4 flex items-center justify-between gap-x-4 border-t">
+            <div className="flex items-center justify-between gap-x-4">
                 <div>
                     <p className="font-medium">Edit Profile</p>
                     <span className="text-sm">Edit your profile information</span>
@@ -26,7 +22,8 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
                 </Button>
             </div>
             {isOpen && (
-                <form className="w-full mt-4 pt-4 text-start border-t" action={updateSession}>
+                <Form className="w-full mt-4 pt-4 text-start border-t" method="POST">
+                    <input type="hidden" name="action" value="updateSession" />
                     <div>
                         <label className="font-medium block" htmlFor="username">
                             Username
@@ -53,11 +50,11 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
                         <Button className="w-full mt-6" variant="default" type="submit">
                             Edit
                         </Button>
-                        <Button className="w-full mt-6" variant="secondary" type="button" onClick={() => setIsOpen(false)}>
+                        <Button className="w-full mt-6" variant="destructive" type="button" onClick={() => setIsOpen(false)}>
                             Cancel
                         </Button>
                     </div>
-                </form>
+                </Form>
             )}
         </section>
     )

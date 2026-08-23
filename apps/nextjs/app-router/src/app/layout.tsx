@@ -3,9 +3,9 @@ import { Header } from "@/components/header"
 import { metadataInfo } from "@/lib/metadata"
 import { AuthProvider } from "@/contexts/auth"
 import "@/app/globals.css"
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
-const jetbrainsMono = JetBrains_Mono({subsets:['latin'],variable:'--font-mono'});
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
