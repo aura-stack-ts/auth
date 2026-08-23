@@ -18,46 +18,45 @@ export const Header = () => {
     }
 
     return (
-        <header className="fixed top-0 w-full z-50 border-b border-muted bg-black/80 backdrop-blur-md">
+        <header className="fixed top-0 w-full z-50 border-b border-muted backdrop-blur-md">
             <nav className="w-11/12 max-w-6xl mx-auto py-4">
                 <div className="flex items-center justify-between">
-                    <Link href="/" className="text-xl font-semibold text-white">
+                    <Link href="/" className="text-xl font-semibold">
                         Aura Auth
                     </Link>
                     <div className="hidden md:flex items-center justify-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-muted-foreground">
                         <a
                             href="https://aura-stack-auth.vercel.app/docs/introduction"
-                            className="text-sm hover:text-white transition-colors"
+                            className="text-sm hover:text-foreground transition-colors"
                             target="_blank"
                         >
                             Documentation
                         </a>
                         <a
                             href="https://github.com/aura-stack-ts/auth"
-                            className="text-sm hover:text-white transition-colors"
+                            className="text-sm hover:text-foreground transition-colors"
                             target="_blank"
                         >
                             Repository
                         </a>
                         <a
                             href="https://discord.com/invite/anXExMR5"
-                            className="text-sm hover:text-white transition-colors"
+                            className="text-sm hover:text-foreground transition-colors"
                             target="_blank"
                         >
                             Discord
                         </a>
                     </div>
                     {!isAuthenticated && (
-                        <Link
-                            href="https://nextjs.org/"
-                            target="_blank"
-                            className="hidden text-xl font-semibold text-white md:flex"
-                        >
+                        <Link href="https://nextjs.org/" target="_blank" className="hidden text-xl font-semibold md:flex">
                             Next.js
                         </Link>
                     )}
                     {isAuthenticated && (
                         <div className="hidden md:flex items-center gap-x-2">
+                            <Button variant="outline" size="sm">
+                                <Link href="/client/profile">Profile</Link>
+                            </Button>
                             <Button variant="outline" size="sm" onClick={handleSignOut}>
                                 Sign Out
                             </Button>
@@ -65,7 +64,7 @@ export const Header = () => {
                     )}
                     <Button
                         type="button"
-                        className="md:hidden text-white"
+                        className="md:hidden"
                         variant="outline"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         aria-label="Toggle menu"
@@ -75,11 +74,11 @@ export const Header = () => {
                 </div>
             </nav>
             {mobileMenuOpen && (
-                <div className="md:hidden bg-black/95 backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]">
+                <div className="md:hidden backdrop-blur-md border-t border-gray-800/50 animate-[slideDown_0.3s_ease-out]">
                     <div className="px-6 py-4 flex flex-col gap-4">
                         <Link
                             href="https://aura-stack-auth.vercel.app/docs/introduction"
-                            className="text-sm text-muted-foreground hover:text-white transition-colors py-2"
+                            className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
                             target="_blank"
                             onClick={() => setMobileMenuOpen(false)}
                         >
@@ -87,7 +86,7 @@ export const Header = () => {
                         </Link>
                         <a
                             href="https://github.com/aura-stack-ts/auth"
-                            className="text-sm text-muted-foreground hover:text-white transition-colors py-2"
+                            className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
                             target="_blank"
                             onClick={() => setMobileMenuOpen(false)}
                         >
@@ -95,7 +94,7 @@ export const Header = () => {
                         </a>
                         <a
                             href="https://discord.com/invite/anXExMR5"
-                            className="text-sm text-muted-foreground hover:text-white transition-colors py-2"
+                            className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
                             target="_blank"
                             onClick={() => setMobileMenuOpen(false)}
                         >
