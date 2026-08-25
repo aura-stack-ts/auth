@@ -5,7 +5,7 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Vary
  */
 export const cacheControl: HeadersInit = {
-    "Cache-Control": "no-store",
+    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
     Pragma: "no-cache",
     Expires: "0",
     Vary: "Cookie",
@@ -39,6 +39,8 @@ export const secureHeaders = {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Cross-Origin-Resource-Policy": "same-origin",
+    "Cross-Origin-Opener-Policy": "same-origin",
 }
 
 /**

@@ -281,10 +281,11 @@ export const createCookieStore = (
             attributes: defineSecureCookieOptions(
                 useSecure,
                 {
-                    ...oauthCookieOptions,
                     ...overrides?.accessToken?.attributes,
+                    ...defaultHostCookieConfig,
+                    sameSite: "strict",
                 },
-                overrides?.accessToken?.attributes?.strategy ?? "secure",
+                overrides?.accessToken?.attributes?.strategy ?? "host",
                 logger
             ),
         },

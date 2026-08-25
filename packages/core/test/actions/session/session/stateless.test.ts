@@ -89,7 +89,7 @@ describe("sessionAction", () => {
             })
         )
         const headers = request.headers
-        expect(headers.get("Cache-Control")).toBe("no-store")
+        expect(headers.get("Cache-Control")).toBe("no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0")
         expect(headers.get("Pragma")).toBe("no-cache")
         expect(headers.get("Expires")).toBe("0")
         expect(headers.get("Vary")).toBe("Cookie")
