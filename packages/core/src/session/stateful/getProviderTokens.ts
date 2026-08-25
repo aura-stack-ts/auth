@@ -1,8 +1,9 @@
 import { createHash } from "@/shared/crypto.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { handleApiError } from "@/shared/utils/api.ts"
-import { getErrorName, shouldRefresh } from "@/shared/utils.ts"
+import { secureApiHeaders } from "@/shared/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
+import { getErrorName, shouldRefresh, toUnionHeaders } from "@/shared/utils.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 import type { GetProviderTokensStatefulReturn } from "@/@types/index.ts"
 
@@ -91,7 +92,8 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
                     "PROVIDER_TOKENS_ERROR",
                     "Failed to get provider tokens"
                 )
-                return { success: false, error: { code, message }, tokens: null, headers: request.headers, statusCode }
+                const headers = toUnionHeaders(request.headers, secureApiHeaders)
+                return { success: false, error: { code, message }, tokens: null, headers, statusCode }
             }
 
             logger?.log("STATEFUL_GET_PROVIDER_TOKENS_OAUTH_ACCOUNT_FOUND", {
@@ -171,7 +173,8 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
                         },
                     })
 
-                    return { success: true, tokens: refreshedTokens, headers: request.headers }
+                    const headers = toUnionHeaders(request.headers, secureApiHeaders)
+                    return { success: true, tokens: refreshedTokens, headers }
                 } catch (refreshError) {
                     logger?.log("STATEFUL_GET_PROVIDER_TOKENS_REFRESH_ERROR", {
                         structuredData: {
@@ -186,7 +189,8 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
                         "PROVIDER_TOKENS_ERROR",
                         "Failed to get provider tokens"
                     )
-                    return { success: false, error: { code, message }, tokens: null, headers: request.headers, statusCode }
+                    const headers = toUnionHeaders(request.headers, secureApiHeaders)
+                    return { success: false, error: { code, message }, tokens: null, headers, statusCode }
                 }
             }
 
@@ -197,7 +201,8 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
                 },
             })
 
-            return { success: true, tokens: tokens as any, headers: request.headers }
+            const headers = toUnionHeaders(request.headers, secureApiHeaders)
+            return { success: true, tokens: tokens as any, headers }
         } catch (error) {
             logger?.log("STATEFUL_GET_PROVIDER_TOKENS_ERROR", {
                 structuredData: {

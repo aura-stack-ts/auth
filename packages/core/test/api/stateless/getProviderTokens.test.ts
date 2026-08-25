@@ -57,6 +57,27 @@ describe("getProviderTokens API", () => {
         })
     })
 
+    test("throws error when session token is missing", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const output = await api.getProviderTokens("oauth-provider", {
+            headers: {
+                Cookie: `aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+        })
+        expect(output).toEqual({
+            success: false,
+            tokens: null,
+            error: {
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
     test("successfully gets provider tokens", async () => {
         vi.stubEnv("BASE_URL", "http://localhost:3000")
         const csrfToken = await createCSRF(jose)

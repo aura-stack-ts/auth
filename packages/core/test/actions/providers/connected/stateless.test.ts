@@ -58,7 +58,7 @@ describe("connectedAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
                 },
             })
         )
@@ -79,7 +79,7 @@ describe("connectedAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=invalid-token`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=invalid-token`,
                 },
             })
         )
@@ -106,7 +106,7 @@ describe("connectedAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedExpiredTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedExpiredTokens}`,
                 },
             })
         )
@@ -153,7 +153,7 @@ describe("connectedAction", () => {
             new Request("https://example.com/auth/providers/oauth-provider", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=`,
                 },
             })
         )
@@ -176,7 +176,7 @@ describe("connectedAction", () => {
             new Request("https://example.com/auth/providers/oauth-profile", {
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Secure-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
                 },
             })
         )
