@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
-- Hardened OAuth token handling in the `/providers/:provider/tokens` endpoint and `api.getProviderTokens()` API. The token storage cookie now uses the `__Host-` prefix, and responses include the `Cross-Origin-Resource-Policy: same-origin` and `Cross-Origin-Opener-Policy: same-origin` headers to strengthen cross-origin isolation and reduce the risk of cross-origin attacks. [#267](https://github.com/aura-stack-ts/auth/pull/267)
+- Hardened OAuth token handling in the `/providers/:provider/tokens` endpoint and `api.getProviderTokens()` API. The token storage cookie now uses the `__Host-` prefix, and responses include the `Cross-Origin-Resource-Policy: same-origin` and `Cross-Origin-Opener-Policy: same-origin` headers to strengthen cross-origin isolation and reduce the risk of cross-origin attacks. [#268](https://github.com/aura-stack-ts/auth/pull/268)
 
 ---
 

@@ -92,7 +92,8 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
                     "PROVIDER_TOKENS_ERROR",
                     "Failed to get provider tokens"
                 )
-                return { success: false, error: { code, message }, tokens: null, headers: request.headers, statusCode }
+                const headers = toUnionHeaders(request.headers, secureApiHeaders)
+                return { success: false, error: { code, message }, tokens: null, headers, statusCode }
             }
 
             logger?.log("STATEFUL_GET_PROVIDER_TOKENS_OAUTH_ACCOUNT_FOUND", {
@@ -200,7 +201,8 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
                 },
             })
 
-            return { success: true, tokens: tokens as any, headers: request.headers }
+            const headers = toUnionHeaders(request.headers, secureApiHeaders)
+            return { success: true, tokens: tokens as any, headers }
         } catch (error) {
             logger?.log("STATEFUL_GET_PROVIDER_TOKENS_ERROR", {
                 structuredData: {
