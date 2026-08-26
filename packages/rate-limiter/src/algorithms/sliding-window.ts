@@ -16,10 +16,11 @@ import type { RateLimiterAlgorithm, RateLimitResult, SlidingWindowRule } from "@
  *
  * Recommended for: security-sensitive endpoints (signIn, signOut, verifyToken).
  */
-export const createSlidingWindowAlgorithm = <RequestInit = Request>(
-    rule: SlidingWindowRule<RequestInit>
-): RateLimiterAlgorithm<RequestInit> => {
-    const { limit, windowMs, storage = createMemoryStorage() } = rule
+export const createSlidingWindowAlgorithm = <RequestInit = Request, Context = never>(
+    rule: SlidingWindowRule<RequestInit, Context>
+): RateLimiterAlgorithm<RequestInit, Context> => {
+    const { limit, windowMs } = rule
+    const storage = rule.storage ?? createMemoryStorage()
 
     const getBoundary = (now: number) => Math.floor(now / windowMs) * windowMs
 
@@ -30,6 +31,11 @@ export const createSlidingWindowAlgorithm = <RequestInit = Request>(
             previous: `${baseKey}:sw:${currentBoundary - windowMs}`,
         }
     }
+
+    const resolveKey = (request: RequestInit, context?: Context): string | Promise<string> =>
+        context !== undefined
+            ? (rule.keyGenerator as (r: RequestInit, c: Context) => string | Promise<string>)(request, context)
+            : (rule.keyGenerator as (r: RequestInit) => string | Promise<string>)(request)
 
     const estimate = async (baseKey: string, now: number): Promise<{ count: number; resetAt: number }> => {
         const boundary = getBoundary(now)
@@ -42,11 +48,11 @@ export const createSlidingWindowAlgorithm = <RequestInit = Request>(
         return { count, resetAt: boundary + windowMs }
     }
 
-    const check = async (request: RequestInit): Promise<RateLimitResult> => {
+    const check = async (request: RequestInit, context?: Context): Promise<RateLimitResult> => {
         const now = Date.now()
         const boundary = getBoundary(now)
         const reset = boundary + windowMs
-        const key = rule.keyGenerator(request)
+        const key = await resolveKey(request, context)
         const { current, previous } = windowKeys(key, now)
 
         const newCount = await storage.increment(current, windowMs * 2)
@@ -64,9 +70,9 @@ export const createSlidingWindowAlgorithm = <RequestInit = Request>(
         })
     }
 
-    const peek = async (request: RequestInit): Promise<RateLimitResult> => {
+    const peek = async (request: RequestInit, context?: Context): Promise<RateLimitResult> => {
+        const key = await resolveKey(request, context)
         const now = Date.now()
-        const key = rule.keyGenerator(request)
         const { count, resetAt } = await estimate(key, now)
         const ok = count <= limit
 
@@ -79,5 +85,12 @@ export const createSlidingWindowAlgorithm = <RequestInit = Request>(
         })
     }
 
-    return { check, peek }
+    const reset = async (request: RequestInit, context?: Context): Promise<void> => {
+        const now = Date.now()
+        const key = await resolveKey(request, context)
+        const { current, previous } = windowKeys(key, now)
+        await Promise.all([storage.delete(current), storage.delete(previous)])
+    }
+
+    return { check, peek, reset } as RateLimiterAlgorithm<RequestInit, Context>
 }

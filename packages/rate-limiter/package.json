@@ -76,9 +76,9 @@
       "require": "./dist/algorithms/index.cjs"
     },
     "./algorithms/*": {
-      "types": "./dist/algorithms/*/index.d.ts",
-      "import": "./dist/algorithms/*/index.js",
-      "require": "./dist/algorithms/*/index.cjs"
+      "types": "./dist/algorithms/*.d.ts",
+      "import": "./dist/algorithms/*.js",
+      "require": "./dist/algorithms/*.cjs"
     },
     "./types": "./dist/types.d.ts"
   },

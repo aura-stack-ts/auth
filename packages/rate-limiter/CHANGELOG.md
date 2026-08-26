@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added support for passing context values to the `check()`, `peek()`, and `reset()` functions. The context can provide additional information for generating or validating rate-limit keys, particularly when a key is derived from external resources rather than directly from the request. [#269](https://github.com/aura-stack-ts/auth/pull/269)
+
+- Added asynchronous support for the `keyGenerator` callback used to generate rate-limiter keys. The callback can now return either a synchronous value or a `Promise`, allowing asynchronous logic to be used when generating the key tracked by the rate limiter. [#269](https://github.com/aura-stack-ts/auth/pull/269)
+
+### Fixed
+
+- Fixed the dedicated `/algorithms/:algorithm` entry points, which now correctly resolve and expose their respective algorithm modules. [#269](https://github.com/aura-stack-ts/auth/pull/269)
+
 ---
 
 ## [0.1.1] - 2026-07-04

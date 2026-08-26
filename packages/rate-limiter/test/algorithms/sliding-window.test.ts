@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-
 import { createMemoryStorage } from "@/memory.ts"
 import { createSlidingWindowAlgorithm } from "@/algorithms/sliding-window.ts"
 
@@ -29,7 +28,7 @@ describe("createSlidingWindowAlgorithm", () => {
                 limit,
                 windowMs,
                 storage,
-                keyGenerator: () => "user",
+                keyGenerator: (_) => "user",
             })
 
             const result = await limiter.peek(request)
@@ -282,5 +281,75 @@ describe("createSlidingWindowAlgorithm", () => {
             expect(second.remaining).toBe(0)
             expect(second.ok).toBe(false)
         })
+    })
+})
+
+describe("createSlidingWindowAlgorithm with context", () => {
+    const limit = 4
+    const windowMs = 15_000
+
+    interface TestRequest {
+        key: string
+    }
+
+    const request = (key: string): TestRequest => ({ key })
+
+    const createAlgorithm = () => {
+        return createSlidingWindowAlgorithm<TestRequest, { clientId: string }>({
+            algorithm: "sliding-window",
+            limit,
+            windowMs,
+            storage: createMemoryStorage(),
+            keyGenerator: (_req, { clientId }) => `sw:account:${clientId}`,
+        })
+    }
+
+    test("different users have independent counters", async () => {
+        const limiter = createAlgorithm()
+        const req = request("ip:1")
+
+        for (let i = 0; i < limit; i++) await limiter.check(req, { clientId: "alice" })
+        const aliceBlocked = await limiter.check(req, { clientId: "alice" })
+
+        const bobResult = await limiter.check(req, { clientId: "bob" })
+
+        expect(aliceBlocked.ok).toBe(false)
+        expect(bobResult.ok).toBe(true)
+    })
+
+    test("peek with context does not consume quota", async () => {
+        const limiter = createAlgorithm()
+        const req = request("ip:1")
+
+        await limiter.peek(req, { clientId: "carol" })
+        await limiter.peek(req, { clientId: "carol" })
+
+        const after = await limiter.check(req, { clientId: "carol" })
+        expect(after.remaining).toBe(limit - 1)
+    })
+
+    test("reset with context only clears that user", async () => {
+        const limiter = createAlgorithm()
+        const req = request("ip:1")
+
+        for (let i = 0; i < limit; i++) await limiter.check(req, { clientId: "dave" })
+        expect((await limiter.check(req, { clientId: "dave" })).ok).toBe(false)
+
+        await limiter.reset(req, { clientId: "dave" })
+        expect((await limiter.check(req, { clientId: "dave" })).ok).toBe(true)
+
+        expect((await limiter.check(req, { clientId: "eve" })).ok).toBe(true)
+    })
+
+    test("retryAfter is 0 when ok, positive when blocked", async () => {
+        const limiter = createAlgorithm()
+        const req = request("ip:1")
+
+        const ok = await limiter.check(req, { clientId: "frank" })
+        expect(ok.retryAfter).toBe(0)
+
+        for (let i = 1; i < limit; i++) await limiter.check(req, { clientId: "frank" })
+        const blocked = await limiter.check(req, { clientId: "frank" })
+        expect(blocked.retryAfter).toBeGreaterThan(0)
     })
 })

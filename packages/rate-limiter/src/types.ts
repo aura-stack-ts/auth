@@ -53,14 +53,24 @@ export interface RateLimitResult {
     toResponse(): Response
 }
 
-export interface RateLimiterAlgorithm<RequestInit = Request> {
-    peek(request: RequestInit): Promise<RateLimitResult>
-    check(request: RequestInit): Promise<RateLimitResult>
+export interface RateLimiterAlgorithm<RequestInit = Request, Context = never> {
+    peek: [Context] extends [never]
+        ? (request: RequestInit) => RateLimitResult | Promise<RateLimitResult>
+        : (request: RequestInit, context: Context) => RateLimitResult | Promise<RateLimitResult>
+    check: [Context] extends [never]
+        ? (request: RequestInit) => RateLimitResult | Promise<RateLimitResult>
+        : (request: RequestInit, context: Context) => RateLimitResult | Promise<RateLimitResult>
+    reset: [Context] extends [never]
+        ? (request: RequestInit) => Promise<void>
+        : (request: RequestInit, context: Context) => Promise<void>
 }
-
 export type AlgorithmType = "token-bucket" | "fixed-window" | "leaky-bucket" | "sliding-window"
 
-interface BaseRule<RequestInit = Request> {
+export type KeyGenerator<RequestInit = Request, Context = never> = [Context] extends [never]
+    ? (request: RequestInit) => string | Promise<string>
+    : (request: RequestInit, context: Context) => string | Promise<string>
+
+interface BaseRule<RequestInit = Request, Context = never> {
     algorithm: AlgorithmType
     /**
      * Derives the storage key from the incoming request.
@@ -68,14 +78,15 @@ interface BaseRule<RequestInit = Request> {
      *
      * @example (req) => `${req.ip}:${req.path}`
      */
-    keyGenerator: (request: RequestInit) => string
+    keyGenerator: KeyGenerator<RequestInit, Context>
+
     /**
      * Optional storage instance specific to this rule.
      */
     storage?: RateLimiterStorage
 }
 
-export type TokenBucketRule<RequestInit = Request> = BaseRule<RequestInit> & {
+export type TokenBucketRule<RequestInit = Request, Context = never> = BaseRule<RequestInit, Context> & {
     algorithm?: "token-bucket"
     /** Maximum token capacity (burst ceiling). */
     capacity: number
@@ -83,7 +94,7 @@ export type TokenBucketRule<RequestInit = Request> = BaseRule<RequestInit> & {
     refillRate: number
 }
 
-export interface FixedWindowRule<RequestInit = Request> extends BaseRule<RequestInit> {
+export interface FixedWindowRule<RequestInit = Request, Context = never> extends BaseRule<RequestInit, Context> {
     algorithm: "fixed-window"
     /** Maximum requests allowed per window. */
     limit: number
@@ -91,7 +102,7 @@ export interface FixedWindowRule<RequestInit = Request> extends BaseRule<Request
     windowMs: number
 }
 
-export interface LeakyBucketRule<RequestInit = Request> extends BaseRule<RequestInit> {
+export interface LeakyBucketRule<RequestInit = Request, Context = never> extends BaseRule<RequestInit, Context> {
     algorithm: "leaky-bucket"
     /**
      * The maximum queue size (burst capacity). When the bucket is full,
@@ -106,7 +117,7 @@ export interface LeakyBucketRule<RequestInit = Request> extends BaseRule<Request
     leakRatePerMs: number
 }
 
-export interface SlidingWindowRule<RequestInit = Request> extends BaseRule<RequestInit> {
+export interface SlidingWindowRule<RequestInit = Request, Context = never> extends BaseRule<RequestInit, Context> {
     algorithm: "sliding-window"
     /** Maximum requests allowed per window. */
     limit: number
@@ -114,13 +125,13 @@ export interface SlidingWindowRule<RequestInit = Request> extends BaseRule<Reque
     windowMs: number
 }
 
-export type RateLimiterRule<RequestInit = Request> =
-    | TokenBucketRule<RequestInit>
-    | FixedWindowRule<RequestInit>
-    | LeakyBucketRule<RequestInit>
-    | SlidingWindowRule<RequestInit>
+export type RateLimiterRule<RequestInit = Request, Context = never> =
+    | TokenBucketRule<RequestInit, Context>
+    | FixedWindowRule<RequestInit, Context>
+    | LeakyBucketRule<RequestInit, Context>
+    | SlidingWindowRule<RequestInit, Context>
 
-export interface RateLimiterConfig<Rules extends Record<string, RateLimiterRule>> {
+export interface RateLimiterConfig<Rules extends Record<string, RateLimiterRule<any, any>>> {
     storage?: RateLimiterStorage
     /**
      * Per-endpoint rules, keyed by an arbitrary route/action name that you pass
@@ -129,24 +140,38 @@ export interface RateLimiterConfig<Rules extends Record<string, RateLimiterRule>
     rules: Rules
 }
 
-export interface RateLimiter<RequestInit = Request> {
+export interface RateLimiter<RequestInit = Request, Context = never> {
     /**
      * Checks `key` against the rule registered for `endpoint`.
      * Returns the result and calls `onRejected` when the request is blocked.
      */
-    check(request: RequestInit): Promise<RateLimitResult>
+    check: [Context] extends [never]
+        ? (request: RequestInit) => Promise<RateLimitResult>
+        : (request: RequestInit, context: Context) => Promise<RateLimitResult>
     /**
      * Resets the counter/bucket for `key` on the given `endpoint`.
      * Useful after a successful login to clear failed-attempt counters.
      */
-    reset(request: RequestInit): Promise<void>
+    reset: [Context] extends [never]
+        ? (request: RequestInit) => Promise<void>
+        : (request: RequestInit, context: Context) => Promise<void>
     /**
      * Returns the current state without mutating any counters.
      * Useful for surfacing limit headers on every response, not just limited ones.
      */
-    peek(request: RequestInit): Promise<RateLimitResult>
+    peek: [Context] extends [never]
+        ? (request: RequestInit) => Promise<RateLimitResult>
+        : (request: RequestInit, context: Context) => Promise<RateLimitResult>
 }
 
-export type InferRules<TRules extends Record<string, RateLimiterRule>> = {
-    [K in keyof TRules]: TRules[K] extends RateLimiterRule<infer TRequest> ? RateLimiter<TRequest> : never
+export type InferContext<T extends RateLimiterRule<any, any>> = T["keyGenerator"] extends (request: any) => any
+    ? never
+    : T["keyGenerator"] extends (request: any, context: infer C) => any
+      ? C
+      : never
+
+export type InferRules<TRules extends Record<string, RateLimiterRule<any, any>>> = {
+    [K in keyof TRules]: TRules[K] extends RateLimiterRule<infer TRequest, any>
+        ? RateLimiter<TRequest, InferContext<TRules[K]>>
+        : never
 }
