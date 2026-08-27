@@ -1,11 +1,11 @@
 import { HeadersBuilder, type RequestHeaders } from "@aura-stack/router"
 import { getOptionalCookie } from "@/cookie.ts"
-import { assertCSRFTokenCookie, createCSRF, createHash } from "@/shared/crypto.ts"
+import { assertCSRFTokenCookie, createCSRF, createHash, verifyClientIdToken as assertClientIdToken } from "@/shared/crypto.ts"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { isHeadersInit, isStatelessStrategy } from "@/shared/assert.ts"
-import { getErrorName, verifyClientIdToken as assertClientIdToken, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
+import { getErrorName, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
 import { getBaseURL, getOriginURL, createRedirectTo } from "@/shared/utils/authorization.ts"
 import type {
     BuiltInOAuthProvider,

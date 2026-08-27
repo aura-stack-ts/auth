@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import supertest from "supertest"
 import { app, auth } from "./presets.ts"
-import { createCSRF } from "@aura-stack/auth/crypto"
+import { createClientIdToken, createCSRF } from "@aura-stack/auth/crypto"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
@@ -88,12 +88,13 @@ describe("GET /api/protected", () => {
 describe("POST /api/auth/signIn/credentials", () => {
     test("returns 401 when invalid credentials are provided", async () => {
         const csrfToken = await createCSRF(auth.jose)
+        const clientIdToken = await createClientIdToken(auth.jose)
 
         const response = await supertest(app)
             .post("/api/auth/signIn/credentials")
             .send({ username: "invalid", password: "invalid" })
             .set("X-CSRF-Token", csrfToken)
-            .set("Cookie", `aura-auth.csrf_token=${csrfToken}`)
+            .set("Cookie", `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientIdToken}`)
         expect(response.status).toBe(401)
         expect(response.body).toMatchObject({
             success: false,
@@ -103,12 +104,13 @@ describe("POST /api/auth/signIn/credentials", () => {
 
     test("returns 200 and a session cookie when valid credentials are provided", async () => {
         const csrfToken = await createCSRF(auth.jose)
+        const clientId = await createClientIdToken(auth.jose)
 
         const response = await supertest(app)
             .post("/api/auth/signIn/credentials")
             .send({ username: "valid", password: "valid" })
             .set("X-CSRF-Token", csrfToken)
-            .set("Cookie", `aura-auth.csrf_token=${csrfToken}`)
+            .set("Cookie", `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientId}`)
         expect(response.status).toBe(200)
         expect(response.body).toMatchObject({
             success: true,

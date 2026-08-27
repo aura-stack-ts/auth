@@ -1,18 +1,19 @@
 import { describe, test, expect } from "vitest"
-import { createCSRF } from "@aura-stack/auth/crypto"
+import { createCSRF, createClientIdToken } from "@aura-stack/auth/crypto"
 import { adapter, app, auth } from "@test/stateful/app"
 import { parseSetCookie } from "@aura-stack/auth/cookies"
 
 describe("signInCredentials (Stateful)", () => {
     test("returns 401 when invalid credentials are provided", async () => {
         const csrfToken = await createCSRF(auth.jose)
+        const clientIdToken = await createClientIdToken(auth.jose)
 
         const response = await app.handle(
             new Request("http://localhost:3000/api/auth/signIn/credentials", {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientIdToken}`,
                 },
                 body: JSON.stringify({ username: "invalid", password: "invalid" }),
             })
@@ -28,6 +29,7 @@ describe("signInCredentials (Stateful)", () => {
 
     test("returns 200 and a session cookie when valid credentials are provided", async () => {
         const csrfToken = await createCSRF(auth.jose)
+        const clientIdToken = await createClientIdToken(auth.jose)
 
         await adapter.createUser({
             id: "credentials:valid",
@@ -42,7 +44,7 @@ describe("signInCredentials (Stateful)", () => {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientIdToken}`,
                 },
                 body: JSON.stringify({ username: "valid", password: "valid" }),
             })
@@ -78,6 +80,7 @@ describe("signInCredentials (Stateful)", () => {
 
     test("sign in credentials fails with CSRF token mismatch", async () => {
         const csrfToken = await createCSRF(auth.jose)
+        const clientIdToken = await createClientIdToken(auth.jose)
 
         const response = await app.handle(
             new Request("http://localhost:3000/api/auth/signIn/credentials", {
@@ -85,7 +88,7 @@ describe("signInCredentials (Stateful)", () => {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=different-token`,
+                    Cookie: `aura-auth.csrf_token=different-token; aura-auth.client_id_token=${clientIdToken}`,
                 },
                 body: JSON.stringify({ username: "valid", password: "valid" }),
             })

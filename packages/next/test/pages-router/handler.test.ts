@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import { createMocks, createResponse, type RequestOptions, type ResponseOptions } from "node-mocks-http"
 import { auth } from "@test/pages-router/preset"
-import { createCSRF } from "@aura-stack/react/crypto"
+import { createClientIdToken, createCSRF } from "@aura-stack/react/crypto"
 import { setResponseHeaders } from "@/pages/handler"
 import type { NextApiRequest, NextApiResponse } from "next"
 
@@ -83,6 +83,7 @@ describe("toHandler", () => {
 
     test("POST /auth/signIn/credentials", async () => {
         const csrfToken = await createCSRF(auth.jose)
+        const clientIdToken = await createClientIdToken(auth.jose)
 
         const { res } = await createHandler({
             method: "POST",
@@ -92,7 +93,7 @@ describe("toHandler", () => {
                 "X-Forwarded-Proto": "http",
                 "Content-Type": "application/json",
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientIdToken}`,
             },
             body: {
                 username: "john.doe",

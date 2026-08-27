@@ -94,7 +94,7 @@ describe("signIn (Stateful)", () => {
         expect(mockFetch).toHaveBeenNthCalledWith(2, "https://api.github.com/user", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/0.8.1`,
+                "User-Agent": `Aura Auth/0.9.0`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
@@ -228,7 +228,7 @@ describe("signIn (Stateful)", () => {
         expect(mockFetch).toHaveBeenNthCalledWith(2, "https://api.github.com/user", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/0.8.1`,
+                "User-Agent": `Aura Auth/0.9.0`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },

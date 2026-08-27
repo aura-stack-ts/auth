@@ -1,8 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { authInstance, deviceEntity, jose, sessionEntityWithUser, userEntity } from "@test/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createClientIdToken } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
-import { createClientIdToken } from "@/shared/utils.ts"
 
 describe("signInCredentials action", async () => {
     const csrfToken = await createCSRF(jose)
