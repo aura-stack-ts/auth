@@ -36,9 +36,9 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
                 ...config?.signUp,
             } as RateLimiterRule,
             updateSession: {
-                algorithm: "token-bucket",
-                capacity: 10,
-                refillRate: 1 / 60_000,
+                algorithm: "sliding-window",
+                limit: 10,
+                windowMs: 15 * 60 * 1000,
                 keyGenerator: (request) => getLimitKey(request, "updateSession"),
                 ...config?.updateSession,
             } as RateLimiterRule,

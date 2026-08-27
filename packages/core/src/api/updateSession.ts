@@ -22,6 +22,15 @@ export const updateSession = async <DefaultUser extends User = User>({
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
     try {
+        const { request, rateLimit } = await createValidation(ctx, new Headers(headersInit as HeadersInit))
+            .buildRequest(requestInit, "/session")
+            .verifyRateLimit("updateSession")
+            .execute()
+
+        if (rateLimit) {
+            return rateLimit as UpdateSessionAPIReturn<DefaultUser>
+        }
+
         const { session, headers } = await ctx.sessionStrategy.refreshSession(
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {}),
             sessionInit,
@@ -32,15 +41,6 @@ export const updateSession = async <DefaultUser extends User = User>({
         }
 
         const newHeaders = toUnionHeaders(headers, secureApiHeaders)
-
-        const { request, rateLimit } = await createValidation(ctx, newHeaders)
-            .buildRequest(requestInit, "/session")
-            .verifyRateLimit("updateSession")
-            .execute()
-
-        if (rateLimit) {
-            return rateLimit as UpdateSessionAPIReturn<DefaultUser>
-        }
 
         const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
             ctx,
