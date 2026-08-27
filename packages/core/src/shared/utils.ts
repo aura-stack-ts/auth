@@ -1,9 +1,9 @@
 import { getEnv } from "@/shared/env.ts"
 import { getCookie } from "@/cookie.ts"
-import { createHash, verifyCSRF } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isString, isValidURL } from "@/shared/assert.ts"
+import { createHash, createSecretValue, verifyCSRF } from "@/shared/crypto.ts"
 import type { DeviceType } from "@/@types/entities.ts"
 import type { JoseInstance, OAuthTokenPayload } from "@/@types/index.ts"
 import type {
@@ -12,6 +12,7 @@ import type {
     SchemaRegistryContext,
     OAuthAccessTokenResponseType,
     JWTManager,
+    RouterGlobalContext,
 } from "@/@types/internal.ts"
 
 export const AURA_AUTH_VERSION = "0.9.0"
@@ -176,7 +177,6 @@ export const verifyCSRFToken = async ({
     try {
         csrfToken = csrfToken || getCookie(headers, cookies.csrfToken.name)
     } catch (cause) {
-        console.log("CSRF_TOKEN_MISSING in cookie retrieval", cause)
         logger?.log("CSRF_TOKEN_MISSING")
         throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
     }
@@ -327,5 +327,33 @@ export const getDeviceInfo = (request: Request) => {
         userAgent,
         name: `${browser} on ${platform}`,
         deviceType: getDeviceType(userAgent, secChUaMobile),
+    }
+}
+
+export const createClientIdToken = async (jose: RouterGlobalContext["jose"], clientIdToken?: string) => {
+    try {
+        if (clientIdToken) {
+            await jose.verifyJWS(clientIdToken)
+            return clientIdToken
+        }
+        const token = createSecretValue(32)
+        return jose.signJWS({ token })
+    } catch {
+        const token = createSecretValue(32)
+        return jose.signJWS({ token })
+    }
+}
+
+export const verifyClientIdToken = async (request: Request, ctx: RouterGlobalContext): Promise<string> => {
+    try {
+        ctx.logger?.log("CLIENT_ID_TOKEN_REQUESTED")
+        const clientIdToken = getCookie(request, ctx.cookies.clientIdToken.name)
+        ctx.logger?.log("CLIENT_ID_TOKEN_VERIFIED")
+        const jws = await ctx.jose.verifyJWS(clientIdToken)
+        ctx.logger?.log("CLIENT_ID_TOKEN_VERIFIED_SUCCESS")
+        return jws!.token as string
+    } catch {
+        ctx.logger?.log("INVALID_CLIENT_ID_TOKEN")
+        throw new AuraAuthError({ code: "INVALID_CLIENT_ID_TOKEN" })
     }
 }

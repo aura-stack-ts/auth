@@ -5,7 +5,7 @@ import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
 import { isHeadersInit, isStatelessStrategy } from "@/shared/assert.ts"
-import { getErrorName, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
+import { getErrorName, verifyClientIdToken as assertClientIdToken, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
 import { getBaseURL, getOriginURL, createRedirectTo } from "@/shared/utils/authorization.ts"
 import type {
     BuiltInOAuthProvider,
@@ -29,6 +29,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
     const output: {
         provider?: RuntimeOAuthProvider
         request?: Request
+        clientId?: string
         rateLimit?: any
         headers: Headers
     } = { headers }
@@ -102,12 +103,21 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         verifyRateLimit: (action: keyof RateLimiterConfig) => {
             steps.push(async () => {
                 if (!output.request) {
-                    throw new Error("buildRequest must be called before verifyRateLimit")
+                    throw new AuraAuthError({ code: "INVALID_BUILD_REQUEST" })
                 }
                 const rateLimit = await verifyRateLimit(ctx, output.request, action)
                 if (rateLimit) {
                     output.rateLimit = rateLimit
                 }
+            })
+            return builder
+        },
+        verifyClientIdToken: () => {
+            steps.push(async () => {
+                if (!output.request) {
+                    throw new AuraAuthError({ code: "INVALID_BUILD_REQUEST" })
+                }
+                output.clientId = await assertClientIdToken(output.request, ctx)
             })
             return builder
         },

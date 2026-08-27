@@ -173,7 +173,7 @@ export const oauthTransactionEntity: OAuthTransactionEntity = {
 
 const auth = createAuth({
     oauth: [oauthCustomService, oauthCustomServiceProfile, openIDCustomProvider],
-    logger: getEnv("CI") === "true" ? false : true,
+    //logger: getEnv("CI") === "true" ? false : true,
     credentials: {
         authorize: async ({ credentials }) => {
             const { username } = credentials

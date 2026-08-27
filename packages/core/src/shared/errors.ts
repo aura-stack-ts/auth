@@ -139,6 +139,8 @@ export const AuraErrorCode = {
      */
     INVALID_SLIDING_THRESHOLD_CONFIG_VALUE: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE",
     INVALID_CSRF_TOKEN: "INVALID_CSRF_TOKEN",
+    INVALID_CLIENT_ID_TOKEN: "INVALID_CLIENT_ID_TOKEN",
+    INVALID_BUILD_REQUEST: "INVALID_BUILD_REQUEST",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -957,6 +959,22 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "CSRF security verification failed. The provided anti-CSRF token does not match the token embedded in the secure session cookie context or failed cryptographic validation.",
         userMessage: "Security verification failed. Invalid or missing CSRF token.",
+    },
+    INVALID_CLIENT_ID_TOKEN: {
+        type: "VALIDATION",
+        statusCode: 400,
+        name: "AuthValidationError",
+        message:
+            "The requested authentication operation could not be performed. The client identification parameter is missing from the request context or the provided client ID token failed security validation checks.",
+        userMessage: "Invalid request. The client identifier or token provided is invalid.",
+    },
+    INVALID_BUILD_REQUEST: {
+        type: "VALIDATION",
+        statusCode: 400,
+        name: "RequestBuildError",
+        message:
+            "The internal request object could not be constructed during the pipeline validation sequence. Initialized request values, rate-limiter contexts, or client parameters are malformed or invalid.",
+        userMessage: "Invalid request state. The request could not be processed during initial validation checks.",
     },
 }
 

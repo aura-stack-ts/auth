@@ -3,14 +3,16 @@ import { jose, POST } from "@test/presets.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { createClientIdToken } from "@/shared/utils.ts"
 
 describe("signInCredentials action", async () => {
     const csrfToken = await createCSRF(jose)
+    const clientIdToken = await createClientIdToken(jose)
 
     const headers = {
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken,
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientIdToken}`,
     }
 
     test("success signIn flow", async () => {
