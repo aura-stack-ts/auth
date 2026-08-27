@@ -21,10 +21,11 @@ interface BucketState {
     lastRefillAt: number
 }
 
-export const createTokenBucketAlgorithm = <RequestInit = Request>(
-    rule: TokenBucketRule<RequestInit>
-): RateLimiterAlgorithm<RequestInit> => {
-    const { capacity, refillRate, storage = createMemoryStorage() } = rule
+export const createTokenBucketAlgorithm = <RequestInit = Request, Context = never>(
+    rule: TokenBucketRule<RequestInit, Context>
+): RateLimiterAlgorithm<RequestInit, Context> => {
+    const { capacity, refillRate } = rule
+    const storage = rule.storage ?? createMemoryStorage()
 
     if (!Number.isFinite(capacity) || capacity <= 0) {
         throw new Error(`[rate-limiter] Invalid token-bucket capacity: ${capacity}`)
@@ -60,9 +61,14 @@ export const createTokenBucketAlgorithm = <RequestInit = Request>(
         await Promise.all([storage.set(tokensKey(key), tokensEntry, ttl), storage.set(lastRefillKey(key), refillEntry, ttl)])
     }
 
-    const check = async (request: RequestInit): Promise<RateLimitResult> => {
+    const resolveKey = (request: RequestInit, context?: Context): string | Promise<string> =>
+        context !== undefined
+            ? (rule.keyGenerator as (r: RequestInit, c: Context) => string | Promise<string>)(request, context)
+            : (rule.keyGenerator as (r: RequestInit) => string | Promise<string>)(request)
+
+    const check = async (request: RequestInit, context?: Context): Promise<RateLimitResult> => {
         const now = Date.now()
-        const key = rule.keyGenerator(request)
+        const key = await resolveKey(request, context)
         const state = await getBucketState(key, now)
         const tokens = refill(state.tokens, state.lastRefillAt, now)
         const ok = tokens >= 1
@@ -81,9 +87,9 @@ export const createTokenBucketAlgorithm = <RequestInit = Request>(
         })
     }
 
-    const peek = async (request: RequestInit): Promise<RateLimitResult> => {
+    const peek = async (request: RequestInit, context?: Context): Promise<RateLimitResult> => {
         const now = Date.now()
-        const key = rule.keyGenerator(request)
+        const key = await resolveKey(request, context)
         const stored = await getBucketState(key, now)
         const currentTokens = refill(stored.tokens, stored.lastRefillAt, now)
         const ok = currentTokens >= 1
@@ -99,5 +105,10 @@ export const createTokenBucketAlgorithm = <RequestInit = Request>(
         })
     }
 
-    return { check, peek }
+    const reset = async (request: RequestInit, context?: Context): Promise<void> => {
+        const key = await resolveKey(request, context)
+        await Promise.all([storage.delete(tokensKey(key)), storage.delete(lastRefillKey(key))])
+    }
+
+    return { check, peek, reset } as RateLimiterAlgorithm<RequestInit, Context>
 }

@@ -23,10 +23,11 @@ interface BucketState {
  *
  * Recommended for: outbound webhook dispatch, downstream call smoothing.
  */
-export const createLeakyBucketAlgorithm = <RequestInit = Request>(
-    rule: LeakyBucketRule<RequestInit>
-): RateLimiterAlgorithm<RequestInit> => {
-    const { capacity, leakRatePerMs, storage = createMemoryStorage() } = rule
+export const createLeakyBucketAlgorithm = <RequestInit = Request, Context = never>(
+    rule: LeakyBucketRule<RequestInit, Context>
+): RateLimiterAlgorithm<RequestInit, Context> => {
+    const { capacity, leakRatePerMs } = rule
+    const storage = rule.storage ?? createMemoryStorage()
 
     const levelKey = (key: string) => `${key}:lb:level`
     const lastLeakKey = (key: string) => `${key}:lb:lastLeak`
@@ -53,9 +54,14 @@ export const createLeakyBucketAlgorithm = <RequestInit = Request>(
         ])
     }
 
-    const check = async (request: RequestInit): Promise<RateLimitResult> => {
+    const resolveKey = (request: RequestInit, context?: Context): string | Promise<string> =>
+        context !== undefined
+            ? (rule.keyGenerator as (r: RequestInit, c: Context) => string | Promise<string>)(request, context)
+            : (rule.keyGenerator as (r: RequestInit) => string | Promise<string>)(request)
+
+    const check = async (request: RequestInit, context?: Context): Promise<RateLimitResult> => {
         const now = Date.now()
-        const key = rule.keyGenerator(request)
+        const key = await resolveKey(request, context)
         const stored = await readBucket(key, now)
         const level = getCurrentLevel(stored, now)
         const newLevel = level + 1
@@ -76,9 +82,9 @@ export const createLeakyBucketAlgorithm = <RequestInit = Request>(
         })
     }
 
-    const peek = async (request: RequestInit): Promise<RateLimitResult> => {
+    const peek = async (request: RequestInit, context?: Context): Promise<RateLimitResult> => {
         const now = Date.now()
-        const key = rule.keyGenerator(request)
+        const key = await resolveKey(request, context)
         const stored = await readBucket(key, now)
         const level = getCurrentLevel(stored, now)
         const nextLevel = level + 1
@@ -94,5 +100,10 @@ export const createLeakyBucketAlgorithm = <RequestInit = Request>(
         })
     }
 
-    return { check, peek }
+    const reset = async (request: RequestInit, context?: Context): Promise<void> => {
+        const key = await resolveKey(request, context)
+        await Promise.all([storage.delete(levelKey(key)), storage.delete(lastLeakKey(key))])
+    }
+
+    return { check, peek, reset } as RateLimiterAlgorithm<RequestInit, Context>
 }

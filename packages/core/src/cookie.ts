@@ -289,5 +289,18 @@ export const createCookieStore = (
                 logger
             ),
         },
+        clientIdToken: {
+            name: `${hostPrefix}${prefix}.${overrides?.clientIdToken?.name ?? "client_id_token"}`,
+            attributes: defineSecureCookieOptions(
+                useSecure,
+                {
+                    ...overrides?.clientIdToken?.attributes,
+                    ...defaultHostCookieConfig,
+                    sameSite: "strict",
+                },
+                overrides?.clientIdToken?.attributes?.strategy ?? "host",
+                logger
+            ),
+        },
     }
 }

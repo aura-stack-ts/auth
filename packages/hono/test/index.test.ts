@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { app, auth } from "./presets.ts"
-import { createCSRF } from "@aura-stack/auth/crypto"
+import { createClientIdToken, createCSRF } from "@aura-stack/auth/crypto"
 
 describe("GET /api/auth/signIn/github", () => {
     test("redirects to GitHub's OAuth page", async () => {
@@ -94,13 +94,14 @@ describe("GET /api/protected", () => {
 describe("POST /api/auth/signIn/credentials", () => {
     test("returns 401 when invalid credentials are provided", async () => {
         const csrfToken = await createCSRF(auth.jose)
+        const clientIdToken = await createClientIdToken(auth.jose)
 
         const res = await app.request("/api/auth/signIn/credentials", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientIdToken}`,
             },
             body: JSON.stringify({ username: "invalid", password: "invalid" }),
         })
@@ -114,13 +115,14 @@ describe("POST /api/auth/signIn/credentials", () => {
 
     test("returns 200 and a session cookie when valid credentials are provided", async () => {
         const csrfToken = await createCSRF(auth.jose)
+        const clientIdToken = await createClientIdToken(auth.jose)
 
         const res = await app.request("/api/auth/signIn/credentials", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientIdToken}`,
             },
             body: JSON.stringify({ username: "valid", password: "valid" }),
         })

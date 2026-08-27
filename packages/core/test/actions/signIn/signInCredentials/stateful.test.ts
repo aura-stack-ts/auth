@@ -1,15 +1,16 @@
 import { describe, test, expect, vi } from "vitest"
 import { authInstance, deviceEntity, jose, sessionEntityWithUser, userEntity } from "@test/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createClientIdToken } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 describe("signInCredentials action", async () => {
     const csrfToken = await createCSRF(jose)
+    const clientId = await createClientIdToken(jose)
 
     const headers = {
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken,
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientId}`,
     }
 
     test("success signIn flow", async () => {

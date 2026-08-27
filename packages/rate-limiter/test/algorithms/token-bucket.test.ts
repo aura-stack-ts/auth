@@ -7,6 +7,10 @@ interface TestRequest {
     key: string
 }
 
+interface SessionContext {
+    clientId: string
+}
+
 const request = (key: string): TestRequest => ({ key })
 const httpRequest = (key: string): Request => new Request("https://example.test/login", { headers: { "x-forwarded-for": key } })
 
@@ -17,6 +21,16 @@ const createAlgorithm = (capacity = 2, refillRate = 0.01) => {
         refillRate,
         storage: createMemoryStorage(),
         keyGenerator: (req) => req.key,
+    })
+}
+
+const createAlgorithmWithContext = (capacity = 4, refillRate = 1 / 1_000_000) => {
+    return createTokenBucketAlgorithm<TestRequest, SessionContext>({
+        algorithm: "token-bucket",
+        capacity,
+        refillRate,
+        storage: createMemoryStorage(),
+        keyGenerator: (req, ctx) => `tb:${ctx.clientId}:${req.key}`,
     })
 }
 
@@ -95,6 +109,91 @@ describe("TokenBucketAlgorithm", () => {
         expect(firstA.ok).toBe(true)
         expect(secondA.ok).toBe(false)
         expect(firstB.ok).toBe(true)
+    })
+})
+
+describe("TokenBucketAlgorithm with context", () => {
+    const capacity = 4
+    const refillRate = 1 / 1_000_000
+
+    test("different sessions have independent buckets", async () => {
+        const limiter = createAlgorithmWithContext(capacity, refillRate)
+        const req = request("ip:1")
+
+        const ctxA: SessionContext = { clientId: "clientA" }
+        const ctxB: SessionContext = { clientId: "clientB" } as any
+
+        for (let i = 0; i < capacity; i++) await limiter.check(req, ctxA)
+        const aBlocked = await limiter.check(req, ctxA)
+
+        const bAllowed = await limiter.check(req, ctxB)
+
+        expect(aBlocked.ok).toBe(false)
+        expect(bAllowed.ok).toBe(true)
+    })
+
+    test("same user, same session shares a bucket", async () => {
+        const limiter = createAlgorithmWithContext(capacity, refillRate)
+        const req = request("ip:1")
+        const ctx: SessionContext = { clientId: "clientC" }
+
+        const r1 = await limiter.check(req, ctx)
+        const r2 = await limiter.check(req, ctx)
+
+        expect(r1.remaining).toBe(3)
+        expect(r2.remaining).toBe(2)
+    })
+
+    test("peek with context reads without draining", async () => {
+        const limiter = createAlgorithmWithContext(capacity, refillRate)
+        const req = request("ip:1")
+        const ctx: SessionContext = { clientId: "u3" }
+
+        await limiter.peek(req, ctx)
+        await limiter.peek(req, ctx)
+
+        const after = await limiter.check(req, ctx)
+        expect(after.remaining).toBe(capacity - 1)
+    })
+
+    test("reset with context replenishes only that session", async () => {
+        const limiter = createAlgorithmWithContext(capacity, refillRate)
+        const req = request("ip:1")
+        const ctxA: SessionContext = { clientId: "u4" }
+        const ctxB: SessionContext = { clientId: "u5" }
+
+        for (let i = 0; i < capacity; i++) await limiter.check(req, ctxA)
+        expect((await limiter.check(req, ctxA)).ok).toBe(false)
+
+        await limiter.reset(req, ctxA)
+        expect((await limiter.check(req, ctxA)).ok).toBe(true)
+
+        const bResult = await limiter.check(req, ctxB)
+        expect(bResult.ok).toBe(true)
+        expect(bResult.remaining).toBe(capacity - 1)
+    })
+
+    test("async keyGenerator resolves correctly with context", async () => {
+        const storage = createMemoryStorage()
+        const limiter = createTokenBucketAlgorithm<TestRequest, SessionContext>({
+            algorithm: "token-bucket",
+            capacity: 2,
+            refillRate,
+            storage,
+            keyGenerator: async (_req, { clientId }) => {
+                await Promise.resolve()
+                return `tb:${clientId}`
+            },
+        })
+
+        const ctx: SessionContext = { clientId: "u5" }
+        const r1 = await limiter.check(request("ip:1"), ctx)
+        const r2 = await limiter.check(request("ip:1"), ctx)
+        const r3 = await limiter.check(request("ip:1"), ctx)
+
+        expect(r1.ok).toBe(true)
+        expect(r2.ok).toBe(true)
+        expect(r3.ok).toBe(false)
     })
 })
 

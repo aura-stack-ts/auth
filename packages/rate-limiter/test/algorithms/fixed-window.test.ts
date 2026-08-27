@@ -18,6 +18,16 @@ const createAlgorithm = (limit = 2, windowMs = 1000) => {
     })
 }
 
+const createAlgorithmWithContext = (limit = 3, windowMs = 10000) => {
+    return createFixedWindowAlgorithm<TestRequest, { clientId: string }>({
+        algorithm: "fixed-window",
+        limit,
+        windowMs,
+        storage: createMemoryStorage(),
+        keyGenerator: (req, ctx) => `account:${req.key}:${ctx.clientId}`,
+    })
+}
+
 beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(0)
@@ -114,5 +124,64 @@ describe("FixedWindowAlgorithm", () => {
         expect(second.ok).toBe(true)
         expect(second.remaining).toBe(0)
         expect(second.resetAt).toBe(2000)
+    })
+
+    test("peek does not mutate and uses context key", async () => {
+        const limiter = createAlgorithmWithContext()
+
+        const result = await limiter.peek(request("ip:1"), { clientId: "123" })
+        expect(result).toMatchObject({ ok: true, limit: 3, remaining: 3, retryAfter: 0 })
+    })
+
+    test("check keys by context — different usernames are independent", async () => {
+        const limiter = createAlgorithmWithContext()
+        const req = request("ip:1")
+
+        await limiter.check(req, { clientId: "123" })
+        await limiter.check(req, { clientId: "123" })
+        await limiter.check(req, { clientId: "123" })
+        const aliceBlocked = await limiter.check(req, { clientId: "123" })
+
+        const bobAllowed = await limiter.check(req, { clientId: "987" })
+
+        expect(aliceBlocked.ok).toBe(false)
+        expect(bobAllowed.ok).toBe(true)
+    })
+
+    test("reset via context clears only that user's counter", async () => {
+        const limiter = createAlgorithmWithContext()
+        const req = request("ip:1")
+
+        await limiter.check(req, { clientId: "123" })
+        await limiter.check(req, { clientId: "123" })
+        await limiter.check(req, { clientId: "123" })
+        expect((await limiter.check(req, { clientId: "123" })).ok).toBe(false)
+
+        await limiter.reset(req, { clientId: "123" })
+
+        expect((await limiter.check(req, { clientId: "123" })).ok).toBe(true)
+        expect((await limiter.check(req, { clientId: "987" })).ok).toBe(true)
+    })
+
+    test("async keyGenerator resolves correctly", async () => {
+        const storage = createMemoryStorage()
+        const limiter = createFixedWindowAlgorithm<TestRequest, { clientId: string }>({
+            algorithm: "fixed-window",
+            limit: 2,
+            windowMs: 10000,
+            storage,
+            keyGenerator: async (_req, { clientId }) => {
+                await Promise.resolve()
+                return `account:${clientId.toLowerCase()}`
+            },
+        })
+
+        const r1 = await limiter.check(request("ip:1"), { clientId: "123" })
+        const r2 = await limiter.check(request("ip:1"), { clientId: "123" })
+        const r3 = await limiter.check(request("ip:1"), { clientId: "123" })
+
+        expect(r1.ok).toBe(true)
+        expect(r2.ok).toBe(true)
+        expect(r3.ok).toBe(false)
     })
 })

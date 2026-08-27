@@ -5,67 +5,27 @@ import {
     createLeakyBucketAlgorithm,
     createSlidingWindowAlgorithm,
 } from "@/algorithms/index.ts"
-import type { InferRules, RateLimiter, RateLimiterAlgorithm, RateLimiterConfig, RateLimiterRule } from "@/types.ts"
+import type { InferRules, RateLimiterConfig, RateLimiterRule } from "@/types.ts"
 
 /**
  * Builds the algorithm instance for a rule, memoized per endpoint name.
  */
-const buildAlgorithm = <RequestInit = Request>(rule: RateLimiterRule<RequestInit>): RateLimiterAlgorithm<RequestInit> => {
+const buildAlgorithm = <RequestInit = Request, Context = never>(
+    rule: RateLimiterRule<RequestInit, Context>
+): InferRules<Record<string, typeof rule>>[string] => {
     rule.algorithm ||= "token-bucket"
     switch (rule.algorithm) {
         case "token-bucket":
-            return createTokenBucketAlgorithm(rule)
+            return createTokenBucketAlgorithm(rule) as InferRules<Record<string, typeof rule>>[string]
         case "fixed-window":
-            return createFixedWindowAlgorithm(rule)
+            return createFixedWindowAlgorithm(rule) as InferRules<Record<string, typeof rule>>[string]
         case "leaky-bucket":
-            return createLeakyBucketAlgorithm(rule)
+            return createLeakyBucketAlgorithm(rule) as InferRules<Record<string, typeof rule>>[string]
         case "sliding-window":
-            return createSlidingWindowAlgorithm(rule)
-        default: {
+            return createSlidingWindowAlgorithm(rule) as InferRules<Record<string, typeof rule>>[string]
+        default:
             throw new Error(`[rate-limiter] Unknown algorithm: "${String((rule as { algorithm?: string }).algorithm)}"`)
-        }
     }
-}
-
-const resetKeys = (rule: RateLimiterRule, key: string): string[] => {
-    switch (rule.algorithm) {
-        case "token-bucket":
-            return [`${key}:tb:tokens`, `${key}:tb:lastRefill`]
-        case "fixed-window":
-            return [`${key}:fw`]
-        case "leaky-bucket":
-            return [`${key}:lb:tokens`, `${key}:lb:lastLeak`]
-        case "sliding-window":
-            const boundary = Math.floor(Date.now() / rule.windowMs) * rule.windowMs
-            return [`${key}:sw:${boundary}`, `${key}:sw:${boundary - rule.windowMs}`]
-    }
-}
-
-const buildHandle = <RequestInit = Request>(
-    rule: RateLimiterRule<RequestInit>,
-    algorithm: RateLimiterAlgorithm<RequestInit>,
-    config: RateLimiterConfig<Record<string, RateLimiterRule>>
-): RateLimiter<RequestInit> => {
-    const { storage } = config
-
-    const resolveKey = (request: RequestInit | string): string => {
-        return typeof request === "string" ? request : rule.keyGenerator(request)
-    }
-
-    const check = (request: RequestInit) => {
-        return algorithm.check(request)
-    }
-
-    const peek = (request: RequestInit) => {
-        return algorithm.peek(request)
-    }
-
-    const reset = async (request: RequestInit | string): Promise<void> => {
-        const key = resolveKey(request)
-        await Promise.all(resetKeys(rule as RateLimiterRule, key).map((k) => storage!.delete(k)))
-    }
-
-    return { check, peek, reset }
 }
 
 /**
@@ -90,14 +50,17 @@ const buildHandle = <RequestInit = Request>(
  *
  * ```
  */
-export const createRateLimiter = <Rules extends Record<string, RateLimiterRule>>(
+export const createRateLimiter = <
+    Rules extends Record<string, RateLimiterRule<any, any>> = Record<string, RateLimiterRule<any, any>>,
+>(
     config: RateLimiterConfig<Rules>
 ): InferRules<Rules> => {
-    config.storage ||= createMemoryStorage()
+    const globalStorage = config.storage ?? createMemoryStorage()
     const handlers = {} as InferRules<Rules>
-    for (const [rule, ruleConfig] of Object.entries(config.rules)) {
-        const algorithm = buildAlgorithm(ruleConfig)
-        handlers[rule as keyof Rules] = buildHandle(ruleConfig, algorithm, config) as InferRules<Rules>[keyof Rules]
+    for (const [name, rule] of Object.entries(config.rules)) {
+        const algorithm = buildAlgorithm(rule) as InferRules<Rules>[keyof Rules]
+        rule.storage ??= globalStorage
+        handlers[name as keyof Rules] = algorithm
     }
     return handlers
 }

@@ -319,6 +319,7 @@ export type CookieName =
     | "redirectURI"
     | "nonce"
     | "accessToken"
+    | "clientIdToken"
 
 /** Resolved cookie names and serialization attributes for each logical auth cookie. */
 export type CookieStoreConfig = Record<CookieName, { name?: string; attributes?: CookieStrategyAttributes }>

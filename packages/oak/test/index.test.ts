@@ -1,6 +1,6 @@
 import { equal, assertNotEquals, assertObjectMatch, assertExists } from "@std/assert"
 import { app, jose } from "./app.ts"
-import { createCSRF } from "@aura-stack/auth/crypto"
+import { createCSRF, createClientIdToken } from "@aura-stack/auth/crypto"
 import type { JWTPayload } from "@aura-stack/jose/jose"
 
 export const sessionPayload: JWTPayload = {
@@ -12,6 +12,10 @@ export const sessionPayload: JWTPayload = {
 
 const createSessionToken = async (payload: JWTPayload): Promise<string> => {
     return await jose.encodeJWT(payload)
+}
+
+const createClientId = async (): Promise<string> => {
+    return await createClientIdToken(jose)
 }
 
 const createCSRFToken = async (): Promise<string> => {
@@ -51,12 +55,13 @@ Deno.test("signIn with invalid provider", async () => {
 
 Deno.test("signInCredentials with valid credentials", async () => {
     const csrfToken = await createCSRFToken()
+    const clientId = await createClientId()
     const response = await handler(
         new Request("http://localhost:3000/api/auth/signIn/credentials", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientId}`,
                 "X-CSRF-Token": csrfToken,
             },
             body: JSON.stringify({
@@ -72,12 +77,13 @@ Deno.test("signInCredentials with valid credentials", async () => {
 
 Deno.test("signInCredentials with invalid credentials", async () => {
     const csrfToken = await createCSRFToken()
+    const clientId = await createClientId()
     const response = await handler(
         new Request("http://localhost:3000/api/auth/signIn/credentials", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientId}`,
                 "X-CSRF-Token": csrfToken,
             },
             body: JSON.stringify({
@@ -93,12 +99,13 @@ Deno.test("signInCredentials with invalid credentials", async () => {
 
 Deno.test("signInCredentials with missing fields", async () => {
     const csrfToken = await createCSRFToken()
+    const clientId = await createClientId()
     const response = await handler(
         new Request("http://localhost:3000/api/auth/signIn/credentials", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientId}`,
                 "X-CSRF-Token": csrfToken,
             },
             body: JSON.stringify({

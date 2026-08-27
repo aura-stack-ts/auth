@@ -1,9 +1,9 @@
 import { getEnv } from "@/shared/env.ts"
 import { getCookie } from "@/cookie.ts"
-import { createHash, verifyCSRF } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isString, isValidURL } from "@/shared/assert.ts"
+import { createHash, verifyCSRF } from "@/shared/crypto.ts"
 import type { DeviceType } from "@/@types/entities.ts"
 import type { JoseInstance, OAuthTokenPayload } from "@/@types/index.ts"
 import type {
@@ -176,7 +176,6 @@ export const verifyCSRFToken = async ({
     try {
         csrfToken = csrfToken || getCookie(headers, cookies.csrfToken.name)
     } catch (cause) {
-        console.log("CSRF_TOKEN_MISSING in cookie retrieval", cause)
         logger?.log("CSRF_TOKEN_MISSING")
         throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
     }

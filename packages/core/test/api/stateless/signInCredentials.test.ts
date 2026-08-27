@@ -2,13 +2,14 @@ import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { getSetCookie } from "@/cookie.ts"
 import { api, jose } from "@test/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createClientIdToken } from "@/shared/crypto.ts"
 
 describe("signInCredentials API", async () => {
     const csrfToken = await createCSRF(jose)
+    const clientId = await createClientIdToken(jose)
 
     const headers = {
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.client_id_token=${clientId}`,
     }
 
     test("success signIn flow", async () => {

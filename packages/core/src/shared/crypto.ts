@@ -5,6 +5,7 @@ import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
 import type { JoseInstance, User } from "@/@types/index.ts"
 import type { AsymmetricKeyPairFromEnv, RouterGlobalContext } from "@/@types/internal.ts"
+import { getCookie } from "@/cookie.ts"
 
 export { generateKeyPair as createKeyPair } from "@aura-stack/jose/jose"
 
@@ -67,6 +68,13 @@ export const createCSRF = async (jose: RouterGlobalContext["jose"], csrfCookie?:
         return jose.signJWS({ token })
     }
 }
+
+/**
+ * Creates a CSRF token to be used in OAuth flows to prevent cross-site request forgery attacks.
+ *
+ * @param csrfCookie - Optional existing CSRF cookie to verify and reuse
+ * @returns Signed CSRF token
+ */
 
 export const verifyCSRF = async <DefaultUser extends User = User>(
     jose: JoseInstance<DefaultUser>,
@@ -185,5 +193,33 @@ export const exportJWKKeyPair = async (alg: string, options?: GenerateKeyPairOpt
     return {
         publicKey: jwkPublicKey,
         privateKey: jwkPrivateKey,
+    }
+}
+
+export const createClientIdToken = async (jose: RouterGlobalContext["jose"], clientIdToken?: string) => {
+    try {
+        if (clientIdToken) {
+            await jose.verifyJWS(clientIdToken)
+            return clientIdToken
+        }
+        const token = createSecretValue(32)
+        return jose.signJWS({ token })
+    } catch {
+        const token = createSecretValue(32)
+        return jose.signJWS({ token })
+    }
+}
+
+export const verifyClientIdToken = async (request: Request, ctx: RouterGlobalContext): Promise<string> => {
+    try {
+        ctx.logger?.log("CLIENT_ID_TOKEN_REQUESTED")
+        const clientIdToken = getCookie(request, ctx.cookies.clientIdToken.name)
+        ctx.logger?.log("CLIENT_ID_TOKEN_VERIFIED")
+        const jws = await ctx.jose.verifyJWS(clientIdToken)
+        ctx.logger?.log("CLIENT_ID_TOKEN_VERIFIED_SUCCESS")
+        return jws!.token as string
+    } catch {
+        ctx.logger?.log("INVALID_CLIENT_ID_TOKEN")
+        throw new AuraAuthError({ code: "INVALID_CLIENT_ID_TOKEN" })
     }
 }

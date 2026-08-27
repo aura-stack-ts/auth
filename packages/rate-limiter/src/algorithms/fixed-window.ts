@@ -18,19 +18,25 @@ import type { FixedWindowRule, RateLimiterAlgorithm, RateLimitResult } from "@/t
  * Recommended for: coarse-grained public API quotas where a boundary burst
  * is acceptable, or anywhere you want the simplest possible semantics.
  */
-export const createFixedWindowAlgorithm = <RequestInit = Request>(
-    rule: FixedWindowRule<RequestInit>
-): RateLimiterAlgorithm<RequestInit> => {
-    const { limit, windowMs, storage = createMemoryStorage() } = rule
+export const createFixedWindowAlgorithm = <RequestInit = Request, Context = never>(
+    rule: FixedWindowRule<RequestInit, Context>
+): RateLimiterAlgorithm<RequestInit, Context> => {
+    const { limit, windowMs } = rule
+    const storage = rule.storage ?? createMemoryStorage()
 
     const boundary = (now: number) => Math.floor(now / windowMs) * windowMs
     const windowKey = (baseKey: string, now: number) => `${baseKey}:fw:${boundary(now)}`
     const resetAt = (now: number) => boundary(now) + windowMs
 
-    const check = async (request: RequestInit): Promise<RateLimitResult> => {
+    const resolveKey = (request: RequestInit, context?: Context): string | Promise<string> =>
+        context !== undefined
+            ? (rule.keyGenerator as (r: RequestInit, c: Context) => string | Promise<string>)(request, context)
+            : (rule.keyGenerator as (r: RequestInit) => string | Promise<string>)(request)
+
+    const check = async (request: RequestInit, context?: Context): Promise<RateLimitResult> => {
         const now = Date.now()
         const reset = resetAt(now)
-        const key = rule.keyGenerator(request)
+        const key = await resolveKey(request, context)
         const count = await storage.increment(windowKey(key, now), windowMs)
         const ok = count <= limit
 
@@ -43,10 +49,10 @@ export const createFixedWindowAlgorithm = <RequestInit = Request>(
         })
     }
 
-    const peek = async (request: RequestInit): Promise<RateLimitResult> => {
+    const peek = async (request: RequestInit, context?: Context): Promise<RateLimitResult> => {
         const now = Date.now()
         const reset = resetAt(now)
-        const key = rule.keyGenerator(request)
+        const key = await resolveKey(request, context)
         const entry = await storage.get(windowKey(key, now))
         const count = entry?.value ?? 0
         const ok = count < limit
@@ -60,5 +66,11 @@ export const createFixedWindowAlgorithm = <RequestInit = Request>(
         })
     }
 
-    return { check, peek }
+    const reset = async (request: RequestInit, context?: Context): Promise<void> => {
+        const now = Date.now()
+        const key = await resolveKey(request, context)
+        await storage.delete(windowKey(key, now))
+    }
+
+    return { check, peek, reset } as RateLimiterAlgorithm<RequestInit, Context>
 }

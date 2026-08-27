@@ -904,6 +904,30 @@ export const LOG_MESSAGES = {
         msgId: "UPDATE_SESSION_INVALID",
         message: "Session update failed due to invalid session state",
     },
+    CLIENT_ID_TOKEN_REQUESTED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "CLIENT_ID_TOKEN_REQUESTED",
+        message: "Client requested a new client ID token",
+    },
+    CLIENT_ID_TOKEN_VERIFIED: {
+        facility: 4,
+        severity: "info",
+        msgId: "CLIENT_ID_TOKEN_VERIFIED",
+        message: "Client ID token verification succeeded",
+    },
+    CLIENT_ID_TOKEN_VERIFIED_SUCCESS: {
+        facility: 4,
+        severity: "info",
+        msgId: "CLIENT_ID_TOKEN_VERIFIED_SUCCESS",
+        message: "Client ID token verified successfully",
+    },
+    INVALID_CLIENT_ID_TOKEN: {
+        facility: 4,
+        severity: "error",
+        msgId: "INVALID_CLIENT_ID_TOKEN",
+        message: "Client ID token validation failed or token is invalid",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof LOG_MESSAGES>(
