@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { jose, PATCH, POST, sessionPayload } from "./presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { equals } from "@/shared/utils.ts"
 
 describe("Rate Limiter", async () => {
     const csrfToken = await createCSRF(jose)
@@ -10,9 +11,9 @@ describe("Rate Limiter", async () => {
         const requests = Array.from({ length: totalRequests }).map(() => makeRequest())
         const responses = await Promise.all(requests.map((req) => (req.method === "PATCH" ? PATCH(req) : POST(req))))
 
-        const successfulResponses = responses.filter((res) => res.status === 200)
-        const rejectedResponses = responses.filter((res) => res.status === 429)
-
+        const successfulResponses = responses.filter((res) => equals(res.status, 200))
+        const rejectedResponses = responses.filter((res) => equals(res.status, 429))
+        expect(rejectedResponses.length).toBe(expectedRejections)
         expect(successfulResponses.length).toBe(allowedLimit)
         expect(rejectedResponses.length).toBe(expectedRejections)
 
