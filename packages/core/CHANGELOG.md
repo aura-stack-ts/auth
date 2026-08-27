@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- Reordered the session refresh flow for the `PATCH /session` endpoint and `api.updateSession()` API so that rate limiting is evaluated before the session is refreshed. Requests must now pass the rate-limit check before the session refresh logic is executed. [#269](https://github.com/aura-stack-ts/auth/pull/269)
+- Reordered the session refresh flow for the `PATCH /session` endpoint and `api.updateSession()` API so that rate limiting is evaluated before the session is refreshed. Requests must now pass the rate-limit check before the session refresh logic is executed. [#270](https://github.com/aura-stack-ts/auth/pull/270)
 
 ### Security
 
