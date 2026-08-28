@@ -33,10 +33,10 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
             .verifyOAuthProvider(oauth)
-            .verifySession()
-            .verifyCSRFToken(doubleSubmitValidation)
             .buildRequest(requestInit, `/providers/${oauth}/user/refresh`)
             .verifyRateLimit("refreshUserInfo")
+            .verifySession()
+            .verifyCSRFToken(doubleSubmitValidation)
             .execute()
 
         if (rateLimit) {

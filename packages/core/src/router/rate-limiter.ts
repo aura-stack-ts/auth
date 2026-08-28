@@ -63,6 +63,19 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
                 keyGenerator: (request) => getLimitKey(request, "revokeToken"),
                 ...config?.revokeToken,
             } as RateLimiterRule,
+            isProviderConnected: {
+                algorithm: "token-bucket",
+                capacity: 10,
+                refillRate: 5,
+                keyGenerator: (request) => getLimitKey(request, "isProviderConnected"),
+            },
+            signOut: {
+                algorithm: "fixed-window",
+                limit: 5,
+                windowMs: 60 * 1000,
+                keyGenerator: (request) => getLimitKey(request, "signOut"),
+                ...config?.signOut,
+            } as RateLimiterRule,
         },
     })
 }

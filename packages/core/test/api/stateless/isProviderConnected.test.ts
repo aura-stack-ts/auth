@@ -18,6 +18,8 @@ describe("isProviderConnected", () => {
     })
 
     test("throws error when session token is missing", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
         const output = await api.isProviderConnected("oauth-provider", { headers: new Headers() })
         expect(output).toEqual({
             success: false,
