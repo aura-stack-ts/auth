@@ -28,7 +28,6 @@ describe("connectedAction", () => {
     })
 
     test("returns connected: false when provider token cookie does not exist", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -48,7 +47,6 @@ describe("connectedAction", () => {
     })
 
     test("returns connected: true when provider token cookie exists and is valid", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -71,7 +69,6 @@ describe("connectedAction", () => {
     })
 
     test("returns connected: false when provider token cookie is malformed", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -92,7 +89,6 @@ describe("connectedAction", () => {
     })
 
     test("returns connected: false when provider token cookie is expired", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -119,7 +115,6 @@ describe("connectedAction", () => {
     })
 
     test("handles expired session token", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
 
         const expiredSessionPayload = {
@@ -145,7 +140,6 @@ describe("connectedAction", () => {
     })
 
     test("handles empty cookie value", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -166,7 +160,6 @@ describe("connectedAction", () => {
     })
 
     test("handles multiple providers - checks correct provider", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -189,7 +182,6 @@ describe("connectedAction", () => {
     })
 
     test("handles malformed cookie header syntax", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 

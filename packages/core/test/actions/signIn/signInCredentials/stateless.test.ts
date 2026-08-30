@@ -39,6 +39,67 @@ describe("signInCredentials action", async () => {
         })
     })
 
+    test("invalid CSRF token", async () => {
+        const response = await POST(
+            new Request("http://localhost:3000/auth/signIn/credentials", {
+                method: "POST",
+                headers: {},
+                body: JSON.stringify({
+                    username: "johndoe",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("missing X-CSRF-Token header", async () => {
+        const csrfToken = await createCSRF(jose)
+
+        const response = await POST(
+            new Request("http://localhost:3000/auth/signIn/credentials", {
+                method: "POST",
+                headers: { Cookie: `aura-auth.csrf_token=${csrfToken}` },
+                body: JSON.stringify({
+                    username: "johndoe",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("csrf token mismatch", async () => {
+        const csrfToken = await createCSRF(jose)
+
+        const response = await POST(
+            new Request("http://localhost:3000/auth/signIn/credentials", {
+                method: "POST",
+                headers: { Cookie: `aura-auth.csrf_token=${csrfToken}`, "X-CSRF-Token": "invalid-token" },
+                body: JSON.stringify({
+                    username: "johndoe",
+                    password: "1234567890",
+                }),
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
     test("invalid credentials", async () => {
         const {
             handlers: { POST },

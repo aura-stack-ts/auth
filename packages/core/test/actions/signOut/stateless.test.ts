@@ -6,6 +6,57 @@ describe("signOut action", async () => {
     const csrf = await createCSRF(jose)
     const { encodeJWT } = jose
 
+    test("missing csrfToken cookie", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {},
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("missing X-CSRF-Token header", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: { Cookie: `__Host-aura-auth.csrf_token=${csrf}` },
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("csrf token mismatch", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": "invalid-csrf-token",
+                    Cookie: `__Host-aura-auth.csrf_token=${csrf}`,
+                },
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
     test("sessionToken cookie not present", async () => {
         const response = await POST(
             new Request("https://example.com/auth/signOut?token_type_hint=session_token", {

@@ -27,6 +27,7 @@ export const updateSessionAction = (identity: SchemaRegistryContext) => {
                 redirect: ctx.searchParams.redirect,
                 redirectTo: ctx.searchParams.redirectTo,
                 session: session as any,
+                skipCSRFCheck: false,
             })
             return toResponse()
         },

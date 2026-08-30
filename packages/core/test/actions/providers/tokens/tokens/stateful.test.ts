@@ -63,8 +63,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("should return 401 if session is not found in database", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn().mockResolvedValue(null)
         const getOAuthAccountMock = vi.fn()
         const updateOAuthTokensMock = vi.fn()
@@ -100,8 +98,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("should return 401 if OAuth account does not exist", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(null)
@@ -140,8 +136,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("successfully get provider tokens from database", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
@@ -197,8 +191,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("refreshToken config not provided", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
@@ -256,8 +248,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("refreshToken successfully refreshes tokens", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
@@ -356,8 +346,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("refreshToken successfully refreshes tokens with credentials auth", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
@@ -471,8 +459,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("refreshToken fails when OAuth provider returns an error", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
@@ -529,8 +515,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("refreshToken handles unexpected network exceptions gracefully", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getOAuthAccountMock = vi.fn().mockResolvedValue({
             accountId: "account-123",
@@ -577,8 +561,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("returns current tokens without refreshing when close to expiry but outside the refresh window", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const currentTime = Math.floor(Date.now() / 1000)
         const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
@@ -633,8 +615,6 @@ describe("tokensAction (Stateful)", async () => {
     })
 
     test("automatically refreshes the token when its lifetime falls inside the refresh window", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const getSessionByTokenMock = vi.fn()
 
         getSessionByTokenMock.mockResolvedValueOnce(sessionEntityWithUser)
