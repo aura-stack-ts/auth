@@ -24,13 +24,20 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
     const { signUp, cookies, sessionStrategy, logger } = ctx
     try {
+        ctx.logger?.log("SIGN_UP_INITIATED", {
+            structuredData: {
+                skipCSRFCheck: skipCSRFCheck,
+                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
+            },
+        })
+
         const { request, rateLimit } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
-            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .buildRequest(requestInit, "/signUp")
             .verifyRateLimit("signUp")
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
             .execute()
 
         if (rateLimit) {

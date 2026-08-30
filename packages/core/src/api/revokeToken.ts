@@ -19,7 +19,8 @@ export const revokeToken = async (
             structuredData: {
                 provider: oauth,
                 operation: disconnect ? "disconnect" : "revoke",
-                skipCSRFCheck: skipCSRFCheck && !!doubleSubmitToken,
+                skipCSRFCheck: skipCSRFCheck,
+                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
             },
         })
 
@@ -31,7 +32,7 @@ export const revokeToken = async (
             .buildRequest(requestInit, `/providers/${oauth}/tokens/revoke`)
             .verifyRateLimit("revokeToken")
             .verifySession()
-            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .execute()
 
         if (rateLimit) {

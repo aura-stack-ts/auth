@@ -1,11 +1,7 @@
-import { verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
 import type { InternalStatelessContext } from "@/@types/internal.ts"
 
-export const destroySession = ({ ctx, cookies, cookieManager }: InternalStatelessContext) => {
-    const { logger, jose, jwtManager } = ctx
-    return async (headers: Headers, skipCSRFCheck: boolean = false) => {
-        await verifyCSRFToken({ headers, skipCSRFCheck, cookies: cookies(), logger, jose })
-        await verifySessionToken({ headers, cookies: cookies(), jwt: jwtManager, logger })
+export const destroySession = ({ cookieManager }: InternalStatelessContext) => {
+    return async (_headers: Headers) => {
         return cookieManager.clearAll()
     }
 }

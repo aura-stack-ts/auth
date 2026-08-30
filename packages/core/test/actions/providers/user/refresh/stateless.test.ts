@@ -277,7 +277,6 @@ describe("refreshUserInfo action", () => {
     })
 
     test("handles expired access token with successful refresh", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 

@@ -1,24 +1,16 @@
 import { createHash } from "@/shared/crypto.ts"
-import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
+import { getErrorName } from "@/shared/utils.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 
-export const destroySession = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
-    const { logger, sessionConfig, jose } = ctx
+export const destroySession = ({ ctx, cookieManager }: InternalStatefulContext) => {
+    const { logger, sessionConfig } = ctx
 
-    return async (headers: Headers, skipCSRFCheck: boolean = false) => {
+    return async (headers: Headers) => {
         logger?.log("STATEFUL_DESTROY_SESSION_START", {
             structuredData: {
                 strategy: "stateful",
                 operation: "destroySession",
             },
-        })
-
-        await verifyCSRFToken({
-            headers,
-            cookies: cookies(),
-            logger,
-            jose: jose,
-            skipCSRFCheck,
         })
 
         try {

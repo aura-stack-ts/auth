@@ -1,19 +1,18 @@
-import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
+import { getErrorName } from "@/shared/utils.ts"
 import { updateExpires } from "@/shared/utils/session-strategy.ts"
 import type { DeepPartial } from "@/@types/utility.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalStatelessContext } from "@/@types/internal.ts"
 
-export const refreshSession = <DefaultUser extends User = User>({ ctx, cookies, cookieManager }: InternalStatelessContext) => {
-    const { logger, jose, jwtManager: jwt, identity, sessionConfig } = ctx
+export const refreshSession = <DefaultUser extends User = User>({ ctx, cookieManager }: InternalStatelessContext) => {
+    const { logger, jwtManager: jwt, identity, sessionConfig } = ctx
 
     const maxAge = sessionConfig?.maxAge ?? sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = sessionConfig?.expirationStrategy ?? sessionConfig?.jwt?.expirationStrategy ?? "absolute"
 
     return async (
         headers: Headers,
-        session: DeepPartial<Session<DefaultUser>>,
-        skipCSRFCheck: boolean = false
+        session: DeepPartial<Session<DefaultUser>>
     ): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
@@ -21,16 +20,6 @@ export const refreshSession = <DefaultUser extends User = User>({ ctx, cookies, 
         try {
             const { sessionToken } = cookieManager.getCookie(headers)
             if (!sessionToken) {
-                return { session: null, headers: cookieManager.clear() }
-            }
-            const isValidToken = await verifyCSRFToken({
-                headers,
-                skipCSRFCheck,
-                cookies: cookies(),
-                jose,
-                logger,
-            })
-            if (!isValidToken) {
                 return { session: null, headers: cookieManager.clear() }
             }
             const claims = await jwt.verifyToken(sessionToken)

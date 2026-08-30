@@ -25,8 +25,6 @@ describe("Revoke Action", () => {
     })
 
     test("throws error when session token is missing", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/tokens/revoke", {
                 method: "POST",
@@ -38,8 +36,6 @@ describe("Revoke Action", () => {
     })
 
     test("throws error when CSRF token is missing", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const response = await POST(
@@ -55,7 +51,6 @@ describe("Revoke Action", () => {
     })
 
     test("throws error when CSRF token is invalid", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -73,7 +68,6 @@ describe("Revoke Action", () => {
     })
 
     test("throws error when provider token cookie does not exist", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -91,7 +85,6 @@ describe("Revoke Action", () => {
     })
 
     test("throws error when provider does not have revoke token configured", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -114,7 +107,6 @@ describe("Revoke Action", () => {
     })
 
     test("successfully revokes token", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -157,7 +149,6 @@ describe("Revoke Action", () => {
     })
 
     test("successfully revokes token with 204 status", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -184,7 +175,6 @@ describe("Revoke Action", () => {
     })
 
     test("handles network error during revocation", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -207,7 +197,6 @@ describe("Revoke Action", () => {
     })
 
     test("handles provider returning error response", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -233,7 +222,6 @@ describe("Revoke Action", () => {
     })
 
     test("handles provider returning unexpected status code", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -259,7 +247,6 @@ describe("Revoke Action", () => {
     })
 
     test("handles malformed provider token cookie", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -277,7 +264,6 @@ describe("Revoke Action", () => {
     })
 
     test("handles expired session token", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
 
         const expiredSessionPayload = {
@@ -300,7 +286,6 @@ describe("Revoke Action", () => {
     })
 
     test("handles provider with custom revoke token URL", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -334,8 +319,6 @@ describe("Revoke Action", () => {
     })
 
     test("handles provider with custom revoke token config object", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 

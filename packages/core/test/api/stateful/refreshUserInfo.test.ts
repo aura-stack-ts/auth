@@ -170,8 +170,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             success: false,
             session: null,
             error: {
-                code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO",
-                message: "Failed to sync profile data. Your active session access token is missing or invalid.",
+                code: "CSRF_TOKEN_MISSING",
+                message: "The CSRF token is missing. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

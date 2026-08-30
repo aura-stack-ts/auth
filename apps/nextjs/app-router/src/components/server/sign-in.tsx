@@ -36,7 +36,7 @@ export const SignIn = () => {
                 username: email,
                 password,
             },
-            redirectTo: "/client",
+            redirectTo: "/server/profile",
         })
     }
 

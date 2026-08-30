@@ -624,8 +624,6 @@ describe("refreshUserInfo action", () => {
     })
 
     test("handles expired access token with successful refresh", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const expiredOAuthAccount = {
             ...oauthAccountEntity,
             accessTokenExpiresAt: new Date(Date.now() - 3600 * 1000),

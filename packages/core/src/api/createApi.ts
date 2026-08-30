@@ -46,7 +46,6 @@ import type {
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
-import { assertDoubleSubmitToken } from "@/shared/utils/api.ts"
 
 type InferSignUp<T> = Wrap<RemoveIndexSignature<InferSchema<T>>>
 
@@ -98,8 +97,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * })
          */
         signInCredentials: async (options: SignInCredentialsAPIOptions): Promise<SignInCredentialsAPIReturn> => {
-            assertDoubleSubmitToken(options)
-            return signInCredentials({ ctx, ...options })
+            return signInCredentials({ ctx, skipCSRFCheck: true, ...options })
         },
         /**
          * Signs up a new user on the server-side. It requires a `payload` with the necessary information for
@@ -123,8 +121,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
         signUp: async <Payload extends Record<string, any> = InferSignUp<SignUpSchema>>(
             options: SignUpAPIOptions<Payload>
         ): Promise<SignUpAPIReturn> => {
-            assertDoubleSubmitToken(options)
-            return signUp({ ctx, ...options })
+            return signUp({ ctx, skipCSRFCheck: true, ...options })
         },
         /**
          * Updates the current session on the server-side. It allows partial updates to the session object, such as
@@ -147,8 +144,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * })
          */
         updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
-            assertDoubleSubmitToken(options)
-            return updateSession<DefaultUser>({ ctx, ...options })
+            return updateSession<DefaultUser>({ ctx, skipCSRFCheck: true, ...options })
         },
         /**
          * Retrieves the access token for a specific OAuth provider on the server-side.
@@ -208,8 +204,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
             oauth: LiteralUnion<BuiltInOAuthProvider>,
             options?: RefreshUserInfoAPIOptions
         ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
-            assertDoubleSubmitToken(options ?? {})
-            return refreshUserInfo<DefaultUser>(oauth, { ctx, ...options })
+            return refreshUserInfo<DefaultUser>(oauth, { ctx, skipCSRFCheck: true, ...options })
         },
         /**
          * Revokes the access token for a specific OAuth provider on the server-side. It makes a request to the
@@ -228,9 +223,9 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
             oauth: LiteralUnion<BuiltInOAuthProvider>,
             options?: RevokeTokenAPIOptions
         ): Promise<RevokeTokenAPIReturn> => {
-            assertDoubleSubmitToken(options || {})
             return revokeToken(oauth, {
                 ctx,
+                skipCSRFCheck: true,
                 ...options,
                 disconnect: false,
             })
@@ -251,8 +246,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
             oauth: LiteralUnion<BuiltInOAuthProvider>,
             options?: DisconnectProviderAPIOptions
         ): Promise<DisconnectProviderAPIReturn> => {
-            assertDoubleSubmitToken(options || {})
-            return disconnectProvider(oauth, { ctx, ...options })
+            return disconnectProvider(oauth, { ctx, skipCSRFCheck: true, ...options })
         },
         /**
          * Checks if the current session is connected to a specific OAuth provider on the server-side. It verifies
@@ -292,8 +286,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * })
          */
         signOut: async (options: SignOutAPIOptions): Promise<SignOutAPIReturn> => {
-            assertDoubleSubmitToken(options)
-            return signOut({ ctx, ...options })
+            return signOut({ ctx, skipCSRFCheck: true, ...options })
         },
     }
 }

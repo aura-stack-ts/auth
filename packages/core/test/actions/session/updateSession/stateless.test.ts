@@ -14,10 +14,56 @@ describe("updateSession action", () => {
                 body: JSON.stringify({}),
             })
         )
-        expect(response.status).toBe(400)
-        expect(await response.json()).toMatchObject({
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
             session: null,
             success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("missing csrf token cookie", async () => {
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session", {
+                method: "PATCH",
+                headers: {
+                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                },
+                body: JSON.stringify({}),
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
+            session: null,
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("csrf token mismatch", async () => {
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const csrfToken = await createCSRF(jose)
+
+        const response = await PATCH(
+            new Request("http://localhost:3000/auth/session", {
+                method: "PATCH",
+                headers: {
+                    "X-CSRF-Token": "invalid-csrf-token",
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({}),
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
+            session: null,
+            success: false,
+            redirect: false,
+            redirectURL: null,
         })
     })
 
@@ -299,7 +345,7 @@ describe("updateSession action", () => {
                 body: JSON.stringify({ user: newUser }),
             })
         )
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(403)
         expect(await response.json()).toEqual({
             session: null,
             success: false,

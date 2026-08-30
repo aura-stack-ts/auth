@@ -326,4 +326,58 @@ describe("signUp API", async () => {
             image: "https://example.com/image.jpg",
         })
     })
+
+    test("missing csrfToken cookie", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signUp", {
+                method: "POST",
+                headers: {},
+                body: JSON.stringify(payload),
+            })
+        )
+
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("missing X-CSRF-Token header", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signUp", {
+                method: "POST",
+                headers: { Cookie: `__Host-aura-auth.csrf_token=${csrfToken}` },
+                body: JSON.stringify(payload),
+            })
+        )
+
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("csrf token mismatch", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signUp", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": "invalid-csrf-token",
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify(payload),
+            })
+        )
+
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
 })

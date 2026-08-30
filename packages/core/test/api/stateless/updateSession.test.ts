@@ -21,8 +21,8 @@ describe("updateSession API", () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "UPDATE_SESSION_INVALID",
-                message: "Failed to update session parameters.",
+                code: "CSRF_TOKEN_MISSING",
+                message: "The CSRF token is missing. Please refresh and try again.",
             },
             toResponse: expect.any(Function),
         })
@@ -464,8 +464,8 @@ describe("updateSession API", () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "UPDATE_SESSION_INVALID",
-                message: "Failed to update session parameters.",
+                code: "CSRF_TOKEN_MISMATCH",
+                message: "CSRF token verification failed. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
