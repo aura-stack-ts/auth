@@ -20,8 +20,16 @@ export const signOut = async ({
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
     let responseHeaders = toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
     try {
+        const { request, rateLimit } = await createValidation(ctx, responseHeaders)
+            .buildRequest(requestInit, "/signOut")
+            .verifyRateLimit("signOut")
+            .execute()
+
+        if (rateLimit) {
+            return rateLimit
+        }
+
         responseHeaders = await ctx.sessionStrategy.destroySession(responseHeaders, skipCSRFCheck && !!doubleSubmitToken)
-        const { request } = await createValidation(ctx, responseHeaders).buildRequest(requestInit, "/signOut").execute()
 
         const headersBuilder = new HeadersBuilder(responseHeaders)
         const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(

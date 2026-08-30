@@ -2,16 +2,21 @@ import { createRateLimiter, type RateLimiterRule } from "@aura-stack/rate-limite
 import type { RateLimiterConfig } from "@/@types/config.ts"
 import type { RouterGlobalContext } from "@/@types/internal.ts"
 
-export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
+export const createRateLimiterInstance = (config?: RateLimiterConfig, useProxyHeaders: boolean = false) => {
     const getLimitKey = (request: Request, action: string): string => {
-        const ip =
-            request.headers.get("cf-connecting-ip") ??
-            request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-            request.headers.get("x-real-ip") ??
-            "anon"
+        const ip = useProxyHeaders
+            ? (request.headers.get("cf-connecting-ip") ??
+              request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+              request.headers.get("x-real-ip") ??
+              request.headers.get("true-client-ip") ??
+              request.headers.get("x-client-ip") ??
+              request.headers.get("x-cluster-client-ip") ??
+              request.headers.get("x-forwarded") ??
+              request.headers.get("forwarded-for") ??
+              "anon")
+            : (request.headers.get("remote-addr") ?? "anon")
         return `rl:${action}:${ip}`
     }
-
     return createRateLimiter<RateLimiterConfig>({
         rules: {
             signIn: {
@@ -62,6 +67,20 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig) => {
                 windowMs: 15 * 60 * 1000,
                 keyGenerator: (request) => getLimitKey(request, "revokeToken"),
                 ...config?.revokeToken,
+            } as RateLimiterRule,
+            isProviderConnected: {
+                algorithm: "token-bucket",
+                capacity: 10,
+                refillRate: 5,
+                keyGenerator: (request) => getLimitKey(request, "isProviderConnected"),
+                ...config?.isProviderConnected,
+            } as RateLimiterRule,
+            signOut: {
+                algorithm: "fixed-window",
+                limit: 5,
+                windowMs: 60 * 1000,
+                keyGenerator: (request) => getLimitKey(request, "signOut"),
+                ...config?.signOut,
             } as RateLimiterRule,
         },
     })

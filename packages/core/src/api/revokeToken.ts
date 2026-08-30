@@ -28,10 +28,10 @@ export const revokeToken = async (
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
             .verifyOAuthProvider(oauth)
-            .verifySession()
-            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .buildRequest(requestInit, `/providers/${oauth}/tokens/revoke`)
             .verifyRateLimit("revokeToken")
+            .verifySession()
+            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
             .execute()
 
         if (rateLimit) {

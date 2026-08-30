@@ -14,11 +14,19 @@ export const isProviderConnected = async (
             structuredData: { provider: oauth, operation: "check_connection" },
         })
 
-        const { headers } = await createValidation(ctx, toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {}))
+        const { headers, rateLimit } = await createValidation(
+            ctx,
+            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
+        )
             .verifyOAuthProvider(oauth)
-            .verifySession()
             .buildRequest(requestInit, `/providers/${oauth}`)
+            .verifyRateLimit("isProviderConnected")
+            .verifySession()
             .execute()
+
+        if (rateLimit) {
+            return rateLimit
+        }
 
         const connected = await ctx.sessionStrategy.isProviderConnected(oauth, headers)
 

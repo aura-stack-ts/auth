@@ -6,6 +6,8 @@ describe("signOut API", async () => {
     const csrfToken = await createCSRF(jose)
 
     test("invalid session", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
         const revokeSessionMock = vi.fn()
         const sessionTokenMock = vi.fn().mockResolvedValue(null)
 

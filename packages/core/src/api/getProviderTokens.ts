@@ -17,9 +17,9 @@ export const getProviderTokens = async (
     try {
         const { request, rateLimit } = await createValidation(ctx, initialHeaders)
             .verifyOAuthProvider(oauth)
-            .verifySession()
             .buildRequest(requestInit, `/providers/${oauth}/tokens`)
             .verifyRateLimit("getProviderTokens")
+            .verifySession()
             .execute()
 
         if (rateLimit) {

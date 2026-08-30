@@ -474,7 +474,17 @@ export interface SignUpConfig<
 export type RateLimiterConfig = Partial<
     RaterLimiterBaseConfig<
         Record<
-            "signIn" | "signInCredentials" | "updateSession" | "signUp" | "getProviderTokens" | "refreshUserInfo" | "revokeToken",
+            // @todo add session origin validation
+            //| "session"
+            | "signIn"
+            | "signInCredentials"
+            | "updateSession"
+            | "signUp"
+            | "getProviderTokens"
+            | "refreshUserInfo"
+            | "revokeToken"
+            | "isProviderConnected"
+            | "signOut",
             RateLimiterRule
         >
     >["rules"]

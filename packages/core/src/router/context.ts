@@ -63,7 +63,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         },
         signUp: config?.signUp,
         jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
-        rateLimiters: createRateLimiterInstance(config?.rateLimiter),
+        rateLimiters: createRateLimiterInstance(config?.rateLimiter, useProxyHeaders),
         sessionConfig: config?.session,
     } as InternalContext<Identity, SignUpSchema>
     ctx.sessionStrategy = createSessionStrategy<Identity>({

@@ -42,6 +42,8 @@ describe("getProviderTokens API (Stateful)", () => {
     })
 
     test("throws error when session token is missing", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
         const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(null)
         const getOAuthAccountMock = vi.fn()
         const updateOAuthTokensMock = vi.fn()
