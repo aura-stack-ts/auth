@@ -1,16 +1,15 @@
 import { createHash } from "@/shared/crypto.ts"
-import { getErrorName, verifyCSRFToken } from "@/shared/utils.ts"
+import { getErrorName } from "@/shared/utils.ts"
 import type { DeepPartial } from "@/@types/utility.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 
-export const refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
-    const { logger, sessionConfig, jose } = ctx
+export const refreshSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
+    const { logger, sessionConfig } = ctx
 
     return async (
         headers: Headers,
-        session: DeepPartial<Session<DefaultUser>>,
-        skipCSRFCheck: boolean = false
+        session: DeepPartial<Session<DefaultUser>>
     ): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
@@ -19,7 +18,6 @@ export const refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieM
             structuredData: {
                 strategy: "stateful",
                 operation: "refreshSession",
-                skip_csrf_check: skipCSRFCheck,
             },
         })
 
@@ -36,35 +34,6 @@ export const refreshSession = <DefaultUser extends User>({ ctx, cookies, cookieM
                 logger?.log("STATEFUL_REFRESH_TOKEN_MISSING", {
                     structuredData: {
                         reason: "no_session_token_in_cookie",
-                    },
-                })
-                return { session: null, headers: cookieManager.clear() }
-            }
-
-            logger?.log("STATEFUL_CSRF_VERIFICATION_START", {
-                structuredData: {
-                    skip_csrf_check: skipCSRFCheck,
-                },
-            })
-
-            const isValidToken = await verifyCSRFToken({
-                headers,
-                skipCSRFCheck,
-                jose,
-                cookies: cookies(),
-                logger,
-            })
-
-            logger?.log("STATEFUL_CSRF_VERIFICATION_RESULT", {
-                structuredData: {
-                    is_valid: isValidToken,
-                },
-            })
-
-            if (!isValidToken) {
-                logger?.log("STATEFUL_CSRF_VERIFICATION_FAILED", {
-                    structuredData: {
-                        reason: "csrf_token_invalid",
                     },
                 })
                 return { session: null, headers: cookieManager.clear() }

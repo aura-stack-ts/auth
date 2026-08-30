@@ -283,8 +283,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      */
     refreshSession(
         headers: Headers,
-        session: DeepPartial<Session<DefaultUser>>,
-        skipCSRFCheck: boolean
+        session: DeepPartial<Session<DefaultUser>>
     ): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
@@ -301,7 +300,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Destroy the session attached to this request (logout).
      * Returns a response that clears cookies.
      */
-    destroySession(headers: Headers, skipCSRFCheck?: boolean): Promise<Headers>
+    destroySession(headers: Headers): Promise<Headers>
 
     /**
      * Revoke the access token for a specific OAuth provider.

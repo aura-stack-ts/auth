@@ -904,6 +904,30 @@ export const LOG_MESSAGES = {
         msgId: "UPDATE_SESSION_INVALID",
         message: "Session update failed due to invalid session state",
     },
+    SIGN_IN_CREDENTIALS_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "SIGN_IN_CREDENTIALS_INITIATED",
+        message: "Starting sign-in process with user credentials",
+    },
+    SIGN_OUT_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "SIGN_OUT_INITIATED",
+        message: "Starting sign-out process for the user",
+    },
+    SIGN_UP_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "SIGN_UP_INITIATED",
+        message: "Starting user sign-up process",
+    },
+    UPDATE_SESSION_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "UPDATE_SESSION_INITIATED",
+        message: "Starting session update process",
+    },
 } as const
 
 export const createLogEntry = <T extends keyof typeof LOG_MESSAGES>(

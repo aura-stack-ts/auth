@@ -22,20 +22,28 @@ export const updateSession = async <DefaultUser extends User = User>({
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
     try {
-        const { request, rateLimit } = await createValidation(ctx, new Headers(headersInit as HeadersInit))
+        ctx.logger?.log("UPDATE_SESSION_INITIATED", {
+            structuredData: {
+                skipCSRFCheck: skipCSRFCheck,
+                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
+            },
+        })
+
+        const {
+            request,
+            rateLimit,
+            headers: validatedHeaders,
+        } = await createValidation(ctx, toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {}))
             .buildRequest(requestInit, "/session")
             .verifyRateLimit("updateSession")
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, false)
             .execute()
 
         if (rateLimit) {
             return rateLimit as UpdateSessionAPIReturn<DefaultUser>
         }
 
-        const { session, headers } = await ctx.sessionStrategy.refreshSession(
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {}),
-            sessionInit,
-            skipCSRFCheck && !!doubleSubmitToken
-        )
+        const { session, headers } = await ctx.sessionStrategy.refreshSession(validatedHeaders, sessionInit)
         if (!session) {
             throw new AuraAuthError({ code: "UPDATE_SESSION_INVALID" })
         }

@@ -5,8 +5,8 @@ import type { InternalStatefulContext } from "@/@types/internal.ts"
 export const refreshUserInfo = <DefaultUser extends User>(ctx: InternalStatefulContext) => {
     const refreshSession = __refreshSession(ctx)
 
-    return async (userInfo: Partial<DefaultUser>, headers: Headers, skipCSRFCheck?: boolean) => {
-        const value = await refreshSession(headers, { user: userInfo }, skipCSRFCheck)
+    return async (userInfo: Partial<DefaultUser>, headers: Headers) => {
+        const value = await refreshSession(headers, { user: userInfo })
         return value as any
     }
 }

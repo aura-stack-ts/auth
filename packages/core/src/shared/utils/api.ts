@@ -1,26 +1,15 @@
 import { HeadersBuilder, type RequestHeaders } from "@aura-stack/router"
-import { getOptionalCookie } from "@/cookie.ts"
-import { assertCSRFTokenCookie, createCSRF, createHash } from "@/shared/crypto.ts"
+import { getCookie, getOptionalCookie } from "@/cookie.ts"
 import { verifyRateLimit } from "@/router/rate-limiter.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
 import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
+import { getErrorName, verifySessionToken } from "@/shared/utils.ts"
 import { isHeadersInit, isStatelessStrategy } from "@/shared/assert.ts"
-import { getErrorName, verifyCSRFToken, verifySessionToken } from "@/shared/utils.ts"
+import { createCSRF, createHash, verifyCSRF } from "@/shared/crypto.ts"
 import { getBaseURL, getOriginURL, createRedirectTo } from "@/shared/utils/authorization.ts"
-import type {
-    BuiltInOAuthProvider,
-    LiteralUnion,
-    RateLimiterConfig,
-    UpdateSessionAPIOptions,
-    SignInCredentialsAPIOptions,
-    SignUpAPIOptions,
-    RefreshUserInfoAPIOptions,
-    RevokeTokenAPIOptions,
-    DisconnectProviderAPIOptions,
-    SignOutAPIOptions,
-} from "@/@types/index.ts"
-import type { InternalLogger, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
 import type { LOG_MESSAGES } from "@/shared/logger.ts"
+import type { BuiltInOAuthProvider, LiteralUnion, RateLimiterConfig } from "@/@types/index.ts"
+import type { InternalLogger, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
 
 export const createValidation = (ctx: RouterGlobalContext, headersInit?: HeadersInit) => {
     const headers = new Headers(headersInit)
@@ -70,17 +59,15 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
             })
             return builder
         },
-        verifyCSRFToken: (skipCSRFCheck: boolean) => {
+        verifyCSRFToken: (skipCSRFCheck: boolean, doubleSubmitToken: string | undefined, generateNewToken: boolean = false) => {
             steps.push(async () => {
                 const existingCSRFToken = getOptionalCookie(output.headers, ctx.cookies.csrfToken.name)
-                assertCSRFTokenCookie(ctx.jose, existingCSRFToken)
-                const csrfTokenValue = await createCSRF(ctx.jose, existingCSRFToken)
-                await verifyCSRFToken({
+                const csrfTokenValue = generateNewToken ? await createCSRF(ctx.jose, existingCSRFToken) : existingCSRFToken
+                await internal_verifyCSRFToken({
+                    ctx,
                     headers: output.headers,
-                    cookies: ctx.cookies,
-                    jose: ctx.jose,
-                    logger: ctx.logger,
                     skipCSRFCheck,
+                    doubleSubmitToken,
                     csrfTokenValue,
                 })
             })
@@ -173,27 +160,86 @@ export const toStandardizedHeaders = (headers: Headers | HeadersInit | RequestHe
           : new Headers(headers as Record<string, string>)
 }
 
-export const assertDoubleSubmitToken = (
-    options:
-        | UpdateSessionAPIOptions
-        | SignInCredentialsAPIOptions
-        | SignUpAPIOptions
-        | RefreshUserInfoAPIOptions
-        | RevokeTokenAPIOptions
-        | DisconnectProviderAPIOptions
-        | SignOutAPIOptions
-) => {
-    if (options.doubleSubmitToken) {
-        options.skipCSRFCheck = false
-        options.headers = new Headers(toStandardizedHeaders(options.headers || {}))
-        options.headers.set("x-csrf-token", options.doubleSubmitToken)
-        options.request?.headers.set("x-csrf-token", options.doubleSubmitToken)
-    } else {
-        if (options.skipCSRFCheck === undefined || options.skipCSRFCheck === true) {
-            options.skipCSRFCheck = true
-            options.doubleSubmitToken = "token"
-        }
+export const internal_verifyCSRFToken = async ({
+    headers,
+    skipCSRFCheck,
+    doubleSubmitToken,
+    ctx,
+    csrfTokenValue,
+}: {
+    headers: Headers
+    skipCSRFCheck: boolean
+    doubleSubmitToken?: string
+    csrfTokenValue?: string
+    ctx: RouterGlobalContext
+}): Promise<boolean> => {
+    let csrfToken = csrfTokenValue || null
+
+    try {
+        csrfToken = csrfToken || getCookie(headers, ctx.cookies.csrfToken.name)
+    } catch (cause) {
+        ctx.logger?.log("CSRF_TOKEN_MISSING")
+
+        throw new AuraAuthError({
+            code: "CSRF_TOKEN_MISSING",
+            cause,
+        })
     }
+
+    if (!csrfToken) {
+        ctx.logger?.log("CSRF_TOKEN_MISSING")
+
+        throw new AuraAuthError({
+            code: "CSRF_TOKEN_MISSING",
+        })
+    }
+
+    try {
+        await ctx.jose.verifyJWS(csrfToken)
+    } catch (cause) {
+        ctx.logger?.log("CSRF_TOKEN_INVALID", {
+            structuredData: {
+                error_type: getErrorName(cause),
+            },
+        })
+
+        throw new AuraAuthError({
+            code: "CSRF_TOKEN_MISMATCH",
+            cause,
+        })
+    }
+
+    if (skipCSRFCheck && !doubleSubmitToken) {
+        return true
+    }
+
+    const requestToken = doubleSubmitToken ?? headers.get("X-CSRF-Token")
+
+    if (!requestToken) {
+        ctx.logger?.log("CSRF_HEADER_MISSING")
+
+        throw new AuraAuthError({
+            code: "CSRF_DOUBLE_SUBMIT_FAILED",
+        })
+    }
+
+    try {
+        await verifyCSRF(ctx.jose, csrfToken, requestToken)
+    } catch (cause) {
+        ctx.logger?.log("CSRF_TOKEN_INVALID", {
+            structuredData: {
+                error_type: getErrorName(cause),
+            },
+        })
+
+        throw new AuraAuthError({
+            code: "CSRF_TOKEN_MISMATCH",
+            cause,
+        })
+    }
+
+    ctx.logger?.log("CSRF_TOKEN_VERIFIED")
+    return true
 }
 
 export const errorToLogMessage = (error: unknown, key: keyof typeof LOG_MESSAGES, logger?: InternalLogger) => {

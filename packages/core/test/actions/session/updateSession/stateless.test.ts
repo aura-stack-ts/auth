@@ -14,7 +14,7 @@ describe("updateSession action", () => {
                 body: JSON.stringify({}),
             })
         )
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(403)
         expect(await response.json()).toMatchObject({
             session: null,
             success: false,
@@ -299,7 +299,7 @@ describe("updateSession action", () => {
                 body: JSON.stringify({ user: newUser }),
             })
         )
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(403)
         expect(await response.json()).toEqual({
             session: null,
             success: false,

@@ -24,13 +24,20 @@ export const signInCredentials = async ({
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, sessionStrategy, logger } = ctx
     try {
+        ctx.logger?.log("SIGN_IN_CREDENTIALS_INITIATED", {
+            structuredData: {
+                skipCSRFCheck: skipCSRFCheck,
+                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
+            },
+        })
+
         const { request, rateLimit } = await createValidation(
             ctx,
             toStandardizedHeaders(headerInit ?? requestInit?.headers ?? {})
         )
             .buildRequest(requestInit, "/signIn/credentials")
             .verifyRateLimit("signInCredentials")
-            .verifyCSRFToken(skipCSRFCheck && !!doubleSubmitToken)
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
             .execute()
 
         if (rateLimit) {

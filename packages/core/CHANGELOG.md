@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
+- Fixed CSRF validation in server-side APIs that perform sensitive operations, including `signOut`, `updateSession`, and `signInCredentials`. Server APIs now correctly determine whether Double-Submit Cookie validation should be skipped by default or explicitly enabled through the `doubleSubmitToken` option. The `skipCSRFCheck` and `doubleSubmitToken` options are now validated against the default configuration, preventing incorrect CSRF validation fallbacks. [#272](https://github.com/aura-stack-ts/auth/pull/272)
+
 - Added missing rate limiting to the `isProviderConnected()` and `signOut()` operations. Rate-limit validation is now performed as an early step when processing incoming requests, ensuring requests are validated before the protected operation is executed. [#271](https://github.com/aura-stack-ts/auth/pull/271)
 
 - Reordered the session refresh flow for the `PATCH /session` endpoint and `api.updateSession()` API so that rate limiting is evaluated before the session is refreshed. Requests must now pass the rate-limit check before the session refresh logic is executed. [#270](https://github.com/aura-stack-ts/auth/pull/270)

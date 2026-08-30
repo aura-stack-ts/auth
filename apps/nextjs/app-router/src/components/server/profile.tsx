@@ -24,7 +24,9 @@ export const Profile = async () => {
 
     const handleSignOut = async (_formData: FormData) => {
         "use server"
-        await api.signOut()
+        await api.signOut({
+            redirectTo: "/server/sign-in",
+        })
     }
 
     return (
@@ -62,7 +64,7 @@ export const Profile = async () => {
                             </label>
                             <span className="text-sm">Sign out of the device with active session</span>
                         </div>
-                        <Button variant="default" type="button" formAction={handleSignOut}>
+                        <Button variant="default" formAction={handleSignOut}>
                             Sign Out
                         </Button>
                     </form>

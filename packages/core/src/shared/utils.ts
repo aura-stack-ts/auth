@@ -1,11 +1,11 @@
 import { getEnv } from "@/shared/env.ts"
 import { getCookie } from "@/cookie.ts"
-import { createHash, verifyCSRF } from "@/shared/crypto.ts"
+import { createHash } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { isRelativeURL, isString, isValidURL } from "@/shared/assert.ts"
 import type { DeviceType } from "@/@types/entities.ts"
-import type { JoseInstance, OAuthTokenPayload } from "@/@types/index.ts"
+import type { OAuthTokenPayload } from "@/@types/index.ts"
 import type {
     InternalCookieStoreConfig,
     InternalLogger,
@@ -153,63 +153,6 @@ export const verifySessionToken = async ({
         logger?.log("INVALID_JWT_TOKEN", { structuredData: { error_type: getErrorName(error) } })
         throw new AuraAuthError({ code: "SESSION_INVALID", cause: error })
     }
-}
-
-export const verifyCSRFToken = async ({
-    headers,
-    skipCSRFCheck,
-    cookies,
-    logger,
-    jose,
-    csrfTokenValue,
-}: {
-    headers: Headers
-    skipCSRFCheck: boolean
-    cookies: InternalCookieStoreConfig
-    logger: InternalLogger | undefined
-    jose: JoseInstance
-    csrfTokenValue?: string
-}): Promise<boolean> => {
-    let csrfToken = csrfTokenValue || null
-    const header = headers.get("X-CSRF-Token")
-
-    try {
-        csrfToken = csrfToken || getCookie(headers, cookies.csrfToken.name)
-    } catch (cause) {
-        logger?.log("CSRF_TOKEN_MISSING")
-        throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
-    }
-    logger?.log("CSRF_TOKEN_REQUESTED", {
-        structuredData: {
-            has_csrf_token: Boolean(csrfToken),
-            has_csrf_header: Boolean(header),
-            skip_csrf_check: skipCSRFCheck,
-        },
-    })
-    if (!skipCSRFCheck) {
-        if (!csrfToken) {
-            logger?.log("CSRF_TOKEN_MISSING")
-            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-        }
-        if (!header) {
-            logger?.log("CSRF_HEADER_MISSING")
-            throw new AuraAuthError({ code: "CSRF_DOUBLE_SUBMIT_FAILED" })
-        }
-        try {
-            await verifyCSRF(jose, csrfToken, header)
-        } catch (error) {
-            logger?.log("CSRF_TOKEN_INVALID", { structuredData: { error_type: getErrorName(error) } })
-            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH", cause: error })
-        }
-        logger?.log("CSRF_TOKEN_VERIFIED")
-    } else {
-        try {
-            await jose.verifyJWS(csrfToken)
-        } catch (cause) {
-            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH", cause })
-        }
-    }
-    return true
 }
 
 export const shouldRefresh = (payload: OAuthTokenPayload, refreshWindow: number): boolean => {

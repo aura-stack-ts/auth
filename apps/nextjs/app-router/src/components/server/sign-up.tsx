@@ -22,8 +22,7 @@ export const SignUp = () => {
                 email,
                 password,
             },
-            redirect: true,
-            redirectTo: "/client/profile",
+            redirectTo: "/server/profile",
         })
     }
 

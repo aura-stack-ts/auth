@@ -74,8 +74,8 @@ describe("revokeToken (Stateful)", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "CSRF_TOKEN_MISSING",
+                message: "The CSRF token is missing. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
