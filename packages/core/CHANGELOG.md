@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.9.2] - 2026-08-30
+
 ### Security
 
 - Fixed CSRF validation in server-side APIs that perform sensitive operations, including `signOut`, `updateSession`, and `signInCredentials`. Server APIs now correctly determine whether Double-Submit Cookie validation should be skipped by default or explicitly enabled through the `doubleSubmitToken` option. The `skipCSRFCheck` and `doubleSubmitToken` options are now validated against the default configuration, preventing incorrect CSRF validation fallbacks. [#272](https://github.com/aura-stack-ts/auth/pull/272)

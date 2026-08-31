@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/auth",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
