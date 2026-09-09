@@ -1,5 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { RedirectOptionsSchema } from "@/schemas.ts"
+import { RedirectOptionsSchema } from "@/shared/schemas/general.ts"
 import { updateSession } from "@/api/updateSession.ts"
 import { getFullSchema } from "@/validator/registry.ts"
 import type { Identities } from "@/identity/index.ts"

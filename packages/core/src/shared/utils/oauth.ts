@@ -9,7 +9,7 @@ import {
     OAuthErrorResponse,
     OIDCAccessTokenResponseSchema,
     OIDCUserInfoSchema,
-} from "@/schemas.ts"
+} from "@/shared/schemas/general.ts"
 import type { AccessTokenContext, User } from "@/@types/index.ts"
 import type {
     RuntimeOAuthProvider,

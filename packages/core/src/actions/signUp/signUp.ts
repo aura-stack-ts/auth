@@ -1,6 +1,7 @@
-import { signUp } from "@/api/signUp.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { RedirectOptionsSchema } from "@/schemas.ts"
+import { signUp } from "@/api/signUp.ts"
+import { RedirectOptionsSchema } from "@/shared/schemas/general.ts"
+import { SignUpActionResponseSchema } from "@/shared/schemas/actions.ts"
 import type { SignUpConfig } from "@/@types/config.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 
@@ -11,6 +12,7 @@ const signUpConfig = <Identity extends Identities, SignUpSchema extends SchemaTy
         schemas: {
             body: config?.schema,
             searchParams: RedirectOptionsSchema,
+            response: SignUpActionResponseSchema,
         },
     })
 }

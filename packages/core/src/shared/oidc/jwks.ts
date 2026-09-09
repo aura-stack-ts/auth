@@ -2,7 +2,7 @@ import { createLocalJWKSet, type JWTVerifyGetKey } from "@aura-stack/jose/jose"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { assertContentTypeResponse } from "@/shared/assert.ts"
-import { JWKSResponseSchema } from "@/schemas.ts"
+import { JWKSResponseSchema } from "@/shared/schemas/general.ts"
 
 interface CachedVerifier {
     verifier: JWTVerifyGetKey

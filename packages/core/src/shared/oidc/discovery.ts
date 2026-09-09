@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/shared/errors.ts"
 import { fetchAsync } from "@/shared/fetch-async.ts"
 import { assertContentTypeResponse } from "@/shared/assert.ts"
-import { OpenIDMetadataSchema } from "@/schemas.ts"
+import { OpenIDMetadataSchema } from "@/shared/schemas/general.ts"
 import type { OpenIDMetadata } from "@/@types/oidc.ts"
 
 export const DISCOVERY_SUFFIX = "/.well-known/openid-configuration"

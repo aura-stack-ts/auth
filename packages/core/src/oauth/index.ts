@@ -30,7 +30,7 @@ import { authentik } from "@/oauth/authentik.ts"
 import { isFalsy } from "@/shared/assert.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createOpenIDPlaceholder } from "@/shared/oidc/resolve-provider.ts"
-import { OAuthEnvSchema, OAuthProviderCredentialsSchema, OpenIDProviderSchema } from "@/schemas.ts"
+import { OAuthEnvSchema, OAuthProviderCredentialsSchema, OpenIDProviderSchema } from "@/shared/schemas/general.ts"
 
 export * from "@/oauth/github.ts"
 export * from "@/oauth/bitbucket.ts"

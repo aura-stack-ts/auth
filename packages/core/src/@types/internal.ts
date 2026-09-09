@@ -30,7 +30,7 @@ import type {
     StatelessStrategyConfig,
     User,
 } from "@/@types/session.ts"
-import type { OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/schemas.ts"
+import type { OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/shared/schemas/general.ts"
 import type { JWTPayload } from "@/jose.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { createCookieManager } from "@/session/cookie-manager.ts"

@@ -32,6 +32,7 @@ describe("Rate Limiter", async () => {
                     password: "1234567890",
                 }),
                 headers: {
+                    "Content-Type": "application/json",
                     "x-forwarded-for": "192.168.1.50",
                     "X-CSRF-Token": csrfToken,
                     Cookie: `aura-auth.csrf_token=${csrfToken}`,
@@ -50,6 +51,7 @@ describe("Rate Limiter", async () => {
                     password: "1234567890",
                 }),
                 headers: {
+                    "Content-Type": "application/json",
                     "x-forwarded-for": "192.168.1.50",
                     "X-CSRF-Token": csrfToken,
                     Cookie: `aura-auth.csrf_token=${csrfToken}`,
@@ -70,6 +72,7 @@ describe("Rate Limiter", async () => {
                     },
                 }),
                 headers: {
+                    "Content-Type": "application/json",
                     "x-forwarded-for": "192.168.1.50",
                     "X-CSRF-Token": csrfToken,
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,

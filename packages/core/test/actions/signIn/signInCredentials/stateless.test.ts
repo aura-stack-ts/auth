@@ -43,7 +43,9 @@ describe("signInCredentials action", async () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
-                headers: {},
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({
                     username: "johndoe",
                     password: "1234567890",
@@ -64,7 +66,10 @@ describe("signInCredentials action", async () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
-                headers: { Cookie: `aura-auth.csrf_token=${csrfToken}` },
+                headers: {
+                    "Content-Type": "application/json",
+                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                },
                 body: JSON.stringify({
                     username: "johndoe",
                     password: "1234567890",
@@ -85,7 +90,11 @@ describe("signInCredentials action", async () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
-                headers: { Cookie: `aura-auth.csrf_token=${csrfToken}`, "X-CSRF-Token": "invalid-token" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": "invalid-token",
+                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                },
                 body: JSON.stringify({
                     username: "johndoe",
                     password: "1234567890",
