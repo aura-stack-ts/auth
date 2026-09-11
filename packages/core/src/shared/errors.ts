@@ -139,6 +139,7 @@ export const AuraErrorCode = {
      */
     INVALID_SLIDING_THRESHOLD_CONFIG_VALUE: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE",
     INVALID_CSRF_TOKEN: "INVALID_CSRF_TOKEN",
+    INVALID_CUSTOM_TRUSTED_PROXY_HEADERS_CONFIG: "INVALID_CUSTOM_TRUSTED_PROXY_HEADERS_CONFIG",
 } as const
 
 export type AuraErrorCode = (typeof AuraErrorCode)[keyof typeof AuraErrorCode]
@@ -957,6 +958,15 @@ export const ERROR_CATALOG: Record<AuraErrorCode, CatalogEntry> = {
         message:
             "CSRF security verification failed. The provided anti-CSRF token does not match the token embedded in the secure session cookie context or failed cryptographic validation.",
         userMessage: "Security verification failed. Invalid or missing CSRF token.",
+    },
+    INVALID_CUSTOM_TRUSTED_PROXY_HEADERS_CONFIG: {
+        type: "AUTH_FLOW",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "Initialization aborted: The custom 'trustedProxyHeaders' configuration is insecure or invalid. Allowing arbitrary or untrusted headers to construct the absolute application URL exposes the server to Host Header Injection and request forgery vulnerabilities.",
+        userMessage:
+            "Internal library configuration error. The custom trusted proxy headers configuration allows unsafe URL construction.",
     },
 }
 

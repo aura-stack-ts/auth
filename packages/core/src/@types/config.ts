@@ -15,6 +15,7 @@ import type {
     Awaitable,
     ZodIdentitySchema,
     EditableShape,
+    LiteralUnion,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
@@ -212,7 +213,7 @@ export type TrustedProxyHeadersConfig =
            * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
            * @experimental
            */
-          trustedProxyHeaders: true
+          trustedProxyHeaders: true | TrustedProxyHeaderSource[]
           /**
            * Defines trusted origins for your application to prevent open redirect attacks.
            * URLs from the Referer header, Origin header, request URL, and redirectTo option
@@ -489,3 +490,19 @@ export type RateLimiterConfig = Partial<
         >
     >["rules"]
 >
+
+/**
+ * Defines the source of trusted proxy headers to construct the incoming request's origin.
+ * It can be a URL string or an object with protocol and host properties.
+ *
+ * @example
+ * { url: "x-custom-header" }
+ * // or
+ * { protocol: "x-forwarded-proto", host: "x-forwarded-host" }
+ */
+export type TrustedProxyHeaderSource =
+    | { url: LiteralUnion<"forwarded"> }
+    | {
+          protocol: LiteralUnion<"forwarded.proto" | "x-forwarded-proto">
+          host: LiteralUnion<"host" | "forwarded.host" | "x-forwarded-host">
+      }
