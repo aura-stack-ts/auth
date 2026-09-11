@@ -1,7 +1,6 @@
-import { signIn } from "@/api/signIn.ts"
-import { RedirectOptionsSchema } from "@/shared/schemas/general.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { OAuthProviderListSchema, SignInActionResponseSchema } from "@/shared/schemas/actions.ts"
+import { signIn } from "@/api/signIn.ts"
+import { OAuthProviderListSchema, SignInActionResponseSchemas, RedirectOptionsSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const signInConfig = (oauth: OAuthProviderRecord) => {
@@ -9,7 +8,7 @@ const signInConfig = (oauth: OAuthProviderRecord) => {
         schemas: {
             params: OAuthProviderListSchema(oauth),
             searchParams: RedirectOptionsSchema,
-            response: SignInActionResponseSchema,
+            response: SignInActionResponseSchemas,
         },
     })
 }

@@ -47,7 +47,7 @@ export const createAuthClient = <
             if (!response.ok) {
                 throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
             }
-            const data: { csrfToken?: string } = await response.json()
+            const data = await response.json()
             const token = data.csrfToken
             if (!token) {
                 throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
@@ -101,6 +101,7 @@ export const createAuthClient = <
     ): Promise<SignInReturn<Options>> => {
         try {
             const { redirectTo } = options ?? {}
+            // @ts-ignore
             const response = await client.get("/signIn/:oauth", {
                 params: {
                     oauth,
@@ -232,7 +233,6 @@ export const createAuthClient = <
             }
             const user = session.user ?? {}
             const response = await client.patch("/session", {
-                // @ts-ignore - Fix type here - go to @aura-stack/router.
                 body: {
                     // @ts-ignore - Fix type here - go to @aura-stack/router.
                     user,

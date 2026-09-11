@@ -320,7 +320,7 @@
       "dependencies": {
         "@aura-stack/jose": "workspace:*",
         "@aura-stack/rate-limiter": "workspace:*",
-        "@aura-stack/router": "^0.11.0",
+        "@aura-stack/router": "^0.11.4",
         "arktype": "^2.2.0",
         "typebox": "^1.1.38",
         "valibot": "catalog:valibot",
@@ -679,7 +679,7 @@
 
     "@aura-stack/react-router": ["@aura-stack/react-router@workspace:packages/react-router"],
 
-    "@aura-stack/router": ["@aura-stack/router@0.11.0", "", { "dependencies": { "cookie": "^1.1.1" }, "peerDependencies": { "arktype": "^2.0.0", "typebox": "^1.1.38", "valibot": "^1.4.0", "zod": "^4.1.11" }, "optionalPeers": ["arktype", "typebox", "valibot", "zod"] }, "sha512-7BYtbkYX34E80/ss69g1NPYihm/ONr4prA/A+pN+32tKEbELBHrIT7fvLEogxehLaFjGK04pd1WFQ76U2WqW3w=="],
+    "@aura-stack/router": ["@aura-stack/router@0.11.4", "", { "dependencies": { "cookie": "^1.1.1" }, "peerDependencies": { "arktype": "^2.0.0", "typebox": "^1.1.38", "valibot": "^1.4.0", "zod": "^4.1.11" }, "optionalPeers": ["arktype", "typebox", "valibot", "zod"] }, "sha512-yPzackDMDXx/aew5DIvMWcUx6r/rCqeETC7yBtEM487vEt5CA2rt1GnNfVgbt8RDmAzEE6fXB4tDsytXGoDtlQ=="],
 
     "@aura-stack/shared": ["@aura-stack/shared@workspace:packages/shared"],
 

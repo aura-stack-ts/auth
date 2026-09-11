@@ -10,8 +10,8 @@ import {
     number,
     array,
     literal,
+    stringbool,
 } from "zod/v4"
-import { RedirectOptionsSchema } from "@/shared/schemas/general.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 export const OAuthProviderListSchema = (oauth: OAuthProviderRecord) => {
@@ -22,6 +22,11 @@ export const OAuthProviderListSchema = (oauth: OAuthProviderRecord) => {
         ),
     })
 }
+
+export const RedirectOptionsSchema = object({
+    redirect: stringbool().optional().default(true),
+    redirectTo: string().optional(),
+})
 
 export const ErrorActionResponseSchema = object({
     code: string(),
@@ -51,8 +56,17 @@ export const SignInActionResponseSchema = object({
     success: boolean(),
     redirect: boolean(),
     signInURL: union([url(), nullable()]),
+})
+
+export const SignInActionResponse500Schema = SignInActionResponseSchema.extend({
     error: optional(ErrorActionResponseSchema),
 })
+
+export const SignInActionResponseSchemas = {
+    200: SignInActionResponseSchema,
+    300: SignInActionResponseSchema,
+    500: SignInActionResponse500Schema,
+}
 
 export const CSRFTokenActionResponseSchema = object({
     csrfToken: string(),

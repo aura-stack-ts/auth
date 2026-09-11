@@ -15,6 +15,7 @@ import type {
     InferSignUp,
     ZodIdentitySchema,
     ZodShapeToObject,
+    RequestHeaders,
 } from "@/@types/index"
 
 describe("createAuth", () => {
@@ -44,7 +45,7 @@ describe("createAuth", () => {
         test("api.updateSession", () => {
             expectTypeOf<Parameters<typeof api.updateSession>[0]>().toEqualTypeOf<{
                 session: DeepPartial<Session<Identity>>
-                headers?: HeadersInit | undefined
+                headers?: HeadersInit | RequestHeaders | undefined
                 request: Request
                 redirect?: boolean | undefined
                 redirectTo?: string | undefined
@@ -66,7 +67,7 @@ describe("createAuth", () => {
             expectTypeOf<Parameters<typeof api.signUp>[0]>().toEqualTypeOf<{
                 payload: {}
                 request: Request
-                headers?: HeadersInit | undefined
+                headers?: HeadersInit | RequestHeaders | undefined
                 redirect?: boolean | undefined
                 redirectTo?: string | undefined
                 skipCSRFCheck?: boolean | undefined
@@ -112,7 +113,7 @@ describe("createAuth", () => {
         test("api.updateSession", () => {
             expectTypeOf<Parameters<typeof api.updateSession>[0]>().toEqualTypeOf<{
                 session: DeepPartial<Session<Identity>>
-                headers?: HeadersInit | undefined
+                headers?: HeadersInit | RequestHeaders | undefined
                 request: Request
                 redirect?: boolean | undefined
                 redirectTo?: string | undefined
@@ -138,7 +139,7 @@ describe("createAuth", () => {
                     password: string
                 }
                 request: Request
-                headers?: HeadersInit | undefined
+                headers?: HeadersInit | RequestHeaders | undefined
                 redirect?: boolean | undefined
                 redirectTo?: string | undefined
                 skipCSRFCheck?: boolean | undefined
@@ -190,7 +191,7 @@ describe("createAuth", () => {
         test("api.updateSession", () => {
             expectTypeOf<Parameters<typeof api.updateSession>[0]>().toEqualTypeOf<{
                 session: DeepPartial<Session<Identity>>
-                headers?: HeadersInit | undefined
+                headers?: HeadersInit | RequestHeaders | undefined
                 request: Request
                 redirect?: boolean | undefined
                 redirectTo?: string | undefined
@@ -216,7 +217,7 @@ describe("createAuth", () => {
                     password: string
                 }
                 request: Request
-                headers?: HeadersInit | undefined
+                headers?: HeadersInit | RequestHeaders | undefined
                 redirect?: boolean | undefined
                 redirectTo?: string | undefined
                 skipCSRFCheck?: boolean | undefined

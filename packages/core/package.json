@@ -65,7 +65,7 @@
   "dependencies": {
     "@aura-stack/jose": "workspace:*",
     "@aura-stack/rate-limiter": "workspace:*",
-    "@aura-stack/router": "^0.11.0",
+    "@aura-stack/router": "^0.11.4",
     "arktype": "^2.2.0",
     "typebox": "^1.1.38",
     "valibot": "catalog:valibot",
