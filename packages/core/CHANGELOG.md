@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded `@aura-stack/router` to `v0.11.4`, adding response schema validation and adopting the built-in `handle()` function for processing incoming requests. This release also updates unsupported HTTP method handling to return a standardized `404 Not Found` response instead of `405 Method Not Allowed`. [#274](https://github.com/aura-stack-ts/auth/pull/274)
+
 ---
 
 ## [0.9.2] - 2026-08-30

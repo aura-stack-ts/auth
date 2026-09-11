@@ -11,6 +11,7 @@ describe("signInCredentials (Stateful)", () => {
             new Request("http://localhost:3000/api/auth/signIn/credentials", {
                 method: "POST",
                 headers: {
+                    "Content-Type": "application/json",
                     "X-CSRF-Token": csrfToken,
                     Cookie: `aura-auth.csrf_token=${csrfToken}`,
                 },
