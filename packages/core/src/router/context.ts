@@ -2,7 +2,7 @@ import { createJoseInstance } from "@/jose.ts"
 import { createCookieStore } from "@/cookie.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createProxyLogger } from "@/shared/logger.ts"
-import { isStatelessStrategy } from "@/shared/assert.ts"
+import { isBoolean, isStatelessStrategy, isTrustedProxyHeaderSource } from "@/shared/assert.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
@@ -16,9 +16,19 @@ import type { InternalContext } from "@/@types/internal.ts"
 export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>
 ) => {
+    const { trustedProxyHeaders } = config ?? {}
     const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
+    /**
+     * @todo clean up the logic here, it's a bit messy
+     */
     const useProxyHeaders =
-        trustedProxyHeadersEnv === undefined ? (config?.trustedProxyHeaders ?? false) : getEnvBoolean("TRUSTED_PROXY_HEADERS")
+        trustedProxyHeadersEnv === undefined
+            ? isBoolean(trustedProxyHeaders)
+                ? trustedProxyHeaders
+                : isTrustedProxyHeaderSource(trustedProxyHeaders) && trustedProxyHeaders.length > 0
+                  ? trustedProxyHeaders
+                  : false
+            : getEnvBoolean("TRUSTED_PROXY_HEADERS")
     const envTrustedOrigins = getEnvArray("TRUSTED_ORIGINS")
     const resolvedTrustedOrigins = envTrustedOrigins.length > 0 ? envTrustedOrigins : config?.trustedOrigins
     const logger = createProxyLogger(config)
@@ -63,7 +73,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         },
         signUp: config?.signUp,
         jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
-        rateLimiters: createRateLimiterInstance(config?.rateLimiter, useProxyHeaders),
+        rateLimiters: createRateLimiterInstance(config?.rateLimiter, Boolean(useProxyHeaders)),
         sessionConfig: config?.session,
     } as InternalContext<Identity, SignUpSchema>
     ctx.sessionStrategy = createSessionStrategy<Identity>({

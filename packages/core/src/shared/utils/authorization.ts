@@ -2,7 +2,14 @@ import { getEnv } from "@/shared/env.ts"
 import { OAuthAuthorization } from "@/shared/schemas/general.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createPKCE, createSecretValue } from "@/shared/crypto.ts"
-import { equals, extractPath, patternToRegex } from "@/shared/utils.ts"
+import {
+    equals,
+    extractPath,
+    getBaseURLFromProxyHeaders,
+    getHostFromForwarded,
+    getProtoFromForwarded,
+    patternToRegex,
+} from "@/shared/utils.ts"
 import { isRelativeURL, isSameOrigin, isValidURL, isTrustedOrigin } from "@/shared/assert.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type { AuthConfig, OAuthProvider } from "@/@types/index.ts"
@@ -32,13 +39,12 @@ export const getBaseURL = async ({
     const origin = getEnv("BASE_URL") || ctx?.baseURL
     if (origin && origin !== "/") return origin
     if (ctx?.trustedProxyHeaders) {
-        const headers = (headersInit && new Headers(headersInit)) || request?.headers
-        const protocol = headers?.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1] ?? headers?.get("X-Forwarded-Proto") ?? "http"
-        const host =
-            headers?.get("Host") ??
-            headers?.get("Forwarded")?.match(/host=([^;]+)/i)?.[1] ??
-            headers?.get("X-Forwarded-Host") ??
-            null
+        const headers = new Headers(headersInit || request?.headers)
+        if (Array.isArray(ctx.trustedProxyHeaders)) {
+            return getBaseURLFromProxyHeaders(headers, ctx.trustedProxyHeaders)
+        }
+        const protocol = getProtoFromForwarded(headers) ?? headers?.get("X-Forwarded-Proto") ?? "http"
+        const host = headers?.get("Host") ?? getHostFromForwarded(headers) ?? headers?.get("X-Forwarded-Host") ?? null
         if (host) return `${protocol}://${host}`
         throw new AuraAuthError({ code: "INVALID_AUTH_CONFIGURATION" })
     }

@@ -21,6 +21,7 @@ import type {
     RateLimiterConfig,
     SignUpConfig,
     TrustedOrigin,
+    TrustedProxyHeaderSource,
 } from "@/@types/config.ts"
 import type {
     JWTKey,
@@ -80,7 +81,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     secret?: JWTKey
     baseURL?: string
     basePath: string
-    trustedProxyHeaders: boolean
+    trustedProxyHeaders: boolean | TrustedProxyHeaderSource[]
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
     sessionStrategy: SessionStrategy<DefaultUser>
