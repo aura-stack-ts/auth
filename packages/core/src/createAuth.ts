@@ -1,90 +1,14 @@
-import { createRouter, type RouterConfig } from "@aura-stack/router"
-import { createAuthAPI } from "@/api/createApi.ts"
-import { createContext } from "@/router/context.ts"
-import { onErrorHook, onRequestHook } from "@/router/hooks.ts"
-import {
-    signInAction,
-    signInCredentialsAction,
-    callbackAction,
-    sessionAction,
-    signOutAction,
-    csrfTokenAction,
-    updateSessionAction,
-    signUpAction,
-    tokensAction,
-    refreshAction,
-    revokeAction,
-    disconnectAction,
-    connectedAction,
-} from "@/actions/index.ts"
+import { createAuthInstance } from "@/router/router.ts"
 import type { ZodObject } from "zod"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
-import type {
-    AuthConfig,
-    AuthInstance,
-    FromShapeToObject,
-    SignUpConfig,
-    EditableShape,
-    ZodIdentitySchema,
-} from "@/@types/index.ts"
-import type { SchemaRegistryContext } from "@/@types/internal.ts"
-
-const createInternalConfig = <
-    const Identity extends Identities = EditableShape<ZodIdentitySchema>,
-    const SignUpSchema extends SchemaTypes = ZodObject<any>,
->(
-    config?: AuthConfig<Identity, SignUpSchema>
-): RouterConfig => {
-    const context = createContext<Identity, SignUpSchema>(config)
-    return {
-        basePath: config?.basePath ?? "/auth",
-        context: context as unknown as RouterConfig["context"],
-        hooks: {
-            onRequest: onRequestHook,
-            onError: onErrorHook,
-        },
-    }
-}
-
-export const createAuthInstance = <
-    const Identity extends Identities = EditableShape<ZodIdentitySchema>,
-    const SignUpSchema extends SchemaTypes = ZodObject<any>,
->(
-    authConfig: AuthConfig<Identity, SignUpSchema>
-) => {
-    const config = createInternalConfig<Identity, SignUpSchema>(authConfig)
-    const router = createRouter(
-        [
-            signInAction(config.context.oauth),
-            signInCredentialsAction,
-            callbackAction(config.context.oauth),
-            sessionAction,
-            signOutAction,
-            csrfTokenAction,
-            updateSessionAction(config.context.identity as SchemaRegistryContext),
-            signUpAction<Identity, SignUpSchema>(config.context.signUp as SignUpConfig<Identity, SignUpSchema>),
-            tokensAction(config.context.oauth),
-            refreshAction(config.context.oauth),
-            revokeAction(config.context.oauth),
-            disconnectAction(config.context.oauth),
-            connectedAction(config.context.oauth),
-        ],
-        config
-    )
-
-    return {
-        handlers: router,
-        jose: config.context.jose,
-        api: createAuthAPI<FromShapeToObject<Identity>, SignUpSchema>(config.context),
-    }
-}
+import type { AuthConfig, AuthInstance, FromShapeToObject, EditableShape, ZodIdentitySchema } from "@/@types/index.ts"
 
 /**
  * Creates the authentication instance with the configuration provided for OAuth provider.
  * > NOTE: The handlers returned by this function should be used in the server to handle the authentication routes
  * and within the `/auth` base path
  *
- * @param authConfig - Authentication configuration including OAuth provider
+ * @param config - Authentication configuration including OAuth provider
  * @returns Authentication instance with handlers to be used in the server
  * @example
  * const auth = createAuth({
@@ -101,25 +25,10 @@ export const createAuth = <
 >(
     config: AuthConfig<Identity, SignUpSchema>
 ) => {
-    const authInstance = createAuthInstance<Identity, SignUpSchema>(config) as unknown as AuthInstance<
+    const auth = createAuthInstance<Identity, SignUpSchema>(config) as unknown as AuthInstance<
         FromShapeToObject<Identity>,
         SignUpSchema
     >
-    authInstance.handlers.ALL = async (request: Request) => {
-        const method = request.method.toUpperCase()
-        const methodHandlers = {
-            GET: authInstance.handlers.GET,
-            POST: authInstance.handlers.POST,
-            PATCH: authInstance.handlers.PATCH,
-            DELETE: authInstance.handlers.DELETE,
-        } as const
-        if (method in methodHandlers) {
-            return await methodHandlers[method as keyof typeof methodHandlers](request)
-        }
-        return new Response("Method Not Allowed", {
-            status: 405,
-            headers: { Allow: Object.keys(methodHandlers).join(", ") },
-        })
-    }
-    return authInstance
+    auth.handlers.ALL = auth.handlers.handle
+    return auth
 }

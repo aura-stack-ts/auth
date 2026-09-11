@@ -1,17 +1,13 @@
-import { z } from "zod/v4"
-import { disconnectProvider } from "@/api/disconnectProvider.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { disconnectProvider } from "@/api/disconnectProvider.ts"
+import { DisconnectProviderActionResponseSchema, OAuthProviderListSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const disconnectConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig({
         schemas: {
-            params: z.object({
-                oauth: z.enum(
-                    Object.keys(oauth) as (keyof OAuthProviderRecord)[],
-                    "The OAuth provider is not supported or invalid."
-                ),
-            }),
+            params: OAuthProviderListSchema(oauth),
+            response: DisconnectProviderActionResponseSchema,
         },
     })
 }

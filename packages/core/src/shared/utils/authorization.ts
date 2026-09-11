@@ -1,5 +1,5 @@
 import { getEnv } from "@/shared/env.ts"
-import { OAuthAuthorization } from "@/schemas.ts"
+import { OAuthAuthorization } from "@/shared/schemas/general.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createPKCE, createSecretValue } from "@/shared/crypto.ts"
 import { equals, extractPath, patternToRegex } from "@/shared/utils.ts"

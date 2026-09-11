@@ -1,19 +1,14 @@
-import { z } from "zod/v4"
-import { signIn } from "@/api/signIn.ts"
-import { RedirectOptionsSchema } from "@/schemas.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { signIn } from "@/api/signIn.ts"
+import { OAuthProviderListSchema, SignInActionResponseSchemas, RedirectOptionsSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const signInConfig = (oauth: OAuthProviderRecord) => {
-    return createEndpointConfig("/signIn/:oauth", {
+    return createEndpointConfig({
         schemas: {
-            params: z.object({
-                oauth: z.enum(
-                    Object.keys(oauth) as (keyof OAuthProviderRecord)[],
-                    "The OAuth provider is not supported or invalid."
-                ),
-            }),
+            params: OAuthProviderListSchema(oauth),
             searchParams: RedirectOptionsSchema,
+            response: SignInActionResponseSchemas,
         },
     })
 }

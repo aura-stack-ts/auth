@@ -195,6 +195,9 @@ export const OAuthEnvSchema = object({
     clientSecret: z.string().min(1, "OAuth Client Secret is required in the environment variables."),
 })
 
+/**
+ * @deprecated
+ */
 export const RedirectOptionsSchema = object({
     redirect: z.stringbool().optional().default(true),
     redirectTo: string().optional(),
@@ -349,9 +352,4 @@ export const OAuthTokenPayloadSchema = object({
     scopes: array(string()).or(string()),
     issuer: string().optional(),
     issuedAt: number().optional(),
-})
-
-export const SearchParamsCallbackSchema = object({
-    code: string("Missing code parameter in the OAuth authorization response."),
-    state: string("Missing state parameter in the OAuth authorization response."),
 })

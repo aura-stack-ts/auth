@@ -1,17 +1,13 @@
-import { z } from "zod/v4"
-import { revokeToken } from "@/api/revokeToken.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { revokeToken } from "@/api/revokeToken.ts"
+import { OAuthProviderListSchema, RevokeTokenActionResponseSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const revokeConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig({
         schemas: {
-            params: z.object({
-                oauth: z.enum(
-                    Object.keys(oauth) as (keyof OAuthProviderRecord)[],
-                    "The OAuth provider is not supported or invalid."
-                ),
-            }),
+            params: OAuthProviderListSchema(oauth),
+            response: RevokeTokenActionResponseSchema,
         },
     })
 }

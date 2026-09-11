@@ -3,7 +3,7 @@
  */
 import type { Prettify } from "@/@types/utility.ts"
 import type { ClientOptions } from "@aura-stack/router"
-import type { createAuthInstance } from "@/createAuth.ts"
+import type { createAuthInstance } from "@/router/router.ts"
 
 export type * from "@/@types/config.ts"
 export type * from "@/@types/oauth.ts"
@@ -15,7 +15,7 @@ export type * from "@/identity/index.ts"
 export type * from "@/@types/entities.ts"
 export type * from "@/@types/adapter.ts"
 
-export type { Awaitable } from "@aura-stack/router/types"
+export type { Awaitable, RequestHeaders } from "@aura-stack/router/types"
 export type { TypedJWTPayload } from "@aura-stack/jose"
 
 export type { IdentityShape as ZodIdentitySchema, IsZod } from "@/identity/zod.ts"

@@ -1,17 +1,13 @@
-import z from "zod/v4"
-import { getProviderTokens } from "@/api/getProviderTokens.ts"
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { getProviderTokens } from "@/api/getProviderTokens.ts"
+import { GetProviderTokensActionResponseSchema, OAuthProviderListSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const tokensConfig = (oauth: OAuthProviderRecord) => {
     return createEndpointConfig({
         schemas: {
-            params: z.object({
-                oauth: z.enum(
-                    Object.keys(oauth) as (keyof OAuthProviderRecord)[],
-                    "The OAuth provider is not supported or invalid."
-                ),
-            }),
+            params: OAuthProviderListSchema(oauth),
+            response: GetProviderTokensActionResponseSchema,
         },
     })
 }

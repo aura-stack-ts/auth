@@ -103,6 +103,7 @@ describe("POST /api/auth/signIn/credentials", () => {
             new Request("http://localhost/api/auth/signIn/credentials", {
                 method: "POST",
                 headers: {
+                    "Content-Type": "application/json",
                     "X-CSRF-Token": csrfToken,
                     Cookie: `aura-auth.csrf_token=${csrfToken}`,
                 },

@@ -11,6 +11,9 @@ describe("updateSession action", () => {
         const response = await PATCH(
             new Request("http://localhost:3000/auth/session", {
                 method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({}),
             })
         )
@@ -30,6 +33,7 @@ describe("updateSession action", () => {
             new Request("http://localhost:3000/auth/session", {
                 method: "PATCH",
                 headers: {
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}`,
                 },
                 body: JSON.stringify({}),
@@ -53,6 +57,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": "invalid-csrf-token",
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({}),
@@ -87,6 +92,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
@@ -128,6 +134,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
@@ -168,6 +175,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
@@ -209,6 +217,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
@@ -256,6 +265,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
@@ -301,6 +311,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
@@ -340,6 +351,7 @@ describe("updateSession action", () => {
             new Request("http://localhost:3000/auth/session", {
                 method: "PATCH",
                 headers: {
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
@@ -376,6 +388,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
@@ -412,6 +425,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
@@ -462,6 +476,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
                     Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({

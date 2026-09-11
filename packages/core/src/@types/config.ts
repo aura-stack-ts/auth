@@ -428,7 +428,7 @@ export interface CredentialsConfig<Identity extends Identities> {
 }
 
 export type Handlers = {
-    [method in "GET" | "POST" | "PATCH" | "DELETE" | "ALL"]: (request: Request) => Response | Promise<Response>
+    [method in "GET" | "POST" | "PATCH" | "DELETE" | "ALL" | "handle"]: (request: Request) => Response | Promise<Response>
 }
 
 /**
