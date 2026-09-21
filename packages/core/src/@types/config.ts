@@ -213,7 +213,7 @@ export type TrustedProxyHeadersConfig =
            * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
            * @experimental
            */
-          trustedProxyHeaders: true | TrustedProxyHeaderSource[]
+          trustedProxyHeaders: true | TrustedProxyHeadersSource[]
           /**
            * Defines trusted origins for your application to prevent open redirect attacks.
            * URLs from the Referer header, Origin header, request URL, and redirectTo option
@@ -500,7 +500,7 @@ export type RateLimiterConfig = Partial<
  * // or
  * { protocol: "x-forwarded-proto", host: "x-forwarded-host" }
  */
-export type TrustedProxyHeaderSource =
+export type TrustedProxyHeadersSource =
     | { url: LiteralUnion<"forwarded"> }
     | {
           protocol: LiteralUnion<"forwarded.proto" | "x-forwarded-proto">

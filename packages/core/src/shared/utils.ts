@@ -7,12 +7,12 @@ import {
     isBoolean,
     isRelativeURL,
     isString,
-    isTrustedProxyHeaderSource,
-    isTrustedProxyHeaderSourceURL,
+    isTrustedProxyHeadersSource,
+    isTrustedProxyHeadersSourceURL,
     isValidURL,
 } from "@/shared/assert.ts"
 import type { DeviceType } from "@/@types/entities.ts"
-import type { AuthConfig, OAuthTokenPayload, TrustedProxyHeaderSource } from "@/@types/index.ts"
+import type { AuthConfig, OAuthTokenPayload, TrustedProxyHeadersSource } from "@/@types/index.ts"
 import type {
     InternalCookieStoreConfig,
     InternalLogger,
@@ -45,7 +45,7 @@ export const isSecureConnection = (
               headers.get("X-Forwarded-Proto") === "https" ||
               (headers.get("Forwarded")?.includes("proto=https") ?? false)
             : (url?.startsWith("https://") ?? false)
-        : isTrustedProxyHeaderSource(trustedProxyHeaders)
+        : isTrustedProxyHeadersSource(trustedProxyHeaders)
           ? getBaseURLFromProxyHeaders(headers, trustedProxyHeaders).startsWith("https://")
           : false
 }
@@ -301,20 +301,22 @@ export const getHostFromForwarded = (headers: Headers) => {
  * @param proxyHeaders - The configured trusted proxy headers.
  * @returns The base URL derived from the proxy headers.
  */
-export const getBaseURLFromProxyHeaders = (headers: Headers, proxyHeaders: TrustedProxyHeaderSource[]): string => {
+export const getBaseURLFromProxyHeaders = (headers: Headers, proxyHeaders: TrustedProxyHeadersSource[]): string => {
     let baseURL = ""
     proxyHeaders.find((config) => {
         try {
-            if (isTrustedProxyHeaderSourceURL(config)) {
+            if (isTrustedProxyHeadersSourceURL(config)) {
                 const url =
                     config.url === "forwarded"
                         ? `${getProtoFromForwarded(headers)}://${getHostFromForwarded(headers)}`
-                        : config.url
+                        : (headers.get(config.url) ?? null)
+                if (!url || !isValidURL(url)) return false
                 return (baseURL = new URL(url).origin)
             } else {
                 const protocol =
                     config.protocol === "forwarded.proto" ? getProtoFromForwarded(headers) : headers.get(config.protocol)!
                 const host = config.host === "forwarded.host" ? getHostFromForwarded(headers) : headers.get(config.host)!
+                if (!protocol || !host || !isValidURL(`${protocol}://${host}`)) return false
                 return (baseURL = new URL(`${protocol}://${host}`).origin)
             }
         } catch {

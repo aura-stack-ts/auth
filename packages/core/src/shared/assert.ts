@@ -16,7 +16,7 @@ import type {
     SessionConfig,
     StatefulStrategyConfig,
     StatelessStrategyConfig,
-    TrustedProxyHeaderSource,
+    TrustedProxyHeadersSource,
 } from "@/@types/index.ts"
 
 export const isFalsy = (value: unknown): boolean => {
@@ -277,15 +277,15 @@ export const isHeadersInit = (value: unknown): value is HeadersInit => {
     return typeof value === "object" && value !== null && (value instanceof Headers || Array.isArray(value) || isObject(value))
 }
 
-export const isTrustedProxyHeaderSource = (value: unknown): value is TrustedProxyHeaderSource => {
-    return isTrustedProxyHeaderSourceURL(value) || isTrustedProxyHeaderSourceProtocolHost(value)
+export const isTrustedProxyHeadersSource = (value: unknown): value is TrustedProxyHeadersSource => {
+    return isTrustedProxyHeadersSourceURL(value) || isTrustedProxyHeadersSourceProtocolHost(value)
 }
 
-export const isTrustedProxyHeaderSourceURL = (value: unknown): value is { url: string } => {
+export const isTrustedProxyHeadersSourceURL = (value: unknown): value is { url: string } => {
     return typeof value === "object" && value !== null && "url" in value
 }
 
-export const isTrustedProxyHeaderSourceProtocolHost = (value: unknown): value is { protocol: string; host: string } => {
+export const isTrustedProxyHeadersSourceProtocolHost = (value: unknown): value is { protocol: string; host: string } => {
     return (
         typeof value === "object" &&
         value !== null &&

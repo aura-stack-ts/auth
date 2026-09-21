@@ -39,7 +39,7 @@ export const getBaseURL = async ({
     const origin = getEnv("BASE_URL") || ctx?.baseURL
     if (origin && origin !== "/") return origin
     if (ctx?.trustedProxyHeaders) {
-        const headers = new Headers(headersInit || request?.headers)
+        const headers = new Headers(request?.headers ?? headersInit ?? {})
         if (Array.isArray(ctx.trustedProxyHeaders)) {
             return getBaseURLFromProxyHeaders(headers, ctx.trustedProxyHeaders)
         }
