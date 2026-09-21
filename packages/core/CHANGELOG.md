@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added experimental support for configuring trusted proxy header sources used to construct request URLs. Header sources can provide the complete URL through `{ url: "header" }` or specify separate protocol and host headers through `{ protocol: "header-proto", host: "header-host" }`. The configuration also includes built-in sources such as `forwarded`, `forwarded.proto`, and `forwarded.host`. [#275](https://github.com/aura-stack-ts/auth/pull/275)
+
 ### Changed
 
 - Upgraded `@aura-stack/router` to `v0.11.4`, adding response schema validation and adopting the built-in `handle()` function for processing incoming requests. This release also updates unsupported HTTP method handling to return a standardized `404 Not Found` response instead of `405 Method Not Allowed`. [#274](https://github.com/aura-stack-ts/auth/pull/274)

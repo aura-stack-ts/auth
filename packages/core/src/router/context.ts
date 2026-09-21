@@ -2,12 +2,12 @@ import { createJoseInstance } from "@/jose.ts"
 import { createCookieStore } from "@/cookie.ts"
 import { AuraAuthError } from "@/shared/errors.ts"
 import { createProxyLogger } from "@/shared/logger.ts"
-import { isStatelessStrategy } from "@/shared/assert.ts"
+import { isBoolean, isStatelessStrategy } from "@/shared/assert.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createBuiltInOAuthProviders } from "@/oauth/index.ts"
-import { getEnv, getEnvArray, getEnvBoolean } from "@/shared/env.ts"
+import { getEnvArray, getEnvBoolean } from "@/shared/env.ts"
 import { createRateLimiterInstance } from "@/router/rate-limiter.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { AuthConfig, FromShapeToObject } from "@/@types/index.ts"
@@ -16,9 +16,16 @@ import type { InternalContext } from "@/@types/internal.ts"
 export const createContext = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config?: AuthConfig<Identity, SignUpSchema>
 ) => {
-    const trustedProxyHeadersEnv = getEnv("TRUSTED_PROXY_HEADERS")
-    const useProxyHeaders =
-        trustedProxyHeadersEnv === undefined ? (config?.trustedProxyHeaders ?? false) : getEnvBoolean("TRUSTED_PROXY_HEADERS")
+    const { trustedProxyHeaders } = config ?? {}
+    const trustedProxyHeadersEnv = getEnvBoolean("TRUSTED_PROXY_HEADERS")
+
+    const proxyHeaders = trustedProxyHeadersEnv
+        ? trustedProxyHeadersEnv
+        : Array.isArray(trustedProxyHeaders)
+          ? trustedProxyHeaders
+          : isBoolean(trustedProxyHeaders)
+            ? trustedProxyHeaders
+            : false
     const envTrustedOrigins = getEnvArray("TRUSTED_ORIGINS")
     const resolvedTrustedOrigins = envTrustedOrigins.length > 0 ? envTrustedOrigins : config?.trustedOrigins
     const logger = createProxyLogger(config)
@@ -38,7 +45,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
     })
 
     if (
-        useProxyHeaders &&
+        proxyHeaders &&
         (!resolvedTrustedOrigins || (Array.isArray(resolvedTrustedOrigins) && resolvedTrustedOrigins.length === 0))
     ) {
         throw new AuraAuthError({ code: "AUTH_INVALID_PROXY_HEADERS_CONFIG" })
@@ -51,7 +58,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         jose: jose,
         secret: config?.secret,
         basePath: config?.basePath ?? "/auth",
-        trustedProxyHeaders: useProxyHeaders,
+        trustedProxyHeaders: proxyHeaders,
         trustedOrigins: resolvedTrustedOrigins,
         logger,
         cookieConfig: { secure: secureCookieStore, standard: standardCookieStore },
@@ -63,7 +70,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         },
         signUp: config?.signUp,
         jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
-        rateLimiters: createRateLimiterInstance(config?.rateLimiter, useProxyHeaders),
+        rateLimiters: createRateLimiterInstance(config?.rateLimiter, Boolean(proxyHeaders)),
         sessionConfig: config?.session,
     } as InternalContext<Identity, SignUpSchema>
     ctx.sessionStrategy = createSessionStrategy<Identity>({

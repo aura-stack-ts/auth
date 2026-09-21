@@ -3,9 +3,16 @@ import { getCookie } from "@/cookie.ts"
 import { createHash } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
-import { isRelativeURL, isString, isValidURL } from "@/shared/assert.ts"
+import {
+    isBoolean,
+    isRelativeURL,
+    isString,
+    isTrustedProxyHeadersSource,
+    isTrustedProxyHeadersSourceURL,
+    isValidURL,
+} from "@/shared/assert.ts"
 import type { DeviceType } from "@/@types/entities.ts"
-import type { OAuthTokenPayload } from "@/@types/index.ts"
+import type { AuthConfig, OAuthTokenPayload, TrustedProxyHeadersSource } from "@/@types/index.ts"
 import type {
     InternalCookieStoreConfig,
     InternalLogger,
@@ -26,14 +33,21 @@ export const getBaseURL = (request: Request) => {
     return `${url.origin}${url.pathname}`
 }
 
-export const isSecureConnection = (request: Request | Headers, trustedProxyHeaders: boolean): boolean => {
+export const isSecureConnection = (
+    request: Request | Headers,
+    trustedProxyHeaders: AuthConfig["trustedProxyHeaders"]
+): boolean => {
     const headers = request instanceof Headers ? request : request.headers
     const url = request instanceof Headers ? null : request.url
-    return trustedProxyHeaders
-        ? url?.startsWith("https://") ||
+    return isBoolean(trustedProxyHeaders)
+        ? trustedProxyHeaders
+            ? url?.startsWith("https://") ||
               headers.get("X-Forwarded-Proto") === "https" ||
               (headers.get("Forwarded")?.includes("proto=https") ?? false)
-        : (url?.startsWith("https://") ?? false)
+            : (url?.startsWith("https://") ?? false)
+        : Array.isArray(trustedProxyHeaders)
+          ? getBaseURLFromProxyHeaders(headers, trustedProxyHeaders).startsWith("https://")
+          : false
 }
 
 export const extractPath = (url: string): string => {
@@ -270,4 +284,45 @@ export const getDeviceInfo = (request: Request) => {
         name: `${browser} on ${platform}`,
         deviceType: getDeviceType(userAgent, secChUaMobile),
     }
+}
+
+export const getProtoFromForwarded = (headers: Headers) => {
+    return headers?.get("Forwarded")?.match(/proto=([^;]+)/i)?.[1]
+}
+
+export const getHostFromForwarded = (headers: Headers) => {
+    return headers?.get("Forwarded")?.match(/host=([^;]+)/i)?.[1]
+}
+
+/**
+ * Extracts the base URL from a set of trusted proxy headers.
+ *
+ * @param headers - The request headers.
+ * @param proxyHeaders - The configured trusted proxy headers.
+ * @returns The base URL derived from the proxy headers.
+ */
+export const getBaseURLFromProxyHeaders = (headers: Headers, proxyHeaders: TrustedProxyHeadersSource[]): string => {
+    let baseURL = ""
+    proxyHeaders.find((config) => {
+        try {
+            if (isTrustedProxyHeadersSourceURL(config)) {
+                const url =
+                    config.url === "forwarded"
+                        ? `${getProtoFromForwarded(headers)}://${getHostFromForwarded(headers)}`
+                        : (headers.get(config.url) ?? null)
+                if (!url || !isValidURL(url)) return false
+                return (baseURL = new URL(url).origin)
+            } else {
+                const protocol =
+                    config.protocol === "forwarded.proto" ? getProtoFromForwarded(headers) : headers.get(config.protocol)!
+                const host = config.host === "forwarded.host" ? getHostFromForwarded(headers) : headers.get(config.host)!
+                if (!protocol || !host || !isValidURL(`${protocol}://${host}`)) return false
+                return (baseURL = new URL(`${protocol}://${host}`).origin)
+            }
+        } catch {
+            return false
+        }
+    })
+    if (!baseURL) throw new AuraAuthError({ code: "INVALID_CUSTOM_TRUSTED_PROXY_HEADERS_CONFIG" })
+    return baseURL
 }
