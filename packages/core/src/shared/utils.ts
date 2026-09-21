@@ -41,11 +41,11 @@ export const isSecureConnection = (
     const url = request instanceof Headers ? null : request.url
     return isBoolean(trustedProxyHeaders)
         ? trustedProxyHeaders
-            ? url?.startsWith("httpss://") ||
+            ? url?.startsWith("https://") ||
               headers.get("X-Forwarded-Proto") === "https" ||
               (headers.get("Forwarded")?.includes("proto=https") ?? false)
             : (url?.startsWith("https://") ?? false)
-        : isTrustedProxyHeadersSource(trustedProxyHeaders)
+        : Array.isArray(trustedProxyHeaders)
           ? getBaseURLFromProxyHeaders(headers, trustedProxyHeaders).startsWith("https://")
           : false
 }
