@@ -1,5 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { revokeToken } from "@/api/revokeToken.ts"
+import { revokeToken } from "@/api/revoke-token.ts"
 import { OAuthProviderListSchema, RevokeTokenActionResponseSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 

@@ -7,7 +7,7 @@ import type { InferSchema, Prettify } from "@aura-stack/router"
 import type { ZodObject, infer as Infer } from "zod"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { identitySchema } from "@/identity/zod.ts"
-import type { createLogEntry } from "@/shared/logger.ts"
+import type { createLogEntry } from "@/config/logger/create-logger.ts"
 import type { InferRules } from "@aura-stack/rate-limiter"
 import type { createSchemaRegistry } from "@/validator/registry.ts"
 import type { FromShapeToObject, Identities, SchemaTypes } from "@/identity/index.ts"
@@ -103,8 +103,8 @@ export type InternalContext<Identity extends Identities, SignUpSchema extends Sc
     SignUpSchema
 > & {
     cookieConfig: {
-        secure: InternalCookieStoreConfig
-        standard: InternalCookieStoreConfig
+        trusted: InternalCookieStoreConfig
+        untrusted: InternalCookieStoreConfig
     }
 }
 

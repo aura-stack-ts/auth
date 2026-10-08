@@ -1,4 +1,4 @@
-import { createAuthInstance } from "@/router/router.ts"
+import { createAuthInstance } from "@/config/router.ts"
 import type { ZodObject } from "zod"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { AuthConfig, AuthInstance, FromShapeToObject, EditableShape, ZodIdentitySchema } from "@/@types/index.ts"

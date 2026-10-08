@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
-import { jose, POST } from "@test/presets.ts"
-import { getSetCookie } from "@/cookie.ts"
+import { jose, POST } from "@test/setup/presets.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 

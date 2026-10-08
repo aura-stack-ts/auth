@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { getCookie, getSetCookie } from "@/cookie.ts"
-import { api, jose, sessionPayload } from "@test/presets.ts"
+import { getCookie, getSetCookie } from "@/shared/http/cookie.ts"
+import { api, jose, sessionPayload } from "@test/setup/presets.ts"
 
 describe("getSession", () => {
     test("getSession with no session token", async () => {

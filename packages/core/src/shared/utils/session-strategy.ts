@@ -1,5 +1,5 @@
 import { isNullOrUndefined } from "@/shared/assert.ts"
-import { createFingerprint, getDeviceInfo } from "@/shared/utils.ts"
+import { createFingerprint, getDeviceInfo } from "@/shared/http/request-metadata.ts"
 import type { ExpirationStrategy } from "@/@types/index.ts"
 import type { InternalExpirationResult, InternalStatefulContext } from "@/@types/internal.ts"
 

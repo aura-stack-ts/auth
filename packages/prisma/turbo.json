@@ -1,0 +1,9 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**", "src/generated/**"],
+      "inputs": ["$TURBO_DEFAULT$", "src/**", "prisma/**"]
+    }
+  }
+}

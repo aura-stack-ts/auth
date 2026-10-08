@@ -1,5 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { getProviderTokens } from "@/api/getProviderTokens.ts"
+import { getProviderTokens } from "@/api/get-provider-tokens.ts"
 import { GetProviderTokensActionResponseSchema, OAuthProviderListSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 

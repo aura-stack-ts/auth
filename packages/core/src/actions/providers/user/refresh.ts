@@ -1,5 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { refreshUserInfo } from "@/api/refreshUserInfo.ts"
+import { refreshUserInfo } from "@/api/refresh-userInfo.ts"
 import { OAuthProviderListSchema, RefreshUserInfoActionResponseSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 

@@ -1,5 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { disconnectProvider } from "@/api/disconnectProvider.ts"
+import { disconnectProvider } from "@/api/disconnect-provider.ts"
 import { DisconnectProviderActionResponseSchema, OAuthProviderListSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 

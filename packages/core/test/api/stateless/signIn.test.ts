@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
-import { getSetCookie } from "@/cookie.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
-import { api, oauthCustomService, openIDMetadata } from "@test/presets.ts"
+import { api, oauthCustomService, openIDMetadata } from "@test/setup/presets.ts"
 
 describe("signIn API", () => {
     test("throws error when provider is missing", async () => {

@@ -1,8 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
 import { createPKCE } from "@/shared/crypto.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
-import { GET, jose, sessionPayload } from "@test/presets.ts"
-import { setCookie, getSetCookie, createCookieStore, getCookie } from "@/cookie.ts"
+import { GET, jose, sessionPayload } from "@test/setup/presets.ts"
+import { setCookie, getSetCookie, createCookieStore, getCookie } from "@/shared/http/cookie.ts"
 
 describe("sessionAction", () => {
     const { encodeJWT } = jose

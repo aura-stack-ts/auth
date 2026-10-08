@@ -53,7 +53,7 @@
     "npm:supabase@^2.76.15": "2.111.0",
     "npm:supertest@^7.2.2": "7.2.2",
     "npm:tsdown@~0.21.10": "0.21.10_rolldown@1.0.0-rc.17",
-    "npm:turbo@^2.9.18": "2.10.8",
+    "npm:turbo@^2.11.7": "2.11.7",
     "npm:typebox@1.1.38": "1.1.38",
     "npm:typebox@^1.1.38": "1.1.38",
     "npm:valibot@1.4.0": "1.4.0",
@@ -1098,33 +1098,33 @@
     "@tokenizer/token@0.3.0": {
       "integrity": "sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A=="
     },
-    "@turbo/darwin-64@2.10.8": {
-      "integrity": "sha512-po+7rfJfUnFXjWlcoN2RwhErgzCdRtBc1T26vYPcywHlggmCQiQe1uWaE4j+BibI2uY9/2pDoFzMN0rmSaPFOw==",
+    "@turbo/darwin-64@2.11.7": {
+      "integrity": "sha512-Z2LFOxwbiJueD1miByXJS/BrW21vv6YaQXZustty5jEX4vQYw6zyh101Sz1QO7WG0mqBzKagZ/DoAeeujI0/Sw==",
       "os": ["darwin"],
       "cpu": ["x64"]
     },
-    "@turbo/darwin-arm64@2.10.8": {
-      "integrity": "sha512-+zB2btDJ00lnPRuqOvpVvgl4x34k/djZQGZTTCfjn7JgNCl8QFY5Njo5+dqkY1g/+9gbbsnAvWm9CmJg9ebcXA==",
+    "@turbo/darwin-arm64@2.11.7": {
+      "integrity": "sha512-Vhv8ybgIflosNDSSRD9fNXHlCFA60dsGyTqQmc7l28SEX5jOaweCCD4BBYNd8/p0WGkw3e7tZbfA9w6FsujGvw==",
       "os": ["darwin"],
       "cpu": ["arm64"]
     },
-    "@turbo/linux-64@2.10.8": {
-      "integrity": "sha512-K1dxqiVisyN7cViVsfQLs6xscQbYuI8aO2nbUhFURDACgEDfZRdP/b4CCxeosBJpcMfhYyiibWqJorCnvz9kKg==",
+    "@turbo/linux-64@2.11.7": {
+      "integrity": "sha512-rAqRp3blQKk1+ylMGlZHAW0eJjVNuuGUm4ZrC6RU1Im8tLryvaO4a2zLQ/FQi1TRlmKqKV9YXBki2YeytlLbXA==",
       "os": ["android", "linux"],
       "cpu": ["x64"]
     },
-    "@turbo/linux-arm64@2.10.8": {
-      "integrity": "sha512-Gi77ibVnrE1fEmvr+/wBD/yvRqhwp/RQuCp2+//lv1U1wNFFyVg0V7Wj8FG9FXPFAw5QHReo8rxc9+wBSDZjzA==",
+    "@turbo/linux-arm64@2.11.7": {
+      "integrity": "sha512-thVYGov7S+llXAxrl3kBb/efalav0xhrjl5NHCR6AfKx14JkbqaetvbVwyss4FvZ9rt+Pv3xsTb+8SIYix8DTg==",
       "os": ["android", "linux"],
       "cpu": ["arm64"]
     },
-    "@turbo/windows-64@2.10.8": {
-      "integrity": "sha512-znnLO1haJPYTHoKMKwlAvlkjRiYbbhBzME6wIGaMd+fwir23U6jVd1ecaTWWi1fbnRVqxMfgDBKseQ/hLKb83g==",
+    "@turbo/windows-64@2.11.7": {
+      "integrity": "sha512-ZIoKT7J7KutgYl4bGxmmgeUQjG+7E0nY8BF9dxUOiMH2vdTsM4JQ2uSwTYFkTR2Llbg6ghGjSmuZ8LQtkLEYjg==",
       "os": ["win32"],
       "cpu": ["x64"]
     },
-    "@turbo/windows-arm64@2.10.8": {
-      "integrity": "sha512-VN30vh3b3Czh2WzYHNTfF1FE0YMZ5aHsLO8dBMGHJewA6792wX6iJR8ZxlzFW6WdOu0gEAKIvlYhfyT81Wkm4Q==",
+    "@turbo/windows-arm64@2.11.7": {
+      "integrity": "sha512-88Xv2f7SLGVJ68lRRx8o375dKmnZYNdDtvlKcPA0kZpcF93eAQd8l96BKQ0/AMHG0bMJA0Z5QqoqtetxzNsC+g==",
       "os": ["win32"],
       "cpu": ["arm64"]
     },
@@ -2759,8 +2759,8 @@
     "tslib@2.8.1": {
       "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
     },
-    "turbo@2.10.8": {
-      "integrity": "sha512-9+8YX5QOkGXzZxcIykTHgaooRHGMWO+jfdyRK0o+rN0U7hBIig2MrJ8r/aNzIPDPhdA73SGb0O+tIztaModTMg==",
+    "turbo@2.11.7": {
+      "integrity": "sha512-RhXHbqfvY6o3xt/zSHCwSNwLrZlXiqHzewi4eAj9PtZ1T1CqgMJ2yIDb7SKPTG9IikTm925mfzL6hldQVdyNWw==",
       "optionalDependencies": [
         "@turbo/darwin-64",
         "@turbo/darwin-arm64",
@@ -2859,7 +2859,7 @@
         "npm:oxfmt@0.51",
         "npm:oxlint@^1.69.0",
         "npm:tsdown@~0.21.10",
-        "npm:turbo@^2.9.18"
+        "npm:turbo@^2.11.7"
       ],
       "overrides": {
         "dompurify": "^3.4.0",

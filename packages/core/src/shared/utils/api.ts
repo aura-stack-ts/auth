@@ -1,13 +1,16 @@
-import { HeadersBuilder, type RequestHeaders } from "@aura-stack/router"
-import { getCookie, getOptionalCookie } from "@/cookie.ts"
-import { verifyRateLimit } from "@/router/rate-limiter.ts"
+import { HeadersBuilder } from "@aura-stack/router"
+import { getErrorName } from "@/errors/aura-error.ts"
+import { getBaseURL } from "@/config/get-base-url.ts"
+import { isStatelessStrategy } from "@/shared/assert.ts"
+import { verifyRateLimit } from "@/shared/rate-limiter.ts"
+import { verifySessionToken } from "@/shared/utils/session.ts"
+import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
-import { getErrorName, verifySessionToken } from "@/shared/utils.ts"
-import { isHeadersInit, isStatelessStrategy } from "@/shared/assert.ts"
+import { createRedirectTo } from "@/shared/oauth2/authorization.ts"
+import { getCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
+import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
 import { createCSRF, createHash, verifyCSRF } from "@/shared/crypto.ts"
-import { getBaseURL, getOriginURL, createRedirectTo } from "@/shared/utils/authorization.ts"
-import type { LOG_MESSAGES } from "@/shared/logger.ts"
+import type { LOG_MESSAGES } from "@/config/logger/catalog.ts"
 import type { BuiltInOAuthProvider, LiteralUnion, RateLimiterConfig } from "@/@types/index.ts"
 import type { InternalLogger, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
 
@@ -150,14 +153,6 @@ export const resolveApiRedirect = async (
         redirect: shouldRedirectServer,
         redirectURL: redirectInit ? null : redirectURL,
     }
-}
-
-export const toStandardizedHeaders = (headers: Headers | HeadersInit | RequestHeaders): Headers => {
-    return isHeadersInit(headers)
-        ? new Headers(headers)
-        : headers instanceof Headers
-          ? headers
-          : new Headers(headers as Record<string, string>)
 }
 
 export const internal_verifyCSRFToken = async ({

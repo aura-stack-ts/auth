@@ -8,7 +8,7 @@ import {
     oauthCustomService,
     oauthTokens,
     sessionEntityWithUser,
-} from "@test/presets.ts"
+} from "@test/setup/presets.ts"
 
 describe("Revoke Action", () => {
     test("throws error when provider is not configured", async () => {

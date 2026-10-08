@@ -1,5 +1,5 @@
-import { AuraAuthError } from "@/shared/errors.ts"
-import { fetchAsync } from "@/shared/fetch-async.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
+import { fetchAsync } from "@/shared/http/fetch-async.ts"
 import { assertContentTypeResponse } from "@/shared/assert.ts"
 import { OpenIDMetadataSchema } from "@/shared/schemas/general.ts"
 import type { OpenIDMetadata } from "@/@types/oidc.ts"

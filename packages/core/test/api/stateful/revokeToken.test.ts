@@ -7,7 +7,7 @@ import {
     oauthAccountEntity,
     oauthCustomService,
     sessionEntityWithUser,
-} from "@test/presets.ts"
+} from "@test/setup/presets.ts"
 
 describe("revokeToken (Stateful)", () => {
     test("throws error when provider is not configured", async () => {

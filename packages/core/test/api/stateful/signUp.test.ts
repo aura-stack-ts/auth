@@ -9,7 +9,7 @@ import {
     sessionEntityWithUser,
     sessionPayload,
     userEntity,
-} from "@test/presets.ts"
+} from "@test/setup/presets.ts"
 import type { User } from "@/index.ts"
 
 describe("signUp API", async () => {

@@ -8,7 +8,7 @@ import {
     oauthTokens,
     sessionEntityWithUser,
     userEntity,
-} from "@test/presets.ts"
+} from "@test/setup/presets.ts"
 import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"

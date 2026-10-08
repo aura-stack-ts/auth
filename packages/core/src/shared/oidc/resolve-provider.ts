@@ -1,5 +1,5 @@
-import { setDynamicParams } from "@/oauth/index.ts"
 import { discoveryMetadata } from "@/shared/oidc/discovery.ts"
+import { setDynamicParams } from "@/shared/utils/params.ts"
 import type { OpenIDProvider } from "@/@types/oidc.ts"
 import type { RuntimeOAuthProvider } from "@/@types/internal.ts"
 

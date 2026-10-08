@@ -38,7 +38,7 @@ export type SchemaTypes = ZodObject<any> | valibot.ObjectSchema<any, undefined> 
 
 type ReturnShapeType<T> =
     T extends EditableShape<ZodShape>
-        ? z.ZodObject<T>
+        ? ZodObject<T>
         : T extends EditableShapeValibot<ValibotShape>
           ? valibot.ObjectSchema<T, undefined>
           : T extends EditableShapeArkType<ArkTypeShape>
@@ -46,7 +46,7 @@ type ReturnShapeType<T> =
             : T extends EditableShapeTypebox<TypeboxShape>
               ? Typebox.TObject<T>
               : T extends EditableUser
-                ? z.ZodObject<T>
+                ? ZodObject<T>
                 : never
 
 export const createIdentity = <S extends Identities>(shape: S): ReturnShapeType<S> => {

@@ -6,7 +6,7 @@ import {
     oauthAccountEntity,
     oauthCustomService,
     sessionEntityWithUser,
-} from "@test/presets.ts"
+} from "@test/setup/presets.ts"
 import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
