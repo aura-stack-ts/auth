@@ -10,6 +10,186 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added experimental support for configuring trusted proxy header sources used to construct request URLs. Header sources can provide the complete URL through `{ url: "header" }` or specify separate protocol and host headers through `{ protocol: "header-proto", host: "header-host" }`. The configuration also includes built-in sources such as `forwarded`, `forwarded.proto`, and `forwarded.host`. [#275](https://github.com/aura-stack-ts/auth/pull/275)
+
+### Changed
+
+- Upgraded `@aura-stack/router` to `v0.11.4`, adding response schema validation and adopting the built-in `handle()` function for processing incoming requests. This release also updates unsupported HTTP method handling to return a standardized `404 Not Found` response instead of `405 Method Not Allowed`. [#274](https://github.com/aura-stack-ts/auth/pull/274)
+
+---
+
+## [0.9.2] - 2026-08-30
+
+### Security
+
+- Fixed CSRF validation in server-side APIs that perform sensitive operations, including `signOut`, `updateSession`, and `signInCredentials`. Server APIs now correctly determine whether Double-Submit Cookie validation should be skipped by default or explicitly enabled through the `doubleSubmitToken` option. The `skipCSRFCheck` and `doubleSubmitToken` options are now validated against the default configuration, preventing incorrect CSRF validation fallbacks. [#272](https://github.com/aura-stack-ts/auth/pull/272)
+
+- Added missing rate limiting to the `isProviderConnected()` and `signOut()` operations. Rate-limit validation is now performed as an early step when processing incoming requests, ensuring requests are validated before the protected operation is executed. [#271](https://github.com/aura-stack-ts/auth/pull/271)
+
+- Reordered the session refresh flow for the `PATCH /session` endpoint and `api.updateSession()` API so that rate limiting is evaluated before the session is refreshed. Requests must now pass the rate-limit check before the session refresh logic is executed. [#270](https://github.com/aura-stack-ts/auth/pull/270)
+
+- Hardened OAuth token handling in the `/providers/:provider/tokens` endpoint and `api.getProviderTokens()` API. The token storage cookie now uses the `__Host-` prefix, and responses include the `Cross-Origin-Resource-Policy: same-origin` and `Cross-Origin-Opener-Policy: same-origin` headers to strengthen cross-origin isolation and reduce the risk of cross-origin attacks. [#268](https://github.com/aura-stack-ts/auth/pull/268)
+
+---
+
+## [0.9.1] - 2026-08-22
+
+### Added
+
+- Added predefined header support to the `headers` option of API functions exposed by `createAuth().api`. The option now accepts `Headers`, `HeadersInit`, or `RequestHeaders`, with `RequestHeaders` providing a typed set of standard HTTP headers such as `authorization`, `content-type`, and others. [#260](https://github.com/aura-stack-ts/auth/pull/260)
+
+### Fixed
+
+- Fixed CSRF token management across API functions. CSRF tokens are now generated and validated directly by API functions for sensitive operations, including `signOut`, `signInCredentials`, and `signUp`. The `/session` endpoint no longer manages or revokes CSRF tokens; each protected operation is now responsible for handling its own CSRF token lifecycle. [#261](https://github.com/aura-stack-ts/auth/pull/261)
+
+- Fixed identity type inference when both `identity.schema` and `signUp.schema` are configured in `createAuth()`. The auth instance's `User` identity type is now inferred exclusively from `identity.schema`, falling back to the default `ZodIdentitySchema` when no identity schema is provided. [#259](https://github.com/aura-stack-ts/auth/pull/259)
+
+---
+
+## [0.9.0] - 2026-08-05
+
+### Added
+
+- Added the `slidingThreshold` option, which defines the remaining lifetime percentage at which a session expiration is automatically refreshed. Supported by both `jwt` and `database` session strategies. Added the `touchInterval` option for the `database` session strategy, which specifies the minimum interval between activity updates to avoid unnecessary database writes. [#248](https://github.com/aura-stack-ts/auth/pull/248)
+
+- Added the `doubleSubmitToken` option to the APIs exposed by `createAuth().api`, allowing explicit Double-Submit Cookie validation for server-side requests. By default, Double-Submit Cookie validation is skipped in trusted server environments, while standard CSRF validation remains enabled. Supplying `doubleSubmitToken` enforces Double-Submit Cookie validation for the request. [#233](https://github.com/aura-stack-ts/auth/pull/233)
+
+- Added support for inferring OpenID Connect (OIDC) provider issuer slugs from environment variables. Issuer slugs can now be configured either through `provider.slugName` or an environment variable following the `PREFIX_SLUG_NAME` naming convention. [#225](https://github.com/aura-stack-ts/auth/pull/225)
+
+- Added the `isProviderConnected()` client API to `createAuthClient()`, providing a client-side interface for the `GET /providers/:provider` endpoint. The API checks whether an OAuth or OpenID Connect (OIDC) provider is currently connected to the active session. [#223](https://github.com/aura-stack-ts/auth/pull/223)
+
+- Added the experimental `isProviderConnected()` API for checking whether an OAuth or OpenID Connect (OIDC) provider is connected to the current session. This API complements `disconnectProvider()` by allowing applications to inspect the connection state without disconnecting the provider. [#223](https://github.com/aura-stack-ts/auth/pull/223)
+
+- Added the `disconnectProvider()` client API to `createAuthClient()`, providing a client-side interface for the `DELETE /providers/:oauth` endpoint. The API disconnects an OAuth or OpenID Connect (OIDC) provider from the current session without revoking the provider's tokens. [#221](https://github.com/aura-stack-ts/auth/pull/221)
+
+- Added the experimental `disconnectProvider()` API for disconnecting an OAuth or OpenID Connect (OIDC) provider from the current session without revoking its tokens. Unlike `revokeToken()`, this API only removes the association between the current session and the provider. [#221](https://github.com/aura-stack-ts/auth/pull/221)
+
+- Added the `revokeToken()` client API to `createAuthClient()`, providing a client-side interface for the `POST /providers/:oauth/tokens/revoke` endpoint. [#220](https://github.com/aura-stack-ts/auth/pull/220)
+
+- Added the experimental `revokeToken()` API for revoking provider-issued OAuth or OpenID Connect (OIDC) tokens. Depending on the provider, this may revoke the current access token, refresh token, or both. [#220](https://github.com/aura-stack-ts/auth/pull/220)
+
+- Added the `refreshUserInfo()` client API to `createAuthClient()`, providing a client-side interface for the `POST /providers/:oauth/user/refresh` endpoint. [#219](https://github.com/aura-stack-ts/auth/pull/219)
+
+- Added the experimental `refreshUserInfo()` API for synchronizing the authenticated user's profile with the provider's `userInfo` endpoint. The API refreshes the stored user information without requiring the user to sign in again. [#219](https://github.com/aura-stack-ts/auth/pull/219)
+
+- Added the `getAccessToken()` client API to `createAuthClient()`. The API provides a client-side interface for retrieving the provider access token through the `GET /providers/:oauth/tokens` endpoint. It is a convenience wrapper around `getProviderTokens()`. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
+- Added the experimental `getAccessToken()` API for retrieving the provider `accessToken` after a successful OAuth or OpenID Connect (OIDC) sign-in. This API is a simplified alternative to `getProviderTokens()` when only the access token is required. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
+- Added dedicated identity schema entry points under `/identity/:schema` (`zod`, `arktype`, `valibot`, and `typebox`). Each entry point exports the `identitySchema` validation schema, the `IdentityShape` type, the `isIdentity` type guard, and re-exports the corresponding schema library. [#216](https://github.com/aura-stack-ts/auth/pull/216)
+
+- Added the `/providers/:oauth/tokens` endpoint for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. This endpoint is intended for client-side integrations. To retrieve refresh tokens, the provider must be configured with the `refreshToken` option. [#213](https://github.com/aura-stack-ts/auth/pull/213)
+
+- Added the `getProviderTokens()` client API to `createAuthClient()`, providing a client-side interface for the `/providers/:oauth/tokens` endpoint. [#213](https://github.com/aura-stack-ts/auth/pull/213)
+
+- Added the experimental `getProviderTokens()` API for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. To enable refresh token retrieval, the provider must be configured with the `refreshToken` option. [#212](https://github.com/aura-stack-ts/auth/pull/212)
+
+### Deprecated
+
+- Deprecated the `session.jwt.maxAge`, `session.jwt.maxExpiration`, and `session.jwt.expirationStrategy` options. These settings have been moved to the top-level `session` configuration, and `maxExpiration` has been renamed to `maxDuration`. [#248](https://github.com/aura-stack-ts/auth/pull/248)
+
+- Deprecated the `skipCSRFCheck` option in the APIs exposed by `createAuth().api`. Use `doubleSubmitToken` instead to explicitly enable Double-Submit Cookie validation. The previous option was misleading because it only disabled the Double-Submit Cookie check while standard CSRF validation continued to be performed. [#233](https://github.com/aura-stack-ts/auth/pull/233)
+
+### BREAKING CHANGES
+
+- Reorganized identity schemas, types, and type guards into dedicated `/identity/:schema` entry points. As part of this change, schema-specific prefixes and suffixes (such as `Zod`) have been removed to provide a consistent API across all supported schema libraries. [#216](https://github.com/aura-stack-ts/auth/pull/216)
+  - Renamed `UserIdentity` to `identitySchema` and moved it to `/identity/:schema`.
+  - Renamed `UserShape` to `IdentityShape` and moved it to `/identity/:schema`.
+  - Moved `ShapeToObject` to the `/types` entry point.
+  - Moved type guards to their respective `/identity/:schema` entry points.
+
+---
+
+## [0.8.1] - 2026-07-04
+
+### Fixed
+
+- Republished the package to include the missing `huggingface` OAuth provider in the published package.
+  > This release contains no code changes compared to `v0.8.0`; it only corrects the published package contents.
+
+---
+
+## [0.8.0] - 2026-07-04
+
+### Added
+
+- Added the `Authentik` OpenID Connect provider, enabling authentication through Authentik accounts with minimal configuration. [#199](https://github.com/aura-stack-ts/auth/pull/199)
+
+- Added the `Hugging Face` OpenID Connect provider, enabling authentication through Hugging Face accounts with minimal configuration. [#198](https://github.com/aura-stack-ts/auth/pull/198)
+
+- Added the `Google` OpenID Connect provider, enabling authentication through Google accounts with minimal configuration. [#197](https://github.com/aura-stack-ts/auth/pull/197)
+
+- Added inference of dynamic parameters in OpenID Connect (OIDC) provider issuers. Issuers containing dynamic segments (prefixed with `:`) are now automatically detected, and users are required to provide values for those parameters when configuring the provider. [#200](https://github.com/aura-stack-ts/auth/pull/200)
+
+- Added OpenID Connect (OIDC) support alongside OAuth 2.0. Providers can now be configured through OpenID Provider Discovery, with built-in support for ID token validation, nonce generation and validation, and JWKS-based signature verification. [#195](https://github.com/aura-stack-ts/auth/pull/195)
+
+- Integrated `@aura-stack/rate-limiter` into authentication flows. Rate limiting is now enforced for `signIn`, `signInCredentials`, `signUp`, and `updateSession` actions, providing built-in protection against abuse and excessive requests. [#194](https://github.com/aura-stack-ts/auth/pull/194)
+
+- Extended `UserFrom` to support type inference from `ArkType` and `Valibot` schemas. User types are now inferred correctly for `Zod`, `ArkType`, and `Valibot` schema definitions. [#191](https://github.com/aura-stack-ts/auth/pull/191)
+
+- Added `InferSignUp`, a utility type for inferring the sign-up payload from `createAuth().signUp.schema`. This type can be reused as the second generic parameter of `createAuthClient()` to ensure consistent typing between server and client authentication configurations. [#190](https://github.com/aura-stack-ts/auth/pull/190)
+
+- Added a `signUp` client function accessible via `createAuthClient`, allowing interaction with the mounted `POST /signUp` endpoint. [#184](https://github.com/aura-stack-ts/auth/pull/184)
+
+- Introduced an experimental `signUp` flow for both the API and endpoint definitions. The new action enables user account creation within the authentication system and provides customizable payload validation through the supported schema. To enable this feature, developers must configure the `signUp` option when calling `createAuth`. [#183](https://github.com/aura-stack-ts/auth/pull/183)
+
+- Added support for a custom `userInfo` function in OAuth provider configuration, enabling callers to perform the user info request themselves. The `userInfo` option continues to accept either a URL string or an object with a `url` and optional request options (for example, custom headers). [#182](https://github.com/aura-stack-ts/auth/pull/182)
+
+- Added the `HubSpot` OAuth provider to the supported integrations in Aura Auth. [#154](https://github.com/aura-stack-ts/auth/pull/154)
+
+### Fixed
+
+- Fixed URL construction when proxy headers are enabled. The `trustedOrigins` option is now required to complete the configuration, allowing URLs to be constructed and validated against a list of trusted origins. [#193](https://github.com/aura-stack-ts/auth/pull/193)
+
+- Fixed type inference for authentication actions created with `createAuth()` and `createAuthClient()`. The `signUp.schema` configuration is now inferred correctly, improving type safety and reducing the need for manual type annotations. [#190](https://github.com/aura-stack-ts/auth/pull/190)
+
+### Changed
+
+- Enforced CSRF protection for `POST` actions and other sensitive operations, including `signUp` and `signInCredentials`, across both server-side APIs and client-side endpoints. Clients must now provide a valid CSRF token when invoking protected actions. [#192](https://github.com/aura-stack-ts/auth/pull/192)
+
+- Refactored and standardized error handling across authentication flows. All authentication errors now extend the `AuraAuthError` base class, providing a consistent error model throughout the library. Error objects now expose structured metadata, including `type`, `code`, `message`, and `userMessage`. [#190](https://github.com/aura-stack-ts/auth/pull/190)
+
+### Security
+
+- Fixed a vulnerability that could allow arbitrary session lifetime extension through the `updateSession` action and endpoint. Session updates now perform additional validation and authorization checks, and expiration times are constrained by the `maxExpiration` setting in `createAuth().session.jwt`. [#192](https://github.com/aura-stack-ts/auth/pull/192)
+
+---
+
+## [0.7.2] - 2026-06-05
+
+### Fixed
+
+- Republished the package to synchronize the `@aura-stack/router` dependency to version `0.7.2`.
+  > The codebase is identical to `v0.7.1`; differences are limited to synchronized lockfiles (`deno.lock`, `bun.lock`, and `pnpm-lock.yaml`).
+
+---
+
+## [0.7.1] - 2026-06-05
+
+### Added
+
+- Added a `/cookies` entry module for cookie management, providing utilities for authentication integrations and framework-specific packages. [#178](https://github.com/aura-stack-ts/auth/pull/178)
+
+### Changed
+
+- Removed TypeBox compile-time type inference from `createAuthClient` client functions and from the `createAuth` auth instance. Runtime validation with TypeBox remains supported. [#179](https://github.com/aura-stack-ts/auth/pull/179)
+
+---
+
+## [0.7.0] - 2026-05-23
+
+### Added
+
+- Added experimental support for `Typebox` schema validation in `createAuth`; it now supports both Zod and Typebox schemas to extend the default User fields. [#163](https://github.com/aura-stack-ts/auth/pull/163)
+
+- Added experimental support for `Valibot` schema validation in `createAuth`; it now supports both Zod and Valibot schemas to extend the default User fields. [#160](https://github.com/aura-stack-ts/auth/pull/160)
+
+- Extended asymmetric cryptography support to accept JWK (JSON Web Key) format keys in addition to `CryptoKeyPair` across JOSE functions exposed by `createAuth.jose`, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encodeJWT`, and `decodeJWT` functions. [#159](https://github.com/aura-stack-ts/auth/pull/159)
+
+- Added support for asymmetric cryptography using `public/private` key pairs via `CryptoKeyPair` across JOSE functions exposed by `createAuth.jose`, including the dedicated `signJWS`, `verifyJWS`, `encryptJWE`, `decryptJWE`, `encodeJWT`, and `decodeJWT` functions. [#157](https://github.com/aura-stack-ts/auth/pull/157)
+
+- Added the `Dribbble` OAuth provider to the supported integrations in Aura Auth. [#153](https://github.com/aura-stack-ts/auth/pull/153)
+
 - Added the `ClickUp` OAuth provider to the supported integrations in Aura Auth. [#151](https://github.com/aura-stack-ts/auth/pull/151)
 
 - Added `InferSession` and `SessionFrom` types to infer the session type from either an auth instance or a Zod schema. [#150](https://github.com/aura-stack-ts/auth/pull/150)

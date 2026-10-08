@@ -1,8 +1,12 @@
-import { AuthSecurityError } from "@/shared/errors.ts"
 import { isJWTPayloadWithToken } from "@/shared/assert.ts"
-import { equals, timingSafeEqual } from "@/shared/utils.ts"
+import { equals } from "@/shared/utils.ts"
+import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
-import type { AuthRuntimeConfig, JoseInstance, User } from "@/@types/index.ts"
+import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
+import type { JoseInstance, User } from "@/@types/index.ts"
+import type { AsymmetricKeyPairFromEnv, RouterGlobalContext } from "@/@types/internal.ts"
+
+export { generateKeyPair as createKeyPair } from "@aura-stack/jose/jose"
 
 export const createSecretValue = (length: number = 32) => {
     return base64url.encode(getRandomBytes(length))
@@ -28,10 +32,20 @@ export const createPKCE = async (verifier?: string) => {
     const byteLength = verifier ? undefined : Math.floor(Math.random() * (96 - 32 + 1) + 32)
     const codeVerifier = verifier ?? createSecretValue(byteLength ?? 64)
     if (codeVerifier.length < 43 || codeVerifier.length > 128) {
-        throw new AuthSecurityError("PKCE_VERIFIER_INVALID", "The code verifier must be between 43 and 128 characters in length.")
+        throw new AuraAuthError({ code: "PKCE_VERIFIER_INVALID" })
     }
     const codeChallenge = await createHash(codeVerifier)
     return { codeVerifier, codeChallenge, method: "S256" }
+}
+
+export const assertCSRFTokenCookie = async (jose: RouterGlobalContext["jose"], cookie?: string) => {
+    try {
+        if (cookie) {
+            await jose.verifyJWS(cookie)
+        }
+    } catch (error) {
+        throw new AuraAuthError({ code: "INVALID_CSRF_TOKEN", cause: error })
+    }
 }
 
 /**
@@ -40,7 +54,7 @@ export const createPKCE = async (verifier?: string) => {
  * @param csrfCookie - Optional existing CSRF cookie to verify and reuse
  * @returns Signed CSRF token
  */
-export const createCSRF = async (jose: AuthRuntimeConfig["jose"], csrfCookie?: string) => {
+export const createCSRF = async (jose: RouterGlobalContext["jose"], csrfCookie?: string) => {
     try {
         if (csrfCookie) {
             await jose.verifyJWS(csrfCookie)
@@ -64,21 +78,24 @@ export const verifyCSRF = async <DefaultUser extends User = User>(
         const headerPayload = await jose.verifyJWS(header)
 
         if (!isJWTPayloadWithToken(cookiePayload)) {
-            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "Cookie payload missing token field.")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
         }
         if (!isJWTPayloadWithToken(headerPayload)) {
-            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "Header payload missing token field.")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
         }
 
         if (!equals(cookiePayload.token.length, headerPayload.token.length)) {
-            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
         }
         if (!timingSafeEqual(cookiePayload.token, headerPayload.token)) {
-            throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
         }
         return true
-    } catch {
-        throw new AuthSecurityError("CSRF_TOKEN_INVALID", "The CSRF tokens do not match.")
+    } catch (error) {
+        if (isAuraAuthError(error)) {
+            throw error
+        }
+        throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause: error })
     }
 }
 
@@ -88,13 +105,15 @@ export const verifyCSRF = async <DefaultUser extends User = User>(
  *
  * @param password - The password to hash.
  * @param salt - Optional salt (base64url encoded). If not provided, a random salt will be generated.
- * @param iterations - The number of PBKDF2 iterations. Default is 100,000.
+ * @param iterations - The number of PBKDF2 iterations. Default is 600,000.
  * @returns The hashed password in the format `iterations:salt:hash` (all segments base64url encoded).
  */
-export const hashPassword = async (password: string, salt?: string, iterations = 100000) => {
+export const hashPassword = async (password: string, salt?: string, iterations = 600_000) => {
     const subtle = getSubtleCrypto()
-    const saltBuffer = (salt ? base64url.decode(salt) : getRandomBytes(16)) as any
-    const baseKey = await subtle.importKey("raw", encoder.encode(password) as any, "PBKDF2", false, ["deriveBits"])
+    const saltBuffer = (salt ? base64url.decode(salt) : getRandomBytes(16)) as Uint8Array<ArrayBuffer>
+    const baseKey = await subtle.importKey("raw", encoder.encode(password) as Uint8Array<ArrayBuffer>, "PBKDF2", false, [
+        "deriveBits",
+    ])
     const derivedKey = await subtle.deriveBits(
         {
             name: "PBKDF2",
@@ -127,8 +146,62 @@ export const verifyPassword = async (password: string, hashedPassword: string) =
         const iterations = parseInt(iterationsStr, 10)
         if (isNaN(iterations)) return false
         const newHashed = await hashPassword(password, saltStr, iterations)
-        return timingSafeEqual(newHashed, hashedPassword)
+        const [, , , hashA] = newHashed.split(":")
+        const [, , , hashB] = hashedPassword.split(":")
+        if (!hashA || !hashB) return false
+        return timingSafeEqual(hashA, hashB)
     } catch {
         return false
     }
+}
+
+/**
+ * Imports a PEM-formatted asymmetric key pair from strings.
+ *
+ * @param key - An object containing the public and private keys as PEM-formatted strings
+ * @param algorithm - The intended algorithm for the keys (e.g. "RS256" for RSA signing, "RSA-OAEP" for RSA encryption)
+ * @returns A Promise that resolves to a CryptoKeyPair with the imported keys
+ */
+export const importPEMKeyPair = async (key: AsymmetricKeyPairFromEnv, algorithm: string) => {
+    const importedPrivateKey = await importPKCS8(key.privateKey, algorithm, { extractable: true })
+    const importedPublicKey = await importSPKI(key.publicKey, algorithm, { extractable: true })
+    return {
+        publicKey: importedPublicKey,
+        privateKey: importedPrivateKey,
+    }
+}
+
+/**
+ * Generates a new asymmetric key pair and exports it in JWK format.
+ *
+ * @param alg - The intended algorithm for the keys (e.g. "RS256" for RSA signing, "RSA-OAEP" for RSA encryption)
+ * @param options - Optional parameters for key generation (e.g. modulusLength for RSA)
+ * @returns A Promise that resolves to an object containing the public and private keys in JWK format
+ */
+export const exportJWKKeyPair = async (alg: string, options?: GenerateKeyPairOptions) => {
+    const { publicKey, privateKey } = await generateKeyPair(alg, options)
+    const jwkPublicKey = await exportJWK(publicKey)
+    const jwkPrivateKey = await exportJWK(privateKey)
+    return {
+        publicKey: jwkPublicKey,
+        privateKey: jwkPrivateKey,
+    }
+}
+
+/**
+ * Compares two strings in a timing-safe manner to prevent timing attacks.
+ *
+ * @param a - The first string to compare
+ * @param b - The second string to compare
+ * @returns True if the strings are equal, false otherwise
+ */
+export const timingSafeEqual = (a: string, b: string): boolean => {
+    const bufferA = encoder.encode(a)
+    const bufferB = encoder.encode(b)
+    const len = Math.max(bufferA.length, bufferB.length)
+    let diff = 0
+    for (let i = 0; i < len; i++) {
+        diff |= (bufferA[i] ?? 0) ^ (bufferB[i] ?? 0)
+    }
+    return diff === 0 && bufferA.length === bufferB.length
 }

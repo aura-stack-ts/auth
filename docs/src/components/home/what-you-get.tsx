@@ -5,46 +5,46 @@ import Image from "next/image"
 
 const useCases = [
     {
-        title: "OAuth 2.0 Integration",
+        title: "Framework-Agnostic",
         description:
-            "Native support for multiple OAuth providers. Easily integrate GitHub, Discord, Google, and more with built-in provider configurations.",
-        icon: Lock,
-        link: "/docs/oauth",
+            "Seamlessly integrate with any web framework or library. Build authentication flows that work with React, Vue, Svelte, and more.",
+        icon: Globe,
+        link: "/docs/concepts/framework-agnostic",
     },
     {
-        title: "Type-Safe Development",
+        title: "Runtime-Agnostic",
+        description:
+            "Run on any JavaScript runtime built on top of the Web Standard APIs (Request, Response, Fetch, Web Crypto).",
+        icon: Layers,
+        link: "/docs/concepts/runtime-agnosstic",
+    },
+    {
+        title: "OAuth 2.0 & OpenID Connect",
+        description:
+            "First-class support for OAuth 2.0 and OpenID Connect. Implements PKCE, Authorization Code Flow for secure authentication.",
+        icon: Lock,
+        link: "/docs/concepts/oauth",
+    },
+    {
+        title: "Type-first API",
         description:
             "First-class TypeScript support with complete type inference. Build authentication flows with confidence and catch errors at compile time.",
         icon: Code2,
-        link: "/docs",
+        link: "/docs/concepts/typescript",
     },
     {
-        title: "Secure Session Management",
+        title: "Secure by default",
         description:
-            "Built-in JWT-based session management with encryption and signing. Sessions are encrypted by default with configurable expiration policies.",
+            "Strong default practices for PKCE, state validation, secure cookies, redirect validation and CSRF validation.",
         icon: Shield,
         link: "/docs/concepts/security-model#token-management",
     },
     {
-        title: "Cookie Security",
+        title: "Composable",
         description:
-            "Secure, configurable cookies for session persistence. Proper security flags, domain settings, and SameSite attributes out of the box.",
+            "Built from small, focused utilities and packages. Use only what you need (auth handlers, JOSE utilities and APIs).",
         icon: Cookie,
-        link: "/docs/guides/cookie-management",
-    },
-    {
-        title: "Extensible Architecture",
-        description:
-            "Easily integrate with @aura-stack/router or custom routing layers. Build on top of a flexible, composable authentication foundation.",
-        icon: Layers,
-        link: "/docs/concepts/architecture",
-    },
-    {
-        title: "Framework-Agnostic Design",
-        description:
-            "Works seamlessly in any environment that supports the Web Request/Response APIs. Deploy anywhere, from traditional servers to edge runtimes.",
-        icon: Globe,
-        link: "/docs/concepts/architecture",
+        link: "/docs/core-principles",
     },
 ]
 

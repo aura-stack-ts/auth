@@ -1,0 +1,118 @@
+---
+title: revokeToken
+description: Complete API reference for the api.revokeToken method, providing type-safe OAuth access token revocation across all runtimes.
+---
+
+The `api.revokeToken` method is the primary programmatic entry point for revoking the OAuth access token for a specific provider. This method runs on the server, so it requires you to pass the `request` or `headers` object from your server-side context.
+
+<Callout>
+  Token revocation depends on the OAuth provider supporting it. If the provider does not support revocation, this method returns
+  `success: false`.
+</Callout>
+
+```ts title="revoke-token.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.revokeToken("github", {
+  request: getRequest(),
+})
+```
+
+<Callout>
+  This method is a stronger alternative to `api.disconnectProvider`, which disconnects a provider from the current session without
+  revoking its access token. Use this method when you specifically need the token itself invalidated. See
+  [`api.disconnectProvider`](/docs/api-reference/server/api/disconnect-provider) for the softer alternative.
+</Callout>
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type                    | Required | Description                                           |
+| ---------- | ----------------------- | -------- | ----------------------------------------------------- |
+| providerId | `string`                | Yes      | The id of the OAuth provider to revoke the token for. |
+| options    | `RevokeTokenAPIOptions` | Yes      | An object containing request context.                 |
+
+### RevokeTokenAPIOptions
+
+| Option            | Type      | Default   | Description                                                                                                   |
+| ----------------- | --------- | --------- | ------------------------------------------------------------------------------------------------------------- |
+| request           | `Request` | undefined | The request object from the server-side context.                                                              |
+| headers           | `Headers` | undefined | The headers object from the server-side context.                                                              |
+| ~~skipCSRFCheck~~ | `boolean` | `false`   | ~~Deprecated~~. This option has been replaced by `doubleSubmitToken` and will be removed in a future release. |
+| doubleSubmitToken | `string`  | undefined | Optional CSRF token used to explicitly enable Double-Submit Cookie validation for server-side API functions.  |
+
+<Callout type="info">
+  At least one of `request` or `headers` is required to construct the incoming URL and validate redirect URLs.
+</Callout>
+
+### Returns
+
+| Return Type                     | Description                                                             |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| `Promise<RevokeTokenAPIReturn>` | Resolves to an object containing `success` — see [Behavior](#behavior). |
+
+## Behavior
+
+- Revocation success depends entirely on the provider's `revokeToken` endpoint configuration and whether the provider supports token revocation at all. If it doesn't, this method returns `success: false`.
+- The `doubleSubmitToken` option enables Double-Submit Cookie validation when calling Aura Auth server-side API functions. By default, API functions execute in a trusted server environment, where browser-based CSRF attacks are not possible because requests originate from server-side code rather than from a user's browser. For that reason, Aura Auth performs the standard CSRF validation but skips the additional Double-Submit Cookie verification.
+
+  This option is intended for advanced scenarios where server-side requests should enforce the same CSRF guarantees as browser-initiated requests.
+
+  <Callout>
+    Providing `doubleSubmitToken` does not replace or disable CSRF protection. It enables the additional Double-Submit Cookie
+    validation on top of the standard CSRF checks already performed by Aura Auth.
+  </Callout>
+
+- If revocation fails (no active token for the provider, or the provider rejects the request), `success` is `false`.
+
+## Usage
+
+### Revoke a provider's access token
+
+```ts title="revoke-token.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success } = await api.revokeToken("github", {
+  request: getRequest(),
+})
+```
+
+### Handling failure
+
+```tsx title="handle-failure.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success } = await api.revokeToken("github", {
+  request: getRequest(),
+})
+
+if (!success) {
+  redirect("/settings/connections")
+}
+```
+
+### Delegating CSRF protection to a different layer
+
+```ts title="skip-csrf.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success } = await api.revokeToken("github", {
+  headers: {
+    "x-csrf-token": getCSRFTokenFromRequest(),
+  },
+  request: getRequest(),
+  skipCSRFCheck: false, // only if enforced elsewhere — see the warning above
+})
+```
+
+### Enable Double-Submit Cookie CSRF protection
+
+```ts title="double-submit.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const { success } = await api.revokeToken("github", {
+  request: getRequest(),
+  doubleSubmitToken: getDoubleSubmitTokenFromRequest(),
+})
+```

@@ -1,12 +1,10 @@
 {
-  "extends": "../../configs/tsconfig/bun.json",
+  "extends": "@aura-stack/tsconfig/bun.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
       "@test/*": ["./test/*"]
-    },
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    }
   },
   "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]

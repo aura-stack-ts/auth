@@ -8,7 +8,92 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.3.2] - 2026-08-30
+
+### Changed
+
+- Updated the `@aura-stack/react` dependency to `v0.3.2`. [#273](https://github.com/aura-stack-ts/auth/pull/273)
+
+---
+
+## [0.3.1] - 2026-08-22
+
 ### Added
+
+- Added the `NextAppInstance` type to expose the auth instance type for Next.js App Router integration. [#257](https://github.com/aura-stack-ts/auth/pull/257)
+
+### Changed
+
+- Updated the `@aura-stack/react` dependency to `v0.3.1`. [#262](https://github.com/aura-stack-ts/auth/pull/262)
+
+### Fixed
+
+- Fixed type inference for `signUp.schema` and `identity.schema` across authentication instances. The configured Zod, Valibot, TypeBox, or ArkType schema is now correctly propagated through the auth instance. Updated `InferUser`, `InferSession`, and `InferSignUp` to correctly derive their types from the corresponding auth instance. [#256](https://github.com/aura-stack-ts/auth/pull/256)
+
+---
+
+## [0.3.0] - 2026-08-05
+
+### Added
+
+- Added the `api.revokeToken()`, `api.disconnectProvider()`, `api.isProviderConnected()`, and `api.refreshUserInfo()` APIs for Next.js applications. The APIs automatically forward request headers using the `headers()` function from `next/headers`, providing server-side integrations for OAuth and OpenID Connect (OIDC) token management, provider connectivity, and user profile synchronization. [#251](https://github.com/aura-stack-ts/auth/pull/251)
+
+- Re-exported the `useRevokeToken()`, `useDisconnectProvider()`, `useIsProviderConnected()`, and `useRefreshUserInfo()` hooks from `@aura-stack/react`, making them available directly from this package. Each hook exposes its corresponding API function and an `isPending` state, providing React integrations for OAuth and OpenID Connect (OIDC) token management, provider connectivity, and user profile synchronization. [#250](https://github.com/aura-stack-ts/auth/pull/250)
+
+- Added the `api.getAccessToken()` API with built-in support for automatically forwarding request headers via the `headers()` function from `next/headers`, simplifying server-side access to the provider `accessToken`. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
+- Re-exported the `useAccessToken()` hook from `@aura-stack/react`, making it available directly from this package. The hook exposes `getAccessToken()` and `isPending` for retrieving the provider `accessToken` after a successful OAuth or OpenID Connect (OIDC) sign-in. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
+---
+
+## [0.2.2] - 2026-07-07
+
+### Added
+
+- Added the `api.getProviderTokens()` API with built-in support for automatically forwarding request headers via the `headers()` function from `next/headers`, simplifying server-side usage in Next.js applications. [#215](https://github.com/aura-stack-ts/auth/pull/215)
+
+- Re-exported `useProviderTokens()` from `@aura-stack/react`, making the hook available directly from this package. The hook exposes `getProviderTokens()` and `isPending` for retrieving provider `accessToken` and `refreshToken` values after a successful OAuth or OpenID Connect (OIDC) sign-in. [#214](https://github.com/aura-stack-ts/auth/pull/214)
+
+### Fixed
+
+- Fixed type inference for the `signUp.schema` configuration. Sign-up schema types are now inferred correctly throughout the authentication flow. [#216](https://github.com/aura-stack-ts/auth/pull/216)
+
+---
+
+## [0.2.1] - 2026-07-04
+
+### Fixed
+
+- Republished the package to include the missing `huggingface` OAuth provider in the published package.
+  > This release contains no code changes compared to `v0.2.0`; it only corrects the published package contents.
+
+---
+
+## [0.2.0] - 2026-07-04
+
+### Added
+
+- Added a `useSignUp` hook for interacting with the mounted `POST /signUp` endpoint. It returns an object with `signUp` and `isPending` fields. [#184](https://github.com/aura-stack-ts/auth/pull/184)
+
+- Introduced an experimental `signUp` flow for both the API and endpoint definitions. The new action enables user account creation within the authentication system and provides customizable payload validation through the supported schema. To enable this feature, developers must configure the `signUp` option when calling `createAuth`. [#183](https://github.com/aura-stack-ts/auth/pull/183)
+
+### Changed
+
+- Updated the `@aura-stack/auth` dependency to `v0.8.0`. [#211](https://github.com/aura-stack-ts/auth/pull/211)
+
+---
+
+## [0.1.0] - 2026-06-05
+
+### Added
+
+- Added a `/cookies` entry module for cookie management, providing utilities for authentication integrations and framework-specific packages. [#178](https://github.com/aura-stack-ts/auth/pull/178)
+
+- Added full support for the Pages Router strategy and introduced new entry modules `/pages/client` and `/pages/context` for accessing dedicated features. [#176](https://github.com/aura-stack-ts/auth/pull/176)
+
+- Introduced the `createAuth` function to manage the Next.js Pages Router. It includes the `toHandler` adapter for handling Node.js requests and is accessible from the `/pages` entry module. [#169](https://github.com/aura-stack-ts/auth/pull/169)
 
 - Updated Next.js API functions (`signIn`, `signInCredentials`, `updateSession`, and `signOut`) to align with the standardized core API contracts, including improved conditional return types for redirect flows, consistent cookie synchronization from API response headers, and support for redirect-aware `updateSession` behavior in App Router helpers. [#146](https://github.com/aura-stack-ts/auth/pull/146)
 

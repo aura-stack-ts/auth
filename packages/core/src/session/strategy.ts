@@ -1,27 +1,28 @@
-import { AuthInvalidConfigurationError } from "@/shared/errors.ts"
-import { createStatelessStrategy } from "@/session/stateless.ts"
-import type { CreateSessionStrategyOptions, SessionStrategy, User, UserShape } from "@/@types/session.ts"
-import { EditableShape, ZodShapeToObject } from "@/@types/utility.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
+import { isStatelessStrategy } from "@/shared/assert.ts"
+import { createCookieManager } from "@/session/cookie-manager.ts"
+import { createStatefulStrategy } from "@/session/stateful/index.ts"
+import { createStatelessStrategy } from "@/session/stateless/index.ts"
+import type { SessionStrategy, User, FromShapeToObject, Identities } from "@/@types/index.ts"
+import type { CreateSessionStrategyOptions, InternalStatefulContext, InternalStatelessContext } from "@/@types/internal.ts"
 
-export const createSessionStrategy = <Identity extends EditableShape<UserShape>>({
-    config,
-    jose,
-    cookies,
-    logger,
-    identity,
-}: CreateSessionStrategyOptions<Identity>): SessionStrategy<ZodShapeToObject<Identity> & User> => {
-    const strategy = config?.strategy ?? "jwt"
+export const createSessionStrategy = <Identity extends Identities>(
+    config: CreateSessionStrategyOptions<Identity>
+): SessionStrategy<FromShapeToObject<Identity> & User> => {
+    const strategy = config?.ctx?.sessionConfig?.strategy ?? "jwt"
+    const cookieManager = createCookieManager(config.cookies)
+    const ctx = { ...config, cookieManager }
+
+    if (!isStatelessStrategy(config?.ctx?.sessionConfig) && !config?.ctx?.sessionConfig?.adapter) {
+        throw new AuraAuthError({ code: "MISSING_ADAPTER_IN_STATEFUL_STRATEGY" })
+    }
 
     switch (strategy) {
         case "jwt":
-            return createStatelessStrategy({
-                jose,
-                config,
-                cookies,
-                logger,
-                identity,
-            })
+            return createStatelessStrategy(ctx as InternalStatelessContext)
+        case "database":
+            return createStatefulStrategy(ctx as InternalStatefulContext)
         default:
-            throw new AuthInvalidConfigurationError(`[auth] unknown session strategy "${strategy}". Valid options are: "jwt".`)
+            throw new AuraAuthError({ code: "INVALID_SESSION_STRATEGY" })
     }
 }

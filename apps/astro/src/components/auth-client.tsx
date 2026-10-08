@@ -1,11 +1,12 @@
 import { LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@aura-stack/react"
+import { useAuthActions, useSession } from "@aura-stack/react"
 import { AuthProvider } from "@/contexts/auth"
 import type { Session } from "@aura-stack/auth"
 
 const AuthClientContent = () => {
-    const { session, status, isPending, signIn, signOut } = useAuth()
+    const { session, status } = useSession()
+    const { isPending, signIn, signOut } = useAuthActions()
     const isAuthenticated = status === "authenticated"
 
     return (

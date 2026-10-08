@@ -8,8 +8,9 @@ export default defineConfig({
         "src/oauth/*.ts",
         "src/@types/index.ts",
         "src/client/index.ts",
-        "src/shared/identity.ts",
+        "src/identity/*.ts",
         "src/shared/crypto.ts",
         "src/shared/index.ts",
+        "src/shared/cookies.ts",
     ],
 })

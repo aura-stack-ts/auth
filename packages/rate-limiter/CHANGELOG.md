@@ -8,6 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.1.1] - 2026-07-04
+
+### Fixed
+
+- Republished the package to correctly expose both the `/algorithms` entry point and individual `/algorithms/{algorithm}` entry points.
+  > This release contains no code changes compared to `v0.1.0`; it only fixes the published package exports.
+
+---
+
+## [0.1.0] - 2026-07-04
+
 ### Added
 
-- Introduced `createRateLimiter` function to create a rate limiter. Currently, the only supported algorithm is `token-bucket`, implemented by the `createTokenBucket` function. [#131](https://github.com/aura-stack-ts/auth/pull/131)
+- Added support for the `sliding-window` rate-limiter algorithm via the `createSlidingWindowAlgorithm` function. The function can be used standalone or integrated with the centralized `createRateLimiter` function. [#186](https://github.com/aura-stack-ts/auth/pull/186)
+
+- Added support for the `leaky-bucket` rate-limiter algorithm via the `createLeakyBucketAlgorithm` function. The function can be used standalone or integrated with the centralized `createRateLimiter` function. [#186](https://github.com/aura-stack-ts/auth/pull/186)
+
+- Added support for the `fixed-window` rate-limiter algorithm via the `createFixedWindowAlgorithm` function. The function can be used standalone or integrated with the centralized `createRateLimiter` function. [#185](https://github.com/aura-stack-ts/auth/pull/185)
+
+- Introduced `createRateLimiter` function to create a rate limiter. Currently, the only supported algorithm is `token-bucket`, implemented by the `createTokenBucketAlgorithm` function. [#131](https://github.com/aura-stack-ts/auth/pull/131)

@@ -1,70 +1,21 @@
 import { getEnv } from "@/shared/env.ts"
+import { isString } from "@/shared/assert.ts"
 import { encoder } from "@aura-stack/jose/crypto"
-import { AuthInternalError } from "@/shared/errors.ts"
-import { isRelativeURL, isValidURL } from "@/shared/assert.ts"
-import type { ZodError } from "zod/v4"
-import type { APIErrorMap } from "@/@types/index.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
+import type { OAuthTokenPayload } from "@/@types/index.ts"
+import type { OAuthAccessTokenResponseType } from "@/@types/internal.ts"
 
-export const AURA_AUTH_VERSION = "0.5.0"
+export const AURA_AUTH_VERSION = "0.9.0"
 
 export const equals = (a: string | number | undefined | null, b: string | number | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
     return a === b
 }
 
-export const getBaseURL = (request: Request) => {
-    const url = new URL(request.url)
-    return `${url.origin}${url.pathname}`
-}
-
-export const isSecureConnection = (request: Request | Headers, trustedProxyHeaders: boolean): boolean => {
-    const headers = request instanceof Headers ? request : request.headers
-    const url = request instanceof Headers ? null : request.url
-    return trustedProxyHeaders
-        ? url?.startsWith("https://") ||
-              headers.get("X-Forwarded-Proto") === "https" ||
-              (headers.get("Forwarded")?.includes("proto=https") ?? false)
-        : (url?.startsWith("https://") ?? false)
-}
-
-export const formatZodError = <T extends Record<string, unknown> = Record<string, unknown>>(error: ZodError<T>): APIErrorMap => {
-    if (!error.issues || error.issues.length === 0) {
-        return {}
-    }
-    return error.issues.reduce((previous, issue) => {
-        const key = issue.path.join(".")
-        return {
-            ...previous,
-            [key]: {
-                code: issue.code,
-                message: issue.message,
-            },
-        }
-    }, {})
-}
-
 export const extractPath = (url: string): string => {
     const pathRegex = /^https?:\/\/[a-zA-Z0-9_\-.]+(:\d+)?(\/.*)$/
     const match = url.match(pathRegex)
     return match && match[2] ? match[2] : "/"
-}
-
-export const getErrorName = (error: unknown): string => {
-    if (error instanceof Error) {
-        return error.name
-    }
-    return typeof error === "string" ? error : "UnknownError"
-}
-
-/**
- * Validates and sanitizes redirect URLs to prevent open redirect attacks.
- * Only relative URLs (starting with /) are allowed; absolute URLs are
- * rejected and replaced with "/" to enforce same-origin redirects.
- */
-export const validateRedirectTo = (url: string): string => {
-    if (!isRelativeURL(url) && !isValidURL(url)) return "/"
-    if (isRelativeURL(url)) return url
-    return "/"
 }
 
 /**
@@ -83,6 +34,7 @@ export const patternToRegex = (pattern: string): RegExp | null => {
         const [, protocol, host, port] = match
         const hasWildcard = host.includes("*")
         if (hasWildcard && !host.startsWith("*.")) return null
+        if (hasWildcard && !host.startsWith("*.")) return null
         if (hasWildcard && host.slice(2).includes("*")) return null
 
         const domain = hasWildcard ? host.slice(2) : host
@@ -96,37 +48,44 @@ export const patternToRegex = (pattern: string): RegExp | null => {
     }
 }
 
-export const timingSafeEqual = (a: string, b: string): boolean => {
-    const bufferA = encoder.encode(a)
-    const bufferB = encoder.encode(b)
-    const len = Math.max(bufferA.length, bufferB.length)
-    let diff = 0
-    for (let i = 0; i < len; i++) {
-        diff |= (bufferA[i] ?? 0) ^ (bufferB[i] ?? 0)
-    }
-    return diff === 0 && bufferA.length === bufferB.length
-}
-
 export const createBasicAuthHeader = (username: string, password: string): string => {
     const getUsername = getEnv(username) ?? username
     const getPassword = getEnv(password) ?? password
     if (!getUsername || !getPassword) {
-        throw new AuthInternalError("INVALID_OAUTH_CONFIGURATION", "Missing client credentials for OAuth provider configuration.")
+        throw new AuraAuthError({ code: "AUTH_BASIC_CREDENTIALS_INVALID" })
     }
     const credentials = `${getUsername}:${getPassword}`
     const binaryCredentials = String.fromCharCode.apply(null, Array.from(encoder.encode(credentials)))
     return `Basic ${btoa(binaryCredentials)}`
 }
 
-export const toUnionHeaders = (init: Headers, headers: HeadersInit): Headers => {
-    new Headers(headers).forEach((value, key) => {
-        if (!init.has(key)) {
-            if (key.toLowerCase() === "set-cookie") {
-                init.append(key, value)
-            } else {
-                init.set(key, value)
-            }
+export const shouldRefresh = (payload: OAuthTokenPayload, refreshWindow: number): boolean => {
+    if (!payload.accessTokenExpiresAt && !payload.refreshToken) return false
+    const now = Math.floor(Date.now() / 1000)
+    if (now >= payload.expiresAt) return true
+    if (payload.expiresAt - now <= refreshWindow) return true
+    return false
+}
+
+export const merge = (origin: Record<string, unknown>, source: Record<string, unknown>) => {
+    for (const key in source) {
+        if (source[key] instanceof Object && !(source[key] instanceof Array) && key in origin) {
+            Object.assign(source[key], merge(origin[key] as Record<string, unknown>, source[key] as Record<string, unknown>))
         }
-    })
-    return init
+    }
+    return { ...origin, ...source }
+}
+
+export const transformToTokenPayload = (tokens: OAuthAccessTokenResponseType & { id_token?: string }) => {
+    const now = Math.floor(Date.now() / 1000)
+    return {
+        accessToken: tokens.access_token,
+        expiresAt: tokens.expires_in ? now + tokens.expires_in : undefined,
+        refreshToken: tokens.refresh_token,
+        refreshTokenExpiresAt: tokens.refresh_token_expires_in ? now + tokens.refresh_token_expires_in : undefined,
+        idToken: tokens.id_token,
+        tokenType: tokens.token_type ?? "Bearer",
+        scopes: isString(tokens.scope) ? [tokens.scope] : Array.isArray(tokens.scope) ? tokens.scope : [],
+        issuedAt: now,
+    }
 }

@@ -1,12 +1,13 @@
 import { Link, useRevalidator } from "react-router"
 import { Button } from "~/components/ui/button"
-import { useAuth } from "@aura-stack/react-router/client"
-import { EditProfile } from "~/components/edit-profile"
+import { useAuthActions, useSession } from "@aura-stack/react-router/client"
+import { EditProfile } from "~/components/client/edit-profile"
 import type { SubmitEvent } from "react"
 
 export const AuthClientPage = () => {
     const revalidator = useRevalidator()
-    const { session, status, isPending, signIn, signOut, signInCredentials, updateSession } = useAuth()
+    const { session, status } = useSession()
+    const { isPending, signIn, signOut, signInCredentials, updateSession } = useAuthActions()
     const isAuthenticated = status === "authenticated"
 
     const handleSignInCredentials = async (event: SubmitEvent<HTMLFormElement>) => {
@@ -53,14 +54,14 @@ export const AuthClientPage = () => {
                     </p>
                 </div>
             </section>
-            <section className="mt-8 max-w-lg mx-auto border bg-black">
+            <section className="mt-8 max-w-lg mx-auto border">
                 {isAuthenticated ? (
                     <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {session?.user?.image ? (
                             <img className="rounded-full" src={session.user.image} alt={session?.user?.name ?? "User"} />
                         ) : (
                             <span className="size-14 block rounded-full ring-2 ring-white/40">
-                                <span className="h-full w-full p-0.5 aspect-square text-xl font-bold flex items-center justify-center rounded-full bg-black">
+                                <span className="h-full w-full p-0.5 aspect-square text-xl font-bold flex items-center justify-center rounded-full">
                                     {session?.user?.name?.[0] || "?"}
                                 </span>
                             </span>
@@ -119,7 +120,7 @@ export const AuthClientPage = () => {
                             </div>
                             <p className="my-5 relative">
                                 <span className="w-full h-px block absolute top-1/2 bg-white/40" />
-                                <span className="px-2 relative z-10 bg-black">Or continue with</span>
+                                <span className="px-2 relative z-10">Or continue with</span>
                             </p>
                             <form className="w-full text-start" onSubmit={handleSignInCredentials}>
                                 <div>
@@ -130,6 +131,7 @@ export const AuthClientPage = () => {
                                         type="text"
                                         id="username"
                                         name="username"
+                                        aria-label="Username"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>
@@ -141,6 +143,7 @@ export const AuthClientPage = () => {
                                         type="password"
                                         id="password"
                                         name="password"
+                                        aria-label="Password"
                                         className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                                     />
                                 </div>

@@ -1,0 +1,119 @@
+---
+title: Hono
+description: Integrate Aura Auth and Hono
+---
+
+This guide walks you through to implement Aura Auth in a Hono application to a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Hono application.
+
+---
+
+<Steps>
+
+<Step>
+
+## Setup Aura Auth
+
+### Create an Auth Instance
+
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
+
+```ts title="src/lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/hono"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+  baseURL: "http://localhost:3000",
+})
+
+export const { toHandler, withAuth, api, jose } = auth
+```
+
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Mount the Aura Auth handlers using a wildcard route under your `/api/auth` subpath. Hono passes the native Web Standard `Request` object through `c.req.raw`, so the handler can delegate directly.
+
+```ts title="src/index.ts" lineNumbers
+import { Hono } from "hono"
+import { toHandler } from "@/lib/auth"
+
+const app = new Hono()
+
+app.all("/api/auth/*", toHandler)
+
+export default app
+```
+
+</Step>
+
+<Step>
+
+## Usage
+
+### Middleware
+
+Middleware is a powerful way to protect your routes and access session data across your app. Use the built-in `withAuth` middleware.
+
+The plugin returns session data only when the request is authenticated, which keeps downstream routes simple and predictable.
+
+### Get Session
+
+Use the middleware in your app and protect routes by checking for an active session before allowing access.
+
+```ts title="src/index.ts" lineNumbers
+import { Hono } from "hono"
+import { toHandler, withAuth } from "@/lib/auth"
+
+const app = new Hono()
+
+app.get("/", (ctx) => {
+  return ctx.text("Welcome to the Aura Auth Hono App!")
+})
+
+app.all("/api/auth/*", toHandler)
+
+app.get("/api/protected", withAuth, (ctx) => {
+  const session = ctx.get("session")
+  return ctx.json({
+    message: "You have access to this protected resource.",
+    session,
+  })
+})
+
+export default app
+```
+
+This pattern works well for dashboards, account endpoints, and any route that should not return private data unless the request is authenticated.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with your auth route**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Import the middleware from the correct folder**. The shared middleware lives in `src/middlewares/with-auth.ts`.
+- **Use `session.authenticated` as the guard**. Check that flag before exposing private data.
+- **Keep the auth handler and route logic separate**. The auth route should only forward requests to Aura Auth.
+
+---
+
+## Resources
+
+- [Hono Documentation](https://hono.dev/)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Hono Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/hono)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/api-reference/options)
+- [TypeScript Guide](/docs/concepts/typescript)

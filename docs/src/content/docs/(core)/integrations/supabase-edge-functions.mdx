@@ -1,0 +1,124 @@
+---
+title: Supabase Edge Functions
+description: Integrate Aura Auth and Supabase Edge Functions
+---
+
+This guide walks you through implementing Aura Auth in a Supabase Edge Functions application with complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Supabase Edge Functions application.
+
+---
+
+<Steps>
+
+<Step>
+
+## Set up `config.toml`
+
+This defines the edge function's route and permissions. Ensure the `index.ts` entrypoint is correctly referenced so Supabase can locate the function.
+
+```toml title="config.toml"
+[functions.auth]
+enabled = true
+# disable JWT verification for faster local development. DO NOT disable in production.
+verify_jwt = false
+import_map = "./functions/auth/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/auth/index.ts"
+```
+
+</Step>
+
+<Step>
+
+## Setup Aura Auth
+
+### Create an Auth Instance
+
+Create an `auth.ts` file in `functions/_shared/` to configure authentication and export the shared helpers used by the function route.
+
+```ts title="supabase-app/functions/_shared/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers, jose, api } = auth
+```
+
+`basePath` must match the route you expose in your Supabase function. If the route changes, update the auth config and function route together.
+
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Using Supabase Edge Function execution, define your handler with `Deno.serve`. The function below routes auth requests to Aura Auth and keeps protected route logic separate from the handler itself.
+
+```ts title="supabase/functions/auth/index.ts" lineNumbers
+import { handlers, api } from "../_shared/auth.ts"
+
+// Follow this setup guide to integrate the Deno language api with your editor:
+// https://deno.land/manual/getting_started/setup_your_environment
+// This enables autocomplete, go to definition, etc.
+import "@supabase/functions-js/edge-runtime.d.ts"
+
+Deno.serve(async (request) => {
+  const pathname = new URL(request.url).pathname
+  switch (pathname) {
+    case "/api/protected": {
+      const session = await api.getSession({
+        headers: request.headers,
+      })
+      if (!session.authenticated) {
+        return Response.json(
+          {
+            error: "Unauthorized",
+            message: "Active session required.",
+          },
+          { status: 401 }
+        )
+      }
+      return Response.json({
+        message: "You have access to this protected resource.",
+        session: session.session,
+      })
+    }
+    default: {
+      if (pathname.startsWith("/api/auth/")) {
+        return await handlers.ALL(request)
+      }
+      return new Response("Not Found", { status: 404 })
+    }
+  }
+})
+```
+
+This structure keeps all auth endpoints in one place and gives you a clear place to add additional protected routes later.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with the function route**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Make sure `config.toml` points at the correct entrypoint**. Supabase needs to know where `functions/auth/index.ts` lives.
+- **Pass the current request headers to `api.getSession()`**. The session lookup needs headers so Aura Auth can read cookies correctly.
+- **Check `session.authenticated` before returning private data**. Use the authenticated flag as your guard for protected responses.
+
+---
+
+## Resources
+
+- [Supabase Edge Functions Documentation](https://supabase.com/docs/guides/functions)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Supabase Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/supabase)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/api-reference/options)
+- [TypeScript Guide](/docs/concepts/typescript)

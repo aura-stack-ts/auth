@@ -20,7 +20,7 @@ Use this skill whenever the user asks for Aura Auth setup, auth route wiring, OA
 
 ## Output Contract (Strict)
 
-Always return ALL of the following unless explicitly scoped otherwise:
+Always return ALL of the following unless explicitly scoped otherwise. If the user asks for a subset, produce only the requested pieces.
 
 1. Setup plan customized to detected runtime and framework.
 2. Correct install commands for package manager and adapters.
@@ -57,42 +57,46 @@ Return all of the following in one response unless the user asks for a subset:
 
 Before writing files, collect or detect:
 
-1. Runtime/framework:
-   - Read project indicators (package.json, deno.json, framework config files).
-   - If multiple frameworks are found, ask user to choose primary auth host.
-2. Package manager from lockfile:
-   - `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lock`.
-3. OAuth provider target:
-   - Default to `github` when unspecified.
-4. Local and deployment URLs:
-   - Default local to http://localhost:3000 if unknown.
-5. Scope:
-   - Server-only setup or server + client helper.
+1. Runtime / framework detection (priority order):
+   - Inspect `package.json`, `deno.json`, `wrangler.jsonc`, `next.config.ts`, `astro.config.mjs`, `tsconfig.json` and `apps/*` folders.
+   - If adapters appear in `packages/` (e.g., `packages/next`, `packages/express`, `packages/astro`) prefer those conventions.
+   - If multiple runtime candidates are present, ask: "Which runtime should host auth (e.g., nextjs, express, cloudflare)?"
+2. Package manager and install command:
+   - Check `pnpm-lock.yaml`, `pnpm-workspace.yaml` -> use `pnpm`.
+   - Check `package-lock.json` -> use `npm`.
+   - Check `yarn.lock` -> use `yarn`.
+   - Check `bun.lockb` or `bun` in `engines` -> use `bun`.
+3. OAuth provider(s):
+   - Default to `github` if not specified. Ask which providers they want when not obvious.
+4. Local and production base URLs:
+   - Default local to `http://localhost:3000`. Ask for deployed host if known (e.g., Vercel, Cloudflare, Supabase).
+5. Scope and client-side needs:
+   - Ask whether the repository contains a frontend that should receive `createAuthClient` snippets.
 
-If critical inputs are missing and cannot be inferred, ask concise follow-up questions before writing code.
+Follow-up questions should be minimal and only when necessary (two short questions maximum recommended).
 
 ### Secret generation consent flow (mandatory)
 
-Before generating secrets, ask:
+Always ask before generating or printing real secrets.
 
-> "Do you want me to generate secure `AURA_AUTH_SALT` and `AURA_AUTH_SECRET` values now?"
+Ask: "Do you want me to generate secure `AURA_AUTH_SALT` and `AURA_AUTH_SECRET` values now?"
 
-- If user accepts: run a generation command and return values once.
-- If user declines: keep placeholders and explain where to generate later.
+- If the user accepts: generate secure values locally (explain the generation method) and paste them once in the response. Also print an `export`/`.env` snippet and recommend copying to a secure vault.
+- If the user declines: leave placeholders in the templates and point to `scripts/update-auth-env.sh` for a safe, idempotent local updater.
 
-Idempotent `.env` updater script: see [scripts/update-auth-env.sh](scripts/update-auth-env.sh).
-
-Run it with: [script](./scripts/update-auth-env.sh)
-
-Never auto-generate without consent. Always ask first and explain the benefits of using generated secrets.
+Never generate or commit secrets without explicit user consent.
 
 ---
+
+Only official adapter packages should be recommended when available. For unsupported adapters recommend using the `@aura-stack/auth` core package plus a minimal adapter shim with clear examples.
+
+The repo contains many `packages/*` adapters — prefer their conventions when wiring routes and examples.
 
 ## Implementation Steps
 
 ### 1) Install Dependencies
 
-Use detected package manager. Example:
+Use the detected package manager. Example (pnpm detected in this repo):
 
 ```bash
 pnpm add @aura-stack/auth
@@ -100,7 +104,7 @@ pnpm add @aura-stack/auth
 
 ### 2) Create auth module
 
-Default module example (src/lib/auth.ts):
+Default module example (server source path depending on framework, e.g. `src/lib/auth.ts`):
 
 ```ts
 import { createAuth } from "@aura-stack/auth"
@@ -111,177 +115,13 @@ export const { handlers, jose, api } = createAuth({
 })
 ```
 
-Prefer minimal defaults first, then layer advanced options only if user asks.
-
-### 3) Wire route handlers correctly
-
-The handler mount must match basePath exactly.
-
-Next.js App Router (src/app/api/auth/[...aura]/route.ts):
-
-```ts
-import { handlers } from "@/lib/auth"
-
-export const { GET, POST, PATCH } = handlers
-```
-
-Next.js Pages Router:
-
-```ts
-import { handlers } from "@/lib/auth"
-export default async function handler(req, res) {
-  const response = await handlers.ALL(req)
-  res.status(response.status).set(response.headers).send(response.body)
-}
-```
-
-Astro:
-
-```ts
-import { handlers } from "@/lib/auth"
-
-import type { APIRoute } from "astro"
-
-export const GET: APIRoute = async ({ request }) => {
-  return await handlers.GET(request)
-}
-
-export const POST: APIRoute = async ({ request }) => {
-  return await handlers.POST(request)
-}
-```
-
-React Router:
-
-```ts
-import { handlers } from "~/lib/auth"
-import type { Route } from "./+types/api.auth.$"
-
-export const loader = async ({ request }: Route.LoaderArgs) => {
-  return handlers.GET(request)
-}
-
-export const action = async ({ request }: Route.ActionArgs) => {
-  return handlers.POST(request)
-}
-```
-
-TanStack Start:
-
-```ts
-import { handlers } from "@/lib/auth"
-import { createFileRoute } from "@tanstack/react-router"
-
-export const Route = createFileRoute("/api/auth/$")({
-  server: {
-    handlers: {
-      GET: async ({ request }) => {
-        return await handlers.GET(request)
-      },
-      POST: async ({ request }) => {
-        return await handlers.POST(request)
-      },
-      PATCH: async ({ request }) => {
-        return await handlers.PATCH(request)
-      },
-    },
-  },
-})
-```
-
-Express:
-
-```ts
-app.use("/api/auth", async (req, res) => {
-  const response = await handlers.ALL(toWebRequest(req))
-  return toExpressResponse(response, res)
-})
-```
-
-```ts
-app.use("/api/auth", async (req, res) => {
-  const response = await handlers.ALL(toWebRequest(req))
-  return toExpressResponse(response, res)
-})
-```
-
-Hono:
-
-```ts
-app.all("/api/auth/*", async (ctx) => {
-  return await handlers.ALL(ctx.req.raw)
-})
-```
-
-Elysia:
-
-```ts
-import { handlers } from "@/lib/auth"
-import type { Context } from "elysia"
-
-app.all("/api/auth/*", handlers.ALL)
-```
-
-Cloudflare Worker:
-
-```ts
-if (new URL(request.url).pathname.startsWith("/api/auth/")) {
-  return await handlers.ALL(request)
-}
-```
-
-Deno or Supabase Edge Function:
-
-```ts
-import { handlers } from "@/lib/auth"
-Deno.serve(async (request) => {
-  const pathname = new URL(request.url).pathname
-  if (pathname.startsWith("/api/auth/")) {
-    return await handlers.ALL(request)
-  }
-})
-```
-
-Vercel Edge Function:
-
-```ts
-import { handlers } from "@/lib/_auth"
-
-export const GET = async (request: Request) => {
-  return await handlers.GET(request)
-}
-
-export const POST = async (request: Request) => {
-  return await handlers.POST(request)
-}
-
-export const PATCH = async (request: Request) => {
-  return await handlers.PATCH(request)
-}
-```
+For more detials about createAuth function read [createAuth Reference](./reference/create-auth.md)
 
 ### 4) Client compatibility gate
 
-Create createAuthClient only for client-capable targets.
+Only add `createAuthClient` when the detected target includes a frontend runtime that will call the auth endpoints directly (Next.js app, Astro, React app, etc.).
 
-Client-capable:
-
-- Next.js
-- Nuxt
-- Astro
-- React Router
-- TanStack Start
-
-Server-only by default:
-
-- Express API-only
-- Hono API-only
-- Cloudflare Worker API-only
-- Deno/Bun backend-only
-
-If server-only, respond with:
-
-This target is server-only, so I will not create a client auth API here. If you have a separate frontend app, I can set up createAuthClient there.
+If the project is API-only (Express, Hono, Cloudflare Worker, standalone Deno/Bun service), do not generate client code — instead output a concise note explaining how to integrate a separate frontend.
 
 ### 5) Add client helper only when allowed
 
@@ -322,10 +162,12 @@ Provider key map examples:
 
 Security requirements:
 
-- Never print real secrets unless user explicitly asked to generate them now.
-- Never commit populated .env files.
-- Ensure .env is ignored by .gitignore.
-- Keep .env.example placeholders only.
+Security requirements:
+
+- Never print real secrets unless the user explicitly asks to generate them now.
+- Never commit populated `.env` files.
+- Ensure `.env` is ignored by `.gitignore`.
+- Keep `.env.example` placeholders only.
 
 ---
 
@@ -341,6 +183,8 @@ const session = await api.getSession({
 
 If client helper is created, include at least one client action:
 
+If client helper is created, include at least one client action:
+
 ```ts
 await authClient.signIn("github", { redirect: true })
 ```
@@ -351,9 +195,11 @@ await authClient.signIn("github", { redirect: true })
 
 Every answer generated with this skill must be:
 
-1. Correct for the detected framework routing model.
+Every answer generated with this skill must be:
+
+1. Correct for the detected framework routing model and use the repository's adapter conventions when present.
 2. Minimal in code changes and aligned with user conventions.
-3. Explicit about why each created file exists.
+3. Explicit about why each created or modified file exists and where to place it.
 4. Safe about secrets and environment handling.
 5. Actionable to run without extra hidden assumptions.
 
@@ -376,6 +222,65 @@ Every answer generated with this skill must be:
 
 ## 6. Troubleshooting (Ordered)
 ```
+
+## createAuth Configuration Options (Summary)
+
+When producing `createAuth` examples, include and explain the most common configuration options. For full details, link to the detailed reference: [reference/create-auth.md](reference/create-auth.md).
+
+- `oauth`: Array of built-in provider IDs or full provider configs (e.g., `"github"` or `{ id: "custom", authorize: { url: "..." }, clientId, clientSecret }`). See provider examples in [reference/create-auth.md](reference/create-auth.md#oauth).
+- `session`: Session strategy and JWT settings (strategy: `"jwt"` or others, `jwt.mode`, `jwt.maxAge`). Default recommendation: sealed JWT with 7-day expiry.
+- `secret`: Cryptographic secret or keys; prefer environment variables `AURA_AUTH_SECRET` / `AUTH_SECRET` and ask for consent before generating.
+- `cookies`: `prefix`, `overrides` for individual cookie names and strategies (`secure`, `host`, `standard`). Link to cookie guidance in [reference/create-auth.md](reference/create-auth.md#cookies).
+- `basePath`: Mount path for auth routes (default `/auth`). Ensure route handlers match this path exactly — see each integration doc.
+- `baseURL`: Public application URL for redirect construction; recommend setting in production.
+- `identity`: Identity schema and validation options (`schema`, `skipValidation`, `unknownKeys`). See identity docs in [reference/create-auth.md](reference/create-auth.md#identity-schema).
+- `credentials`: Credentials provider for username/password flows (authorize handler, hashing helpers).
+- `signUp`: Sign-up flow configuration and callbacks for user creation.
+- `rateLimiter`: Rate limiting rules for auth endpoints.
+- `trustedOrigins` & `trustedProxyHeaders`: Configure redirect validation and proxy awareness (use carefully).
+- `logger`: `true` or custom logger implementing Aura Auth `Logger` interface.
+
+When generating examples for a specific framework, link to the integration guide under `reference/integrations/` (examples below).
+
+## Integration Guides (quick links)
+
+- Astro: [reference/integrations/astro.md](reference/integrations/astro.md)
+- Next.js App Router: [reference/integrations/nextjs-app-router.md](reference/integrations/nextjs-app-router.md)
+- Next.js Pages Router: [reference/integrations/nextjs-pages-router.md](reference/integrations/nextjs-pages-router.md)
+- Express: [reference/integrations/express.md](reference/integrations/express.md)
+- Elysia: [reference/integrations/elysia.md](reference/integrations/elysia.md)
+- Hono: [reference/integrations/hono.md](reference/integrations/hono.md)
+- React: [reference/integrations/react.md](reference/integrations/react.md)
+- React Router: [reference/integrations/react-router.md](reference/integrations/react-router.md)
+- Cloudflare Workers: [reference/integrations/cloudflare-workers.md](reference/integrations/cloudflare-workers.md)
+- Vercel Edge Functions: [reference/integrations/vercel-edge-functions.md](reference/integrations/vercel-edge-functions.md)
+- Supabase Edge Functions: [reference/integrations/supabase-edge-functions.md](reference/integrations/supabase-edge-functions.md)
+- TanStack Start: [reference/integrations/tanstack-start.md](reference/integrations/tanstack-start.md)
+
+Include the relevant integration link in every response when the framework is detected.
+
+## Example Prompts
+
+- "Set up Aura Auth for my Next.js app with GitHub and Google providers, using pnpm."
+- "Add auth handlers to `apps/astro` and create a client helper in `apps/astro/src/client.ts`."
+- "I want an Express API-only auth server; don't generate client code."
+
+## Iteration & Delivery
+
+1. Draft: produce the plan and code snippets.
+2. Ask the user for missing inputs (provider, host, consent for secrets).
+3. Apply changes (create files) only after confirmation.
+4. Run a light verification checklist and update until green.
+
+## Suggested Next Customizations
+
+- Add a `create-auth` generator script (`bin/create-auth`) to scaffold files automatically.
+- Add framework-specific tests under `packages/*/test` to verify example routes.
+- Create `docs/content/docs/examples/auth-quickstart.mdx` with copy-paste examples for the most common stacks.
+
+---
+
+References used from the repository: `packages/` adapter folders and `docs/content/docs` examples.
 
 ---
 

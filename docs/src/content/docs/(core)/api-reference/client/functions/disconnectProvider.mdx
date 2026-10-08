@@ -1,0 +1,59 @@
+---
+title: disconnectProvider
+description: Disconnect an OAuth provider from the current session, from the client.
+---
+
+The `disconnectProvider` client method disconnects an OAuth provider from the current session, without revoking its access token, from a client-side or browser context.
+
+```ts title="disconnect-provider.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const success = await authClient.disconnectProvider("github")
+```
+
+<Callout>
+  This is a softer alternative to `revokeToken`: it disconnects the provider from the session without revoking the access token
+  itself. See [`revokeToken`](/docs/api-reference/client/functions/revokeToken) for the stronger alternative.
+</Callout>
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type     | Required | Description                                 |
+| ---------- | -------- | -------- | ------------------------------------------- |
+| providerId | `string` | Yes      | The id of the OAuth provider to disconnect. |
+
+### Returns
+
+| Return Type        | Description                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `Promise<boolean>` | Resolves to `true` if the provider was successfully disconnected, `false` otherwise. |
+
+## Behavior
+
+- Cookies are read automatically from the browser context — you don't need to handle them or CSRF tokens manually.
+- The access token itself remains valid until it naturally expires or is separately revoked with `revokeToken`.
+- If disconnection fails (the provider isn't connected to the current session), the method resolves to `false` — this does not throw an error, as "not connected" is an expected outcome.
+
+## Usage
+
+### Disconnect a provider
+
+```ts title="disconnect-provider.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const success = await authClient.disconnectProvider("github")
+```
+
+### Handling failure
+
+```tsx title="handle-failure.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const success = await authClient.disconnectProvider("github")
+
+if (!success) {
+  window.location.assign("/settings/connections")
+}
+```

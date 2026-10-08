@@ -1,4 +1,5 @@
 import type {
+    ReactRouterAPI,
     ReactRouterSignInAPIOptions,
     ReactRouterSignInCredentialsAPIOptions,
     ReactRouterSignInCredentialsReturn,
@@ -7,9 +8,32 @@ import type {
     ReactRouterSignOutReturn,
     ReactRouterUpdateSessionReturn,
     ReactRouterUpdateSessionAPIOptions,
-} from "@/@types"
+    ReactRouterSignUpAPIOptions,
+    ReactRouterSignUpReturn,
+    ReactRouterRefreshUserInfoAPIOptions,
+    ReactRouterRevokeTokenAPIOptions,
+    ReactRouterDisconnectProviderAPIOptions,
+    ReactRouterProviderConnectedAPIOptions,
+} from "@/@types/api"
+import type { zod } from "@aura-stack/react/identity/zod"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
-import type { BuiltInOAuthProvider, GetSessionAPIOptions, LiteralUnion } from "@aura-stack/react/types"
+import type {
+    AccessTokenAPIOptions,
+    AccessTokenAPIReturn,
+    BuiltInOAuthProvider,
+    GetProviderTokensAPIOptions,
+    GetProviderTokensAPIReturn,
+    GetSessionAPIOptions,
+    LiteralUnion,
+    RefreshUserInfoAPIReturn,
+    RevokeTokenAPIReturn,
+    DisconnectProviderAPIReturn,
+    ProviderConnectedAPIReturn,
+    SchemaTypes,
+    Wrap,
+    RemoveIndexSignature,
+    InferSchema,
+} from "@aura-stack/react/types"
 
 export const getSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async (options: GetSessionAPIOptions): Promise<Session<DefaultUser> | null> => {
@@ -66,6 +90,21 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
     }
 }
 
+export const getProviderTokens = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async (
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: GetProviderTokensAPIOptions
+    ): Promise<GetProviderTokensAPIReturn> => {
+        return await api.getProviderTokens(oauth, options)
+    }
+}
+
+export const getAccessToken = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: AccessTokenAPIOptions): Promise<AccessTokenAPIReturn> => {
+        return await api.getAccessToken(oauth, options)
+    }
+}
+
 export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async <Options extends ReactRouterSignOutAPIOptions>(options: Options): Promise<ReactRouterSignOutReturn<Options>> => {
         const out = await api.signOut({
@@ -79,7 +118,80 @@ export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<D
     }
 }
 
-export const api = <DefaultUser extends User = User>(config: AuthInstance<DefaultUser>) => {
+type Infer<T> = Wrap<RemoveIndexSignature<InferSchema<T>>> & Record<string, any>
+
+export const signUp = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>({
+    api,
+}: AuthInstance<DefaultUser, SignUpSchema>) => {
+    return async <Options extends ReactRouterSignUpAPIOptions<Infer<SignUpSchema>>>(
+        options: Options
+    ): Promise<ReactRouterSignUpReturn<Options>> => {
+        const signUp = await api.signUp<Infer<SignUpSchema>>({
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options?.redirect === false) {
+            return signUp as ReactRouterSignUpReturn<Options>
+        }
+        return signUp.toResponse() as ReactRouterSignUpReturn<Options>
+    }
+}
+
+export const refreshUserInfo = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterRefreshUserInfoAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options: Options
+    ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
+        const refresh = await api.refreshUserInfo(oauth, {
+            headers: options.request.headers,
+            ...options,
+        })
+        return refresh
+    }
+}
+
+export const revokeToken = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterRevokeTokenAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options: Options
+    ): Promise<RevokeTokenAPIReturn> => {
+        const revoke = await api.revokeToken(oauth, {
+            headers: options.request.headers,
+            ...options,
+        })
+        return revoke
+    }
+}
+
+export const disconnectProvider = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterDisconnectProviderAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options: Options
+    ): Promise<DisconnectProviderAPIReturn> => {
+        const disconnect = await api.disconnectProvider(oauth, {
+            headers: options.request.headers,
+            ...options,
+        })
+        return disconnect
+    }
+}
+
+export const isProviderConnected = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterProviderConnectedAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options: Options
+    ): Promise<ProviderConnectedAPIReturn> => {
+        const connected = await api.isProviderConnected(oauth, {
+            headers: options.request.headers,
+            ...options,
+        })
+        return connected
+    }
+}
+
+export const api = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>(
+    config: AuthInstance<DefaultUser, SignUpSchema>
+) => {
     return {
         /**
          * Retrieves the current session data from the server-side.
@@ -162,6 +274,44 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          */
         updateSession: updateSession<DefaultUser>(config),
         /**
+         * Retrieves the OAuth provider tokens for the current session on the server-side. It allows access to the
+         * provider's access and refresh tokens, which can be used for making authenticated requests to the provider's API.
+         *
+         * @params options - Options for the API call, including headers to verify `session_token` cookie.
+         * @returns The object returned by the API call {@link GetProviderTokensAPIReturn}
+         * @example
+         * export const loader = async ({ request }) => {
+         *   return await api.getProviderTokens("github", {
+         *     request,
+         *     headers: request.headers
+         *   })
+         * }
+         *
+         */
+        getProviderTokens: getProviderTokens<DefaultUser>(config),
+        /**
+         * Retrieves the access token for a specific OAuth provider on the server-side.
+         * It implements CSRF Protection by default, for server-side calls it only verifies and validates the CSRF Token,
+         * it also provides Double-Submit Cookie protection by requiring the `session_token` cookie to be included in
+         * the request headers.
+         *
+         * > **NOTE**: This method is based on `getProviderTokens` and it's recommended for simple use cases where only the
+         * access token is needed. For more advanced scenarios, consider using `getProviderTokens` directly.
+         *
+         * @params oauth - The OAuth provider for which to retrieve the access token (e.g., "github", "gitlab", "bitbucket").
+         * @params options - Options for the API call, including headers and request object.
+         * @example
+         * export const loader = async ({ request }) => {
+         *   const { accessToken } = await api.getAccessToken("github", {
+         *     request,
+         *     headers: request.headers
+         *   })
+         *
+         *   // Use the access token to make authenticated requests to the provider's API
+         * }
+         */
+        getAccessToken: getAccessToken<DefaultUser>(config),
+        /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for
          * server-side calls it only verifies and validates the CSRF Token, it also provides Double-Submit
          * Cookie protection by requiring the `session_token` cookie to be included in the request headers.
@@ -177,5 +327,92 @@ export const api = <DefaultUser extends User = User>(config: AuthInstance<Defaul
          * }
          */
         signOut: signOut<DefaultUser>(config),
-    }
+        /**
+         * Signs up a new user on the server-side. It requires a `payload` with the necessary information for
+         * user creation and a callback function configured in `signUp.onCreateUser` to handle the actual user
+         * creation logic.
+         *
+         * @param options - Options for the API call, including the sign-up payload, headers, and redirect behavior.
+         * @returns The object returned by the API call {@link ReactRouterSignUpReturn}
+         * @example
+         * export const action = async ({ request }) => {
+         *   const formData = await request.formData()
+         *   const name = formData.get("name") as string
+         *   const email = formData.get("email") as string
+         *   const password = formData.get("password") as string
+         *
+         *   return await api.signUp({
+         *     payload: {
+         *       name,
+         *       email,
+         *       password
+         *     },
+         *     request,
+         *     redirectTo: "/dashboard",
+         *   })
+         * }
+         */
+        signUp: signUp<DefaultUser, SignUpSchema>(config),
+        /**
+         * Refreshes user information from the OAuth provider on the server-side. It retrieves the latest
+         * user information from the provider and updates the session accordingly.
+         *
+         * @param oauth - The OAuth provider to refresh user information from (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Optional parameters for the refresh operation, including headers and request object.
+         * @returns The object returned by the API call {@link ReactRouterRefreshUserInfoReturn}
+         * @example
+         * export const action = async ({ request }) => {
+         *   return await api.refreshUserInfo("github", {
+         *     request,
+         *   })
+         * }
+         */
+        refreshUserInfo: refreshUserInfo<DefaultUser>(config),
+        /**
+         * Revokes the OAuth provider token on the server-side. It invalidates the access token for the specified
+         * provider, effectively disconnecting the user from that provider.
+         *
+         * @param oauth - The OAuth provider to revoke the token for (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Optional parameters for the revoke operation, including headers and request object.
+         * @returns The object returned by the API call {@link ReactRouterRevokeTokenReturn}
+         * @example
+         * export const action = async ({ request }) => {
+         *   return await api.revokeToken("github", {
+         *     request,
+         *   })
+         * }
+         */
+        revokeToken: revokeToken<DefaultUser>(config),
+        /**
+         * Disconnects the OAuth provider on the server-side. It revokes the access token and removes the provider
+         * connection from the user's session.
+         *
+         * @param oauth - The OAuth provider to disconnect (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Optional parameters for the disconnect operation, including headers and request object.
+         * @returns The object returned by the API call {@link ReactRouterDisconnectProviderReturn}
+         * @example
+         * export const action = async ({ request }) => {
+         *   return await api.disconnectProvider("github", {
+         *     request,
+         *   })
+         * }
+         */
+        disconnectProvider: disconnectProvider<DefaultUser>(config),
+        /**
+         * Checks if the OAuth provider is connected on the server-side. It returns a boolean indicating whether
+         * the user has an active connection with the specified provider.
+         *
+         * @param oauth - The OAuth provider to check connection status for (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Optional parameters for the check operation, including headers and request object.
+         * @returns The object returned by the API call {@link ReactRouterProviderConnectedReturn}
+         * @example
+         * export const loader = async ({ request }) => {
+         *   const { connected } = await api.isProviderConnected("github", {
+         *     request,
+         *   })
+         *   return Response.json({ connected })
+         * }
+         */
+        isProviderConnected: isProviderConnected<DefaultUser>(config),
+    } satisfies ReactRouterAPI<DefaultUser, SignUpSchema>
 }

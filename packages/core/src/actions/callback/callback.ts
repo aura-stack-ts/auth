@@ -1,54 +1,13 @@
-import { z } from "zod/v4"
-import { createEndpoint, createEndpointConfig, HeadersBuilder } from "@aura-stack/router"
-import { createCSRF } from "@/shared/crypto.ts"
-import { cacheControl } from "@/shared/headers.ts"
-import { isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/assert.ts"
-import { getUserInfo } from "@/actions/callback/userinfo.ts"
-import { OAuthAuthorizationErrorResponse } from "@/schemas.ts"
-import { AuthSecurityError, OAuthProtocolError } from "@/shared/errors.ts"
-import { getOriginURL, getTrustedOrigins } from "@/actions/signIn/authorization.ts"
-import { createAccessToken } from "@/actions/callback/access-token.ts"
-import { getCookie, expiredCookieAttributes } from "@/cookie.ts"
-import type { OAuthProviderRecord } from "@/@types/index.ts"
-import { timingSafeEqual } from "@/shared/utils.ts"
+import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { SearchParamsCallbackSchema, OAuthProviderListSchema } from "@/shared/schemas/actions.ts"
+import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
 const callbackConfig = (oauth: OAuthProviderRecord) => {
-    return createEndpointConfig("/callback/:oauth", {
+    return createEndpointConfig({
         schemas: {
-            params: z.object({
-                oauth: z.enum(
-                    Object.keys(oauth) as (keyof OAuthProviderRecord)[],
-                    "The OAuth provider is not supported or invalid."
-                ),
-            }),
-            searchParams: z.object({
-                code: z.string("Missing code parameter in the OAuth authorization response."),
-                state: z.string("Missing state parameter in the OAuth authorization response."),
-            }),
+            params: OAuthProviderListSchema(oauth),
+            searchParams: SearchParamsCallbackSchema,
         },
-        use: [
-            (ctx) => {
-                const {
-                    searchParams,
-                    context: { logger },
-                } = ctx
-                const response = OAuthAuthorizationErrorResponse.safeParse(searchParams)
-                if (response.success) {
-                    const { error, error_description } = response.data
-                    const criticalAuthErrors = ["access_denied", "server_error"]
-                    const severity = criticalAuthErrors.includes(error.toLowerCase()) ? "critical" : "warning"
-                    logger?.log("OAUTH_AUTHORIZATION_ERROR", {
-                        severity,
-                        structuredData: {
-                            error,
-                            error_description: error_description ?? "",
-                        },
-                    })
-                    throw new OAuthProtocolError(error, error_description || "OAuth Authorization Error")
-                }
-                return ctx
-            },
-        ],
     })
 }
 
@@ -63,71 +22,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 searchParams: { code, state },
                 context,
             } = ctx
-            const { oauth: providers, cookies, jose, logger, trustedOrigins } = context
-
-            const oauthConfig = providers[oauth]
-            const cookieState = getCookie(request, cookies.state.name)
-            const codeVerifier = getCookie(request, cookies.codeVerifier.name)
-            const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
-            const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
-
-            if (!timingSafeEqual(cookieState, state)) {
-                logger?.log("MISMATCHING_STATE", {
-                    structuredData: {
-                        oauth_provider: oauth,
-                    },
-                })
-                throw new AuthSecurityError(
-                    "MISMATCHING_STATE",
-                    "The provided state passed in the OAuth response does not match the stored state."
-                )
-            }
-
-            const accessToken = await createAccessToken(oauthConfig, cookieRedirectURI, code, codeVerifier, logger)
-            const origins = await getTrustedOrigins(request, trustedOrigins)
-            const requestOrigin = await getOriginURL(request, context)
-
-            if (!isRelativeURL(cookieRedirectTo)) {
-                const isValid =
-                    origins.length > 0
-                        ? isTrustedOrigin(cookieRedirectTo, origins)
-                        : isSameOrigin(cookieRedirectTo, requestOrigin)
-                if (!isValid) {
-                    logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
-                        structuredData: {
-                            redirect_path: cookieRedirectTo,
-                            provider: oauth,
-                            has_trusted_origins: origins.length > 0,
-                            request_origin: requestOrigin,
-                        },
-                    })
-                    throw new AuthSecurityError(
-                        "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED",
-                        "Invalid redirect path. Potential open redirect attack detected."
-                    )
-                }
-            }
-
-            const userInfo = await getUserInfo(oauthConfig, accessToken.access_token, logger)
-            const session = await context.sessionStrategy.createSession(userInfo)
-            const csrfToken = await createCSRF(jose)
-
-            logger?.log("OAUTH_CALLBACK_SUCCESS", {
-                structuredData: {
-                    provider: oauth,
-                },
-            })
-
-            const headers = new HeadersBuilder(cacheControl)
-                .setHeader("Location", cookieRedirectTo)
-                .setCookie(cookies.sessionToken.name, session, cookies.sessionToken.attributes)
-                .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
-                .setCookie(cookies.state.name, "", expiredCookieAttributes)
-                .setCookie(cookies.redirectURI.name, "", expiredCookieAttributes)
-                .setCookie(cookies.redirectTo.name, "", expiredCookieAttributes)
-                .setCookie(cookies.codeVerifier.name, "", expiredCookieAttributes)
-                .toHeaders()
-            return Response.json({ oauth }, { status: 302, headers: headers })
+            return await context.sessionStrategy.oauthCallback(oauth, request, { code, state })
         },
         callbackConfig(oauth)
     )
