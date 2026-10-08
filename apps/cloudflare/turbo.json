@@ -1,0 +1,12 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "deploy": {
+      "cache": false
+    },
+    "typegen": {
+      "cache": false,
+      "outputs": ["worker-configuration.d.ts"]
+    }
+  }
+}
