@@ -4,7 +4,7 @@ import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { createFingerprint, getDeviceInfo } from "@/shared/http/request-metadata.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
-import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth/authorization.ts"
+import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth2/authorization.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const signIn = ({ ctx }: InternalStatefulContext) => {

@@ -1,4 +1,4 @@
-import { createSignInURL } from "@/shared/oauth/authorization.ts"
+import { createSignInURL } from "@/shared/oauth2/authorization.ts"
 import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"

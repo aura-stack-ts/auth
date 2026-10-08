@@ -1,5 +1,5 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getUserInfo } from "@/shared/oauth/get-user-info.ts"
+import { getUserInfo } from "@/shared/oauth2/get-user-info.ts"
 import { getProviderTokens } from "@/api/get-provider-tokens.ts"
 import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
