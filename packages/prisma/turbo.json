@@ -2,7 +2,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "outputs": ["dist/**"],
+      "outputs": ["dist/**", "src/generated/**"],
       "inputs": ["$TURBO_DEFAULT$", "src/**", "prisma/**"]
     }
   }
