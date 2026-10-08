@@ -1,4 +1,4 @@
-import { AuraAuthError } from "@/shared/errors.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import type { JWTManager } from "@/@types/internal.ts"
 import type { JoseInstance, User, JWTConfig } from "@/@types/index.ts"
 

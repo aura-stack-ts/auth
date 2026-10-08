@@ -18,7 +18,7 @@ import type {
     SignUpReturn,
     GetProviderTokensReturn,
 } from "@/@types/index.ts"
-import { AuraAuthError } from "@/shared/errors.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 
 export type { AuthClientOptions }
 

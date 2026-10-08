@@ -10,7 +10,7 @@ import {
     sessionEntityWithUser,
     sessionPayload,
     userEntity,
-} from "@test/presets.ts"
+} from "@test/setup/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 describe("signUp API", async () => {

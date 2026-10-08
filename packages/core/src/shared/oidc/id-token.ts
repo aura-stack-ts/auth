@@ -1,6 +1,6 @@
 import { jwtVerify, errors as joseErrors } from "@aura-stack/jose/jose"
-import { AuraAuthError } from "@/shared/errors.ts"
-import { timingSafeEqual } from "@/shared/utils.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
+import { timingSafeEqual } from "@/shared/crypto.ts"
 import { IDTokenClaimsSchema } from "@/shared/schemas/general.ts"
 import { ensureJWKSValidated } from "@/shared/oidc/jwks.ts"
 import { normalizeIssuer } from "@/shared/oidc/discovery.ts"

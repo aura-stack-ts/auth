@@ -1,0 +1,124 @@
+import { AuraAuthError } from "@/errors/aura-error.ts"
+import { getUserInfo } from "@/shared/oauth/get-user-info.ts"
+import { getProviderTokens } from "@/api/get-provider-tokens.ts"
+import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import type { FunctionAPIContext } from "@/@types/internal.ts"
+import type {
+    RefreshUserInfoAPIOptions,
+    RefreshUserInfoAPIReturn,
+    LiteralUnion,
+    User,
+    BuiltInOAuthProvider,
+} from "@/@types/index.ts"
+
+export const refreshUserInfo = async <DefaultUser extends User = User>(
+    oauth: LiteralUnion<BuiltInOAuthProvider>,
+    {
+        ctx,
+        headers: headersInit,
+        request: requestInit,
+        skipCSRFCheck = false,
+        doubleSubmitToken = undefined,
+    }: FunctionAPIContext<RefreshUserInfoAPIOptions>
+): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
+    try {
+        ctx.logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
+            structuredData: {
+                provider: oauth,
+                skipCSRFCheck: skipCSRFCheck,
+                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
+            },
+        })
+
+        const { provider, headers, rateLimit } = await createValidation(
+            ctx,
+            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
+        )
+            .verifyOAuthProvider(oauth)
+            .buildRequest(requestInit, `/providers/${oauth}/user/refresh`)
+            .verifyRateLimit("refreshUserInfo")
+            .verifySession()
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
+            .execute()
+
+        if (rateLimit) {
+            ctx.logger?.log("INVALID_REQUEST", {
+                structuredData: { provider: oauth },
+            })
+            return rateLimit as RefreshUserInfoAPIReturn<DefaultUser>
+        }
+
+        const { success, tokens } = await getProviderTokens(oauth, {
+            ctx,
+            request: requestInit,
+            headers: headersInit,
+        })
+        if (!success) {
+            ctx.logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
+                structuredData: { provider: oauth },
+            })
+            throw new AuraAuthError({ code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO" })
+        }
+
+        const expiresIn = tokens?.expiresAt
+            ? Math.max(0, Math.floor(tokens.expiresAt - Math.floor(Date.now() / 1000)))
+            : undefined
+
+        const userInfo = await getUserInfo(
+            provider!,
+            {
+                access_token: tokens.accessToken,
+                expires_in: expiresIn,
+                refresh_token: tokens?.refreshToken,
+                id_token: tokens?.idToken,
+                scope: tokens?.scopes?.join(" "),
+                token_type: tokens?.tokenType,
+            },
+            ctx.logger
+        )
+
+        ctx.logger?.log("OAUTH_USERINFO_SUCCESS", {
+            structuredData: { provider: oauth, userId: userInfo.sub },
+        })
+
+        const { session, headers: newHeaders } = await ctx.sessionStrategy.refreshUserInfo(userInfo, headers)
+        return {
+            success: !!session,
+            headers: newHeaders,
+            session: session,
+            toResponse: () => {
+                return Response.json(
+                    {
+                        success: !!session,
+                        session,
+                    },
+                    { headers: newHeaders, status: 200 }
+                )
+            },
+        } as RefreshUserInfoAPIReturn<DefaultUser>
+    } catch (error) {
+        errorToLogMessage(error, "REFRESH_USER_INFO_ERROR", ctx.logger)
+        const { errors, statusCode } = handleApiError(
+            error,
+            "UNKNOWN_REFRESH_USER_INFO_ERROR",
+            "Failed to refresh user information from the OAuth provider"
+        )
+        const newHeaders = new Headers(secureApiHeaders)
+        return {
+            success: false,
+            headers: newHeaders,
+            error: errors,
+            session: null,
+            toResponse: () => {
+                return Response.json(
+                    {
+                        success: false,
+                        session: null,
+                    },
+                    { headers: newHeaders, status: statusCode }
+                )
+            },
+        }
+    }
+}

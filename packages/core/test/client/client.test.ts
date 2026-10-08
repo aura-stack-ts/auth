@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { createAuthClient } from "@/client/client.ts"
 import { createClient } from "@aura-stack/router"
-import { oauthTokens, sessionPayload } from "@test/presets.ts"
+import { oauthTokens, sessionPayload } from "@test/setup/presets.ts"
 
 vi.mock(import("@aura-stack/router"), async (importOriginal) => {
     const actual = await importOriginal()

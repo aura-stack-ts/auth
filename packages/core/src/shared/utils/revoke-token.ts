@@ -1,5 +1,5 @@
-import { AuraAuthError } from "@/shared/errors.ts"
-import { fetchAsync } from "@/shared/fetch-async.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
+import { fetchAsync } from "@/shared/http/fetch-async.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import type { RuntimeOAuthProvider } from "@/@types/internal.ts"
 

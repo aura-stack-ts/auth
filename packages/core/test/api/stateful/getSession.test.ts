@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
-import { getSetCookie } from "@/cookie.ts"
-import { authInstance, sessionEntityWithUser, userEntity } from "@test/presets.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
+import { authInstance, sessionEntityWithUser, userEntity } from "@test/setup/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createHash } from "@/shared/crypto.ts"
 

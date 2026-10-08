@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { isRelativeURL, isValidURL, isTrustedOrigin } from "@/shared/assert.ts"
+import { isRelativeURL, isValidURL, isTrustedOrigin } from "@/shared/utils/get-origin-url.ts"
 
 describe("isRelativeURL", () => {
     const testCases = [

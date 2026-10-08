@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { jose, oauthCustomService, oauthTokens, POST, sessionPayload } from "@test/presets.ts"
+import { jose, oauthCustomService, oauthTokens, POST, sessionPayload } from "@test/setup/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"

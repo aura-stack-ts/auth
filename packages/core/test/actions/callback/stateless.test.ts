@@ -1,10 +1,10 @@
 import { describe, test, expect, vi } from "vitest"
-import { GET, jose, oauthCustomService, openIDCustomProvider, openIDMetadata, RS256PEMFormat } from "@test/presets.ts"
+import { GET, jose, oauthCustomService, openIDCustomProvider, openIDMetadata, RS256PEMFormat } from "@test/setup/presets.ts"
 import { clearResolvedProviderCache } from "@/shared/oidc/resolve-provider.ts"
 import { clearJWKSCache } from "@/shared/oidc/jwks.ts"
 import { SignJWT, exportJWK, importPKCS8, importSPKI } from "@aura-stack/jose/jose"
 import { createPKCE } from "@/shared/crypto.ts"
-import { setCookie, getSetCookie } from "@/cookie.ts"
+import { setCookie, getSetCookie } from "@/shared/http/cookie.ts"
 import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
 import { createAuth } from "@/createAuth.ts"
 

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { accountEntity, authInstance, jose, oauthCustomService, sessionEntityWithUser } from "@test/presets.ts"
+import { accountEntity, authInstance, jose, oauthCustomService, sessionEntityWithUser } from "@test/setup/presets.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"

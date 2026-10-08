@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { getSetCookie } from "@/cookie.ts"
-import { GET, oauthCustomService } from "@test/presets.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
+import { GET, oauthCustomService } from "@test/setup/presets.ts"
 
 describe("signIn action", () => {
     test("default signIn", async () => {

@@ -1,5 +1,5 @@
 import { createJoseInstance } from "@/jose.ts"
-import { createAuthAPI } from "@/api/createApi.ts"
+import { createAuthAPI } from "@/api/create-api.ts"
 import type {
     OpenIDProvider,
     BuiltInOAuthProvider,
