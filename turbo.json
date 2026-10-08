@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/turbo/schema.json",
+  "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "dev": {
       "cache": false,
@@ -7,8 +7,6 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "inputs": [".env"],
-      "env": ["AURA_AUTH_*"],
       "outputs": [
         "dist/**",
         "!.turbo/**",
@@ -21,7 +19,8 @@
         ".astro/**",
         ".wrangler/**",
         ".vercel/output/**"
-      ]
+      ],
+      "env": ["AURA_AUTH_*"]
     },
     "test": {
       "dependsOn": ["^test"]
@@ -41,8 +40,8 @@
   },
   "ui": "stream",
   "cacheDir": ".turbo/cache",
-  "globalDependencies": [".env", "tsconfig.json"],
   "globalEnv": [".env"],
+  "concurrency": "100%",
   "remoteCache": {
     "enabled": true,
     "signature": false

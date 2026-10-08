@@ -3,9 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    }
   },
   "include": ["src", "tsdown.config.ts", "test"],
   "exclude": ["dist", "node_modules"]

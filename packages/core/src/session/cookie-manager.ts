@@ -1,9 +1,9 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders } from "@/shared/headers.ts"
-import { expiredCookieAttributes, getCookie as getCookieByName } from "@/cookie.ts"
-import type { CookieStoreConfig } from "@/@types/index.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getExpiredCookie, getCookie as getCookieByName } from "@/shared/http/cookie.ts"
+import type { InternalCookieStoreConfig } from "@/@types/internal.ts"
 
-export const createCookieManager = (store: () => CookieStoreConfig) => {
+export const createCookieManager = (store: () => InternalCookieStoreConfig) => {
     const getCookie = (request: Request | Headers) => {
         const sessionToken = getCookieByName(request, store().sessionToken.name)
         return {
@@ -19,9 +19,16 @@ export const createCookieManager = (store: () => CookieStoreConfig) => {
 
     const clear = () => {
         return new HeadersBuilder(secureApiHeaders)
-            .setCookie(store().csrfToken.name, "", { ...expiredCookieAttributes, ...store().csrfToken.attributes })
-            .setCookie(store().sessionToken.name, "", { ...expiredCookieAttributes, ...store().sessionToken.attributes })
+            .setCookie(store().sessionToken.name, "", getExpiredCookie(store().sessionToken.attributes))
             .toHeaders()
     }
-    return { getCookie, setCookie, clear }
+
+    const clearAll = () => {
+        return new HeadersBuilder(secureApiHeaders)
+            .setCookie(store().csrfToken.name, "", getExpiredCookie(store().csrfToken.attributes))
+            .setCookie(store().sessionToken.name, "", getExpiredCookie(store().sessionToken.attributes))
+            .toHeaders()
+    }
+
+    return { getCookie, setCookie, clear, clearAll }
 }

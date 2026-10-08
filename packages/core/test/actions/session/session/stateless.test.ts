@@ -1,0 +1,232 @@
+import { describe, test, expect, vi } from "vitest"
+import { createPKCE } from "@/shared/crypto.ts"
+import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { GET, jose, sessionPayload } from "@test/setup/presets.ts"
+import { setCookie, getSetCookie, createCookieStore, getCookie } from "@/shared/http/cookie.ts"
+
+describe("sessionAction", () => {
+    const { encodeJWT } = jose
+
+    test("sessionToken cookie not found", async () => {
+        const request = await GET(new Request("https://example.com/auth/session"))
+        expect(request.status).toBe(401)
+        expect(await request.json()).toEqual({ success: false, session: null })
+    })
+
+    test("invalid sessionToken cookie", async () => {
+        const request = await GET(
+            new Request("https://example.com/auth/session", {
+                headers: {
+                    Cookie: "aura-auth.session_token=invalidtoken",
+                },
+            })
+        )
+        expect(request.status).toBe(401)
+        expect(await request.json()).toEqual({ success: false, session: null })
+    })
+
+    test("valid sessionToken cookie with correct version", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+
+        const request = await GET(
+            new Request("https://example.com/auth/session", {
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(request.status).toBe(200)
+        expect(await request.json()).toEqual({
+            success: true,
+            session: { user: sessionPayload, expires: expect.any(String) },
+        })
+        const decodedToken = await jose.decodeJWT(getCookie(request.headers, "__Secure-aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject(sessionPayload)
+    })
+
+    test("valid sessionToken cookie in insecure connection", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+
+        const request = await GET(
+            new Request("http://example.com/auth/session", {
+                headers: {
+                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(request.status).toBe(200)
+        expect(await request.json()).toMatchObject({
+            success: true,
+            session: { user: sessionPayload, expires: expect.any(String) },
+        })
+        const decodedToken = await jose.decodeJWT(getCookie(request.headers, "aura-auth.session_token")!)
+        expect(decodedToken).toMatchObject(sessionPayload)
+    })
+
+    test("expired sessionToken cookie", async () => {
+        const sessionToken = await encodeJWT({ exp: Math.floor(Date.now() / 1000) - 3600, ...sessionPayload }) // expired 1 hour ago
+        const request = await GET(
+            new Request("https://example.com/auth/session", {
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(request.status).toBe(401)
+        expect(await request.json()).toEqual({ success: false, session: null })
+        expect(() => getCookie(request.headers, "__Secure-aura-auth.session_token")).toThrow(
+            "The request pipeline expected parsing access to a 'Cookie' header block, but the raw header property evaluates to undefined."
+        )
+    })
+
+    test("verify cache control headers are set", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await GET(
+            new Request("https://example.com/auth/session", {
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        const headers = request.headers
+        expect(headers.get("Cache-Control")).toBe("no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0")
+        expect(headers.get("Pragma")).toBe("no-cache")
+        expect(headers.get("Expires")).toBe("0")
+        expect(headers.get("Vary")).toBe("Cookie")
+    })
+
+    test("invalid access from http", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await GET(
+            new Request("http://example.com/auth/session", {
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(() => getCookie(request.headers, "aura-auth.session_token")).toThrow(
+            "The request pipeline expected parsing access to a 'Cookie' header block, but the raw header property evaluates to undefined."
+        )
+    })
+
+    test("invalid access from https", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await GET(
+            new Request("https://example.com/auth/session", {
+                headers: {
+                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(() => getCookie(request.headers, "aura-auth.session_token")).toThrow(
+            "The request pipeline expected parsing access to a 'Cookie' header block, but the raw header property evaluates to undefined."
+        )
+    })
+
+    test("update default profile function", async () => {
+        const mockFetch = vi.fn()
+        vi.stubGlobal("fetch", mockFetch)
+
+        const cookies = createCookieStore(true)
+
+        const accessTokenMock = {
+            access_token: "access_123",
+            token_type: "Bearer",
+        }
+
+        /**
+         * Mock user info response. For this case it simulates the profile function
+         */
+        const userInfoMock = {
+            id: "user_123",
+            email: "john.doe@example.com",
+            name: "John Doe",
+            image: "https://example.com/john-doe.jpg",
+            username: "johndoe",
+            nickname: "johnny",
+            email_verified: true,
+        }
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => accessTokenMock,
+        })
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => userInfoMock,
+        })
+
+        const state = setCookie("__Secure-aura-auth.state", "abc", cookies.state.attributes)
+        const redirectURI = setCookie(
+            "__Secure-aura-auth.redirect_uri",
+            "https://example.com/auth/callback/oauth-profile",
+            cookies.redirectURI.attributes
+        )
+        const redirectTo = setCookie("__Secure-aura-auth.redirect_to", "/auth", cookies.redirectTo.attributes)
+        const { codeVerifier } = await createPKCE()
+        const codeVerifierCookie = setCookie("__Secure-aura-auth.code_verifier", codeVerifier, cookies.codeVerifier.attributes)
+        const response = await GET(
+            new Request("https://example.com/auth/callback/oauth-profile?code=auth_code_123&state=abc", {
+                headers: {
+                    Cookie: [state, redirectURI, redirectTo, codeVerifierCookie].join("; "),
+                },
+            })
+        )
+
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                client_id: "oauth_client_id",
+                client_secret: "oauth_client_secret",
+                code: "auth_code_123",
+                redirect_uri: "https://example.com/auth/callback/oauth-profile",
+                grant_type: "authorization_code",
+                code_verifier: codeVerifier,
+            }).toString(),
+            signal: expect.any(AbortSignal),
+        })
+
+        expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                Accept: "application/json",
+                Authorization: "Bearer access_123",
+            },
+            signal: expect.any(AbortSignal),
+        })
+        expect(mockFetch).toHaveBeenCalledTimes(2)
+        expect(response.status).toBe(302)
+        expect(response.headers.get("Location")).toBe("/auth")
+        const sessionToken = getSetCookie(response, "__Secure-aura-auth.session_token")
+        expect(sessionToken).toBeDefined()
+
+        const requestSession = await GET(
+            new Request("https://example.com/auth/session", {
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        const session = await requestSession.json()
+        const { id, name, image, email } = userInfoMock
+        expect(session).toMatchObject({
+            success: true,
+            session: {
+                user: { sub: id, name, image, email },
+                expires: expect.any(String),
+            },
+        })
+    })
+})

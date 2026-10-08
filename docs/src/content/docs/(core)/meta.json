@@ -1,0 +1,18 @@
+{
+  "title": "Core",
+  "description": "The docs library",
+  "pages": [
+    "(getting-started)",
+    "concepts",
+    "configuration",
+    "guides",
+    "integrations",
+    "oauth",
+    "ai-resources",
+    "api-reference",
+    "---Community---",
+    "contributing",
+    "faq"
+  ],
+  "root": true
+}

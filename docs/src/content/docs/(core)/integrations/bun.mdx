@@ -1,0 +1,108 @@
+---
+title: Bun
+description: Integrate Aura Auth and Native Bun Server
+---
+
+This guide walks you through to implement Aura Auth in the native Bun server to a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Bun native application.
+
+---
+
+<Steps>
+
+<Step>
+
+## Setup Aura Auth
+
+### Create an Auth Instance
+
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
+
+```ts title="src/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { handlers, jose, api } = auth
+```
+
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
+
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Define auth routes directly in `Bun.serve`. Any request matching `/api/auth/*` is handled by `handlers.ALL`. Bun passes standard Web `Request` objects, so the route can delegate directly.
+
+```ts title="src/index.ts" lineNumbers
+import { handlers } from "@/lib/auth"
+
+Bun.serve({
+  port: 3000,
+  fetch(request) {
+    const url = new URL(request.url)
+    if (url.pathname.startsWith("/api/auth/")) {
+      return handlers.ALL(request)
+    }
+    return new Response("Not Found", { status: 404 })
+  },
+})
+
+console.log("Bun server running on http://localhost:3000")
+```
+
+</Step>
+
+<Step>
+
+## Auth Request Flow
+
+When a request hits an auth route, Aura Auth processes it and returns a response. For example, a sign-in request to `/api/auth/signin/github` will trigger the GitHub OAuth flow. The handlers manage sessions, cookies, and token generation automatically.
+
+```ts title="src/index.ts" lineNumbers
+import { api, handlers } from "@/lib/auth"
+
+Bun.serve({
+  port: 3000,
+  async fetch(request) {
+    const url = new URL(request.url)
+    if (url.pathname.startsWith("/api/auth/")) {
+      return handlers.ALL(request)
+    }
+    return new Response("Not Found", { status: 404 })
+  },
+})
+
+console.log("Bun server running on http://localhost:3000")
+```
+
+This pattern works well for small APIs or microservices. For larger applications, consider extracting route handlers into separate files.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with your route segment**. If your handler route is `/api/auth/*`, `basePath` should be `/api/auth`.
+- **Always pass request headers to `api.getSession()`**. The session lookup needs headers so Aura Auth can read cookies.
+
+---
+
+## Resources
+
+- [Bun Documentation](https://bun.sh/docs)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/api-reference/options)
+- [TypeScript Guide](/docs/concepts/typescript)

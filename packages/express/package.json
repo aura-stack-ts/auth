@@ -1,9 +1,9 @@
 {
   "name": "@aura-stack/express",
-  "version": "0.0.0",
+  "version": "0.3.2",
   "private": false,
   "type": "module",
-  "description": "Express integration for Aura Stack authentication library",
+  "description": "Authentication integration for Express applications. Provides middleware, route handlers and session verification powered by Aura Auth.",
   "scripts": {
     "dev": "tsdown --watch",
     "build": "pnpm sync:modules && tsdown",
@@ -12,22 +12,75 @@
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
+    "test:types": "vitest --run --typecheck.only",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist src/_core src/oauth",
-    "clean:cts": "if [ -d dist ]; then find dist -type f -name \"*.cts\" -delete; fi",
+    "clean": "rm -rf dist src/_core src/oauth src/identity",
+    "clean:cts": "[ -d dist ] && find dist -type f -name \"*.cts\" -delete || true",
     "prepublishOnly": "pnpm sync:modules && pnpm build && pnpm clean:cts",
     "sync:modules": "node ../shared/scripts/modules.js"
   },
+  "homepage": "https://aura-stack-auth.vercel.app",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues",
+    "email": "aurastackjs@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aura-stack-ts/auth"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/halvaradop"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "sideEffects": false,
   "files": [
     "dist"
   ],
+  "keywords": [
+    "auth",
+    "oauth",
+    "oauth2",
+    "security",
+    "session",
+    "authentication",
+    "authorization",
+    "express",
+    "expressjs",
+    "node",
+    "bun",
+    "deno",
+    "middleware",
+    "typescript",
+    "javascript",
+    "web-api",
+    "aura stack",
+    "aura-stack",
+    "aura-stack-ts",
+    "aura stack ts"
+  ],
+  "dependencies": {
+    "@aura-stack/auth": "workspace:*"
+  },
+  "devDependencies": {
+    "@aura-stack/tsconfig": "workspace:*",
+    "@aura-stack/tsdown-config": "workspace:*",
+    "@types/express": "catalog:express",
+    "@types/supertest": "^7.2.0",
+    "express": "catalog:express",
+    "supertest": "^7.2.2",
+    "vitest": "catalog:vitest"
+  },
+  "peerDependencies": {
+    "express": ">=4.0.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -45,9 +98,14 @@
       "require": "./dist/oauth/*.cjs"
     },
     "./identity": {
-      "types": "./dist/_core/identity.d.ts",
-      "import": "./dist/_core/identity.js",
-      "require": "./dist/_core/identity.cjs"
+      "types": "./dist/identity/index.d.ts",
+      "import": "./dist/identity/index.js",
+      "require": "./dist/identity/index.cjs"
+    },
+    "./identity/*": {
+      "types": "./dist/identity/*.d.ts",
+      "import": "./dist/identity/*.js",
+      "require": "./dist/identity/*.cjs"
     },
     "./crypto": {
       "types": "./dist/_core/crypto.d.ts",
@@ -58,29 +116,13 @@
       "types": "./dist/_core/shared.d.ts",
       "import": "./dist/_core/shared.js",
       "require": "./dist/_core/shared.cjs"
-    }
-  },
-  "keywords": [],
-  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
-  "homepage": "https://aura-stack-auth.vercel.app",
-  "bugs": {
-    "url": "https://github.com/aura-stack-ts/auth/issues"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "@aura-stack/auth": "workspace:*"
-  },
-  "devDependencies": {
-    "@aura-stack/tsconfig": "workspace:*",
-    "@aura-stack/tsdown-config": "workspace:*",
-    "@types/supertest": "^6.0.3",
-    "supertest": "^7.2.2",
-    "express": "catalog:express",
-    "@types/express": "catalog:express",
-    "vitest": "catalog:vitest"
-  },
-  "peerDependencies": {
-    "express": ">=4.0.0"
+    },
+    "./cookies": {
+      "types": "./dist/_core/cookies.d.ts",
+      "import": "./dist/_core/cookies.js",
+      "require": "./dist/_core/cookies.cjs"
+    },
+    "./types": "./dist/@types/index.d.ts"
   },
   "packageManager": "pnpm@10.15.0"
 }

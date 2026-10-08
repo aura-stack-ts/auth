@@ -1,7 +1,7 @@
-import { AuthConfig, createAuth as createAuthInstance } from "@aura-stack/auth"
-import type { EditableShape, UserShape } from "@aura-stack/auth/identity"
+import { type AuthConfig, createAuth as createAuthInstance } from "@aura-stack/auth"
+import type { Identities } from "@aura-stack/auth/identity"
 
-export const createAuth = <Identity extends EditableShape<UserShape>>(config: AuthConfig<Identity>) => {
+export const createAuth = <Identity extends Identities>(config: AuthConfig<Identity>) => {
     const auth = createAuthInstance<Identity>(config)
     return auth
 }

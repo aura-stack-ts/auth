@@ -34,7 +34,8 @@ export const env = new Proxy({} as Record<string, string | undefined>, {
 
 export const getEnv = (key: string): string | undefined => {
     const keys = [`AURA_AUTH_${key.toUpperCase()}`, `AURA_${key.toUpperCase()}`, `AUTH_${key.toUpperCase()}`, key.toUpperCase()]
-    return env[keys.find((k) => env[k]) ?? ""]
+    const found = keys.find((k) => env[k] !== undefined)
+    return found ? env[found] : undefined
 }
 
 export const getEnvBoolean = (key: string): boolean => {

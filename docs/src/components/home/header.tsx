@@ -7,7 +7,7 @@ import { Menu, X } from "lucide-react"
 
 const menuItems = [
     { name: "Home", href: "/" },
-    { name: "Docs", href: "/docs" },
+    { name: "Docs", href: "/docs/introduction" },
     { name: "Community", href: "/docs/contributing" },
 ]
 
@@ -71,7 +71,7 @@ export const Header = () => {
                                     </Link>
                                 </Button>
                                 <Button className="w-full rounded-none lg:w-fit" variant="outline" size="lg" asChild>
-                                    <Link href="/docs">Get Started</Link>
+                                    <Link href="/docs/introduction">Get Started</Link>
                                 </Button>
                             </div>
                         </div>

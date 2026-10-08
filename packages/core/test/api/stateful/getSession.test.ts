@@ -1,0 +1,206 @@
+import { describe, test, expect, vi } from "vitest"
+import { getSetCookie } from "@/shared/http/cookie.ts"
+import { authInstance, sessionEntityWithUser, userEntity } from "@test/setup/presets.ts"
+import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createHash } from "@/shared/crypto.ts"
+
+describe("getSession", () => {
+    test("getSession with no session token", async () => {
+        const { api } = authInstance({})
+        const session = await api.getSession({ headers: new Headers() })
+        expect(session).toMatchObject({
+            session: null,
+            headers: {},
+            success: false,
+        })
+    })
+
+    test("getSession with invalid session token", async () => {
+        const { api } = authInstance({})
+
+        const session = await api.getSession({
+            headers: { Cookie: `aura-auth.session_token=invalidtoken` },
+        })
+        expect(session).toMatchObject({
+            session: null,
+            headers: {},
+            success: false,
+        })
+    })
+
+    test("getSession with valid session token", async () => {
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spy = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const mock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+
+        const { api } = authInstance({
+            getSessionByToken: mock,
+        })
+        const output = await api.getSession({
+            headers: { Cookie: `aura-auth.session_token=valid-token-hash` },
+        })
+
+        expect(output).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe",
+                    email: "john@example.com",
+                    image: "https://example.com/image.jpg",
+                },
+                expires: expect.any(String),
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const tokenHash = await createHash("valid-token-hash")
+        expect(mock).toHaveBeenCalledWith(tokenHash)
+        const { attributes: _, ...spreadPayload } = userEntity
+        expect(spy).toHaveBeenCalledWith({ sub: userEntity.id, ...spreadPayload })
+        expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("valid-token-hash")
+    })
+
+    test("getSession with expired session token", async () => {
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spy = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const sessionByTokenMock = vi.fn().mockResolvedValue({
+            ...sessionEntityWithUser,
+            expiresAt: new Date(Date.now() - 1000),
+        })
+        const revokeSessionMock = vi.fn().mockResolvedValue(true)
+
+        const { api } = authInstance({
+            getSessionByToken: sessionByTokenMock,
+            revokeSession: revokeSessionMock,
+        })
+        const output = await api.getSession({
+            headers: { Cookie: `aura-auth.session_token=valid-token-hash` },
+        })
+        expect(output).toEqual({
+            session: null,
+            success: false,
+            error: {
+                code: "GET_SESSION_FAILED",
+                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const tokenHash = await createHash("valid-token-hash")
+        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
+        expect(spy).not.toHaveBeenCalled()
+        expect(() => getSetCookie(output.headers, "aura-auth.csrf_token")).toThrow()
+        expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("")
+    })
+
+    test("getSession with session token missing sub claim", async () => {
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spy = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const mock = vi.fn().mockResolvedValue({
+            ...sessionEntityWithUser,
+            user: {
+                ...userEntity,
+                id: undefined,
+                name: undefined,
+            },
+        })
+
+        const { api } = authInstance({
+            getSessionByToken: mock,
+        })
+        const output = await api.getSession({
+            headers: { Cookie: `aura-auth.session_token=valid-token-hash` },
+        })
+
+        expect(output).toMatchObject({
+            session: null,
+            success: false,
+            error: {
+                code: "GET_SESSION_FAILED",
+                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const tokenHash = await createHash("valid-token-hash")
+        expect(mock).toHaveBeenCalledWith(tokenHash)
+        const { attributes: _, ...spreadPayload } = userEntity
+        expect(spy).toHaveBeenCalledWith({
+            ...spreadPayload,
+            id: undefined,
+            sub: undefined,
+            name: undefined,
+        })
+        expect(() => getSetCookie(output.headers, "aura-auth.csrf_token")).toThrow()
+        expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("")
+    })
+
+    test("getSession with extra claims in session token", async () => {
+        const registry = createSchemaRegistry({})
+        const module = await import("@/validator/registry.ts")
+
+        const spy = vi.spyOn(registry, "parse")
+        vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
+
+        const mock = vi.fn().mockResolvedValue({
+            ...sessionEntityWithUser,
+            user: {
+                ...userEntity,
+                attributes: {
+                    role: "admin",
+                    permissions: ["read", "write"],
+                },
+            },
+        })
+
+        const { api } = authInstance({
+            getSessionByToken: mock,
+        })
+        const output = await api.getSession({
+            headers: { Cookie: `aura-auth.session_token=valid-token-hash` },
+        })
+
+        expect(output).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe",
+                    email: "john@example.com",
+                    image: "https://example.com/image.jpg",
+                },
+                expires: expect.any(String),
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const tokenHash = await createHash("valid-token-hash")
+        expect(mock).toHaveBeenCalledWith(tokenHash)
+        const { attributes: _, ...spreadPayload } = userEntity
+        expect(spy).toHaveBeenCalledWith({
+            ...spreadPayload,
+            sub: userEntity.id,
+            role: "admin",
+            permissions: ["read", "write"],
+        })
+        expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("valid-token-hash")
+    })
+})

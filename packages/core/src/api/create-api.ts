@@ -1,0 +1,292 @@
+import {
+    getSession,
+    signIn,
+    signInCredentials,
+    signOut,
+    updateSession,
+    signUp,
+    getProviderTokens,
+    getAccessToken,
+    refreshUserInfo,
+    revokeToken,
+    disconnectProvider,
+    isProviderConnected,
+} from "@/api/index.ts"
+import type { GlobalContext, InferSchema } from "@aura-stack/router"
+import type {
+    BuiltInOAuthProvider,
+    LiteralUnion,
+    GetSessionAPIOptions,
+    GetSessionAPIReturn,
+    SignInAPIOptions,
+    SignInAPIReturn,
+    SignOutAPIOptions,
+    UpdateSessionAPIOptions,
+    User,
+    SignInCredentialsAPIOptions,
+    SignInCredentialsAPIReturn,
+    SignOutAPIReturn,
+    UpdateSessionAPIReturn,
+    SignUpAPIOptions,
+    SignUpAPIReturn,
+    Wrap,
+    RemoveIndexSignature,
+    GetProviderTokensAPIOptions,
+    GetProviderTokensAPIReturn,
+    AccessTokenAPIOptions,
+    AccessTokenAPIReturn,
+    RefreshUserInfoAPIOptions,
+    RevokeTokenAPIOptions,
+    DisconnectProviderAPIOptions,
+    ProviderConnectedAPIOptions,
+    RefreshUserInfoAPIReturn,
+    RevokeTokenAPIReturn,
+    ProviderConnectedAPIReturn,
+    DisconnectProviderAPIReturn,
+} from "@/@types/index.ts"
+import type { ZodObject } from "zod"
+import type { SchemaTypes } from "@/identity/index.ts"
+
+type InferSignUp<T> = Wrap<RemoveIndexSignature<InferSchema<T>>>
+
+export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>>(
+    ctx: GlobalContext
+) => {
+    return {
+        /**
+         * Retrieves the current session data from the server-side.
+         *
+         * @param options - Options for the API call, including headers to verify `session_token` cookie.
+         * @returns An object containing session data see {@link User}
+         */
+        getSession: async (options: GetSessionAPIOptions): Promise<GetSessionAPIReturn<DefaultUser>> => {
+            const session = await getSession<DefaultUser>({ ctx, headers: options.headers })
+            return session
+        },
+        /**
+         * Initiates the sign-in flow on the server-side. By default the redirect is automatic, but it can be
+         * disabled by setting the `redirect` option to `false`. When redirect is disabled, the API returns the
+         * `signInURL` in the response for the client to handle the redirect manually.
+         *
+         * @param oauth - The OAuth provider to use for sign-in (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Optional parameters for the sign-in process, including headers and redirect behavior.
+         * @returns The object returned by the API call {@link SignInAPIReturn}
+         * @example
+         * const response = await api.signIn("github", {
+         *   redirectTo: "/dashboard",
+         *   request: await getRequest(),
+         * })
+         */
+        signIn: async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: SignInAPIOptions): Promise<SignInAPIReturn> => {
+            return signIn(oauth, { ctx, ...options })
+        },
+        /**
+         * Signs in a user using credentials (`username` and `password`) on the server-side. The credentials must
+         * be verified by the `authorize` function provided in the `credentials` configuration option.
+         *
+         * @param options - Options for the API call, including the credentials payload, headers, and redirect behavior.
+         * @returns The object returned by the API call {@link SignInCredentialsAPIReturn}
+         * @example
+         * const response = await api.signInCredentials({
+         *   payload: {
+         *     username: "johndoe",
+         *     password: "1234567890"
+         *   },
+         *   redirectTo: "/dashboard",
+         *   request: await getRequest(),
+         * })
+         */
+        signInCredentials: async (options: SignInCredentialsAPIOptions): Promise<SignInCredentialsAPIReturn> => {
+            return signInCredentials({ ctx, skipCSRFCheck: true, ...options })
+        },
+        /**
+         * Signs up a new user on the server-side. It requires a `payload` with the necessary information for
+         * user creation and a callback function configured in `signUp.onCreateUser` to handle the actual user
+         * creation logic.
+         *
+         * @params options - Options for the API call, including the sign-up payload, headers, and redirect behavior.
+         * @return The object returned by the API call {@link SignUpAPIReturn}
+         * @example
+         * const response = await api.signUp({
+         *   payload: {
+         *     name: "John",
+         *     lastName: "Doe",
+         *     email: "john.doe@example.com",
+         *     password: "1234567890"
+         *   },
+         *   redirectTo: "/dashboard",
+         *   request: await getRequest()
+         * })
+         */
+        signUp: async <Payload extends Record<string, any> = InferSignUp<SignUpSchema>>(
+            options: SignUpAPIOptions<Payload>
+        ): Promise<SignUpAPIReturn> => {
+            return signUp({ ctx, skipCSRFCheck: true, ...options })
+        },
+        /**
+         * Updates the current session on the server-side. It allows partial updates to the session object, such as
+         * modifying user fields or extending the session expiry. It implements CSRF Protection by default, for
+         * server-side calls it only verifies and validates the CSRF Token, it also provides Double-Submit
+         * Cookie protection by requiring the `session_token` cookie to be included in the request headers.
+         *
+         * @param options - Options for the API call, including the session updates, headers, redirect behavior, and CSRF check bypass.
+         * @returns The object returned by the API call {@link UpdateSessionAPIReturn}
+         * @example
+         * const response = await api.updateSession({
+         *   session: {
+         *     user: {
+         *       name: "John Doe",
+         *       email: "john.doe@example.com"
+         *     }
+         *   },
+         *   redirectTo: "/dashboard",
+         *   request: await getRequest()
+         * })
+         */
+        updateSession: async (options: UpdateSessionAPIOptions<DefaultUser>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
+            return updateSession<DefaultUser>({ ctx, skipCSRFCheck: true, ...options })
+        },
+        /**
+         * Retrieves the access token for a specific OAuth provider on the server-side.
+         * It implements CSRF Protection by default, for server-side calls it only verifies and validates the CSRF Token,
+         * it also provides Double-Submit Cookie protection by requiring the `session_token` cookie to be included in
+         * the request headers.
+         *
+         * @params oauth - The OAuth provider for which to retrieve the access token (e.g., "github", "gitlab", "bitbucket").
+         * @params options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, tokens } = await api.getProviderTokens("github", {
+         *    headers: getHeaders()
+         * })
+         *
+         * const { accessToken, refreshToken } = tokens
+         */
+        getProviderTokens: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: GetProviderTokensAPIOptions
+        ): Promise<GetProviderTokensAPIReturn> => {
+            return getProviderTokens(oauth, { ctx, ...options })
+        },
+        /**
+         * Retrieves the access token for a specific OAuth provider on the server-side.
+         * It implements CSRF Protection by default, for server-side calls it only verifies and validates the CSRF Token,
+         * it also provides Double-Submit Cookie protection by requiring the `session_token` cookie to be included in
+         * the request headers.
+         *
+         * > **NOTE**: This method is based on `getProviderTokens` and it's recommended for simple use cases where only the
+         * access token is needed. For more advanced scenarios, consider using `getProviderTokens` directly.
+         *
+         * @params oauth - The OAuth provider for which to retrieve the access token (e.g., "github", "gitlab", "bitbucket").
+         * @params options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, accessToken } = await api.getAccessToken("github", {
+         *    headers: getHeaders()
+         * })
+         */
+        getAccessToken: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: AccessTokenAPIOptions
+        ): Promise<AccessTokenAPIReturn> => {
+            return getAccessToken(oauth, { ctx, ...options })
+        },
+        /**
+         * Refreshes the user profile data from the OAuth provider on the server-side. It makes a request to the
+         * `userInfo` endpoint of the specified OAuth provider.
+         *
+         * @param oauth - The OAuth provider for which to refresh the user profile data (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, session } = await api.refreshUserInfo("github", {
+         *    headers: getHeaders()
+         * })
+         */
+        refreshUserInfo: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: RefreshUserInfoAPIOptions
+        ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
+            return refreshUserInfo<DefaultUser>(oauth, { ctx, skipCSRFCheck: true, ...options })
+        },
+        /**
+         * Revokes the access token for a specific OAuth provider on the server-side. It makes a request to the
+         * `revokeToken` endpoint of the specified OAuth provider.
+         *
+         * @param oauth - The OAuth provider for which to revoke the access token (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, headers } = await api.revokeToken("github", {
+         *    headers: getHeaders()
+         * })
+         * // Use the returned headers to update the response headers in your server-side logic
+         * return new Response(null, { status: 200, headers })
+         */
+        revokeToken: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: RevokeTokenAPIOptions
+        ): Promise<RevokeTokenAPIReturn> => {
+            return revokeToken(oauth, {
+                ctx,
+                skipCSRFCheck: true,
+                ...options,
+                disconnect: false,
+            })
+        },
+        /**
+         * Disconnects the OAuth provider for the current session on the server-side. It removes the association
+         * between the user's session and the specified OAuth provider.
+         * @params oauth - The OAuth provider to disconnect (e.g., "github", "gitlab", "bitbucket").
+         * @params options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, headers } = await api.disconnectProvider("github", {
+         *    headers: getHeaders()
+         * })
+         * // Use the returned headers to update the response headers in your server-side logic
+         * return new Response(null, { status: 200, headers })
+         */
+        disconnectProvider: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: DisconnectProviderAPIOptions
+        ): Promise<DisconnectProviderAPIReturn> => {
+            return disconnectProvider(oauth, { ctx, skipCSRFCheck: true, ...options })
+        },
+        /**
+         * Checks if the current session is connected to a specific OAuth provider on the server-side. It verifies
+         * the presence of a valid access token for the specified provider in the session.
+         *
+         * @param oauth - The OAuth provider to check for connection (e.g., "github", "gitlab", "bitbucket").
+         * @param options - Options for the API call, including headers and request object.
+         * @example
+         * const { success, connected } = await api.isProviderConnected("github", {
+         *    headers: getHeaders()
+         * })
+         * if (connected) {
+         *    // The session is connected to the GitHub provider
+         * }
+         */
+        isProviderConnected: async (
+            oauth: LiteralUnion<BuiltInOAuthProvider>,
+            options?: ProviderConnectedAPIOptions
+        ): Promise<ProviderConnectedAPIReturn> => {
+            return isProviderConnected(oauth, { ctx, ...options })
+        },
+        /**
+         * Signs out the current session on the server-side. It implements CSRF Protection by default, for
+         * server-side calls it only verifies and validates the CSRF Token, it also provides Double-Submit
+         * Cookie protection by requiring the `session_token` cookie to be included in the request headers.
+         *
+         * @param options - Options for the API call, including headers, redirect behavior, and CSRF check bypass.
+         * @returns The object returned by the API call {@link SignOutAPIReturn}
+         * @example
+         * const response = await api.signOut({
+         *   redirectTo: "/goodbye",
+         *   headers: {
+         *     Cookie: "session_token=abc123; csrf_token=def456"
+         *   },
+         *   // Only set this to true for trusted server-side calls that have already verified the CSRF token
+         *   skipCSRFCheck: true
+         * })
+         */
+        signOut: async (options: SignOutAPIOptions): Promise<SignOutAPIReturn> => {
+            return signOut({ ctx, skipCSRFCheck: true, ...options })
+        },
+    }
+}

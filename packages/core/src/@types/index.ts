@@ -1,36 +1,27 @@
 /**
  * Public type entry for `@aura-stack/auth` and `@aura-stack/auth/types`: configuration, session, OAuth, API results, and utilities.
  */
-import { z } from "zod/v4"
-import { OAuthEnvSchema } from "@/schemas.ts"
-import type { JWTPayload } from "@/jose.ts"
 import type { Prettify } from "@/@types/utility.ts"
 import type { ClientOptions } from "@aura-stack/router"
-import type { createAuthInstance } from "@/createAuth.ts"
-
-export type { TypedJWTPayload } from "@aura-stack/jose"
+import type { createAuthInstance } from "@/config/router.ts"
 
 export type * from "@/@types/config.ts"
-export type * from "@/@types/errors.ts"
 export type * from "@/@types/oauth.ts"
+export type * from "@/@types/oidc.ts"
 export type * from "@/@types/session.ts"
 export type * from "@/@types/utility.ts"
 export type * from "@/@types/api.ts"
+export type * from "@/identity/index.ts"
+export type * from "@/@types/entities.ts"
+export type * from "@/@types/adapter.ts"
 
-export type { UserShape } from "@/shared/identity.ts"
-/**
- * Standard JWT claims that are managed internally by the token system.
- * These fields are typically filtered out before returning user data.
- */
-export type JWTStandardClaims = Pick<JWTPayload, "exp" | "iat" | "jti" | "nbf" | "sub" | "aud" | "iss">
+export type { Awaitable, RequestHeaders } from "@aura-stack/router/types"
+export type { TypedJWTPayload } from "@aura-stack/jose"
 
-/**
- * JWT payload structure that includes a mandatory `token` field used to verify CSRF Tokens
- */
-export type JWTPayloadWithToken = JWTPayload & { token: string }
-
-/** Environment variables for OAuth client credentials, inferred from `OAuthEnvSchema`. */
-export type OAuthEnv = z.infer<typeof OAuthEnvSchema>
+export type { IdentityShape as ZodIdentitySchema, IsZod } from "@/identity/zod.ts"
+export type { IdentityShape as ArkTypeIdentitySchema, IsArkType } from "@/identity/arktype.ts"
+export type { IdentityShape as TypeboxIdentitySchema, IsTypeBox } from "@/identity/typebox.ts"
+export type { IdentityShape as ValibotIdentitySchema, IsValibot } from "@/identity/valibot.ts"
 
 /**
  * HTTP route handlers exposed by the auth instance (`GET`, `POST`, `PATCH`, `ALL`) for mounting on your app router.

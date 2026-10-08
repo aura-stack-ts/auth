@@ -3,6 +3,7 @@
  *
  * These conditional types describe return values when `redirect()` is used (which never returns in Next.js).
  */
+import type { zod } from "@aura-stack/react/identity/zod"
 import type {
     Prettify,
     SignInAPIOptions,
@@ -14,6 +15,24 @@ import type {
     UpdateSessionAPIOptions,
     UpdateSessionAPIReturn,
     User,
+    SignUpAPIOptions,
+    SignUpAPIReturn,
+    RefreshUserInfoAPIOptions,
+    RevokeTokenAPIOptions,
+    RevokeTokenAPIReturn,
+    DisconnectProviderAPIOptions,
+    ProviderConnectedAPIOptions,
+    LiteralUnion,
+    BuiltInOAuthProvider,
+    DisconnectProviderAPIReturn,
+    ProviderConnectedAPIReturn,
+    RefreshUserInfoAPIReturn,
+    SchemaTypes,
+    Wrap,
+    RemoveIndexSignature,
+    InferSchema,
+    GetSessionAPIOptions,
+    Session,
 } from "@aura-stack/react/types"
 
 /**
@@ -61,3 +80,47 @@ export type NextUpdateSessionReturn<
 export type NextSignOutReturn<Options extends SignOutAPIOptions> = Options extends { redirectTo: string }
     ? never
     : SignOutAPIReturn
+
+/**
+ * Return type for the Next.js server `api.signUp` helper.
+ * Same `never` rule as {@link NextSignInReturn} when a server redirect is triggered via options.
+ */
+export type NextSignUpReturn<Options extends SignUpAPIOptions> = Options extends { redirect: true }
+    ? never
+    : Options extends { redirectTo: string }
+      ? never
+      : SignUpAPIReturn
+
+export interface NextAPI<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>> {
+    getSession: (options?: GetSessionAPIOptions) => Promise<Session<DefaultUser> | null>
+    signIn: <Options extends SignInAPIOptions>(
+        provider: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<NextSignInReturn<Options>>
+    signInCredentials: <Options extends SignInCredentialsAPIOptions>(options: Options) => Promise<NextSignInCredentials<Options>>
+    updateSession: <Options extends NextUpdateSessionOptions<DefaultUser>>(
+        options: Options
+    ) => Promise<NextUpdateSessionReturn<Options, DefaultUser>>
+    getProviderTokens: (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: any) => Promise<any>
+    getAccessToken: (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: any) => Promise<any>
+    signOut: <Options extends SignOutAPIOptions>(options?: Partial<Options>) => Promise<NextSignOutReturn<Options>>
+    signUp: <Options extends SignUpAPIOptions<Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>>>(
+        options: Options
+    ) => Promise<NextSignUpReturn<Options>>
+    refreshUserInfo: <Options extends RefreshUserInfoAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<RefreshUserInfoAPIReturn<DefaultUser>>
+    revokeToken: <Options extends RevokeTokenAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<RevokeTokenAPIReturn>
+    disconnectProvider: <Options extends DisconnectProviderAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<DisconnectProviderAPIReturn>
+    isProviderConnected: <Options extends ProviderConnectedAPIOptions>(
+        oauth: LiteralUnion<BuiltInOAuthProvider>,
+        options?: Options
+    ) => Promise<ProviderConnectedAPIReturn>
+}

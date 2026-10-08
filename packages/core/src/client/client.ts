@@ -1,4 +1,3 @@
-import { AuthClientError } from "@/shared/errors.ts"
 import { createClient as createClientAPI } from "@aura-stack/router"
 import type {
     Session,
@@ -14,20 +13,25 @@ import type {
     SignOutReturn,
     UpdateSessionReturn,
     SignInCredentialsReturn,
-    SignInAPIReturn,
-    SignOutAPIReturn,
-    SignInCredentialsAPIReturn,
-    UpdateSessionAPIReturn,
     SignInCredentialsOptions,
+    SignUpOptions,
+    SignUpReturn,
+    GetProviderTokensReturn,
 } from "@/@types/index.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 
 export type { AuthClientOptions }
 
 export const createClient = createClientAPI<AuthClient>
 
-export const createAuthClient = <DefaultUser extends User = User>(options: AuthClientOptions) => {
+export const createAuthClient = <
+    DefaultUser extends User = User,
+    SignUpPayload extends Record<string, any> = Record<string, any>,
+>(
+    options: AuthClientOptions
+) => {
     if (typeof window === "undefined" && !options.baseURL) {
-        throw new AuthClientError("`baseURL` is required when createAuthClient is used outside the browser.")
+        throw new AuraAuthError({ code: "CLIENT_BASE_URL_MISSING" })
     }
 
     const client = createClient({
@@ -37,47 +41,78 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         ...options,
     })
 
-    const getCSRFToken = async (): Promise<string | null> => {
+    const getCSRFToken = async (): Promise<string> => {
         try {
             const response = await client.get("/csrfToken")
-            if (!response.ok) return null
-            const data: { csrfToken?: string } = await response.json()
-            return data.csrfToken ?? null
+            if (!response.ok) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
+            const data = await response.json()
+            const token = data.csrfToken
+            if (!token) {
+                throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
+            }
+            return token
         } catch (error) {
             console.error("Error fetching CSRF token:", error)
-            return null
+            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause: error })
         }
     }
 
+    /**
+     * Gets the current session for the authenticated user.
+     *
+     * @returns Session object if the user is authenticated, or null if not authenticated or an error occurs.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const session = await authClient.getSession()
+     */
     const getSession = async (): Promise<Session<DefaultUser> | null> => {
         try {
             const response = await client.get("/session")
             if (!response.ok) return null
             const session = await response.json()
             if (!session.success) return null
-            return session.session
+            return session.session as Session<DefaultUser>
         } catch (error) {
             console.error("Error fetching session:", error)
             return null
         }
     }
 
+    /**
+     * Initiates the sign-in process for a specified OAuth provider.
+     *
+     * @param oauth The OAuth provider identifier (e.g., "google", "github").
+     * @param options Optional sign-in options, including redirect behavior and target URL.
+     * @returns An object containing the sign-in result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.signIn("google", {
+     *   redirect: true,
+     *   redirectTo: "/dashboard"
+     * })
+     */
     const signIn = async <Options extends SignInOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
     ): Promise<SignInReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+            // @ts-ignore
             const response = await client.get("/signIn/:oauth", {
                 params: {
                     oauth,
                 },
                 searchParams: {
-                    ...options,
+                    redirectTo,
                     redirect: false,
                 },
             })
-            const json = (await response.json()) as SignInAPIReturn
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.signInURL) {
+            const json = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.signInURL) {
                 window.location.assign(json.signInURL)
             }
             return json as unknown as SignInReturn<Options>
@@ -87,18 +122,39 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
+    /**
+     * Initiates the sign-in process using user credentials (e.g., email and password).
+     *
+     * @param options Sign-in options, including the credentials payload and redirect behavior.
+     * @returns An object containing the sign-in result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.signInCredentials({
+     *   payload: {
+     *     email: "user@example.com",
+     *     password: "securepassword"
+     *   }
+     * })
+     */
     const signInCredentials = async <Options extends SignInCredentialsOptions>(
         options: Options
     ): Promise<SignInCredentialsReturn<Options>> => {
         try {
+            const csrfToken = await getCSRFToken()
+            const { redirectTo } = options ?? {}
             const response = await client.post("/signIn/credentials", {
                 body: options.payload,
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    redirectTo,
+                    redirect: false,
+                },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
                 },
             })
-            const json: SignInCredentialsAPIReturn = await response.json()
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+            const json = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as SignInCredentialsReturn<Options>
@@ -108,30 +164,91 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
+    /**
+     * Initiates the sign-up process for a new user with the provided payload.
+     *
+     * @param options Sign-up options, including the payload for user registration and redirect behavior.
+     * @return An object containing the sign-up result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.signUp({
+     *   payload: {
+     *     name: "John Doe",
+     *     email: "john@example.com",
+     *     password: "securepassword"
+     *   },
+     * })
+     */
+    const signUp = async <Options extends SignUpOptions<SignUpPayload>>(options: Options): Promise<SignUpReturn<Options>> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            const { redirectTo } = options ?? {}
+            // @ts-ignore
+            const response = await client.post("/signUp", {
+                body: options.payload,
+                searchParams: {
+                    redirectTo,
+                    redirect: false,
+                },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json: any = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as SignUpReturn<Options>
+        } catch (error) {
+            console.error("Error during sign-up:", error)
+            return { success: false, redirect: false, redirectURL: null } as unknown as SignUpReturn<Options>
+        }
+    }
+
+    /**
+     * Updates the current session with new information, such as user data or expiration time.
+     *
+     * @param options Update session options, including the new session data and redirect behavior.
+     * @returns An object containing the update session result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.updateSession({
+     *   session: {
+     *     user: {
+     *       name: "John Doe"
+     *     }
+     *   }
+     * })
+     */
     const updateSession = async <Options extends UpdateSessionOptions<DefaultUser>>(
         options: Options
     ): Promise<UpdateSessionReturn<Options, DefaultUser>> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuthClientError("Failed to fetch CSRF token for session update.")
-            }
-            const { session } = options ?? {}
+            const { session, redirectTo } = options ?? {}
             if (!session) {
                 return { success: false, session: null } as UpdateSessionReturn<Options, DefaultUser>
             }
             const user = session.user ?? {}
             const response = await client.patch("/session", {
                 body: {
+                    // @ts-ignore - Fix type here - go to @aura-stack/router.
                     user,
+                    // @ts-ignore - Fix type here - go to @aura-stack/router.
                     expires: session.expires ? new Date(session.expires) : undefined,
+                },
+                searchParams: {
+                    redirectTo,
+                    redirect: false,
                 },
                 headers: {
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json: UpdateSessionAPIReturn<DefaultUser> = await response.json()
-            if ((options.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+            const json = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as UpdateSessionReturn<Options, DefaultUser>
@@ -141,24 +258,226 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         }
     }
 
+    /**
+     * Fetches the OAuth tokens for a specified provider, if available.
+     *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
+     * @param oauth The OAuth provider identifier (e.g., "google", "github").
+     * @returns An object with `success` and `tokens`, where `tokens` is null if unavailable or on error.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.getProviderTokens("google")
+     * // Expected:
+     * {
+     *   success: true,
+     *   tokens: {
+     *     accessToken: "access_token_value",
+     *     expiresAt: 1234567890,
+     *     refreshToken: "refresh_token_value",
+     *     refreshTokenExpiresAt: 1234567890,
+     *     scopes: ["scope1", "scope2"],
+     *     tokenType: "Bearer",
+     *   }
+     * }
+     */
+    const getProviderTokens = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<GetProviderTokensReturn> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            const response = await client.get("/providers/:oauth/tokens", {
+                params: {
+                    oauth,
+                },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json = await response.json()
+            return json
+        } catch (error) {
+            console.error("Error getting provider tokens:", error)
+            return { success: false, tokens: null } as unknown as GetProviderTokensReturn
+        }
+    }
+
+    /**
+     * Retrieves the access token for a specific OAuth provider, if available.
+     *
+     * > **NOTE**: This method is based on `getProviderTokens` and it's recommended for simple use cases where only the
+     * access token is needed. For more advanced scenarios, consider using `getProviderTokens` directly.
+     *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @returns the access token string if available, or null if not available or on error.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const accessToken = await authClient.getAccessToken("google")
+     * // Expected:
+     * "access_token_value" or null
+     */
+    const getAccessToken = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<string | null> => {
+        const { success, tokens } = await getProviderTokens(oauth)
+        return success && tokens ? tokens.accessToken : null
+    }
+
+    /**
+     * Refreshes the user information from making a request to the user info endpoint of the specified
+     * OAuth provider. This is useful for keeping the session data up-to-date without requiring the user
+     * to re-authenticate,
+     *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @returns the updated session object if successful, or null if the refresh fails or the user is not authenticated.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const updatedSession = await authClient.refreshUserInfo("google")
+     * // Expected:
+     * {
+     *   sub: "user_id",
+     *   name: "John Doe",
+     *   email: "john.doe@example.com",
+     *   image: "https://example.com/avatar.jpg",
+     * }
+     */
+    const refreshUserInfo = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<Session<DefaultUser> | null> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            const response = await client.post("/providers/:oauth/user/refresh", {
+                params: { oauth },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json = await response.json()
+            return json.session as Session<DefaultUser> | null
+        } catch (error) {
+            console.error("Error refreshing user info:", error)
+            return null
+        }
+    }
+
+    /**
+     * Revokes the OAuth token for a specified provider. It doesn't sign out the user, but it invalidates
+     * the access token, preventing further use of the token for API requests.
+     *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @returns A boolean indicating whether the token revocation was successful.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const success = await authClient.revokeToken("google")
+     * // Expected:
+     * true or false
+     */
+    const revokeToken = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            const response = await client.post("/providers/:oauth/tokens/revoke", {
+                params: { oauth },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json = await response.json()
+            return json?.success === true
+        } catch (error) {
+            console.error("Error revoking token:", error)
+            return false
+        }
+    }
+
+    /**
+     * Disconnets the OAuth provider with the current user, removing the association between the
+     * user's account and the OAuth provider. This action does not revoke the OAuth token, but it
+     * removes the link between the user's account and the provider, effectively "disconnecting" the provider.
+     *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @params - Additional options for the disconnect operation (currently not used).
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * // Expected: true or false
+     * const success = await authClient.disconnectProvider("google")
+     */
+    const disconnectProvider = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
+        try {
+            const csrfToken = await getCSRFToken()
+            const response = await client.delete("/providers/:oauth", {
+                params: { oauth },
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+            const json = await response.json()
+            return json?.success === true
+        } catch (error) {
+            console.error("Error disconnecting provider:", error)
+            return false
+        }
+    }
+
+    /**
+     * Verifies if the specified OAuth provider is connected to the current user's account.
+     *
+     *  > **NOTE**: This method is experimental and may change in future releases.
+     *
+     * @param oauth - The OAuth provider identifier (e.g., "google", "github").
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * // Expected: true or false
+     * const isConnected = await authClient.isProviderConnected("google")
+     */
+    const isProviderConnected = async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
+        try {
+            const response = await client.get("/providers/:oauth", {
+                params: { oauth },
+            })
+            const json = await response.json()
+            return json?.success === true && json?.connected === true
+        } catch (error) {
+            console.error("Error checking provider connection:", error)
+            return false
+        }
+    }
+
+    /**
+     * Signs out the current user, ending their session and optionally redirecting them to a specified URL.
+     *
+     * @param options Sign-out options, including redirect behavior and target URL after sign-out.
+     * @returns An object containing the sign-out result, including success status and redirect URL if applicable.
+     * @example
+     * const authClient = createAuthClient({ ... })
+     *
+     * const output = await authClient.signOut({
+     *   redirect: true,
+     *   redirectTo: "/goodbye"
+     * })
+     */
     const signOut = async <Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
-            if (!csrfToken) {
-                throw new AuthClientError("Failed to fetch CSRF token for sign-out.")
-            }
-
             const response = await client.post("/signOut", {
                 searchParams: {
                     redirectTo: options?.redirectTo,
+                    redirect: false,
                     token_type_hint: "session_token",
                 },
                 headers: {
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json: SignOutAPIReturn = await response.json()
-            if ((options?.redirect ?? true) && typeof window !== "undefined" && json?.redirectURL) {
+            const json = await response.json()
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
             return json as unknown as SignOutReturn<Options>
@@ -172,7 +491,14 @@ export const createAuthClient = <DefaultUser extends User = User>(options: AuthC
         getSession,
         signIn,
         signInCredentials,
+        signUp,
         updateSession,
+        getProviderTokens,
+        getAccessToken,
+        refreshUserInfo,
+        revokeToken,
+        disconnectProvider,
+        isProviderConnected,
         signOut,
     }
 }

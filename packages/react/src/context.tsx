@@ -1,128 +1,98 @@
-import { createContext, useCallback, useEffect, useMemo, useState, useTransition } from "react"
+import { createContext, useCallback, useEffect, useRef, useState } from "react"
 import type { Session, User } from "@aura-stack/auth"
-import type {
-    LiteralUnion,
-    SignInOptions,
-    SignOutOptions,
-    BuiltInOAuthProvider,
-    SignInCredentialsOptions,
-    UpdateSessionOptions,
-} from "@aura-stack/auth/types"
-import type { AuthProviderProps, AuthReactContextValue } from "@/@types/types.ts"
-
-/**
- * React context for {@link AuthReactContextValue}. Use {@link AuthProvider} to supply a client and {@link useAuth} (or other hooks) to read it.
- */
-export const AuthContext = createContext<AuthReactContextValue<User> | null>(null)
+import type { AuthClientInstance, AuthProviderProps, BroadcastMessage, Context } from "@/@types/types.ts"
 
 export type { AuthProviderProps }
 
+export const AuthContext = createContext<Context | undefined>(undefined)
+
+const BROADCAST_CHANNEL_NAME = "aura-auth"
+
+let _channel: BroadcastChannel | null = null
+
+const isSupportedBroadcastChannel = (): boolean => {
+    return typeof window !== "undefined" && "BroadcastChannel" in window
+}
+
+const getBroadcastChannel = (): BroadcastChannel | null => {
+    if (!isSupportedBroadcastChannel()) return null
+    if (!_channel) _channel = new BroadcastChannel(BROADCAST_CHANNEL_NAME)
+    return _channel
+}
+
+export const broadcast = (message: BroadcastMessage): void => {
+    getBroadcastChannel()?.postMessage(message)
+}
+
 /**
- * Provides session state and auth actions for the tree, using the {@link AuthProviderProps.client} you pass in.
- * Swap or recreate `client` when you need different configuration; when `client` changes, session is re-synced like on mount.
+ * Wrapper component that provides authentication context in client-side React applications.
+ *
+ * @param {AuthProviderProps<DefaultUser>} props The properties for the AuthProvider component
+ * @returns {JSX.Element} The AuthProvider component that wraps its children with authentication context
+ * @example
+ * const client = createAuthClient({ baseURL: "http://localhost:3000" })
+ *
+ * <AuthProvider client={client}>
+ *   <App />
+ * </AuthProvider>
  */
 export const AuthProvider = <DefaultUser extends User = User>({
+    initialSession,
     children,
     client,
-    initialSession,
+    redirect,
 }: AuthProviderProps<DefaultUser>) => {
-    const [session, setSession] = useState<Session<DefaultUser> | null | undefined>(initialSession)
-    const [isPending, startTransition] = useTransition()
+    const clientRef = useRef<AuthClientInstance<DefaultUser>>(client)
+    clientRef.current = client
 
-    const status = useMemo((): AuthReactContextValue<DefaultUser>["status"] => {
-        if (session === undefined) return "loading"
-        return session ? "authenticated" : "unauthenticated"
-    }, [session])
+    const [session, setSession] = useState<Session<DefaultUser> | null>(() => {
+        if (initialSession !== undefined) {
+            return initialSession
+        }
+        return null
+    })
+    const [status, setStatus] = useState<Context["status"]>(initialSession ? "authenticated" : "unauthenticated")
 
-    const refresh = useCallback(async () => {
-        startTransition(async () => {
-            const next = await client.getSession()
-            setSession(next)
-        })
-    }, [client])
-
-    const signIn = useCallback(
-        async (oauth: LiteralUnion<BuiltInOAuthProvider>, options?: SignInOptions) => {
-            const result = await client.signIn(oauth, options)
-            if (!(options?.redirect ?? true)) {
-                await refresh()
-            }
-            return result
-        },
-        [client, refresh]
-    )
-
-    const signInCredentials = useCallback(
-        async (options: SignInCredentialsOptions) => {
-            const result = await client.signInCredentials(options)
-            if (!(options?.redirect ?? true)) {
-                await refresh()
-            }
-            return result
-        },
-        [client, refresh]
-    )
-
-    const signOut = useCallback(
-        async (signOutOptions?: SignOutOptions) => {
-            const result = await client.signOut(signOutOptions)
-            if (!(signOutOptions?.redirect ?? true)) {
-                await refresh()
-            }
-            return result
-        },
-        [client, refresh]
-    )
-
-    const updateSession = useCallback(
-        async (options: UpdateSessionOptions<DefaultUser>) => {
-            const result = await client.updateSession(options)
-            if (!(options?.redirect ?? true)) {
-                await refresh()
-            }
-            return result
-        },
-        [client, refresh]
-    )
+    const refreshSession = useCallback(async (session: Session | null | undefined = undefined) => {
+        setStatus("pending")
+        try {
+            const next = session !== undefined ? session : ((await clientRef.current.getSession()) ?? null)
+            setSession(next as Session<DefaultUser> | null)
+            setStatus(next ? "authenticated" : "unauthenticated")
+        } catch {
+            setSession(null)
+            setStatus("unauthenticated")
+        }
+    }, [])
 
     useEffect(() => {
-        if (initialSession !== undefined) {
-            startTransition(() => {
-                setSession(initialSession)
-            })
-            return
+        if (initialSession === undefined) {
+            refreshSession()
         }
+    }, [initialSession, refreshSession])
 
-        let cancelled = false
-        ;(async () => {
-            const next = await client.getSession()
-            if (!cancelled) {
-                startTransition(() => {
-                    setSession(next)
-                })
+    useEffect(() => {
+        if (!isSupportedBroadcastChannel()) return
+        const channel = new BroadcastChannel(BROADCAST_CHANNEL_NAME)
+
+        const handleBroadcast = (event: MessageEvent<BroadcastMessage>) => {
+            if (event.data.type === "session:update") {
+                refreshSession(event.data.payload)
             }
-        })()
-
-        return () => {
-            cancelled = true
+            if (event.data.type === "session:sync") {
+                refreshSession()
+            }
+            if (event.data.type === "session:clear") {
+                refreshSession(null)
+            }
         }
-    }, [initialSession, client])
 
-    const value = useMemo(
-        (): AuthReactContextValue<DefaultUser> =>
-            ({
-                session,
-                status,
-                isPending,
-                client,
-                refresh,
-                signIn,
-                signInCredentials,
-                signOut,
-                updateSession,
-            }) as AuthReactContextValue<DefaultUser>,
-        [session, status, isPending, client, refresh, signIn, signInCredentials, signOut, updateSession]
-    )
+        channel.addEventListener("message", handleBroadcast)
+        return () => {
+            channel.removeEventListener("message", handleBroadcast)
+            channel.close()
+        }
+    }, [refreshSession])
 
-    return <AuthContext.Provider value={value as AuthReactContextValue<User>}>{children}</AuthContext.Provider>
+    return <AuthContext value={{ session, status, client: clientRef.current, redirect }}>{children}</AuthContext>
 }

@@ -8,6 +8,7 @@ import {
     signJWS,
     verifyJWS,
     type SecretInput,
+    type JWTSecretInput,
     type DecodeJWTOptions,
     type TypedJWTPayload,
     type DerivedKeyInput,
@@ -57,7 +58,7 @@ describe("type-safe payload", () => {
             .toEqualTypeOf<TypedJWTPayload<Partial<User>>>()
         expectTypeOf(encodeJWT<User>)
             .parameter(1)
-            .toEqualTypeOf<SecretInput | DerivedKeyInput>()
+            .toEqualTypeOf<JWTSecretInput | DerivedKeyInput>()
     })
 
     test("decodeJWT", async () => {
@@ -68,7 +69,7 @@ describe("type-safe payload", () => {
             .toEqualTypeOf<string>()
         expectTypeOf(decodeJWT<User>)
             .parameter(1)
-            .toEqualTypeOf<SecretInput | DerivedKeyInput>()
+            .toEqualTypeOf<JWTSecretInput | DerivedKeyInput>()
         expectTypeOf(decodeJWT<User>)
             .parameter(2)
             .toEqualTypeOf<DecodeJWTOptions | undefined>()

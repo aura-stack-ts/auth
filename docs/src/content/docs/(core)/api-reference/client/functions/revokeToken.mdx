@@ -1,0 +1,64 @@
+---
+title: revokeToken
+description: Revoke the OAuth access token for a connected provider, from the client.
+---
+
+The `revokeToken` client method revokes the OAuth access token for a specific connected provider, from a client-side or browser context.
+
+<Callout>
+  Token revocation depends on the OAuth provider supporting it. If the provider does not support revocation, this method resolves
+  to `success: false`.
+</Callout>
+
+```ts title="revoke-token.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const success = await authClient.revokeToken("github")
+```
+
+<Callout>
+  This is a stronger alternative to `disconnectProvider`, which disconnects a provider without revoking its token. Use this method
+  when you specifically need the token itself invalidated. See
+  [`disconnectProvider`](/docs/api-reference/client/functions/disconnectProvider) for the softer alternative.
+</Callout>
+
+## Reference
+
+### Parameters
+
+| Parameter  | Type     | Required | Description                                           |
+| ---------- | -------- | -------- | ----------------------------------------------------- |
+| providerId | `string` | Yes      | The id of the OAuth provider to revoke the token for. |
+
+### Returns
+
+| Return Type        | Description                                                                  |
+| ------------------ | ---------------------------------------------------------------------------- |
+| `Promise<boolean>` | Resolves to `true` if the token was successfully revoked, `false` otherwise. |
+
+## Behavior
+
+- Cookies are read automatically from the browser context — you don't need to handle them or CSRF tokens manually.
+- If revocation fails (no active token for the provider, or the provider rejects the request), the method resolves to `false`.
+
+## Usage
+
+### Revoke a provider's access token
+
+```ts title="revoke-token.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const success = await authClient.revokeToken("github")
+```
+
+### Handling failure
+
+```tsx title="handle-failure.ts" lineNumbers
+import { authClient } from "@/lib/auth-client"
+
+const success = await authClient.revokeToken("github")
+
+if (!success) {
+  window.location.assign("/settings/connections")
+}
+```

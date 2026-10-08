@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 export const EditProfile = ({ action }: { action: (formData: FormData) => void | Promise<void> }) => {
@@ -12,7 +13,7 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
 
     return (
         <section>
-            <div className="mt-4 pt-4 flex items-center justify-between gap-x-4 border-t">
+            <div className="flex items-center justify-between gap-x-4">
                 <div>
                     <label className="font-medium block" htmlFor="signout">
                         Edit Profile
@@ -20,7 +21,7 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
                     <span className="text-sm">Edit your profile information</span>
                 </div>
                 <Button
-                    className="w-20 data-[open='true']:hidden"
+                    className="w-17.5 data-[open='true']:hidden"
                     variant="secondary"
                     data-open={isOpen}
                     onClick={() => setIsOpen(true)}
@@ -34,10 +35,13 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
                         <label className="font-medium block" htmlFor="username">
                             Username
                         </label>
-                        <input
+                        <Input
                             type="text"
                             id="username"
                             name="username"
+                            aria-label="Username"
+                            autoComplete="username"
+                            aria-autocomplete="list"
                             className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                         />
                     </div>
@@ -49,14 +53,15 @@ export const EditProfile = ({ action }: { action: (formData: FormData) => void |
                             type="email"
                             id="email"
                             name="email"
+                            aria-label="Email"
+                            autoComplete="email"
+                            aria-autocomplete="list"
                             className="w-full h-9 mt-1 font-medium border border-input rounded-none bg-background hover:text-accent-foreground hover:bg-input/50 focus:outline-1"
                         />
                     </div>
-                    <div className="grid grid-cols-2 gap-x-4">
-                        <Button className="w-full mt-6" variant="default" type="submit">
-                            Edit
-                        </Button>
-                        <Button className="w-full mt-6" variant="secondary" type="button" onClick={() => setIsOpen(false)}>
+                    <div className="mt-6 grid grid-cols-2 gap-x-4">
+                        <Button type="submit">Edit</Button>
+                        <Button variant="destructive" type="button" onClick={() => setIsOpen(false)}>
                             Cancel
                         </Button>
                     </div>

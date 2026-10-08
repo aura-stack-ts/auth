@@ -1,10 +1,7 @@
-import { getEnv } from "@/shared/env.ts"
 import {
     createJWT,
     createJWS,
     createJWE,
-    createDeriveKey,
-    createSecret,
     type JWTVerifyOptions,
     type DecodeJWTOptions,
     type TypedJWTPayload,
@@ -13,14 +10,15 @@ import {
     type JWEHeaderParameters,
     type JWTDecryptOptions,
 } from "@aura-stack/jose"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
-import { AuthInternalError, AuthSecurityError } from "@/shared/errors.ts"
-import { isEncryptedMode, isSealedMode, isSignedMode } from "@/shared/assert.ts"
+import { getSecrets, type InternalSecret } from "@/config/get-secret.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
-import type { User, SessionConfig, JWTKey } from "@/@types/index.ts"
+import { isEncryptedMode, isSealedMode, isSignedMode, isStatelessStrategy } from "@/shared/assert.ts"
+import type { User, SessionConfig } from "@/@types/index.ts"
 
 const getJWTConfig = (config?: SessionConfig) => {
-    return config?.jwt
+    return isStatelessStrategy(config) ? config?.jwt : {}
 }
 
 export const getJWTClaims = (config?: SessionConfig) => {
@@ -33,10 +31,14 @@ export const getJWTClaims = (config?: SessionConfig) => {
         claims.iss = jwt.issuer
     }
     const now = Math.floor(Date.now() / 1000)
-    if (jwt?.maxAge) {
+    if (config?.maxAge) {
+        claims.exp = now + config.maxAge
+    } else if (jwt?.maxAge) {
         claims.exp = now + jwt.maxAge
     }
-    if (jwt?.maxExpiration) {
+    if (config?.maxDuration) {
+        claims.mexp = now + config.maxDuration
+    } else if (jwt?.maxExpiration) {
         claims.mexp = now + jwt.maxExpiration
     }
     return claims
@@ -98,7 +100,7 @@ export const getDecryptOptions = (config?: SessionConfig, options?: JWTDecryptOp
 export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => {
     const now = Math.floor(Date.now() / 1000)
     if (payload.mexp && typeof payload.mexp === "number" && now > payload.mexp) {
-        throw new AuthSecurityError("TOKEN_EXPIRED", "The token has expired based on its maxExpiration (mexp) claim.")
+        throw new AuraAuthError({ code: "JWT_EXPIRED" })
     }
 }
 
@@ -116,46 +118,20 @@ export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => 
  * @param session the session configuration that drives algorithm and mode selection
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
  */
-export const createJoseInstance = <DefaultUser extends User = User>(secret?: JWTKey, session?: SessionConfig) => {
-    secret ??= getEnv("SECRET")
-    if (!secret) {
-        throw new AuthInternalError(
-            "JOSE_INITIALIZATION_FAILED",
-            "AURA_AUTH_SECRET environment variable is not set and no secret was provided."
-        )
-    }
-
-    const salt = getEnv("SALT")
-    if (!salt) {
-        throw new AuthInternalError(
-            "JOSE_INITIALIZATION_FAILED",
-            "AURA_AUTH_SALT or AUTH_SALT environment variable is not set. A salt value is required for key derivation."
-        )
-    }
-    try {
-        createSecret(salt)
-    } catch (error) {
-        throw new AuthInternalError(
-            "INVALID_SALT_SECRET_VALUE",
-            "AURA_AUTH_SALT/AUTH_SALT is invalid. It must be at least 32 bytes long and meet entropy requirements.",
-            { cause: error }
-        )
-    }
-
+export const createJoseInstance = <DefaultUser extends User = User>(
+    secret: InternalSecret,
+    salt: string,
+    session?: SessionConfig
+) => {
     const jose = (async () => {
-        const [derivedSigningKey, derivedEncryptionKey, derivedCsrfTokenKey] = await Promise.all([
-            createDeriveKey(secret, salt, "signing"),
-            createDeriveKey(secret, salt, "encryption"),
-            createDeriveKey(secret, salt, "csrfToken"),
-        ])
+        const { jwsSecret, jweSecret, jwtSecret } = await getSecrets(secret, salt, session)
 
         return {
-            jwt: createJWT<DefaultUser>({ sign: derivedSigningKey, encrypt: derivedEncryptionKey }),
-            jws: createJWS<DefaultUser>(derivedCsrfTokenKey),
-            jwe: createJWE<DefaultUser>(derivedEncryptionKey),
+            jwt: createJWT<DefaultUser>(jwtSecret),
+            jws: createJWS<DefaultUser>(jwsSecret),
+            jwe: createJWE<DefaultUser>(jweSecret),
         }
     })()
-    jose.catch(() => {})
 
     return {
         signJWS: async (payload: TypedJWTPayload<Partial<DefaultUser>>, options?: JWTHeaderParameters) => {

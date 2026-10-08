@@ -1,0 +1,137 @@
+---
+title: OAuth providers
+description: OAuth providers supported by Aura Auth to consume and add authentication to typescript apps
+---
+
+An OAuth provider is a third-party service that implements the `OAuth 2.0` authorization protocol. This integration enables applications to obtain limited access to user accounts on external services without requiring users to share credentials directly with the application.
+
+Aura Auth delegates authentication and authorization to these trusted third parties. The provider manages user authentication, requests consent, and issues tokens, while Aura Auth provides the infrastructure to securely handle these flows within TypeScript applications.
+
+For technical details on the underlying protocol, refer to the [OAuth 2.0 Authorization Framework](/docs/concepts/oauth).
+
+---
+
+## Implementation Patterns
+
+Aura Auth offers multiple ways to initialize OAuth providers, ranging from zero-configuration setups to highly customized factory functions.
+
+### Configuration Methods
+
+Providers can be defined using three distinct patterns within the `createAuth` instance:
+
+```ts lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { bitbucket } from "@aura-stack/auth/oauth/bitbucket"
+import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
+
+export const auth = createAuth({
+  oauth: [
+    // 1. String Pattern: Automatic environment variable resolution
+    "github",
+
+    // 2. Object Pattern: Access via a single built-in collection
+    builtInOAuthProviders.gitlab(),
+
+    // 3. Factory Pattern: Direct import for optimal tree-shaking
+    bitbucket(),
+  ],
+})
+```
+
+---
+
+### Supported Providers
+
+The following OAuth providers are currently supported by Aura Auth:
+
+<Cards>
+  <Card title="GitHub" href="/docs/oauth/github">
+    GitHub OAuth Identity Provider
+  </Card>
+  <Card title="Discord" href="/docs/oauth/discord">
+    Discord OAuth Identity Provider
+  </Card>
+  <Card title="Bitbucket" href="/docs/oauth/bitbucket">
+    Bitbucket OAuth Identity Provider
+  </Card>
+  <Card title="Figma" href="/docs/oauth/figma">
+    Figma OAuth Identity Provider
+  </Card>
+  <Card title="GitLab" href="/docs/oauth/gitlab">
+    GitLab OAuth Identity Provider
+  </Card>
+  <Card title="X" href="/docs/oauth/x">
+    X (Twitter) OAuth Identity Provider
+  </Card>
+  <Card title="Spotify" href="/docs/oauth/spotify">
+    Spotify OAuth Identity Provider
+  </Card>
+  <Card title="Strava" href="/docs/oauth/strava">
+    Strava OAuth Identity Provider
+  </Card>
+  <Card title="Mailchimp" href="/docs/oauth/mailchimp">
+    Mailchimp OAuth Identity Provider
+  </Card>
+  <Card title="Pinterest" href="/docs/oauth/pinterest">
+    Pinterest OAuth Identity Provider
+  </Card>
+  <Card title="Twitch" href="/docs/oauth/twitch">
+    Twitch OAuth Identity Provider
+  </Card>
+  <Card title="Notion" href="/docs/oauth/notion">
+    Notion OAuth Identity Provider
+  </Card>
+  <Card title="Dropbox" href="/docs/oauth/dropbox">
+    Dropbox OAuth Identity Provider
+  </Card>
+</Cards>
+
+---
+
+## Advanced Configuration
+
+Built-in providers are implemented as lowercase factory functions. This architecture enables developers to override default settings while retaining automatic environment variable loading for sensitive credentials like Client IDs and Secrets.
+
+### Provider Factories
+
+The `builtInOAuthProviders` object provides a centralized collection for all supported services. This approach is recommended when dynamic provider resolution is required.
+
+```ts title="auth.ts"
+import { createAuth } from "@aura-stack/auth"
+import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
+
+export const auth = createAuth({
+  oauth: [
+    builtInOAuthProviders.github({
+      authorize: {
+        url: "https://github.com/login/oauth/authorize",
+        params: {
+          scope: "read:user user:email repo",
+        },
+      },
+    }),
+  ],
+})
+```
+
+### Modular Imports
+
+For production environments where bundle size is critical, importing providers directly from their respective entry points ensures optimal tree-shaking.
+
+```ts title="auth.ts"
+import { createAuth } from "@aura-stack/auth"
+import { github } from "@aura-stack/auth/oauth/github"
+
+export const auth = createAuth({
+  oauth: [
+    github({
+      authorize: {
+        url: "https://github.com/login/oauth/authorize",
+        params: {
+          scope: "read:user user:email repo",
+        },
+      },
+    }),
+  ],
+})
+```

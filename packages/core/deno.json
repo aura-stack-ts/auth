@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/auth",
-  "version": "0.6.0",
+  "version": "0.9.2",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
@@ -8,18 +8,29 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client/index.ts",
-    "./identity": "./src/shared/identity.ts",
+    "./identity": "./src/identity/index.ts",
+    "./identity/zod": "./src/identity/zod.ts",
+    "./identity/valibot": "./src/identity/valibot.ts",
+    "./identity/arktype": "./src/identity/arktype.ts",
+    "./identity/typebox": "./src/identity/typebox.ts",
     "./crypto": "./src/shared/crypto.ts",
     "./shared": "./src/shared/index.ts",
     "./types": "./src/@types/index.ts",
+    "./cookies": "./src/shared/cookies.ts",
     "./oauth": "./src/oauth/index.ts",
     "./oauth/atlassian": "./src/oauth/atlassian.ts",
+    "./oauth/authentik": "./src/oauth/authentik.ts",
     "./oauth/bitbucket": "./src/oauth/bitbucket.ts",
+    "./oauth/click-up": "./src/oauth/click-up.ts",
     "./oauth/discord": "./src/oauth/discord.ts",
+    "./oauth/dribbble": "./src/oauth/dribbble.ts",
     "./oauth/dropbox": "./src/oauth/dropbox.ts",
     "./oauth/figma": "./src/oauth/figma.ts",
     "./oauth/github": "./src/oauth/github.ts",
     "./oauth/gitlab": "./src/oauth/gitlab.ts",
+    "./oauth/google": "./src/oauth/google.ts",
+    "./oauth/hubspot": "./src/oauth/hubspot.ts",
+    "./oauth/huggingface": "./src/oauth/huggingface.ts",
     "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
     "./oauth/notion": "./src/oauth/notion.ts",
     "./oauth/pinterest": "./src/oauth/pinterest.ts",
@@ -30,11 +41,14 @@
   },
   "imports": {
     "@/": "./src/",
-    "@aura-stack/router": "npm:@aura-stack/router@^0.6.0",
-    "zod": "npm:zod@4.3.5"
+    "@aura-stack/router": "npm:@aura-stack/router@^0.11.4",
+    "zod": "npm:zod@4.3.5",
+    "arktype": "npm:arktype@2.2.0",
+    "valibot": "npm:valibot@1.4.0",
+    "typebox": "npm:typebox@1.1.38"
   },
   "publish": {
-    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"]
-  },
-  "exclude": ["dist", "node_modules"]
+    "include": ["src/**/*.ts", "README.md", "CHANGELOG.md"],
+    "exclude": ["dist", "node_modules"]
+  }
 }

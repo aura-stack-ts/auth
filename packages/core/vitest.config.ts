@@ -1,23 +1,28 @@
 import path from "path"
-import crypto from "crypto"
 import { defineConfig } from "vitest/config"
+import { getRandomBytes } from "@aura-stack/jose/crypto"
+import { base64url } from "@aura-stack/jose/jose"
 
-const SECRET_KEY = crypto.randomBytes(34).toString("base64url")
-const SALT_KEY = crypto.randomBytes(34).toString("base64url")
+const SECRET_KEY = getRandomBytes(44)
+const SALT_KEY = getRandomBytes(44)
 
+/**
+ * Vitest configuration for the Aura Auth core package.
+ *
+ * @example
+ * pnpm test
+ * pnpm test --project core
+ * pnpm test --project rate-limiter
+ */
 export default defineConfig({
     test: {
         include: ["test/**/*.test.ts"],
-        coverage: {
-            provider: "v8",
-            enabled: true,
-        },
         unstubEnvs: true,
         env: {
-            AURA_AUTH_SECRET: SECRET_KEY,
+            AURA_AUTH_SECRET: base64url.encode(SECRET_KEY),
             AURA_AUTH_GITHUB_CLIENT_ID: "github-client-id",
             AURA_AUTH_GITHUB_CLIENT_SECRET: "github-client-secret",
-            AURA_AUTH_SALT: SALT_KEY,
+            AURA_AUTH_SALT: base64url.encode(SALT_KEY),
             AURA_AUTH_OAUTH_PROVIDER_CLIENT_ID: "oauth_client_id",
             AURA_AUTH_OAUTH_PROVIDER_CLIENT_SECRET: "oauth_client_secret",
             "AURA_AUTH_OAUTH-PROVIDER_CLIENT_ID": "oauth_client_id",
@@ -26,14 +31,37 @@ export default defineConfig({
             "AURA_AUTH_OAUTH-PROFILE_CLIENT_SECRET": "oauth_profile_client_secret",
         },
         typecheck: {
-            include: ["test/**/*.test-d.ts"],
             enabled: false,
+            include: ["test/**/*.test-d.ts"],
+            exclude: ["test/**/*.test.ts"],
         },
-    },
-    resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@test": path.resolve(__dirname, "./test"),
-        },
+        projects: [
+            {
+                test: {
+                    name: "core",
+                    include: ["test/**/*.test.ts"],
+                    exclude: ["test/shared/rate-limiter.test.ts"],
+                    setupFiles: ["./test/setup/vitest.setup.ts", "./test/setup/actions.setup.ts"],
+                },
+                resolve: {
+                    alias: {
+                        "@": path.resolve(import.meta.dirname, "./src"),
+                        "@test": path.resolve(import.meta.dirname, "./test"),
+                    },
+                },
+            },
+            {
+                test: {
+                    name: "rate-limiter",
+                    include: ["test/shared/rate-limiter.test.ts"],
+                },
+                resolve: {
+                    alias: {
+                        "@": path.resolve(import.meta.dirname, "./src"),
+                        "@test": path.resolve(import.meta.dirname, "./test"),
+                    },
+                },
+            },
+        ],
     },
 })
