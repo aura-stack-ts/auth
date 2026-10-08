@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
-import { GET, jose, oauthTokens, sessionPayload } from "@test/presets.ts"
+import { GET, jose, oauthTokens, sessionPayload } from "@test/setup/presets.ts"
 
 describe("connectedAction", () => {
     test("throws error when provider is not configured", async () => {

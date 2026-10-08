@@ -3,7 +3,7 @@
  */
 import type { Prettify } from "@/@types/utility.ts"
 import type { ClientOptions } from "@aura-stack/router"
-import type { createAuthInstance } from "@/router/router.ts"
+import type { createAuthInstance } from "@/config/router.ts"
 
 export type * from "@/@types/config.ts"
 export type * from "@/@types/oauth.ts"

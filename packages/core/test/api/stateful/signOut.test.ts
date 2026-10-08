@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest"
 import { createCSRF, createHash } from "@/shared/crypto.ts"
-import { authInstance, jose, sessionEntityWithUser } from "@test/presets.ts"
+import { authInstance, jose, sessionEntityWithUser } from "@test/setup/presets.ts"
 
 describe("signOut API", async () => {
     const csrfToken = await createCSRF(jose)

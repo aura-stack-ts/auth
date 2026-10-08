@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders } from "@/shared/headers.ts"
-import { getExpiredCookie, getCookie as getCookieByName } from "@/cookie.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getExpiredCookie, getCookie as getCookieByName } from "@/shared/http/cookie.ts"
 import type { InternalCookieStoreConfig } from "@/@types/internal.ts"
 
 export const createCookieManager = (store: () => InternalCookieStoreConfig) => {

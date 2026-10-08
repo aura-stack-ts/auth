@@ -1,5 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { isProviderConnected } from "@/api/isProviderConnected.ts"
+import { isProviderConnected } from "@/api/is-provider-connected.ts"
 import { IsProviderConnectedActionResponseSchema, OAuthProviderListSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 

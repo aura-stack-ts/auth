@@ -3,7 +3,7 @@ import { z } from "zod/v4"
 import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
-import { authInstance, jose, sessionEntityWithUser, userEntity } from "@test/presets.ts"
+import { authInstance, jose, sessionEntityWithUser, userEntity } from "@test/setup/presets.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {

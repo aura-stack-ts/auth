@@ -8,7 +8,7 @@ import {
     deviceEntity,
     oauthTransactionEntity,
     accountEntity,
-} from "@test/presets.ts"
+} from "@test/setup/presets.ts"
 
 describe("callbackAction (stateful)", () => {
     test("invalid endpoint", async () => {

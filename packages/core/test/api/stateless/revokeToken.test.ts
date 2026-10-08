@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { api, jose, oauthCustomService, oauthTokens, sessionPayload } from "@test/presets.ts"
+import { api, jose, oauthCustomService, oauthTokens, sessionPayload } from "@test/setup/presets.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { createAuth } from "@/createAuth.ts"
 

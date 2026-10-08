@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { sessionPayload } from "@test/presets.ts"
-import { getSetCookie } from "@/cookie.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
 
 describe("session: stateless strategy", () => {
     beforeEach(() => {

@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
-import { authInstance, deviceEntity, jose, sessionEntityWithUser, userEntity } from "@test/presets.ts"
+import { authInstance, deviceEntity, jose, sessionEntityWithUser, userEntity } from "@test/setup/presets.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 describe("signInCredentials API", async () => {

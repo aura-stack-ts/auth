@@ -1,7 +1,6 @@
 import { Type } from "arktype"
 import { Type as TypeboxType } from "typebox"
-import { AuraAuthError } from "@/shared/errors.ts"
-import { equals, patternToRegex } from "@/shared/utils.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import type { ZodObject, ZodTypeAny } from "zod"
 import type { JWK } from "@aura-stack/jose/jose"
 import type { BaseSchema, ObjectSchema } from "valibot"
@@ -19,96 +18,38 @@ import type {
     TrustedProxyHeadersSource,
 } from "@/@types/index.ts"
 
+// #region Type Guards
 export const isFalsy = (value: unknown): boolean => {
-    return value === false || value === 0 || value === "" || value === null || value === undefined || Number.isNaN(value)
+    return value === false || value === 0 || value === "" || isNullOrUndefined(value) || Number.isNaN(value)
 }
 
 export const isRequest = (value: unknown): value is Request => {
     return typeof Request !== "undefined" && value instanceof Request
 }
 
-export const unsafeChars = [
-    "<",
-    ">",
-    '"',
-    "`",
-    " ",
-    "\r",
-    "\n",
-    "\t",
-    "\\",
-    "%2F",
-    "%5C",
-    "%2f",
-    "%5c",
-    "\r\n",
-    "%0A",
-    "%0D",
-    "%0a",
-    "%0d",
-    "..",
-    "//",
-    "///",
-    "...",
-    "%20",
-    "\0",
-]
-
-export const isValidURL = (value: string): boolean => {
-    if (!new RegExp(/^https?:\/\/[^/]/).test(value)) {
-        return false
-    }
-    const match = value.match(/^(https?:\/\/)(.*)$/)
-    if (!match) return false
-    const rest = match[2]
-    for (const char of unsafeChars) {
-        if (rest.includes(char)) return false
-    }
-    const regex =
-        /^https?:\/\/(?:[a-zA-Z0-9._-]+|localhost|\[[0-9a-fA-F:]+\])(?::\d{1,5})?(?:\/[a-zA-Z0-9._~!$&'()?#*+,;=:@-]*)*\/?$/
-
-    return regex.test(match[0])
+export const isResponse = (value: unknown): value is Response => {
+    return typeof Response !== "undefined" && value instanceof Response
 }
 
+export const isString = (value: unknown): value is string => {
+    return typeof value === "string"
+}
+
+export const isBoolean = (value: unknown): value is boolean => {
+    return typeof value === "boolean"
+}
+
+export const isObject = (value: unknown): value is Record<string, any> => {
+    return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+export const isNullOrUndefined = (value: unknown): value is null | undefined => {
+    return value === null || value === undefined
+}
+
+// #region JWT and Session
 export const isJWTPayloadWithToken = (payload: unknown): payload is JWTPayloadWithToken => {
     return typeof payload === "object" && payload !== null && "token" in payload && typeof payload?.token === "string"
-}
-
-export const isRelativeURL = (value: string): boolean => {
-    if (value.length > 100) return false
-    for (const char of unsafeChars) {
-        if (value.includes(char)) return false
-    }
-    const regex = /^\/[a-zA-Z0-9\-_/.?&=#]*\/?$/
-    return regex.test(value)
-}
-
-export const isSameOrigin = (origin: string, expected: string): boolean => {
-    const originURL = new URL(origin)
-    const expectedURL = new URL(expected)
-    return equals(originURL.origin, expectedURL.origin)
-}
-
-/**
- * Checks if a URL matches any of the trusted origin patterns.
- * A URL is trusted if its origin matches any pattern (exact or wildcard).
- *
- * @param url - The URL to validate (e.g. from Referer, Origin, redirectTo)
- * @param trustedOrigins - Array of exact URLs or patterns (e.g. `https://*.example.com`)
- */
-export const isTrustedOrigin = (url: string, trustedOrigins: string[]): boolean => {
-    if (!isValidURL(url) || trustedOrigins.length === 0) return false
-    try {
-        const urlOrigin = new URL(url).origin
-        for (const pattern of trustedOrigins) {
-            const regex = patternToRegex(pattern)
-            if (regex?.test(urlOrigin)) return true
-            try {
-                if (isValidURL(pattern) && equals(new URL(pattern).origin, urlOrigin)) return true
-            } catch {}
-        }
-    } catch {}
-    return false
 }
 
 export const isStatelessStrategy = (config?: SessionConfig): config is StatelessStrategyConfig => {
@@ -191,6 +132,7 @@ export const isJWKFormattedKey = (value: unknown): value is JWK => {
     return typeof value === "object" && value !== null && "kty" in value && typeof (value as any).kty === "string"
 }
 
+// #region Identities
 export const isValibotSchema = (value: unknown): value is ObjectSchema<any, undefined> => {
     return typeof value === "object" && value !== null && "~run" in value && typeof (value as any)["~run"] === "function"
 }
@@ -226,9 +168,9 @@ export const isTypeboxEntries = (value: unknown): value is TypeboxType.TProperti
     )
 }
 
-type CustomUserInfoFunction = Extract<OAuthProviderConfig["userInfo"], { request: (context: AccessTokenContext) => any }>
-
-export const isCustomUserInfoFunction = (value: OAuthProviderConfig["userInfo"]): value is CustomUserInfoFunction => {
+export const isCustomUserInfoFunction = (
+    value: OAuthProviderConfig["userInfo"]
+): value is Extract<OAuthProviderConfig["userInfo"], { request: (context: AccessTokenContext) => any }> => {
     return (
         typeof value === "object" &&
         value !== null &&
@@ -249,24 +191,8 @@ export const assertContentTypeResponse = (response: Response, logger?: InternalL
     }
 }
 
-export const isString = (value: unknown): value is string => {
-    return typeof value === "string"
-}
-
-export const isObject = (value: unknown): value is Record<string, any> => {
-    return typeof value === "object" && value !== null && !Array.isArray(value)
-}
-
 export const isRefreshTokenObject = (value: unknown): value is Exclude<OAuthProviderConfig["refreshToken"], string> => {
     return isObject(value) && "url" in value
-}
-
-export const isResponse = (value: unknown): value is Response => {
-    return typeof Response !== "undefined" && value instanceof Response
-}
-
-export const isNullOrUndefined = (value: unknown): value is null | undefined => {
-    return value === null || value === undefined
 }
 
 export const isInvalidSlidingThreshold = (value: unknown): value is number => {
@@ -277,6 +203,7 @@ export const isHeadersInit = (value: unknown): value is HeadersInit => {
     return typeof value === "object" && value !== null && (value instanceof Headers || Array.isArray(value) || isObject(value))
 }
 
+// #region Trusted Proxy Headers Source
 export const isTrustedProxyHeadersSource = (value: unknown): value is TrustedProxyHeadersSource => {
     return isTrustedProxyHeadersSourceURL(value) || isTrustedProxyHeadersSourceProtocolHost(value)
 }
@@ -294,8 +221,4 @@ export const isTrustedProxyHeadersSourceProtocolHost = (value: unknown): value i
         typeof (value as any).protocol === "string" &&
         typeof (value as any).host === "string"
     )
-}
-
-export const isBoolean = (value: unknown): value is boolean => {
-    return typeof value === "boolean"
 }

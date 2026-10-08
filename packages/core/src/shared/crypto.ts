@@ -1,6 +1,6 @@
 import { isJWTPayloadWithToken } from "@/shared/assert.ts"
-import { equals, timingSafeEqual } from "@/shared/utils.ts"
-import { AuraAuthError, isAuraAuthError } from "@/shared/errors.ts"
+import { equals } from "@/shared/utils.ts"
+import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
 import type { JoseInstance, User } from "@/@types/index.ts"
@@ -186,4 +186,22 @@ export const exportJWKKeyPair = async (alg: string, options?: GenerateKeyPairOpt
         publicKey: jwkPublicKey,
         privateKey: jwkPrivateKey,
     }
+}
+
+/**
+ * Compares two strings in a timing-safe manner to prevent timing attacks.
+ *
+ * @param a - The first string to compare
+ * @param b - The second string to compare
+ * @returns True if the strings are equal, false otherwise
+ */
+export const timingSafeEqual = (a: string, b: string): boolean => {
+    const bufferA = encoder.encode(a)
+    const bufferB = encoder.encode(b)
+    const len = Math.max(bufferA.length, bufferB.length)
+    let diff = 0
+    for (let i = 0; i < len; i++) {
+        diff |= (bufferA[i] ?? 0) ^ (bufferB[i] ?? 0)
+    }
+    return diff === 0 && bufferA.length === bufferB.length
 }

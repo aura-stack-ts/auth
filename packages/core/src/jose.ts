@@ -1,10 +1,7 @@
-import { getEnv } from "@/shared/env.ts"
 import {
     createJWT,
     createJWS,
     createJWE,
-    createDeriveKey,
-    createSecret,
     type JWTVerifyOptions,
     type DecodeJWTOptions,
     type TypedJWTPayload,
@@ -13,24 +10,12 @@ import {
     type JWEHeaderParameters,
     type JWTDecryptOptions,
 } from "@aura-stack/jose"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
-import {
-    isCryptoKey,
-    isCryptoKeyPair,
-    isCryptoSecret,
-    isEncryptedMode,
-    isJWTPEMFormattedKeyPair,
-    isKeyPair,
-    isPEMFormattedKeyPairFromEnv,
-    isSealedMode,
-    isSignedMode,
-    isStatelessStrategy,
-} from "@/shared/assert.ts"
-import { AuraAuthError } from "@/shared/errors.ts"
-import { importPEMKeyPair } from "@/shared/crypto.ts"
+import { getSecrets, type InternalSecret } from "@/config/get-secret.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"
-import type { User, SessionConfig, JWTKey } from "@/@types/index.ts"
-import type { AsymmetricKeyPairFromEnv } from "@/@types/internal.ts"
+import { isEncryptedMode, isSealedMode, isSignedMode, isStatelessStrategy } from "@/shared/assert.ts"
+import type { User, SessionConfig } from "@/@types/index.ts"
 
 const getJWTConfig = (config?: SessionConfig) => {
     return isStatelessStrategy(config) ? config?.jwt : {}
@@ -119,127 +104,6 @@ export const verifyMaxExpiration = (payload: TypedJWTPayload<Partial<User>>) => 
     }
 }
 
-const getSecrets = async (
-    secret: JWTKey | AsymmetricKeyPairFromEnv | { sign: AsymmetricKeyPairFromEnv; encrypt: AsymmetricKeyPairFromEnv },
-    salt: string,
-    session?: SessionConfig
-) => {
-    if (isJWTPEMFormattedKeyPair(secret)) {
-        if (!isSealedMode(session)) {
-            throw new AuraAuthError({ code: "INVALID_PEM_KEY_PAIR_MODE_MISMATCH" })
-        }
-
-        const { sign, encrypt } = secret
-        const signingAlg = getEnv("SIGNING_ALG") || getEnv("SIGNING_ALGORITHM") || session?.jwt.signingAlgorithm || "RS256"
-        const encryptionAlg =
-            getEnv("ENCRYPTION_ALG") || getEnv("ENCRYPTION_ALGORITHM") || session?.jwt.keyAlgorithm || "RSA-OAEP-256"
-        const importedSign = await importPEMKeyPair(sign, signingAlg)
-        const importedEncrypt = await importPEMKeyPair(encrypt, encryptionAlg)
-
-        return {
-            jwsSecret: importedSign,
-            jweSecret: importedEncrypt,
-            jwtSecret: {
-                sign: importedSign,
-                encrypt: importedEncrypt,
-            },
-        }
-    }
-    if (isPEMFormattedKeyPairFromEnv(secret)) {
-        if (isSealedMode(session)) {
-            throw new AuraAuthError({ code: "INVALID_PEM_KEY_PAIR_SINGLE_MISMATCH" })
-        }
-        const algorithm =
-            getEnv("ALGORITHM") ||
-            getEnv("ALG") ||
-            (isSignedMode(session) ? session?.jwt?.signingAlgorithm : undefined) ||
-            (isEncryptedMode(session) ? session?.jwt?.keyAlgorithm : undefined) ||
-            "RS256"
-        const { publicKey, privateKey } = await importPEMKeyPair(secret, algorithm)
-        return {
-            jwsSecret: {
-                publicKey,
-                privateKey,
-            },
-            jweSecret: {
-                publicKey,
-                privateKey,
-            },
-            jwtSecret: {
-                sign: {
-                    publicKey,
-                    privateKey,
-                },
-                encrypt: {
-                    publicKey,
-                    privateKey,
-                },
-            },
-        }
-    }
-
-    if (isCryptoSecret(secret)) {
-        return {
-            jwsSecret: secret.sign,
-            jweSecret: secret.encrypt,
-            jwtSecret: {
-                sign: secret.sign,
-                encrypt: secret.encrypt,
-            },
-        }
-    }
-    if (isCryptoKey(secret) || isCryptoKeyPair(secret) || isKeyPair(secret)) {
-        return {
-            jwsSecret: secret,
-            jweSecret: secret,
-            jwtSecret: {
-                sign: secret,
-                encrypt: secret,
-            },
-        }
-    }
-
-    const [derivedSigningKey, derivedEncryptionKey] = await Promise.all([
-        createDeriveKey(secret, salt, "aura:signing"),
-        createDeriveKey(secret, salt, "aura:encryption"),
-    ])
-    return {
-        jwsSecret: derivedSigningKey,
-        jweSecret: derivedEncryptionKey,
-        jwtSecret: {
-            sign: derivedSigningKey,
-            encrypt: derivedEncryptionKey,
-        },
-    }
-}
-
-const getPEMKeyFromEnv = (prefix: string): AsymmetricKeyPairFromEnv | null => {
-    const publicKey = getEnv(`${prefix}${prefix && "_"}PUBLIC_KEY`)
-    const privateKey = getEnv(`${prefix}${prefix && "_"}PRIVATE_KEY`)
-    if (publicKey && privateKey) {
-        return { publicKey, privateKey }
-    }
-    return null
-}
-
-const getSecretKey = (secret?: JWTKey) => {
-    secret ??= getEnv("SECRET")
-    if (secret) return secret
-    const pem = getPEMKeyFromEnv("")
-    if (pem) {
-        return pem
-    }
-    const signing = getPEMKeyFromEnv("SIGNING")
-    const encryption = getPEMKeyFromEnv("ENCRYPTION")
-    if (signing && encryption) {
-        return {
-            sign: signing,
-            encrypt: encryption,
-        }
-    }
-    throw new AuraAuthError({ code: "JOSE_INITIALIZATION_SECRET_MISSING" })
-}
-
 /**
  * Creates the JOSE instance used for signing and verifying tokens. It derives keys
  * for session tokens and CSRF tokens. For security and determinism, it's required
@@ -254,20 +118,13 @@ const getSecretKey = (secret?: JWTKey) => {
  * @param session the session configuration that drives algorithm and mode selection
  * @returns jose instance with methods for encoding/decoding JWTs and signing/verifying JWSs
  */
-export const createJoseInstance = <DefaultUser extends User = User>(secret?: JWTKey, session?: SessionConfig) => {
-    const secretKey = getSecretKey(secret)
-    const salt = getEnv("SALT")
-    if (!salt) {
-        throw new AuraAuthError({ code: "JOSE_INITIALIZATION_SALT_MISSING" })
-    }
-    try {
-        createSecret(salt)
-    } catch (cause) {
-        throw new AuraAuthError({ code: "INVALID_SALT_SECRET_VALUE", cause })
-    }
-
+export const createJoseInstance = <DefaultUser extends User = User>(
+    secret: InternalSecret,
+    salt: string,
+    session?: SessionConfig
+) => {
     const jose = (async () => {
-        const { jwsSecret, jweSecret, jwtSecret } = await getSecrets(secretKey, salt, session)
+        const { jwsSecret, jweSecret, jwtSecret } = await getSecrets(secret, salt, session)
 
         return {
             jwt: createJWT<DefaultUser>(jwtSecret),
