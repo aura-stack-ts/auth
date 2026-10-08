@@ -18,12 +18,7 @@ import { notion } from "./notion.ts"
 import { dropbox } from "./dropbox.ts"
 import { atlassian } from "./atlassian.ts"
 import { clickUp } from "./click-up.ts"
-import { coinbase } from "./coinbase.ts"
-import { dribbble } from "./dribbble.ts"
-import { hubspot } from "./hubspot.ts"
-import { google } from "./google.ts"
-import { huggingface } from "./huggingface.ts"
-import { authentik } from "./authentik.ts"
+import { reddit } from "./reddit.ts"
 
 export * from "./github.ts"
 export * from "./bitbucket.ts"
@@ -40,6 +35,7 @@ export * from "./notion.ts"
 export * from "./dropbox.ts"
 export * from "./atlassian.ts"
 export * from "./click-up.ts"
+export * from "./reddit.ts"
 export * from "./coinbase.ts"
 
 export const builtInOAuthProviders = {
@@ -58,12 +54,7 @@ export const builtInOAuthProviders = {
     dropbox,
     atlassian,
     clickUp,
-    coinbase,
-    dribbble,
-    hubspot,
-    google,
-    huggingface,
-    authentik,
+    reddit,
 } as const
 
 export type BuiltInOAuthProvider = keyof typeof builtInOAuthProviders
