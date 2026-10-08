@@ -18,6 +18,8 @@ import { notion } from "./notion.ts"
 import { dropbox } from "./dropbox.ts"
 import { atlassian } from "./atlassian.ts"
 import { clickUp } from "./click-up.ts"
+import { dribbble } from "./dribbble.ts"
+import { tiktok } from "./tiktok.ts"
 import { reddit } from "./reddit.ts"
 
 export * from "./github.ts"
@@ -35,6 +37,8 @@ export * from "./notion.ts"
 export * from "./dropbox.ts"
 export * from "./atlassian.ts"
 export * from "./click-up.ts"
+export * from "./dribbble.ts"
+export * from "./tiktok.ts"
 export * from "./reddit.ts"
 export * from "./coinbase.ts"
 
@@ -54,6 +58,8 @@ export const builtInOAuthProviders = {
     dropbox,
     atlassian,
     clickUp,
+    dribbble,
+    tiktok,
     reddit,
 } as const
 
