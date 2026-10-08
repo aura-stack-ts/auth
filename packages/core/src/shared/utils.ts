@@ -3,14 +3,7 @@ import { getCookie } from "@/cookie.ts"
 import { createHash } from "@/shared/crypto.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/shared/errors.ts"
-import {
-    isBoolean,
-    isRelativeURL,
-    isString,
-    isTrustedProxyHeadersSource,
-    isTrustedProxyHeadersSourceURL,
-    isValidURL,
-} from "@/shared/assert.ts"
+import { isBoolean, isRelativeURL, isString, isTrustedProxyHeadersSourceURL, isValidURL } from "@/shared/assert.ts"
 import type { DeviceType } from "@/@types/entities.ts"
 import type { AuthConfig, OAuthTokenPayload, TrustedProxyHeadersSource } from "@/@types/index.ts"
 import type {

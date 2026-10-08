@@ -8,16 +8,16 @@
     "dev": "turbo run dev",
     "dev:core": "turbo run @aura-stack/auth#dev",
     "dev:docs": "turbo run docs#dev",
-    "build": "turbo run build --filter=./configs/* --filter=./packages/* --filter=./apps/*",
-    "build:packages": "turbo run build --filter=./configs/* --filter=./packages/* --filter=!./packages/integration --continue=dependencies-successful",
-    "test": "turbo run test --parallel --filter=./packages/* --filter=!./packages/integration --filter=!./packages/prisma --filter=!./packages/elysia && pnpm --filter @aura-stack/elysia test:stateless",
-    "format": "turbo run format format:root --parallel",
+    "build": "turbo run build --filter=./packages/* --filter=./apps/*",
+    "build:packages": "turbo run build --filter=./packages/* --filter=!./packages/integration --continue=dependencies-successful",
+    "test": "turbo run test --filter=./packages/* --filter=!./packages/integration --filter=!./packages/prisma --filter=!./packages/elysia && pnpm --filter @aura-stack/elysia test:stateless",
+    "format": "turbo run format format:root",
     "format:root": "oxfmt \"!packages\" \"!apps\" \"!configs\"",
     "format:check": "oxfmt --check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "type-check": "turbo run type-check --parallel",
-    "type-check:packages": "turbo run type-check --parallel --filter=./packages/*",
+    "type-check": "turbo run type-check",
+    "type-check:packages": "turbo run type-check --filter=./packages/*",
     "create:integration": "node packages/shared/scripts/integration.js"
   },
   "homepage": "https://github.com/aura-stack-ts/auth#readme",
@@ -122,7 +122,7 @@
     "@types/node": "catalog:node",
     "@vitest/coverage-v8": "catalog:vitest",
     "tsdown": "^0.21.10",
-    "turbo": "^2.9.18",
+    "turbo": "^2.11.7",
     "typescript": "catalog:typescript",
     "vitest": "catalog:vitest"
   },
@@ -143,5 +143,11 @@
   "packageManager": "pnpm@10.15.0",
   "engines": {
     "node": ">=22"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "10.15.0"
+    }
   }
 }
