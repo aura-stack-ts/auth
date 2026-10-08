@@ -6,9 +6,12 @@
     "format": "deno fmt"
   },
   "imports": {
+    "@/": "./src/",
     "@oak/oak": "jsr:@oak/oak@^17.2.0"
   },
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "fmt": {
     "semiColons": false,
     "indentWidth": 4,

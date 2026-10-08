@@ -13,6 +13,13 @@ const config: NextConfig = {
             },
         ]
     },
+    redirects: async () => [
+        {
+            source: "/docs",
+            destination: "/docs/introduction",
+            permanent: true,
+        },
+    ],
 }
 
 export default withMDX(config)

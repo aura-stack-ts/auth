@@ -4,7 +4,7 @@
 
 **Demonstration app**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [React Router v7](https://reactrouter.com/)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [React Router v7](https://reactrouter.com/)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in an [React Router v7](https://reactrouter.com/) application.
+This project demonstrates Aura Auth authentication using [Aura Auth documentation](https://aura-stack-auth.vercel.app/docs/introduction) in an [React Router v7](https://reactrouter.com/) application.
 
 ## Getting Started
 

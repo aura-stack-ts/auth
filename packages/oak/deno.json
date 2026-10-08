@@ -1,0 +1,52 @@
+{
+  "name": "@aura-stack/oak",
+  "version": "0.0.0",
+  "license": "MIT",
+  "tasks": {
+    "dev": "deno run --watch src/index.ts",
+    "test": "deno test --allow-env --allow-net --no-check",
+    "test:coverage": "deno test --allow-env --allow-net --no-check --coverage=coverage",
+    "test:filter": "deno test --allow-env --allow-net --no-check --filter",
+    "test:types": "deno test --allow-env --allow-net --no-check test/types.test-d.ts"
+  },
+  "imports": {
+    "@/": "./src/",
+    "@std/testing": "jsr:@std/testing@^1.0.20",
+    "path-to-regexp": "npm:path-to-regexp@^6.3.0",
+    "@std/assert": "jsr:@std/assert@^1.0.19",
+    "@oak/oak": "jsr:@oak/oak@^17.2.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./identity": "./src/_core/identity.ts",
+    "./crypto": "./src/_core/crypto.ts",
+    "./shared": "./src/_core/shared.ts",
+    "./cookies": "./src/_core/cookies.ts",
+    "./oauth": "./src/oauth/index.ts",
+    "./oauth/atlassian": "./src/oauth/atlassian.ts",
+    "./oauth/authentik": "./src/oauth/authentik.ts",
+    "./oauth/bitbucket": "./src/oauth/bitbucket.ts",
+    "./oauth/click-up": "./src/oauth/click-up.ts",
+    "./oauth/discord": "./src/oauth/discord.ts",
+    "./oauth/dribbble": "./src/oauth/dribbble.ts",
+    "./oauth/dropbox": "./src/oauth/dropbox.ts",
+    "./oauth/figma": "./src/oauth/figma.ts",
+    "./oauth/github": "./src/oauth/github.ts",
+    "./oauth/gitlab": "./src/oauth/gitlab.ts",
+    "./oauth/google": "./src/oauth/google.ts",
+    "./oauth/hubspot": "./src/oauth/hubspot.ts",
+    "./oauth/huggingface": "./src/oauth/huggingface.ts",
+    "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
+    "./oauth/notion": "./src/oauth/notion.ts",
+    "./oauth/pinterest": "./src/oauth/pinterest.ts",
+    "./oauth/spotify": "./src/oauth/spotify.ts",
+    "./oauth/strava": "./src/oauth/strava.ts",
+    "./oauth/twitch": "./src/oauth/twitch.ts",
+    "./oauth/x": "./src/oauth/x.ts",
+    "./types": "./src/types/index.ts"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "src/_core", "src/oauth", "src/identity", "README.md", "CHANGELOG.md"],
+    "exclude": ["dist", "node_modules"]
+  }
+}

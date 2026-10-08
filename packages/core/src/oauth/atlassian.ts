@@ -24,6 +24,7 @@ export interface AtlassianProfile {
 }
 
 /**
+ * @see [Atlassian - Authorizing OAuth Apps](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/)
  * @see [Atlassian - OAuth Apps](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/)
  * @see [Atlassian - My Apps](https://developer.atlassian.com/console/myapps/)
  * @see [Atlassian - Retrieve Authenticated User](https://developer.atlassian.com/cloud/jira/software/oauth-2-3lo-apps/#how-do-i-retrieve-the-public-profile-of-the-authenticated-user-)

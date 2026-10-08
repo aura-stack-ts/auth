@@ -8,7 +8,82 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.3.2] - 2026-08-30
+
+### Changed
+
+- Updated the `@aura-stack/auth` dependency to `v0.9.2`. [#273](https://github.com/aura-stack-ts/auth/pull/273)
+
+---
+
+## [0.3.1] - 2026-08-22
+
+### Changed
+
+- Updated the `@aura-stack/auth` dependency to `v0.9.1`. [#262](https://github.com/aura-stack-ts/auth/pull/262)
+
+### Fixed
+
+- Fixed type inference for `signUp.schema` and `identity.schema` across authentication instances. The configured Zod, Valibot, TypeBox, or ArkType schema is now correctly propagated through the auth instance. Updated `InferUser`, `InferSession`, and `InferSignUp` to correctly derive their types from the corresponding auth instance. [#256](https://github.com/aura-stack-ts/auth/pull/256)
+
+---
+
+## [0.3.0] - 2026-08-05
+
 ### Added
+
+- Added React hooks for managing OAuth and OpenID Connect (OIDC) provider integrations, exposing the corresponding client APIs in a React-friendly interface: [#250](https://github.com/aura-stack-ts/auth/pull/250)
+  - `useRevokeToken()` revokes the provider's access token.
+  - `useDisconnectProvider()` disconnects the provider from the current user session without revoking its tokens.
+  - `useIsProviderConnected()` checks whether the current session is connected to a provider.
+  - `useRefreshUserInfo()` synchronizes the authenticated user's profile with the provider's `userinfo` endpoint.
+
+- Added the `useAccessToken()` hook, a simplified React API for retrieving the provider `accessToken` as a `string | null` after a successful OAuth or OpenID Connect (OIDC) sign-in. The hook exposes `getAccessToken()` and `isPending`, and internally communicates with the `GET /providers/:provider/tokens` endpoint. [#218](https://github.com/aura-stack-ts/auth/pull/218)
+
+---
+
+## [0.2.2] - 2026-07-07
+
+### Added
+
+- Added the `useProviderTokens()` hook for retrieving the `accessToken` and `refreshToken` issued after a successful OAuth or OpenID Connect (OIDC) sign-in. The hook communicates with the `GET /providers/:oauth/tokens` endpoint and exposes `getProviderTokens()` and `isPending` for managing token retrieval. [#214](https://github.com/aura-stack-ts/auth/pull/214)
+
+---
+
+## [0.2.1] - 2026-07-04
+
+### Fixed
+
+- Republished the package to include the missing `huggingface` OAuth provider in the published package.
+  > This release contains no code changes compared to `v0.2.0`; it only corrects the published package contents.
+
+---
+
+## [0.2.0] - 2026-07-04
+
+### Added
+
+- Added a `useSignUp` hook for interacting with the mounted `POST /signUp` endpoint. It returns an object with `signUp` and `isPending` fields. [#184](https://github.com/aura-stack-ts/auth/pull/184)
+
+- Introduced an experimental `signUp` flow for both the API and endpoint definitions. The new action enables user account creation within the authentication system and provides customizable payload validation through the supported schema. To enable this feature, developers must configure the `signUp` option when calling `createAuth`. [#183](https://github.com/aura-stack-ts/auth/pull/183)
+
+### Changed
+
+- Updated the `@aura-stack/auth` dependency to `v0.8.0`. [#211](https://github.com/aura-stack-ts/auth/pull/211)
+
+---
+
+## [0.1.0] - 2026-06-05
+
+### Added
+
+- Added a `/cookies` entry module for cookie management, providing utilities for authentication integrations and framework-specific packages. [#178](https://github.com/aura-stack-ts/auth/pull/178)
+
+- Added support for a custom `redirect` function in `AuthProvider`, allowing callers to provide their own redirect implementation for seamless integration with framework-specific navigation APIs. [#175](https://github.com/aura-stack-ts/auth/pull/175)
+
+- Added support for multi-tab synchronization via `BroadcastChannel`, allowing sessions to stay synchronized across browser tabs during the auth flow. Additionally, added a centralized `useAuthActions` hook that re-exports all auth actions (`signIn`, `updateSession`, `signOut`, etc.). [#172](https://github.com/aura-stack-ts/auth/pull/172)
 
 - Updated React context and hooks (`useSignInCredentials`, `useUpdateSession`, and related context actions) to align with the standardized core client API contracts, including the new object-based credentials/session payload shapes and redirect-driven refresh behavior, while simplifying React-side auth type definitions. [#146](https://github.com/aura-stack-ts/auth/pull/146)
 

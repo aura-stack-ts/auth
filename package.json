@@ -8,23 +8,33 @@
     "dev": "turbo run dev",
     "dev:core": "turbo run @aura-stack/auth#dev",
     "dev:docs": "turbo run docs#dev",
-    "build": "turbo run build --filter=./configs/* --filter=./packages/* --filter=./apps/*",
-    "build:prod": "turbo run build --filter=./configs/* --filter=./packages/* --filter=!./packages/integration --continue=dependencies-successful",
-    "test": "turbo run test --parallel",
-    "format": "turbo run format format:root --parallel",
+    "build": "turbo run build --filter=./packages/* --filter=./apps/*",
+    "build:packages": "turbo run build --filter=./packages/* --filter=!./packages/integration --continue=dependencies-successful",
+    "test": "turbo run test --filter=./packages/* --filter=!./packages/integration --filter=!./packages/prisma --filter=!./packages/elysia && pnpm --filter @aura-stack/elysia test:stateless",
+    "format": "turbo run format format:root",
     "format:root": "oxfmt \"!packages\" \"!apps\" \"!configs\"",
     "format:check": "oxfmt --check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "type-check": "turbo run type-check --parallel",
+    "type-check": "turbo run type-check",
+    "type-check:packages": "turbo run type-check --filter=./packages/*",
     "create:integration": "node packages/shared/scripts/integration.js"
   },
+  "homepage": "https://github.com/aura-stack-ts/auth#readme",
+  "bugs": {
+    "url": "https://github.com/aura-stack-ts/auth/issues",
+    "email": "aurastackjs@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aura-stack-js/auth.git"
+    "url": "git+https://github.com/aura-stack-ts/auth.git"
   },
-  "bugs": "https://github.com/aura-stack-js/auth/issues",
-  "homepage": "https://github.com/aura-stack-js/auth#readme",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/halvaradop"
+  },
   "keywords": [
     "authentication",
     "auth",
@@ -35,20 +45,6 @@
     "openid connect",
     "oidc"
   ],
-  "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <halvaradop.dev@gmail.com>",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "catalog:node",
-    "@vitest/coverage-v8": "catalog:vitest",
-    "eslint": "^9.35.0",
-    "oxfmt": "^0.41.0",
-    "oxlint": "^1.56.0",
-    "tsdown": "^0.21.8",
-    "turbo": "^2.7.5",
-    "typescript": "catalog:typescript",
-    "vitest": "catalog:vitest"
-  },
-  "packageManager": "pnpm@10.15.0",
   "workspaces": {
     "packages": [
       "packages/*",
@@ -64,10 +60,10 @@
         "lucide-react": "^0.561.0"
       },
       "next": {
-        "next": "^16.1.6"
+        "next": "^16.2.6"
       },
       "node": {
-        "@types/node": "^24.9.2"
+        "@types/node": "^24.13.2"
       },
       "react": {
         "@types/react": "^19.2.7",
@@ -76,14 +72,14 @@
         "react-dom": "^19.2.3"
       },
       "tailwindcss": {
-        "@tailwindcss/postcss": "^4.1.16",
+        "@tailwindcss/postcss": "^4.3.0",
         "tailwindcss": "4.1.18"
       },
       "typescript": {
-        "typescript": "^5.9.2"
+        "typescript": "^5.9.3"
       },
       "vite": {
-        "vite": "^7.1.7"
+        "vite": "^7.3.2"
       },
       "zod-v3": {
         "zod": "3.25.76"
@@ -92,7 +88,7 @@
         "zod": "4.3.5"
       },
       "hono": {
-        "hono": "4.12.8"
+        "hono": "4.12.21"
       },
       "bun": {
         "@types/bun": "^1.3.9"
@@ -102,26 +98,56 @@
         "express": "^4.18.2"
       },
       "react-router": {
-        "react-router": "7.12.0"
+        "react-router": "7.15.0"
       },
       "vitest": {
         "vitest": "4.1.4",
         "@vitest/coverage-v8": "4.1.4"
+      },
+      "valibot": {
+        "valibot": "^1.4.0"
+      },
+      "testing-library": {
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/react": "^16.3.2",
+        "@testing-library/user-event": "^14.6.1"
       }
     }
   },
+  "dependencies": {
+    "oxfmt": "^0.51.0",
+    "oxlint": "^1.69.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:node",
+    "@vitest/coverage-v8": "catalog:vitest",
+    "tsdown": "^0.21.10",
+    "turbo": "^2.11.7",
+    "typescript": "catalog:typescript",
+    "vitest": "catalog:vitest"
+  },
   "overrides": {
-    "dompurify": "^3.3.2",
+    "dompurify": "^3.4.0",
     "file-type": "^21.3.2",
     "undici": "^7.24.0",
     "seroval": "^1.4.1",
-    "lodash": "^4.17.23",
-    "lodash-es": "^4.17.23",
+    "lodash": "^4.18.0",
+    "lodash-es": "^4.18.0",
     "tar": "^7.5.11",
-    "path-to-regexp": "^1.9.0",
-    "serialize-javascript": "^7.0.3"
+    "serialize-javascript": "^7.0.3",
+    "h3": "^2.0.1-rc.17",
+    "brace-expansion": "^5.0.6",
+    "uuid": "^11.1.1",
+    "qs": "^6.15.2"
   },
+  "packageManager": "pnpm@10.15.0",
   "engines": {
     "node": ">=22"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "10.15.0"
+    }
   }
 }

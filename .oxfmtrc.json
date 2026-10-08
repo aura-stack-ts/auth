@@ -13,5 +13,5 @@
     }
   ],
   "sortPackageJson": false,
-  "ignorePatterns": ["pnpm-lock.yaml", "deno.lock", "bun.lock", "dist", "node_modules", "coverage"]
+  "ignorePatterns": ["pnpm-lock.yaml", "deno.lock", "bun.lock", "dist", "node_modules", "coverage", "routeTree.gen.ts"]
 }

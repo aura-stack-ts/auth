@@ -1,0 +1,159 @@
+---
+title: signUp
+description: Complete API reference for the api.signUp method, the centralized entry point for user registration, input validation, and automatic profile provisioning.
+---
+
+The `api.signUp` method is the primary programmatic entry point for initiating user registration flows. This method runs on the server-side so it requires to pass the request or headers as arguments.
+
+```ts title="syntax.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = api.signUp({
+  payload: {
+    username: "user@example.com",
+    password: "password123",
+  },
+  request: getRequest(),
+  redirectTo: "/dashboard",
+})
+```
+
+---
+
+## Reference
+
+### Parameters
+
+| Parameter | Type               | Required | Description                                                      |
+| --------- | ------------------ | -------- | ---------------------------------------------------------------- |
+| options   | `SignUpAPIOptions` | No       | An object containing additional options for the sign-in process. |
+
+### SignUpOptions
+
+| Option            | Type                      | Default   | Description                                                                                                   |
+| ----------------- | ------------------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
+| payload           | `Record<string, unknown>` | undefined | The user registration data.                                                                                   |
+| request           | `Request`                 | undefined | The request object from the server-side context.                                                              |
+| headers           | `Headers`                 | undefined | The headers object from the server-side context.                                                              |
+| redirect          | `boolean`                 | true      | Whether to redirect the user after successful sign-in by `Location` header or returns an object result        |
+| redirectTo        | `string`                  | undefined | The URL to redirect to after successful sign-in.                                                              |
+| ~~skipCSRFCheck~~ | `boolean`                 | `false`   | ~~Deprecated~~. This option has been replaced by `doubleSubmitToken` and will be removed in a future release. |
+| doubleSubmitToken | `string`                  | undefined | Optional CSRF token used to explicitly enable Double-Submit Cookie validation for server-side API functions.  |
+
+### Returns
+
+| Return Type                | Description                                              |
+| -------------------------- | -------------------------------------------------------- |
+| `Promise<SignUpAPIReturn>` | A promise that resolves to an object containing the sign |
+
+---
+
+## Behavior
+
+- The complete success of the sign-up process depends on `signUp.onCreateUser` function that verifies the provided user data and returns the `User` object if the data is valid or `null` if it is invalid
+
+- The `doubleSubmitToken` option enables Double-Submit Cookie validation when calling Aura Auth server-side API functions. By default, API functions execute in a trusted server environment, where browser-based CSRF attacks are not possible because requests originate from server-side code rather than from a user's browser. For that reason, Aura Auth performs the standard CSRF validation but skips the additional Double-Submit Cookie verification.
+
+  This option is intended for advanced scenarios where server-side requests should enforce the same CSRF guarantees as browser-initiated requests.
+
+  <Callout>
+    Providing `doubleSubmitToken` does not replace or disable CSRF protection. It enables the additional Double-Submit Cookie
+    validation on top of the standard CSRF checks already performed by Aura Auth.
+  </Callout>
+
+- The behavior of `api.signUp` function depends on the `redirect` option:
+  - If `redirect: true`, the user will be redirected to the authorize URL of the specified OAuth provider using the `Location` header in the request.
+  - If `redirect: false`, the function will return an object containing `redirectURL`, `redirect` and `success` properties. The `redirectURL` is the URL to which the user should be redirected for sign-up auth flow.
+
+- If the sign-up process fails, the `redirectURL` will be `null`, and the `success` property will be `false`.
+
+<Callout>
+  For the server-side functions like `api.signUp` is mandatory to pass the `request` or `headers` object to construct the incoming
+  URL and validate the redirect URLs
+</Callout>
+
+---
+
+## Setup
+
+```ts title="lib/auth.ts" lineNumbers
+import { createAuth } from "@aura-stack/auth"
+import { createSecretValue } from "@aura-stack/auth/crypto"
+
+export const auth = createAuth({
+  oauth: [],
+  signUp: {
+    onCreateUser: async ({ payload }) => {
+      if (!payload || !payload.username || !payload.password) {
+        return null
+      }
+
+      const sub = createSecretValue(10)
+      return {
+        sub,
+        name: "John Doe",
+        email: payload.username,
+        image: `https://avatars.dicebear.com/api/initials/${sub}.svg`,
+      }
+    },
+  },
+})
+```
+
+## Usage
+
+### Sign Up
+
+```ts title="credentials-signup.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signUp({
+  payload: {
+    username: "John Doe",
+    nickname: "johndoe",
+    email: "johndoe@example.com",
+    password: "password",
+  },
+  request: getRequest(),
+  redirectTo: "/dashboard",
+})
+```
+
+### Manual Navigation
+
+```tsx title="manual-navigation.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signUp({
+  payload: {
+    username: "John Doe",
+    nickname: "johndoe",
+    email: "johndoe@example.com",
+    password: "password",
+  },
+  request: getRequest(),
+  redirectTo: "/dashboard",
+})
+
+if (output.success) {
+  redirect(output.redirectURL)
+}
+```
+
+### Enable Double-Submit Cookie CSRF protection
+
+```ts title="double-submit.ts" lineNumbers
+import { api } from "@/lib/auth"
+
+const output = await api.signUp({
+  payload: {
+    username: "John Doe",
+    nickname: "johndoe",
+    email: "johndoe@example.com",
+    password: "password",
+  },
+  request: getRequest(),
+  redirectTo: "/dashboard",
+  doubleSubmitToken: getDoubleSubmitTokenFromRequest(),
+})
+```

@@ -1,7 +1,7 @@
 import { Form, Link, useSubmit } from "react-router"
 import { api } from "~/lib/auth"
 import { Button } from "~/components/ui/button"
-import { EditProfile } from "~/components/edit-profile"
+import { EditProfile } from "~/components/client/edit-profile"
 import type { SubmitEvent } from "react"
 import type { Route } from "./+types/index"
 import type { Session } from "@aura-stack/react-router"
@@ -90,7 +90,7 @@ const AuthServerPage = ({ loaderData }: Route.ComponentProps) => {
                     </p>
                 </div>
             </section>
-            <section className="mt-8 max-w-lg mx-auto border bg-black">
+            <section className="mt-8 max-w-lg mx-auto border">
                 {isAuthenticated ? (
                     <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {session?.user?.image ? (
@@ -103,7 +103,7 @@ const AuthServerPage = ({ loaderData }: Route.ComponentProps) => {
                             />
                         ) : (
                             <span className="size-14 block rounded-full ring-2 ring-white/40">
-                                <span className="h-full w-full p-0.5 aspect-square text-xl font-bold flex items-center justify-center rounded-full bg-black">
+                                <span className="h-full w-full p-0.5 aspect-square text-xl font-bold flex items-center justify-center rounded-full">
                                     {session?.user?.name?.[0] || "?"}
                                 </span>
                             </span>
@@ -159,7 +159,7 @@ const AuthServerPage = ({ loaderData }: Route.ComponentProps) => {
                             </div>
                             <p className="my-5 relative">
                                 <span className="w-full h-px block absolute top-1/2 bg-white/40" />
-                                <span className="px-2 relative z-10 bg-black">Or continue with</span>
+                                <span className="px-2 relative z-10">Or continue with</span>
                             </p>
                             <Form className="w-full text-start" method="post" onSubmit={handleSignInCredentials}>
                                 <input type="hidden" name="action" value="signInCredentials" />

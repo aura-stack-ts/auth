@@ -1,5 +1,5 @@
-export const encoder = new TextEncoder()
-export const decoder = new TextDecoder()
+export const encoder: TextEncoder = new TextEncoder()
+export const decoder: TextDecoder = new TextDecoder()
 
 /**
  * Generate random bytes using the Web Crypto API

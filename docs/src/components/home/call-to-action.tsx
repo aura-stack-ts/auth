@@ -17,7 +17,7 @@ export const CallToAction = () => {
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <Button className="w-full sm:w-fit" variant="secondary" size="lg" asChild>
-                        <Link href="/docs">Get Started</Link>
+                        <Link href="/docs/introduction">Get Started</Link>
                     </Button>
                     <Button className="w-full bg-transparent sm:w-fit" variant="outline" size="lg" asChild>
                         <Link href="https://github.com/aura-stack-ts/auth" target="_blank" rel="noopener noreferrer">

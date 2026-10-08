@@ -1,0 +1,292 @@
+import { describe, test, expect, vi } from "vitest"
+import { createCSRF } from "@/shared/crypto.ts"
+import { POST, jose, sessionPayload } from "@test/setup/presets.ts"
+
+describe("signOut action", async () => {
+    const csrf = await createCSRF(jose)
+    const { encodeJWT } = jose
+
+    test("missing csrfToken cookie", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {},
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("missing X-CSRF-Token header", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: { Cookie: `__Host-aura-auth.csrf_token=${csrf}` },
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("csrf token mismatch", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-Token": "invalid-csrf-token",
+                    Cookie: `__Host-aura-auth.csrf_token=${csrf}`,
+                },
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("sessionToken cookie not present", async () => {
+        const response = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Host-aura-auth.csrfToken=${csrf}`,
+                },
+            })
+        )
+        expect(response.status).toBe(403)
+        expect(response.headers.get("Location")).toBeNull()
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("invalid sessionToken cookie", async () => {
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=invalid_token; __Host-aura-auth.csrf_token=${csrf}`,
+                },
+            })
+        )
+        expect(request.status).toBe(403)
+        expect(request.headers.get("Location")).toBeNull()
+        expect(await request.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("expired sessionToken cookie", async () => {
+        const decodeJWTMock = vi.spyOn(await import("@/jose.ts"), "createJoseInstance").mockImplementation(() => {
+            throw new Error("Token expired")
+        })
+
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(request.status).toBe(403)
+        expect(request.headers.get("Location")).toBeNull()
+        expect(await request.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+        decodeJWTMock.mockRestore()
+    })
+
+    test("valid sessionToken cookie with valid csrfToken in a secure connection", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                },
+            })
+        )
+        expect(request.status).toBe(202)
+        expect(await request.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
+    })
+
+    test("valid sessionToken cookie with valid csrfToken in a secure connection with referer", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                    Referer: "https://example.com/auth/form",
+                },
+            })
+        )
+        expect(request.status).toBe(302)
+        expect(await request.json()).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
+        })
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
+        expect(request.headers.get("Location")).toContain("/auth/form")
+    })
+
+    test("valid sessionToken cookie with valid csrfToken in an insecure connection", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("http://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                },
+            })
+        )
+        expect(request.status).toBe(202)
+        expect(await request.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+        expect(request.headers.get("Set-Cookie")).toContain("aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("aura-auth.csrf_token=;")
+    })
+
+    test("valid sessionToken cookie with missing csrfToken", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(request.status).toBe(403)
+        expect(await request.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+    })
+
+    test("signOut with redirect: true (by default)", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token&redirectTo=/custom-logout-page", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                },
+            })
+        )
+        expect(request.status).toBe(302)
+        expect(await request.json()).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
+        })
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
+        expect(request.headers.get("Location")).toBe("/custom-logout-page")
+    })
+
+    test("valid sessionToken cookie with invalid redirectTo parameter", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token&redirectTo=https://malicious.com", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                },
+            })
+        )
+        expect(request.status).toBe(302)
+        expect(request.headers.get("Location")).toBe("/")
+        expect(await request.json()).toEqual({
+            success: true,
+            redirect: true,
+            redirectURL: null,
+        })
+    })
+
+    test("signOut with redirect: false and redirectTo", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request(
+                "https://example.com/auth/signOut?token_type_hint=session_token&redirect=false&redirectTo=/custom-logout-page",
+                {
+                    method: "POST",
+                    headers: {
+                        Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
+                        "X-CSRF-Token": csrf,
+                    },
+                }
+            )
+        )
+        expect(request.status).toBe(202)
+        expect(await request.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: "/custom-logout-page",
+        })
+        expect(request.headers).not.toHaveProperty("Location")
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
+        expect(request.headers.get("Location")).toBeNull()
+    })
+
+    test("signOut with redirect: false without redirectTo", async () => {
+        const sessionToken = await encodeJWT(sessionPayload)
+        const request = await POST(
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token&redirect=false", {
+                method: "POST",
+                headers: {
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
+                    "X-CSRF-Token": csrf,
+                },
+            })
+        )
+        expect(request.status).toBe(202)
+        expect(await request.json()).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: null,
+        })
+        expect(request.headers.get("Set-Cookie")).toContain("__Secure-aura-auth.session_token=;")
+        expect(request.headers.get("Set-Cookie")).toContain("__Host-aura-auth.csrf_token=;")
+        expect(request.headers.get("Location")).toBeNull()
+    })
+})

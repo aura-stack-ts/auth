@@ -11,7 +11,7 @@ const community = [
 const resources = [
     {
         title: "Documentation",
-        href: "https://aura-stack-auth.vercel.app/docs",
+        href: "https://aura-stack-auth.vercel.app/docs/introduction",
     },
     {
         title: "GitHub Repository",

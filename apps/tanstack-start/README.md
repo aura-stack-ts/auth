@@ -4,7 +4,7 @@
 
 **Demonstration app**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Tanstack Start](https://tanstack.com/start/latest)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [Tanstack Start](https://tanstack.com/start/latest)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in an [Tanstack Start](https://tanstack.com/start/latest) application.
+This project demonstrates Aura Auth authentication using [Aura Auth documentation](https://aura-stack-auth.vercel.app/docs/introduction) in an [Tanstack Start](https://tanstack.com/start/latest) application.
 
 ## Getting Started
 

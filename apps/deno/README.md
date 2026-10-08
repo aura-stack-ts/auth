@@ -4,7 +4,7 @@
 
 **Demonstration app**
 
-[Official Docs](https://aura-stack-auth.vercel.app/docs) · [Deno](https://docs.deno.com/runtime/)
+[Official Docs](https://aura-stack-auth.vercel.app/docs/introduction) · [Deno](https://docs.deno.com/runtime/)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-This project demonstrates Aura Auth authentication using [OAuth 2.0 providers](https://aura-stack-auth.vercel.app/docs/) in a
+This project demonstrates Aura Auth authentication using [Aura Auth documentation](https://aura-stack-auth.vercel.app/docs/introduction) in a
 [Deno](https://docs.deno.com/runtime/) application.
 
 ## Getting Started

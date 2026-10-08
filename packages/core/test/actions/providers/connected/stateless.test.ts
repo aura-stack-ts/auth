@@ -1,0 +1,203 @@
+import { describe, test, expect } from "vitest"
+import { createCSRF } from "@/shared/crypto.ts"
+import { GET, jose, oauthTokens, sessionPayload } from "@test/setup/presets.ts"
+
+describe("connectedAction", () => {
+    test("throws error when provider is not configured", async () => {
+        const response = await GET(new Request("https://example.com/auth/providers/unsupported", { headers: new Headers() }))
+        expect(await response.json()).toEqual({
+            code: "UNPROCESSABLE_ENTITY",
+            type: "VALIDATION",
+            message: "The request body or parameter schema layout contains input format errors.",
+            details: {
+                oauth: {
+                    code: "invalid_value",
+                    message: "The OAuth provider is not supported or invalid.",
+                },
+            },
+        })
+    })
+
+    test("throws error when session token is missing", async () => {
+        const response = await GET(new Request("https://example.com/auth/providers/oauth-provider", { headers: new Headers() }))
+        expect(response.status).toBe(401)
+        expect(await response.json()).toEqual({
+            success: false,
+            connected: false,
+        })
+    })
+
+    test("returns connected: false when provider token cookie does not exist", async () => {
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const response = await GET(
+            new Request("https://example.com/auth/providers/oauth-provider", {
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
+                },
+            })
+        )
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            connected: false,
+        })
+    })
+
+    test("returns connected: true when provider token cookie exists and is valid", async () => {
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const response = await GET(
+            new Request("https://example.com/auth/providers/oauth-provider", {
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            connected: true,
+        })
+    })
+
+    test("returns connected: false when provider token cookie is malformed", async () => {
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const response = await GET(
+            new Request("https://example.com/auth/providers/oauth-provider", {
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=invalid-token`,
+                },
+            })
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            connected: false,
+        })
+    })
+
+    test("returns connected: false when provider token cookie is expired", async () => {
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const expiredTokens = {
+            ...oauthTokens,
+            exp: Math.floor(Date.now() / 1000) - 3600,
+        }
+        const encodedExpiredTokens = await jose.encodeJWT(expiredTokens as unknown as Record<string, unknown>)
+
+        const response = await GET(
+            new Request("https://example.com/auth/providers/oauth-provider", {
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedExpiredTokens}`,
+                },
+            })
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            connected: false,
+        })
+    })
+
+    test("handles expired session token", async () => {
+        const csrfToken = await createCSRF(jose)
+
+        const expiredSessionPayload = {
+            ...sessionPayload,
+            exp: Math.floor(Date.now() / 1000) - 3600,
+        }
+        const expiredSessionToken = await jose.encodeJWT(expiredSessionPayload)
+
+        const response = await GET(
+            new Request("https://example.com/auth/providers/oauth-provider", {
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${expiredSessionToken}`,
+                },
+            })
+        )
+
+        expect(response.status).toBe(401)
+        expect(await response.json()).toEqual({
+            success: false,
+            connected: false,
+        })
+    })
+
+    test("handles empty cookie value", async () => {
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const response = await GET(
+            new Request("https://example.com/auth/providers/oauth-provider", {
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=`,
+                },
+            })
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            connected: false,
+        })
+    })
+
+    test("handles multiple providers - checks correct provider", async () => {
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const response = await GET(
+            new Request("https://example.com/auth/providers/oauth-profile", {
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                },
+            })
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            connected: false,
+        })
+    })
+
+    test("handles malformed cookie header syntax", async () => {
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const response = await GET(
+            new Request("https://example.com/auth/providers/oauth-provider", {
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; malformed-cookie`,
+                },
+            })
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: true,
+            connected: false,
+        })
+    })
+})

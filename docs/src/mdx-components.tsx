@@ -4,6 +4,7 @@ import { createFileSystemGeneratorCache, createGenerator } from "fumadocs-typesc
 import { AutoTypeTable } from "fumadocs-typescript/ui"
 import * as TabsComponents from "fumadocs-ui/components/tabs"
 import * as StepComponents from "fumadocs-ui/components/steps"
+import * as AccordionComponents from "fumadocs-ui/components/accordion"
 import * as Files from "fumadocs-ui/components/files"
 import { Mermaid } from "@/components/mdx/mermaid"
 
@@ -18,6 +19,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
         Mermaid,
         ...TabsComponents,
         ...StepComponents,
+        ...AccordionComponents,
         ...Files,
         ...components,
     }

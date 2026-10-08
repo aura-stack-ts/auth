@@ -9,6 +9,12 @@ export default defineConfig({
     test: {
         globals: true,
         include: ["test/**/*.test.ts"],
+        exclude: ["test/**/*.test-d.ts"],
+        typecheck: {
+            enabled: false,
+            include: ["test/**/*.test-d.ts"],
+            exclude: ["test/**/*.test.ts"],
+        },
         coverage: {
             provider: "v8",
             enabled: true,
@@ -23,8 +29,8 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@test": path.resolve(__dirname, "./test"),
+            "@": path.resolve(import.meta.dirname, "./src"),
+            "@test": path.resolve(import.meta.dirname, "./test"),
         },
     },
 })

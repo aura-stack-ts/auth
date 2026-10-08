@@ -32,7 +32,7 @@ export const Hero = () => {
                     </p>
                     <div className="flex flex-col justify-center items-center gap-5 xs:flex-row">
                         <Button className="w-full xs:w-fit" variant="secondary" size="lg" asChild>
-                            <Link href="/docs">Get Started</Link>
+                            <Link href="/docs/introduction">Get Started</Link>
                         </Button>
                         <Button className="w-full xs:w-fit" variant="secondary" size="lg" asChild onClick={copyToClipboard}>
                             <span>

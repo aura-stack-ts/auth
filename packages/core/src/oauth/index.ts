@@ -3,8 +3,6 @@
  *
  * This modules re-exports OAuth providers available in Aura Auth to be used in the Auth instance configuration.
  */
-import { type LiteralUnion, type OAuthProviderCredentials } from "@/@types/index.ts"
-import { getEnv } from "@/shared/env.ts"
 import { github } from "./github.ts"
 import { bitbucket } from "./bitbucket.ts"
 import { figma } from "./figma.ts"
@@ -20,11 +18,9 @@ import { notion } from "./notion.ts"
 import { dropbox } from "./dropbox.ts"
 import { atlassian } from "./atlassian.ts"
 import { clickUp } from "./click-up.ts"
-import { dribbble } from "./dribble.ts"
+import { dribbble } from "./dribbble.ts"
 import { tiktok } from "./tiktok.ts"
-import { formatZodError } from "@/shared/utils.ts"
-import { AuthInternalError } from "@/shared/errors.ts"
-import { OAuthEnvSchema, OAuthProviderCredentialsSchema } from "@/schemas.ts"
+import { reddit } from "./reddit.ts"
 
 export * from "./github.ts"
 export * from "./bitbucket.ts"
@@ -41,8 +37,10 @@ export * from "./notion.ts"
 export * from "./dropbox.ts"
 export * from "./atlassian.ts"
 export * from "./click-up.ts"
-export * from "./dribble.ts"
+export * from "./dribbble.ts"
 export * from "./tiktok.ts"
+export * from "./reddit.ts"
+export * from "./coinbase.ts"
 
 export const builtInOAuthProviders = {
     github,
@@ -62,82 +60,7 @@ export const builtInOAuthProviders = {
     clickUp,
     dribbble,
     tiktok,
+    reddit,
 } as const
-
-/**
- * Loads OAuth provider credentials from environment variables based on the provider name.
- * Supported patterns for environment variables are:
- *   - `AURA_AUTH_{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
- *   - `AURA_{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
- *   - `AUTH_{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
- *   - `{OAUTH_PROVIDER}_CLIENT_{ID|SECRET}`
- *
- * @param oauth The name of the OAuth provider
- * @returns The credentials for the specified OAuth provider
- */
-const defineOAuthEnvironment = (oauth: string) => {
-    const loadEnvs = OAuthEnvSchema.safeParse({
-        clientId: getEnv(`${oauth.replace("-", "_").toUpperCase()}_CLIENT_ID`),
-        clientSecret: getEnv(`${oauth.replace("-", "_").toUpperCase()}_CLIENT_SECRET`),
-    })
-    if (!loadEnvs.success) {
-        const msg = JSON.stringify({ [oauth]: formatZodError(loadEnvs.error) }, null, 2)
-        throw new AuthInternalError("INVALID_ENVIRONMENT_CONFIGURATION", msg)
-    }
-    return loadEnvs.data
-}
-
-const defineOAuthProviderConfig = (config: BuiltInOAuthProvider | OAuthProviderCredentials) => {
-    if (typeof config === "string") {
-        const definition = defineOAuthEnvironment(config)
-        const oauthConfig = builtInOAuthProviders[config]()
-        const parsed = OAuthProviderCredentialsSchema.safeParse({ ...oauthConfig, ...definition })
-        if (!parsed.success) {
-            const details = JSON.stringify({ [config]: formatZodError(parsed.error) }, null, 2)
-            throw new AuthInternalError(
-                "INVALID_OAUTH_PROVIDER_CONFIGURATION",
-                `Invalid configuration for OAuth provider "${config}": ${details}`
-            )
-        }
-        return parsed.data
-    }
-    const hasCredentials = config.clientId && config.clientSecret
-    const envConfig = hasCredentials ? {} : defineOAuthEnvironment(config.id)
-    const parsed = OAuthProviderCredentialsSchema.safeParse({ ...envConfig, ...config })
-    if (!parsed.success) {
-        const details = JSON.stringify({ [config.id]: formatZodError(parsed.error) }, null, 2)
-        throw new AuthInternalError(
-            "INVALID_OAUTH_PROVIDER_CONFIGURATION",
-            `Invalid configuration for OAuth provider "${config.id}": ${details}`
-        )
-    }
-    return parsed.data
-}
-
-/**
- * Constructs OAuth provider configurations from an array of provider names or configurations.
- * It loads the client ID and client secret from environment variables if only the provider name is provided.
- *
- * @param oauth - Array of OAuth provider configurations or provider names to be defined from environment variables
- * @returns A record of OAuth provider configurations
- * @example
- * // Using built-in provider with env variables
- * createBuiltInOAuthProviders(["github"])
- *
- * // Using built-in provider with explicit credentials via factory
- * createBuiltInOAuthProviders([github({ clientId: "...", clientSecret: "..." })])
- */
-export const createBuiltInOAuthProviders = (oauth: (BuiltInOAuthProvider | OAuthProviderCredentials<any>)[] = []) => {
-    return oauth.reduce((previous, config) => {
-        const oauthConfig = defineOAuthProviderConfig(config)
-        if (oauthConfig.id in previous) {
-            throw new AuthInternalError(
-                "DUPLICATED_OAUTH_PROVIDER_ID",
-                `Duplicate OAuth provider id "${oauthConfig.id}" found. Each provider must have a unique id.`
-            )
-        }
-        return { ...previous, [oauthConfig.id]: oauthConfig }
-    }, {}) as Record<LiteralUnion<BuiltInOAuthProvider>, OAuthProviderCredentials<any>>
-}
 
 export type BuiltInOAuthProvider = keyof typeof builtInOAuthProviders

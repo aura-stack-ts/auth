@@ -1,0 +1,114 @@
+---
+title: Oak
+description: Integrate Aura Auth with Oak (Deno)
+---
+
+This guide walks you through to implement Aura Auth in a Oak application to a complete support.
+If you haven't configured Aura Auth yet, start with the [Installation Guide](/docs/installation) and [Quick Start Guide](/docs/quick-start) to set up your Auth instance and environment variables. Then follow the steps in this guide to integrate Aura Auth with your Oak application.
+
+<Steps>
+
+<Step>
+
+## Setup Aura Auth
+
+### Create an Auth Instance
+
+Create an `auth.ts` file in `src/lib` directory to configure your Aura Auth instance.
+
+```ts title="src/lib/auth.ts"
+import { createAuth } from "@aura-stack/oak"
+
+export const auth = createAuth({
+  oauth: ["github"],
+  basePath: "/api/auth",
+})
+
+export const { withAuth, toHandler, api, jose } = auth
+```
+
+<Callout type="warning">
+  The `basePath` should match the path where your auth route handlers are mounted and `baseURL` should point to your local
+  development server or deployed application URL.
+</Callout>
+
+</Step>
+
+<Step>
+
+## Mount HTTP Handlers
+
+Use `toHandler` to mount Aura Auth's HTTP handlers in your Oak application. This keeps all auth endpoints in one place and leaves the rest of your app free to use the same auth instance.
+
+```ts title="src/index.ts" lineNumbers
+import { Application, Router } from "@oak/oak"
+import { toHandler } from "@/lib/handler.ts"
+
+const router = new Router()
+const app = new Application()
+
+router.all("/api/auth/(.*)", toHandler)
+
+app.use(router.routes())
+await app.listen({ port: 3000 })
+```
+
+This keeps all auth endpoints in one place and leaves the rest of your app free to use the same auth instance.
+
+</Step>
+
+<Step>
+
+## Usage
+
+### Middleware
+
+The middlewares are commonly used to guard protected routes and provide the session object to your route handlers. Use `withAuth` middleware to protect your routes.
+
+### Get Session
+
+Use the middleware in your app and guard protected routes with the session it provides.
+
+```ts title="src/index.ts" lineNumbers
+import { Application, Router } from "@oak/oak"
+import { withAuth, toHandler } from "@/lib/auth.ts"
+
+const router = new Router()
+const app = new Application()
+
+router.all("/api/auth/(.*)", toHandler)
+
+router.get("/api/protected", withAuth, (ctx) => {
+  ctx.response.body = {
+    message: "You have access to this protected resource.",
+    session: ctx.state.session,
+  }
+})
+
+app.use(router.routes())
+await app.listen({ port: 3000 })
+```
+
+This pattern works well for dashboards, account endpoints, and any route that should not return private data unless the request is authenticated.
+
+</Step>
+
+</Steps>
+
+---
+
+## Common Pitfalls
+
+- **Keep `basePath` aligned with your auth route**. If your auth endpoint is `/api/auth/*`, the auth config should use `basePath: "/api/auth"`.
+- **Keep the auth handler and route logic separate**. The auth route should only forward requests to Aura Auth.
+
+---
+
+## Resources
+
+- [Oak Documentation](https://deno.land/x/oak)
+- [Aura Auth Documentation](/docs/quick-start)
+- [Oak Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/oak)
+- [Integration Guide](/docs/guides/integration)
+- [Configuration Reference](/docs/api-reference/options)
+- [TypeScript Guide](/docs/concepts/typescript)
