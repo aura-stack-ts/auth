@@ -1,5 +1,5 @@
+import { isHeadersInit } from "@/shared/assert.ts"
 import type { RequestHeaders } from "@aura-stack/router"
-import { isHeadersInit } from "../assert.ts"
 
 /**
  * Headers to prevent caching of responses. It includes Pragma header for HTTP/1.0 compatibility.
