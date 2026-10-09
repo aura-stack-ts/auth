@@ -1,32 +1,25 @@
 ---
-title: OAuth providers
-description: OAuth providers supported by Aura Auth to consume and add authentication to typescript apps
+title: OAuth Providers
+description: Explore built-in OAuth providers and configure them in TypeScript applications with Aura Auth.
 ---
 
-An OAuth provider is a third-party service that implements the `OAuth 2.0` authorization protocol. This integration enables applications to obtain limited access to user accounts on external services without requiring users to share credentials directly with the application.
+An OAuth provider is an external service that implements the OAuth 2.0 authorization framework. OAuth allows applications to obtain limited access to a user's resources without requiring the user to share their credentials directly with the application.
 
-Aura Auth delegates authentication and authorization to these trusted third parties. The provider manages user authentication, requests consent, and issues tokens, while Aura Auth provides the infrastructure to securely handle these flows within TypeScript applications.
+Aura Auth integrates with external providers to manage authorization flows and, where supported, retrieve user profile information. The provider handles user authentication and consent, while Aura Auth manages the corresponding authorization flow within the application.
 
-For technical details on the underlying protocol, refer to the [OAuth 2.0 Authorization Framework](/docs/concepts/oauth).
+For more information about the underlying protocol, see the [OAuth 2.0 Authorization Framework](/docs/concepts/oauth).
 
 ---
 
 ## Implementation Patterns
 
-Aura Auth offers multiple ways to initialize OAuth providers, ranging from zero-configuration setups to highly customized factory functions.
-
-Providers can be defined using three distinct patterns within the `createAuth` instance:
+Aura Auth supports three ways to configure built-in OAuth providers, depending on the application's customization and bundle-size requirements.
 
 ### String Pattern
 
-The supported providers can be acceded directly by its name. It load automatically the environment variables.
+The string pattern is the simplest way to enable a built-in provider. Pass the provider's identifier to the `oauth` array, and Aura Auth resolves the provider configuration using the corresponding environment variables.
 
-<Callout type="warning">
-  This strategy didn't accept custom configurations and overrides. If you want to configure extra values use the another two
-  strategies.
-</Callout>
-
-```ts title="@/lib/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -34,9 +27,14 @@ export const auth = createAuth({
 })
 ```
 
+<Callout type="warning">
+  The string pattern does not support customizing individual provider options. To override defaults or configure additional
+  options, use the provider factory or modular import pattern instead.
+</Callout>
+
 ### Provider Factories
 
-The `builtInOAuthProviders` object provides a centralized collection for all supported services. This approach is recommended when dynamic provider resolution is required.
+The `builtInOAuthProviders` object provides a centralized collection of built-in provider factories. This pattern is useful when provider configurations need to be customized while keeping imports centralized.
 
 ```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
@@ -58,7 +56,7 @@ export const auth = createAuth({
 
 ### Modular Imports
 
-For production environments where bundle size is critical, importing providers directly from their respective entry points ensures optimal tree-shaking.
+Modular imports load a provider directly from its dedicated entry point. This approach can help bundlers eliminate unused provider implementations through tree-shaking, making it useful when bundle size is a concern.
 
 ```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"

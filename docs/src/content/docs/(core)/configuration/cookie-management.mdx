@@ -3,54 +3,58 @@ title: Cookie Management
 description: How Aura Auth stores, secures, and customizes authentication cookies
 ---
 
-Aura Auth uses a HTTP cookies to store authentication information, even when the application is set to run in a stateful manner. All cookies are configured with **secure-by-default attributes**, ensuring strong protection without requiring manual setup based on the [HTTP State Management Mechanism](https://datatracker.ietf.org/doc/html/rfc6265).
+Aura Auth uses HTTP cookies to store authentication-related information, including session data, CSRF tokens, and temporary OAuth values. Cookies are used regardless of whether the application uses a stateful or stateless session strategy.
+
+By default, cookies are configured with security-focused attributes based on the [HTTP State Management Mechanism (RFC 6265)](https://datatracker.ietf.org/doc/html/rfc6265). Aura Auth also supports customizing cookie names and attributes while preserving security requirements.
 
 ## Cookie Names
 
-| Option         | Cookie Name     | Purpose                                            |
-| -------------- | --------------- | -------------------------------------------------- |
-| `sessionToken` | `session_token` | Stores the user session.                           |
-| `csrfToken`    | `csrf_token`    | Stores the token used for CSRF verification.       |
-| `state`        | `state`         | Temporarily stores the OAuth state during sign-in. |
-| `codeVerifier` | `code_verifier` | Temporarily stores the PKCE code verifier.         |
-| `redirectTo`   | `redirect_to`   | Stores the post-authentication redirect path.      |
-| `redirectURI`  | `redirect_uri`  | Stores the OAuth callback redirect URI.            |
-| `nonce`        | `nonce`         | Temporarily stores the OAuth nonce.                |
-| `accessToken`  | `access_token`  | Stores the OAuth access token.                     |
+Aura Auth uses the following cookies:
+
+| Option         | Default Cookie Name | Purpose                                                             |
+| -------------- | ------------------- | ------------------------------------------------------------------- |
+| `sessionToken` | `session_token`     | Stores the session token used to identify the user's session.       |
+| `csrfToken`    | `csrf_token`        | Stores the token used for CSRF verification.                        |
+| `state`        | `state`             | Temporarily stores the OAuth state parameter during sign-in.        |
+| `codeVerifier` | `code_verifier`     | Temporarily stores the PKCE code verifier.                          |
+| `redirectTo`   | `redirect_to`       | Stores the destination to redirect to after authentication.         |
+| `redirectURI`  | `redirect_uri`      | Stores the OAuth callback redirect URI.                             |
+| `nonce`        | `nonce`             | Temporarily stores the OAuth nonce used to mitigate replay attacks. |
+| `accessToken`  | `access_token`      | Stores an OAuth access token when applicable.                       |
 
 <Callout>
-  If your application runs on `https` (production), the `__Secure-` and `__Host-` prefixes may be automatically applied depending
-  on browser and framework behavior, but Aura Auth handles this logic internally.
+  Cookie prefixes such as `__Secure-` and `__Host-` have specific browser-enforced requirements. Aura Auth can apply these
+  prefixes through its cookie configuration strategy; browsers do not automatically add them to cookie names.
 </Callout>
 
-## Cookie Overrides [#cookies]
+## Cookie Overrides
 
-The `createAuth` function exposes a `cookies` configuration object that allows controlled customization of cookie behavior.
+The `createAuth` function exposes a `cookies` configuration object for customizing cookie names and attributes.
 
-### Prefix [#prefix]
+### Prefix
 
-The global cookie prefix to be added to all of the cookies consumed. By default it is `aura-auth` and it's applied as: `<prefix>.<cookie_name>`.
+The `cookies.prefix` option defines the prefix applied to cookie names. Its default value is `aura-auth`, and it is combined with each cookie's name using a period (`.`) as the separator.
 
-```ts title="@/lib/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: []
+  oauth: [],
   cookies: {
     prefix: "my_app",
   },
 })
 ```
 
-> This would change `aura-auth.session_token` to `my_app.session_token`.
+For example, the default cookie name `aura-auth.session_token` becomes `my_app.session_token`.
 
-### Overrides [#overrides]
+### Overrides
 
-For more granular control, it's possible to override or re-write the default cookie specification options for the cookies used by Aura Auth (`sessionToken`, `csrfToken`, `state`, `codeVerifier`, `redirectTo` and `redirectURI`).
+For more granular control, `cookies.overrides` allows customization of individual cookies. Each override can specify a custom cookie name through `name` and modify cookie attributes through `attributes`.
 
-To override the default per-cookie options, it's possible to change the default cookie name via `name` and cookie attributes (like `path`, `domain`, `maxAge`, `sameSite`, etc.) via the `attributes` property.
+#### Cookie Name Override
 
-```ts title="@/lib/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -59,6 +63,39 @@ export const auth = createAuth({
     overrides: {
       sessionToken: {
         name: "jwt_session",
+      },
+    },
+  },
+})
+```
+
+#### Cookie Attributes
+
+The `attributes` property allows customization of cookie attributes. For more information, see the [Set-Cookie header attributes reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#attributes).
+
+- `domain`: Specifies the domain for which the cookie is sent. When omitted, the browser applies the default host-only behavior.
+- `expires`: Specifies the cookie's expiration date.
+- `httpOnly`: Determines whether the cookie is inaccessible to client-side JavaScript. Defaults to `true`.
+- `maxAge`: Specifies the cookie's lifetime in seconds.
+- `path`: Specifies the URL path for which the cookie is sent. Defaults to `/`.
+- `sameSite`: Controls when the browser sends the cookie in cross-site requests. Defaults to `lax`.
+- `secure`: Determines whether the cookie is sent only over secure connections, such as HTTPS. Defaults to `true`.
+
+Expiration behavior depends on the cookie type. For example, session-related cookies and temporary OAuth cookies may have different lifetimes.
+
+<Callout type="warn">
+  Not all cookie attributes can be freely customized. If an override weakens a security guarantee, Aura Auth may enforce a safer
+  value instead.
+</Callout>
+
+```ts title="@/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  cookies: {
+    overrides: {
+      sessionToken: {
         attributes: {
           maxAge: 3600,
           domain: ".example.com",
@@ -70,25 +107,19 @@ export const auth = createAuth({
 })
 ```
 
-<Callout type="warn">
+#### Cookie Prefix Strategy
 
-Not all cookie attributes are always respected. If a configuration weakens security guarantees, Aura Auth will enforce a safer alternative.
+The `attributes.strategy` option controls how Aura Auth configures a cookie for compatibility with cookie prefixes. It accepts three values: `standard`, `secure`, and `host`. The default is `standard`.
 
-For a complete attribute reference, see the [Cookies API Reference](/docs/api-reference/core#overrides)
+| Strategy   | Description                                                                          |
+| ---------- | ------------------------------------------------------------------------------------ |
+| `standard` | Uses the standard cookie configuration, subject to Aura Auth's security defaults.    |
+| `secure`   | Configures the cookie to satisfy the requirements for the `__Secure-` prefix.        |
+| `host`     | Configures the cookie to satisfy the stricter requirements for the `__Host-` prefix. |
 
-</Callout>
+For details about the browser requirements for these prefixes, see the [Cookies: HTTP](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix).
 
-#### Strategy Attribute
-
-For safety, a `strategy` optional field is provided within the `attributes` field for per-cookie configuration. This recommends appropriate cookie attributes for setting cookie prefixes correctly (`__Secure-` and `__Host-`). The accepted values are: `standard`, `secure`, and `host`, with `standard` as the default strategy value. For more detailed documentation related to cookie strategies, read the [Cookie Prefixes](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html#name-the-__secure-prefix) section of the HTTP State Management Mechanism RFC.
-
-| Strategy   | Description                                                |
-| ---------- | ---------------------------------------------------------- |
-| `standard` | Default behavior. Secure when possible.                    |
-| `secure`   | Enforces compatibility with `__Secure-` cookies.           |
-| `host`     | Enforces compatibility with `__Host-` cookies (strictest). |
-
-```ts title="@/lib/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({

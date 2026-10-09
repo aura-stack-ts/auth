@@ -3,45 +3,46 @@ title: Session Strategies
 description: Configure how Aura Auth stores and maintains user sessions across requests.
 ---
 
-The `session` option on [`createAuth`](/docs/api-reference/createAuth#session) defines the session management strategy — how a user's session is stored and validated on subsequent requests. Aura Auth currently supports the `jwt` (stateless) strategy.
+The `session` option in [`createAuth`](/docs/api-reference/createAuth#session) configures how Aura Auth stores, validates, and manages sessions across requests.
 
-```ts title="@/lib/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: [],
   session: {
-    strategy: "jwt",
     maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
-    jwt: {
-      mode: "sealed",
-    },
+    slidingThreshold: 0.5, // 50% of maxAge
+    expirationStrategy: "sliding",
   },
 })
 ```
 
-## `jwt` strategy
+## `strategy`
 
-The `jwt` session strategy is the stateless option: it uses a JSON Web Token to represent the session, with no server-side storage or database lookup required to validate a request.
+The `strategy` property selects the session management strategy.
 
-### Options
+- **`jwt`**: Uses a JWT to represent the session. Session validation does not require a database lookup, although other application operations may still use a database.
+- **`database`**: Stores session records in a database, enabling server-side session management, including session revocation and tracking. This strategy is suitable for applications that need direct control over the session lifecycle.
 
-| Option                   | Type                                              | Required                  | Description                                                                                                                                                 |
-| ------------------------ | ------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mode`                   | `"sealed" \| "signed" \| "encrypted"`             | No (default `"sealed"`)   | Determines how the JWT is protected. See [Choosing a mode](#choosing-a-mode) below.                                                                         |
-| `issuer`                 | `string`                                          | No                        | Sets the `iss` claim on the JWT, identifying the issuer of the token. Useful for additional validation on the client or server.                             |
-| `audience`               | `string`                                          | No                        | Sets the `aud` claim on the JWT, identifying the intended audience. Useful for restricting token usage to specific clients or services.                     |
-| ~~`maxAge`~~             | `number` (seconds)                                | Yes                       | ~~Deprecated~~. Maximum age of the JWT. After this period, the token expires and the user must re-authenticate.                                             |
-| ~~`maxExpiration`~~      | `number` (seconds)                                | No                        | ~~Deprecated~~. A hard ceiling on token expiration that persists even if the token is refreshed, preventing indefinitely-valid tokens.                      |
-| ~~`expirationStrategy`~~ | `"absolute" \| "rolling" \| "fixed" \| "sliding"` | No (default `"absolute"`) | ~~Deprecated~~. `absolute` expires the token a fixed time after issuance. `rolling` extends the expiration on each request, keeping active users signed in. |
+## `jwt`
 
-### Choosing a mode
+The `jwt` option configures the JWT session strategy. Its properties apply only when `session.strategy` is set to `jwt`.
 
-- **`sealed`** (default) — encrypts the token, providing both confidentiality and integrity. The payload is not readable without the secret, and it cannot be tampered with. Use this unless you have a specific reason not to.
-- **`signed`** — signs the token without encrypting it. Integrity is guaranteed (the token cannot be modified undetected), but the payload is plainly visible to anyone holding the token. Use this only if you need the payload to be readable outside of Aura Auth (for example, by a separate service that only verifies signatures).
-- **`encrypted`** — encrypts the token without signing it. The payload is confidential, but there is no signature to verify integrity. This mode is narrower in purpose than `sealed` and should generally be avoided unless you have a specific compatibility requirement.
+<Callout>
+  The `jwt` configuration is ignored when the `database` strategy is selected. See the [database configuration](#database) section
+  for options specific to database-backed sessions.
+</Callout>
 
-```ts title="@/lib/auth.ts" lineNumbers
+### `mode`
+
+The `mode` property determines how session JWTs are protected.
+
+- **`sealed`** (default): Encrypts and authenticates the token, providing confidentiality and integrity. The payload cannot be read without the appropriate key material or modified without detection.
+- **`signed`**: Signs the token to provide integrity and authenticity, but does not encrypt the payload. Anyone holding the token can read its contents. Use this mode when another service needs to inspect the claims and verify the signature.
+- **`encrypted`**: Encrypts the token to protect the confidentiality of its payload. Unlike `sealed`, this mode does not provide a separate signature. Use it only when its behavior meets the application's security requirements and compatibility needs.
+
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -55,23 +56,153 @@ export const auth = createAuth({
 })
 ```
 
-<Callout type="info">
-  Stateful (database-backed) and hybrid session strategies are on the roadmap but not yet available. If your application requires
-  the ability to revoke a session server-side before its `maxAge` expires, track this on the roadmap rather than working around it
-  with a short `maxAge`.
+### `issuer`
+
+The `issuer` property sets the JWT issuer (`iss`) claim. It identifies the entity that issued the token and can be used by token consumers to validate its origin.
+
+```ts title="@/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "jwt",
+    jwt: {
+      issuer: "my-app",
+    },
+  },
+})
+```
+
+### `audience`
+
+The `audience` property sets the JWT audience (`aud`) claim. It identifies the intended recipient or recipients of the token and can be used to restrict token acceptance to specific applications or services.
+
+```ts title="@/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "jwt",
+    jwt: {
+      audience: "my-app-client",
+    },
+  },
+})
+```
+
+## `database`
+
+The `database` configuration controls database-backed session management. These options apply only when `session.strategy` is set to `database`.
+
+<Callout>
+  The `database` configuration is ignored when the `jwt` strategy is selected. See the [JWT configuration](#jwt) section for
+  options specific to JWT-based sessions.
 </Callout>
+
+### `deleteStrategy`
+
+The `deleteStrategy` property determines how session records are deleted. It accepts `soft` or `hard` and defaults to `soft`.
+
+- **`soft`**: Marks a session as deleted without physically removing its database record. This can preserve records for auditing or recovery, depending on the adapter's implementation.
+- **`hard`**: Permanently removes the session record from the database.
+
+```ts title="@/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "database",
+    deleteStrategy: "soft",
+  },
+})
+```
+
+### `maxSessions`
+
+The `maxSessions` property sets the maximum number of concurrent sessions allowed per user. When the limit is exceeded, the oldest session is invalidated to make room for the new session. The default is `5`.
+
+```ts title="@/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "database",
+    maxSessions: 5,
+  },
+})
+```
+
+### `touchInterval`
+
+The `touchInterval` property sets the minimum interval, in seconds, between updates to a session's last-activity timestamp in the database. This can reduce database writes while maintaining activity information for session management. The default is `300` seconds (5 minutes).
+
+```ts title="@/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "database",
+    touchInterval: 300, // 5 minutes
+  },
+})
+```
+
+## `adapter`
+
+The `adapter` property specifies the database adapter used to persist session data. Aura Auth provides a Prisma adapter through the `@aura-stack/prisma` package.
+
+The adapter must be configured with the application's Prisma client and passed to `createAuth` when using the `database` session strategy.
+
+<Callout>
+  An adapter is required when using the `database` strategy. If no adapter is provided, Aura Auth throws an error during
+  initialization.
+</Callout>
+
+The following example configures the Prisma adapter with PostgreSQL:
+
+```ts title="@/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+import { PrismaPg } from "@prisma/adapter-pg"
+import { prismaAdapter } from "@aura-stack/prisma"
+import { PrismaClient } from "@/generated/prisma/client.ts"
+
+const adapterPg = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+})
+
+export const prismaClient = new PrismaClient({
+  adapter: adapterPg,
+})
+
+export const adapter = prismaAdapter({
+  client: prismaClient as any,
+  deleteStrategy: "soft",
+})
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    strategy: "database",
+    adapter,
+  },
+})
+```
 
 ## `maxAge`
 
-The `maxAge` option defines the session's lifetime in seconds. After this period, the session expires and the user must re-authenticate. The default is 15 days (60 \* 60 \* 24 \* 15 seconds).
+The `maxAge` property specifies the session's maximum age in seconds. Its exact effect depends on the configured expiration strategy. When the session reaches its applicable expiration time, it can no longer be used and the user must authenticate again. The default is 15 days (`60 * 60 * 24 * 15` seconds).
 
-```ts title="@/lib/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: [],
   session: {
-    strategy: "jwt",
     maxAge: 60 * 60 * 24 * 7, // 7 days
   },
 })
@@ -79,15 +210,14 @@ export const auth = createAuth({
 
 ## `maxDuration`
 
-The `maxDuration` option defines the maximum lifetime of a session in seconds, regardless of activity. After this period, the session expires and the user must re-authenticate.
+The `maxDuration` property sets the maximum absolute lifetime of a session in seconds, regardless of activity. Once this limit is reached, the session expires even if it has been renewed during that period.
 
-```ts title="@/lib/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: [],
   session: {
-    strategy: "jwt",
     maxDuration: 60 * 60 * 24 * 30, // 30 days
   },
 })
@@ -95,21 +225,36 @@ export const auth = createAuth({
 
 ## `expirationStrategy`
 
-The `expirationStrategy` option defines the renewal policy for the session/session expiration strategy. Determines how the session's lifetime is calculated and enforced
+The `expirationStrategy` property determines how session expiration is calculated and renewed.
 
-- `fixed`: The session expires after a fixed duration from the time of creation.
-- `rolling`: The session expiration is extended on each request, up to the maximum age.
-- `absolute`: The session has a hard expiration time, regardless of activity.
-- `sliding`: The session expiration is extended on each request, but cannot exceed the maximum expiration time.
+- **`fixed`**: The session expires after a fixed duration from its creation time.
+- **`rolling`**: The expiration time is renewed as activity occurs.
+- **`absolute`**: The session has a fixed expiration time that activity does not extend.
+- **`sliding`**: The expiration time is extended according to the sliding-expiration policy, subject to the configured lifetime limits.
 
-```ts title="@/lib/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
   oauth: [],
   session: {
-    strategy: "jwt",
     expirationStrategy: "rolling",
+  },
+})
+```
+
+## `slidingThreshold`
+
+The `slidingThreshold` property sets the fraction of `maxAge` that must elapse before a sliding session's expiration is extended. For example, `0.5` represents 50% of `maxAge`.
+
+```ts title="@/lib/auth.ts"
+import { createAuth } from "@aura-stack/auth"
+
+export const auth = createAuth({
+  oauth: [],
+  session: {
+    slidingThreshold: 0.5, // 50% of maxAge
+    expirationStrategy: "sliding",
   },
 })
 ```
