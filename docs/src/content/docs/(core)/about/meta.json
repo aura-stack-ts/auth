@@ -1,0 +1,5 @@
+{
+  "title": "About",
+  "pages": ["core-principles", "runtime-agnostic", "framework-agnostic", "security-model"],
+  "defaultOpen": false
+}

@@ -3,7 +3,7 @@ title: Session Strategies
 description: Configure how Aura Auth stores and maintains user sessions across requests.
 ---
 
-The `session` option on [`createAuth`](/docs/api-reference/server/createAuth#session) defines the session management strategy — how a user's session is stored and validated on subsequent requests. Aura Auth currently supports the `jwt` (stateless) strategy.
+The `session` option on [`createAuth`](/docs/api-reference/createAuth#session) defines the session management strategy — how a user's session is stored and validated on subsequent requests. Aura Auth currently supports the `jwt` (stateless) strategy.
 
 ```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"

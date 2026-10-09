@@ -3,16 +3,9 @@ title: Integration Guide
 description: Learn how to integrate Aura Auth with any JavaScript library or framework
 ---
 
-Aura Auth is a **framework-agnostic and modular authentication system** designed for TypeScript applications. It is built on **Web Standards**—including the [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) and [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) interfaces—and implements the [OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749).
+Aura Auth is a **framework-agnostic and modular authentication system** designed for TypeScript applications. It is built on **Web Standards**—including the [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) and [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) interfaces—and implements the [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749) and [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html).
 
-Aura Auth can be integrated into any JavaScript runtime that supports server-side request handling.
-
-<Callout>
-  The integrating library or framework must support server or backend execution. Aura Auth communicates exclusively through `GET`
-  and `POST` HTTP handlers that must be mounted on a server.
-</Callout>
-
-For reference implementations, see [Aura Auth Apps](https://github.com/aura-stack-ts/auth/tree/master/apps).
+Aura Auth can be integrated into any JavaScript runtime that supports server-side request handling. For reference implementations, see [Aura Auth Apps](https://github.com/aura-stack-ts/auth/tree/master/apps).
 
 ---
 
@@ -22,7 +15,7 @@ For reference implementations, see [Aura Auth Apps](https://github.com/aura-stac
 
 The `createAuth` function is the entry function of the package which creates the Aura Auth instance configuration. It defines the behavior, options, and values to be supported by the Auth Instance. This includes the definitions of the [OAuth Providers](/docs/oauth) to be consumed, [Cookie Management](/docs/guides/cookie-management), and more configurable options. For more details, read the [createAuth API Reference](/docs/api-reference/core#createAuth).
 
-```ts title="@/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -46,7 +39,7 @@ Aura Auth exposes pre-built HTTP handlers for the OAuth and session lifecycle. T
 
 By default, the handlers are mounted under the `/auth` route on the backend server. However, this can be customized by setting the `basePath` option in the `createAuth` function.
 
-```ts title="@/auth.ts" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -56,16 +49,6 @@ export const auth = createAuth({
 
 export const { handlers, jose, api } = auth
 ```
-
-These handlers internally provide:
-
-| Route              | Description                                   |
-| ------------------ | --------------------------------------------- |
-| `/signIn/:oauth`   | Starts the OAuth flow (Authorization Request) |
-| `/callback/:oauth` | Completes the OAuth flow and issues a session |
-| `/session`         | Returns the current session                   |
-| `/signOut`         | invalidates the active session                |
-| `/csrfToken`       | Generates a CSRF token (for forms)            |
 
 <Callout type="warning">
   Aura Auth provides the handlers, but mounting them correctly depends on the integrating framework.
@@ -205,7 +188,3 @@ import { authClient } from "@/lib/auth-client"
 
 export const signOut = await authClient.signOut()
 ```
-
----
-
-## Resources

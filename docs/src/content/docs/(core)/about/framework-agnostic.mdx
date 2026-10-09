@@ -33,26 +33,3 @@ For step-by-step instructions, see the [Integration Guide](/docs/guides/integrat
 | SvelteKit                           |        ❌        | Coming soon                                                                                                                                                      |
 
 > **Note:** Even if a framework doesn't have an official integration package yet, Aura Auth can typically be integrated by following the Integration Guide.
-
-## How it works
-
-Aura Auth doesn't sit behind a framework-specific abstraction. Instead, your framework receives an HTTP request, forwards it to Aura Auth, and returns the resulting HTTP response.
-
-```mermaid
-graph TD
-    Client[Client / Browser]
-    Client -->|HTTP Request| Framework[Framework Router]
-    Framework --> Aura[Aura Auth]
-    Aura -->|Response| Framework
-    Framework -->|HTTP Response| Client
-```
-
-## Benefits
-
-- **No framework lock-in** — Use Aura Auth with the framework that best fits your project.
-- **Minimal integration layer** — Most frameworks only require forwarding standard `Request` and `Response` objects.
-- **Smaller bundles** — No framework-specific runtime or adapter dependencies are required.
-- **Easy to extend** — New framework integrations can be added without changing Aura Auth's core.
-- **Future-proof** — As new frameworks adopt the standard Web APIs, they can integrate with Aura Auth using the same architecture.
-
-By building on Web Standards instead of framework-specific APIs, Aura Auth provides a consistent authentication experience across the JavaScript ecosystem while remaining lightweight, portable, and easy to integrate.

@@ -244,7 +244,7 @@ Create a new file in your server or API directory to manage the auth routes or c
 ```ts title="app/api/auth/[...aura]/route.ts" lineNumbers
 import { handlers } from "@/lib/auth"
 
-export const { GET, POST, PATCH } = handlers
+export const { GET, POST, PATCH, DELETE } = handlers
 ```
 
 </Tab>
@@ -293,6 +293,9 @@ export const Route = createFileRoute("/api/auth/$")({
       },
       PATCH: async ({ request }) => {
         return await handlers.PATCH(request)
+      },
+      DELETE: async ({ request }) => {
+        return await handlers.DELETE(request)
       },
     },
   },
@@ -482,8 +485,6 @@ export const authClient = createAuthClient({
   basePath: "/api/auth",
   baseURL: "http://localhost:3000",
 })
-
-export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
 ```
 
 </Tab>
@@ -497,8 +498,6 @@ export const authClient = createAuthClient({
   basePath: "/api/auth",
   baseURL: "http://localhost:3000",
 })
-
-export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
 ```
 
 </Tab>
@@ -512,8 +511,6 @@ export const authClient = createAuthClient({
   basePath: "/api/auth",
   baseURL: "http://localhost:3000",
 })
-
-export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
 ```
 
 </Tab>
@@ -527,8 +524,6 @@ export const authClient = createAuthClient({
   basePath: "/api/auth",
   baseURL: "http://localhost:3000",
 })
-
-export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
 ```
 
 </Tab>
@@ -542,8 +537,6 @@ export const authClient = createAuthClient({
   basePath: "/api/auth",
   baseURL: "http://localhost:3000",
 })
-
-export const { getSession, signIn, signInCredentials, signUp, updateSession, signOut } = authClient
 ```
 
 </Tab>
