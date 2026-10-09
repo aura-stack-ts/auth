@@ -21,28 +21,7 @@ function createAuthClient<DefaultUser extends User = User, SignUpPayload extends
 }
 ```
 
-## Returns
-
-`createAuthClient()` returns an Auth Client instance for client-side usage, exposing the following methods:
-
-| Method                | Description                                                                                                | Link                                                           |
-| --------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `getSession()`        | Retrieves the current session from the `GET /auth/session` endpoint                                        | [Docs](/docs/api-reference/client/functions/getSession)        |
-| `signIn()`            | Initiates the sign-in process for the specified OAuth provider from the `GET /auth/signIn/:oauth` endpoint | [Docs](/docs/api-reference/client/functions/signIn)            |
-| `signInCredentials()` | Signs in a user with their email and password from the `POST /auth/signIn/credentials` endpoint            | [Docs](/docs/api-reference/client/functions/signInCredentials) |
-| `signUp()`            | Creates a new user account from the `POST /auth/signUp` endpoint                                           | [Docs](/docs/api-reference/client/functions/signUp)            |
-| `updateSession()`     | Updates the current session from the `PATCH /auth/session` endpoint                                        | [Docs](/docs/api-reference/client/functions/updateSession)     |
-| `signOut()`           | Signs out the current user from the `POST /auth/signOut` endpoint                                          | [Docs](/docs/api-reference/client/functions/signOut)           |
-
-<Callout type="info">
-  The Auth Client instance is designed for client-side usage and talks to the Aura Auth HTTP handler endpoints over `fetch`. It is
-  not intended for server-side usage — if you need to perform server-side flows, use the `api` object instead. See the [Server API
-  Reference](/docs/api-reference/server/api).
-</Callout>
-
 ## Options
-
-`baseURL`, `basePath`, and `headers` configure how requests are addressed. `fetch`, `cache`, `credentials`, and `mode` are passed straight through to the underlying `fetch()` call the client makes internally — if you're familiar with the Fetch API, these behave exactly as they would in a normal `fetch()` call.
 
 ### `baseURL`
 
@@ -164,6 +143,30 @@ export const authClient = createAuthClient({
 })
 ```
 
+<Callout type="info">
+  This is only necessary if you've customized `identity.schema` in your `createAuth` configuration. If you haven't, the default
+  `User` type is used automatically. See [Identity Schema](/docs/configuration/identity-schema#type-inference).
+</Callout>
+
+## Returns
+
+`createAuthClient()` returns an Auth Client instance for client-side usage, exposing the following methods:
+
+| Method                | Description                                                                                                | Link                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `getSession()`        | Retrieves the current session from the `GET /auth/session` endpoint                                        | [Docs](/docs/api-reference/client/getSession)        |
+| `signIn()`            | Initiates the sign-in process for the specified OAuth provider from the `GET /auth/signIn/:oauth` endpoint | [Docs](/docs/api-reference/client/signIn)            |
+| `signInCredentials()` | Signs in a user with their email and password from the `POST /auth/signIn/credentials` endpoint            | [Docs](/docs/api-reference/client/signInCredentials) |
+| `signUp()`            | Creates a new user account from the `POST /auth/signUp` endpoint                                           | [Docs](/docs/api-reference/client/signUp)            |
+| `updateSession()`     | Updates the current session from the `PATCH /auth/session` endpoint                                        | [Docs](/docs/api-reference/client/updateSession)     |
+| `signOut()`           | Signs out the current user from the `POST /auth/signOut` endpoint                                          | [Docs](/docs/api-reference/client/signOut)           |
+
+<Callout type="info">
+  The Auth Client instance is designed for client-side usage and talks to the Aura Auth HTTP handler endpoints over `fetch`. It is
+  not intended for server-side usage — if you need to perform server-side flows, use the `api` object instead. See the [Server API
+  Reference](/docs/api-reference/server/api).
+</Callout>
+
 ## Generic types
 
 `createAuthClient` accepts two generic parameters, `DefaultUser` and `SignUpPayload`, letting you type the client to match your application's user shape and sign-up payload.
@@ -182,11 +185,6 @@ export const authClient = createAuthClient<User>({
   baseURL: "https://api.example.com",
 })
 ```
-
-<Callout type="info">
-  This is only necessary if you've customized `identity.schema` in your `createAuth` configuration. If you haven't, the default
-  `User` type is used automatically. See [Identity Schema](/docs/configuration/identity-schema#type-inference).
-</Callout>
 
 ### `SignUpPayload`
 

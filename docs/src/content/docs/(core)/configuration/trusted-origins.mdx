@@ -3,7 +3,7 @@ title: Trusted Origins
 description: Configure allowed origins for CORS and redirect URI validation, including dynamic and wildcard matching.
 ---
 
-The `trustedOrigins` option on [`createAuth`](/docs/api-reference/server/createAuth#trustedorigins) defines the allowed origins for CORS and redirect URI validation. It supports static matches, origins resolved dynamically per-request, and wildcard patterns for subdomains and ports.
+The `trustedOrigins` option on [`createAuth`](/docs/api-reference/createAuth#trustedorigins) defines the allowed origins for CORS and redirect URI validation. It supports static matches, origins resolved dynamically per-request, and wildcard patterns for subdomains and ports.
 
 <Callout type="warning">
   This option is security-sensitive. Misconfigured `trustedOrigins` can lead to CORS vulnerabilities or open redirect flaws.
@@ -93,6 +93,6 @@ Matches any port on `https://example.com` (e.g. `https://example.com:3000`, `htt
 | `https://*.example.com:*`    | `https://app.example.com:3001`, `https://www.example.com:4567` | `https://example.com:3000`, `http://app.example.com:3000`                    |
 
 <Callout type="info">
-  `trustedOrigins` is required whenever [`trustedProxyHeaders`](/docs/api-reference/server/createAuth#trusted-proxy-headers) is
-  enabled — without a whitelist, proxy-forwarded origin headers cannot be safely trusted for CORS or redirect validation.
+  `trustedOrigins` is required whenever [`trustedProxyHeaders`](/docs/api-reference/createAuth#trusted-proxy-headers) is enabled —
+  without a whitelist, proxy-forwarded origin headers cannot be safely trusted for CORS or redirect validation.
 </Callout>

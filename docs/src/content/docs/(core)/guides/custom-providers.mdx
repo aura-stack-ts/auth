@@ -1,126 +1,50 @@
 ---
 title: Custom OAuth Providers
-description: Define and extend OAuth providers in Aura Auth
+description: Define and configure custom OAuth 2.0 and OpenID Connect providers in Aura Auth.
 ---
 
-Aura Auth provides **fully compliant support** for the [OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749).
+Aura Auth supports integrations with providers that implement the [OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749) and [OpenID Connect (OIDC)](https://openid.net/specs/openid-connect-core-1_0.html). These protocols allow applications to delegate authorization and authentication to external services and identity providers.
 
-To minimize setup time and reduce implementation risk, Aura Auth ships with a growing set of **built-in OAuth providers** for widely used third-party services (such as GitHub, GitLab, X, Spotify, and others).
+Aura Auth includes built-in providers for widely used services such as GitHub, GitLab, X, and Spotify. See the [OAuth Providers](/docs/oauth) guide for the complete list of supported providers.
 
-However, some organizations rely on **internal OAuth servers** or providers that are not included by default. For these cases, Aura Auth allows **custom OAuth providers** to be defined while preserving the same security guarantees and integration model.
+When an application needs to integrate with an internal authorization server or a provider that is not included by default, Aura Auth supports custom provider configurations. These configurations allow the application to define provider-specific endpoints, scopes, and profile mapping while using Aura Auth's existing authentication flow.
 
----
+## Adding a Custom OAuth Provider
 
-## OAuth Providers
+A custom OAuth provider can be configured using the `OAuthProvider` type. The provider configuration defines the authorization and token endpoints, optional user information and token management endpoints, requested scopes, and profile mapping.
 
-### Built-in OAuth Providers
+For the complete list of supported properties and their types, see the [OAuth Provider API Reference](/docs/api-reference/core#oauth).
 
-Aura Auth exposes a curated set of built-in OAuth providers that follow a consistent and type-safe configuration model.
+### OAuth 2.0 Provider
 
-Built-in providers can be imported in two ways:
+The following table describes the main properties available when configuring a custom OAuth 2.0 provider.
 
-- From the provider index (all providers) `@aura-stack/auth/oauth/index`
-- From a provider-specific entry point `@aura-stack/auth/oauth/:provider`
+| Property        | Type                                | Description                                                                            |
+| --------------- | ----------------------------------- | -------------------------------------------------------------------------------------- |
+| `id`            | `string`                            | Unique identifier for the provider within the application.                             |
+| `name`          | `string`                            | Human-readable provider name.                                                          |
+| `authorize`     | `string \| object`                  | Authorization endpoint URL or authorization endpoint configuration.                    |
+| `accessToken`   | `string \| object`                  | Access token endpoint URL or token endpoint configuration.                             |
+| `userInfo`      | `string \| object`                  | User information endpoint URL or configuration.                                        |
+| `refreshToken`  | `string \| object`                  | Refresh token endpoint URL or configuration, when supported.                           |
+| `revokeToken`   | `string \| object`                  | Token revocation endpoint URL or configuration, when supported.                        |
+| `refreshWindow` | `number`                            | Time in seconds before access token expiration at which a refresh may be attempted.    |
+| `scope`         | `string`                            | Scopes requested during authorization.                                                 |
+| `profile`       | `(profile: Profile) => DefaultUser` | Optional function that maps the provider's profile to Aura Auth's user representation. |
 
-For configuration options, see [`AuthConfig.oauth`](/docs/api-reference/core#oauth).
+```ts title="@/lib/auth.ts"
+import type { User } from "@aura-stack/auth"
+import type { OAuthProvider } from "@aura-stack/auth/types"
 
-#### Using the provider index
-
-```ts title="@/auth.ts" lineNumbers
-import { createAuth, type OAuthProviderCredentials } from "@aura-stack/auth"
-import { builtInOAuthProviders, type GitHubProfile } from "@aura-stack/auth/oauth/index"
-
-export const auth = createAuth({
-  oauth: [
-    builtInOAuthProviders.github({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      profile(profile: GitHubProfile) {
-        return {
-          sub: profile.id.toString(),
-          email: profile.email,
-          image: profile.avatar_url,
-          name: profile.name,
-        }
-      },
-    }),
-  ],
-})
-```
-
-#### Using a provider-specific import
-
-```ts title="@/auth.ts" lineNumbers
-import { createAuth, type OAuthProviderCredentials } from "@aura-stack/auth"
-import { github, type GitHubProfile } from "@aura-stack/auth/oauth/github"
-
-export const auth = createAuth({
-  oauth: [
-    github({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      profile(profile: GitHubProfile) {
-        return {
-          sub: profile.id.toString(),
-          email: profile.email,
-          image: profile.avatar_url,
-          name: profile.name,
-        }
-      },
-    }),
-  ],
-})
-```
-
-The `profile` function normalizes the provider-specific user profile into Aura Auth’s internal user shape.
-
-### Adding a Custom OAuth Providers
-
-If a required OAuth provider is not included, Aura Auth allows defining a fully custom provider.
-
-To do so, the provider must conform to the `OAuthProviderCredentials` interface. This interface defines the OAuth endpoints, client credentials, scopes, and optional profile mapping logic. For all available fields, see [OAuthProvider API Reference](/docs/api-reference/core#oauth)
-
-#### Minimal custom provider
-
-```ts title="@/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: [
-    {
-      id: "custom",
-      name: "Custom Provider",
-      authorize: {
-        url: "https://custom.com/authorization",
-        params: {
-          scope: "user:email user:profile",
-          responseType: "code",
-        },
-      },
-      accessToken: "https://custom.com/access_token",
-      userInfo: "https://api.custom.com/v1/user",
-    },
-  ],
-})
-```
-
-This configuration is sufficient when the provider returns a user profile compatible with Aura Auth’s default expectations.
-
-#### Custom Provider with Profile Mapping
-
-```ts title="@/auth.ts" lineNumbers
-import { createAuth, type OAuthProviderCredentials } from "@aura-stack/auth"
-
-interface CustomProvider {
+interface CustomProviderProfile {
   id: number
   username: string
   email: string
   name: string
   avatar_url: string
-  web_url: string
 }
 
-const provider: OAuthProviderCredentials<CustomProvider> = {
+const provider: OAuthProvider<CustomProviderProfile, User> = {
   id: "custom",
   name: "Custom Provider",
   authorize: {
@@ -132,27 +56,60 @@ const provider: OAuthProviderCredentials<CustomProvider> = {
   },
   accessToken: "https://custom.com/access_token",
   userInfo: "https://api.custom.com/v1/user",
-  profile(profile: CustomProvider) {
+  profile(profile) {
     return {
       sub: profile.id.toString(),
       name: profile.name,
       email: profile.email,
-      avatar: profile.avatar_url,
+      image: profile.avatar_url,
     }
   },
 }
-
-export const auth = createAuth({
-  oauth: [provider],
-})
 ```
 
-The `profile` function is responsible for returning a stable and unique sub identifier, which is used internally for session and user identity.
+The `profile` function maps the provider's profile to Aura Auth's user representation. The returned `sub` value must be a stable, unique identifier for the user within that provider. Avoid using mutable values, such as usernames or email addresses, as the subject identifier.
 
----
+### OpenID Connect Provider
 
-## Resources
+For providers that implement OpenID Connect, Aura Auth can use the issuer URL to configure the provider. OIDC defines an identity layer on top of OAuth 2.0 and standardizes identity claims and discovery metadata.
 
-- [The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
-- [OAuth Configuration API Reference](/docs/api-reference/core#oauth)
-- [Built-in OAuth Providers](/docs/oauth)
+The following table describes the main properties available when configuring an OIDC provider.
+
+| Property        | Type                                | Description                                                                            |
+| --------------- | ----------------------------------- | -------------------------------------------------------------------------------------- |
+| `id`            | `string`                            | Unique identifier for the provider within the application.                             |
+| `name`          | `string`                            | Human-readable provider name.                                                          |
+| `issuer`        | `string`                            | OpenID Connect issuer URL.                                                             |
+| `refreshWindow` | `number`                            | Time in seconds before access token expiration at which a refresh may be attempted.    |
+| `revokeToken`   | `string`                            | Token revocation endpoint URL, when supported.                                         |
+| `scope`         | `string`                            | OIDC scopes requested during authorization.                                            |
+| `profile`       | `(profile: Profile) => DefaultUser` | Optional function that maps the provider's profile to Aura Auth's user representation. |
+
+```ts title="@/lib/auth.ts"
+import type { User } from "@aura-stack/auth"
+import type { OAuthProvider } from "@aura-stack/auth/types"
+
+interface CustomOIDCProfile {
+  sub: string
+  name: string
+  email: string
+  picture?: string
+}
+
+const provider: OAuthProvider<CustomOIDCProfile, User> = {
+  id: "custom-oidc",
+  name: "Custom OIDC Provider",
+  issuer: "https://custom.com",
+  scope: "openid profile email",
+  profile(profile) {
+    return {
+      sub: profile.sub,
+      name: profile.name,
+      email: profile.email,
+      image: profile.picture,
+    }
+  },
+}
+```
+
+For OIDC providers, the `sub` claim identifies the user within the issuer's namespace. Use this stable identifier to associate the authenticated identity with the correct user.

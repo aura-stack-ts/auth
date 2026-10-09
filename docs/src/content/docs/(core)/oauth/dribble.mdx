@@ -27,9 +27,9 @@ The first step is to create and register an OAuth App on the Dribbble Applicatio
 
 ## Installation
 
-Install the package using a package manager like `npm`, `pnpm`, or `yarn`:
+Install the `@aura-stack/auth` package. Please follow the [Installation Guide](/docs/installation) to complete the setup and core configuration for `aura-stack/auth`.
 
-```npm
+```bash
 npm install @aura-stack/auth
 ```
 
@@ -51,13 +51,6 @@ AURA_AUTH_DRIBBBLE_CLIENT_ID="your_dribbble_client_id"
 AURA_AUTH_DRIBBBLE_CLIENT_SECRET="your_dribbble_client_secret"
 ```
 
-<Callout type="warn">
-  **CRITICAL SECURITY WARNING:** The `AURA_AUTH_SECRET` and `AURA_AUTH_SALT` variables are used to encrypt and sign user sessions.
-  These MUST be securely generated, highly randomized strings consisting of at least 32 bytes to ensure adequate entropy. Never
-  hardcode these values in your repository. Use a secure generator (like `openssl rand -base64 32`) to create them, and store them
-  exclusively in your secure environment variables manager.
-</Callout>
-
 </Step>
 
 <Step>
@@ -66,7 +59,7 @@ AURA_AUTH_DRIBBBLE_CLIENT_SECRET="your_dribbble_client_secret"
 
 Configure the `createAuth` instance inside an `auth.ts` file located at the root of your project. Ensure you explicitly export the `handlers`, `api`, and `jose` objects.
 
-```ts title="auth.ts" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
@@ -90,7 +83,7 @@ export const { handlers, api, jose } = auth
 
 If you need to define custom scopes, change the response type, or map profile data differently, you can use the provider's factory function instead of a simple string identifier.
 
-```ts title="auth.ts" lineNumbers
+```ts title="@/lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 import { dribbble } from "@aura-stack/auth/oauth/dribbble"
 

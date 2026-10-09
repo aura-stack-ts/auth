@@ -11,6 +11,7 @@ type Handlers = {
   POST: (req: Request) => Response | Promise<Response>
   PATCH: (req: Request) => Response | Promise<Response>
   ALL: (req: Request) => Response | Promise<Response>
+  DELETE: (req: Request) => Response | Promise<Response>
 }
 ```
 
@@ -20,21 +21,7 @@ type Handlers = {
   The HTTP handlers can be implemented by any runtime that supports the native `Request`/`Response` Web APIs.
 </Callout>
 
-All routes below are relative to your configured [`basePath`](/docs/api-reference/server/createAuth#basepath) (default: `/auth`).
-
-## Endpoints
-
-| Method  | Path                       | Description                                      |
-| ------- | -------------------------- | ------------------------------------------------ |
-| `GET`   | `/auth/signIn/:oauth`      | Initiates the OAuth authorization flow.          |
-| `POST`  | `/auth/signIn/credentials` | Signs in a user with username/password.          |
-| `GET`   | `/auth/session`            | Returns the current user's session.              |
-| `POST`  | `/auth/session`            | Updates session data from the OAuth profile.     |
-| `PATCH` | `/auth/session`            | Updates the current user's session.              |
-| `POST`  | `/auth/signUp`             | Registers a new user.                            |
-| `GET`   | `/auth/callback/:oauth`    | Handles the OAuth provider callback.             |
-| `GET`   | `/auth/csrfToken`          | Issues a CSRF token for state-changing requests. |
-| `POST`  | `/auth/signOut`            | Signs out the current user.                      |
+All routes below are relative to your configured [`basePath`](/docs/api-reference/createAuth#basepath) (default: `/auth`).
 
 ### `GET /auth/signIn/:oauth`
 
@@ -53,7 +40,7 @@ Signs in a user with a username and password. Expects a JSON payload:
 }
 ```
 
-Requires [`credentials.authorize`](/docs/api-reference/server/createAuth#credentials) to be configured, it validates the submitted credentials and returns the user profile used to create the session.
+Requires [`credentials.authorize`](/docs/api-reference/createAuth#credentials) to be configured, it validates the submitted credentials and returns the user profile used to create the session.
 
 Supports the [redirect query parameters](#optional-query-parameters).
 
@@ -102,7 +89,7 @@ Supports the [redirect query parameters](#optional-query-parameters).
 
 Registers a new user. No request body is required by default, though fields defined in `signUp.schema` may be included.
 
-Requires [`signUp.onCreateUser`](/docs/api-reference/server/createAuth#signup) to be configured, it creates the user record and returns the user profile used to create the session.
+Requires [`signUp.onCreateUser`](/docs/api-reference/createAuth#signup) to be configured, it creates the user record and returns the user profile used to create the session.
 
 Supports the [redirect query parameters](#optional-query-parameters).
 
@@ -139,14 +126,3 @@ new Request("/auth/signOut", {
   },
 })
 ```
-
-Supports the [redirect query parameters](#optional-query-parameters).
-
-## Optional Query Parameters
-
-#### Redirect
-
-Any endpoint above marked "Supports the redirect query parameters" accepts `redirect` and `redirectTo` to control post-request navigation:
-
-- `redirect` — `"true"` or `"false"`. If `true`, the response redirects to `redirectTo` via the `Location` header. If `false` (default), the response is returned as JSON with no redirect.
-- `redirectTo` — the URL to redirect to when `redirect=true`. Ignored otherwise. If omitted while `redirect=true`, the default post-action URL is used.

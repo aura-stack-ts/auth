@@ -1,4 +1,17 @@
 {
   "title": "Client",
-  "pages": ["createAuthClient", "functions"]
+  "pages": [
+    "signIn",
+    "signInCredentials",
+    "signUp",
+    "getSession",
+    "updateSession",
+    "isProviderConnected",
+    "getProviderTokens",
+    "getAccessToken",
+    "refreshUserInfo",
+    "disconnectProvider",
+    "revokeToken",
+    "signOut"
+  ]
 }

@@ -1,102 +1,42 @@
 ---
-title: OAuth providers
-description: OAuth providers supported by Aura Auth to consume and add authentication to typescript apps
+title: OAuth Providers
+description: Explore built-in OAuth providers and configure them in TypeScript applications with Aura Auth.
 ---
 
-An OAuth provider is a third-party service that implements the `OAuth 2.0` authorization protocol. This integration enables applications to obtain limited access to user accounts on external services without requiring users to share credentials directly with the application.
+An OAuth provider is an external service that implements the OAuth 2.0 authorization framework. OAuth allows applications to obtain limited access to a user's resources without requiring the user to share their credentials directly with the application.
 
-Aura Auth delegates authentication and authorization to these trusted third parties. The provider manages user authentication, requests consent, and issues tokens, while Aura Auth provides the infrastructure to securely handle these flows within TypeScript applications.
+Aura Auth integrates with external providers to manage authorization flows and, where supported, retrieve user profile information. The provider handles user authentication and consent, while Aura Auth manages the corresponding authorization flow within the application.
 
-For technical details on the underlying protocol, refer to the [OAuth 2.0 Authorization Framework](/docs/concepts/oauth).
+For more information about the underlying protocol, see the [OAuth 2.0 Authorization Framework](/docs/concepts/oauth).
 
 ---
 
 ## Implementation Patterns
 
-Aura Auth offers multiple ways to initialize OAuth providers, ranging from zero-configuration setups to highly customized factory functions.
+Aura Auth supports three ways to configure built-in OAuth providers, depending on the application's customization and bundle-size requirements.
 
-### Configuration Methods
+### String Pattern
 
-Providers can be defined using three distinct patterns within the `createAuth` instance:
+The string pattern is the simplest way to enable a built-in provider. Pass the provider's identifier to the `oauth` array, and Aura Auth resolves the provider configuration using the corresponding environment variables.
 
-```ts lineNumbers
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
-import { bitbucket } from "@aura-stack/auth/oauth/bitbucket"
-import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 
 export const auth = createAuth({
-  oauth: [
-    // 1. String Pattern: Automatic environment variable resolution
-    "github",
-
-    // 2. Object Pattern: Access via a single built-in collection
-    builtInOAuthProviders.gitlab(),
-
-    // 3. Factory Pattern: Direct import for optimal tree-shaking
-    bitbucket(),
-  ],
+  oauth: ["github"],
 })
 ```
 
----
-
-### Supported Providers
-
-The following OAuth providers are currently supported by Aura Auth:
-
-<Cards>
-  <Card title="GitHub" href="/docs/oauth/github">
-    GitHub OAuth Identity Provider
-  </Card>
-  <Card title="Discord" href="/docs/oauth/discord">
-    Discord OAuth Identity Provider
-  </Card>
-  <Card title="Bitbucket" href="/docs/oauth/bitbucket">
-    Bitbucket OAuth Identity Provider
-  </Card>
-  <Card title="Figma" href="/docs/oauth/figma">
-    Figma OAuth Identity Provider
-  </Card>
-  <Card title="GitLab" href="/docs/oauth/gitlab">
-    GitLab OAuth Identity Provider
-  </Card>
-  <Card title="X" href="/docs/oauth/x">
-    X (Twitter) OAuth Identity Provider
-  </Card>
-  <Card title="Spotify" href="/docs/oauth/spotify">
-    Spotify OAuth Identity Provider
-  </Card>
-  <Card title="Strava" href="/docs/oauth/strava">
-    Strava OAuth Identity Provider
-  </Card>
-  <Card title="Mailchimp" href="/docs/oauth/mailchimp">
-    Mailchimp OAuth Identity Provider
-  </Card>
-  <Card title="Pinterest" href="/docs/oauth/pinterest">
-    Pinterest OAuth Identity Provider
-  </Card>
-  <Card title="Twitch" href="/docs/oauth/twitch">
-    Twitch OAuth Identity Provider
-  </Card>
-  <Card title="Notion" href="/docs/oauth/notion">
-    Notion OAuth Identity Provider
-  </Card>
-  <Card title="Dropbox" href="/docs/oauth/dropbox">
-    Dropbox OAuth Identity Provider
-  </Card>
-</Cards>
-
----
-
-## Advanced Configuration
-
-Built-in providers are implemented as lowercase factory functions. This architecture enables developers to override default settings while retaining automatic environment variable loading for sensitive credentials like Client IDs and Secrets.
+<Callout type="warning">
+  The string pattern does not support customizing individual provider options. To override defaults or configure additional
+  options, use the provider factory or modular import pattern instead.
+</Callout>
 
 ### Provider Factories
 
-The `builtInOAuthProviders` object provides a centralized collection for all supported services. This approach is recommended when dynamic provider resolution is required.
+The `builtInOAuthProviders` object provides a centralized collection of built-in provider factories. This pattern is useful when provider configurations need to be customized while keeping imports centralized.
 
-```ts title="auth.ts"
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 import { builtInOAuthProviders } from "@aura-stack/auth/oauth/index"
 
@@ -116,9 +56,9 @@ export const auth = createAuth({
 
 ### Modular Imports
 
-For production environments where bundle size is critical, importing providers directly from their respective entry points ensures optimal tree-shaking.
+Modular imports load a provider directly from its dedicated entry point. This approach can help bundlers eliminate unused provider implementations through tree-shaking, making it useful when bundle size is a concern.
 
-```ts title="auth.ts"
+```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
 import { github } from "@aura-stack/auth/oauth/github"
 
