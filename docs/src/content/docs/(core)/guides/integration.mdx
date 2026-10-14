@@ -1,211 +1,217 @@
 ---
 title: Integration Guide
-description: Learn how to integrate Aura Auth with any JavaScript library or framework
+description: Learn how to integrate Aura Auth with JavaScript frameworks and build custom integrations.
 ---
 
-Aura Auth is a **framework-agnostic and modular authentication system** designed for TypeScript applications. It is built on **Web Standards**—including the [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) and [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) interfaces—and implements the [OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749).
+Aura Auth is a **framework-agnostic and modular authentication system** designed for TypeScript applications. Its core is built on Web Standards, including the [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request) and [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) interfaces, and supports OAuth 2.0 and OpenID Connect (OIDC).
 
-Aura Auth can be integrated into any JavaScript runtime that supports server-side request handling.
-
-<Callout>
-  The integrating library or framework must support server or backend execution. Aura Auth communicates exclusively through `GET`
-  and `POST` HTTP handlers that must be mounted on a server.
-</Callout>
+Because Aura Auth uses standard HTTP requests and responses, it can be integrated with JavaScript runtimes and frameworks that support server-side request handling.
 
 For reference implementations, see [Aura Auth Apps](https://github.com/aura-stack-ts/auth/tree/master/apps).
 
----
+This guide explains the architecture of Aura Auth integrations and how to create a dedicated integration package for a framework or library.
 
-## Core Concepts
+## Architecture
 
-### Aura Auth Instance
+### Core Package
 
-The `createAuth` function is the entry function of the package which creates the Aura Auth instance configuration. It defines the behavior, options, and values to be supported by the Auth Instance. This includes the definitions of the [OAuth Providers](/docs/oauth) to be consumed, [Cookie Management](/docs/guides/cookie-management), and more configurable options. For more details, read the [createAuth API Reference](/docs/api-reference/core#createAuth).
+The `@aura-stack/auth` package provides the core `createAuth` function and authentication logic. It returns an `AuthInstance` with the following properties:
 
-```ts title="@/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
+- `handlers`: HTTP handlers for authentication endpoints.
+- `api`: Server-side API functions, including `signIn`, `signOut`, and `getSession`.
+- `jose`: JWT and cryptographic utilities.
+- `session`: Session management utilities.
 
-export const auth = createAuth({
-  oauth: [],
-})
-```
+The core package handles authentication independently of any specific framework. Integrations connect this functionality to a framework's request lifecycle, routing system, and context APIs.
 
-> It is recommended to place this configuration in a file named `auth.ts`
+### Integration Packages
 
-The Auth Instance exposes two main objects:
+Integration packages provide framework-specific adapters around the core authentication functionality. Depending on the framework, an integration may:
 
-- `handlers`: HTTP handlers required for the authentication flow
-- `jose`: cryptographic utilities used internally and by integrations
-- `api`: programmatic API for interact with the authentication flows.
+1. Wrap the core `createAuth` function with framework-specific configuration or utilities.
+2. Provide handler adapters, such as `toHandler`, to connect Aura Auth handlers to the framework's request lifecycle.
+3. Expose middleware or plugins, such as `withAuth`, to make session data available in the framework's context.
+4. Export framework-specific types while preserving the core API's type information.
 
-For all configuration options, see [createAuth API Reference](/docs/api-reference/core#createAuth)
+Not every integration requires all these utilities. The implementation should follow the framework's conventions and expose only the functionality that is useful for that framework.
 
-### HTTP Handlers
+### Generic Types
 
-Aura Auth exposes pre-built HTTP handlers for the OAuth and session lifecycle. These handlers must be mounted on the server router used by the integrating framework
-
-By default, the handlers are mounted under the `/auth` route on the backend server. However, this can be customized by setting the `basePath` option in the `createAuth` function.
-
-```ts title="@/auth.ts" lineNumbers
-import { createAuth } from "@aura-stack/auth"
-
-export const auth = createAuth({
-  oauth: [],
-  basePath: "/auth",
-})
-
-export const { handlers, jose, api } = auth
-```
-
-These handlers internally provide:
-
-| Route              | Description                                   |
-| ------------------ | --------------------------------------------- |
-| `/signIn/:oauth`   | Starts the OAuth flow (Authorization Request) |
-| `/callback/:oauth` | Completes the OAuth flow and issues a session |
-| `/session`         | Returns the current session                   |
-| `/signOut`         | invalidates the active session                |
-| `/csrfToken`       | Generates a CSRF token (for forms)            |
-
-<Callout type="warning">
-  Aura Auth provides the handlers, but mounting them correctly depends on the integrating framework.
-</Callout>
-
-### Server
-
-#### Mount HTTP Handlers
-
-The integration must provide support for the server or backend application. Specifically, it is required to mount the HTTP handlers (`handlers`) returned by the Aura Auth instance created via `createAuth`.
-
-These handlers expose the `GET`, `POST`, `PATCH` and `ALL` (implements the earlier HTTP methods) endpoints that implement the Aura Auth protocol and must be registered in a server framework or router capable of dispatching incoming HTTP requests. They handle all interactions between the client application and the Aura Auth authentication flows, including redirects, callbacks, and session-related operations.
-
-```ts title="@/server.ts" lineNumbers
-import { handlers } from "@/auth"
-
-export const authRequest = (request: Request) => {
-  return handlers.ALL(request)
-}
-```
-
-#### Sign In (Server) [#sign-in-server]
-
-Signing in is initiated by redirecting the user to the sign-in endpoint.
-
-```ts title="@/server.ts" lineNumbers
-import { api } from "@/auth"
-
-const signIn = await api.signIn("github", {
-  redirectTo: "/",
-})
-```
-
-#### Get Session (Server) [#get-session-server]
-
-To retrieve the active session on the server, request the `/session` endpoint. See [Get Session (Client)](#get-session-client)
-
-```ts title="@/auth/server.ts" lineNumbers
-import { api } from "@/auth"
-
-export const getSession = async () => {
-  const headers = getHeaders()
-  return await api.getSession({ headers })
-}
-```
-
-<Callout type="warning">
-  On the server side, headers and cookies must be accessed and manipulated explicitly using the built-in APIs provided by the
-  runtime or framework in use. Unlike client-side environments, request headers and cookies are not loaded automatically and must
-  be read directly from the incoming request.
-</Callout>
-
-#### Sign Out (Server) [#sign-out-server]
-
-```ts title="@/auth/server.ts" lineNumbers
-import { api } from "@/auth"
-
-export const signOut = () => {
-  const headers = getHeaders()
-  const response = await api.signOut({
-    headers,
-  })
-  setHeaders(response.headers)
-}
-```
-
-<Callout type="warning">
-  The request `body` and `application/json` content type are currently required due to a temporary limitation in
-  `@aura-stack/router`.
-</Callout>
-
----
-
-### Client
-
-Aura Auth provides a Client API that interacts with the endpoints exposed by the mounted HTTP handlers to drive the authentication flow. This includes retrieving the active session, initiating sign-in, signing out the current session, and obtaining the CSRF token required for protected operations.
-
-```ts title="@/lib/auth-client" lineNumbers
-import { createAuthClient } from "@aura-stack/auth/client"
-
-export const authClient = createAuthClient({
-  baseURL: "http://localhost:3000",
-})
-```
-
-<Callout>
-
-In the browser (client) environment, cookies and relevant headers are automatically included in incoming requests and responses, so they do not need to be explicitly set when using `fetch`.
-
-This behavior differs on the server side, where cookies and headers must be explicitly read from and written to the request and response objects to ensure correct authentication behavior.
-
-</Callout>
-
-#### Sign In (Client) [#sign-in-client]
-
-Redirect the user to the sign-in endpoint for the selected provider.
-
-**Client API**
+The core `createAuth` function accepts generic type parameters for the identity and sign-up schema:
 
 ```ts
-import { authClient } from "@/lib/auth-client"
-
-export const signIn = await authClient.signIn("github")
+createAuth<Identity, SignUpSchema>(
+  config: AuthConfig<Identity, SignUpSchema>,
+)
 ```
 
-**Form Action**
+- `Identity` extends `Identities` and defines the application's identity structure.
+- `SignUpSchema` extends `SchemaTypes` and defines the sign-up validation schema. Supported schema libraries depend on the core package's current type definitions.
 
-```html title="index.html" lineNumbers
-<form action="/auth/signIn/github">
-  <input type="hidden" name="redirecTo" value="/" />
-  <button>Sign in with GitHub</button>
-</form>
-```
+A dedicated integration should preserve these generic parameters when wrapping `createAuth` so applications retain type inference and type safety.
 
-**OR**
+## Creating a Dedicated Integration Package
 
-```html title="index.html" lineNumbers
-<a href="/auth/signIn/github">Sign in with GitHub</a>
-```
+For integrations that require framework-specific behavior or are intended for community distribution, use the existing integration packages as implementation references.
 
-This initiates the OAuth flow, handling the redirect to the selected provider and the subsequent callback to your server, or redirecting to the path defined in the `redirectTo` search parameter.
+<Steps>
+  <Step>
+    ## Scaffold the Integration
 
-For more details about the built-in OAuth providers, see [OAuth Providers](/docs/oauth).
+    Use the `create:integration` command to scaffold a package from the integration template:
 
-#### Get Session (Client) [#get-session-client]
+    ```bash
+    pnpm create:integration --name my-framework
+    ```
 
-```ts title="@/lib/auth-client.ts" lineNumbers
-import { authClient } from "@/lib/auth-client"
+    The scaffold command is intended to:
 
-export const session = await authClient.getSession()
-```
+    - Copy the integration template into `packages/my-framework`.
+    - Create the initial package structure.
+    - Configure TypeScript and build tooling.
 
-#### Sign Out (Client) [#sign-out-client]
+  </Step>
+  <Step>
+    ## Sync Core Modules
 
-```ts title="@/auth/client.ts" lineNumbers
-import { authClient } from "@/lib/auth-client"
+    From the new package directory, run the module synchronization script:
 
-export const signOut = await authClient.signOut()
-```
+    ```bash
+    cd packages/my-framework
+    pnpm sync:modules
+    ```
 
----
+    The script synchronizes the shared modules required by the integration. These may include:
 
-## Resources
+    - `oauth`: OAuth provider implementations.
+    - `identity`: Identity schema types and utilities.
+    - `crypto`: Cryptographic utilities.
+    - `shared`: Shared utilities.
+    - `cookies`: Cookie management utilities.
+
+    If the script manages package exports, verify that the required modules are exported and that the resulting package builds correctly.
+
+  </Step>
+  <Step>
+    ## Implement a Framework-Specific `createAuth`
+
+    Create a framework-specific `createAuth` wrapper that delegates authentication configuration and initialization to the core implementation.
+
+    The wrapper should:
+
+    1. Preserve the core generic parameters, including `Identity` and `SignUpSchema`.
+    2. Pass the authentication configuration to the core `createAuth` function.
+    3. Add framework-specific utilities where necessary.
+    4. Return an instance that preserves the core `AuthInstance` API and exposes the integration's additional utilities.
+
+    The implementation will vary by framework. Keep the wrapper thin and avoid duplicating authentication logic that already belongs to the core package.
+
+  </Step>
+  <Step>
+    ## Define Instance Types
+
+    Define the return type of the framework-specific `createAuth` function. It should preserve the core instance's types and describe any additional framework-specific properties, such as:
+
+    - Handler adapter signatures.
+    - Middleware or plugin signatures.
+    - Framework-specific request or context types.
+
+    Export the integration's public types from an appropriate entry point. Re-export core types when they are part of the intended public API.
+
+  </Step>
+  <Step>
+    ## Implement a Handler Adapter
+
+    Implement a handler adapter that connects the framework's request lifecycle to Aura Auth's Web Standard `Request` and `Response` interfaces.
+
+    The adapter should:
+
+    1. Accept the framework's request or context object.
+    2. Obtain or construct a standard `Request`.
+    3. Pass the request to the appropriate Aura Auth handler.
+    4. Return the resulting `Response` in the format expected by the framework.
+
+    Prefer passing through native `Request` and `Response` objects when the framework supports them. If conversion is required, preserve relevant request data, headers, cookies, and response semantics.
+
+  </Step>
+  <Step>
+    ## Implement Middleware or a Plugin
+
+    If the framework supports middleware or plugins, consider providing a utility that exposes session information to route handlers or other parts of the application.
+
+    A typical implementation should:
+
+    1. Accept an initialized auth instance.
+    2. Retrieve session information through `api.getSession`.
+    3. Attach the session to the framework's request context using its established middleware or plugin conventions.
+    4. Define explicit behavior for missing sessions and errors.
+
+    Treat an unauthenticated request separately from an unexpected error where the framework's API permits it. Set the session to `null` only when that matches the intended contract, and avoid silently hiding failures that should be reported or logged.
+
+  </Step>
+  <Step>
+    ## Export the Public API
+
+    Create the package entry point and export the supported integration API. For example:
+
+    ```ts
+    // packages/my-framework/src/index.ts
+    export { createAuth } from "./createAuth"
+    export type {
+      User,
+      Session,
+      AuthConfig,
+      AuthInstance,
+    } from "@aura-stack/auth/types"
+    ```
+
+    Adjust the imports and exported types to match the actual package structure and the public types available in the core package. Prefer stable public entry points over internal module paths.
+
+  </Step>
+  <Step>
+    ## Add an Example Application
+
+    Add an example application under `apps/` to demonstrate installation, configuration, and use of the integration.
+
+    For example:
+
+    ```text
+    apps/
+    └── my-framework/
+        ├── src/
+        │   ├── lib/
+        │   │   ├── handler.ts
+        │   │   └── with-auth.ts
+        │   └── index.ts
+        ├── package.json
+        └── tsconfig.json
+    ```
+
+    Adapt the structure to the framework's conventions. The example should demonstrate how to configure Aura Auth, register its handlers, and access session information where applicable.
+
+  </Step>
+</Steps>
+
+## Return Object Requirements
+
+A framework-specific `createAuth` wrapper should preserve the core instance's public API.
+
+At a minimum, this means retaining the core properties required by the integration, such as:
+
+- `handlers`: Authentication HTTP handlers.
+- `api`: Server-side authentication and session functions.
+- `jose`: JWT and cryptographic utilities, if exposed by the core instance.
+- `session`: Session management utilities, if exposed by the core instance.
+
+The exact properties should match the `AuthInstance` type exported by the version of `@aura-stack/auth` being integrated. Framework-specific utilities should extend the core API rather than replace or unintentionally narrow it.
+
+## Best Practices
+
+1. **Preserve generic types.** Carry `Identity` and `SignUpSchema` through the wrapper and its return type to maintain type inference.
+2. **Keep the integration thin.** Delegate authentication logic to the core package and focus on framework-specific request handling and context integration.
+3. **Re-export public types deliberately.** Expose the core types consumers need without depending on unstable internal modules.
+4. **Document framework-specific behavior.** Use JSDoc and integration documentation to explain added utilities, expected inputs, and error handling.
+5. **Provide a working example.** Include an example application that demonstrates the integration's main use cases.
+6. **Test the adapter and middleware.** Cover request and response conversion, session retrieval, unauthenticated requests, and error handling.
+7. **Keep synchronized modules up to date.** Run `pnpm sync:modules` after core changes when the integration relies on synchronized modules, then verify the generated code, exports, and build.
+8. **Verify runtime compatibility.** Test against the runtimes and framework versions the integration claims to support.

@@ -3,7 +3,7 @@ title: createAuth
 description: The `createAuth` function initializes the Aura Auth instance with configuration options for OAuth providers, session management, cookie handling, and security settings. It returns an object containing the auth handlers, JOSE utilities, and API methods.
 ---
 
-### Signature
+## Signature
 
 ```ts lineNumbers
 function createAuth<Identity extends Identities = EditableShape<UserShape>, SignUpSchema extends SchemaTypes = ZodObject<any>>(
@@ -11,15 +11,7 @@ function createAuth<Identity extends Identities = EditableShape<UserShape>, Sign
 ): AuthInstance<FromShapeToObject<Identity>, SignUpSchema>
 ```
 
-### Returns
-
-`createAuth()` returns an `AuthInstance` with three top-level properties. Server-side functions are **not** returned directly on the instance — they are namespaced under `api`.
-
-| Property   | Description                                                                                                                                                    |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api`      | Server-side functions: `signIn`, `signInCredentials`, `signUp`, `signOut`, `getSession`, `updateSession`. See [API Functions](/docs/api-reference/server/api). |
-| `handlers` | HTTP handlers (`GET`, `POST`, `PATCH`, `ALL`) to mount in your router or framework adapter. See [Handlers](/docs/api-reference/server/handlers).               |
-| `jose`     | JOSE utilities for signing, encrypting, and verifying tokens outside the request/response cycle. See [JOSE](/docs/api-reference/server/jose).                  |
+## Options
 
 ### `oauth`
 
@@ -360,3 +352,13 @@ export const auth = createAuth({
   The logger can be configured using `LEVEL` and `LOG_LEVEL` environment variables, which set the log level for the built-in
   logger. Custom loggers can implement their own configuration mechanisms as needed.
 </Callout>
+
+### Returns
+
+`createAuth()` returns an `AuthInstance` with three top-level properties. Server-side functions are **not** returned directly on the instance — they are namespaced under `api`.
+
+| Property   | Description                                                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api`      | Server-side functions: `signIn`, `signInCredentials`, `signUp`, `signOut`, `getSession`, `updateSession`. See [API Functions](/docs/api-reference/server/api). |
+| `handlers` | HTTP handlers (`GET`, `POST`, `PATCH`, `ALL`) to mount in your router or framework adapter. See [Handlers](/docs/api-reference/server/handlers).               |
+| `jose`     | JOSE utilities for signing, encrypting, and verifying tokens outside the request/response cycle. See [JOSE](/docs/api-reference/server/jose).                  |

@@ -65,7 +65,7 @@ Create a catch-all route in `app/api/auth/[...aura]/route.ts` to handle all auth
 ```ts title="src/app/api/auth/[...aura]/route.ts" lineNumbers
 import { handlers } from "@/lib/auth"
 
-export const { GET, POST, PATCH } = handlers
+export const { GET, POST, PATCH, DELETE } = handlers
 ```
 
 </Step>
@@ -230,14 +230,3 @@ Client-side sign-out is a better fit for navigation menus, profile popovers, and
 - **Mismatched Paths**: Ensure the `basePath` in your auth configuration matches the path where your route handlers are mounted. For example, if your handlers are in `app/api/auth/[...aura]/route.ts`, then `basePath` should be `/api/auth`.
 - **Incorrect Headers**: When calling `api.getSession` or `api.signOut` from server components or actions, always pass the current request headers using Next.js's `headers()` function. This allows Aura Auth to read cookies and manage sessions correctly.
 - **Don't update cookies in signOut**: When signing out is called, Aura Auth will return a response with `Set-Cookie` headers and it's required to set the cookies using `cookies` function.
-
----
-
-## Resources
-
-- [Next.js App Router Documentation](https://nextjs.org/docs/app)
-- [Aura Auth Documentation](/docs/quick-start)
-- [Next.js Integration App](https://github.com/aura-stack-ts/auth/tree/master/apps/nextjs/app-router)
-- [Integration Guide](/docs/guides/integration)
-- [Configuration Reference](/docs/api-reference/options)
-- [TypeScript Guide](/docs/concepts/typescript)

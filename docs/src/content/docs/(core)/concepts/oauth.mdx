@@ -15,13 +15,13 @@ Before diving into the technical details, it's important to note how **Aura Auth
 
 ---
 
-## OAuth 2.0: The Delegated Authorization Framework [#oauth-authorization-server]
+## OAuth 2.0 Authorization Framework [#oauth-authorization-server]
 
 The **Internet Engineering Task Force (IETF)** published the OAuth 2.0 Authorization Framework in October 2012, documented under [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749).
 
 The **OAuth 2.0 Authorization Framework** is an **authorization** protocol that allows client applications to access a user's protected resources without the user having to share their credentials. It is based on the concept of **delegated authority**, where the user grants limited permission to a client application via a digital credential (**Access Token**).
 
-### The Importance of OAuth 2.0
+### The Importance of OAuth 2.0 [!toc]
 
 OAuth 2.0 is a fundamental solution implemented by major service providers like `Google`, `GitHub`, `Facebook`, and `Spotify`, among many others. Its importance lies in a key security principle:
 
@@ -31,7 +31,7 @@ Although the OAuth concept is commonly associated with web applications, the pro
 
 ---
 
-## Core Principles: Authorization vs. Authentication [#core-principles]
+## Core Principles [#core-principles]
 
 It is vital for security to understand OAuth 2.0's primary role:
 
@@ -51,7 +51,7 @@ OAuth defines four essential roles to facilitate the delegated authorization pro
 
 ---
 
-## Authorization Grant: The Authorization Code Flow [#authorization-grant]
+## Authorization Grant [#authorization-grant]
 
 The **Authorization Code Flow** is the most recommended and secure authorization mechanism, especially for clients that can maintain a secret.
 
@@ -176,12 +176,6 @@ pragma: no-cache
 
 Once the OAuth workflow is completed, the `access_token` is used to authenticate requests to the Resource Server (API) to retrieve protected data.
 
-<Callout>
-  **Security Note:** For enhanced security, Aura Auth does not store the raw `access_token` in the browser. Instead, the token is
-  exchanged during the initial server-side interaction with the API. The retrieved user data is then encapsulated into a secure,
-  encrypted, and signed JWT cookie called `sessionToken` (by default) to manage the local session.
-</Callout>
-
 **Request using cURL**
 
 To access the protected user profile endpoint, the `access_token` must be sent in the `Authorization` header using the `Bearer` schema.
@@ -194,8 +188,3 @@ curl -H "Authorization: Bearer token_123" \
 </Step>
 
 </Steps>
-
-## Resources
-
-- [The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749).
-- [Proof Key for Code Exchange by OAuth Public Clients](https://datatracker.ietf.org/doc/html/rfc7636).
