@@ -12,10 +12,15 @@ export const getBaseURLConfig = <Identity extends Identities, SignUpSchema exten
     /**
      * @todo remove the check for baseURL !== "/". It's added by vitest
      */
-    if (baseURL && baseURL !== "/" && !URL.canParse(baseURL)) {
+    if (!baseURL || baseURL === "/") return undefined
+    if (!URL.canParse(baseURL)) {
         throw new AuraAuthError({ code: "INVALID_BASE_URL_CONFIG" })
     }
-    return baseURL && baseURL !== "/" ? new URL(baseURL).origin : undefined
+    const url = new URL(baseURL)
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw new AuraAuthError({ code: "INVALID_BASE_URL_CONFIG" })
+    }
+    return url.origin
 }
 
 export const getBaseURL = async ({
