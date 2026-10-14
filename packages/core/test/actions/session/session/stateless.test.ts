@@ -1,6 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { createPKCE } from "@/shared/crypto.ts"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { VERSION } from "@/version.ts"
+
 import { GET, jose, sessionPayload } from "@test/setup/presets.ts"
 import { setCookie, getSetCookie, createCookieStore, getCookie } from "@/shared/http/cookie.ts"
 
@@ -200,7 +201,7 @@ describe("sessionAction", () => {
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_123",
             },

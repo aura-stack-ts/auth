@@ -5,8 +5,6 @@ import { AuraAuthError } from "@/errors/aura-error.ts"
 import type { OAuthTokenPayload } from "@/@types/index.ts"
 import type { OAuthAccessTokenResponseType } from "@/@types/internal.ts"
 
-export const AURA_AUTH_VERSION = "0.9.0"
-
 export const equals = (a: string | number | undefined | null, b: string | number | undefined | null) => {
     if (a === null || b === null || a === undefined || b === undefined) return false
     return a === b

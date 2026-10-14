@@ -10,7 +10,8 @@ import {
     userEntity,
 } from "@test/setup/presets.ts"
 import { createCSRF, createHash } from "@/shared/crypto.ts"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { VERSION } from "@/version.ts"
+
 import { createSchemaRegistry } from "@/validator/registry.ts"
 
 describe("refreshUserInfo action", () => {
@@ -299,7 +300,7 @@ describe("refreshUserInfo action", () => {
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: `Bearer ${oauthTokens.accessToken}`,
             },
