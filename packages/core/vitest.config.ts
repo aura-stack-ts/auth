@@ -2,9 +2,12 @@ import path from "path"
 import { defineConfig } from "vitest/config"
 import { getRandomBytes } from "@aura-stack/jose/crypto"
 import { base64url } from "@aura-stack/jose/jose"
+import { readFileSync } from "fs"
 
 const SECRET_KEY = getRandomBytes(44)
 const SALT_KEY = getRandomBytes(44)
+
+const version = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf-8")).version
 
 /**
  * Vitest configuration for the Aura Auth core package.
@@ -15,6 +18,9 @@ const SALT_KEY = getRandomBytes(44)
  * pnpm test --project rate-limiter
  */
 export default defineConfig({
+    define: {
+        __PACKAGE_VERSION__: JSON.stringify(version),
+    },
     test: {
         include: ["test/**/*.test.ts"],
         unstubEnvs: true,

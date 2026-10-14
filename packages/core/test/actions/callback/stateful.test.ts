@@ -1,5 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { VERSION } from "@/version.ts"
+
 import {
     oauthCustomService,
     sessionEntityWithUser,
@@ -391,7 +392,7 @@ describe("callbackAction (stateful)", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_123",
             },
@@ -549,7 +550,7 @@ describe("callbackAction (stateful)", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_123",
             },

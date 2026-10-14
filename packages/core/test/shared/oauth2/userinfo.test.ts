@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { oauthCustomService } from "@test/setup/presets.ts"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { VERSION } from "@/version.ts"
 import type { OAuthProviderConfig, OAuthProviderCredentials } from "@/@types/index.ts"
 import { getUserInfo } from "@/shared/oauth2/get-user-info.ts"
 
@@ -31,7 +31,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
@@ -79,7 +79,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
@@ -130,7 +130,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
@@ -163,7 +163,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer invalid_access_token",
             },
@@ -190,7 +190,7 @@ describe("getUserInfo", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_token",
             },
@@ -214,7 +214,7 @@ describe("getUserInfo", () => {
                     const response = await fetch(ctx.userInfoURL, {
                         method: "GET",
                         headers: {
-                            "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                            "User-Agent": `Aura Auth/${VERSION}`,
                         },
                         mode: "no-cors",
                     })
@@ -236,7 +236,7 @@ describe("getUserInfo", () => {
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
             },
             mode: "no-cors",
         })

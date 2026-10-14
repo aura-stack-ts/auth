@@ -1,7 +1,8 @@
 import { fetchAsync } from "@/shared/http/fetch-async.ts"
 import { isOIDCProvider } from "@/shared/oidc/resolve-provider.ts"
 import { AuraAuthError, getErrorName, isAuraAuthError } from "@/errors/aura-error.ts"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { VERSION } from "@/version.ts"
+
 import { assertContentTypeResponse, isCustomUserInfoFunction } from "@/shared/assert.ts"
 import { OAuthErrorResponse, OIDCUserInfoSchema } from "@/shared/schemas/general.ts"
 import type { AccessTokenContext, User } from "@/@types/index.ts"
@@ -51,7 +52,7 @@ const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: s
         const response = await fetchAsync(userinfoURL, {
             method,
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: `Bearer ${accessToken}`,
                 ...extraHeaders,

@@ -5,7 +5,8 @@ import { clearJWKSCache } from "@/shared/oidc/jwks.ts"
 import { SignJWT, exportJWK, importPKCS8, importSPKI } from "@aura-stack/jose/jose"
 import { createPKCE } from "@/shared/crypto.ts"
 import { setCookie, getSetCookie } from "@/shared/http/cookie.ts"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { VERSION } from "@/version.ts"
+
 import { createAuth } from "@/createAuth.ts"
 
 describe("callbackAction", () => {
@@ -176,7 +177,7 @@ describe("callbackAction", () => {
             expect.objectContaining({
                 method: "GET",
                 headers: {
-                    "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                    "User-Agent": `Aura Auth/${VERSION}`,
                     Accept: "application/json",
                     Authorization: "Bearer access_123",
                 },
@@ -294,7 +295,7 @@ describe("callbackAction", () => {
             expect.objectContaining({
                 method: "GET",
                 headers: {
-                    "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                    "User-Agent": `Aura Auth/${VERSION}`,
                     Accept: "application/json",
                     Authorization: "Bearer access_123",
                 },
@@ -402,7 +403,7 @@ describe("callbackAction", () => {
             expect.objectContaining({
                 method: "GET",
                 headers: {
-                    "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                    "User-Agent": `Aura Auth/${VERSION}`,
                     Accept: "application/json",
                     Authorization: "Bearer access_123",
                 },
