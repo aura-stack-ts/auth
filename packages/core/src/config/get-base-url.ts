@@ -8,7 +8,19 @@ import type { Identities, SchemaTypes } from "@/identity/index.ts"
 export const getBaseURLConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config: AuthConfig<Identity, SignUpSchema> | undefined
 ) => {
-    return config?.baseURL
+    const baseURL = getEnv("BASE_URL") ?? config?.baseURL
+    /**
+     * @todo remove the check for baseURL !== "/". It's added by vitest
+     */
+    if (!baseURL || baseURL === "/") return undefined
+    if (!URL.canParse(baseURL)) {
+        throw new AuraAuthError({ code: "INVALID_BASE_URL_CONFIG" })
+    }
+    const url = new URL(baseURL)
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw new AuraAuthError({ code: "INVALID_BASE_URL_CONFIG" })
+    }
+    return url.origin
 }
 
 export const getBaseURL = async ({
@@ -37,9 +49,4 @@ export const getBaseURL = async ({
     } catch (cause) {
         throw new AuraAuthError({ code: "INVALID_AUTH_CONFIGURATION", cause })
     }
-}
-
-export const getBaseURLFromRequest = (request: Request) => {
-    const url = new URL(request.url)
-    return `${url.origin}${url.pathname}`
 }

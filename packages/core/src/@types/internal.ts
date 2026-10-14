@@ -3,7 +3,7 @@
  * types to the public API. This manuall solution was proposed because the current version
  * of tsdown does not support stripping internal types.
  */
-import type { InferSchema, Prettify } from "@aura-stack/router"
+import type { InferSchema, Prettify, RoutePattern } from "@aura-stack/router"
 import type { ZodObject, infer as Infer } from "zod"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { identitySchema } from "@/identity/zod.ts"
@@ -80,7 +80,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     jose: JoseInstance<DefaultUser>
     secret?: JWTKey
     baseURL?: string
-    basePath: string
+    basePath: RoutePattern
     trustedProxyHeaders: boolean | TrustedProxyHeadersSource[]
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger

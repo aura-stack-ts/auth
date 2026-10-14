@@ -822,6 +822,22 @@ export const ERROR_CATALOG = {
         userMessage:
             "Internal library configuration error. The custom trusted proxy headers configuration allows unsafe URL construction.",
     },
+    INVALID_BASE_PATH_CONFIG: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The 'basePath' configuration value must be a valid string that starts with a leading slash ('/'). The provided value does not meet this requirement.",
+        userMessage: "Internal library configuration error. The basePath must start with a leading slash ('/').",
+    },
+    INVALID_BASE_URL_CONFIG: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The 'baseURL' configuration value must be a valid URL string. The provided value does not meet this requirement.",
+        userMessage: "Internal library configuration error. The baseURL must be a valid URL string.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

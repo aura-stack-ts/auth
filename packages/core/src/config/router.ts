@@ -32,7 +32,7 @@ const createInternalConfig = <
 ): RouterConfig => {
     const context = createContext<Identity, SignUpSchema>(config)
     return {
-        basePath: config?.basePath ?? "/auth",
+        basePath: context.basePath,
         context: context as unknown as RouterConfig["context"],
         hooks: {
             onRequest: onRequestHook,
