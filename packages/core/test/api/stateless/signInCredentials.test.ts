@@ -1,8 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { getSetCookie } from "@/shared/http/cookie.ts"
-import { api, jose } from "@test/setup/presets.ts"
+import { api, jose } from "@test/setup/auth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
 
 describe("signInCredentials API", async () => {
     const csrfToken = await createCSRF(jose)

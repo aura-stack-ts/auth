@@ -1,6 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
-import { POST, jose, sessionPayload } from "@test/setup/presets.ts"
+import { POST, jose } from "@test/setup/auth.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
 
 describe("signOut action", async () => {
     const csrf = await createCSRF(jose)

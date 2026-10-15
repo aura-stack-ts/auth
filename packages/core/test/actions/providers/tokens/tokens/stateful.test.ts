@@ -1,10 +1,12 @@
 import { describe, test, expect, vi } from "vitest"
-import { accountEntity, authInstance, jose, oauthCustomService, sessionEntityWithUser } from "@test/setup/presets.ts"
 import { createAuth } from "@/createAuth.ts"
+import { authInstance, jose } from "@test/setup/auth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
-import type { OAuthProviderConfig } from "@/@types/oauth.ts"
+import { oauthCustomService } from "@test/setup/presets.ts"
 import { createCSRF, createHash } from "@/shared/crypto.ts"
+import { accountEntity, sessionEntityWithUser } from "@test/setup/entities.ts"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
+import type { OAuthProviderConfig } from "@/@types/oauth.ts"
 
 describe("tokensAction (Stateful)", async () => {
     test("should return 422 if the provider is not supported", async () => {

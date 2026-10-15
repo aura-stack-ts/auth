@@ -4,6 +4,7 @@ import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
 import { getBaseURLFromProxyHeaders } from "@/shared/utils/proxy-headers-source.ts"
 import { createRedirectTo, createRedirectURI, createAuthorizationURL } from "@/shared/oauth2/authorization.ts"
 import type { GlobalContext } from "@aura-stack/router/types"
+import type { RouterGlobalContext } from "@/@types/internal.ts"
 import type { OAuthProviderCredentials, TrustedProxyHeadersSource } from "@/@types/index.ts"
 
 beforeEach(() => {
@@ -76,7 +77,7 @@ describe("createRedirectURI", () => {
                 const redirectURI = await createRedirectURI(request, oauth, {
                     basePath: "/auth",
                     trustedProxyHeaders,
-                } as GlobalContext)
+                } as any as GlobalContext)
                 expect(redirectURI).toBe(expected)
             })
         }
@@ -103,7 +104,7 @@ describe("createRedirectURI", () => {
                     createRedirectURI(request, oauth, {
                         basePath: "/auth",
                         trustedProxyHeaders,
-                    } as GlobalContext)
+                    } as any as RouterGlobalContext)
                 ).rejects.toThrow(
                     "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules."
                 )
