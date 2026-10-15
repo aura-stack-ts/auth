@@ -1,9 +1,10 @@
 import { describe, test, expect, vi } from "vitest"
 import { z } from "zod/v4"
+import { authInstance, jose } from "@test/setup/auth.ts"
 import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
-import { authInstance, jose, sessionEntityWithUser, userEntity } from "@test/setup/presets.ts"
+import { sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {

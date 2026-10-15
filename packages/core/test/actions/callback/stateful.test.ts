@@ -1,15 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
 import { VERSION } from "@/version.ts"
-
-import {
-    oauthCustomService,
-    sessionEntityWithUser,
-    userEntity,
-    authInstance,
-    deviceEntity,
-    oauthTransactionEntity,
-    accountEntity,
-} from "@test/setup/presets.ts"
+import { authInstance } from "@test/setup/auth.ts"
+import { oauthCustomService } from "@test/setup/presets.ts"
+import { sessionEntityWithUser, userEntity, deviceEntity, oauthTransactionEntity, accountEntity } from "@test/setup/entities.ts"
 
 describe("callbackAction (stateful)", () => {
     test("invalid endpoint", async () => {

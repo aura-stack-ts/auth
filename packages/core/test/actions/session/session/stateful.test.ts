@@ -1,7 +1,9 @@
 import { describe, test, expect, vi } from "vitest"
-import { authInstance, jose, sessionEntityWithUser, sessionPayload, userEntity } from "@test/setup/presets.ts"
-import { createSchemaRegistry } from "@/validator/registry.ts"
 import { createHash } from "@/shared/crypto.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
+import { authInstance, jose } from "@test/setup/auth.ts"
+import { createSchemaRegistry } from "@/validator/registry.ts"
+import { sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("sessionAction", () => {
     const { encodeJWT } = jose

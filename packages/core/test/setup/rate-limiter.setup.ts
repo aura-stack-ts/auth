@@ -5,6 +5,7 @@ afterEach(() => {
     vi.unstubAllEnvs()
     vi.restoreAllMocks()
     vi.unstubAllGlobals()
+    vi.useRealTimers()
 })
 
 vi.mock("@aura-stack/rate-limiter", async () => {

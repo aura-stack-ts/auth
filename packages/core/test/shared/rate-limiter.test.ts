@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest"
-import { jose, PATCH, POST, sessionPayload } from "@test/setup/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
 import { equals } from "@/shared/utils.ts"
+import { createCSRF } from "@/shared/crypto.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
+import { jose, PATCH, POST } from "@test/setup/auth.ts"
 
 describe("Rate Limiter", async () => {
     const csrfToken = await createCSRF(jose)

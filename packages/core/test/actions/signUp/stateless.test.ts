@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { z } from "zod/v4"
-import { jose, POST } from "@test/setup/presets.ts"
+import { jose, POST } from "@test/setup/auth.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { getSetCookie } from "@/shared/http/cookie.ts"

@@ -1,5 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
-import { authInstance, openIDMetadata } from "@test/setup/presets.ts"
+import { authInstance } from "@test/setup/auth.ts"
+import { openIDMetadata } from "@test/setup/presets.ts"
 
 describe("signIn API (stateful)", () => {
     test("throws error when provider is missing", async () => {

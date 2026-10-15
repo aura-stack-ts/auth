@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
-import { validateIDToken } from "@/shared/oidc/id-token.ts"
 import { clearJWKSCache } from "@/shared/oidc/jwks.ts"
-import { RS256PEMFormat } from "@test/setup/presets.ts"
+import { RS256PEMFormat } from "@test/fixtures/pem.ts"
+import { validateIDToken } from "@/shared/oidc/id-token.ts"
 import { SignJWT, exportJWK, importPKCS8, importSPKI } from "@aura-stack/jose/jose"
 
 const ISSUER = "https://id.example.com"

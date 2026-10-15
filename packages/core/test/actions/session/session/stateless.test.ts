@@ -1,8 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
-import { createPKCE } from "@/shared/crypto.ts"
 import { VERSION } from "@/version.ts"
-
-import { GET, jose, sessionPayload } from "@test/setup/presets.ts"
+import { createPKCE } from "@/shared/crypto.ts"
+import { GET, jose } from "@test/setup/auth.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
 import { setCookie, getSetCookie, createCookieStore, getCookie } from "@/shared/http/cookie.ts"
 
 describe("sessionAction", () => {

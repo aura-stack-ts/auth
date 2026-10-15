@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest"
-import { fetchJWKS, clearJWKSCache } from "@/shared/oidc/jwks.ts"
-import { RS256PEMFormat } from "@test/setup/presets.ts"
+import { RS256PEMFormat } from "@test/fixtures/pem.ts"
 import { exportJWK, importSPKI } from "@aura-stack/jose/jose"
+import { fetchJWKS, clearJWKSCache } from "@/shared/oidc/jwks.ts"
 
 describe("fetchJWKS", () => {
     beforeEach(() => {

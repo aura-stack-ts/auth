@@ -1,7 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-import { jose, oauthCustomService, oauthTokens, POST, sessionPayload } from "@test/setup/presets.ts"
+import { POST, jose } from "@test/setup/auth.ts"
+import { oauthCustomService, oauthTokens, sessionPayload } from "@test/setup/presets.ts"
 
 describe("Revoke Action", () => {
     test("throws error when provider is not configured", async () => {
