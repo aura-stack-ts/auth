@@ -29,7 +29,7 @@ export default defineConfig({
     test: {
         include: ["test/**/*.test.ts"],
         unstubEnvs: true,
-        isolate: false,
+        isolate: true,
         pool: "threads",
         env: {
             AURA_AUTH_SALT: base64url.encode(SALT_KEY),
