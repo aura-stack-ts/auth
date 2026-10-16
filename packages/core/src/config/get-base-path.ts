@@ -6,7 +6,7 @@ import type { Identities, SchemaTypes } from "@/identity/index.ts"
 export const getBasePathConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config: AuthConfig<Identity, SignUpSchema> | undefined
 ) => {
-    const basePath = (getEnv("BASE_PATH") ?? config?.basePath ?? "/auth")?.replace(/\/\/+/g, "/")
+    const basePath = (getEnv("BASE_PATH") || config?.basePath || "/auth")?.replace(/\/\/+/g, "/")
     if (!basePath.startsWith("/") || basePath.endsWith("/")) {
         throw new AuraAuthError({ code: "INVALID_BASE_PATH_CONFIG" })
     }
