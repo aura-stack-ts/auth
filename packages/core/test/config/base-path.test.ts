@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { getBasePathConfig } from "@/config/get-base-path.ts"
 import type { RoutePattern } from "@aura-stack/router"
 
@@ -8,13 +8,13 @@ describe("add custom basePath config", () => {
             {
                 description: "basePath without trailing slash",
                 basePath: "/api/v1/auth",
-                expectedBasePath: "/api/v1/auth",
+                expected: "/api/v1/auth",
             },
         ]
 
-        for (const { description, basePath, expectedBasePath } of testCases) {
+        for (const { description, basePath, expected } of testCases) {
             test(description, () => {
-                expect(getBasePathConfig({ oauth: [], basePath: basePath as RoutePattern })).toBe(expectedBasePath)
+                expect(getBasePathConfig({ oauth: [], basePath: basePath as RoutePattern })).toBe(expected)
             })
         }
     })
@@ -54,6 +54,33 @@ describe("add custom basePath config", () => {
                         code: "INVALID_BASE_PATH_CONFIG",
                     })
                 )
+            })
+        }
+    })
+
+    describe("define basePath config with environment variable", () => {
+        const testCases = [
+            {
+                description: "set basePath from BASE_PATH environment variable",
+                basePath: "/api/v1/auth",
+                expected: "/api/v1/auth",
+            },
+            {
+                description: "set basePath from BASE_PATH environment variable with undefined value",
+                basePath: undefined,
+                expected: "/auth",
+            },
+            {
+                description: "set basePath from BASE_PATH environment variable with empty string value",
+                basePath: "",
+                expected: "/auth",
+            },
+        ]
+
+        for (const { description, basePath, expected } of testCases) {
+            test(description, () => {
+                vi.stubEnv("BASE_PATH", basePath)
+                expect(getBasePathConfig({ oauth: [] })).toBe(expected)
             })
         }
     })
