@@ -101,22 +101,22 @@ Run commands from the repository root unless a package-level command is explicit
 
 ### Root Commands
 
-| Command                    | Description                                 |
-| -------------------------- | ------------------------------------------- |
-| `pnpm install`             | Install workspace dependencies.             |
-| `pnpm build`               | Build packages and applications.            |
-| `pnpm build:packages`      | Build packages only.                        |
-| `pnpm dev`                 | Start the configured development servers.   |
-| `pnpm dev:core`            | Run the core package in watch mode.         |
-| `pnpm dev:docs`            | Start the documentation development server. |
-| `pnpm test`                | Run package tests.                          |
-| `pnpm test:coverage`       | Run tests with coverage.                    |
-| `pnpm type-check`          | Run TypeScript checks.                      |
-| `pnpm type-check:packages` | Type-check packages only.                   |
-| `pnpm lint`                | Run lint checks.                            |
-| `pnpm lint:fix`            | Run lint checks and apply supported fixes.  |
-| `pnpm format`              | Format supported files.                     |
-| `pnpm format:check`        | Check formatting without applying changes.  |
+| Command                                      | Description                                   |
+| -------------------------------------------- | --------------------------------------------- |
+| `pnpm install`                               | Install workspace dependencies.               |
+| `pnpm build`                                 | Build packages and applications.              |
+| `pnpm build:packages`                        | Build packages only.                          |
+| `pnpm dev`                                   | Start the configured development servers.     |
+| `pnpm dev:core`                              | Run the core package in watch mode.           |
+| `pnpm dev:docs`                              | Start the documentation development server.   |
+| `pnpm test`                                  | Run package tests.                            |
+| `pnpm type-check`                            | Run TypeScript checks.                        |
+| `pnpm type-check:packages`                   | Type-check packages only.                     |
+| `pnpm lint`                                  | Run lint checks.                              |
+| `pnpm lint:fix`                              | Run lint checks and apply supported fixes.    |
+| `pnpm format`                                | Format supported files.                       |
+| `pnpm format:check`                          | Check formatting without applying changes.    |
+| `pnpm create:integration --name <framework>` | Scaffold a new framework integration package. |
 
 ### Package-Level Commands
 
