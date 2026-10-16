@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added support for configuring `basePath` through the `BASE_PATH` environment variable, in addition to passing it directly to `createAuth()`. [#283](https://github.com/aura-stack-ts/auth/pull/283)
+
 - Added experimental support for configuring trusted proxy header sources used to construct request URLs. Header sources can provide the complete URL through `{ url: "header" }` or specify separate protocol and host headers through `{ protocol: "header-proto", host: "header-host" }`. The configuration also includes built-in sources such as `forwarded`, `forwarded.proto`, and `forwarded.host`. [#275](https://github.com/aura-stack-ts/auth/pull/275)
 
 ### Changed

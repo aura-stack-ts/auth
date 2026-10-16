@@ -9,7 +9,7 @@
     "build": "tsdown",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "test": "vitest --run --exclude test/shared/rate-limiter.test.ts --silent",
+    "test": "vitest --run --exclude test/shared/rate-limiter.test.ts",
     "test:rate-limiter": "vitest --run --sequence.setupFiles test/setup/rate-limiter.setup.ts test/shared/rate-limiter.test.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
