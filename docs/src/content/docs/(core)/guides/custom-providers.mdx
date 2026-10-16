@@ -32,8 +32,8 @@ The following table describes the main properties available when configuring a c
 | `scope`         | `string`                            | Scopes requested during authorization.                                                 |
 | `profile`       | `(profile: Profile) => DefaultUser` | Optional function that maps the provider's profile to Aura Auth's user representation. |
 
-```ts title="@/lib/auth.ts"
-import type { User } from "@aura-stack/auth"
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth, type User } from "@aura-stack/auth"
 import type { OAuthProvider } from "@aura-stack/auth/types"
 
 interface CustomProviderProfile {
@@ -65,6 +65,8 @@ const provider: OAuthProvider<CustomProviderProfile, User> = {
     }
   },
 }
+
+export const auth = createAuth({ oauth: [provider] })
 ```
 
 The `profile` function maps the provider's profile to Aura Auth's user representation. The returned `sub` value must be a stable, unique identifier for the user within that provider. Avoid using mutable values, such as usernames or email addresses, as the subject identifier.
@@ -85,9 +87,9 @@ The following table describes the main properties available when configuring an 
 | `scope`         | `string`                            | OIDC scopes requested during authorization.                                            |
 | `profile`       | `(profile: Profile) => DefaultUser` | Optional function that maps the provider's profile to Aura Auth's user representation. |
 
-```ts title="@/lib/auth.ts"
-import type { User } from "@aura-stack/auth"
-import type { OAuthProvider } from "@aura-stack/auth/types"
+```ts title="@/lib/auth.ts" lineNumbers
+import { createAuth, type User } from "@aura-stack/auth"
+import type { OpenIDProvider } from "@aura-stack/auth/types"
 
 interface CustomOIDCProfile {
   sub: string
@@ -96,7 +98,7 @@ interface CustomOIDCProfile {
   picture?: string
 }
 
-const provider: OAuthProvider<CustomOIDCProfile, User> = {
+const provider: OpenIDProvider<CustomOIDCProfile, User> = {
   id: "custom-oidc",
   name: "Custom OIDC Provider",
   issuer: "https://custom.com",
@@ -110,6 +112,8 @@ const provider: OAuthProvider<CustomOIDCProfile, User> = {
     }
   },
 }
+
+export const auth = createAuth({ oauth: [provider] })
 ```
 
 For OIDC providers, the `sub` claim identifies the user within the issuer's namespace. Use this stable identifier to associate the authenticated identity with the correct user.

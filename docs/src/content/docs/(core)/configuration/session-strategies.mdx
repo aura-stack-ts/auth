@@ -115,14 +115,16 @@ export const auth = createAuth({
   oauth: [],
   session: {
     strategy: "database",
-    deleteStrategy: "soft",
+    database: {
+      deleteStrategy: "soft",
+    },
   },
 })
 ```
 
 ### `maxSessions`
 
-The `maxSessions` property sets the maximum number of concurrent sessions allowed per user. When the limit is exceeded, the oldest session is invalidated to make room for the new session. The default is `5`.
+The `maxSessions` property sets the maximum number of concurrent sessions allowed per user. When the limit is exceeded, the oldest session is invalidated to make room for the new session.
 
 ```ts title="@/lib/auth.ts"
 import { createAuth } from "@aura-stack/auth"
@@ -131,7 +133,9 @@ export const auth = createAuth({
   oauth: [],
   session: {
     strategy: "database",
-    maxSessions: 5,
+    database: {
+      maxSessions: 5,
+    },
   },
 })
 ```
@@ -147,7 +151,9 @@ export const auth = createAuth({
   oauth: [],
   session: {
     strategy: "database",
-    touchInterval: 300, // 5 minutes
+    database: {
+      touchInterval: 300, // 5 minutes
+    },
   },
 })
 ```

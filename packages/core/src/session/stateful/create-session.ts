@@ -59,7 +59,7 @@ export const createSession = <DefaultUser extends User>({ ctx, cookies, cookieMa
             },
         })
 
-        const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 15 * 1000)
+        const expiresAt = new Date(Date.now() + (sessionConfig?.maxAge || 60 * 60 * 24 * 15) * 1000)
         logger?.log("STATEFUL_SESSION_EXPIRATION_SET", {
             structuredData: {
                 expires_at: expiresAt?.toISOString(),
