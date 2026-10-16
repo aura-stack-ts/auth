@@ -1,8 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
-import { getSetCookie } from "@/shared/http/cookie.ts"
-import { api, jose } from "@test/setup/presets.ts"
 import { createAuth } from "@/createAuth.ts"
+import { api, jose } from "@test/setup/auth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
 import type { User } from "@/index.ts"
 
 const payload = {
@@ -46,7 +46,6 @@ describe("signUp API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const { api } = createAuth({
-            oauth: [],
             signUp: {
                 onCreateUser: () => null,
             },
@@ -72,7 +71,6 @@ describe("signUp API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const { api } = createAuth({
-            oauth: [],
             signUp: {
                 onCreateUser: () =>
                     ({

@@ -1,6 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
-import { authInstance, jose, sessionEntityWithUser } from "@test/setup/presets.ts"
+import { authInstance, jose } from "@test/setup/auth.ts"
 import { createCSRF, createHash } from "@/shared/crypto.ts"
+import { sessionEntityWithUser } from "@test/setup/entities.ts"
 
 describe("isProviderConnected (Stateful)", () => {
     test("throws error when provider is not configured", async () => {

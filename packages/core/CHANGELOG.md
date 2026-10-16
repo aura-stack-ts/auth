@@ -10,9 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added support for configuring `basePath` through the `BASE_PATH` environment variable, in addition to passing it directly to `createAuth()`. [#283](https://github.com/aura-stack-ts/auth/pull/283)
+
 - Added experimental support for configuring trusted proxy header sources used to construct request URLs. Header sources can provide the complete URL through `{ url: "header" }` or specify separate protocol and host headers through `{ protocol: "header-proto", host: "header-host" }`. The configuration also includes built-in sources such as `forwarded`, `forwarded.proto`, and `forwarded.host`. [#275](https://github.com/aura-stack-ts/auth/pull/275)
 
 ### Changed
+
+- Made the `oauth` option optional in `createAuth()`, ensuring that all options accepted by the function are optional. [#284](https://github.com/aura-stack-ts/auth/pull/284)
+
+- Strengthened validation for the `basePath` and `baseURL` options in `createAuth()`, ensuring that authentication instances are configured with valid URL settings. [#279](https://github.com/aura-stack-ts/auth/pull/279)
 
 - Upgraded `@aura-stack/router` to `v0.11.4`, adding response schema validation and adopting the built-in `handle()` function for processing incoming requests. This release also updates unsupported HTTP method handling to return a standardized `404 Not Found` response instead of `405 Method Not Allowed`. [#274](https://github.com/aura-stack-ts/auth/pull/274)
 

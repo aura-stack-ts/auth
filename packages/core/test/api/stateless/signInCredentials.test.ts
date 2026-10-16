@@ -1,8 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { getSetCookie } from "@/shared/http/cookie.ts"
-import { api, jose } from "@test/setup/presets.ts"
+import { api, jose } from "@test/setup/auth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
 
 describe("signInCredentials API", async () => {
     const csrfToken = await createCSRF(jose)
@@ -39,7 +39,6 @@ describe("signInCredentials API", async () => {
 
     test("invalid authorize return", async () => {
         const { api } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: () => null,
             },
@@ -56,7 +55,6 @@ describe("signInCredentials API", async () => {
 
     test("invalid authorize by missing required fields", async () => {
         const { api } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: () =>
                     ({
@@ -89,7 +87,6 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const { api } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: async (ctx) => {
                     // Simulate password hashing and verification

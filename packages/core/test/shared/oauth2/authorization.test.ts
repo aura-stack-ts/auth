@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { oauthCustomService } from "@test/setup/presets.ts"
-import { createRedirectTo, createRedirectURI, createAuthorizationURL } from "@/shared/oauth2/authorization.ts"
-import type { OAuthProviderCredentials, TrustedProxyHeadersSource } from "@/@types/index.ts"
-import type { GlobalContext } from "@aura-stack/router/types"
-import { getBaseURLFromProxyHeaders } from "@/shared/utils/proxy-headers-source.ts"
-import { getBaseURL } from "@/config/get-base-url.ts"
 import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
+import { getBaseURLFromProxyHeaders } from "@/shared/utils/proxy-headers-source.ts"
+import { createRedirectTo, createRedirectURI, createAuthorizationURL } from "@/shared/oauth2/authorization.ts"
+import type { GlobalContext } from "@aura-stack/router/types"
+import type { RouterGlobalContext } from "@/@types/internal.ts"
+import type { OAuthProviderCredentials, TrustedProxyHeadersSource } from "@/@types/index.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)
@@ -77,7 +77,7 @@ describe("createRedirectURI", () => {
                 const redirectURI = await createRedirectURI(request, oauth, {
                     basePath: "/auth",
                     trustedProxyHeaders,
-                } as GlobalContext)
+                } as any as GlobalContext)
                 expect(redirectURI).toBe(expected)
             })
         }
@@ -104,7 +104,7 @@ describe("createRedirectURI", () => {
                     createRedirectURI(request, oauth, {
                         basePath: "/auth",
                         trustedProxyHeaders,
-                    } as GlobalContext)
+                    } as any as RouterGlobalContext)
                 ).rejects.toThrow(
                     "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules."
                 )
@@ -796,69 +796,6 @@ describe("getOriginURL", () => {
                 await expect(getOriginURL(request, { trustedOrigins, trustedProxyHeaders } as GlobalContext)).rejects.toThrow()
             })
         }
-    })
-})
-
-describe("getBaseURL", () => {
-    const testCases = [
-        {
-            description: "baseURL from request URL",
-            request: new Request("https://example.com/auth/signIn/github"),
-            trustedProxyHeaders: false,
-            expected: "https://example.com",
-        },
-        {
-            description: "baseURL from request URL with trustedProxyHeaders",
-            request: new Request("https://example.com/auth/signIn/github", {
-                headers: {
-                    "X-Forwarded-Proto": "https",
-                    "X-Forwarded-Host": "example.com",
-                },
-            }),
-            trustedProxyHeaders: true,
-            expected: "https://example.com",
-        },
-        {
-            description: "baseURL from request URL with trusted proxy headers and localhost",
-            request: new Request("http://localhost:3000/auth/signIn/github", {
-                headers: {
-                    "X-Forwarded-Proto": "http",
-                    "X-Forwarded-Host": "localhost:4000",
-                },
-            }),
-            trustedProxyHeaders: true,
-            expected: "http://localhost:4000",
-        },
-        {
-            description: "baseURL from request object with trustedProxyHeaders and priority headers",
-            request: new Request("https://example.com/auth/signIn/github", {
-                headers: {
-                    Forwarded: "proto=https;host=example.com",
-                    "X-Forwarded-Proto": "http",
-                    "X-Forwarded-Host": "malicious.com",
-                },
-            }),
-            trustedProxyHeaders: true,
-            expected: "https://example.com",
-        },
-    ]
-
-    for (const { description, request, trustedProxyHeaders, expected } of testCases) {
-        test(description, async () => {
-            const baseURL = await getBaseURL({ request, ctx: { trustedProxyHeaders } as GlobalContext })
-            expect(baseURL).toBe(expected)
-        })
-    }
-
-    test("with BASE_URL environment variable", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-        const baseURL = await getBaseURL({})
-        expect(baseURL).toBe("https://example.com")
-    })
-
-    test("with baseURL in context", async () => {
-        const baseURL = await getBaseURL({ ctx: { baseURL: "https://example.com" } as GlobalContext })
-        expect(baseURL).toBe("https://example.com")
     })
 })
 

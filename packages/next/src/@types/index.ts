@@ -41,7 +41,6 @@ export type NextInstance<DefaultUser extends User = User, SignUpSchema extends S
  *
  * @example
  * const auth = createAuth({
- *   oauth: [],
  *   signUp: {
  *     schema: z.object({
  *       username: z.string(),

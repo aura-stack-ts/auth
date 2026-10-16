@@ -1,7 +1,8 @@
 import { describe, test, expect } from "vitest"
 import { createAuth } from "@/createAuth.ts"
+import { api, jose } from "@test/setup/auth.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
 import { getCookie, getSetCookie } from "@/shared/http/cookie.ts"
-import { api, jose, sessionPayload } from "@test/setup/presets.ts"
 
 describe("getSession", () => {
     test("getSession with no session token", async () => {
@@ -106,7 +107,7 @@ describe("getSession", () => {
     })
 
     test("getSession refreshes session token if exp is close", async () => {
-        const auth = createAuth({ oauth: [], session: { expirationStrategy: "rolling" } })
+        const auth = createAuth({ session: { expirationStrategy: "rolling" } })
 
         const jwt = await auth.jose.encodeJWT({
             ...sessionPayload,

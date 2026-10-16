@@ -1,14 +1,8 @@
 import { describe, test, expect, vi } from "vitest"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
-import {
-    oauthCustomService,
-    sessionEntityWithUser,
-    userEntity,
-    authInstance,
-    deviceEntity,
-    oauthTransactionEntity,
-    accountEntity,
-} from "@test/setup/presets.ts"
+import { VERSION } from "@/version.ts"
+import { authInstance } from "@test/setup/auth.ts"
+import { oauthCustomService } from "@test/setup/presets.ts"
+import { sessionEntityWithUser, userEntity, deviceEntity, oauthTransactionEntity, accountEntity } from "@test/setup/entities.ts"
 
 describe("callbackAction (stateful)", () => {
     test("invalid endpoint", async () => {
@@ -391,7 +385,7 @@ describe("callbackAction (stateful)", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_123",
             },
@@ -549,7 +543,7 @@ describe("callbackAction (stateful)", () => {
         expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: "Bearer access_123",
             },

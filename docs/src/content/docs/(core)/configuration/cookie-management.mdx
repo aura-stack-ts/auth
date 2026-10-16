@@ -39,7 +39,10 @@ The `cookies.prefix` option defines the prefix applied to cookie names. Its defa
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
+<<<<<<< HEAD
   oauth: [],
+=======
+>>>>>>> origin/master
   cookies: {
     prefix: "my_app",
   },
@@ -58,7 +61,6 @@ For more granular control, `cookies.overrides` allows customization of individua
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   cookies: {
     overrides: {
       sessionToken: {
@@ -123,7 +125,6 @@ For details about the browser requirements for these prefixes, see the [Cookies:
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   cookies: {
     overrides: {
       sessionToken: {

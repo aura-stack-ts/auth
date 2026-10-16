@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { z } from "zod/v4"
-import { jose, POST } from "@test/setup/presets.ts"
+import { jose, POST } from "@test/setup/auth.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
 import { getSetCookie } from "@/shared/http/cookie.ts"
@@ -48,7 +48,6 @@ describe("signUp API", async () => {
 
     test("invalid signUp.onCreateUser return", async () => {
         const { handlers } = createAuth({
-            oauth: [],
             signUp: {
                 onCreateUser: () => null,
             },
@@ -71,7 +70,6 @@ describe("signUp API", async () => {
 
     test("invalid signUp.onCreateUser return with custom schema", async () => {
         const { handlers } = createAuth({
-            oauth: [],
             signUp: {
                 schema: z.object({
                     name: z.string(),
@@ -109,7 +107,6 @@ describe("signUp API", async () => {
 
     test("valid signUp.onCreateUser return with custom schema", async () => {
         const { handlers } = createAuth({
-            oauth: [],
             signUp: {
                 schema: z.object({
                     name: z.string(),
@@ -155,7 +152,6 @@ describe("signUp API", async () => {
 
     test("valid signUp.onCreateUser return with custom schema and identity.schema", async () => {
         const { handlers } = createAuth({
-            oauth: [],
             identity: {
                 // @ts-ignore @todo fix this type issue
                 schema: identitySchema.extend({

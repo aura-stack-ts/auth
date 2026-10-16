@@ -49,7 +49,6 @@ Unless the user specifies otherwise, generate:
 
 ```ts
 createAuth({
-  oauth: [],
   session: {
     strategy: "jwt",
     maxAge: 60 * 60 * 24 * 7,
@@ -160,7 +159,6 @@ Recommend:
 
 ```ts
 createAuth({
-  oauth: [],
   session: {
     strategy: "jwt",
     maxAge: 60 * 60 * 24 * 7,

@@ -45,7 +45,6 @@ describe("createIdentity", () => {
         })
 
         const auth = createAuth({
-            oauth: [],
             identity: {
                 schema,
             },
@@ -87,7 +86,6 @@ describe("createIdentity", () => {
         })
 
         const auth = createAuth({
-            oauth: [],
             identity: {
                 schema,
             },
@@ -139,7 +137,6 @@ describe("createIdentity", () => {
         )
 
         const auth = createAuth({
-            oauth: [],
             identity: {
                 schema: Schema,
             },
@@ -186,7 +183,6 @@ describe("createIdentity", () => {
 
         type ExpectedIdentity = Static<typeof Schema>
         createAuth({
-            oauth: [],
             identity: {
                 schema: Schema,
             },

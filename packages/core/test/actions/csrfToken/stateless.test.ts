@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { GET } from "@test/setup/presets.ts"
+import { GET } from "@test/setup/auth.ts"
 import { setCookie } from "@/shared/http/cookie.ts"
 
 describe("csrfTokenAction", () => {

@@ -1,15 +1,9 @@
 import { describe, test, expect, vi } from "vitest"
 import { createCSRF } from "@/shared/crypto.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
+import { authInstance, jose } from "@test/setup/auth.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
-import {
-    accountEntity,
-    authInstance,
-    deviceEntity,
-    jose,
-    sessionEntityWithUser,
-    sessionPayload,
-    userEntity,
-} from "@test/setup/presets.ts"
+import { accountEntity, deviceEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 import type { User } from "@/index.ts"
 
 describe("signUp API", async () => {

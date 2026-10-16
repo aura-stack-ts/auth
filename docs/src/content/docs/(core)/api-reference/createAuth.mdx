@@ -70,7 +70,6 @@ For autocomplete and safer suggestions, set the `strategy` field, which provides
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   cookies: {
     prefix: "aura-auth",
     overrides: {
@@ -91,7 +90,6 @@ Defines the session behavior and management strategy. How user sessions are stor
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   session: {
     strategy: "jwt",
     maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
@@ -118,7 +116,6 @@ Base URL of the application used to construct absolute URLs for redirects and AP
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   baseURL: "https://example.com",
 })
 ```
@@ -131,7 +128,6 @@ Base path prefix where Aura Auth endpoints are mounted and exposed to your routi
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   basePath: "/auth",
 })
 ```
@@ -144,7 +140,6 @@ Secret used to sign, encrypt, and hash JWTs, CSRF tokens, and other sensitive va
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   secret: "secret-key",
 })
 ```
@@ -178,7 +173,6 @@ import { createAuth } from "@aura-stack/auth"
 import { UserIdentity } from "@aura-stack/auth/identity"
 
 export const auth = createAuth({
-  oauth: [],
   identity: {
     schema: UserIdentity.extend({
       role: z.enum(["user", "admin"]),
@@ -200,7 +194,6 @@ import { createAuth } from "@aura-stack/auth"
 import { findUserByEmail } from "@/lib/db"
 
 export const auth = createAuth({
-  oauth: [],
   credentials: {
     authorize: async ({ credentials, verifyPassword }) => {
       const user = await findUserByEmail(credentials.email)
@@ -230,7 +223,6 @@ It includes the `onCreateUser` callback, which is called when a new user is crea
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   signUp: {
     onCreateUser: async ({ payload }) => {
       const newUser = await createUserInDatabase(payload)
@@ -268,7 +260,6 @@ When this option is enabled, is required to set `trustedOrigins` to a whitelist 
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   trustedProxyHeaders: true,
   trustedOrigins: ["https://app.example.com"],
 })
@@ -282,7 +273,6 @@ Defines the allowed origins for CORS and redirect URI validation. It supports st
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   trustedOrigins: ["http://example.com", "https://app.example.com:3000"],
 })
 ```
@@ -297,7 +287,6 @@ Defines the configuration for rate limiting authentication requests. It allows y
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   rateLimiter: {
     signIn: {
       algorithm: "fixed-window",
@@ -323,7 +312,6 @@ The built-in logger prints the metadata following the syslog format, which inclu
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   logger: true,
 })
 ```
@@ -336,7 +324,6 @@ Custom logger to replace the default syslog-based logger. The custom logger must
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   logger: {
     level: "info",
     log(metadata) {

@@ -10,7 +10,6 @@ import { createAuth } from "@aura-stack/auth"
 import { identitySchema, zod } from "@aura-stack/auth/identity/zod"
 
 export const auth = createAuth({
-  oauth: [],
   identity: {
     schema: identitySchema,
     unknownKeys: "strip",
@@ -40,7 +39,6 @@ const schema = identitySchema.extend({
 })
 
 export const auth = createAuth({
-  oauth: [],
   identity: {
     schema,
   },
@@ -61,7 +59,6 @@ const schema = valibot.object({
 })
 
 export const auth = createAuth({
-  oauth: [],
   identity: {
     schema,
   },
@@ -81,7 +78,6 @@ const schema = identitySchema.and({
 })
 
 export const auth = createAuth({
-  oauth: [],
   identity: {
     schema,
   },
@@ -102,7 +98,6 @@ const schema = typebox.Object({
 })
 
 export const auth = createAuth({
-  oauth: [],
   identity: {
     schema,
   },
@@ -121,7 +116,6 @@ By default, fields present on an incoming identity object but absent from your s
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   identity: {
     unknownKeys: "strict", // throws if the identity object has fields outside the schema
   },
@@ -136,7 +130,6 @@ When schema validation isn't relevant to your application, set `skipValidation` 
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   identity: {
     skipValidation: true,
   },

@@ -121,7 +121,6 @@ describe("trustedProxyHeaders", () => {
         test("throws error if trustedProxyHeaders is enabled but trustedOrigins is not set", () => {
             expect(() =>
                 createAuth({
-                    oauth: [],
                     trustedProxyHeaders: true,
                     trustedOrigins: [],
                 })
@@ -133,7 +132,6 @@ describe("trustedProxyHeaders", () => {
         test("does not throw error if trustedProxyHeaders is enabled and trustedOrigins is set", () => {
             expect(() =>
                 createAuth({
-                    oauth: [],
                     trustedProxyHeaders: true,
                     trustedOrigins: ["https://example.com"],
                 })
@@ -143,11 +141,7 @@ describe("trustedProxyHeaders", () => {
         test("throws error if trustedProxyHeaders is enabled but trustedOrigins is not set via env", () => {
             vi.stubEnv("TRUSTED_PROXY_HEADERS", "true")
 
-            expect(() =>
-                createAuth({
-                    oauth: [],
-                })
-            ).toThrow(
+            expect(() => createAuth({})).toThrow(
                 "Security assertion failed during instantiation: 'trustedProxyHeaders' was enabled, but 'trustedOrigins' is completely empty or undefined. Real proxy networks require explicit origin mapping rules to mitigate host-header hijacking and cache-poisoning vectors."
             )
         })
@@ -156,11 +150,7 @@ describe("trustedProxyHeaders", () => {
             vi.stubEnv("TRUSTED_PROXY_HEADERS", "true")
             vi.stubEnv("TRUSTED_ORIGINS", "")
 
-            expect(() =>
-                createAuth({
-                    oauth: [],
-                })
-            ).toThrow(
+            expect(() => createAuth({})).toThrow(
                 "Security assertion failed during instantiation: 'trustedProxyHeaders' was enabled, but 'trustedOrigins' is completely empty or undefined. Real proxy networks require explicit origin mapping rules to mitigate host-header hijacking and cache-poisoning vectors."
             )
         })
@@ -169,11 +159,7 @@ describe("trustedProxyHeaders", () => {
             vi.stubEnv("TRUSTED_PROXY_HEADERS", "true")
             vi.stubEnv("TRUSTED_ORIGINS", "https://example.com")
 
-            expect(() =>
-                createAuth({
-                    oauth: [],
-                })
-            ).not.toThrow()
+            expect(() => createAuth({})).not.toThrow()
         })
     })
 })

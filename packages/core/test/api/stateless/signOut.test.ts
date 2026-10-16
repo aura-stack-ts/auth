@@ -1,7 +1,8 @@
 import { describe, expect, test, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { api, jose, sessionPayload } from "@test/setup/presets.ts"
+import { api, jose } from "@test/setup/auth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
 
 describe("signOut API", async () => {
     const csrfToken = await createCSRF(jose)
@@ -49,7 +50,7 @@ describe("signOut API", async () => {
     })
 
     test("signOut with baseURL from createAuth config", async () => {
-        const api = createAuth({ oauth: [], baseURL: "http://localhost:3000" }).api
+        const api = createAuth({ baseURL: "http://localhost:3000" }).api
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",

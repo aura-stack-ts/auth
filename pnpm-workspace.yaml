@@ -41,8 +41,8 @@ catalogs:
   vite:
     vite: ^7.3.2
   vitest:
-    "@vitest/coverage-v8": 4.1.4
-    vitest: 4.1.4
+    "@vitest/coverage-v8": ^5.0.5
+    vitest: ^5.0.5
   zod-v3:
     zod: 3.25.76
   zod-v4:

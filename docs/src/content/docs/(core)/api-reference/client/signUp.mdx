@@ -56,7 +56,6 @@ import { createAuth } from "@aura-stack/auth"
 import { createSecretValue } from "@aura-stack/auth/crypto"
 
 export const auth = createAuth({
-  oauth: [],
   signUp: {
     onCreateUser: async ({ payload }) => {
       if (!payload || !payload.username || !payload.password) {

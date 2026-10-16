@@ -18,7 +18,6 @@ Set the static origins accepted by Aura Auth.
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   trustedOrigins: ["http://example.com", "https://app.example.com:3000"],
 })
 ```
@@ -31,7 +30,6 @@ Resolve the trusted origin at request time based on the incoming request.
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   trustedOrigins: (request) => {
     const origin = request.headers.get("origin")
     if (origin && origin.endsWith(".example.com")) {
@@ -59,7 +57,6 @@ Trust one level of subdomains under a specific domain.
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   trustedOrigins: ["https://*.example.com"],
 })
 ```
@@ -74,7 +71,6 @@ Trust any port on a specific domain.
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   trustedOrigins: ["https://example.com:*"],
 })
 ```

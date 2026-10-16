@@ -1,8 +1,9 @@
 import { describe, test, expect, vi } from "vitest"
-import { jose, oauthCustomService, oauthTokens, POST, sessionPayload } from "@test/setup/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { VERSION } from "@/version.ts"
 import { createAuth } from "@/createAuth.ts"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { createCSRF } from "@/shared/crypto.ts"
+import { POST, jose } from "@test/setup/auth.ts"
+import { oauthCustomService, oauthTokens, sessionPayload } from "@test/setup/presets.ts"
 
 describe("refreshUserInfo action", () => {
     test("unsupported oauth provider", async () => {
@@ -124,7 +125,7 @@ describe("refreshUserInfo action", () => {
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                "User-Agent": `Aura Auth/${VERSION}`,
                 Accept: "application/json",
                 Authorization: `Bearer ${oauthTokens.accessToken}`,
             },

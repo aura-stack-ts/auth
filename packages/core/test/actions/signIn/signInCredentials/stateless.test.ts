@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vitest"
-import { jose, POST } from "@test/setup/presets.ts"
-import { getSetCookie } from "@/shared/http/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
+import { jose, POST } from "@test/setup/auth.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
 
 describe("signInCredentials action", async () => {
     const csrfToken = await createCSRF(jose)
@@ -113,7 +113,6 @@ describe("signInCredentials action", async () => {
         const {
             handlers: { POST },
         } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: () => null,
             },
@@ -140,7 +139,6 @@ describe("signInCredentials action", async () => {
         const {
             handlers: { POST },
         } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: () =>
                     ({
@@ -172,7 +170,6 @@ describe("signInCredentials action", async () => {
             jose,
             handlers: { POST },
         } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: async (ctx) => {
                     // Simulate password hashing and verification

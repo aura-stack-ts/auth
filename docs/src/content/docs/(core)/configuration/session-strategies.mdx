@@ -9,7 +9,6 @@ The `session` option in [`createAuth`](/docs/api-reference/createAuth#session) c
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   session: {
     maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     slidingThreshold: 0.5, // 50% of maxAge
@@ -46,7 +45,6 @@ The `mode` property determines how session JWTs are protected.
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   session: {
     strategy: "jwt",
     jwt: {
@@ -207,7 +205,6 @@ The `maxAge` property specifies the session's maximum age in seconds. Its exact 
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   session: {
     maxAge: 60 * 60 * 24 * 7, // 7 days
   },
@@ -222,7 +219,6 @@ The `maxDuration` property sets the maximum absolute lifetime of a session in se
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   session: {
     maxDuration: 60 * 60 * 24 * 30, // 30 days
   },
@@ -242,7 +238,6 @@ The `expirationStrategy` property determines how session expiration is calculate
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   session: {
     expirationStrategy: "rolling",
   },

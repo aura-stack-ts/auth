@@ -1,10 +1,11 @@
 import { describe, test, expect, vi } from "vitest"
 import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
-import { api, jose, sessionPayload } from "@test/setup/presets.ts"
+import { api, jose } from "@test/setup/auth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 import { getSetCookie } from "@/shared/http/cookie.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
+import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
@@ -117,7 +118,6 @@ describe("updateSession API", () => {
         vi.stubEnv("BASE_URL", "http://localhost:3000")
 
         const { jose, api } = createAuth({
-            oauth: [],
             identity: {
                 schema: UserIdentity.extend({
                     role: z.string(),
@@ -168,9 +168,7 @@ describe("updateSession API", () => {
     test("updates user session with invalid user data", async () => {
         vi.stubEnv("BASE_URL", "http://localhost:3000")
 
-        const { jose, api } = createAuth({
-            oauth: [],
-        })
+        const { jose, api } = createAuth({})
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",

@@ -4,7 +4,7 @@ import { getSecretKey } from "@/config/get-secret.ts"
 import { generateKeyPair } from "@aura-stack/jose/jose"
 import { createJoseInstance, encoder } from "@/jose.ts"
 import { createSecretValue, exportJWKKeyPair } from "@/shared/crypto.ts"
-import { RS256PEMFormat, RSAOAEP256PEMFormat } from "./setup/presets.ts"
+import { RS256PEMFormat, RSAOAEP256PEMFormat } from "@test/fixtures/pem.ts"
 
 const payload = {
     sub: "1234567890",
@@ -168,14 +168,14 @@ describe("createJoseInstance", () => {
     })
 
     test("invalid secret", () => {
-        expect(() => createAuth({ oauth: [] })).toThrow(
+        expect(() => createAuth({})).toThrow(
             "Core security initialization failed because both 'AURA_AUTH_SECRET' and 'AUTH_SECRET' environment string keys are completely missing from runtime access contexts."
         )
     })
 
     test("invalid salt", () => {
         const secret = createSecretValue(32)
-        expect(() => createAuth({ oauth: [], secret })).toThrow(
+        expect(() => createAuth({ secret })).toThrow(
             "Core security initialization failed because both 'AURA_AUTH_SALT' and 'AUTH_SALT' environment string keys are completely missing from runtime access contexts."
         )
     })

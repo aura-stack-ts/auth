@@ -1,11 +1,14 @@
 import { describe, test, expect, vi } from "vitest"
-import { GET, jose, oauthCustomService, openIDCustomProvider, openIDMetadata, RS256PEMFormat } from "@test/setup/presets.ts"
-import { clearResolvedProviderCache } from "@/shared/oidc/resolve-provider.ts"
-import { clearJWKSCache } from "@/shared/oidc/jwks.ts"
-import { SignJWT, exportJWK, importPKCS8, importSPKI } from "@aura-stack/jose/jose"
+import { VERSION } from "@/version.ts"
+import { GET, jose } from "@test/setup/auth.ts"
 import { createPKCE } from "@/shared/crypto.ts"
+import { RS256PEMFormat } from "@test/fixtures/pem.ts"
+import { clearJWKSCache } from "@/shared/oidc/jwks.ts"
 import { setCookie, getSetCookie } from "@/shared/http/cookie.ts"
-import { AURA_AUTH_VERSION } from "@/shared/utils.ts"
+import { clearResolvedProviderCache } from "@/shared/oidc/resolve-provider.ts"
+import { SignJWT, exportJWK, importPKCS8, importSPKI } from "@aura-stack/jose/jose"
+import { oauthCustomService, openIDCustomProvider, openIDMetadata } from "@test/setup/presets.ts"
+
 import { createAuth } from "@/createAuth.ts"
 
 describe("callbackAction", () => {
@@ -176,7 +179,7 @@ describe("callbackAction", () => {
             expect.objectContaining({
                 method: "GET",
                 headers: {
-                    "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                    "User-Agent": `Aura Auth/${VERSION}`,
                     Accept: "application/json",
                     Authorization: "Bearer access_123",
                 },
@@ -294,7 +297,7 @@ describe("callbackAction", () => {
             expect.objectContaining({
                 method: "GET",
                 headers: {
-                    "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                    "User-Agent": `Aura Auth/${VERSION}`,
                     Accept: "application/json",
                     Authorization: "Bearer access_123",
                 },
@@ -402,7 +405,7 @@ describe("callbackAction", () => {
             expect.objectContaining({
                 method: "GET",
                 headers: {
-                    "User-Agent": `Aura Auth/${AURA_AUTH_VERSION}`,
+                    "User-Agent": `Aura Auth/${VERSION}`,
                     Accept: "application/json",
                     Authorization: "Bearer access_123",
                 },

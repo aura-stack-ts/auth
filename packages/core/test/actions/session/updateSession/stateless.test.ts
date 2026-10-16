@@ -1,8 +1,9 @@
 import { describe, test, expect } from "vitest"
-import { getSetCookie } from "@/shared/http/cookie.ts"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/shared/crypto.ts"
-import { jose, PATCH, sessionPayload } from "@test/setup/presets.ts"
+import { jose, PATCH } from "@test/setup/auth.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
 import { identitySchema as UserIdentityArkType } from "@/identity/arktype.ts"
 import { identitySchema as UserIdentityValibot } from "@/identity/valibot.ts"
 
@@ -240,7 +241,6 @@ describe("updateSession action", () => {
 
     test("updates user session with valibot schema", async () => {
         const { handlers, jose } = createAuth({
-            oauth: [],
             identity: {
                 schema: UserIdentityValibot,
             },
@@ -286,7 +286,6 @@ describe("updateSession action", () => {
 
     test("updates user session with arktype schema", async () => {
         const { handlers, jose } = createAuth({
-            oauth: [],
             identity: {
                 schema: UserIdentityArkType,
             },

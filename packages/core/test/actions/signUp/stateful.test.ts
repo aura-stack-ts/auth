@@ -2,16 +2,10 @@ import { describe, test, expect, vi } from "vitest"
 import { z } from "zod/v4"
 import { createCSRF } from "@/shared/crypto.ts"
 import { identitySchema } from "@/identity/zod.ts"
-import {
-    accountEntity,
-    authInstance,
-    deviceEntity,
-    jose,
-    sessionEntityWithUser,
-    sessionPayload,
-    userEntity,
-} from "@test/setup/presets.ts"
+import { sessionPayload } from "@test/setup/presets.ts"
+import { authInstance, jose } from "@test/setup/auth.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
+import { accountEntity, deviceEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("signUp API", async () => {
     const csrfToken = await createCSRF(jose)

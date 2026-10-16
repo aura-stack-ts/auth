@@ -1,38 +1,38 @@
-import { describe, test, expect } from "vitest"
+import { describe, test } from "vitest"
 import { setCookie, createCookieStore, getCookie, getSetCookie, defineSecureCookieOptions } from "@/shared/http/cookie.ts"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 
 const cookieStore = createCookieStore(true)
 
 describe("setCookie", () => {
-    test("set state cookie with default options", () => {
+    test.concurrent("set state cookie with default options", ({ expect }) => {
         const { expires: _expires, ...exclude } = cookieStore.state.attributes
         const cookie = setCookie("state", "xyz123", exclude)
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("state=xyz123; Max-Age=300; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 
-    test("set csrfToken cookie with disabled httpOnly flag on cookie", () => {
+    test.concurrent("set csrfToken cookie with disabled httpOnly flag on cookie", ({ expect }) => {
         const { expires: _expires, ...exclude } = cookieStore.csrfToken.attributes
         const cookie = setCookie(cookieStore.csrfToken.name, "xyz123", exclude)
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("__Host-aura-auth.csrf_token=xyz123; Max-Age=1296000; Path=/; HttpOnly; Secure; SameSite=Strict")
     })
 
-    test("set pkce cookie with secure flag on cookie", () => {
+    test.concurrent("set pkce cookie with secure flag on cookie", ({ expect }) => {
         const { expires: _expires, ...exclude } = cookieStore.codeVerifier.attributes
         const cookie = setCookie(cookieStore.codeVerifier.name, "xyz123", exclude)
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("__Secure-aura-auth.code_verifier=xyz123; Max-Age=300; Path=/; HttpOnly; Secure; SameSite=Lax")
     })
 
-    test("set custom cookie with default options", () => {
+    test.concurrent("set custom cookie with default options", ({ expect }) => {
         const cookie = setCookie("customCookie", "customValue")
         expect(cookie).toBeDefined()
         expect(cookie).toEqual("customCookie=customValue")
     })
 
-    test("set session cookie and retrieve it from a client-sent Cookie header", () => {
+    test.concurrent("set session cookie and retrieve it from a client-sent Cookie header", ({ expect }) => {
         const session = setCookie(cookieStore.sessionToken.name, "userId:1", { httpOnly: false })
         const headers = new Headers()
         headers.set("Cookie", session)
@@ -42,7 +42,7 @@ describe("setCookie", () => {
         expect(cookie).toBe("userId:1")
     })
 
-    test("retrieve multiple cookies from Cookie header and compare values", () => {
+    test.concurrent("retrieve multiple cookies from Cookie header and compare values", ({ expect }) => {
         const sessionCookie = setCookie(cookieStore.sessionToken.name, "session-1")
         const stateCookie = setCookie(cookieStore.state.name, "state-1")
         const headers = new Headers()
@@ -54,7 +54,7 @@ describe("setCookie", () => {
         expect(state).toBe("state-1")
     })
 
-    test("getCookie throws when no Cookie header is present", () => {
+    test.concurrent("getCookie throws when no Cookie header is present", ({ expect }) => {
         const headers = new Headers()
         const request = new Request("http://localhost", { headers })
         expect(() => getCookie(request, cookieStore.sessionToken.name)).toThrow()
@@ -62,7 +62,7 @@ describe("setCookie", () => {
 })
 
 describe("getCookie", () => {
-    test("retrieve sessionToken from a request without secure", () => {
+    test.concurrent("retrieve sessionToken from a request without secure", ({ expect }) => {
         const sessionCookie = setCookie(cookieStore.sessionToken.name, "session", { secure: false })
         const request = new Request("http://localhost", {
             headers: {
@@ -72,7 +72,7 @@ describe("getCookie", () => {
         expect(getCookie(request, cookieStore.sessionToken.name)).toBe("session")
     })
 
-    test("retrieve sessionToken from a request with __Secure- prefix", () => {
+    test.concurrent("retrieve sessionToken from a request with __Secure- prefix", ({ expect }) => {
         const sessionCookie = setCookie(cookieStore.sessionToken.name, "session", { secure: true })
         const request = new Request("https://www.example.com", {
             headers: {
@@ -82,7 +82,7 @@ describe("getCookie", () => {
         expect(getCookie(request, cookieStore.sessionToken.name)).toBe("session")
     })
 
-    test("retrieve sessionToken from a request with __Host- prefix", () => {
+    test.concurrent("retrieve sessionToken from a request with __Host- prefix", ({ expect }) => {
         const sessionCookie = setCookie(cookieStore.sessionToken.name, "session")
         const request = new Request("https://www.example.com", {
             headers: {
@@ -92,7 +92,7 @@ describe("getCookie", () => {
         expect(getCookie(request, cookieStore.sessionToken.name)).toBe("session")
     })
 
-    test("getCookie throws when cookie is not found", () => {
+    test.concurrent("getCookie throws when cookie is not found", ({ expect }) => {
         const sessionCookie = setCookie(cookieStore.sessionToken.name, "session")
         const request = new Request("http://localhost", {
             headers: {
@@ -102,12 +102,12 @@ describe("getCookie", () => {
         expect(() => getCookie(request, "nonExistentCookie")).toThrow()
     })
 
-    test("getCookie throws when no Cookie header is present", () => {
+    test.concurrent("getCookie throws when no Cookie header is present", ({ expect }) => {
         const request = new Request("http://localhost")
         expect(() => getCookie(request, cookieStore.sessionToken.name)).toThrow()
     })
 
-    test("retrieve cookie from Response Set-Cookie header", () => {
+    test.concurrent("retrieve cookie from Response Set-Cookie header", ({ expect }) => {
         const sessionCookie = setCookie(cookieStore.sessionToken.name, "sessionValue")
         const response = new Response(null, {
             headers: {
@@ -117,7 +117,7 @@ describe("getCookie", () => {
         expect(getSetCookie(response, cookieStore.sessionToken.name)).toBe("sessionValue")
     })
 
-    test("getCookie from headers object", () => {
+    test.concurrent("getCookie from headers object", ({ expect }) => {
         const sessionCookie = setCookie(cookieStore.sessionToken.name, "sessionValue")
         const headers = new Headers()
         headers.set("Cookie", sessionCookie)
@@ -356,7 +356,7 @@ describe("defineSecureCookieOptions", () => {
     ]
 
     for (const { description, useSecure, strategy, attributes, expected } of testCases) {
-        test(description, () => {
+        test.concurrent(description, ({ expect }) => {
             const config = defineSecureCookieOptions(useSecure, attributes, strategy)
             expect(config).toEqual(expected)
         })
