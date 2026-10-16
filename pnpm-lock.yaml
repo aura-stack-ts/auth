@@ -1,97 +1,3 @@
----
-lockfileVersion: '9.0'
-
-importers:
-
-  .:
-    configDependencies: {}
-    packageManagerDependencies:
-      '@pnpm/exe':
-        specifier: 10.15.0
-        version: 10.15.0
-      pnpm:
-        specifier: 10.15.0
-        version: 10.15.0
-
-packages:
-
-  '@pnpm/exe@10.15.0':
-    resolution: {integrity: sha512-uzB4+WYBqWHFo6vpnlpQi3h83yxfKfcJ6q+dj42AnMX9MXD7G9UyNtbnCkLyB4W3iQEvcxHkrS3vZ4FYKD0Xgw==}
-    hasBin: true
-
-  '@pnpm/linux-arm64@10.15.0':
-    resolution: {integrity: sha512-sbW1KKHc+JZB9oSyZ9OCLXKOua5hJIDUEf88dwDnAI3Rod7YSENwd+5fxPN6uX4EcxoJjrktcLbn7Zv/Fo0/OA==}
-    cpu: [arm64]
-    os: [linux]
-    hasBin: true
-
-  '@pnpm/linux-x64@10.15.0':
-    resolution: {integrity: sha512-WykYDc3pYcl9kpHazwbmC7sbscR7nxE3hy8y+/3OA0or5gXNACLvw8tlyiPp08b48jbgDGGeHryYz+DpNuUmsw==}
-    cpu: [x64]
-    os: [linux]
-    hasBin: true
-
-  '@pnpm/macos-arm64@10.15.0':
-    resolution: {integrity: sha512-msCRrpwtvaARgTfZ/L5KPA+/EpOoGK5Rrd/pWJV6SU6ieknB49Aaq0r/rmlnJmn8t37ufqM4btwwYdEr/a0jiw==}
-    cpu: [arm64]
-    os: [darwin]
-    hasBin: true
-
-  '@pnpm/macos-x64@10.15.0':
-    resolution: {integrity: sha512-uibT56UBGwCSFfQyrs1d9j+815yaf1ekZu3OMYNvoYkCIc9e+ARumilaJxRy2Lr0cnzjzRH7Z29x6ijvFhUAAQ==}
-    cpu: [x64]
-    os: [darwin]
-    hasBin: true
-
-  '@pnpm/win-arm64@10.15.0':
-    resolution: {integrity: sha512-Y+T2lJKLFdyu4f4MP8wevMpW5DS1XWy/T3017gKvn4e8Ccpl6cIBmGPfPg4t9PIU7nawoBOZqPaXCZabaY2rgA==}
-    cpu: [arm64]
-    os: [win32]
-    hasBin: true
-
-  '@pnpm/win-x64@10.15.0':
-    resolution: {integrity: sha512-bVkG0bNZXSIPBqsdsT6Jx2vgt66binP8Obu5FXyGRjOTGWARjXe5lr00jpNLoO9WlfG2kpLfM0oniJQL/OmYpA==}
-    cpu: [x64]
-    os: [win32]
-    hasBin: true
-
-  pnpm@10.15.0:
-    resolution: {integrity: sha512-SG68JZ0+mZpOhpHOA7XKxKccvso5Nyqbdiy1AM/fCHPiyxar49lRse4s8BJQPwJ7mLZYTk3yJSTgx0UNnseqew==}
-    engines: {node: '>=18.12'}
-    hasBin: true
-
-snapshots:
-
-  '@pnpm/exe@10.15.0':
-    optionalDependencies:
-      '@pnpm/linux-arm64': 10.15.0
-      '@pnpm/linux-x64': 10.15.0
-      '@pnpm/macos-arm64': 10.15.0
-      '@pnpm/macos-x64': 10.15.0
-      '@pnpm/win-arm64': 10.15.0
-      '@pnpm/win-x64': 10.15.0
-
-  '@pnpm/linux-arm64@10.15.0':
-    optional: true
-
-  '@pnpm/linux-x64@10.15.0':
-    optional: true
-
-  '@pnpm/macos-arm64@10.15.0':
-    optional: true
-
-  '@pnpm/macos-x64@10.15.0':
-    optional: true
-
-  '@pnpm/win-arm64@10.15.0':
-    optional: true
-
-  '@pnpm/win-x64@10.15.0':
-    optional: true
-
-  pnpm@10.15.0: {}
-
----
 lockfileVersion: '9.0'
 
 settings:
@@ -10217,10 +10123,6 @@ packages:
     resolution: {integrity: sha512-Pugqs6M0m7Lv1I7FtxN4aoyToKg1C4tu+/381vH35y8oENM/Ai7f7C4StcoK4/+BSw9ebcS8jRiVrORFKCALLw==}
     engines: {node: ^20.0.0 || >=22.0.0}
 
-  tinyrainbow@3.1.0:
-    resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
-    engines: {node: '>=14.0.0'}
-
   tinyrainbow@3.2.0:
     resolution: {integrity: sha512-LgO3D9yZJjApUiuUfl9iFAwrtaX4+lok3wJIqttGoKCHlWUqHqbQpnxCf82L8FjgKsh4iGo78hqJwgL8F6To2A==}
     engines: {node: '>=14.0.0'}
@@ -16333,7 +16235,7 @@ snapshots:
 
   '@vitest/pretty-format@4.1.4':
     dependencies:
-      tinyrainbow: 3.1.0
+      tinyrainbow: 3.2.0
 
   '@vitest/runner@4.1.4':
     dependencies:
@@ -16353,7 +16255,7 @@ snapshots:
     dependencies:
       '@vitest/pretty-format': 4.1.4
       convert-source-map: 2.0.0
-      tinyrainbow: 3.1.0
+      tinyrainbow: 3.2.0
 
   '@volar/kit@2.4.28(typescript@5.9.3)':
     dependencies:
@@ -22377,8 +22279,6 @@ snapshots:
       picomatch: 4.0.4
 
   tinypool@2.1.0: {}
-
-  tinyrainbow@3.1.0: {}
 
   tinyrainbow@3.2.0: {}
 
