@@ -241,7 +241,6 @@ describe("updateSession action", () => {
 
     test("updates user session with valibot schema", async () => {
         const { handlers, jose } = createAuth({
-            oauth: [],
             identity: {
                 schema: UserIdentityValibot,
             },
@@ -287,7 +286,6 @@ describe("updateSession action", () => {
 
     test("updates user session with arktype schema", async () => {
         const { handlers, jose } = createAuth({
-            oauth: [],
             identity: {
                 schema: UserIdentityArkType,
             },

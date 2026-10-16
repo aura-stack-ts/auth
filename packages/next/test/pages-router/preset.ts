@@ -2,7 +2,6 @@ import { createAuth } from "@/pages/createAuth"
 import { createSecretValue } from "@aura-stack/react/crypto"
 
 export const auth = createAuth({
-    oauth: [],
     logger: process.env.CI === "true" ? false : true,
     credentials: {
         authorize: (ctx) => {

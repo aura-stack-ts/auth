@@ -63,7 +63,6 @@ describe("Client Types", () => {
         })
 
         const auth = createAuth({
-            oauth: [],
             identity: {
                 schema,
             },
@@ -94,7 +93,6 @@ describe("Client Types", () => {
         })
 
         const auth = createAuth({
-            oauth: [],
             identity: {
                 schema,
             },
@@ -124,7 +122,6 @@ describe("Client Types", () => {
         })
 
         const auth = createAuth({
-            oauth: [],
             identity: {
                 schema,
             },
@@ -160,7 +157,6 @@ describe("Client Types", () => {
         })
 
         createAuth({
-            oauth: [],
             identity: {
                 schema,
             },
@@ -183,7 +179,6 @@ describe("Client Types", () => {
 
     test("with custom zod signUp schema", () => {
         const auth = createAuth({
-            oauth: [],
             signUp: {
                 schema: z.object({
                     username: z.string(),
@@ -206,7 +201,6 @@ describe("Client Types", () => {
 
     test("with custom valibot signUp schema", () => {
         const auth = createAuth({
-            oauth: [],
             signUp: {
                 schema: valibot.object({
                     username: valibot.string(),
@@ -229,7 +223,6 @@ describe("Client Types", () => {
 
     test("with custom arktype signUp schema", () => {
         const auth = createAuth({
-            oauth: [],
             signUp: {
                 schema: type({
                     username: "string",
@@ -258,7 +251,6 @@ describe("Client Types", () => {
         })
 
         createAuth({
-            oauth: [],
             signUp: {
                 schema,
                 onCreateUser: () => null,

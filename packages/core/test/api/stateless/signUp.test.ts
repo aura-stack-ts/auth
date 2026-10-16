@@ -46,7 +46,6 @@ describe("signUp API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const { api } = createAuth({
-            oauth: [],
             signUp: {
                 onCreateUser: () => null,
             },
@@ -72,7 +71,6 @@ describe("signUp API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const { api } = createAuth({
-            oauth: [],
             signUp: {
                 onCreateUser: () =>
                     ({

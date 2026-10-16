@@ -32,7 +32,6 @@ export interface HonoInstance<
  *
  * @example
  * const auth = createAuth({
- *   oauth: [],
  *   signUp: {
  *     schema: z.object({
  *       username: z.string(),

@@ -115,7 +115,6 @@ export type Wrap<T> = T extends any ? { [K in keyof T]: T[K] } : never
  * Infers the user type from an {@link AuthInstance} config, or falls back to {@link User}.
  * @example
  * const auth = createAuth({
- *   oauth: [],
  *   identity: UserIdentity.extend({
  *     role: z.string().nullable().optional(),
  *     username: z.string().optional(),
@@ -137,7 +136,6 @@ export type InferUser<Config> =
  * Infers the session type from an {@link AuthInstance} config.
  * @example
  * const auth = createAuth({
- *   oauth: [],
  *   identity: UserIdentity.extend({
  *     role: z.string().nullable().optional(),
  *     username: z.string().optional(),
@@ -182,7 +180,6 @@ export type SessionFrom<T extends SchemaTypes> = Wrap<Session<Merge<UserFrom<T>,
  *
  * @example
  * const auth = createAuth({
- *   oauth: [],
  *   signUp: {
  *     schema: z.object({
  *       username: z.string(),

@@ -168,14 +168,14 @@ describe("createJoseInstance", () => {
     })
 
     test("invalid secret", () => {
-        expect(() => createAuth({ oauth: [] })).toThrow(
+        expect(() => createAuth({})).toThrow(
             "Core security initialization failed because both 'AURA_AUTH_SECRET' and 'AUTH_SECRET' environment string keys are completely missing from runtime access contexts."
         )
     })
 
     test("invalid salt", () => {
         const secret = createSecretValue(32)
-        expect(() => createAuth({ oauth: [], secret })).toThrow(
+        expect(() => createAuth({ secret })).toThrow(
             "Core security initialization failed because both 'AURA_AUTH_SALT' and 'AUTH_SALT' environment string keys are completely missing from runtime access contexts."
         )
     })

@@ -9,13 +9,13 @@ describe("createProxyLogger", () => {
     })
 
     test("proxyLogger with enabled logger", () => {
-        const logger = createProxyLogger({ oauth: [], logger: true })
+        const logger = createProxyLogger({ logger: true })
         expect(logger).toMatchObject({ level: "debug", log: expect.any(Function) })
     })
 
     test("proxyLogger with enabled logger and DEBUG env var set to false", () => {
         vi.stubEnv("DEBUG", "false")
-        const logger = createProxyLogger({ oauth: [], logger: true })
+        const logger = createProxyLogger({ logger: true })
         expect(logger).toMatchObject({ level: "debug", log: expect.any(Function) })
     })
 
@@ -27,27 +27,27 @@ describe("createProxyLogger", () => {
 
     test("proxyLogger with LOG_LEVEL env var set to info", () => {
         vi.stubEnv("LOG_LEVEL", "info")
-        const logger = createProxyLogger({ oauth: [], logger: true })
+        const logger = createProxyLogger({ logger: true })
         expect(logger?.level).toBe("info")
     })
 
     test("proxyLogger with DEBUG and LOG_LEVEL env vars set", () => {
         vi.stubEnv("DEBUG", "true")
         vi.stubEnv("LOG_LEVEL", "error")
-        const logger = createProxyLogger({ oauth: [], logger: true })
+        const logger = createProxyLogger({ logger: true })
         expect(logger?.level).toBe("error")
     })
 
     test("proxyLogger with enabled logger and DEBUG and LOG_LEVEL env vars set", () => {
         vi.stubEnv("DEBUG", "true")
         vi.stubEnv("LOG_LEVEL", "error")
-        const logger = createProxyLogger({ oauth: [], logger: { level: "warn", log: () => {} } })
+        const logger = createProxyLogger({ logger: { level: "warn", log: () => {} } })
         expect(logger?.level).toBe("warn")
     })
 
     test("proxyLogger should fallback to debug when LOG_LEVEL env var is invalid", () => {
         vi.stubEnv("LOG_LEVEL", "verbose")
-        const logger = createProxyLogger({ oauth: [], logger: true })
+        const logger = createProxyLogger({ logger: true })
         expect(logger?.level).toBe("debug")
     })
 
@@ -58,7 +58,7 @@ describe("createProxyLogger", () => {
     })
 
     test("proxyLogger with empty config", () => {
-        const logger = createProxyLogger({ oauth: [], logger: {} })
+        const logger = createProxyLogger({ logger: {} })
         expect(logger?.level).toBe("error")
     })
 
@@ -68,7 +68,7 @@ describe("createProxyLogger", () => {
             level: "error",
             log,
         }
-        const logger = createProxyLogger({ oauth: [], logger: customLogger })
+        const logger = createProxyLogger({ logger: customLogger })
         expect(logger).toMatchObject({ level: "error", log: expect.any(Function) })
 
         logger?.log("AUTH_SESSION_INVALID")

@@ -118,7 +118,6 @@ describe("updateSession API", () => {
         vi.stubEnv("BASE_URL", "http://localhost:3000")
 
         const { jose, api } = createAuth({
-            oauth: [],
             identity: {
                 schema: UserIdentity.extend({
                     role: z.string(),
@@ -169,9 +168,7 @@ describe("updateSession API", () => {
     test("updates user session with invalid user data", async () => {
         vi.stubEnv("BASE_URL", "http://localhost:3000")
 
-        const { jose, api } = createAuth({
-            oauth: [],
-        })
+        const { jose, api } = createAuth({})
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",

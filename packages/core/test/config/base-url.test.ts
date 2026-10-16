@@ -40,7 +40,7 @@ describe("getBaseURLConfig", () => {
 
         for (const { description, baseURL, expected } of testCases) {
             test.concurrent(description, () => {
-                expect(getBaseURLConfig({ oauth: [], baseURL: baseURL as RoutePattern })).toBe(expected)
+                expect(getBaseURLConfig({ baseURL: baseURL as RoutePattern })).toBe(expected)
             })
         }
     })
@@ -59,7 +59,7 @@ describe("getBaseURLConfig", () => {
 
         for (const { description, baseURL } of testCases) {
             test.concurrent(description, () => {
-                expect(() => getBaseURLConfig({ oauth: [], baseURL: baseURL as RoutePattern })).toThrow()
+                expect(() => getBaseURLConfig({ baseURL: baseURL as RoutePattern })).toThrow()
             })
         }
     })
