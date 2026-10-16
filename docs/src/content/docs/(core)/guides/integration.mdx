@@ -26,7 +26,7 @@ The `createAuth` function is the entry function of the package which creates the
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
+  oauth: ["github"],
 })
 ```
 
@@ -50,7 +50,6 @@ By default, the handlers are mounted under the `/auth` route on the backend serv
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   basePath: "/auth",
 })
 

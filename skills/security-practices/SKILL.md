@@ -189,7 +189,6 @@ Baseline secure template:
 
 ```ts
 createAuth({
-  oauth: [],
   session: {
     strategy: "jwt",
     jwt: {

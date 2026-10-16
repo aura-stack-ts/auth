@@ -52,7 +52,6 @@ The global cookie prefix to be added to all of the cookies consumed. By default 
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: []
   cookies: {
     prefix: "my_app.",
   },
@@ -71,7 +70,6 @@ To override the default per-cookie options, it's possible to change the default 
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   cookies: {
     overrides: {
       sessionToken: {
@@ -112,7 +110,6 @@ For safety, a `strategy` optional field is provided within the `attributes` fiel
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: [],
   cookies: {
     overrides: {
       sessionToken: {
@@ -144,7 +141,6 @@ The `createAuth` function accepts a `trustedProxyHeaders` boolean option to enab
 import { createAuth } from "@aura-stack/auth"
 
 export const auth = createAuth({
-  oauth: []
   trustedProxyHeaders: true,
 })
 ```
