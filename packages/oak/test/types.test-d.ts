@@ -23,7 +23,6 @@ Deno.env.set("AURA_AUTH_GITHUB_CLIENT_ID", "github-client-id")
 Deno.env.set("AURA_AUTH_GITHUB_CLIENT_SECRET", "github-client-secret")
 
 const auth = createAuth({
-    oauth: [],
     identity: {
         schema: identitySchema.extend({
             role: zod.string(),

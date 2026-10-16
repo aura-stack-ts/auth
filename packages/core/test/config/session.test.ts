@@ -21,7 +21,7 @@ describe("session: stateless strategy", () => {
 
     describe("Initialization & Defaults", () => {
         test("defaults to maxAge 15 days and absolute strategy", async () => {
-            const { handlers, jose } = createAuth({ oauth: [], logger: false })
+            const { handlers, jose } = createAuth({ logger: false })
             const { GET } = handlers
 
             const token = await jose.encodeJWT(sessionPayload)
@@ -47,7 +47,6 @@ describe("session: stateless strategy", () => {
     describe("Expiration Models (Rolling)", () => {
         test("always updates expiration upon access", async () => {
             const { handlers, jose } = createAuth({
-                oauth: [],
                 session: { maxAge: 3600, expirationStrategy: "rolling" },
                 logger: false,
             })
@@ -87,7 +86,6 @@ describe("session: stateless strategy", () => {
     describe("Expiration Models (Sliding)", () => {
         test("updates only when within 25% threshold", async () => {
             const { handlers, jose } = createAuth({
-                oauth: [],
                 session: { maxAge: 3600, expirationStrategy: "sliding" }, // threshold is 900 seconds
                 logger: false,
             })
@@ -123,7 +121,6 @@ describe("session: stateless strategy", () => {
         test("invalid sliding threshold", () => {
             expect(() =>
                 createAuth({
-                    oauth: [],
                     session: { maxAge: 3600, expirationStrategy: "sliding", slidingThreshold: -1 },
                     logger: false,
                 })
@@ -134,7 +131,6 @@ describe("session: stateless strategy", () => {
     describe("JWT Max Expiration (mexp)", () => {
         test("enforces strict cut-off even if rolling strategy extends standard exp", async () => {
             const { handlers, jose } = createAuth({
-                oauth: [],
                 session: { maxAge: 3600, expirationStrategy: "rolling" },
                 logger: false,
             })

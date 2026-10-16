@@ -27,9 +27,7 @@ Reusing a single raw secret for multiple distinct cryptographic operations signi
 ```ts title="lib/auth.ts" lineNumbers
 import { createAuth } from "@aura-stack/auth"
 
-export const { handlers, jose, api } = createAuth({
-  oauth: [],
-})
+export const { handlers, jose, api } = createAuth({})
 ```
 
 ---

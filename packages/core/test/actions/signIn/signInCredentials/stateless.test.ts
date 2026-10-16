@@ -113,7 +113,6 @@ describe("signInCredentials action", async () => {
         const {
             handlers: { POST },
         } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: () => null,
             },
@@ -140,7 +139,6 @@ describe("signInCredentials action", async () => {
         const {
             handlers: { POST },
         } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: () =>
                     ({
@@ -172,7 +170,6 @@ describe("signInCredentials action", async () => {
             jose,
             handlers: { POST },
         } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: async (ctx) => {
                     // Simulate password hashing and verification

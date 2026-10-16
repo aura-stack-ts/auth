@@ -24,7 +24,6 @@ export interface ElysiaInstance<
  *
  * @example
  * const auth = createAuth({
- *   oauth: [],
  *   signUp: {
  *     schema: z.object({
  *       username: z.string(),

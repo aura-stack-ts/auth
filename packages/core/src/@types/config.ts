@@ -61,7 +61,7 @@ export type AuthConfig<
      * ```
      */
     // @todo: add type inference for built-in providers
-    oauth: OAuthProvidersConfig<Identity>[]
+    oauth?: OAuthProvidersConfig<Identity>[]
     /**
      * Cookie options defines the configuration for cookies used in Aura Auth.
      * It includes a prefix for cookie names and flag options to determine

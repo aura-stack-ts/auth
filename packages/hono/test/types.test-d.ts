@@ -19,7 +19,6 @@ import type { InferSession, InferUser } from "@aura-stack/auth/identity"
 describe("createAuth", () => {
     describe("with custom identity", async () => {
         const auth = createAuth({
-            oauth: [],
             identity: {
                 schema: identitySchema.extend({
                     role: zod.string(),
@@ -60,7 +59,6 @@ describe("createAuth", () => {
 
     describe("with sign up schema", () => {
         const auth = createAuth({
-            oauth: [],
             signUp: {
                 schema: zod.object({
                     nickname: zod.string(),
@@ -107,7 +105,6 @@ describe("createAuth", () => {
 
     describe("with custom identity and sign up schema", () => {
         const auth = createAuth({
-            oauth: [],
             identity: {
                 schema: identitySchema.extend({
                     role: zod.string(),

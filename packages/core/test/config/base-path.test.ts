@@ -14,7 +14,7 @@ describe("add custom basePath config", () => {
 
         for (const { description, basePath, expected } of testCases) {
             test(description, () => {
-                expect(getBasePathConfig({ oauth: [], basePath: basePath as RoutePattern })).toBe(expected)
+                expect(getBasePathConfig({ basePath: basePath as RoutePattern })).toBe(expected)
             })
         }
     })
@@ -49,7 +49,7 @@ describe("add custom basePath config", () => {
 
         for (const { description, basePath } of invalidTestCases) {
             test.concurrent(description, () => {
-                expect(() => getBasePathConfig({ oauth: [], basePath: basePath as RoutePattern })).toThrow(
+                expect(() => getBasePathConfig({ basePath: basePath as RoutePattern })).toThrow(
                     expect.objectContaining({
                         code: "INVALID_BASE_PATH_CONFIG",
                     })
@@ -80,7 +80,7 @@ describe("add custom basePath config", () => {
         for (const { description, basePath, expected } of testCases) {
             test(description, () => {
                 vi.stubEnv("BASE_PATH", basePath)
-                expect(getBasePathConfig({ oauth: [] })).toBe(expected)
+                expect(getBasePathConfig({})).toBe(expected)
             })
         }
     })

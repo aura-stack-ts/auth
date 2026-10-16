@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- Made the `oauth` option optional in `createAuth()`, ensuring that all options accepted by the function are optional. [#284](https://github.com/aura-stack-ts/auth/pull/284)
+
 - Strengthened validation for the `basePath` and `baseURL` options in `createAuth()`, ensuring that authentication instances are configured with valid URL settings. [#279](https://github.com/aura-stack-ts/auth/pull/279)
 
 - Upgraded `@aura-stack/router` to `v0.11.4`, adding response schema validation and adopting the built-in `handle()` function for processing incoming requests. This release also updates unsupported HTTP method handling to return a standardized `404 Not Found` response instead of `405 Method Not Allowed`. [#274](https://github.com/aura-stack-ts/auth/pull/274)

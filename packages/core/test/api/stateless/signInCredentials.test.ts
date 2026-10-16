@@ -39,7 +39,6 @@ describe("signInCredentials API", async () => {
 
     test("invalid authorize return", async () => {
         const { api } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: () => null,
             },
@@ -56,7 +55,6 @@ describe("signInCredentials API", async () => {
 
     test("invalid authorize by missing required fields", async () => {
         const { api } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: () =>
                     ({
@@ -89,7 +87,6 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const { api } = createAuth({
-            oauth: [],
             credentials: {
                 authorize: async (ctx) => {
                     // Simulate password hashing and verification

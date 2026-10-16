@@ -50,7 +50,7 @@ describe("signOut API", async () => {
     })
 
     test("signOut with baseURL from createAuth config", async () => {
-        const api = createAuth({ oauth: [], baseURL: "http://localhost:3000" }).api
+        const api = createAuth({ baseURL: "http://localhost:3000" }).api
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
