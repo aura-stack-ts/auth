@@ -16,7 +16,7 @@ const output = await api.getAccessToken("github", {
 <Callout>
   This method is a simplified version of `api.getProviderTokens`, which retrieves the full set of OAuth tokens (access token,
   refresh token, and ID token) for a provider. Use this method if you only need the access token. See
-  [`api.getProviderTokens`](/docs/api-reference/server/api/get-provider-tokens) for the advanced alternative.
+  [`api.getProviderTokens`](/docs/api-reference/createAuth/api/get-provider-tokens) for the advanced alternative.
 </Callout>
 
 ## Reference
@@ -48,7 +48,7 @@ const output = await api.getAccessToken("github", {
 
 ## Behavior
 
-- This function internally uses `api.getProviderTokens` to retrieve the access token for the specified provider. See [`api.getProviderTokens`](/docs/api-reference/server/api/get-provider-tokens) for the full retrieval/refresh behavior.
+- This function internally uses `api.getProviderTokens` to retrieve the access token for the specified provider. See [`api.getProviderTokens`](/docs/api-reference/createAuth/api/get-provider-tokens) for the full retrieval/refresh behavior.
 - CSRF protection is verified by default. Set `skipCSRFCheck: true` only if you're enforcing CSRF protection at a different layer (e.g. a framework-level middleware) — disabling it here without an equivalent safeguard reintroduces the vulnerability it protects against.
 - If retrieval fails (no valid access or refresh token for the provider), `accessToken` resolves to `null` and `success` is `false`.
 

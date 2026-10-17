@@ -22,7 +22,7 @@ This function accepts no parameters — session data is read automatically from 
 | `Promise<Session<DefaultUser> \| null>` | Resolves to the current session object, or `null`. |
 
 <Callout type="info">
-  This return shape is intentionally simpler than the server-side [`api.getSession`](/docs/api-reference/server/api/get-session),
+  This return shape is intentionally simpler than the server-side [`api.getSession`](/docs/api-reference/createAuth/api/get-session),
   which returns `{ session, success, headers }`. The client doesn't need the `headers` field that server-side rolling
   session rotation requires — the browser already handles the refreshed cookie automatically.
 </Callout>

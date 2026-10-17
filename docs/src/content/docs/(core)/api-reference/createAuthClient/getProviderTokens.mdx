@@ -13,7 +13,7 @@ const { success, tokens } = await authClient.getProviderTokens("github")
 
 <Callout>
   This is the advanced version of `getAccessToken`, which only returns the access token. Use this if you need the full token set.
-  See [`getAccessToken`](/docs/api-reference/client/getAccessToken) for the simpler alternative.
+  See [`getAccessToken`](/docs/api-reference/createAuthClient/getAccessToken) for the simpler alternative.
 </Callout>
 
 ## Reference
@@ -33,7 +33,7 @@ const { success, tokens } = await authClient.getProviderTokens("github")
 ## Behavior
 
 - Cookies are read automatically from the browser context — you don't need to handle them or CSRF tokens manually.
-- Follows the same access-token → refresh-token fallback described in [`api.getProviderTokens`](/docs/api-reference/server/api/getProviderTokens#behavior). If neither is valid, resolves to `success: false` and `tokens: null`.
+- Follows the same access-token → refresh-token fallback described in [`api.getProviderTokens`](/docs/api-reference/createAuth/api/getProviderTokens#behavior). If neither is valid, resolves to `success: false` and `tokens: null`.
 
 ## Usage
 

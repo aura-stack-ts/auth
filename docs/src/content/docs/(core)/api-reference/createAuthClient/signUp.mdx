@@ -43,7 +43,7 @@ const output = await authClient.signUp({
 
 - Cookies are set automatically in the browser context — you don't need to handle them manually.
 - The CSRF token is automatically loaded and sent with the request — you don't need to handle it manually.
-- Sign-up success depends entirely on your configured [`signUp.onCreateUser`](/docs/api-reference/server/create-auth#signup) function on the server, which validates the submitted data and returns the `User` object (or `null` if invalid).
+- Sign-up success depends entirely on your configured [`signUp.onCreateUser`](/docs/api-reference/createAuth/create-auth#signup) function on the server, which validates the submitted data and returns the `User` object (or `null` if invalid).
 - The return value depends on the `redirect` option:
   - **`redirect: true`** (default) — navigates to `redirectTo` (or the default post-sign-up URL) via `window.location.assign`.
   - **`redirect: false`** — resolves to an object with `redirectURL`, `redirect: false`, and `success`, letting you handle navigation yourself.

@@ -66,7 +66,7 @@ The session response filters out JWT-standard claims (`exp`, `iat`, `jti`, `nbf`
 
 ### `POST /auth/session`
 
-Updates session data from the initial OAuth profile, currently supports the `email`, `name`, and `image` fields, or any additional fields defined in [`identity.schema`](/docs/configuration/identity-schema). For programmatic updates outside of a request/response cycle, use [`api.updateSession`](/docs/api-reference/server/api/updateSession) instead.
+Updates session data from the initial OAuth profile, currently supports the `email`, `name`, and `image` fields, or any additional fields defined in [`identity.schema`](/docs/configuration/identity-schema). For programmatic updates outside of a request/response cycle, use [`api.updateSession`](/docs/api-reference/createAuth/api/updateSession) instead.
 
 ### `PATCH /auth/session`
 
