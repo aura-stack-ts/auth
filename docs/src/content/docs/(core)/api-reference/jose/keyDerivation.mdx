@@ -1,0 +1,100 @@
+---
+title: Key Derivation
+description: Key derivation implementation using the jose library.
+---
+
+### `deriveKey(secret, salt, info, len)`
+
+Create a Key derivation which implements HKDF
+
+#### Signature
+
+```ts lineNumbers
+import type { SecretInput } from "@aura-stack/jose"
+
+function deriveKey(
+  secret: SecretInput,
+  salt: BinaryLike,
+  info: string,
+  length: number
+): {
+  key: ArrayBuffer
+  deriveKey: Buffer<ArrayBuffer>
+}
+```
+
+#### Parameters
+
+| Parameter | Type          | Description                        |
+| --------- | ------------- | ---------------------------------- |
+| `secret`  | `SecretInput` | Secret key for HKDF key derivation |
+| `salt`    | `BinaryLike`  | The salt value                     |
+| `info`    | `string`      | Additional information value       |
+| `length`  | `number`      | The length of the key to generate  |
+
+#### Returns
+
+| Return    | Type                  | Description                    |
+| --------- | --------------------- | ------------------------------ |
+| key       | `ArrayBuffer`         | The derived key as ArrayBuffer |
+| deriveKey | `Buffer<ArrayBuffer>` | The derived key as Buffer type |
+
+#### Example
+
+```ts lineNumbers
+import { deriveKey } from "@aura-stack/jose/hkdf"
+
+const secret = "secret-key"
+const salt = "salt"
+
+const sessionKey = deriveKey(secret, salt, "session key", 32)
+const databaseKey = deriveKey(secret, salt, "database key", 64)
+```
+
+### `createDeriveKey(secret, salt, info, len)`
+
+Creates a key derivation function that includes verification for the key length. It implements the `deriveKey` function.
+
+#### Signature
+
+```ts lineNumbers
+import type { SecretInput } from "@aura-stack/jose"
+
+function createDeriveKey(
+  secret: SecretInput,
+  salt?: BinaryLike
+  info?: string,
+  len?: number
+): {
+  key: ArrayBuffer
+  deriveKey: Buffer<ArrayBuffer>
+}
+```
+
+#### Parameters
+
+| Parameter | Type          | Description                        |
+| --------- | ------------- | ---------------------------------- |
+| `secret`  | `SecretInput` | Secret key for HKDF key derivation |
+| `salt`    | `BinaryLike`  | The salt value                     |
+| `info`    | `string`      | Additional information value       |
+| `length`  | `number`      | The length of the key to generate  |
+
+#### Returns
+
+| Return    | Type                  | Description                    |
+| --------- | --------------------- | ------------------------------ |
+| key       | `ArrayBuffer`         | The derived key as ArrayBuffer |
+| deriveKey | `Buffer<ArrayBuffer>` | The derived key as Buffer type |
+
+#### Example
+
+```ts lineNumbers
+import { createDeriveKey } from "@aura-stack/jose/hkdf"
+
+const secret = "secret-key"
+const salt = "salt"
+
+const sessionKey = createDeriveKey(secret, salt, "session key", 32)
+const databaseKey = createDeriveKey(secret, salt, "database key", 64)
+```

@@ -1,0 +1,47 @@
+---
+title: "@aura-stack/jose"
+description: JOSE utilities for JWT signing, verification, and encryption
+---
+
+`@aura-stack/jose` provides a curated API surface for working with **JWS**, **JWE**, and **JWT** standards.  
+It also includes a convenience re-export of the official [`jose`](https://github.com/panva/jose) library via the path `@aura-stack/jose/jose`, allowing consumers to access low-level cryptographic primitives when needed.
+
+```ts lineNumbers
+import { createJWT, createJWS, createJWE } from "@aura-stack/jose"
+
+// JWSs (Json Web Signature)
+export const { signJWS, verifyJWS } = createJWS("secret-key")
+
+// JWEs (Json Web Encryption)
+export const { encryptJWE, decryptJWE } = createJWE("secret-key")
+
+// Nested JWTs (JWS + JWE)
+export const { encodeJWT, decodeJWT } = createJWT("secret-key")
+```
+
+---
+
+## Installation
+
+If you haven’t installed the package yet:
+
+```npm
+npm install @aura-stack/jose
+```
+
+<Callout>
+  The `@aura-stack/jose` package is already included as a dependency of `@aura-stack/auth`. You only need to install it separately
+  if you want to use it standalone.
+</Callout>
+
+## Underlying Library
+
+This package is built on top of [`jose`](https://github.com/panva/jose) - a robust implementation of JOSE standards. For advanced use cases, you can access the underlying library directly via the `@aura-stack/jose/jose` entry point.
+
+```ts lineNumbers
+import * as jose from "@aura-stack/jose/jose"
+
+// Full access to jose library
+const key = await jose.generateSecret("HS256")
+const jwt = await new jose.SignJWT({ foo: "bar" }).setProtectedHeader({ alg: "HS256" }).sign(key)
+```
