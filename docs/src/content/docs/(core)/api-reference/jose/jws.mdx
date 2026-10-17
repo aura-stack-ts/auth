@@ -1,0 +1,158 @@
+---
+title: JWS
+description: JSON Web Signature (JWS) implementation using the jose library.
+---
+
+## Signing API (JWS)
+
+### `signJWS(payload, secret)`
+
+Signs a JWT using HS256 algorithm with standard claims.
+
+#### Signature
+
+```ts lineNumbers
+function signJWS(payload: JWTPayload, secret: SecretInput): Promise<string>
+```
+
+#### Parameters
+
+| Parameter | Type          | Description              |
+| --------- | ------------- | ------------------------ |
+| `payload` | `JWTPayload`  | JWT payload data to sign |
+| `secret`  | `SecretInput` | Secret key for signing   |
+
+#### Returns
+
+| Return     | Type              | Description         |
+| ---------- | ----------------- | ------------------- |
+| Signed JWT | `Promise<string>` | A signed JWT string |
+
+#### Generated Claims [!toc]
+
+The following claims are automatically added:
+
+| Claim | Description                      |
+| ----- | -------------------------------- |
+| `alg` | Algorithm: `HS256`               |
+| `typ` | Type: `JWT`                      |
+| `iat` | Issued At: Current timestamp     |
+| `nbf` | Not Before: Current timestamp    |
+| `exp` | Expiration: 15 days from now     |
+| `jti` | JWT ID: Random unique identifier |
+
+#### Example
+
+```ts lineNumbers
+import { signJWS } from "@aura-stack/jose"
+
+const signed = await signJWS(
+  {
+    sub: "user-123",
+    email: "user@example.com",
+  },
+  process.env.JWT_SECRET!
+)
+
+// Result: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+---
+
+### `verifyJWS(token, secret, options)`
+
+Verifies a signed JWT and returns the payload if valid.
+
+#### Signature
+
+```ts lineNumbers
+function verifyJWS(token: string, secret: SecretInput, options?: JWTVerifyOptions): Promise<JWTPayload>
+```
+
+#### Parameters
+
+| Parameter | Type               | Description                                       |
+| --------- | ------------------ | ------------------------------------------------- |
+| `token`   | `string`           | The JWT string to be verified                     |
+| `secret`  | `SecretInput`      | Secret key for verifying the integrity of the JWT |
+| `options` | `JWTVerifyOptions` | Extra JWT verification options                    |
+
+#### Returns
+
+| Return               | Type                  | Description                      |
+| -------------------- | --------------------- | -------------------------------- |
+| Verified JWT payload | `Promise<JWTPayload>` | The verified JWT payload content |
+
+**Security**
+
+- Rejects tokens using the "none" algorithm (unsecured JWTs)
+- Validates signature integrity
+- Checks expiration automatically
+
+#### Example
+
+```ts lineNumbers
+import { verifyJWS } from "@aura-stack/jose"
+
+try {
+  const payload = await verifyJWS(signed, process.env.JWT_SECRET!)
+  console.log("Valid token:", payload)
+} catch (error) {
+  console.error("Invalid token:", error.message)
+}
+```
+
+**Using extra JWT verification options**
+
+```ts lineNumbers
+import { verifyJWS } from "@aura-stack/jose"
+
+try {
+  const payload = await verifyJWS(signed, process.env.JWT_SECRET!, {
+    algorithms: ["HS256"],
+    audience: "audience.value",
+  })
+  console.log("Valid token:", payload)
+} catch (error) {
+  console.error("Invalid token:", error.message)
+}
+```
+
+---
+
+### `createJWS(secret)`
+
+Creates a JWS handler with bound signing and verification methods.
+
+#### Signature
+
+```ts lineNumbers
+function createJWS(secret: SecretInput): {
+  signJWS: (payload: JWTPayload) => Promise<string>
+  verifyJWS: (token: string, options?: JWTVerifyOptions) => Promise<JWTPayload>
+}
+```
+
+#### Parameters
+
+| Parameter | Type          | Description                                  |
+| --------- | ------------- | -------------------------------------------- |
+| `secret`  | `SecretInput` | Secret key for signing and verifying the JWT |
+
+#### Returns
+
+| Return    | Type                                                                 | Description                                                                        |
+| --------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| signJWS   | `(payload: JWTPayload) => Promise<string>`                           | Function to sign a JWT using HS256 algorithm                                       |
+| verifyJWS | `(token: string, options?: JWTVerifyOptions) => Promise<JWTPayload>` | Function to verify the signature and JWT integrity signed using `signJWS` function |
+
+#### Example
+
+```ts lineNumbers
+import { createJWS } from "@aura-stack/jose"
+
+const jws = createJWS(process.env.JWT_SECRET!)
+
+const signed = await jws.signJWS({ sub: "user-123" })
+const payload = await jws.verifyJWS(signed)
+```

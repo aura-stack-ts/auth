@@ -1,0 +1,196 @@
+---
+title: JWT
+description: JSON Web Token (JWT) implementation using the jose library.
+---
+
+## Signing and Encrypting a JWT
+
+By default, Aura Auth uses the same secret value to encrypt and sign JWTs. However, a stronger version is provided that accepts separate secret keys for encryption and signing. The `encodeJWT`, `decodeJWT`, and `createJWT` functions accept an object with `jws` and `jwe` fields to specify separate keys. The second argument extends the `DerivedKeyInput` type.
+
+```ts lineNumbers
+import { DerivedKeyInput } from "@aura-stack/jose"
+
+const derivedKeys: DerivedKeyInput = {
+  jwe: process.env.AURA_AUTH_JWE_SECRET,
+  jws: process.env.AURA_AUTH_JWS_SECRET,
+}
+```
+
+### `encodeJWT(payload, secret)`
+
+Encodes a JWT by first signing it (JWS) and then encrypting it (JWE). This ensures both **integrity** and **confidentiality** as recommended by [RFC 7519 #11.2](https://datatracker.ietf.org/doc/html/rfc7519#section-11.2).
+
+#### Signature
+
+```ts lineNumbers
+function encodeJWT(token: JWTPayload, secret: SecretInput | DerivedKeyInput): Promise<string>
+```
+
+#### Parameters
+
+| Parameter | Type                               | Description                           |
+| --------- | ---------------------------------- | ------------------------------------- |
+| `token`   | `JWTPayload`                       | Payload data to encode in the JWT     |
+| `secret`  | `SecretInput` \| `DerivedKeyInput` | Secret key for signing and encrypting |
+
+#### Returns
+
+| Return  | Type              | Description                       |
+| ------- | ----------------- | --------------------------------- |
+| Encoded | `Promise<string>` | A signed and encrypted JWT string |
+
+#### Example
+
+```ts lineNumbers
+import { encodeJWT } from "@aura-stack/jose"
+
+const token = await encodeJWT(
+  {
+    sub: "user-123",
+    email: "user@example.com",
+    role: "admin",
+  },
+  process.env.JWT_SECRET!
+)
+
+console.log(token) // eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIi...
+```
+
+<Callout type="info">The token is first signed using HS256, then encrypted using A256GCM.</Callout>
+
+**Using Derived Keys**
+
+```ts lineNumbers
+import { encodeJWT } from "@aura-stack/jose"
+
+const token = await encodeJWT(
+  {
+    sub: "user-123",
+    email: "user@example.com",
+    role: "admin",
+  },
+  {
+    jwe: process.env.AURA_AUTH_JWE_SECRET,
+    jws: process.env.AURA_AUTH_JWS_SECRET,
+  }
+)
+
+console.log(token) // eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIi...
+```
+
+### `decodeJWT(token, secret)`
+
+Decodes a JWT by first decrypting it (JWE) and then verifying it (JWS). This validates both **confidentiality** and **integrity**.
+
+#### Signature
+
+```ts lineNumbers
+function decodeJWT(token: string, secret: SecretInput | DerivedKeyInput): Promise<JWTPayload>
+```
+
+#### Parameters
+
+| Parameter | Type                               | Description                             |
+| --------- | ---------------------------------- | --------------------------------------- |
+| `token`   | `string`                           | Encoded JWT string to decode            |
+| `secret`  | `SecretInput` \| `DerivedKeyInput` | Secret key for decrypting and verifying |
+
+#### Returns
+
+| Return  | Type                  | Description                     |
+| ------- | --------------------- | ------------------------------- |
+| Decoded | `Promise<JWTPayload>` | The decoded JWT payload content |
+
+#### Example
+
+```ts lineNumbers
+import { decodeJWT } from "@aura-stack/jose"
+
+try {
+  const payload = await decodeJWT(token, process.env.JWT_SECRET!)
+
+  console.log(payload.sub) // 'user-123'
+  console.log(payload.email) // 'user@example.com'
+  console.log(payload.exp) // 1234567890 (expiration timestamp)
+} catch (error) {
+  console.error("Invalid or expired token")
+}
+```
+
+**Using Derived Keys**
+
+```ts lineNumbers
+import { decodeJWT } from "@aura-stack/jose"
+
+try {
+  const payload = await decodeJWT(token, {
+    jwe: process.env.AURA_AUTH_JWE_SECRET,
+    jws: process.env.AURA_AUTH_JWS_SECRET,
+  })
+
+  console.log(payload.sub) // 'user-123'
+  console.log(payload.email) // 'user@example.com'
+  console.log(payload.exp) // 1234567890 (expiration timestamp)
+} catch (error) {
+  console.error("Invalid or expired token")
+}
+```
+
+---
+
+### `createJWT(secret)`
+
+Creates a JWT handler with bound `encodeJWT` and `decodeJWT` methods.
+
+#### Signature
+
+```ts lineNumbers
+function createJWT(secret: SecretInput | DerivedKeyInput): {
+  encodeJWT: (payload: JWTPayload) => Promise<string>
+  decodeJWT: (token: string) => Promise<JWTPayload>
+}
+```
+
+#### Parameters
+
+| Parameter | Type                               | Description                       |
+| --------- | ---------------------------------- | --------------------------------- |
+| `secret`  | `SecretInput` \| `DerivedKeyInput` | Secret key for all JWT operations |
+
+#### Returns
+
+| Return     | Type                                       | Description                                                                |
+| ---------- | ------------------------------------------ | -------------------------------------------------------------------------- |
+| encodedJWT | `(payload: JWTPayload) => Promise<string>` | Function that encodes a JWT that is signed and encrypted from payload data |
+| decodedJWT | `(token: string) => Promise<JWTPayload>`   | Function that decodes the JWT string by verifying and decrypting it        |
+
+#### Example
+
+```ts lineNumbers
+import { createJWT } from "@aura-stack/jose"
+
+const jwt = createJWT(process.env.JWT_SECRET!)
+
+// Encode
+const token = await jwt.encodeJWT({ sub: "user-123" })
+
+// Decode
+const payload = await jwt.decodeJWT(token)
+```
+
+**Using Derived Keys**
+
+```ts lineNumbers
+import { createJWT } from "@aura-stack/jose"
+
+const jwt = createJWT({
+  jwe: process.env.AURA_AUTH_JWE_SECRET,
+  jws: process.env.AURA_AUTH_JWS_SECRET,
+})
+
+// Encode
+const token = await jwt.encodeJWT({ sub: "user-123" })
+
+// Decode
+const payload = await jwt.decodeJWT(token)
+```

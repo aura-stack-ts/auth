@@ -1,0 +1,179 @@
+---
+title: JWE
+description: JSON Web Encryption (JWE) implementation using the jose library.
+---
+
+## Encryption API (JWE)
+
+### `encryptJWE(payload, secret, options)`
+
+Encrypts a JWT string using A256GCM encryption.
+
+#### Signature
+
+```ts lineNumbers
+function encryptJWE(payload: JWTPayload, secret: SecretInput, options?: EncryptOptions): Promise<string>
+```
+
+#### Parameters
+
+| Parameter | Type             | Description                                      |
+| --------- | ---------------- | ------------------------------------------------ |
+| `payload` | `JWTPayload`     | The JWTPayload data to be encrypted              |
+| `secret`  | `SecretInput`    | Secret key for encrypting and decrypting         |
+| `options` | `EncryptOptions` | Encryption options to set `nbf` and `exp` claims |
+
+#### Returns
+
+| Return    | Type              | Description             |
+| --------- | ----------------- | ----------------------- |
+| Encrypted | `Promise<string>` | An encrypted JWT string |
+
+**Generated Claims**
+
+| Claim | Description                          |
+| ----- | ------------------------------------ |
+| `alg` | Algorithm: `dir` (direct encryption) |
+| `enc` | Encryption: `A256GCM`                |
+| `typ` | Type: `JWT`                          |
+| `cty` | Content Type: `JWT`                  |
+| `iat` | Issued At: Current timestamp         |
+| `nbf` | Not Before: Current timestamp        |
+| `exp` | Expiration: 15 days from now         |
+| `jti` | JWT ID: Random unique identifier     |
+
+#### Example
+
+```ts lineNumbers
+import { encryptJWE } from "@aura-stack/jose"
+
+const encrypted = await encryptJWE({ sub: "user-123" }, process.env.ENCRYPTION_KEY!)
+```
+
+**Using encryption options**
+
+```ts lineNumbers
+import { encryptJWE } from "@aura-stack/jose"
+
+const encrypted = await encryptJWE({ sub: "user-123" }, process.env.ENCRYPTION_KEY!, {
+  nbf: Math.floor(Date.now() / 1000) + 60,
+  exp: Math.floor(Date.now() / 1000) + 60 * 60 * 5,
+})
+```
+
+---
+
+### `decryptJWE(token, secret, options)`
+
+Decrypts an encrypted JWT and returns the original payload.
+
+#### Signature
+
+```ts lineNumbers
+function decryptJWE(token: string, secret: SecretInput, options?: JWTDecryptOptions): Promise<JWTPayload>
+```
+
+#### Parameters
+
+| Parameter | Type                | Description                                |
+| --------- | ------------------- | ------------------------------------------ |
+| `token`   | `string`            | The string data to be decrypted            |
+| `secret`  | `SecretInput`       | Secret key for decrypting the token string |
+| `options` | `JWTDecryptOptions` | Extra JWE decryption options               |
+
+#### Returns
+
+| Return    | Type                  | Description                |
+| --------- | --------------------- | -------------------------- |
+| Decrypted | `Promise<JWTPayload>` | A decrypted payload object |
+
+#### Example
+
+```ts lineNumbers
+import { decryptJWE } from "@aura-stack/jose"
+
+try {
+  const decrypted = await decryptJWE(encrypted, process.env.ENCRYPTION_KEY!)
+  console.log("Decrypted JWT:", decrypted)
+} catch (error) {
+  console.error("Decryption failed:", error.message)
+}
+```
+
+---
+
+### `createJWE(secret)`
+
+Creates a JWE handler with bound encryption and decryption methods.
+
+#### Signature
+
+```ts lineNumbers
+function createJWE(secret: SecretInput): {
+  encryptJWE: (payload: JWTPayload, options?: EncryptOptions) => Promise<string>
+  decryptJWE: (token: string, options?: JWTDecryptOptions) => Promise<JWTPayload>
+}
+```
+
+#### Parameters
+
+| Parameter | Type          | Description                              |
+| --------- | ------------- | ---------------------------------------- |
+| `secret`  | `SecretInput` | Secret key for encrypting and decrypting |
+
+#### Returns
+
+| Return     | Type                                                                  | Description                                                      |
+| ---------- | --------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| encryptJWE | `(payload: JWTPayload, options?: EncryptOptions) => Promise<string>`  | Function to encrypt a payload using A256GCM algorithm            |
+| decryptJWE | `(token: string, options?: JWTDecryptOptions) => Promise<JWTPayload>` | Function to decrypt structural data encrypted using `encryptJWE` |
+
+#### Example
+
+```ts lineNumbers
+import { createJWE } from "@aura-stack/jose"
+
+const jwe = createJWE(process.env.ENCRYPTION_KEY!)
+
+const encrypted = await jwe.encryptJWE({ sub: "user-123" })
+const decrypted = await jwe.decryptJWE(encrypted)
+```
+
+---
+
+## Compact Encryption API (Compact JWE)
+
+For use cases where you need to encrypt and decrypt arbitrary strings rather than structured JSON objects, use the compact JWE APIs introduced in `@aura-stack/jose`.
+
+### `compactEncryptJWE(payload, secret, options)`
+
+Encrypts an arbitrary string payload using compact JWE serialization.
+
+#### Signature
+
+```ts lineNumbers
+function compactEncryptJWE(payload: string, secret: SecretInput, options?: EncryptOptions): Promise<string>
+```
+
+### `decryptCompactJWE(token, secret, options)`
+
+Decrypts a compact JWE string and returns the original string payload.
+
+#### Signature
+
+```ts lineNumbers
+function decryptCompactJWE(token: string, secret: SecretInput, options?: JWTDecryptOptions): Promise<string>
+```
+
+### `createCompactJWE(secret)`
+
+Creates a combined handler for compact encryption and decryption.
+
+#### Signature
+
+```ts lineNumbers
+function createCompactJWE(secret: SecretInput): {
+  compactEncryptJWE: (payload: string, options?: EncryptOptions) => Promise<string>
+  decryptCompactJWE: (token: string, options?: JWTDecryptOptions) => Promise<string>
+}
+```
