@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added support for configuring `baseURL` through the `BASE_URL` environment variable, in addition to passing it directly to `createAuthClient()`. [#286](https://github.com/aura-stack-ts/auth/pull/286)
+
 ---
 
 ## [0.10.1] - 2026-10-17

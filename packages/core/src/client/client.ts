@@ -29,7 +29,7 @@ export const createAuthClient = <
     DefaultUser extends User = User,
     SignUpPayload extends Record<string, any> = Record<string, any>,
 >(
-    options: AuthClientOptions
+    options?: AuthClientOptions
 ) => {
     const baseURL = getEnv("BASE_URL") || options?.baseURL
     if (typeof window === "undefined" && !baseURL) {
