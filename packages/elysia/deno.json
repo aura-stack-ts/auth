@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/elysia",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts"
@@ -44,7 +44,7 @@
   "imports": {
     "@/": "./src/",
     "elysia": "npm:elysia@^1.2.22",
-    "@aura-stack/auth": "npm:@aura-stack/auth@^0.10.0"
+    "@aura-stack/auth": "npm:@aura-stack/auth@^0.10.1"
   },
   "publish": {
     "include": ["src/**/*.ts", "src/_core", "src/oauth", "src/identity", "README.md", "CHANGELOG.md"],

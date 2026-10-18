@@ -10,11 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [0.4.0] - 2026-10-17
+## [0.4.1] - 2026-10-17
 
 ### Changed
 
-- Updated the `@aura-stack/react` dependency to `v0.4.0`. [#285](https://github.com/aura-stack-ts/auth/pull/285)
+- Updated the `@aura-stack/react` dependency to `v0.4.1`. [#285](https://github.com/aura-stack-ts/auth/pull/285)
 
 ---
 
