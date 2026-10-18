@@ -905,4 +905,11 @@ describe("createAuthClient", () => {
         })
         expect(response).toEqual(false)
     })
+
+    test("set baseURL from BASE_URL environment variable", () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        expect(createClientMock).toHaveBeenCalledWith({
+            baseURL: "https://example.com",
+        })
+    })
 })

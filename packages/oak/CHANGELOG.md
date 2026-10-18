@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.1.0] - 2026-10-17
+
 ### Added
 
 - Added the `/types` entry point to re-export the public types from `@aura-stack/auth` and expose the integration-specific `OakInstance` type. [#257](https://github.com/aura-stack-ts/auth/pull/257)

@@ -8,11 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.10.1] - 2026-10-17
+
 ### Added
 
 - Added support for configuring `basePath` through the `BASE_PATH` environment variable, in addition to passing it directly to `createAuth()`. [#283](https://github.com/aura-stack-ts/auth/pull/283)
 
 - Added experimental support for configuring trusted proxy header sources used to construct request URLs. Header sources can provide the complete URL through `{ url: "header" }` or specify separate protocol and host headers through `{ protocol: "header-proto", host: "header-host" }`. The configuration also includes built-in sources such as `forwarded`, `forwarded.proto`, and `forwarded.host`. [#275](https://github.com/aura-stack-ts/auth/pull/275)
+
+- Added the `TikTok` OAuth provider to the supported integrations in Aura Auth. [#156](https://github.com/aura-stack-ts/auth/pull/156)
+
+- Added the `Reddit` OAuth provider to the supported integrations in Aura Auth. [#155](https://github.com/aura-stack-ts/auth/pull/155)
+
+- Added the `Coinbase` OAuth provider to the supported integrations in Aura Auth. [#152](https://github.com/aura-stack-ts/auth/pull/152)
 
 ### Changed
 
@@ -276,7 +286,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [0.4.0] - 2026-02-16
+## [0.4.1] - 2026-02-16
 
 ### Added
 

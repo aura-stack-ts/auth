@@ -2912,7 +2912,7 @@
       },
       "packages/elysia": {
         "dependencies": [
-          "npm:@aura-stack/auth@0.9",
+          "npm:@aura-stack/auth@~0.10.1",
           "npm:elysia@^1.2.22"
         ],
         "packageJson": {
@@ -2929,7 +2929,7 @@
       },
       "packages/express": {
         "dependencies": [
-          "npm:@aura-stack/auth@0.9",
+          "npm:@aura-stack/auth@~0.10.1",
           "npm:express@^4.18.2"
         ],
         "packageJson": {
@@ -2941,7 +2941,7 @@
       },
       "packages/hono": {
         "dependencies": [
-          "npm:@aura-stack/auth@0.9",
+          "npm:@aura-stack/auth@~0.10.1",
           "npm:hono@4"
         ]
       },
@@ -2957,7 +2957,7 @@
       },
       "packages/next": {
         "dependencies": [
-          "npm:@aura-stack/react@~0.3.1",
+          "npm:@aura-stack/react@~0.4.1",
           "npm:next@16.1.6",
           "npm:react@19.2.3"
         ],
@@ -2997,13 +2997,13 @@
       },
       "packages/react": {
         "dependencies": [
-          "npm:@aura-stack/auth@0.9",
+          "npm:@aura-stack/auth@~0.10.1",
           "npm:react@^19.2.3"
         ]
       },
       "packages/react-router": {
         "dependencies": [
-          "npm:@aura-stack/react@~0.3.1",
+          "npm:@aura-stack/react@~0.4.1",
           "npm:react-router@^7.12.0",
           "npm:react@^19.2.3"
         ]
