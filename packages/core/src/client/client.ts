@@ -19,6 +19,7 @@ import type {
     GetProviderTokensReturn,
 } from "@/@types/index.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
+import { getEnv } from "@/shared/env.ts"
 
 export type { AuthClientOptions }
 
@@ -30,14 +31,15 @@ export const createAuthClient = <
 >(
     options: AuthClientOptions
 ) => {
-    if (typeof window === "undefined" && !options.baseURL) {
+    const baseURL = getEnv("BASE_URL") || options?.baseURL
+    if (typeof window === "undefined" && !baseURL) {
         throw new AuraAuthError({ code: "CLIENT_BASE_URL_MISSING" })
     }
 
     const client = createClient({
         cache: "no-store",
         credentials: "include",
-        baseURL: options.baseURL ?? window.location.origin,
+        baseURL: baseURL ?? window.location.origin,
         ...options,
     })
 
