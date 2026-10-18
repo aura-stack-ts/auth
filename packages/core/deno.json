@@ -22,6 +22,7 @@
     "./oauth/authentik": "./src/oauth/authentik.ts",
     "./oauth/bitbucket": "./src/oauth/bitbucket.ts",
     "./oauth/click-up": "./src/oauth/click-up.ts",
+    "./oauth/coinbase": "./src/oauth/coinbase.ts",
     "./oauth/discord": "./src/oauth/discord.ts",
     "./oauth/dribbble": "./src/oauth/dribbble.ts",
     "./oauth/dropbox": "./src/oauth/dropbox.ts",
@@ -34,9 +35,11 @@
     "./oauth/mailchimp": "./src/oauth/mailchimp.ts",
     "./oauth/notion": "./src/oauth/notion.ts",
     "./oauth/pinterest": "./src/oauth/pinterest.ts",
+    "./oauth/reddit": "./src/oauth/reddit.ts",
     "./oauth/spotify": "./src/oauth/spotify.ts",
     "./oauth/strava": "./src/oauth/strava.ts",
     "./oauth/twitch": "./src/oauth/twitch.ts",
+    "./oauth/tiktok": "./src/oauth/tiktok.ts",
     "./oauth/x": "./src/oauth/x.ts"
   },
   "imports": {
