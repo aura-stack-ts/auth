@@ -906,10 +906,49 @@ describe("createAuthClient", () => {
         expect(response).toEqual(false)
     })
 
-    test("set baseURL from BASE_URL environment variable", () => {
+    test("set baseURL from BASE_URL environment variable", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        expect(createClientMock).toHaveBeenCalledWith({
+
+        const spy = vi.spyOn(await import("@/client/client.ts"), "createClient")
+        createAuthClient({})
+        expect(spy).toHaveBeenCalledWith({
+            baseURL: "https://example.com",
+            cache: "no-store",
+            credentials: "include",
+        })
+    })
+
+    test("set baseURL from options when BASE_URL environment variable is not set and options are provided", async () => {
+        vi.stubEnv("BASE_URL", "")
+
+        const spy = vi.spyOn(await import("@/client/client.ts"), "createClient")
+        createAuthClient({
             baseURL: "https://example.com",
         })
+        expect(spy).toHaveBeenCalledWith({
+            baseURL: "https://example.com",
+            cache: "no-store",
+            credentials: "include",
+        })
+    })
+
+    test("set baseURL from window.location.origin when BASE_URL environment variable is not set and options are not provided", async () => {
+        vi.stubEnv("BASE_URL", "")
+        vi.stubGlobal("window", { location: { origin: "https://example.com" } })
+
+        const spy = vi.spyOn(await import("@/client/client.ts"), "createClient")
+        createAuthClient({})
+        expect(spy).toHaveBeenCalledWith({
+            baseURL: "https://example.com",
+            cache: "no-store",
+            credentials: "include",
+        })
+    })
+
+    test("throws error when BASE_URL environment variable is not set, options are not provided, and window.location.origin is not available", async () => {
+        vi.stubEnv("BASE_URL", "")
+        vi.stubGlobal("window", undefined)
+
+        expect(() => createAuthClient({})).toThrow()
     })
 })
