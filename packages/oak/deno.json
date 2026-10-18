@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/oak",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch src/index.ts",

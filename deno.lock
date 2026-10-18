@@ -21,7 +21,9 @@
     "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/testing@^1.0.20": "1.0.20",
     "jsr:@supabase/functions-js@2": "2.112.1",
+    "npm:@aura-stack/auth@0.9": "0.9.2_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5",
     "npm:@aura-stack/auth@0.9.0": "0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5",
+    "npm:@aura-stack/react@~0.3.1": "0.3.2_@types+react@19.2.18_react@19.2.3",
     "npm:@aura-stack/router@~0.11.4": "0.11.4_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5",
     "npm:@prisma/adapter-pg@7.9.1": "7.9.1",
     "npm:@prisma/adapter-pg@^7.9.1": "7.9.1",
@@ -168,6 +170,18 @@
         "zod"
       ]
     },
+    "@aura-stack/auth@0.9.2_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5": {
+      "integrity": "sha512-voRsCngRc90a7s2Qs602WSXFrX7tQAAE9LKre2nGJXM1kWjyvx0VvKKUL/BsPds3TogGJSD/ZJyhOEBysX6FIA==",
+      "dependencies": [
+        "@aura-stack/jose",
+        "@aura-stack/rate-limiter",
+        "@aura-stack/router@0.9.0_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5",
+        "arktype",
+        "typebox",
+        "valibot@1.4.2",
+        "zod"
+      ]
+    },
     "@aura-stack/jose@0.6.0": {
       "integrity": "sha512-wt1Jg6S42x1s9nqftvTBPXK/iYQX6Ihn01Oo5PO3i5ULW+QJNZFww6udicqzXKAFMu5rmez4e8L9qf/sx6uJaA==",
       "dependencies": [
@@ -176,6 +190,14 @@
     },
     "@aura-stack/rate-limiter@0.1.1": {
       "integrity": "sha512-DWA2u97BZpMMu2MRlEQV7+R992KjY911yg+kajU7+mVIBaxkdKBfZRLxHQ7pR/INos+WIjqGRsJ34awccVUo1g=="
+    },
+    "@aura-stack/react@0.3.2_@types+react@19.2.18_react@19.2.3": {
+      "integrity": "sha512-KYQ/kXznTR8gEOxuOvV7N6uHF9PkN6pmJmzFBszI5z270ZpX2c4p21Im1iaMxvUvzfoZkn/SCzAKFiGtZrnvjQ==",
+      "dependencies": [
+        "@aura-stack/auth@0.9.2_arktype@2.2.0_typebox@1.1.38_valibot@1.4.2_zod@4.3.5",
+        "@types/react",
+        "react"
+      ]
     },
     "@aura-stack/router@0.11.4_arktype@2.2.0_typebox@1.1.38_valibot@1.4.0_zod@4.3.5": {
       "integrity": "sha512-yPzackDMDXx/aew5DIvMWcUx6r/rCqeETC7yBtEM487vEt5CA2rt1GnNfVgbt8RDmAzEE6fXB4tDsytXGoDtlQ==",
