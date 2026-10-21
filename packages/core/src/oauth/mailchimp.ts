@@ -1,4 +1,5 @@
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface Login {
     email: string
@@ -30,21 +31,23 @@ export interface MailchimpProfile {
  * @see [Mailchimp - API Root](https://mailchimp.com/developer/marketing/api/root/)
  */
 export const mailchimp = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<MailchimpProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<MailchimpProfile, DefaultUser>>
 ): OAuthProviderCredentials<MailchimpProfile, DefaultUser> => {
-    return {
-        id: "mailchimp",
-        name: "Mailchimp",
-        authorize: "https://login.mailchimp.com/oauth2/authorize",
-        accessToken: "https://login.mailchimp.com/oauth2/token",
-        userInfo: "https://login.mailchimp.com/oauth2/metadata",
-        profile: (profile) =>
-            ({
-                sub: profile.user_id,
-                name: profile.accountname,
-                email: profile.login.email,
-                image: profile.login.avatar,
-            }) as DefaultUser,
-        ...options,
-    }
+    return merge(
+        {
+            id: "mailchimp",
+            name: "Mailchimp",
+            authorize: "https://login.mailchimp.com/oauth2/authorize",
+            accessToken: "https://login.mailchimp.com/oauth2/token",
+            userInfo: "https://login.mailchimp.com/oauth2/metadata",
+            profile: (profile) =>
+                ({
+                    sub: profile.user_id,
+                    name: profile.accountname,
+                    email: profile.login.email,
+                    image: profile.login.avatar,
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<MailchimpProfile, DefaultUser>,
+        options
+    )
 }

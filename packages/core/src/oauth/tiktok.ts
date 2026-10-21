@@ -1,3 +1,4 @@
+import { merge } from "@/shared/utils.ts"
 import type { OAuthProviderConfig, OAuthProviderCredentials, User } from "@/@types/index.js"
 
 /**
@@ -31,25 +32,27 @@ export interface TikTokProfile {
 export const tiktok = <DefaultUser extends User = User>(
     options?: Partial<OAuthProviderConfig<TikTokProfile, DefaultUser>>
 ): OAuthProviderCredentials<TikTokProfile, DefaultUser> => {
-    return {
-        id: "tiktok",
-        name: "TikTok",
-        authorize: {
-            url: "https://www.tiktok.com/v2/auth/authorize",
-            params: {
-                scope: "user.info.basic",
-                response_type: "code",
+    return merge(
+        {
+            id: "tiktok",
+            name: "TikTok",
+            authorize: {
+                url: "https://www.tiktok.com/v2/auth/authorize",
+                params: {
+                    scope: "user.info.basic",
+                    response_type: "code",
+                },
             },
-        },
-        accessToken: "https://open.tiktokapis.com/v2/oauth/token",
-        userInfo: "https://open.tiktokapis.com/v2/user/info",
-        profile: (profile) =>
-            ({
-                sub: profile.open_id,
-                name: profile.display_name,
-                image: profile.avatar_url_100,
-                email: "",
-            }) as DefaultUser,
-        ...options,
-    }
+            accessToken: "https://open.tiktokapis.com/v2/oauth/token",
+            userInfo: "https://open.tiktokapis.com/v2/user/info",
+            profile: (profile) =>
+                ({
+                    sub: profile.open_id,
+                    name: profile.display_name,
+                    image: profile.avatar_url_100,
+                    email: "",
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<TikTokProfile, DefaultUser>,
+        options
+    )
 }

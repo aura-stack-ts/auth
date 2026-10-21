@@ -1,4 +1,5 @@
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Figma API - Users](https://developers.figma.com/docs/rest-api/users-types/)
@@ -18,27 +19,29 @@ export interface FigmaProfile {
  * @see [Figma - OAuth Scopes](https://developers.figma.com/docs/rest-api/scopes/)
  */
 export const figma = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<FigmaProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<FigmaProfile, DefaultUser>>
 ): OAuthProviderCredentials<FigmaProfile, DefaultUser> => {
-    return {
-        id: "figma",
-        name: "Figma",
-        authorize: {
-            url: "https://www.figma.com/oauth",
-            params: {
-                scope: "current_user:read",
-                responseType: "code",
+    return merge(
+        {
+            id: "figma",
+            name: "Figma",
+            authorize: {
+                url: "https://www.figma.com/oauth",
+                params: {
+                    scope: "current_user:read",
+                    responseType: "code",
+                },
             },
-        },
-        accessToken: "https://api.figma.com/v1/oauth/token",
-        userInfo: "https://api.figma.com/v1/me",
-        profile: (profile) =>
-            ({
-                sub: profile.id,
-                name: profile.handle,
-                email: profile.email,
-                image: profile.img_url,
-            }) as DefaultUser,
-        ...options,
-    }
+            accessToken: "https://api.figma.com/v1/oauth/token",
+            userInfo: "https://api.figma.com/v1/me",
+            profile: (profile) =>
+                ({
+                    sub: profile.id,
+                    name: profile.handle,
+                    email: profile.email,
+                    image: profile.img_url,
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<FigmaProfile, DefaultUser>,
+        options
+    )
 }

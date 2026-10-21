@@ -1,4 +1,5 @@
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Get the authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user)
@@ -61,27 +62,29 @@ export interface GitHubProfile {
  * @see [Github - Get the authenticated user](https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user)
  */
 export const github = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<GitHubProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<GitHubProfile, DefaultUser>>
 ): OAuthProviderCredentials<GitHubProfile, DefaultUser> => {
-    return {
-        id: "github",
-        name: "GitHub",
-        authorize: {
-            url: "https://github.com/login/oauth/authorize",
-            params: {
-                scope: "read:user user:email",
-                responseType: "code",
+    return merge(
+        {
+            id: "github",
+            name: "GitHub",
+            authorize: {
+                url: "https://github.com/login/oauth/authorize",
+                params: {
+                    scope: "read:user user:email",
+                    responseType: "code",
+                },
             },
-        },
-        accessToken: "https://github.com/login/oauth/access_token",
-        userInfo: "https://api.github.com/user",
-        profile: (profile) =>
-            ({
-                sub: profile.id.toString(),
-                name: profile.name ?? profile.login,
-                email: profile.email ?? undefined,
-                image: profile.avatar_url,
-            }) as DefaultUser,
-        ...options,
-    }
+            accessToken: "https://github.com/login/oauth/access_token",
+            userInfo: "https://api.github.com/user",
+            profile: (profile) =>
+                ({
+                    sub: profile.id.toString(),
+                    name: profile.name ?? profile.login,
+                    email: profile.email ?? undefined,
+                    image: profile.avatar_url,
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<GitHubProfile, DefaultUser>,
+        options
+    )
 }

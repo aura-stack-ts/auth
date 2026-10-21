@@ -1,4 +1,5 @@
-import type { OpenIDProvider, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OpenIDProvider, User } from "@/@types/index.ts"
 
 export interface AuthentikProfile {
     iss: string
@@ -27,19 +28,21 @@ export interface AuthentikProfile {
  * @see [Authentik - Create an OAuth2 Provider](https://docs.goauthentik.io/add-secure-apps/providers/oauth2/create-oauth2-provider/)
  */
 export const authentik = <DefaultUser extends User = User>(
-    options?: Partial<OpenIDProvider<AuthentikProfile, DefaultUser>>
+    options?: DeepPartial<OpenIDProvider<AuthentikProfile, DefaultUser>>
 ): OpenIDProvider<AuthentikProfile, DefaultUser> => {
-    return {
-        id: "authentik",
-        name: "Authentik",
-        issuer: "https://authentik.company/application/o/:application_slug",
-        profile: (profile) =>
-            ({
-                sub: profile.sub,
-                name: profile.given_name,
-                email: profile.email,
-                image: null,
-            }) as DefaultUser,
-        ...options,
-    }
+    return merge(
+        {
+            id: "authentik",
+            name: "Authentik",
+            issuer: "https://authentik.company/application/o/:application_slug",
+            profile: (profile) =>
+                ({
+                    sub: profile.sub,
+                    name: profile.given_name,
+                    email: profile.email,
+                    image: null,
+                }) as DefaultUser,
+        },
+        options
+    )
 }

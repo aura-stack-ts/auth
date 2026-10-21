@@ -1,4 +1,5 @@
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Strava - SummaryClub](https://developers.strava.com/docs/reference/#api-models-SummaryClub)
@@ -74,27 +75,29 @@ export interface StravaProfile {
  * @see [Strava - API Reference](https://developers.strava.com/docs/reference/)
  */
 export const strava = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<StravaProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<StravaProfile, DefaultUser>>
 ): OAuthProviderCredentials<StravaProfile, DefaultUser> => {
-    return {
-        id: "strava",
-        name: "Strava",
-        authorize: {
-            url: "https://www.strava.com/oauth/authorize",
-            params: {
-                scope: "read",
-                responseType: "code",
+    return merge(
+        {
+            id: "strava",
+            name: "Strava",
+            authorize: {
+                url: "https://www.strava.com/oauth/authorize",
+                params: {
+                    scope: "read",
+                    responseType: "code",
+                },
             },
-        },
-        accessToken: "https://www.strava.com/oauth/token",
-        userInfo: "https://www.strava.com/api/v3/athlete",
-        profile: (profile) =>
-            ({
-                sub: profile.id.toString(),
-                name: `${profile.firstname} ${profile.lastname}`,
-                image: profile.profile,
-                email: undefined,
-            }) as DefaultUser,
-        ...options,
-    }
+            accessToken: "https://www.strava.com/oauth/token",
+            userInfo: "https://www.strava.com/api/v3/athlete",
+            profile: (profile) =>
+                ({
+                    sub: profile.id.toString(),
+                    name: `${profile.firstname} ${profile.lastname}`,
+                    image: profile.profile,
+                    email: undefined,
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<StravaProfile, DefaultUser>,
+        options
+    )
 }

@@ -1,3 +1,4 @@
+import { merge } from "@/shared/utils.ts"
 import type { OpenIDProvider, User } from "@/@types/index.ts"
 
 /**
@@ -93,17 +94,19 @@ export interface GoogleProfile {
 export const google = <DefaultUser extends User = User>(
     options?: Partial<OpenIDProvider<GoogleProfile, DefaultUser>>
 ): OpenIDProvider<GoogleProfile, DefaultUser> => {
-    return {
-        id: "google",
-        name: "Google",
-        issuer: "https://accounts.google.com",
-        profile: (profile) =>
-            ({
-                sub: profile.sub,
-                name: profile.name,
-                email: profile.email,
-                image: profile.picture,
-            }) as DefaultUser,
-        ...options,
-    }
+    return merge(
+        {
+            id: "google",
+            name: "Google",
+            issuer: "https://accounts.google.com",
+            profile: (profile) =>
+                ({
+                    sub: profile.sub,
+                    name: profile.name,
+                    email: profile.email,
+                    image: profile.picture,
+                }) as DefaultUser,
+        },
+        options
+    )
 }

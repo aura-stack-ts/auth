@@ -1,21 +1,24 @@
 import { getEnv } from "@/shared/env.ts"
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Twitch - Get Users](https://dev.twitch.tv/docs/api/reference#get-users)
  */
 export interface TwitchProfile {
-    id: string
-    login: string
-    display_name: string
-    type: string
-    broadcaster_type: string
-    description: string
-    profile_image_url: string
-    offline_image_url: string
-    view_count: number
-    email?: string
-    created_at: string
+    data: {
+        id: string
+        login: string
+        display_name: string
+        type: string
+        broadcaster_type: string
+        description: string
+        profile_image_url: string
+        offline_image_url: string
+        view_count: number
+        email?: string
+        created_at: string
+    }[]
 }
 
 /**
@@ -28,36 +31,38 @@ export interface TwitchProfile {
  * @see [Twitch - Scopes](https://dev.twitch.tv/docs/authentication/scopes/)
  */
 export const twitch = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<TwitchProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<TwitchProfile, DefaultUser>>
 ): OAuthProviderCredentials<TwitchProfile, DefaultUser> => {
     const clientId = options?.clientId ?? getEnv("TWITCH_CLIENT_ID")
 
-    return {
-        id: "twitch",
-        name: "Twitch",
-        authorize: {
-            url: "https://id.twitch.tv/oauth2/authorize",
-            params: { scope: "user:read:email", responseType: "code" },
-        },
-        accessToken: "https://id.twitch.tv/oauth2/token",
-        userInfo: {
-            url: "https://api.twitch.tv/helix/users",
-            headers: {
-                "Client-ID": clientId!,
+    return merge(
+        {
+            id: "twitch",
+            name: "Twitch",
+            authorize: {
+                url: "https://id.twitch.tv/oauth2/authorize",
+                params: { scope: "user:read:email", responseType: "code" },
             },
-        },
-        profile(profile: { data: TwitchProfile[] }) {
-            const user = profile.data[0]
-            if (!user) {
-                throw new Error("No user data found in Twitch profile response")
-            }
-            return {
-                sub: user.id,
-                name: user.display_name,
-                email: user.email,
-                image: user.profile_image_url,
-            }
-        },
-        ...options,
-    } as OAuthProviderCredentials<TwitchProfile, DefaultUser>
+            accessToken: "https://id.twitch.tv/oauth2/token",
+            userInfo: {
+                url: "https://api.twitch.tv/helix/users",
+                headers: {
+                    "Client-ID": clientId!,
+                },
+            },
+            profile(profile) {
+                const user = profile.data[0]
+                if (!user) {
+                    throw new Error("No user data found in Twitch profile response")
+                }
+                return {
+                    sub: user.id,
+                    name: user.display_name,
+                    email: user.email,
+                    image: user.profile_image_url,
+                } as DefaultUser
+            },
+        } satisfies OAuthProviderCredentials<TwitchProfile, DefaultUser>,
+        options
+    )
 }

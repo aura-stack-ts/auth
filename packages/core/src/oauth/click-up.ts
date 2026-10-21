@@ -1,4 +1,5 @@
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Click Up - Get Authorized User](https://developer.clickup.com/reference/getauthorizeduser)
@@ -26,22 +27,24 @@ export interface ClickUpProfile {
  * @see [Click Up - Get Authorized User](https://developer.clickup.com/reference/getauthorizeduser)
  */
 export const clickUp = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<ClickUpProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<ClickUpProfile, DefaultUser>>
 ): OAuthProviderCredentials<ClickUpProfile, DefaultUser> => {
-    return {
-        id: "click-up",
-        name: "ClickUp",
-        authorize: "https://app.clickup.com/api",
-        accessToken: "https://api.clickup.com/api/v2/oauth/token",
-        userInfo: "https://api.clickup.com/api/v2/user",
-        profile: (profile) => {
-            return {
-                sub: String(profile.user.id),
-                name: profile.user.username,
-                email: profile.user.email,
-                image: profile.user.profilePicture,
-            } as DefaultUser
-        },
-        ...options,
-    }
+    return merge(
+        {
+            id: "click-up",
+            name: "ClickUp",
+            authorize: "https://app.clickup.com/api",
+            accessToken: "https://api.clickup.com/api/v2/oauth/token",
+            userInfo: "https://api.clickup.com/api/v2/user",
+            profile: (profile) => {
+                return {
+                    sub: String(profile.user.id),
+                    name: profile.user.username,
+                    email: profile.user.email,
+                    image: profile.user.profilePicture,
+                } as DefaultUser
+            },
+        } satisfies OAuthProviderCredentials<ClickUpProfile, DefaultUser>,
+        options
+    )
 }

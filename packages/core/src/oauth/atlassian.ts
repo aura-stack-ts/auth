@@ -1,4 +1,5 @@
-import type { LiteralUnion, OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, LiteralUnion, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface ExtendedProfile {
     job_title: string
@@ -30,29 +31,30 @@ export interface AtlassianProfile {
  * @see [Atlassian - Retrieve Authenticated User](https://developer.atlassian.com/cloud/jira/software/oauth-2-3lo-apps/#how-do-i-retrieve-the-public-profile-of-the-authenticated-user-)
  */
 export const atlassian = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<AtlassianProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<AtlassianProfile, DefaultUser>>
 ): OAuthProviderCredentials<AtlassianProfile, DefaultUser> => {
-    return {
-        id: "atlassian",
-        name: "Atlassian",
-        authorize: {
-            url: "https://auth.atlassian.com/authorize",
-            params: {
-                audience: "api.atlassian.com",
-                scope: "read:me read:account",
-                prompt: "consent",
+    return merge(
+        {
+            id: "atlassian",
+            name: "Atlassian",
+            authorize: {
+                url: "https://auth.atlassian.com/authorize",
+                params: {
+                    audience: "api.atlassian.com",
+                    scope: "read:me read:account",
+                    prompt: "consent",
+                },
             },
-        },
-        authorizeURL: "https://auth.atlassian.com/authorize",
-        accessToken: "https://auth.atlassian.com/oauth/token",
-        userInfo: "https://api.atlassian.com/me",
-        profile: (profile) =>
-            ({
-                sub: profile.account_id,
-                name: profile.name,
-                email: profile.email,
-                image: profile.picture,
-            }) as DefaultUser,
-        ...options,
-    }
+            accessToken: "https://auth.atlassian.com/oauth/token",
+            userInfo: "https://api.atlassian.com/me",
+            profile: (profile) =>
+                ({
+                    sub: profile.account_id,
+                    name: profile.name,
+                    email: profile.email,
+                    image: profile.picture,
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<AtlassianProfile, DefaultUser>,
+        options
+    )
 }

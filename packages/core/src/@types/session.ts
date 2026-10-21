@@ -319,7 +319,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * @unstable This API is experimental and may change in future releases.
      */
     refreshUserInfo(
-        user: Partial<DefaultUser>,
+        user: DeepPartial<DefaultUser>,
         headers: Headers,
         skipCSRFCheck?: boolean
     ): Promise<{

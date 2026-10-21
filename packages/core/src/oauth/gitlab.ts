@@ -1,4 +1,5 @@
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [GitLab - User Structure](https://docs.gitlab.com/ee/api/users.html#external-user-structure)
@@ -62,27 +63,29 @@ export interface GitLabProfile {
  * @see [GitLab - Get current user](https://docs.gitlab.com/api/users/#get-the-current-user)
  */
 export const gitlab = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<GitLabProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<GitLabProfile, DefaultUser>>
 ): OAuthProviderCredentials<GitLabProfile, DefaultUser> => {
-    return {
-        id: "gitlab",
-        name: "GitLab",
-        authorize: {
-            url: "https://gitlab.com/oauth/authorize",
-            params: {
-                scope: "read_user",
-                responseType: "code",
+    return merge(
+        {
+            id: "gitlab",
+            name: "GitLab",
+            authorize: {
+                url: "https://gitlab.com/oauth/authorize",
+                params: {
+                    scope: "read_user",
+                    responseType: "code",
+                },
             },
-        },
-        accessToken: "https://gitlab.com/oauth/token",
-        userInfo: "https://gitlab.com/api/v4/user",
-        profile: (profile) =>
-            ({
-                sub: profile.id.toString(),
-                name: profile.name ?? profile.username,
-                email: profile.email,
-                image: profile.avatar_url,
-            }) as DefaultUser,
-        ...options,
-    }
+            accessToken: "https://gitlab.com/oauth/token",
+            userInfo: "https://gitlab.com/api/v4/user",
+            profile: (profile) =>
+                ({
+                    sub: profile.id.toString(),
+                    name: profile.name ?? profile.username,
+                    email: profile.email,
+                    image: profile.avatar_url,
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<GitLabProfile, DefaultUser>,
+        options
+    )
 }

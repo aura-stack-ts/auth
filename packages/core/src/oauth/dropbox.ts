@@ -1,4 +1,5 @@
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export type AccountType = "basic" | "pro" | "business"
 
@@ -48,27 +49,29 @@ export interface DropboxProfile {
  * @see [Dropbox - Developer Guide](https://www.dropbox.com/developers/reference/developer-guide)
  */
 export const dropbox = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<DropboxProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<DropboxProfile, DefaultUser>>
 ): OAuthProviderCredentials<DropboxProfile, DefaultUser> => {
-    return {
-        id: "dropbox",
-        name: "Dropbox",
-        authorize: {
-            url: "https://www.dropbox.com/oauth2/authorize",
-            params: { scope: "account_info.read" },
-        },
-        accessToken: "https://api.dropboxapi.com/oauth2/token",
-        userInfo: {
-            method: "POST",
-            url: "https://api.dropboxapi.com/2/users/get_current_account",
-        },
-        profile: (profile) =>
-            ({
-                sub: profile.account_id,
-                name: profile.name.display_name,
-                email: profile.email,
-                image: profile.profile_photo_url,
-            }) as DefaultUser,
-        ...options,
-    }
+    return merge(
+        {
+            id: "dropbox",
+            name: "Dropbox",
+            authorize: {
+                url: "https://www.dropbox.com/oauth2/authorize",
+                params: { scope: "account_info.read" },
+            },
+            accessToken: "https://api.dropboxapi.com/oauth2/token",
+            userInfo: {
+                method: "POST",
+                url: "https://api.dropboxapi.com/2/users/get_current_account",
+            },
+            profile: (profile) =>
+                ({
+                    sub: profile.account_id,
+                    name: profile.name.display_name,
+                    email: profile.email,
+                    image: profile.profile_photo_url,
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<DropboxProfile, DefaultUser>,
+        options
+    )
 }
