@@ -1,5 +1,5 @@
 import { merge } from "@/shared/utils.ts"
-import type { OpenIDProvider, User } from "@/@types/index.ts"
+import type { DeepPartial, OpenIDProvider, User } from "@/@types/index.ts"
 
 /**
  * @see [Google - ID Token (Claims)](https://developers.google.com/identity/openid-connect/reference#id_token_claims)
@@ -92,7 +92,7 @@ export interface GoogleProfile {
  * @see [Google - Client Credentials](https://console.cloud.google.com/auth/clients)
  */
 export const google = <DefaultUser extends User = User>(
-    options?: Partial<OpenIDProvider<GoogleProfile, DefaultUser>>
+    options?: DeepPartial<OpenIDProvider<GoogleProfile, DefaultUser>>
 ): OpenIDProvider<GoogleProfile, DefaultUser> => {
     return merge(
         {

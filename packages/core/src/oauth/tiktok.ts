@@ -1,5 +1,5 @@
 import { merge } from "@/shared/utils.ts"
-import type { OAuthProviderConfig, OAuthProviderCredentials, User } from "@/@types/index.js"
+import type { DeepPartial, OAuthProviderConfig, OAuthProviderCredentials, User } from "@/@types/index.js"
 
 /**
  * @see [TikTok - User Object](https://developers.tiktok.com/doc/tiktok-api-v1-user-info)
@@ -30,7 +30,7 @@ export interface TikTokProfile {
  * @todo: add `client_key` search parameter in `authorize` endpoint.
  */
 export const tiktok = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderConfig<TikTokProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderConfig<TikTokProfile, DefaultUser>>
 ): OAuthProviderCredentials<TikTokProfile, DefaultUser> => {
     return merge(
         {

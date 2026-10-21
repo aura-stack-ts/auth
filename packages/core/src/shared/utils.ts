@@ -67,12 +67,10 @@ export const shouldRefresh = (payload: OAuthTokenPayload, refreshWindow: number)
 
 export const merge = <O extends Record<PropertyKey, unknown>>(origin: O, source: Record<PropertyKey, unknown> | undefined) => {
     const result: Record<PropertyKey, unknown> = { ...origin }
-    for (const key in source) {
-        if (isObject(source[key]) && isObject(origin[key])) {
-            result[key] = merge(origin[key] as Record<PropertyKey, unknown>, source[key] as Record<PropertyKey, unknown>)
-        } else {
-            result[key] = source[key]
-        }
+    for (const [key, value] of Object.entries(source ?? {})) {
+        if (key === "__proto__") continue
+        const base = origin[key]
+        result[key] = isObject(value) && isObject(base) ? merge(base, value) : value
     }
     return result as O
 }
