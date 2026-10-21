@@ -105,9 +105,14 @@ export type ReturnUpdateSessionShape<T> =
               : never
 
 /** Recursively makes every property optional. */
-export type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
-}
+export type DeepPartial<T> = T extends (...args: any[]) => any
+    ? T
+    : T extends object
+      ? {
+            [P in keyof T]?: DeepPartial<T[P]>
+        }
+      : T
+
 /** Wraps a type in an object with the same keys. */
 export type Wrap<T> = T extends any ? { [K in keyof T]: T[K] } : never
 

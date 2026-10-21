@@ -1,4 +1,5 @@
-import type { OpenIDProvider, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OpenIDProvider, User } from "@/@types/index.ts"
 
 export interface HuggingFaceResourceGroup {
     sub: string
@@ -47,19 +48,21 @@ export interface HuggingFaceProfile {
  * @see [Hugging Face - OpenID Metadata](https://huggingface.co/.well-known/openid-configuration)
  */
 export const huggingface = <DefaultUser extends User = User>(
-    options?: Partial<OpenIDProvider<HuggingFaceProfile, DefaultUser>>
+    options?: DeepPartial<OpenIDProvider<HuggingFaceProfile, DefaultUser>>
 ): OpenIDProvider<HuggingFaceProfile, DefaultUser> => {
-    return {
-        id: "huggingface",
-        name: "Hugging Face",
-        issuer: "https://huggingface.co",
-        profile: (profile) =>
-            ({
-                sub: profile.sub,
-                name: profile.name,
-                email: profile.email,
-                image: profile.picture,
-            }) as DefaultUser,
-        ...options,
-    }
+    return merge(
+        {
+            id: "huggingface",
+            name: "Hugging Face",
+            issuer: "https://huggingface.co",
+            profile: (profile) =>
+                ({
+                    sub: profile.sub,
+                    name: profile.name,
+                    email: profile.email,
+                    image: profile.picture,
+                }) as DefaultUser,
+        },
+        options
+    )
 }

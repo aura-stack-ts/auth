@@ -1,4 +1,5 @@
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface CoinbaseProfile {
     data: {
@@ -21,28 +22,30 @@ export interface CoinbaseProfile {
  * @see [Coinbase - Scopes](https://docs.cdp.coinbase.com/coinbase-app/oauth2-integration/scopes)
  */
 export const coinbase = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<CoinbaseProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<CoinbaseProfile, DefaultUser>>
 ): OAuthProviderCredentials<CoinbaseProfile, DefaultUser> => {
-    return {
-        id: "coinbase",
-        name: "Coinbase",
-        authorize: {
-            url: "https://login.coinbase.com/oauth2/auth",
-            params: {
-                scope: "wallet:user:read+wallet:user:email",
-                responseType: "code",
+    return merge(
+        {
+            id: "coinbase",
+            name: "Coinbase",
+            authorize: {
+                url: "https://login.coinbase.com/oauth2/auth",
+                params: {
+                    scope: "wallet:user:read+wallet:user:email",
+                    responseType: "code",
+                },
             },
-        },
-        accessToken: "https://login.coinbase.com/oauth2/token",
-        userInfo: "https://api.coinbase.com/v2/user",
-        profile: (profile) => {
-            return {
-                sub: String(profile.data.id),
-                name: profile.data.name,
-                image: profile.data.avatar_url,
-                email: null,
-            } as DefaultUser
-        },
-        ...options,
-    }
+            accessToken: "https://login.coinbase.com/oauth2/token",
+            userInfo: "https://api.coinbase.com/v2/user",
+            profile: (profile) => {
+                return {
+                    sub: String(profile.data.id),
+                    name: profile.data.name,
+                    image: profile.data.avatar_url,
+                    email: null,
+                } as DefaultUser
+            },
+        } satisfies OAuthProviderCredentials<CoinbaseProfile, DefaultUser>,
+        options
+    )
 }

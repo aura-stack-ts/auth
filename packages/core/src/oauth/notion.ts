@@ -1,5 +1,5 @@
-import { createBasicAuthHeader } from "@/shared/utils.ts"
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { createBasicAuthHeader, merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface Person {
     email: string
@@ -42,41 +42,43 @@ export interface NotionProfile {
  * @see [Notion - Retrieve your token's bot user](https://developers.notion.com/reference/get-self)
  */
 export const notion = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<NotionProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<NotionProfile, DefaultUser>>
 ): OAuthProviderCredentials<NotionProfile, DefaultUser> => {
-    return {
-        id: "notion",
-        name: "Notion",
-        authorize: {
-            url: "https://api.notion.com/v1/oauth/authorize",
-            params: {
-                owner: "user",
-                scope: "user:read",
-                responseType: "code",
+    return merge(
+        {
+            id: "notion",
+            name: "Notion",
+            authorize: {
+                url: "https://api.notion.com/v1/oauth/authorize",
+                params: {
+                    owner: "user",
+                    scope: "user:read",
+                    responseType: "code",
+                },
             },
-        },
-        accessToken: {
-            url: "https://api.notion.com/v1/oauth/token",
-            headers: {
-                Authorization: createBasicAuthHeader(
-                    options?.clientId ?? "NOTION_CLIENT_ID",
-                    options?.clientSecret ?? "NOTION_CLIENT_SECRET"
-                ),
+            accessToken: {
+                url: "https://api.notion.com/v1/oauth/token",
+                headers: {
+                    Authorization: createBasicAuthHeader(
+                        options?.clientId ?? "NOTION_CLIENT_ID",
+                        options?.clientSecret ?? "NOTION_CLIENT_SECRET"
+                    ),
+                },
             },
-        },
-        userInfo: {
-            url: "https://api.notion.com/v1/users/me",
-            headers: {
-                "Notion-Version": "2022-06-28",
+            userInfo: {
+                url: "https://api.notion.com/v1/users/me",
+                headers: {
+                    "Notion-Version": "2022-06-28",
+                },
             },
-        },
-        profile: (profile) =>
-            ({
-                sub: profile.id,
-                name: profile.name,
-                image: profile.avatar_url ?? "",
-                email: profile?.bot?.owner?.user?.person?.email,
-            }) as DefaultUser,
-        ...options,
-    }
+            profile: (profile) =>
+                ({
+                    sub: profile.id,
+                    name: profile.name,
+                    image: profile.avatar_url ?? "",
+                    email: profile?.bot?.owner?.user?.person?.email,
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<NotionProfile, DefaultUser>,
+        options
+    )
 }

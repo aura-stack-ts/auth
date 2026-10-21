@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
-import { createBuiltInOAuthProviders, defineOpenIDProviderConfig } from "@/config/get-oauth.ts"
-import { builtInOAuthProviders, type GitHubProfile } from "@/oauth/index.ts"
 import { openIDCustomProvider } from "@test/setup/presets.ts"
+import { builtInOAuthProviders, github, type GitHubProfile } from "@/oauth/index.ts"
+import { createBuiltInOAuthProviders, defineOpenIDProviderConfig } from "@/config/get-oauth.ts"
 import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 describe("createBuiltInOAuthProviders", () => {
@@ -143,6 +143,57 @@ describe("defineOpenIDProviderConfig", () => {
             oidc: {
                 issuer: "https://app.com/issuer/1/apps/2",
             },
+        })
+    })
+})
+
+describe("OAuth Providers", () => {
+    test("override authorize url", () => {
+        expect(
+            github({
+                authorize: {
+                    url: "https://github.com/enterprise/login/oauth/authorize",
+                },
+            })
+        ).toMatchObject({
+            id: "github",
+            name: "GitHub",
+            authorize: {
+                url: "https://github.com/enterprise/login/oauth/authorize",
+                params: {
+                    scope: "read:user user:email",
+                    responseType: "code",
+                },
+            },
+        })
+    })
+
+    test("override scope and responseType", () => {
+        expect(
+            github({
+                authorizeURL: "https://github.com/deprecated/oauth/authorize",
+                authorize: {
+                    params: {
+                        scope: "read:wiki",
+                        responseType: "id_token",
+                    },
+                },
+                scope: "read:org read:repo",
+                responseType: "token",
+            })
+        ).toMatchObject({
+            id: "github",
+            name: "GitHub",
+            authorizeURL: "https://github.com/deprecated/oauth/authorize",
+            authorize: {
+                url: "https://github.com/login/oauth/authorize",
+                params: {
+                    scope: "read:wiki",
+                    responseType: "id_token",
+                },
+            },
+            scope: "read:org read:repo",
+            responseType: "token",
         })
     })
 })

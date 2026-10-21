@@ -1,4 +1,5 @@
-import type { LiteralUnion, OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, LiteralUnion, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Get current user](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get)
@@ -30,28 +31,30 @@ export interface BitbucketProfile {
  * @see [Bitbucket - User Endpoint](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-users-endpoint)
  */
 export const bitbucket = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<BitbucketProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<BitbucketProfile, DefaultUser>>
 ): OAuthProviderCredentials<BitbucketProfile, DefaultUser> => {
-    return {
-        id: "bitbucket",
-        name: "Bitbucket",
-        authorize: {
-            url: "https://bitbucket.org/site/oauth2/authorize",
-            params: {
-                scope: "account email",
-                responseType: "code",
+    return merge(
+        {
+            id: "bitbucket",
+            name: "Bitbucket",
+            authorize: {
+                url: "https://bitbucket.org/site/oauth2/authorize",
+                params: {
+                    scope: "account email",
+                    responseType: "code",
+                },
             },
-        },
-        authorizeURL: "https://bitbucket.org/site/oauth2/authorize",
-        accessToken: "https://bitbucket.org/site/oauth2/access_token",
-        userInfo: "https://api.bitbucket.org/2.0/user",
-        profile: (profile) =>
-            ({
-                sub: profile.uuid ?? profile.account_id,
-                name: profile.display_name ?? profile.nickname,
-                image: profile.links.avatar?.href,
-                email: undefined,
-            }) as DefaultUser,
-        ...options,
-    }
+            authorizeURL: "https://bitbucket.org/site/oauth2/authorize",
+            accessToken: "https://bitbucket.org/site/oauth2/access_token",
+            userInfo: "https://api.bitbucket.org/2.0/user",
+            profile: (profile) =>
+                ({
+                    sub: profile.uuid ?? profile.account_id,
+                    name: profile.display_name ?? profile.nickname,
+                    image: profile.links.avatar?.href,
+                    email: undefined,
+                }) as DefaultUser,
+        } satisfies OAuthProviderCredentials<BitbucketProfile, DefaultUser>,
+        options
+    )
 }

@@ -1,5 +1,5 @@
 import { getEnv } from "@/shared/env.ts"
-import { isString } from "@/shared/assert.ts"
+import { isObject, isString } from "@/shared/assert.ts"
 import { encoder } from "@aura-stack/jose/crypto"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import type { OAuthTokenPayload } from "@/@types/index.ts"
@@ -65,13 +65,14 @@ export const shouldRefresh = (payload: OAuthTokenPayload, refreshWindow: number)
     return false
 }
 
-export const merge = (origin: Record<string, unknown>, source: Record<string, unknown>) => {
-    for (const key in source) {
-        if (source[key] instanceof Object && !(source[key] instanceof Array) && key in origin) {
-            Object.assign(source[key], merge(origin[key] as Record<string, unknown>, source[key] as Record<string, unknown>))
-        }
+export const merge = <O extends Record<PropertyKey, unknown>>(origin: O, source: Record<PropertyKey, unknown> | undefined) => {
+    const result: Record<PropertyKey, unknown> = { ...origin }
+    for (const [key, value] of Object.entries(source ?? {})) {
+        if (key === "__proto__") continue
+        const base = origin[key]
+        result[key] = isObject(value) && isObject(base) ? merge(base, value) : value
     }
-    return { ...origin, ...source }
+    return result as O
 }
 
 export const transformToTokenPayload = (tokens: OAuthAccessTokenResponseType & { id_token?: string }) => {

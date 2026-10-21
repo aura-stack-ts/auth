@@ -1,4 +1,5 @@
-import type { OAuthProviderCredentials, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**
  * @see [Dribble - User](https://developer.dribbble.com/v2/user/)
@@ -41,27 +42,29 @@ export interface DribbbleProfile extends DribbbleDefault {
  * @see [Dribbble - User](https://developer.dribbble.com/v2/user/)
  */
 export const dribbble = <DefaultUser extends User = User>(
-    options?: Partial<OAuthProviderCredentials<DribbbleProfile, DefaultUser>>
+    options?: DeepPartial<OAuthProviderCredentials<DribbbleProfile, DefaultUser>>
 ): OAuthProviderCredentials<DribbbleProfile, DefaultUser> => {
-    return {
-        id: "dribbble",
-        name: "Dribbble",
-        authorize: {
-            url: "https://dribbble.com/oauth/authorize",
-            params: {
-                scope: "public",
+    return merge(
+        {
+            id: "dribbble",
+            name: "Dribbble",
+            authorize: {
+                url: "https://dribbble.com/oauth/authorize",
+                params: {
+                    scope: "public",
+                },
             },
-        },
-        accessToken: "https://dribbble.com/oauth/token",
-        userInfo: "https://api.dribbble.com/v2/user",
-        profile: (profile) => {
-            return {
-                sub: String(profile.id),
-                name: profile.name,
-                image: profile.avatar_url,
-                email: profile.email,
-            } as DefaultUser
-        },
-        ...options,
-    }
+            accessToken: "https://dribbble.com/oauth/token",
+            userInfo: "https://api.dribbble.com/v2/user",
+            profile: (profile) => {
+                return {
+                    sub: String(profile.id),
+                    name: profile.name,
+                    image: profile.avatar_url,
+                    email: profile.email,
+                } as DefaultUser
+            },
+        } satisfies OAuthProviderCredentials<DribbbleProfile, DefaultUser>,
+        options
+    )
 }

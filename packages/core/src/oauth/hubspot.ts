@@ -1,4 +1,5 @@
-import type { OAuthProviderConfig, User } from "@/@types/index.ts"
+import { merge } from "@/shared/utils.ts"
+import type { DeepPartial, OAuthProviderConfig, User } from "@/@types/index.ts"
 
 export interface HubSportSignedAccessToken {
     appId: number
@@ -78,34 +79,36 @@ export interface HubSpotProfile {
  * @see [HubSpot - Retrieve OAuth token metadata](https://developers.hubspot.com/docs/api-reference/legacy/authentication/oauth-tokens/v1/get-oauth-token-metadata)
  */
 export const hubspot = <DefaultUser extends User = User>(
-    options?: OAuthProviderConfig<HubSpotProfile, DefaultUser>
+    options?: DeepPartial<OAuthProviderConfig<HubSpotProfile, DefaultUser>>
 ): OAuthProviderConfig<HubSpotProfile, DefaultUser> => {
-    return {
-        id: "hubspot",
-        name: "HubSpot",
-        authorize: {
-            url: "https://app.hubspot.com/oauth/authorize",
-            params: {
-                scope: "oauth",
+    return merge(
+        {
+            id: "hubspot",
+            name: "HubSpot",
+            authorize: {
+                url: "https://app.hubspot.com/oauth/authorize",
+                params: {
+                    scope: "oauth",
+                },
             },
-        },
-        accessToken: "https://api.hubapi.com/oauth/v1/token",
-        userInfo: {
-            url: "https://api.hubapi.com/oauth/v1/access-tokens",
-            request: async ({ accessToken }) => {
-                const response = await fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${accessToken}`)
-                const json = await response.json()
-                return json
+            accessToken: "https://api.hubapi.com/oauth/v1/token",
+            userInfo: {
+                url: "https://api.hubapi.com/oauth/v1/access-tokens",
+                request: async ({ accessToken }) => {
+                    const response = await fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${accessToken}`)
+                    const json = await response.json()
+                    return json
+                },
             },
-        },
-        profile: (profile) => {
-            return {
-                sub: String(profile.user_id),
-                name: profile.user,
-                email: null,
-                image: null,
-            } as DefaultUser
-        },
-        ...options,
-    }
+            profile: (profile) => {
+                return {
+                    sub: String(profile.user_id),
+                    name: profile.user,
+                    email: null,
+                    image: null,
+                } as DefaultUser
+            },
+        } satisfies OAuthProviderConfig<HubSpotProfile, DefaultUser>,
+        options
+    )
 }
