@@ -103,18 +103,21 @@ MfaCredentials {
 }
 
 TotpCredentials {
+  varchar id PK
   varchar credentialId PK,FK
   text secretCipher
   timestamp verifiedAt
 }
 
 SmsCredentials {
+  varchar id PK
   varchar credentialId PK,FK
   varchar phoneNumber
   timestamp verifiedAt
 }
 
 PushCredentials {
+  varchar id PK
   varchar credentialId PK,FK
   text deviceToken
   varchar platform

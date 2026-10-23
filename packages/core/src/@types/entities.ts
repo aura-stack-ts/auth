@@ -36,6 +36,10 @@ export type RevokeReason =
 
 export type MFAChallengeStatus = "pending" | "verified" | "expired" | "failed"
 
+export type MfaCredentialStatus = "active" | "pending" | "disabled"
+
+export type VerificationTokenType = "email_verification" | "password_reset" | "email_change" | "mfa_recovery"
+
 export interface UserEntity {
     id: string
     name: string | null
@@ -137,7 +141,9 @@ export interface MFACredentialEntity {
     id: string
     userId: string
     type: MFAMethod
+    status: MfaCredentialStatus
     isPrimary: boolean
+    enrolledAt: Date
     verifiedAt: Date | null
     createdAt: Date
     deletedAt: Date | null
@@ -160,6 +166,7 @@ export interface SmsCredentialEntity {
 export interface PushCredentialEntity {
     id: string
     credentialId: string
+    deviceToken: string
     platform: string
     verifiedAt: Date | null
 }
@@ -175,9 +182,10 @@ export interface BackupCodeCredentialEntity {
 export interface MFAChallengeEntity {
     id: string
     userId: string
-    sessionId: string | null
+    sessionId: string
     credentialId: string
-    type: MFAChallengeStatus
+    type: MFAMethod
+    status: MFAChallengeStatus
     attempCount: number
     expiresAt: Date
     createdAt: Date
@@ -188,7 +196,9 @@ export interface VerificationTokenEntity {
     id: string
     userId: string
     tokenHash: string
-    type: "email_verification" | "password_reset" | "email_change" | "mfa_recovery"
+    type: VerificationTokenType
+    identifier: string
+    newIdentifier: string | null
     expiresAt: Date
     revokedAt: Date | null
     createdAt: Date
