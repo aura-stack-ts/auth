@@ -48,16 +48,12 @@ export { Prisma }
 export type User = Prisma.UserModel
 /**
  * Model Account
- * ---------------------------------------------------------------------------
- * ACCOUNTS
- * ---------------------------------------------------------------------------
+ * 
  */
 export type Account = Prisma.AccountModel
 /**
  * Model OAuthAccount
- * ---------------------------------------------------------------------------
- * OAUTH ACCOUNT
- * ---------------------------------------------------------------------------
+ * 
  */
 export type OAuthAccount = Prisma.OAuthAccountModel
 /**
@@ -77,11 +73,39 @@ export type Device = Prisma.DeviceModel
 export type Session = Prisma.SessionModel
 /**
  * Model MfaCredential
- * ---------------------------------------------------------------------------
- * MFA CREDENTIALS
- * ---------------------------------------------------------------------------
+ * 
  */
 export type MfaCredential = Prisma.MfaCredentialModel
+/**
+ * Model TotpCredential
+ * 
+ */
+export type TotpCredential = Prisma.TotpCredentialModel
+/**
+ * Model SmsCredential
+ * 
+ */
+export type SmsCredential = Prisma.SmsCredentialModel
+/**
+ * Model PushCredential
+ * 
+ */
+export type PushCredential = Prisma.PushCredentialModel
+/**
+ * Model BackupCode
+ * 
+ */
+export type BackupCode = Prisma.BackupCodeModel
+/**
+ * Model MfaChallenge
+ * 
+ */
+export type MfaChallenge = Prisma.MfaChallengeModel
+/**
+ * Model VerificationToken
+ * 
+ */
+export type VerificationToken = Prisma.VerificationTokenModel
 /**
  * Model OAuthTransaction
  * 

@@ -14,9 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model Account
- * ---------------------------------------------------------------------------
- * ACCOUNTS
- * ---------------------------------------------------------------------------
+ * 
  */
 export type AccountModel = runtime.Types.Result.DefaultSelection<Prisma.$AccountPayload>
 
@@ -35,6 +33,7 @@ export type AccountMinAggregateOutputType = {
   status: $Enums.AccountStatus | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
 }
 
 export type AccountMaxAggregateOutputType = {
@@ -46,6 +45,7 @@ export type AccountMaxAggregateOutputType = {
   status: $Enums.AccountStatus | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
 }
 
 export type AccountCountAggregateOutputType = {
@@ -57,7 +57,7 @@ export type AccountCountAggregateOutputType = {
   status: number
   createdAt: number
   updatedAt: number
-  metadata: number
+  deletedAt: number
   _all: number
 }
 
@@ -71,6 +71,7 @@ export type AccountMinAggregateInputType = {
   status?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
 }
 
 export type AccountMaxAggregateInputType = {
@@ -82,6 +83,7 @@ export type AccountMaxAggregateInputType = {
   status?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
 }
 
 export type AccountCountAggregateInputType = {
@@ -93,7 +95,7 @@ export type AccountCountAggregateInputType = {
   status?: true
   createdAt?: true
   updatedAt?: true
-  metadata?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -178,7 +180,7 @@ export type AccountGroupByOutputType = {
   status: $Enums.AccountStatus
   createdAt: Date
   updatedAt: Date
-  metadata: runtime.JsonValue | null
+  deletedAt: Date | null
   _count: AccountCountAggregateOutputType | null
   _min: AccountMinAggregateOutputType | null
   _max: AccountMaxAggregateOutputType | null
@@ -211,10 +213,10 @@ export type AccountWhereInput = {
   status?: Prisma.EnumAccountStatusFilter<"Account"> | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFilter<"Account"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Account"> | Date | string
-  metadata?: Prisma.JsonNullableFilter<"Account">
+  deletedAt?: Prisma.DateTimeNullableFilter<"Account"> | Date | string | null
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   oauthAccount?: Prisma.XOR<Prisma.OAuthAccountNullableScalarRelationFilter, Prisma.OAuthAccountWhereInput> | null
   credentialAccount?: Prisma.XOR<Prisma.CredentialAccountNullableScalarRelationFilter, Prisma.CredentialAccountWhereInput> | null
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type AccountOrderByWithRelationInput = {
@@ -226,10 +228,10 @@ export type AccountOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  user?: Prisma.UserOrderByWithRelationInput
   oauthAccount?: Prisma.OAuthAccountOrderByWithRelationInput
   credentialAccount?: Prisma.CredentialAccountOrderByWithRelationInput
-  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type AccountWhereUniqueInput = Prisma.AtLeast<{
@@ -245,10 +247,10 @@ export type AccountWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumAccountStatusFilter<"Account"> | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFilter<"Account"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Account"> | Date | string
-  metadata?: Prisma.JsonNullableFilter<"Account">
+  deletedAt?: Prisma.DateTimeNullableFilter<"Account"> | Date | string | null
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   oauthAccount?: Prisma.XOR<Prisma.OAuthAccountNullableScalarRelationFilter, Prisma.OAuthAccountWhereInput> | null
   credentialAccount?: Prisma.XOR<Prisma.CredentialAccountNullableScalarRelationFilter, Prisma.CredentialAccountWhereInput> | null
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "provider_providerUserId">
 
 export type AccountOrderByWithAggregationInput = {
@@ -260,7 +262,7 @@ export type AccountOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AccountCountOrderByAggregateInput
   _max?: Prisma.AccountMaxOrderByAggregateInput
   _min?: Prisma.AccountMinOrderByAggregateInput
@@ -278,7 +280,7 @@ export type AccountScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumAccountStatusWithAggregatesFilter<"Account"> | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Account"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Account"> | Date | string
-  metadata?: Prisma.JsonNullableWithAggregatesFilter<"Account">
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Account"> | Date | string | null
 }
 
 export type AccountCreateInput = {
@@ -289,10 +291,10 @@ export type AccountCreateInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  user: Prisma.UserCreateNestedOneWithoutAccountsInput
   oauthAccount?: Prisma.OAuthAccountCreateNestedOneWithoutAccountInput
   credentialAccount?: Prisma.CredentialAccountCreateNestedOneWithoutAccountInput
-  user: Prisma.UserCreateNestedOneWithoutAccountsInput
 }
 
 export type AccountUncheckedCreateInput = {
@@ -304,7 +306,7 @@ export type AccountUncheckedCreateInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   oauthAccount?: Prisma.OAuthAccountUncheckedCreateNestedOneWithoutAccountInput
   credentialAccount?: Prisma.CredentialAccountUncheckedCreateNestedOneWithoutAccountInput
 }
@@ -317,10 +319,10 @@ export type AccountUpdateInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
   oauthAccount?: Prisma.OAuthAccountUpdateOneWithoutAccountNestedInput
   credentialAccount?: Prisma.CredentialAccountUpdateOneWithoutAccountNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
 }
 
 export type AccountUncheckedUpdateInput = {
@@ -332,7 +334,7 @@ export type AccountUncheckedUpdateInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oauthAccount?: Prisma.OAuthAccountUncheckedUpdateOneWithoutAccountNestedInput
   credentialAccount?: Prisma.CredentialAccountUncheckedUpdateOneWithoutAccountNestedInput
 }
@@ -346,7 +348,7 @@ export type AccountCreateManyInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
 }
 
 export type AccountUpdateManyMutationInput = {
@@ -357,7 +359,7 @@ export type AccountUpdateManyMutationInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type AccountUncheckedUpdateManyInput = {
@@ -369,7 +371,7 @@ export type AccountUncheckedUpdateManyInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type AccountListRelationFilter = {
@@ -396,7 +398,7 @@ export type AccountCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type AccountMaxOrderByAggregateInput = {
@@ -408,6 +410,7 @@ export type AccountMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type AccountMinOrderByAggregateInput = {
@@ -419,6 +422,7 @@ export type AccountMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type AccountScalarRelationFilter = {
@@ -512,7 +516,7 @@ export type AccountCreateWithoutUserInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   oauthAccount?: Prisma.OAuthAccountCreateNestedOneWithoutAccountInput
   credentialAccount?: Prisma.CredentialAccountCreateNestedOneWithoutAccountInput
 }
@@ -525,7 +529,7 @@ export type AccountUncheckedCreateWithoutUserInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   oauthAccount?: Prisma.OAuthAccountUncheckedCreateNestedOneWithoutAccountInput
   credentialAccount?: Prisma.CredentialAccountUncheckedCreateNestedOneWithoutAccountInput
 }
@@ -568,7 +572,7 @@ export type AccountScalarWhereInput = {
   status?: Prisma.EnumAccountStatusFilter<"Account"> | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFilter<"Account"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Account"> | Date | string
-  metadata?: Prisma.JsonNullableFilter<"Account">
+  deletedAt?: Prisma.DateTimeNullableFilter<"Account"> | Date | string | null
 }
 
 export type AccountCreateWithoutOauthAccountInput = {
@@ -579,9 +583,9 @@ export type AccountCreateWithoutOauthAccountInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credentialAccount?: Prisma.CredentialAccountCreateNestedOneWithoutAccountInput
+  deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutAccountsInput
+  credentialAccount?: Prisma.CredentialAccountCreateNestedOneWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutOauthAccountInput = {
@@ -593,7 +597,7 @@ export type AccountUncheckedCreateWithoutOauthAccountInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   credentialAccount?: Prisma.CredentialAccountUncheckedCreateNestedOneWithoutAccountInput
 }
 
@@ -621,9 +625,9 @@ export type AccountUpdateWithoutOauthAccountInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  credentialAccount?: Prisma.CredentialAccountUpdateOneWithoutAccountNestedInput
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
+  credentialAccount?: Prisma.CredentialAccountUpdateOneWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutOauthAccountInput = {
@@ -635,7 +639,7 @@ export type AccountUncheckedUpdateWithoutOauthAccountInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   credentialAccount?: Prisma.CredentialAccountUncheckedUpdateOneWithoutAccountNestedInput
 }
 
@@ -647,9 +651,9 @@ export type AccountCreateWithoutCredentialAccountInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  oauthAccount?: Prisma.OAuthAccountCreateNestedOneWithoutAccountInput
+  deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutAccountsInput
+  oauthAccount?: Prisma.OAuthAccountCreateNestedOneWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutCredentialAccountInput = {
@@ -661,7 +665,7 @@ export type AccountUncheckedCreateWithoutCredentialAccountInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   oauthAccount?: Prisma.OAuthAccountUncheckedCreateNestedOneWithoutAccountInput
 }
 
@@ -689,9 +693,9 @@ export type AccountUpdateWithoutCredentialAccountInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  oauthAccount?: Prisma.OAuthAccountUpdateOneWithoutAccountNestedInput
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
+  oauthAccount?: Prisma.OAuthAccountUpdateOneWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutCredentialAccountInput = {
@@ -703,7 +707,7 @@ export type AccountUncheckedUpdateWithoutCredentialAccountInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oauthAccount?: Prisma.OAuthAccountUncheckedUpdateOneWithoutAccountNestedInput
 }
 
@@ -715,7 +719,7 @@ export type AccountCreateManyUserInput = {
   status?: $Enums.AccountStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
 }
 
 export type AccountUpdateWithoutUserInput = {
@@ -726,7 +730,7 @@ export type AccountUpdateWithoutUserInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oauthAccount?: Prisma.OAuthAccountUpdateOneWithoutAccountNestedInput
   credentialAccount?: Prisma.CredentialAccountUpdateOneWithoutAccountNestedInput
 }
@@ -739,7 +743,7 @@ export type AccountUncheckedUpdateWithoutUserInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oauthAccount?: Prisma.OAuthAccountUncheckedUpdateOneWithoutAccountNestedInput
   credentialAccount?: Prisma.CredentialAccountUncheckedUpdateOneWithoutAccountNestedInput
 }
@@ -752,7 +756,7 @@ export type AccountUncheckedUpdateManyWithoutUserInput = {
   status?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -766,10 +770,10 @@ export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   oauthAccount?: boolean | Prisma.Account$oauthAccountArgs<ExtArgs>
   credentialAccount?: boolean | Prisma.Account$credentialAccountArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["account"]>
 
 export type AccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -781,7 +785,7 @@ export type AccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["account"]>
 
@@ -794,7 +798,7 @@ export type AccountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["account"]>
 
@@ -807,14 +811,14 @@ export type AccountSelectScalar = {
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
 }
 
-export type AccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "provider" | "providerUserId" | "type" | "status" | "createdAt" | "updatedAt" | "metadata", ExtArgs["result"]["account"]>
+export type AccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "provider" | "providerUserId" | "type" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["account"]>
 export type AccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   oauthAccount?: boolean | Prisma.Account$oauthAccountArgs<ExtArgs>
   credentialAccount?: boolean | Prisma.Account$credentialAccountArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type AccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -826,9 +830,9 @@ export type AccountIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
 export type $AccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Account"
   objects: {
+    user: Prisma.$UserPayload<ExtArgs>
     oauthAccount: Prisma.$OAuthAccountPayload<ExtArgs> | null
     credentialAccount: Prisma.$CredentialAccountPayload<ExtArgs> | null
-    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -839,7 +843,7 @@ export type $AccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     status: $Enums.AccountStatus
     createdAt: Date
     updatedAt: Date
-    metadata: runtime.JsonValue | null
+    deletedAt: Date | null
   }, ExtArgs["result"]["account"]>
   composites: {}
 }
@@ -1234,9 +1238,9 @@ readonly fields: AccountFieldRefs;
  */
 export interface Prisma__AccountClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   oauthAccount<T extends Prisma.Account$oauthAccountArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$oauthAccountArgs<ExtArgs>>): Prisma.Prisma__OAuthAccountClient<runtime.Types.Result.GetResult<Prisma.$OAuthAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   credentialAccount<T extends Prisma.Account$credentialAccountArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$credentialAccountArgs<ExtArgs>>): Prisma.Prisma__CredentialAccountClient<runtime.Types.Result.GetResult<Prisma.$CredentialAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1274,7 +1278,7 @@ export interface AccountFieldRefs {
   readonly status: Prisma.FieldRef<"Account", 'AccountStatus'>
   readonly createdAt: Prisma.FieldRef<"Account", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Account", 'DateTime'>
-  readonly metadata: Prisma.FieldRef<"Account", 'Json'>
+  readonly deletedAt: Prisma.FieldRef<"Account", 'DateTime'>
 }
     
 

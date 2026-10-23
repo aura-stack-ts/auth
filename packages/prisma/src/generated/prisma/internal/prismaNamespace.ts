@@ -404,6 +404,12 @@ export const ModelName = {
   Device: 'Device',
   Session: 'Session',
   MfaCredential: 'MfaCredential',
+  TotpCredential: 'TotpCredential',
+  SmsCredential: 'SmsCredential',
+  PushCredential: 'PushCredential',
+  BackupCode: 'BackupCode',
+  MfaChallenge: 'MfaChallenge',
+  VerificationToken: 'VerificationToken',
   OAuthTransaction: 'OAuthTransaction'
 } as const
 
@@ -420,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "oAuthAccount" | "credentialAccount" | "device" | "session" | "mfaCredential" | "oAuthTransaction"
+    modelProps: "user" | "account" | "oAuthAccount" | "credentialAccount" | "device" | "session" | "mfaCredential" | "totpCredential" | "smsCredential" | "pushCredential" | "backupCode" | "mfaChallenge" | "verificationToken" | "oAuthTransaction"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -942,6 +948,450 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TotpCredential: {
+      payload: Prisma.$TotpCredentialPayload<ExtArgs>
+      fields: Prisma.TotpCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TotpCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TotpCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.TotpCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TotpCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.TotpCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.TotpCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.TotpCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TotpCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.TotpCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload>
+        }
+        update: {
+          args: Prisma.TotpCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.TotpCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TotpCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TotpCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.TotpCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TotpCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.TotpCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTotpCredential>
+        }
+        groupBy: {
+          args: Prisma.TotpCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TotpCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TotpCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TotpCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
+    SmsCredential: {
+      payload: Prisma.$SmsCredentialPayload<ExtArgs>
+      fields: Prisma.SmsCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SmsCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SmsCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.SmsCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SmsCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.SmsCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.SmsCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.SmsCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SmsCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.SmsCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload>
+        }
+        update: {
+          args: Prisma.SmsCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.SmsCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SmsCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SmsCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.SmsCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SmsCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.SmsCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSmsCredential>
+        }
+        groupBy: {
+          args: Prisma.SmsCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SmsCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SmsCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SmsCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
+    PushCredential: {
+      payload: Prisma.$PushCredentialPayload<ExtArgs>
+      fields: Prisma.PushCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PushCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PushCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.PushCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PushCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.PushCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.PushCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.PushCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PushCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.PushCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload>
+        }
+        update: {
+          args: Prisma.PushCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.PushCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PushCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PushCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.PushCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PushCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.PushCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePushCredential>
+        }
+        groupBy: {
+          args: Prisma.PushCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PushCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PushCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PushCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
+    BackupCode: {
+      payload: Prisma.$BackupCodePayload<ExtArgs>
+      fields: Prisma.BackupCodeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BackupCodeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BackupCodeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload>
+        }
+        findFirst: {
+          args: Prisma.BackupCodeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BackupCodeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload>
+        }
+        findMany: {
+          args: Prisma.BackupCodeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload>[]
+        }
+        create: {
+          args: Prisma.BackupCodeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload>
+        }
+        createMany: {
+          args: Prisma.BackupCodeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BackupCodeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload>[]
+        }
+        delete: {
+          args: Prisma.BackupCodeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload>
+        }
+        update: {
+          args: Prisma.BackupCodeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload>
+        }
+        deleteMany: {
+          args: Prisma.BackupCodeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BackupCodeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BackupCodeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload>[]
+        }
+        upsert: {
+          args: Prisma.BackupCodeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BackupCodePayload>
+        }
+        aggregate: {
+          args: Prisma.BackupCodeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBackupCode>
+        }
+        groupBy: {
+          args: Prisma.BackupCodeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BackupCodeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BackupCodeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BackupCodeCountAggregateOutputType> | number
+        }
+      }
+    }
+    MfaChallenge: {
+      payload: Prisma.$MfaChallengePayload<ExtArgs>
+      fields: Prisma.MfaChallengeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MfaChallengeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MfaChallengeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload>
+        }
+        findFirst: {
+          args: Prisma.MfaChallengeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MfaChallengeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload>
+        }
+        findMany: {
+          args: Prisma.MfaChallengeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload>[]
+        }
+        create: {
+          args: Prisma.MfaChallengeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload>
+        }
+        createMany: {
+          args: Prisma.MfaChallengeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MfaChallengeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload>[]
+        }
+        delete: {
+          args: Prisma.MfaChallengeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload>
+        }
+        update: {
+          args: Prisma.MfaChallengeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload>
+        }
+        deleteMany: {
+          args: Prisma.MfaChallengeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MfaChallengeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MfaChallengeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload>[]
+        }
+        upsert: {
+          args: Prisma.MfaChallengeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MfaChallengePayload>
+        }
+        aggregate: {
+          args: Prisma.MfaChallengeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMfaChallenge>
+        }
+        groupBy: {
+          args: Prisma.MfaChallengeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MfaChallengeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MfaChallengeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MfaChallengeCountAggregateOutputType> | number
+        }
+      }
+    }
+    VerificationToken: {
+      payload: Prisma.$VerificationTokenPayload<ExtArgs>
+      fields: Prisma.VerificationTokenFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VerificationTokenFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VerificationTokenFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>
+        }
+        findFirst: {
+          args: Prisma.VerificationTokenFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VerificationTokenFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>
+        }
+        findMany: {
+          args: Prisma.VerificationTokenFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>[]
+        }
+        create: {
+          args: Prisma.VerificationTokenCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>
+        }
+        createMany: {
+          args: Prisma.VerificationTokenCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VerificationTokenCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>[]
+        }
+        delete: {
+          args: Prisma.VerificationTokenDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>
+        }
+        update: {
+          args: Prisma.VerificationTokenUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>
+        }
+        deleteMany: {
+          args: Prisma.VerificationTokenDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VerificationTokenUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VerificationTokenUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>[]
+        }
+        upsert: {
+          args: Prisma.VerificationTokenUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VerificationTokenPayload>
+        }
+        aggregate: {
+          args: Prisma.VerificationTokenAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVerificationToken>
+        }
+        groupBy: {
+          args: Prisma.VerificationTokenGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VerificationTokenGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VerificationTokenCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VerificationTokenCountAggregateOutputType> | number
+        }
+      }
+    }
     OAuthTransaction: {
       payload: Prisma.$OAuthTransactionPayload<ExtArgs>
       fields: Prisma.OAuthTransactionFieldRefs
@@ -1062,11 +1512,10 @@ export const UserScalarFieldEnum = {
   image: 'image',
   emailVerifiedAt: 'emailVerifiedAt',
   status: 'status',
-  mfaEnabled: 'mfaEnabled',
-  mfaPreferredMethod: 'mfaPreferredMethod',
+  attributes: 'attributes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  attributes: 'attributes'
+  deletedAt: 'deletedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1081,7 +1530,7 @@ export const AccountScalarFieldEnum = {
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  metadata: 'metadata'
+  deletedAt: 'deletedAt'
 } as const
 
 export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
@@ -1125,7 +1574,7 @@ export const DeviceScalarFieldEnum = {
   trusted: 'trusted',
   firstSeenAt: 'firstSeenAt',
   lastSeenAt: 'lastSeenAt',
-  metadata: 'metadata'
+  deletedAt: 'deletedAt'
 } as const
 
 export type DeviceScalarFieldEnum = (typeof DeviceScalarFieldEnum)[keyof typeof DeviceScalarFieldEnum]
@@ -1142,7 +1591,6 @@ export const SessionScalarFieldEnum = {
   expiresAt: 'expiresAt',
   lastActivityAt: 'lastActivityAt',
   revokedAt: 'revokedAt',
-  metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1154,14 +1602,89 @@ export const MfaCredentialScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   type: 'type',
-  credentialData: 'credentialData',
+  status: 'status',
   isPrimary: 'isPrimary',
+  enrolledAt: 'enrolledAt',
   verifiedAt: 'verifiedAt',
   createdAt: 'createdAt',
-  metadata: 'metadata'
+  deletedAt: 'deletedAt'
 } as const
 
 export type MfaCredentialScalarFieldEnum = (typeof MfaCredentialScalarFieldEnum)[keyof typeof MfaCredentialScalarFieldEnum]
+
+
+export const TotpCredentialScalarFieldEnum = {
+  id: 'id',
+  credentialId: 'credentialId',
+  secretCipher: 'secretCipher',
+  verifiedAt: 'verifiedAt'
+} as const
+
+export type TotpCredentialScalarFieldEnum = (typeof TotpCredentialScalarFieldEnum)[keyof typeof TotpCredentialScalarFieldEnum]
+
+
+export const SmsCredentialScalarFieldEnum = {
+  id: 'id',
+  credentialId: 'credentialId',
+  phoneNumber: 'phoneNumber',
+  verifiedAt: 'verifiedAt'
+} as const
+
+export type SmsCredentialScalarFieldEnum = (typeof SmsCredentialScalarFieldEnum)[keyof typeof SmsCredentialScalarFieldEnum]
+
+
+export const PushCredentialScalarFieldEnum = {
+  id: 'id',
+  credentialId: 'credentialId',
+  deviceToken: 'deviceToken',
+  platform: 'platform',
+  verifiedAt: 'verifiedAt'
+} as const
+
+export type PushCredentialScalarFieldEnum = (typeof PushCredentialScalarFieldEnum)[keyof typeof PushCredentialScalarFieldEnum]
+
+
+export const BackupCodeScalarFieldEnum = {
+  id: 'id',
+  credentialId: 'credentialId',
+  codeHash: 'codeHash',
+  used: 'used',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type BackupCodeScalarFieldEnum = (typeof BackupCodeScalarFieldEnum)[keyof typeof BackupCodeScalarFieldEnum]
+
+
+export const MfaChallengeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  credentialId: 'credentialId',
+  type: 'type',
+  status: 'status',
+  attemptCount: 'attemptCount',
+  expiresAt: 'expiresAt',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type MfaChallengeScalarFieldEnum = (typeof MfaChallengeScalarFieldEnum)[keyof typeof MfaChallengeScalarFieldEnum]
+
+
+export const VerificationTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  type: 'type',
+  identifier: 'identifier',
+  newIdentifier: 'newIdentifier',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum]
 
 
 export const OAuthTransactionScalarFieldEnum = {
@@ -1175,7 +1698,6 @@ export const OAuthTransactionScalarFieldEnum = {
   userAgent: 'userAgent',
   fingerprint: 'fingerprint',
   deviceId: 'deviceId',
-  metadata: 'metadata',
   createdAt: 'createdAt',
   expiresAt: 'expiresAt'
 } as const
@@ -1197,13 +1719,6 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1280,27 +1795,6 @@ export type ListEnumUserStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-/**
- * Reference to a field of type 'MfaType'
- */
-export type EnumMfaTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MfaType'>
-    
-
-
-/**
- * Reference to a field of type 'MfaType[]'
- */
-export type ListEnumMfaTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MfaType[]'>
-    
-
-
-/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -1357,6 +1851,13 @@ export type ListEnumDeviceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'SessionStatus'
  */
 export type EnumSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SessionStatus'>
@@ -1371,16 +1872,58 @@ export type ListEnumSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
- * Reference to a field of type 'MfaState'
+ * Reference to a field of type 'MFAState'
  */
-export type EnumMfaStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MfaState'>
+export type EnumMFAStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFAState'>
     
 
 
 /**
- * Reference to a field of type 'MfaState[]'
+ * Reference to a field of type 'MFAState[]'
  */
-export type ListEnumMfaStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MfaState[]'>
+export type ListEnumMFAStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFAState[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MFAMethod'
+ */
+export type EnumMFAMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFAMethod'>
+    
+
+
+/**
+ * Reference to a field of type 'MFAMethod[]'
+ */
+export type ListEnumMFAMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFAMethod[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MFACredentialStatus'
+ */
+export type EnumMFACredentialStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFACredentialStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MFACredentialStatus[]'
+ */
+export type ListEnumMFACredentialStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFACredentialStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MFAChallengeStatus'
+ */
+export type EnumMFAChallengeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFAChallengeStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MFAChallengeStatus[]'
+ */
+export type ListEnumMFAChallengeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFAChallengeStatus[]'>
     
 
 
@@ -1395,6 +1938,34 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'VerificationTokenType'
+ */
+export type EnumVerificationTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationTokenType'>
+    
+
+
+/**
+ * Reference to a field of type 'VerificationTokenType[]'
+ */
+export type ListEnumVerificationTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationTokenType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**
@@ -1555,6 +2126,12 @@ export type GlobalOmitConfig = {
   device?: Prisma.DeviceOmit
   session?: Prisma.SessionOmit
   mfaCredential?: Prisma.MfaCredentialOmit
+  totpCredential?: Prisma.TotpCredentialOmit
+  smsCredential?: Prisma.SmsCredentialOmit
+  pushCredential?: Prisma.PushCredentialOmit
+  backupCode?: Prisma.BackupCodeOmit
+  mfaChallenge?: Prisma.MfaChallengeOmit
+  verificationToken?: Prisma.VerificationTokenOmit
   oAuthTransaction?: Prisma.OAuthTransactionOmit
 }
 

@@ -10,70 +10,99 @@
 */
 
 export const UserStatus = {
-  ACTIVE: 'ACTIVE',
-  PENDING: 'PENDING',
-  SUSPENDED: 'SUSPENDED',
-  DELETED: 'DELETED'
+  active: 'active',
+  suspended: 'suspended',
+  pending_verification: 'pending_verification',
+  deleted: 'deleted'
 } as const
 
 export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
 
 
 export const AccountType = {
-  OAUTH: 'OAUTH',
-  CREDENTIALS: 'CREDENTIALS'
+  oauth: 'oauth',
+  credentials: 'credentials'
 } as const
 
 export type AccountType = (typeof AccountType)[keyof typeof AccountType]
 
 
 export const AccountStatus = {
-  ACTIVE: 'ACTIVE',
-  UNLINKED: 'UNLINKED',
-  SUSPENDED: 'SUSPENDED'
+  active: 'active',
+  unlinked: 'unlinked',
+  suspended: 'suspended'
 } as const
 
 export type AccountStatus = (typeof AccountStatus)[keyof typeof AccountStatus]
 
 
 export const SessionStatus = {
-  ACTIVE: 'ACTIVE',
-  EXPIRED: 'EXPIRED',
-  REVOKED: 'REVOKED'
+  active: 'active',
+  expired: 'expired',
+  revoked: 'revoked'
 } as const
 
 export type SessionStatus = (typeof SessionStatus)[keyof typeof SessionStatus]
 
 
-export const MfaState = {
-  NONE: 'NONE',
-  PENDING: 'PENDING',
-  COMPLETED: 'COMPLETED',
-  SKIPPED: 'SKIPPED'
+export const MFAState = {
+  none: 'none',
+  pending: 'pending',
+  completed: 'completed',
+  skipped: 'skipped'
 } as const
 
-export type MfaState = (typeof MfaState)[keyof typeof MfaState]
+export type MFAState = (typeof MFAState)[keyof typeof MFAState]
+
+
+export const MFAMethod = {
+  totp: 'totp',
+  webauthn_passkey: 'webauthn_passkey',
+  webauthn_security_key: 'webauthn_security_key',
+  sms: 'sms',
+  email: 'email',
+  recovery_code: 'recovery_code'
+} as const
+
+export type MFAMethod = (typeof MFAMethod)[keyof typeof MFAMethod]
 
 
 export const DeviceType = {
-  DESKTOP: 'DESKTOP',
-  MOBILE: 'MOBILE',
-  TABLET: 'TABLET',
-  TV: 'TV',
-  BOT: 'BOT',
-  UNKNOWN: 'UNKNOWN'
+  desktop: 'desktop',
+  mobile: 'mobile',
+  tablet: 'tablet',
+  tv: 'tv',
+  bot: 'bot',
+  unknown: 'unknown'
 } as const
 
 export type DeviceType = (typeof DeviceType)[keyof typeof DeviceType]
 
 
-export const MfaType = {
-  TOTP: 'TOTP',
-  EMAIL: 'EMAIL',
-  SMS: 'SMS',
-  WEBAUTHN_PASSKEY: 'WEBAUTHN_PASSKEY',
-  WEBAUTHN_SECURITY_KEY: 'WEBAUTHN_SECURITY_KEY',
-  RECOVERY_CODE: 'RECOVERY_CODE'
+export const MFAChallengeStatus = {
+  pending: 'pending',
+  verified: 'verified',
+  expired: 'expired',
+  failed: 'failed'
 } as const
 
-export type MfaType = (typeof MfaType)[keyof typeof MfaType]
+export type MFAChallengeStatus = (typeof MFAChallengeStatus)[keyof typeof MFAChallengeStatus]
+
+
+export const MFACredentialStatus = {
+  active: 'active',
+  pending: 'pending',
+  disabled: 'disabled'
+} as const
+
+export type MFACredentialStatus = (typeof MFACredentialStatus)[keyof typeof MFACredentialStatus]
+
+
+export const VerificationTokenType = {
+  email_verification: 'email_verification',
+  password_reset: 'password_reset',
+  email_change: 'email_change',
+  mfa_recovery: 'mfa_recovery'
+} as const
+
+export type VerificationTokenType = (typeof VerificationTokenType)[keyof typeof VerificationTokenType]

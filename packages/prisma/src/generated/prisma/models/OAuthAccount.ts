@@ -14,9 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model OAuthAccount
- * ---------------------------------------------------------------------------
- * OAUTH ACCOUNT
- * ---------------------------------------------------------------------------
+ * 
  */
 export type OAuthAccountModel = runtime.Types.Result.DefaultSelection<Prisma.$OAuthAccountPayload>
 

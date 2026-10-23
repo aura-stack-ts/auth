@@ -1,38 +1,36 @@
 import type {
     AccountEntity,
-    AccountStatus,
-    AccountType,
+    BackupCodeCredentialEntity,
     CredentialAccountEntity,
     DeviceEntity,
-    DeviceType,
+    MFAChallengeEntity,
     MFACredentialEntity,
-    MFAMethod,
-    MFAState,
     OAuthAccountEntity,
     OAuthTransactionEntity,
+    PushCredentialEntity,
     RevokeReason,
     SessionEntity,
-    SessionStatus,
     SessionWithUserEntity,
+    SmsCredentialEntity,
+    TotpCredentialEntity,
     UserEntity,
-    UserStatus,
+    VerificationTokenEntity,
 } from "@aura-stack/auth/types"
 import type {
     Account,
-    AccountStatus as PrismaAccountStatus,
-    AccountType as PrismaAccountType,
+    BackupCode,
     CredentialAccount,
     Device,
-    DeviceType as PrismaDeviceType,
+    MfaChallenge,
     MfaCredential,
-    MfaState as PrismaMfaState,
-    MfaType,
     OAuthAccount,
     OAuthTransaction,
+    PushCredential,
     Session,
-    SessionStatus as PrismaSessionStatus,
+    SmsCredential,
+    TotpCredential,
     User,
-    UserStatus as PrismaUserStatus,
+    VerificationToken,
 } from "@/generated/prisma/client.js"
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -42,200 +40,17 @@ export const toJson = (value: Record<string, unknown> | null | undefined) => (va
 
 export const fromJson = (value: unknown): Record<string, unknown> | null => (isRecord(value) ? value : null)
 
-export const toUserStatus = (status: UserStatus): PrismaUserStatus => {
-    switch (status) {
-        case "active":
-            return "ACTIVE"
-        case "pending_verification":
-            return "PENDING"
-        case "suspended":
-            return "SUSPENDED"
-        case "deleted":
-            return "DELETED"
-    }
-}
-
-export const fromUserStatus = (status: PrismaUserStatus): UserStatus => {
-    switch (status) {
-        case "ACTIVE":
-            return "active"
-        case "PENDING":
-            return "pending_verification"
-        case "SUSPENDED":
-            return "suspended"
-        case "DELETED":
-            return "deleted"
-    }
-}
-
-export const fromAccountType = (type: PrismaAccountType): AccountType => {
-    switch (type) {
-        case "OAUTH":
-            return "oauth"
-        case "CREDENTIALS":
-            return "credentials"
-    }
-}
-
-export const toAccountType = (type: AccountType): PrismaAccountType => {
-    switch (type) {
-        case "oauth":
-            return "OAUTH"
-        case "credentials":
-            return "CREDENTIALS"
-    }
-}
-
-export const fromAccountStatus = (status: PrismaAccountStatus): AccountStatus => {
-    switch (status) {
-        case "ACTIVE":
-            return "active"
-        case "UNLINKED":
-            return "unlinked"
-        case "SUSPENDED":
-            return "suspended"
-    }
-}
-
-export const toAccountStatus = (status: AccountStatus): PrismaAccountStatus => {
-    switch (status) {
-        case "active":
-            return "ACTIVE"
-        case "unlinked":
-            return "UNLINKED"
-        case "suspended":
-            return "SUSPENDED"
-    }
-}
-
-export const fromSessionStatus = (status: PrismaSessionStatus): SessionStatus => {
-    switch (status) {
-        case "ACTIVE":
-            return "active"
-        case "EXPIRED":
-            return "expired"
-        case "REVOKED":
-            return "revoked"
-    }
-}
-
-export const toSessionStatus = (status: SessionStatus): PrismaSessionStatus => {
-    switch (status) {
-        case "active":
-            return "ACTIVE"
-        case "expired":
-            return "EXPIRED"
-        case "revoked":
-            return "REVOKED"
-    }
-}
-
-export const fromMFAStatus = (state: PrismaMfaState): MFAState => {
-    switch (state) {
-        case "NONE":
-            return "none"
-        case "PENDING":
-            return "pending"
-        case "COMPLETED":
-            return "completed"
-        case "SKIPPED":
-            return "skipped"
-    }
-}
-
-export const toMFAStatus = (state: MFAState): PrismaMfaState => {
-    switch (state) {
-        case "none":
-            return "NONE"
-        case "pending":
-            return "PENDING"
-        case "completed":
-            return "COMPLETED"
-        case "skipped":
-            return "SKIPPED"
-    }
-}
-
-export const fromMFAMethod = (type: MfaType): MFAMethod => {
-    switch (type) {
-        case "TOTP":
-            return "totp"
-        case "EMAIL":
-            return "email"
-        case "SMS":
-            return "sms"
-        case "WEBAUTHN_PASSKEY":
-            return "webauthn_passkey"
-        case "WEBAUTHN_SECURITY_KEY":
-            return "webauthn_security_key"
-        case "RECOVERY_CODE":
-            return "recovery_code"
-    }
-}
-
-export const toMFAMethod = (type: MFAMethod): MfaType => {
-    switch (type) {
-        case "totp":
-            return "TOTP"
-        case "email":
-            return "EMAIL"
-        case "sms":
-            return "SMS"
-        case "webauthn_passkey":
-            return "WEBAUTHN_PASSKEY"
-        case "webauthn_security_key":
-            return "WEBAUTHN_SECURITY_KEY"
-        case "recovery_code":
-            return "RECOVERY_CODE"
-    }
-}
-
-export const fromDeviceType = (type: PrismaDeviceType): DeviceType => {
-    switch (type) {
-        case "DESKTOP":
-            return "desktop"
-        case "MOBILE":
-            return "mobile"
-        case "TABLET":
-            return "tablet"
-        case "TV":
-            return "tv"
-        case "BOT":
-            return "bot"
-        case "UNKNOWN":
-            return "unknown"
-    }
-}
-
-export const toDeviceType = (type: DeviceType): PrismaDeviceType => {
-    switch (type) {
-        case "desktop":
-            return "DESKTOP"
-        case "mobile":
-            return "MOBILE"
-        case "tablet":
-            return "TABLET"
-        case "tv":
-            return "TV"
-        case "bot":
-            return "BOT"
-        case "unknown":
-            return "UNKNOWN"
-    }
-}
-
 export const toUser = (user: User): UserEntity => ({
     id: user.id,
     name: user.name,
     email: user.email,
     image: user.image,
     emailVerifiedAt: user.emailVerifiedAt,
-    status: fromUserStatus(user.status),
-    mfaEnabled: user.mfaEnabled,
-    mfaPreferredMethod: user.mfaPreferredMethod ? fromMFAMethod(user.mfaPreferredMethod) : null,
+    status: user.status,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     attributes: fromJson(user.attributes),
+    deletedAt: user.deletedAt,
 })
 
 export const toAccount = (account: Account): AccountEntity => ({
@@ -243,10 +58,11 @@ export const toAccount = (account: Account): AccountEntity => ({
     userId: account.userId,
     provider: account.provider,
     providerUserId: account.providerUserId,
-    type: fromAccountType(account.type),
-    status: fromAccountStatus(account.status),
+    type: account.type,
+    status: account.status,
     createdAt: account.createdAt,
     updatedAt: account.updatedAt,
+    deletedAt: account.deletedAt,
 })
 
 export const toOAuthAccount = (account: OAuthAccount): OAuthAccountEntity => ({
@@ -273,11 +89,10 @@ export const toSession = (session: Session): SessionEntity => ({
     userId: session.userId,
     deviceId: session.deviceId,
     authenticatedWith: session.authenticatedWith,
-    status: fromSessionStatus(session.status),
-    mfaState: fromMFAStatus(session.mfaState),
+    status: session.status,
+    mfaState: session.mfaState,
     tokenHash: session.tokenHash,
     expiresAt: session.expiresAt,
-    metadata: fromJson(session.metadata),
     lastActivityAt: session.lastActivityAt,
     revokedAt: session.revokedAt,
     createdAt: session.createdAt,
@@ -293,7 +108,7 @@ export const toDevice = (device: Device): DeviceEntity => ({
     id: device.id,
     userId: device.userId,
     name: device.name,
-    type: fromDeviceType(device.type),
+    type: device.type,
     platform: device.platform,
     browser: device.browser,
     userAgent: device.userAgent,
@@ -302,18 +117,19 @@ export const toDevice = (device: Device): DeviceEntity => ({
     trusted: device.trusted,
     firstSeenAt: device.firstSeenAt,
     lastSeenAt: device.lastSeenAt,
-    metadata: fromJson(device.metadata),
+    deletedAt: device.deletedAt,
 })
 
 export const toMFACredential = (credential: MfaCredential): MFACredentialEntity => ({
     id: credential.id,
     userId: credential.userId,
-    type: fromMFAMethod(credential.type),
-    credentialData: fromJson(credential.credentialData) ?? {},
+    type: credential.type,
+    status: credential.status,
     isPrimary: credential.isPrimary,
     verifiedAt: credential.verifiedAt,
     createdAt: credential.createdAt,
-    metadata: fromJson(credential.metadata),
+    deletedAt: credential.deletedAt,
+    enrolledAt: credential.enrolledAt,
 })
 
 export const toOAuthTransaction = (transaction: OAuthTransaction): OAuthTransactionEntity => ({
@@ -328,7 +144,6 @@ export const toOAuthTransaction = (transaction: OAuthTransaction): OAuthTransact
     fingerprint: transaction.fingerprint,
     createdAt: transaction.createdAt,
     expiresAt: transaction.expiresAt,
-    metadata: fromJson(transaction.metadata),
     deviceId: transaction.deviceId,
 })
 
@@ -340,4 +155,59 @@ export const appendRevokeReason = (
     ...(metadata ?? {}),
     revokeReason: reason,
     revokedAt: revokedAt.toISOString(),
+})
+
+export const toTotpCredential = (credential: TotpCredential): TotpCredentialEntity => ({
+    id: credential.id,
+    credentialId: credential.credentialId,
+    secretCipher: credential.secretCipher,
+    verifiedAt: credential.verifiedAt,
+})
+
+export const toSmsCredential = (credential: SmsCredential): SmsCredentialEntity => ({
+    id: credential.id,
+    credentialId: credential.credentialId,
+    phoneNumber: credential.phoneNumber,
+    verifiedAt: credential.verifiedAt,
+})
+
+export const toPushCredential = (credential: PushCredential): PushCredentialEntity => ({
+    id: credential.id,
+    credentialId: credential.credentialId,
+    deviceToken: credential.deviceToken,
+    platform: credential.platform,
+    verifiedAt: credential.verifiedAt,
+})
+
+export const toBackupCode = (code: BackupCode): BackupCodeCredentialEntity => ({
+    id: code.id,
+    credentialId: code.credentialId,
+    codeHash: code.codeHash,
+    createdAt: code.createdAt,
+    usedAt: code.usedAt,
+})
+
+export const toMFAChallenge = (challenge: MfaChallenge): MFAChallengeEntity => ({
+    id: challenge.id,
+    userId: challenge.userId,
+    sessionId: challenge.sessionId ?? "",
+    credentialId: challenge.credentialId,
+    type: challenge.type,
+    status: challenge.status,
+    attempCount: challenge.attemptCount,
+    expiresAt: challenge.expiresAt,
+    createdAt: challenge.createdAt,
+    verifiedAt: challenge.verifiedAt,
+})
+
+export const toVerificationToken = (token: VerificationToken): VerificationTokenEntity => ({
+    id: token.id,
+    userId: token.userId,
+    tokenHash: token.tokenHash,
+    type: token.type,
+    identifier: token.identifier ?? "",
+    newIdentifier: token.newIdentifier,
+    expiresAt: token.expiresAt,
+    revokedAt: token.revokedAt,
+    createdAt: token.createdAt,
 })

@@ -6,8 +6,11 @@
   "description": "Prisma Database Adapter for Aura Auth authentication library",
   "scripts": {
     "dev": "tsdown --watch",
-    "generate": "prisma generate",
     "build": "pnpm exec prisma generate && tsdown",
+    "db:validate": "prisma validate",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev --name",
+    "db:studio": "prisma studio",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "test": "vitest --run",

@@ -176,6 +176,7 @@ export interface BackupCodeCredentialEntity {
     credentialId: string
     codeHash: string
     createdAt: Date
+    used: boolean
     usedAt: Date | null
 }
 

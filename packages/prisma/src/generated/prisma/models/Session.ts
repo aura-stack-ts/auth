@@ -30,7 +30,7 @@ export type SessionMinAggregateOutputType = {
   deviceId: string | null
   authenticatedWith: string | null
   status: $Enums.SessionStatus | null
-  mfaState: $Enums.MfaState | null
+  mfaState: $Enums.MFAState | null
   tokenHash: string | null
   expiresAt: Date | null
   lastActivityAt: Date | null
@@ -45,7 +45,7 @@ export type SessionMaxAggregateOutputType = {
   deviceId: string | null
   authenticatedWith: string | null
   status: $Enums.SessionStatus | null
-  mfaState: $Enums.MfaState | null
+  mfaState: $Enums.MFAState | null
   tokenHash: string | null
   expiresAt: Date | null
   lastActivityAt: Date | null
@@ -65,7 +65,6 @@ export type SessionCountAggregateOutputType = {
   expiresAt: number
   lastActivityAt: number
   revokedAt: number
-  metadata: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -113,7 +112,6 @@ export type SessionCountAggregateInputType = {
   expiresAt?: true
   lastActivityAt?: true
   revokedAt?: true
-  metadata?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -197,12 +195,11 @@ export type SessionGroupByOutputType = {
   deviceId: string | null
   authenticatedWith: string
   status: $Enums.SessionStatus
-  mfaState: $Enums.MfaState
+  mfaState: $Enums.MFAState
   tokenHash: string
   expiresAt: Date
   lastActivityAt: Date
   revokedAt: Date | null
-  metadata: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: SessionCountAggregateOutputType | null
@@ -234,16 +231,16 @@ export type SessionWhereInput = {
   deviceId?: Prisma.StringNullableFilter<"Session"> | string | null
   authenticatedWith?: Prisma.StringFilter<"Session"> | string
   status?: Prisma.EnumSessionStatusFilter<"Session"> | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFilter<"Session"> | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFilter<"Session"> | $Enums.MFAState
   tokenHash?: Prisma.StringFilter<"Session"> | string
   expiresAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   lastActivityAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   revokedAt?: Prisma.DateTimeNullableFilter<"Session"> | Date | string | null
-  metadata?: Prisma.JsonNullableFilter<"Session">
   createdAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   device?: Prisma.XOR<Prisma.DeviceNullableScalarRelationFilter, Prisma.DeviceWhereInput> | null
+  mfaChallenges?: Prisma.MfaChallengeListRelationFilter
 }
 
 export type SessionOrderByWithRelationInput = {
@@ -257,11 +254,11 @@ export type SessionOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrder
   lastActivityAt?: Prisma.SortOrder
   revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   device?: Prisma.DeviceOrderByWithRelationInput
+  mfaChallenges?: Prisma.MfaChallengeOrderByRelationAggregateInput
 }
 
 export type SessionWhereUniqueInput = Prisma.AtLeast<{
@@ -274,15 +271,15 @@ export type SessionWhereUniqueInput = Prisma.AtLeast<{
   deviceId?: Prisma.StringNullableFilter<"Session"> | string | null
   authenticatedWith?: Prisma.StringFilter<"Session"> | string
   status?: Prisma.EnumSessionStatusFilter<"Session"> | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFilter<"Session"> | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFilter<"Session"> | $Enums.MFAState
   expiresAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   lastActivityAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   revokedAt?: Prisma.DateTimeNullableFilter<"Session"> | Date | string | null
-  metadata?: Prisma.JsonNullableFilter<"Session">
   createdAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   device?: Prisma.XOR<Prisma.DeviceNullableScalarRelationFilter, Prisma.DeviceWhereInput> | null
+  mfaChallenges?: Prisma.MfaChallengeListRelationFilter
 }, "id" | "tokenHash">
 
 export type SessionOrderByWithAggregationInput = {
@@ -296,7 +293,6 @@ export type SessionOrderByWithAggregationInput = {
   expiresAt?: Prisma.SortOrder
   lastActivityAt?: Prisma.SortOrder
   revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SessionCountOrderByAggregateInput
@@ -313,12 +309,11 @@ export type SessionScalarWhereWithAggregatesInput = {
   deviceId?: Prisma.StringNullableWithAggregatesFilter<"Session"> | string | null
   authenticatedWith?: Prisma.StringWithAggregatesFilter<"Session"> | string
   status?: Prisma.EnumSessionStatusWithAggregatesFilter<"Session"> | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateWithAggregatesFilter<"Session"> | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateWithAggregatesFilter<"Session"> | $Enums.MFAState
   tokenHash?: Prisma.StringWithAggregatesFilter<"Session"> | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"Session"> | Date | string
   lastActivityAt?: Prisma.DateTimeWithAggregatesFilter<"Session"> | Date | string
   revokedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Session"> | Date | string | null
-  metadata?: Prisma.JsonNullableWithAggregatesFilter<"Session">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Session"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Session"> | Date | string
 }
@@ -327,16 +322,16 @@ export type SessionCreateInput = {
   id?: string
   authenticatedWith: string
   status?: $Enums.SessionStatus
-  mfaState?: $Enums.MfaState
+  mfaState?: $Enums.MFAState
   tokenHash: string
   expiresAt: Date | string
   lastActivityAt?: Date | string
   revokedAt?: Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSessionsInput
   device?: Prisma.DeviceCreateNestedOneWithoutSessionsInput
+  mfaChallenges?: Prisma.MfaChallengeCreateNestedManyWithoutSessionInput
 }
 
 export type SessionUncheckedCreateInput = {
@@ -345,30 +340,30 @@ export type SessionUncheckedCreateInput = {
   deviceId?: string | null
   authenticatedWith: string
   status?: $Enums.SessionStatus
-  mfaState?: $Enums.MfaState
+  mfaState?: $Enums.MFAState
   tokenHash: string
   expiresAt: Date | string
   lastActivityAt?: Date | string
   revokedAt?: Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  mfaChallenges?: Prisma.MfaChallengeUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type SessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSessionsNestedInput
   device?: Prisma.DeviceUpdateOneWithoutSessionsNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUpdateManyWithoutSessionNestedInput
 }
 
 export type SessionUncheckedUpdateInput = {
@@ -377,14 +372,14 @@ export type SessionUncheckedUpdateInput = {
   deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mfaChallenges?: Prisma.MfaChallengeUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type SessionCreateManyInput = {
@@ -393,12 +388,11 @@ export type SessionCreateManyInput = {
   deviceId?: string | null
   authenticatedWith: string
   status?: $Enums.SessionStatus
-  mfaState?: $Enums.MfaState
+  mfaState?: $Enums.MFAState
   tokenHash: string
   expiresAt: Date | string
   lastActivityAt?: Date | string
   revokedAt?: Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -407,12 +401,11 @@ export type SessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -423,12 +416,11 @@ export type SessionUncheckedUpdateManyInput = {
   deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -454,7 +446,6 @@ export type SessionCountOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   lastActivityAt?: Prisma.SortOrder
   revokedAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -487,6 +478,11 @@ export type SessionMinOrderByAggregateInput = {
   revokedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type SessionNullableScalarRelationFilter = {
+  is?: Prisma.SessionWhereInput | null
+  isNot?: Prisma.SessionWhereInput | null
 }
 
 export type SessionCreateNestedManyWithoutUserInput = {
@@ -577,23 +573,39 @@ export type EnumSessionStatusFieldUpdateOperationsInput = {
   set?: $Enums.SessionStatus
 }
 
-export type EnumMfaStateFieldUpdateOperationsInput = {
-  set?: $Enums.MfaState
+export type EnumMFAStateFieldUpdateOperationsInput = {
+  set?: $Enums.MFAState
+}
+
+export type SessionCreateNestedOneWithoutMfaChallengesInput = {
+  create?: Prisma.XOR<Prisma.SessionCreateWithoutMfaChallengesInput, Prisma.SessionUncheckedCreateWithoutMfaChallengesInput>
+  connectOrCreate?: Prisma.SessionCreateOrConnectWithoutMfaChallengesInput
+  connect?: Prisma.SessionWhereUniqueInput
+}
+
+export type SessionUpdateOneWithoutMfaChallengesNestedInput = {
+  create?: Prisma.XOR<Prisma.SessionCreateWithoutMfaChallengesInput, Prisma.SessionUncheckedCreateWithoutMfaChallengesInput>
+  connectOrCreate?: Prisma.SessionCreateOrConnectWithoutMfaChallengesInput
+  upsert?: Prisma.SessionUpsertWithoutMfaChallengesInput
+  disconnect?: Prisma.SessionWhereInput | boolean
+  delete?: Prisma.SessionWhereInput | boolean
+  connect?: Prisma.SessionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SessionUpdateToOneWithWhereWithoutMfaChallengesInput, Prisma.SessionUpdateWithoutMfaChallengesInput>, Prisma.SessionUncheckedUpdateWithoutMfaChallengesInput>
 }
 
 export type SessionCreateWithoutUserInput = {
   id?: string
   authenticatedWith: string
   status?: $Enums.SessionStatus
-  mfaState?: $Enums.MfaState
+  mfaState?: $Enums.MFAState
   tokenHash: string
   expiresAt: Date | string
   lastActivityAt?: Date | string
   revokedAt?: Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   device?: Prisma.DeviceCreateNestedOneWithoutSessionsInput
+  mfaChallenges?: Prisma.MfaChallengeCreateNestedManyWithoutSessionInput
 }
 
 export type SessionUncheckedCreateWithoutUserInput = {
@@ -601,14 +613,14 @@ export type SessionUncheckedCreateWithoutUserInput = {
   deviceId?: string | null
   authenticatedWith: string
   status?: $Enums.SessionStatus
-  mfaState?: $Enums.MfaState
+  mfaState?: $Enums.MFAState
   tokenHash: string
   expiresAt: Date | string
   lastActivityAt?: Date | string
   revokedAt?: Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  mfaChallenges?: Prisma.MfaChallengeUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type SessionCreateOrConnectWithoutUserInput = {
@@ -646,12 +658,11 @@ export type SessionScalarWhereInput = {
   deviceId?: Prisma.StringNullableFilter<"Session"> | string | null
   authenticatedWith?: Prisma.StringFilter<"Session"> | string
   status?: Prisma.EnumSessionStatusFilter<"Session"> | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFilter<"Session"> | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFilter<"Session"> | $Enums.MFAState
   tokenHash?: Prisma.StringFilter<"Session"> | string
   expiresAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   lastActivityAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   revokedAt?: Prisma.DateTimeNullableFilter<"Session"> | Date | string | null
-  metadata?: Prisma.JsonNullableFilter<"Session">
   createdAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Session"> | Date | string
 }
@@ -660,15 +671,15 @@ export type SessionCreateWithoutDeviceInput = {
   id?: string
   authenticatedWith: string
   status?: $Enums.SessionStatus
-  mfaState?: $Enums.MfaState
+  mfaState?: $Enums.MFAState
   tokenHash: string
   expiresAt: Date | string
   lastActivityAt?: Date | string
   revokedAt?: Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSessionsInput
+  mfaChallenges?: Prisma.MfaChallengeCreateNestedManyWithoutSessionInput
 }
 
 export type SessionUncheckedCreateWithoutDeviceInput = {
@@ -676,14 +687,14 @@ export type SessionUncheckedCreateWithoutDeviceInput = {
   userId: string
   authenticatedWith: string
   status?: $Enums.SessionStatus
-  mfaState?: $Enums.MfaState
+  mfaState?: $Enums.MFAState
   tokenHash: string
   expiresAt: Date | string
   lastActivityAt?: Date | string
   revokedAt?: Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  mfaChallenges?: Prisma.MfaChallengeUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type SessionCreateOrConnectWithoutDeviceInput = {
@@ -712,17 +723,92 @@ export type SessionUpdateManyWithWhereWithoutDeviceInput = {
   data: Prisma.XOR<Prisma.SessionUpdateManyMutationInput, Prisma.SessionUncheckedUpdateManyWithoutDeviceInput>
 }
 
+export type SessionCreateWithoutMfaChallengesInput = {
+  id?: string
+  authenticatedWith: string
+  status?: $Enums.SessionStatus
+  mfaState?: $Enums.MFAState
+  tokenHash: string
+  expiresAt: Date | string
+  lastActivityAt?: Date | string
+  revokedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutSessionsInput
+  device?: Prisma.DeviceCreateNestedOneWithoutSessionsInput
+}
+
+export type SessionUncheckedCreateWithoutMfaChallengesInput = {
+  id?: string
+  userId: string
+  deviceId?: string | null
+  authenticatedWith: string
+  status?: $Enums.SessionStatus
+  mfaState?: $Enums.MFAState
+  tokenHash: string
+  expiresAt: Date | string
+  lastActivityAt?: Date | string
+  revokedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SessionCreateOrConnectWithoutMfaChallengesInput = {
+  where: Prisma.SessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SessionCreateWithoutMfaChallengesInput, Prisma.SessionUncheckedCreateWithoutMfaChallengesInput>
+}
+
+export type SessionUpsertWithoutMfaChallengesInput = {
+  update: Prisma.XOR<Prisma.SessionUpdateWithoutMfaChallengesInput, Prisma.SessionUncheckedUpdateWithoutMfaChallengesInput>
+  create: Prisma.XOR<Prisma.SessionCreateWithoutMfaChallengesInput, Prisma.SessionUncheckedCreateWithoutMfaChallengesInput>
+  where?: Prisma.SessionWhereInput
+}
+
+export type SessionUpdateToOneWithWhereWithoutMfaChallengesInput = {
+  where?: Prisma.SessionWhereInput
+  data: Prisma.XOR<Prisma.SessionUpdateWithoutMfaChallengesInput, Prisma.SessionUncheckedUpdateWithoutMfaChallengesInput>
+}
+
+export type SessionUpdateWithoutMfaChallengesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
+  tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutSessionsNestedInput
+  device?: Prisma.DeviceUpdateOneWithoutSessionsNestedInput
+}
+
+export type SessionUncheckedUpdateWithoutMfaChallengesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
+  tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type SessionCreateManyUserInput = {
   id?: string
   deviceId?: string | null
   authenticatedWith: string
   status?: $Enums.SessionStatus
-  mfaState?: $Enums.MfaState
+  mfaState?: $Enums.MFAState
   tokenHash: string
   expiresAt: Date | string
   lastActivityAt?: Date | string
   revokedAt?: Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -731,15 +817,15 @@ export type SessionUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   device?: Prisma.DeviceUpdateOneWithoutSessionsNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUpdateManyWithoutSessionNestedInput
 }
 
 export type SessionUncheckedUpdateWithoutUserInput = {
@@ -747,14 +833,14 @@ export type SessionUncheckedUpdateWithoutUserInput = {
   deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mfaChallenges?: Prisma.MfaChallengeUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type SessionUncheckedUpdateManyWithoutUserInput = {
@@ -762,12 +848,11 @@ export type SessionUncheckedUpdateManyWithoutUserInput = {
   deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -777,12 +862,11 @@ export type SessionCreateManyDeviceInput = {
   userId: string
   authenticatedWith: string
   status?: $Enums.SessionStatus
-  mfaState?: $Enums.MfaState
+  mfaState?: $Enums.MFAState
   tokenHash: string
   expiresAt: Date | string
   lastActivityAt?: Date | string
   revokedAt?: Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -791,15 +875,15 @@ export type SessionUpdateWithoutDeviceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSessionsNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUpdateManyWithoutSessionNestedInput
 }
 
 export type SessionUncheckedUpdateWithoutDeviceInput = {
@@ -807,14 +891,14 @@ export type SessionUncheckedUpdateWithoutDeviceInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mfaChallenges?: Prisma.MfaChallengeUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type SessionUncheckedUpdateManyWithoutDeviceInput = {
@@ -822,16 +906,44 @@ export type SessionUncheckedUpdateManyWithoutDeviceInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   authenticatedWith?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
-  mfaState?: Prisma.EnumMfaStateFieldUpdateOperationsInput | $Enums.MfaState
+  mfaState?: Prisma.EnumMFAStateFieldUpdateOperationsInput | $Enums.MFAState
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastActivityAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type SessionCountOutputType
+ */
+
+export type SessionCountOutputType = {
+  mfaChallenges: number
+}
+
+export type SessionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  mfaChallenges?: boolean | SessionCountOutputTypeCountMfaChallengesArgs
+}
+
+/**
+ * SessionCountOutputType without action
+ */
+export type SessionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SessionCountOutputType
+   */
+  select?: Prisma.SessionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * SessionCountOutputType without action
+ */
+export type SessionCountOutputTypeCountMfaChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MfaChallengeWhereInput
+}
 
 
 export type SessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -845,11 +957,12 @@ export type SessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   expiresAt?: boolean
   lastActivityAt?: boolean
   revokedAt?: boolean
-  metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   device?: boolean | Prisma.Session$deviceArgs<ExtArgs>
+  mfaChallenges?: boolean | Prisma.Session$mfaChallengesArgs<ExtArgs>
+  _count?: boolean | Prisma.SessionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["session"]>
 
 export type SessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -863,7 +976,6 @@ export type SessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   expiresAt?: boolean
   lastActivityAt?: boolean
   revokedAt?: boolean
-  metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -881,7 +993,6 @@ export type SessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   expiresAt?: boolean
   lastActivityAt?: boolean
   revokedAt?: boolean
-  metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -899,15 +1010,16 @@ export type SessionSelectScalar = {
   expiresAt?: boolean
   lastActivityAt?: boolean
   revokedAt?: boolean
-  metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "deviceId" | "authenticatedWith" | "status" | "mfaState" | "tokenHash" | "expiresAt" | "lastActivityAt" | "revokedAt" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
+export type SessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "deviceId" | "authenticatedWith" | "status" | "mfaState" | "tokenHash" | "expiresAt" | "lastActivityAt" | "revokedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
 export type SessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   device?: boolean | Prisma.Session$deviceArgs<ExtArgs>
+  mfaChallenges?: boolean | Prisma.Session$mfaChallengesArgs<ExtArgs>
+  _count?: boolean | Prisma.SessionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -923,6 +1035,7 @@ export type $SessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     device: Prisma.$DevicePayload<ExtArgs> | null
+    mfaChallenges: Prisma.$MfaChallengePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -930,12 +1043,11 @@ export type $SessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     deviceId: string | null
     authenticatedWith: string
     status: $Enums.SessionStatus
-    mfaState: $Enums.MfaState
+    mfaState: $Enums.MFAState
     tokenHash: string
     expiresAt: Date
     lastActivityAt: Date
     revokedAt: Date | null
-    metadata: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["session"]>
@@ -1334,6 +1446,7 @@ export interface Prisma__SessionClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   device<T extends Prisma.Session$deviceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Session$deviceArgs<ExtArgs>>): Prisma.Prisma__DeviceClient<runtime.Types.Result.GetResult<Prisma.$DevicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  mfaChallenges<T extends Prisma.Session$mfaChallengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Session$mfaChallengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MfaChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1368,12 +1481,11 @@ export interface SessionFieldRefs {
   readonly deviceId: Prisma.FieldRef<"Session", 'String'>
   readonly authenticatedWith: Prisma.FieldRef<"Session", 'String'>
   readonly status: Prisma.FieldRef<"Session", 'SessionStatus'>
-  readonly mfaState: Prisma.FieldRef<"Session", 'MfaState'>
+  readonly mfaState: Prisma.FieldRef<"Session", 'MFAState'>
   readonly tokenHash: Prisma.FieldRef<"Session", 'String'>
   readonly expiresAt: Prisma.FieldRef<"Session", 'DateTime'>
   readonly lastActivityAt: Prisma.FieldRef<"Session", 'DateTime'>
   readonly revokedAt: Prisma.FieldRef<"Session", 'DateTime'>
-  readonly metadata: Prisma.FieldRef<"Session", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Session", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Session", 'DateTime'>
 }
@@ -1793,6 +1905,30 @@ export type Session$deviceArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   include?: Prisma.DeviceInclude<ExtArgs> | null
   where?: Prisma.DeviceWhereInput
+}
+
+/**
+ * Session.mfaChallenges
+ */
+export type Session$mfaChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MfaChallenge
+   */
+  select?: Prisma.MfaChallengeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MfaChallenge
+   */
+  omit?: Prisma.MfaChallengeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MfaChallengeInclude<ExtArgs> | null
+  where?: Prisma.MfaChallengeWhereInput
+  orderBy?: Prisma.MfaChallengeOrderByWithRelationInput | Prisma.MfaChallengeOrderByWithRelationInput[]
+  cursor?: Prisma.MfaChallengeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MfaChallengeScalarFieldEnum | Prisma.MfaChallengeScalarFieldEnum[]
 }
 
 /**
