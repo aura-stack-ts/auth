@@ -66,7 +66,6 @@ describe("signInCredentials action", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -231,7 +230,6 @@ describe("signInCredentials action", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -290,7 +288,6 @@ describe("signInCredentials action", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -349,7 +346,6 @@ describe("signInCredentials action", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -408,7 +404,6 @@ describe("signInCredentials action", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 })

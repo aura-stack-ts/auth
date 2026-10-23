@@ -15,11 +15,10 @@ export const userEntity: UserEntity = {
     image: "https://example.com/image.jpg",
     emailVerifiedAt: new Date(),
     status: "active",
-    mfaEnabled: false,
-    mfaPreferredMethod: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     attributes: null,
+    deletedAt: null,
 }
 
 export const sessionEntity: SessionEntity = {
@@ -31,7 +30,6 @@ export const sessionEntity: SessionEntity = {
     mfaState: "none",
     tokenHash: "hashed-token",
     expiresAt: new Date(Date.now() + 3600 * 1000),
-    metadata: null,
     lastActivityAt: new Date(),
     revokedAt: null,
     createdAt: new Date(),
@@ -77,7 +75,7 @@ export const deviceEntity: DeviceEntity = {
     firstSeenAt: new Date(),
     lastSeenAt: new Date(),
     trusted: false,
-    metadata: null,
+    deletedAt: null,
 }
 
 export const oauthTransactionEntity: OAuthTransactionEntity = {
@@ -93,5 +91,4 @@ export const oauthTransactionEntity: OAuthTransactionEntity = {
     deviceId: null,
     createdAt: new Date(),
     expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-    metadata: null,
 }
