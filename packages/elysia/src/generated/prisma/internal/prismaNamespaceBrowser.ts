@@ -58,6 +58,12 @@ export const ModelName = {
   Device: 'Device',
   Session: 'Session',
   MfaCredential: 'MfaCredential',
+  TotpCredential: 'TotpCredential',
+  SmsCredential: 'SmsCredential',
+  PushCredential: 'PushCredential',
+  BackupCode: 'BackupCode',
+  MfaChallenge: 'MfaChallenge',
+  VerificationToken: 'VerificationToken',
   OAuthTransaction: 'OAuthTransaction'
 } as const
 
@@ -84,11 +90,10 @@ export const UserScalarFieldEnum = {
   image: 'image',
   emailVerifiedAt: 'emailVerifiedAt',
   status: 'status',
-  mfaEnabled: 'mfaEnabled',
-  mfaPreferredMethod: 'mfaPreferredMethod',
+  attributes: 'attributes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  attributes: 'attributes'
+  deletedAt: 'deletedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -103,7 +108,7 @@ export const AccountScalarFieldEnum = {
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  metadata: 'metadata'
+  deletedAt: 'deletedAt'
 } as const
 
 export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
@@ -147,7 +152,7 @@ export const DeviceScalarFieldEnum = {
   trusted: 'trusted',
   firstSeenAt: 'firstSeenAt',
   lastSeenAt: 'lastSeenAt',
-  metadata: 'metadata'
+  deletedAt: 'deletedAt'
 } as const
 
 export type DeviceScalarFieldEnum = (typeof DeviceScalarFieldEnum)[keyof typeof DeviceScalarFieldEnum]
@@ -164,7 +169,6 @@ export const SessionScalarFieldEnum = {
   expiresAt: 'expiresAt',
   lastActivityAt: 'lastActivityAt',
   revokedAt: 'revokedAt',
-  metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -176,14 +180,86 @@ export const MfaCredentialScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   type: 'type',
-  credentialData: 'credentialData',
+  status: 'status',
   isPrimary: 'isPrimary',
+  enrolledAt: 'enrolledAt',
   verifiedAt: 'verifiedAt',
   createdAt: 'createdAt',
-  metadata: 'metadata'
+  deletedAt: 'deletedAt'
 } as const
 
 export type MfaCredentialScalarFieldEnum = (typeof MfaCredentialScalarFieldEnum)[keyof typeof MfaCredentialScalarFieldEnum]
+
+
+export const TotpCredentialScalarFieldEnum = {
+  credentialId: 'credentialId',
+  secretCipher: 'secretCipher',
+  verifiedAt: 'verifiedAt'
+} as const
+
+export type TotpCredentialScalarFieldEnum = (typeof TotpCredentialScalarFieldEnum)[keyof typeof TotpCredentialScalarFieldEnum]
+
+
+export const SmsCredentialScalarFieldEnum = {
+  credentialId: 'credentialId',
+  phoneNumber: 'phoneNumber',
+  verifiedAt: 'verifiedAt'
+} as const
+
+export type SmsCredentialScalarFieldEnum = (typeof SmsCredentialScalarFieldEnum)[keyof typeof SmsCredentialScalarFieldEnum]
+
+
+export const PushCredentialScalarFieldEnum = {
+  credentialId: 'credentialId',
+  deviceToken: 'deviceToken',
+  platform: 'platform',
+  verifiedAt: 'verifiedAt'
+} as const
+
+export type PushCredentialScalarFieldEnum = (typeof PushCredentialScalarFieldEnum)[keyof typeof PushCredentialScalarFieldEnum]
+
+
+export const BackupCodeScalarFieldEnum = {
+  id: 'id',
+  credentialId: 'credentialId',
+  codeHash: 'codeHash',
+  used: 'used',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type BackupCodeScalarFieldEnum = (typeof BackupCodeScalarFieldEnum)[keyof typeof BackupCodeScalarFieldEnum]
+
+
+export const MfaChallengeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  credentialId: 'credentialId',
+  type: 'type',
+  status: 'status',
+  attemptCount: 'attemptCount',
+  expiresAt: 'expiresAt',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type MfaChallengeScalarFieldEnum = (typeof MfaChallengeScalarFieldEnum)[keyof typeof MfaChallengeScalarFieldEnum]
+
+
+export const VerificationTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  type: 'type',
+  identifier: 'identifier',
+  newIdentifier: 'newIdentifier',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum]
 
 
 export const OAuthTransactionScalarFieldEnum = {
@@ -197,7 +273,6 @@ export const OAuthTransactionScalarFieldEnum = {
   userAgent: 'userAgent',
   fingerprint: 'fingerprint',
   deviceId: 'deviceId',
-  metadata: 'metadata',
   createdAt: 'createdAt',
   expiresAt: 'expiresAt'
 } as const
@@ -219,13 +294,6 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

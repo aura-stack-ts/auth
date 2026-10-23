@@ -14,9 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model MfaCredential
- * ---------------------------------------------------------------------------
- * MFA CREDENTIALS
- * ---------------------------------------------------------------------------
+ * 
  */
 export type MfaCredentialModel = runtime.Types.Result.DefaultSelection<Prisma.$MfaCredentialPayload>
 
@@ -29,30 +27,37 @@ export type AggregateMfaCredential = {
 export type MfaCredentialMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  type: $Enums.MfaType | null
+  type: $Enums.MFAMethod | null
+  status: string | null
   isPrimary: boolean | null
+  enrolledAt: Date | null
   verifiedAt: Date | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type MfaCredentialMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  type: $Enums.MfaType | null
+  type: $Enums.MFAMethod | null
+  status: string | null
   isPrimary: boolean | null
+  enrolledAt: Date | null
   verifiedAt: Date | null
   createdAt: Date | null
+  deletedAt: Date | null
 }
 
 export type MfaCredentialCountAggregateOutputType = {
   id: number
   userId: number
   type: number
-  credentialData: number
+  status: number
   isPrimary: number
+  enrolledAt: number
   verifiedAt: number
   createdAt: number
-  metadata: number
+  deletedAt: number
   _all: number
 }
 
@@ -61,29 +66,36 @@ export type MfaCredentialMinAggregateInputType = {
   id?: true
   userId?: true
   type?: true
+  status?: true
   isPrimary?: true
+  enrolledAt?: true
   verifiedAt?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type MfaCredentialMaxAggregateInputType = {
   id?: true
   userId?: true
   type?: true
+  status?: true
   isPrimary?: true
+  enrolledAt?: true
   verifiedAt?: true
   createdAt?: true
+  deletedAt?: true
 }
 
 export type MfaCredentialCountAggregateInputType = {
   id?: true
   userId?: true
   type?: true
-  credentialData?: true
+  status?: true
   isPrimary?: true
+  enrolledAt?: true
   verifiedAt?: true
   createdAt?: true
-  metadata?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -162,12 +174,13 @@ export type MfaCredentialGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
 export type MfaCredentialGroupByOutputType = {
   id: string
   userId: string
-  type: $Enums.MfaType
-  credentialData: runtime.JsonValue
+  type: $Enums.MFAMethod
+  status: string
   isPrimary: boolean
+  enrolledAt: Date
   verifiedAt: Date | null
   createdAt: Date
-  metadata: runtime.JsonValue | null
+  deletedAt: Date | null
   _count: MfaCredentialCountAggregateOutputType | null
   _min: MfaCredentialMinAggregateOutputType | null
   _max: MfaCredentialMaxAggregateOutputType | null
@@ -194,25 +207,37 @@ export type MfaCredentialWhereInput = {
   NOT?: Prisma.MfaCredentialWhereInput | Prisma.MfaCredentialWhereInput[]
   id?: Prisma.StringFilter<"MfaCredential"> | string
   userId?: Prisma.StringFilter<"MfaCredential"> | string
-  type?: Prisma.EnumMfaTypeFilter<"MfaCredential"> | $Enums.MfaType
-  credentialData?: Prisma.JsonFilter<"MfaCredential">
+  type?: Prisma.EnumMFAMethodFilter<"MfaCredential"> | $Enums.MFAMethod
+  status?: Prisma.StringFilter<"MfaCredential"> | string
   isPrimary?: Prisma.BoolFilter<"MfaCredential"> | boolean
+  enrolledAt?: Prisma.DateTimeFilter<"MfaCredential"> | Date | string
   verifiedAt?: Prisma.DateTimeNullableFilter<"MfaCredential"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MfaCredential"> | Date | string
-  metadata?: Prisma.JsonNullableFilter<"MfaCredential">
+  deletedAt?: Prisma.DateTimeNullableFilter<"MfaCredential"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  totpCredential?: Prisma.XOR<Prisma.TotpCredentialNullableScalarRelationFilter, Prisma.TotpCredentialWhereInput> | null
+  smsCredential?: Prisma.XOR<Prisma.SmsCredentialNullableScalarRelationFilter, Prisma.SmsCredentialWhereInput> | null
+  pushCredential?: Prisma.XOR<Prisma.PushCredentialNullableScalarRelationFilter, Prisma.PushCredentialWhereInput> | null
+  backupCodes?: Prisma.BackupCodeListRelationFilter
+  mfaChallenges?: Prisma.MfaChallengeListRelationFilter
 }
 
 export type MfaCredentialOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  credentialData?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  enrolledAt?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  totpCredential?: Prisma.TotpCredentialOrderByWithRelationInput
+  smsCredential?: Prisma.SmsCredentialOrderByWithRelationInput
+  pushCredential?: Prisma.PushCredentialOrderByWithRelationInput
+  backupCodes?: Prisma.BackupCodeOrderByRelationAggregateInput
+  mfaChallenges?: Prisma.MfaChallengeOrderByRelationAggregateInput
 }
 
 export type MfaCredentialWhereUniqueInput = Prisma.AtLeast<{
@@ -221,24 +246,31 @@ export type MfaCredentialWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.MfaCredentialWhereInput[]
   NOT?: Prisma.MfaCredentialWhereInput | Prisma.MfaCredentialWhereInput[]
   userId?: Prisma.StringFilter<"MfaCredential"> | string
-  type?: Prisma.EnumMfaTypeFilter<"MfaCredential"> | $Enums.MfaType
-  credentialData?: Prisma.JsonFilter<"MfaCredential">
+  type?: Prisma.EnumMFAMethodFilter<"MfaCredential"> | $Enums.MFAMethod
+  status?: Prisma.StringFilter<"MfaCredential"> | string
   isPrimary?: Prisma.BoolFilter<"MfaCredential"> | boolean
+  enrolledAt?: Prisma.DateTimeFilter<"MfaCredential"> | Date | string
   verifiedAt?: Prisma.DateTimeNullableFilter<"MfaCredential"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MfaCredential"> | Date | string
-  metadata?: Prisma.JsonNullableFilter<"MfaCredential">
+  deletedAt?: Prisma.DateTimeNullableFilter<"MfaCredential"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  totpCredential?: Prisma.XOR<Prisma.TotpCredentialNullableScalarRelationFilter, Prisma.TotpCredentialWhereInput> | null
+  smsCredential?: Prisma.XOR<Prisma.SmsCredentialNullableScalarRelationFilter, Prisma.SmsCredentialWhereInput> | null
+  pushCredential?: Prisma.XOR<Prisma.PushCredentialNullableScalarRelationFilter, Prisma.PushCredentialWhereInput> | null
+  backupCodes?: Prisma.BackupCodeListRelationFilter
+  mfaChallenges?: Prisma.MfaChallengeListRelationFilter
 }, "id">
 
 export type MfaCredentialOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  credentialData?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  enrolledAt?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.MfaCredentialCountOrderByAggregateInput
   _max?: Prisma.MfaCredentialMaxOrderByAggregateInput
   _min?: Prisma.MfaCredentialMinOrderByAggregateInput
@@ -250,88 +282,116 @@ export type MfaCredentialScalarWhereWithAggregatesInput = {
   NOT?: Prisma.MfaCredentialScalarWhereWithAggregatesInput | Prisma.MfaCredentialScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"MfaCredential"> | string
   userId?: Prisma.StringWithAggregatesFilter<"MfaCredential"> | string
-  type?: Prisma.EnumMfaTypeWithAggregatesFilter<"MfaCredential"> | $Enums.MfaType
-  credentialData?: Prisma.JsonWithAggregatesFilter<"MfaCredential">
+  type?: Prisma.EnumMFAMethodWithAggregatesFilter<"MfaCredential"> | $Enums.MFAMethod
+  status?: Prisma.StringWithAggregatesFilter<"MfaCredential"> | string
   isPrimary?: Prisma.BoolWithAggregatesFilter<"MfaCredential"> | boolean
+  enrolledAt?: Prisma.DateTimeWithAggregatesFilter<"MfaCredential"> | Date | string
   verifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MfaCredential"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"MfaCredential"> | Date | string
-  metadata?: Prisma.JsonNullableWithAggregatesFilter<"MfaCredential">
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MfaCredential"> | Date | string | null
 }
 
 export type MfaCredentialCreateInput = {
   id?: string
-  type: $Enums.MfaType
-  credentialData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type: $Enums.MFAMethod
+  status: string
   isPrimary?: boolean
+  enrolledAt?: Date | string
   verifiedAt?: Date | string | null
   createdAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutMfaCredentialsInput
+  totpCredential?: Prisma.TotpCredentialCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeCreateNestedManyWithoutCredentialInput
 }
 
 export type MfaCredentialUncheckedCreateInput = {
   id?: string
   userId: string
-  type: $Enums.MfaType
-  credentialData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type: $Enums.MFAMethod
+  status: string
   isPrimary?: boolean
+  enrolledAt?: Date | string
   verifiedAt?: Date | string | null
   createdAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeUncheckedCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedCreateNestedManyWithoutCredentialInput
 }
 
 export type MfaCredentialUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumMfaTypeFieldUpdateOperationsInput | $Enums.MfaType
-  credentialData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutMfaCredentialsNestedInput
+  totpCredential?: Prisma.TotpCredentialUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUpdateManyWithoutCredentialNestedInput
 }
 
 export type MfaCredentialUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumMfaTypeFieldUpdateOperationsInput | $Enums.MfaType
-  credentialData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUncheckedUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedUpdateManyWithoutCredentialNestedInput
 }
 
 export type MfaCredentialCreateManyInput = {
   id?: string
   userId: string
-  type: $Enums.MfaType
-  credentialData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type: $Enums.MFAMethod
+  status: string
   isPrimary?: boolean
+  enrolledAt?: Date | string
   verifiedAt?: Date | string | null
   createdAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
 }
 
 export type MfaCredentialUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumMfaTypeFieldUpdateOperationsInput | $Enums.MfaType
-  credentialData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MfaCredentialUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumMfaTypeFieldUpdateOperationsInput | $Enums.MfaType
-  credentialData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MfaCredentialListRelationFilter = {
@@ -348,29 +408,41 @@ export type MfaCredentialCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  credentialData?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  enrolledAt?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type MfaCredentialMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  enrolledAt?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type MfaCredentialMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  enrolledAt?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
+}
+
+export type MfaCredentialScalarRelationFilter = {
+  is?: Prisma.MfaCredentialWhereInput
+  isNot?: Prisma.MfaCredentialWhereInput
 }
 
 export type MfaCredentialCreateNestedManyWithoutUserInput = {
@@ -415,28 +487,110 @@ export type MfaCredentialUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.MfaCredentialScalarWhereInput | Prisma.MfaCredentialScalarWhereInput[]
 }
 
-export type EnumMfaTypeFieldUpdateOperationsInput = {
-  set?: $Enums.MfaType
+export type EnumMFAMethodFieldUpdateOperationsInput = {
+  set?: $Enums.MFAMethod
+}
+
+export type MfaCredentialCreateNestedOneWithoutTotpCredentialInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutTotpCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutTotpCredentialInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutTotpCredentialInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+}
+
+export type MfaCredentialUpdateOneRequiredWithoutTotpCredentialNestedInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutTotpCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutTotpCredentialInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutTotpCredentialInput
+  upsert?: Prisma.MfaCredentialUpsertWithoutTotpCredentialInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MfaCredentialUpdateToOneWithWhereWithoutTotpCredentialInput, Prisma.MfaCredentialUpdateWithoutTotpCredentialInput>, Prisma.MfaCredentialUncheckedUpdateWithoutTotpCredentialInput>
+}
+
+export type MfaCredentialCreateNestedOneWithoutSmsCredentialInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutSmsCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutSmsCredentialInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutSmsCredentialInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+}
+
+export type MfaCredentialUpdateOneRequiredWithoutSmsCredentialNestedInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutSmsCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutSmsCredentialInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutSmsCredentialInput
+  upsert?: Prisma.MfaCredentialUpsertWithoutSmsCredentialInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MfaCredentialUpdateToOneWithWhereWithoutSmsCredentialInput, Prisma.MfaCredentialUpdateWithoutSmsCredentialInput>, Prisma.MfaCredentialUncheckedUpdateWithoutSmsCredentialInput>
+}
+
+export type MfaCredentialCreateNestedOneWithoutPushCredentialInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutPushCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutPushCredentialInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutPushCredentialInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+}
+
+export type MfaCredentialUpdateOneRequiredWithoutPushCredentialNestedInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutPushCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutPushCredentialInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutPushCredentialInput
+  upsert?: Prisma.MfaCredentialUpsertWithoutPushCredentialInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MfaCredentialUpdateToOneWithWhereWithoutPushCredentialInput, Prisma.MfaCredentialUpdateWithoutPushCredentialInput>, Prisma.MfaCredentialUncheckedUpdateWithoutPushCredentialInput>
+}
+
+export type MfaCredentialCreateNestedOneWithoutBackupCodesInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutBackupCodesInput, Prisma.MfaCredentialUncheckedCreateWithoutBackupCodesInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutBackupCodesInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+}
+
+export type MfaCredentialUpdateOneRequiredWithoutBackupCodesNestedInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutBackupCodesInput, Prisma.MfaCredentialUncheckedCreateWithoutBackupCodesInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutBackupCodesInput
+  upsert?: Prisma.MfaCredentialUpsertWithoutBackupCodesInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MfaCredentialUpdateToOneWithWhereWithoutBackupCodesInput, Prisma.MfaCredentialUpdateWithoutBackupCodesInput>, Prisma.MfaCredentialUncheckedUpdateWithoutBackupCodesInput>
+}
+
+export type MfaCredentialCreateNestedOneWithoutMfaChallengesInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutMfaChallengesInput, Prisma.MfaCredentialUncheckedCreateWithoutMfaChallengesInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutMfaChallengesInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+}
+
+export type MfaCredentialUpdateOneRequiredWithoutMfaChallengesNestedInput = {
+  create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutMfaChallengesInput, Prisma.MfaCredentialUncheckedCreateWithoutMfaChallengesInput>
+  connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutMfaChallengesInput
+  upsert?: Prisma.MfaCredentialUpsertWithoutMfaChallengesInput
+  connect?: Prisma.MfaCredentialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MfaCredentialUpdateToOneWithWhereWithoutMfaChallengesInput, Prisma.MfaCredentialUpdateWithoutMfaChallengesInput>, Prisma.MfaCredentialUncheckedUpdateWithoutMfaChallengesInput>
 }
 
 export type MfaCredentialCreateWithoutUserInput = {
   id?: string
-  type: $Enums.MfaType
-  credentialData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type: $Enums.MFAMethod
+  status: string
   isPrimary?: boolean
+  enrolledAt?: Date | string
   verifiedAt?: Date | string | null
   createdAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  totpCredential?: Prisma.TotpCredentialCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeCreateNestedManyWithoutCredentialInput
 }
 
 export type MfaCredentialUncheckedCreateWithoutUserInput = {
   id?: string
-  type: $Enums.MfaType
-  credentialData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type: $Enums.MFAMethod
+  status: string
   isPrimary?: boolean
+  enrolledAt?: Date | string
   verifiedAt?: Date | string | null
   createdAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeUncheckedCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedCreateNestedManyWithoutCredentialInput
 }
 
 export type MfaCredentialCreateOrConnectWithoutUserInput = {
@@ -471,77 +625,538 @@ export type MfaCredentialScalarWhereInput = {
   NOT?: Prisma.MfaCredentialScalarWhereInput | Prisma.MfaCredentialScalarWhereInput[]
   id?: Prisma.StringFilter<"MfaCredential"> | string
   userId?: Prisma.StringFilter<"MfaCredential"> | string
-  type?: Prisma.EnumMfaTypeFilter<"MfaCredential"> | $Enums.MfaType
-  credentialData?: Prisma.JsonFilter<"MfaCredential">
+  type?: Prisma.EnumMFAMethodFilter<"MfaCredential"> | $Enums.MFAMethod
+  status?: Prisma.StringFilter<"MfaCredential"> | string
   isPrimary?: Prisma.BoolFilter<"MfaCredential"> | boolean
+  enrolledAt?: Prisma.DateTimeFilter<"MfaCredential"> | Date | string
   verifiedAt?: Prisma.DateTimeNullableFilter<"MfaCredential"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MfaCredential"> | Date | string
-  metadata?: Prisma.JsonNullableFilter<"MfaCredential">
+  deletedAt?: Prisma.DateTimeNullableFilter<"MfaCredential"> | Date | string | null
+}
+
+export type MfaCredentialCreateWithoutTotpCredentialInput = {
+  id?: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  user: Prisma.UserCreateNestedOneWithoutMfaCredentialsInput
+  smsCredential?: Prisma.SmsCredentialCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialUncheckedCreateWithoutTotpCredentialInput = {
+  id?: string
+  userId: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  smsCredential?: Prisma.SmsCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeUncheckedCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialCreateOrConnectWithoutTotpCredentialInput = {
+  where: Prisma.MfaCredentialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutTotpCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutTotpCredentialInput>
+}
+
+export type MfaCredentialUpsertWithoutTotpCredentialInput = {
+  update: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutTotpCredentialInput, Prisma.MfaCredentialUncheckedUpdateWithoutTotpCredentialInput>
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutTotpCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutTotpCredentialInput>
+  where?: Prisma.MfaCredentialWhereInput
+}
+
+export type MfaCredentialUpdateToOneWithWhereWithoutTotpCredentialInput = {
+  where?: Prisma.MfaCredentialWhereInput
+  data: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutTotpCredentialInput, Prisma.MfaCredentialUncheckedUpdateWithoutTotpCredentialInput>
+}
+
+export type MfaCredentialUpdateWithoutTotpCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  user?: Prisma.UserUpdateOneRequiredWithoutMfaCredentialsNestedInput
+  smsCredential?: Prisma.SmsCredentialUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUpdateManyWithoutCredentialNestedInput
+}
+
+export type MfaCredentialUncheckedUpdateWithoutTotpCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  smsCredential?: Prisma.SmsCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUncheckedUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedUpdateManyWithoutCredentialNestedInput
+}
+
+export type MfaCredentialCreateWithoutSmsCredentialInput = {
+  id?: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  user: Prisma.UserCreateNestedOneWithoutMfaCredentialsInput
+  totpCredential?: Prisma.TotpCredentialCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialUncheckedCreateWithoutSmsCredentialInput = {
+  id?: string
+  userId: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeUncheckedCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialCreateOrConnectWithoutSmsCredentialInput = {
+  where: Prisma.MfaCredentialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutSmsCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutSmsCredentialInput>
+}
+
+export type MfaCredentialUpsertWithoutSmsCredentialInput = {
+  update: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutSmsCredentialInput, Prisma.MfaCredentialUncheckedUpdateWithoutSmsCredentialInput>
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutSmsCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutSmsCredentialInput>
+  where?: Prisma.MfaCredentialWhereInput
+}
+
+export type MfaCredentialUpdateToOneWithWhereWithoutSmsCredentialInput = {
+  where?: Prisma.MfaCredentialWhereInput
+  data: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutSmsCredentialInput, Prisma.MfaCredentialUncheckedUpdateWithoutSmsCredentialInput>
+}
+
+export type MfaCredentialUpdateWithoutSmsCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  user?: Prisma.UserUpdateOneRequiredWithoutMfaCredentialsNestedInput
+  totpCredential?: Prisma.TotpCredentialUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUpdateManyWithoutCredentialNestedInput
+}
+
+export type MfaCredentialUncheckedUpdateWithoutSmsCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUncheckedUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedUpdateManyWithoutCredentialNestedInput
+}
+
+export type MfaCredentialCreateWithoutPushCredentialInput = {
+  id?: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  user: Prisma.UserCreateNestedOneWithoutMfaCredentialsInput
+  totpCredential?: Prisma.TotpCredentialCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialUncheckedCreateWithoutPushCredentialInput = {
+  id?: string
+  userId: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeUncheckedCreateNestedManyWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialCreateOrConnectWithoutPushCredentialInput = {
+  where: Prisma.MfaCredentialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutPushCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutPushCredentialInput>
+}
+
+export type MfaCredentialUpsertWithoutPushCredentialInput = {
+  update: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutPushCredentialInput, Prisma.MfaCredentialUncheckedUpdateWithoutPushCredentialInput>
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutPushCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutPushCredentialInput>
+  where?: Prisma.MfaCredentialWhereInput
+}
+
+export type MfaCredentialUpdateToOneWithWhereWithoutPushCredentialInput = {
+  where?: Prisma.MfaCredentialWhereInput
+  data: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutPushCredentialInput, Prisma.MfaCredentialUncheckedUpdateWithoutPushCredentialInput>
+}
+
+export type MfaCredentialUpdateWithoutPushCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  user?: Prisma.UserUpdateOneRequiredWithoutMfaCredentialsNestedInput
+  totpCredential?: Prisma.TotpCredentialUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUpdateManyWithoutCredentialNestedInput
+}
+
+export type MfaCredentialUncheckedUpdateWithoutPushCredentialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUncheckedUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedUpdateManyWithoutCredentialNestedInput
+}
+
+export type MfaCredentialCreateWithoutBackupCodesInput = {
+  id?: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  user: Prisma.UserCreateNestedOneWithoutMfaCredentialsInput
+  totpCredential?: Prisma.TotpCredentialCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialCreateNestedOneWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialUncheckedCreateWithoutBackupCodesInput = {
+  id?: string
+  userId: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialCreateOrConnectWithoutBackupCodesInput = {
+  where: Prisma.MfaCredentialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutBackupCodesInput, Prisma.MfaCredentialUncheckedCreateWithoutBackupCodesInput>
+}
+
+export type MfaCredentialUpsertWithoutBackupCodesInput = {
+  update: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutBackupCodesInput, Prisma.MfaCredentialUncheckedUpdateWithoutBackupCodesInput>
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutBackupCodesInput, Prisma.MfaCredentialUncheckedCreateWithoutBackupCodesInput>
+  where?: Prisma.MfaCredentialWhereInput
+}
+
+export type MfaCredentialUpdateToOneWithWhereWithoutBackupCodesInput = {
+  where?: Prisma.MfaCredentialWhereInput
+  data: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutBackupCodesInput, Prisma.MfaCredentialUncheckedUpdateWithoutBackupCodesInput>
+}
+
+export type MfaCredentialUpdateWithoutBackupCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  user?: Prisma.UserUpdateOneRequiredWithoutMfaCredentialsNestedInput
+  totpCredential?: Prisma.TotpCredentialUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUpdateOneWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUpdateManyWithoutCredentialNestedInput
+}
+
+export type MfaCredentialUncheckedUpdateWithoutBackupCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedUpdateManyWithoutCredentialNestedInput
+}
+
+export type MfaCredentialCreateWithoutMfaChallengesInput = {
+  id?: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  user: Prisma.UserCreateNestedOneWithoutMfaCredentialsInput
+  totpCredential?: Prisma.TotpCredentialCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialUncheckedCreateWithoutMfaChallengesInput = {
+  id?: string
+  userId: string
+  type: $Enums.MFAMethod
+  status: string
+  isPrimary?: boolean
+  enrolledAt?: Date | string
+  verifiedAt?: Date | string | null
+  createdAt?: Date | string
+  deletedAt?: Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  smsCredential?: Prisma.SmsCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  pushCredential?: Prisma.PushCredentialUncheckedCreateNestedOneWithoutCredentialInput
+  backupCodes?: Prisma.BackupCodeUncheckedCreateNestedManyWithoutCredentialInput
+}
+
+export type MfaCredentialCreateOrConnectWithoutMfaChallengesInput = {
+  where: Prisma.MfaCredentialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutMfaChallengesInput, Prisma.MfaCredentialUncheckedCreateWithoutMfaChallengesInput>
+}
+
+export type MfaCredentialUpsertWithoutMfaChallengesInput = {
+  update: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutMfaChallengesInput, Prisma.MfaCredentialUncheckedUpdateWithoutMfaChallengesInput>
+  create: Prisma.XOR<Prisma.MfaCredentialCreateWithoutMfaChallengesInput, Prisma.MfaCredentialUncheckedCreateWithoutMfaChallengesInput>
+  where?: Prisma.MfaCredentialWhereInput
+}
+
+export type MfaCredentialUpdateToOneWithWhereWithoutMfaChallengesInput = {
+  where?: Prisma.MfaCredentialWhereInput
+  data: Prisma.XOR<Prisma.MfaCredentialUpdateWithoutMfaChallengesInput, Prisma.MfaCredentialUncheckedUpdateWithoutMfaChallengesInput>
+}
+
+export type MfaCredentialUpdateWithoutMfaChallengesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  user?: Prisma.UserUpdateOneRequiredWithoutMfaCredentialsNestedInput
+  totpCredential?: Prisma.TotpCredentialUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUpdateManyWithoutCredentialNestedInput
+}
+
+export type MfaCredentialUncheckedUpdateWithoutMfaChallengesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUncheckedUpdateManyWithoutCredentialNestedInput
 }
 
 export type MfaCredentialCreateManyUserInput = {
   id?: string
-  type: $Enums.MfaType
-  credentialData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type: $Enums.MFAMethod
+  status: string
   isPrimary?: boolean
+  enrolledAt?: Date | string
   verifiedAt?: Date | string | null
   createdAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
 }
 
 export type MfaCredentialUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumMfaTypeFieldUpdateOperationsInput | $Enums.MfaType
-  credentialData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpCredential?: Prisma.TotpCredentialUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUpdateManyWithoutCredentialNestedInput
 }
 
 export type MfaCredentialUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumMfaTypeFieldUpdateOperationsInput | $Enums.MfaType
-  credentialData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totpCredential?: Prisma.TotpCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  smsCredential?: Prisma.SmsCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  pushCredential?: Prisma.PushCredentialUncheckedUpdateOneWithoutCredentialNestedInput
+  backupCodes?: Prisma.BackupCodeUncheckedUpdateManyWithoutCredentialNestedInput
+  mfaChallenges?: Prisma.MfaChallengeUncheckedUpdateManyWithoutCredentialNestedInput
 }
 
 export type MfaCredentialUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumMfaTypeFieldUpdateOperationsInput | $Enums.MfaType
-  credentialData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+
+/**
+ * Count Type MfaCredentialCountOutputType
+ */
+
+export type MfaCredentialCountOutputType = {
+  backupCodes: number
+  mfaChallenges: number
+}
+
+export type MfaCredentialCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  backupCodes?: boolean | MfaCredentialCountOutputTypeCountBackupCodesArgs
+  mfaChallenges?: boolean | MfaCredentialCountOutputTypeCountMfaChallengesArgs
+}
+
+/**
+ * MfaCredentialCountOutputType without action
+ */
+export type MfaCredentialCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MfaCredentialCountOutputType
+   */
+  select?: Prisma.MfaCredentialCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MfaCredentialCountOutputType without action
+ */
+export type MfaCredentialCountOutputTypeCountBackupCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BackupCodeWhereInput
+}
+
+/**
+ * MfaCredentialCountOutputType without action
+ */
+export type MfaCredentialCountOutputTypeCountMfaChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MfaChallengeWhereInput
+}
 
 
 export type MfaCredentialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
   type?: boolean
-  credentialData?: boolean
+  status?: boolean
   isPrimary?: boolean
+  enrolledAt?: boolean
   verifiedAt?: boolean
   createdAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  totpCredential?: boolean | Prisma.MfaCredential$totpCredentialArgs<ExtArgs>
+  smsCredential?: boolean | Prisma.MfaCredential$smsCredentialArgs<ExtArgs>
+  pushCredential?: boolean | Prisma.MfaCredential$pushCredentialArgs<ExtArgs>
+  backupCodes?: boolean | Prisma.MfaCredential$backupCodesArgs<ExtArgs>
+  mfaChallenges?: boolean | Prisma.MfaCredential$mfaChallengesArgs<ExtArgs>
+  _count?: boolean | Prisma.MfaCredentialCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mfaCredential"]>
 
 export type MfaCredentialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
   type?: boolean
-  credentialData?: boolean
+  status?: boolean
   isPrimary?: boolean
+  enrolledAt?: boolean
   verifiedAt?: boolean
   createdAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mfaCredential"]>
 
@@ -549,11 +1164,12 @@ export type MfaCredentialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   id?: boolean
   userId?: boolean
   type?: boolean
-  credentialData?: boolean
+  status?: boolean
   isPrimary?: boolean
+  enrolledAt?: boolean
   verifiedAt?: boolean
   createdAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mfaCredential"]>
 
@@ -561,16 +1177,23 @@ export type MfaCredentialSelectScalar = {
   id?: boolean
   userId?: boolean
   type?: boolean
-  credentialData?: boolean
+  status?: boolean
   isPrimary?: boolean
+  enrolledAt?: boolean
   verifiedAt?: boolean
   createdAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
 }
 
-export type MfaCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "credentialData" | "isPrimary" | "verifiedAt" | "createdAt" | "metadata", ExtArgs["result"]["mfaCredential"]>
+export type MfaCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "type" | "status" | "isPrimary" | "enrolledAt" | "verifiedAt" | "createdAt" | "deletedAt", ExtArgs["result"]["mfaCredential"]>
 export type MfaCredentialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  totpCredential?: boolean | Prisma.MfaCredential$totpCredentialArgs<ExtArgs>
+  smsCredential?: boolean | Prisma.MfaCredential$smsCredentialArgs<ExtArgs>
+  pushCredential?: boolean | Prisma.MfaCredential$pushCredentialArgs<ExtArgs>
+  backupCodes?: boolean | Prisma.MfaCredential$backupCodesArgs<ExtArgs>
+  mfaChallenges?: boolean | Prisma.MfaCredential$mfaChallengesArgs<ExtArgs>
+  _count?: boolean | Prisma.MfaCredentialCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MfaCredentialIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -583,16 +1206,22 @@ export type $MfaCredentialPayload<ExtArgs extends runtime.Types.Extensions.Inter
   name: "MfaCredential"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    totpCredential: Prisma.$TotpCredentialPayload<ExtArgs> | null
+    smsCredential: Prisma.$SmsCredentialPayload<ExtArgs> | null
+    pushCredential: Prisma.$PushCredentialPayload<ExtArgs> | null
+    backupCodes: Prisma.$BackupCodePayload<ExtArgs>[]
+    mfaChallenges: Prisma.$MfaChallengePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    type: $Enums.MfaType
-    credentialData: runtime.JsonValue
+    type: $Enums.MFAMethod
+    status: string
     isPrimary: boolean
+    enrolledAt: Date
     verifiedAt: Date | null
     createdAt: Date
-    metadata: runtime.JsonValue | null
+    deletedAt: Date | null
   }, ExtArgs["result"]["mfaCredential"]>
   composites: {}
 }
@@ -988,6 +1617,11 @@ readonly fields: MfaCredentialFieldRefs;
 export interface Prisma__MfaCredentialClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  totpCredential<T extends Prisma.MfaCredential$totpCredentialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MfaCredential$totpCredentialArgs<ExtArgs>>): Prisma.Prisma__TotpCredentialClient<runtime.Types.Result.GetResult<Prisma.$TotpCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  smsCredential<T extends Prisma.MfaCredential$smsCredentialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MfaCredential$smsCredentialArgs<ExtArgs>>): Prisma.Prisma__SmsCredentialClient<runtime.Types.Result.GetResult<Prisma.$SmsCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  pushCredential<T extends Prisma.MfaCredential$pushCredentialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MfaCredential$pushCredentialArgs<ExtArgs>>): Prisma.Prisma__PushCredentialClient<runtime.Types.Result.GetResult<Prisma.$PushCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  backupCodes<T extends Prisma.MfaCredential$backupCodesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MfaCredential$backupCodesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mfaChallenges<T extends Prisma.MfaCredential$mfaChallengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MfaCredential$mfaChallengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MfaChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1019,12 +1653,13 @@ export interface Prisma__MfaCredentialClient<T, Null = never, ExtArgs extends ru
 export interface MfaCredentialFieldRefs {
   readonly id: Prisma.FieldRef<"MfaCredential", 'String'>
   readonly userId: Prisma.FieldRef<"MfaCredential", 'String'>
-  readonly type: Prisma.FieldRef<"MfaCredential", 'MfaType'>
-  readonly credentialData: Prisma.FieldRef<"MfaCredential", 'Json'>
+  readonly type: Prisma.FieldRef<"MfaCredential", 'MFAMethod'>
+  readonly status: Prisma.FieldRef<"MfaCredential", 'String'>
   readonly isPrimary: Prisma.FieldRef<"MfaCredential", 'Boolean'>
+  readonly enrolledAt: Prisma.FieldRef<"MfaCredential", 'DateTime'>
   readonly verifiedAt: Prisma.FieldRef<"MfaCredential", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"MfaCredential", 'DateTime'>
-  readonly metadata: Prisma.FieldRef<"MfaCredential", 'Json'>
+  readonly deletedAt: Prisma.FieldRef<"MfaCredential", 'DateTime'>
 }
     
 
@@ -1423,6 +2058,111 @@ export type MfaCredentialDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many MfaCredentials to delete.
    */
   limit?: number
+}
+
+/**
+ * MfaCredential.totpCredential
+ */
+export type MfaCredential$totpCredentialArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TotpCredential
+   */
+  select?: Prisma.TotpCredentialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TotpCredential
+   */
+  omit?: Prisma.TotpCredentialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TotpCredentialInclude<ExtArgs> | null
+  where?: Prisma.TotpCredentialWhereInput
+}
+
+/**
+ * MfaCredential.smsCredential
+ */
+export type MfaCredential$smsCredentialArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SmsCredential
+   */
+  select?: Prisma.SmsCredentialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SmsCredential
+   */
+  omit?: Prisma.SmsCredentialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SmsCredentialInclude<ExtArgs> | null
+  where?: Prisma.SmsCredentialWhereInput
+}
+
+/**
+ * MfaCredential.pushCredential
+ */
+export type MfaCredential$pushCredentialArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PushCredential
+   */
+  select?: Prisma.PushCredentialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PushCredential
+   */
+  omit?: Prisma.PushCredentialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PushCredentialInclude<ExtArgs> | null
+  where?: Prisma.PushCredentialWhereInput
+}
+
+/**
+ * MfaCredential.backupCodes
+ */
+export type MfaCredential$backupCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BackupCode
+   */
+  select?: Prisma.BackupCodeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BackupCode
+   */
+  omit?: Prisma.BackupCodeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BackupCodeInclude<ExtArgs> | null
+  where?: Prisma.BackupCodeWhereInput
+  orderBy?: Prisma.BackupCodeOrderByWithRelationInput | Prisma.BackupCodeOrderByWithRelationInput[]
+  cursor?: Prisma.BackupCodeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BackupCodeScalarFieldEnum | Prisma.BackupCodeScalarFieldEnum[]
+}
+
+/**
+ * MfaCredential.mfaChallenges
+ */
+export type MfaCredential$mfaChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MfaChallenge
+   */
+  select?: Prisma.MfaChallengeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MfaChallenge
+   */
+  omit?: Prisma.MfaChallengeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MfaChallengeInclude<ExtArgs> | null
+  where?: Prisma.MfaChallengeWhereInput
+  orderBy?: Prisma.MfaChallengeOrderByWithRelationInput | Prisma.MfaChallengeOrderByWithRelationInput[]
+  cursor?: Prisma.MfaChallengeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MfaChallengeScalarFieldEnum | Prisma.MfaChallengeScalarFieldEnum[]
 }
 
 /**

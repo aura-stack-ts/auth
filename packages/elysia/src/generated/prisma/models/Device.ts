@@ -37,6 +37,7 @@ export type DeviceMinAggregateOutputType = {
   trusted: boolean | null
   firstSeenAt: Date | null
   lastSeenAt: Date | null
+  deletedAt: Date | null
 }
 
 export type DeviceMaxAggregateOutputType = {
@@ -52,6 +53,7 @@ export type DeviceMaxAggregateOutputType = {
   trusted: boolean | null
   firstSeenAt: Date | null
   lastSeenAt: Date | null
+  deletedAt: Date | null
 }
 
 export type DeviceCountAggregateOutputType = {
@@ -67,7 +69,7 @@ export type DeviceCountAggregateOutputType = {
   trusted: number
   firstSeenAt: number
   lastSeenAt: number
-  metadata: number
+  deletedAt: number
   _all: number
 }
 
@@ -85,6 +87,7 @@ export type DeviceMinAggregateInputType = {
   trusted?: true
   firstSeenAt?: true
   lastSeenAt?: true
+  deletedAt?: true
 }
 
 export type DeviceMaxAggregateInputType = {
@@ -100,6 +103,7 @@ export type DeviceMaxAggregateInputType = {
   trusted?: true
   firstSeenAt?: true
   lastSeenAt?: true
+  deletedAt?: true
 }
 
 export type DeviceCountAggregateInputType = {
@@ -115,7 +119,7 @@ export type DeviceCountAggregateInputType = {
   trusted?: true
   firstSeenAt?: true
   lastSeenAt?: true
-  metadata?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -204,7 +208,7 @@ export type DeviceGroupByOutputType = {
   trusted: boolean
   firstSeenAt: Date
   lastSeenAt: Date
-  metadata: runtime.JsonValue | null
+  deletedAt: Date | null
   _count: DeviceCountAggregateOutputType | null
   _min: DeviceMinAggregateOutputType | null
   _max: DeviceMaxAggregateOutputType | null
@@ -241,7 +245,7 @@ export type DeviceWhereInput = {
   trusted?: Prisma.BoolFilter<"Device"> | boolean
   firstSeenAt?: Prisma.DateTimeFilter<"Device"> | Date | string
   lastSeenAt?: Prisma.DateTimeFilter<"Device"> | Date | string
-  metadata?: Prisma.JsonNullableFilter<"Device">
+  deletedAt?: Prisma.DateTimeNullableFilter<"Device"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   sessions?: Prisma.SessionListRelationFilter
   oauthTransactions?: Prisma.OAuthTransactionListRelationFilter
@@ -260,7 +264,7 @@ export type DeviceOrderByWithRelationInput = {
   trusted?: Prisma.SortOrder
   firstSeenAt?: Prisma.SortOrder
   lastSeenAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   oauthTransactions?: Prisma.OAuthTransactionOrderByRelationAggregateInput
@@ -282,7 +286,7 @@ export type DeviceWhereUniqueInput = Prisma.AtLeast<{
   trusted?: Prisma.BoolFilter<"Device"> | boolean
   firstSeenAt?: Prisma.DateTimeFilter<"Device"> | Date | string
   lastSeenAt?: Prisma.DateTimeFilter<"Device"> | Date | string
-  metadata?: Prisma.JsonNullableFilter<"Device">
+  deletedAt?: Prisma.DateTimeNullableFilter<"Device"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   sessions?: Prisma.SessionListRelationFilter
   oauthTransactions?: Prisma.OAuthTransactionListRelationFilter
@@ -301,7 +305,7 @@ export type DeviceOrderByWithAggregationInput = {
   trusted?: Prisma.SortOrder
   firstSeenAt?: Prisma.SortOrder
   lastSeenAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DeviceCountOrderByAggregateInput
   _max?: Prisma.DeviceMaxOrderByAggregateInput
   _min?: Prisma.DeviceMinOrderByAggregateInput
@@ -323,7 +327,7 @@ export type DeviceScalarWhereWithAggregatesInput = {
   trusted?: Prisma.BoolWithAggregatesFilter<"Device"> | boolean
   firstSeenAt?: Prisma.DateTimeWithAggregatesFilter<"Device"> | Date | string
   lastSeenAt?: Prisma.DateTimeWithAggregatesFilter<"Device"> | Date | string
-  metadata?: Prisma.JsonNullableWithAggregatesFilter<"Device">
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Device"> | Date | string | null
 }
 
 export type DeviceCreateInput = {
@@ -338,7 +342,7 @@ export type DeviceCreateInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutDevicesInput
   sessions?: Prisma.SessionCreateNestedManyWithoutDeviceInput
   oauthTransactions?: Prisma.OAuthTransactionCreateNestedManyWithoutDeviceInput
@@ -357,7 +361,7 @@ export type DeviceUncheckedCreateInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutDeviceInput
   oauthTransactions?: Prisma.OAuthTransactionUncheckedCreateNestedManyWithoutDeviceInput
 }
@@ -374,7 +378,7 @@ export type DeviceUpdateInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutDevicesNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutDeviceNestedInput
   oauthTransactions?: Prisma.OAuthTransactionUpdateManyWithoutDeviceNestedInput
@@ -393,7 +397,7 @@ export type DeviceUncheckedUpdateInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutDeviceNestedInput
   oauthTransactions?: Prisma.OAuthTransactionUncheckedUpdateManyWithoutDeviceNestedInput
 }
@@ -411,7 +415,7 @@ export type DeviceCreateManyInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
 }
 
 export type DeviceUpdateManyMutationInput = {
@@ -426,7 +430,7 @@ export type DeviceUpdateManyMutationInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type DeviceUncheckedUpdateManyInput = {
@@ -442,7 +446,7 @@ export type DeviceUncheckedUpdateManyInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type DeviceListRelationFilter = {
@@ -468,7 +472,7 @@ export type DeviceCountOrderByAggregateInput = {
   trusted?: Prisma.SortOrder
   firstSeenAt?: Prisma.SortOrder
   lastSeenAt?: Prisma.SortOrder
-  metadata?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type DeviceMaxOrderByAggregateInput = {
@@ -484,6 +488,7 @@ export type DeviceMaxOrderByAggregateInput = {
   trusted?: Prisma.SortOrder
   firstSeenAt?: Prisma.SortOrder
   lastSeenAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type DeviceMinOrderByAggregateInput = {
@@ -499,6 +504,7 @@ export type DeviceMinOrderByAggregateInput = {
   trusted?: Prisma.SortOrder
   firstSeenAt?: Prisma.SortOrder
   lastSeenAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type DeviceNullableScalarRelationFilter = {
@@ -552,6 +558,10 @@ export type EnumDeviceTypeFieldUpdateOperationsInput = {
   set?: $Enums.DeviceType
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type DeviceCreateNestedOneWithoutSessionsInput = {
   create?: Prisma.XOR<Prisma.DeviceCreateWithoutSessionsInput, Prisma.DeviceUncheckedCreateWithoutSessionsInput>
   connectOrCreate?: Prisma.DeviceCreateOrConnectWithoutSessionsInput
@@ -596,7 +606,7 @@ export type DeviceCreateWithoutUserInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutDeviceInput
   oauthTransactions?: Prisma.OAuthTransactionCreateNestedManyWithoutDeviceInput
 }
@@ -613,7 +623,7 @@ export type DeviceUncheckedCreateWithoutUserInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutDeviceInput
   oauthTransactions?: Prisma.OAuthTransactionUncheckedCreateNestedManyWithoutDeviceInput
 }
@@ -660,7 +670,7 @@ export type DeviceScalarWhereInput = {
   trusted?: Prisma.BoolFilter<"Device"> | boolean
   firstSeenAt?: Prisma.DateTimeFilter<"Device"> | Date | string
   lastSeenAt?: Prisma.DateTimeFilter<"Device"> | Date | string
-  metadata?: Prisma.JsonNullableFilter<"Device">
+  deletedAt?: Prisma.DateTimeNullableFilter<"Device"> | Date | string | null
 }
 
 export type DeviceCreateWithoutSessionsInput = {
@@ -675,7 +685,7 @@ export type DeviceCreateWithoutSessionsInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutDevicesInput
   oauthTransactions?: Prisma.OAuthTransactionCreateNestedManyWithoutDeviceInput
 }
@@ -693,7 +703,7 @@ export type DeviceUncheckedCreateWithoutSessionsInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   oauthTransactions?: Prisma.OAuthTransactionUncheckedCreateNestedManyWithoutDeviceInput
 }
 
@@ -725,7 +735,7 @@ export type DeviceUpdateWithoutSessionsInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutDevicesNestedInput
   oauthTransactions?: Prisma.OAuthTransactionUpdateManyWithoutDeviceNestedInput
 }
@@ -743,7 +753,7 @@ export type DeviceUncheckedUpdateWithoutSessionsInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   oauthTransactions?: Prisma.OAuthTransactionUncheckedUpdateManyWithoutDeviceNestedInput
 }
 
@@ -759,7 +769,7 @@ export type DeviceCreateWithoutOauthTransactionsInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutDevicesInput
   sessions?: Prisma.SessionCreateNestedManyWithoutDeviceInput
 }
@@ -777,7 +787,7 @@ export type DeviceUncheckedCreateWithoutOauthTransactionsInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutDeviceInput
 }
 
@@ -809,7 +819,7 @@ export type DeviceUpdateWithoutOauthTransactionsInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutDevicesNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutDeviceNestedInput
 }
@@ -827,7 +837,7 @@ export type DeviceUncheckedUpdateWithoutOauthTransactionsInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutDeviceNestedInput
 }
 
@@ -843,7 +853,7 @@ export type DeviceCreateManyUserInput = {
   trusted?: boolean
   firstSeenAt?: Date | string
   lastSeenAt?: Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Date | string | null
 }
 
 export type DeviceUpdateWithoutUserInput = {
@@ -858,7 +868,7 @@ export type DeviceUpdateWithoutUserInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUpdateManyWithoutDeviceNestedInput
   oauthTransactions?: Prisma.OAuthTransactionUpdateManyWithoutDeviceNestedInput
 }
@@ -875,7 +885,7 @@ export type DeviceUncheckedUpdateWithoutUserInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutDeviceNestedInput
   oauthTransactions?: Prisma.OAuthTransactionUncheckedUpdateManyWithoutDeviceNestedInput
 }
@@ -892,7 +902,7 @@ export type DeviceUncheckedUpdateManyWithoutUserInput = {
   trusted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   firstSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSeenAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -948,7 +958,7 @@ export type DeviceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   trusted?: boolean
   firstSeenAt?: boolean
   lastSeenAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   sessions?: boolean | Prisma.Device$sessionsArgs<ExtArgs>
   oauthTransactions?: boolean | Prisma.Device$oauthTransactionsArgs<ExtArgs>
@@ -968,7 +978,7 @@ export type DeviceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   trusted?: boolean
   firstSeenAt?: boolean
   lastSeenAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["device"]>
 
@@ -985,7 +995,7 @@ export type DeviceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   trusted?: boolean
   firstSeenAt?: boolean
   lastSeenAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["device"]>
 
@@ -1002,10 +1012,10 @@ export type DeviceSelectScalar = {
   trusted?: boolean
   firstSeenAt?: boolean
   lastSeenAt?: boolean
-  metadata?: boolean
+  deletedAt?: boolean
 }
 
-export type DeviceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "type" | "platform" | "browser" | "userAgent" | "fingerprint" | "lastIp" | "trusted" | "firstSeenAt" | "lastSeenAt" | "metadata", ExtArgs["result"]["device"]>
+export type DeviceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "type" | "platform" | "browser" | "userAgent" | "fingerprint" | "lastIp" | "trusted" | "firstSeenAt" | "lastSeenAt" | "deletedAt", ExtArgs["result"]["device"]>
 export type DeviceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   sessions?: boolean | Prisma.Device$sessionsArgs<ExtArgs>
@@ -1039,7 +1049,7 @@ export type $DevicePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     trusted: boolean
     firstSeenAt: Date
     lastSeenAt: Date
-    metadata: runtime.JsonValue | null
+    deletedAt: Date | null
   }, ExtArgs["result"]["device"]>
   composites: {}
 }
@@ -1478,7 +1488,7 @@ export interface DeviceFieldRefs {
   readonly trusted: Prisma.FieldRef<"Device", 'Boolean'>
   readonly firstSeenAt: Prisma.FieldRef<"Device", 'DateTime'>
   readonly lastSeenAt: Prisma.FieldRef<"Device", 'DateTime'>
-  readonly metadata: Prisma.FieldRef<"Device", 'Json'>
+  readonly deletedAt: Prisma.FieldRef<"Device", 'DateTime'>
 }
     
 

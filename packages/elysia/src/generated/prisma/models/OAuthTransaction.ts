@@ -65,7 +65,6 @@ export type OAuthTransactionCountAggregateOutputType = {
   userAgent: number
   fingerprint: number
   deviceId: number
-  metadata: number
   createdAt: number
   expiresAt: number
   _all: number
@@ -113,7 +112,6 @@ export type OAuthTransactionCountAggregateInputType = {
   userAgent?: true
   fingerprint?: true
   deviceId?: true
-  metadata?: true
   createdAt?: true
   expiresAt?: true
   _all?: true
@@ -202,7 +200,6 @@ export type OAuthTransactionGroupByOutputType = {
   userAgent: string | null
   fingerprint: string | null
   deviceId: string | null
-  metadata: runtime.JsonValue | null
   createdAt: Date
   expiresAt: Date
   _count: OAuthTransactionCountAggregateOutputType | null
@@ -239,7 +236,6 @@ export type OAuthTransactionWhereInput = {
   userAgent?: Prisma.StringNullableFilter<"OAuthTransaction"> | string | null
   fingerprint?: Prisma.StringNullableFilter<"OAuthTransaction"> | string | null
   deviceId?: Prisma.StringNullableFilter<"OAuthTransaction"> | string | null
-  metadata?: Prisma.JsonNullableFilter<"OAuthTransaction">
   createdAt?: Prisma.DateTimeFilter<"OAuthTransaction"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"OAuthTransaction"> | Date | string
   device?: Prisma.XOR<Prisma.DeviceNullableScalarRelationFilter, Prisma.DeviceWhereInput> | null
@@ -256,7 +252,6 @@ export type OAuthTransactionOrderByWithRelationInput = {
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   fingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   deviceId?: Prisma.SortOrderInput | Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   device?: Prisma.DeviceOrderByWithRelationInput
@@ -276,7 +271,6 @@ export type OAuthTransactionWhereUniqueInput = Prisma.AtLeast<{
   userAgent?: Prisma.StringNullableFilter<"OAuthTransaction"> | string | null
   fingerprint?: Prisma.StringNullableFilter<"OAuthTransaction"> | string | null
   deviceId?: Prisma.StringNullableFilter<"OAuthTransaction"> | string | null
-  metadata?: Prisma.JsonNullableFilter<"OAuthTransaction">
   createdAt?: Prisma.DateTimeFilter<"OAuthTransaction"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"OAuthTransaction"> | Date | string
   device?: Prisma.XOR<Prisma.DeviceNullableScalarRelationFilter, Prisma.DeviceWhereInput> | null
@@ -293,7 +287,6 @@ export type OAuthTransactionOrderByWithAggregationInput = {
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   fingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   deviceId?: Prisma.SortOrderInput | Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   _count?: Prisma.OAuthTransactionCountOrderByAggregateInput
@@ -315,7 +308,6 @@ export type OAuthTransactionScalarWhereWithAggregatesInput = {
   userAgent?: Prisma.StringNullableWithAggregatesFilter<"OAuthTransaction"> | string | null
   fingerprint?: Prisma.StringNullableWithAggregatesFilter<"OAuthTransaction"> | string | null
   deviceId?: Prisma.StringNullableWithAggregatesFilter<"OAuthTransaction"> | string | null
-  metadata?: Prisma.JsonNullableWithAggregatesFilter<"OAuthTransaction">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"OAuthTransaction"> | Date | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"OAuthTransaction"> | Date | string
 }
@@ -330,7 +322,6 @@ export type OAuthTransactionCreateInput = {
   redirectTo?: string | null
   userAgent?: string | null
   fingerprint?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   expiresAt: Date | string
   device?: Prisma.DeviceCreateNestedOneWithoutOauthTransactionsInput
@@ -347,7 +338,6 @@ export type OAuthTransactionUncheckedCreateInput = {
   userAgent?: string | null
   fingerprint?: string | null
   deviceId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   expiresAt: Date | string
 }
@@ -362,7 +352,6 @@ export type OAuthTransactionUpdateInput = {
   redirectTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   device?: Prisma.DeviceUpdateOneWithoutOauthTransactionsNestedInput
@@ -379,7 +368,6 @@ export type OAuthTransactionUncheckedUpdateInput = {
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -395,7 +383,6 @@ export type OAuthTransactionCreateManyInput = {
   userAgent?: string | null
   fingerprint?: string | null
   deviceId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   expiresAt: Date | string
 }
@@ -410,7 +397,6 @@ export type OAuthTransactionUpdateManyMutationInput = {
   redirectTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -426,7 +412,6 @@ export type OAuthTransactionUncheckedUpdateManyInput = {
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -452,7 +437,6 @@ export type OAuthTransactionCountOrderByAggregateInput = {
   userAgent?: Prisma.SortOrder
   fingerprint?: Prisma.SortOrder
   deviceId?: Prisma.SortOrder
-  metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
 }
@@ -539,7 +523,6 @@ export type OAuthTransactionCreateWithoutDeviceInput = {
   redirectTo?: string | null
   userAgent?: string | null
   fingerprint?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   expiresAt: Date | string
 }
@@ -554,7 +537,6 @@ export type OAuthTransactionUncheckedCreateWithoutDeviceInput = {
   redirectTo?: string | null
   userAgent?: string | null
   fingerprint?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   expiresAt: Date | string
 }
@@ -599,7 +581,6 @@ export type OAuthTransactionScalarWhereInput = {
   userAgent?: Prisma.StringNullableFilter<"OAuthTransaction"> | string | null
   fingerprint?: Prisma.StringNullableFilter<"OAuthTransaction"> | string | null
   deviceId?: Prisma.StringNullableFilter<"OAuthTransaction"> | string | null
-  metadata?: Prisma.JsonNullableFilter<"OAuthTransaction">
   createdAt?: Prisma.DateTimeFilter<"OAuthTransaction"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"OAuthTransaction"> | Date | string
 }
@@ -614,7 +595,6 @@ export type OAuthTransactionCreateManyDeviceInput = {
   redirectTo?: string | null
   userAgent?: string | null
   fingerprint?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   expiresAt: Date | string
 }
@@ -629,7 +609,6 @@ export type OAuthTransactionUpdateWithoutDeviceInput = {
   redirectTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -644,7 +623,6 @@ export type OAuthTransactionUncheckedUpdateWithoutDeviceInput = {
   redirectTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -659,7 +637,6 @@ export type OAuthTransactionUncheckedUpdateManyWithoutDeviceInput = {
   redirectTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -677,7 +654,6 @@ export type OAuthTransactionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   userAgent?: boolean
   fingerprint?: boolean
   deviceId?: boolean
-  metadata?: boolean
   createdAt?: boolean
   expiresAt?: boolean
   device?: boolean | Prisma.OAuthTransaction$deviceArgs<ExtArgs>
@@ -694,7 +670,6 @@ export type OAuthTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   userAgent?: boolean
   fingerprint?: boolean
   deviceId?: boolean
-  metadata?: boolean
   createdAt?: boolean
   expiresAt?: boolean
   device?: boolean | Prisma.OAuthTransaction$deviceArgs<ExtArgs>
@@ -711,7 +686,6 @@ export type OAuthTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   userAgent?: boolean
   fingerprint?: boolean
   deviceId?: boolean
-  metadata?: boolean
   createdAt?: boolean
   expiresAt?: boolean
   device?: boolean | Prisma.OAuthTransaction$deviceArgs<ExtArgs>
@@ -728,12 +702,11 @@ export type OAuthTransactionSelectScalar = {
   userAgent?: boolean
   fingerprint?: boolean
   deviceId?: boolean
-  metadata?: boolean
   createdAt?: boolean
   expiresAt?: boolean
 }
 
-export type OAuthTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "provider" | "state" | "nonce" | "codeVerifier" | "redirectURI" | "redirectTo" | "userAgent" | "fingerprint" | "deviceId" | "metadata" | "createdAt" | "expiresAt", ExtArgs["result"]["oAuthTransaction"]>
+export type OAuthTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "provider" | "state" | "nonce" | "codeVerifier" | "redirectURI" | "redirectTo" | "userAgent" | "fingerprint" | "deviceId" | "createdAt" | "expiresAt", ExtArgs["result"]["oAuthTransaction"]>
 export type OAuthTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   device?: boolean | Prisma.OAuthTransaction$deviceArgs<ExtArgs>
 }
@@ -760,7 +733,6 @@ export type $OAuthTransactionPayload<ExtArgs extends runtime.Types.Extensions.In
     userAgent: string | null
     fingerprint: string | null
     deviceId: string | null
-    metadata: runtime.JsonValue | null
     createdAt: Date
     expiresAt: Date
   }, ExtArgs["result"]["oAuthTransaction"]>
@@ -1197,7 +1169,6 @@ export interface OAuthTransactionFieldRefs {
   readonly userAgent: Prisma.FieldRef<"OAuthTransaction", 'String'>
   readonly fingerprint: Prisma.FieldRef<"OAuthTransaction", 'String'>
   readonly deviceId: Prisma.FieldRef<"OAuthTransaction", 'String'>
-  readonly metadata: Prisma.FieldRef<"OAuthTransaction", 'Json'>
   readonly createdAt: Prisma.FieldRef<"OAuthTransaction", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"OAuthTransaction", 'DateTime'>
 }
