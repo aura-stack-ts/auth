@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Merged the OAuth and OIDC provider options into a unified configuration and made all nested options optional. [#288](https://github.com/aura-stack-ts/auth/pull/288)
 
+### Fixed
+
+- Fixed missing exports for the `authentik`, `coinbase`, `google`, `hubspot`, and `huggingface` OAuth providers from the `@aura-stack/auth` package. All providers are now correctly exported through the `/oauth` entry point. [#290](https://github.com/aura-stack-ts/auth/pull/290)
+
 ---
 
 ## [0.10.1] - 2026-10-17
