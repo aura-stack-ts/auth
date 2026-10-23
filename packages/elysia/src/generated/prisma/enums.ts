@@ -89,6 +89,15 @@ export const MFAChallengeStatus = {
 export type MFAChallengeStatus = (typeof MFAChallengeStatus)[keyof typeof MFAChallengeStatus]
 
 
+export const MFACredentialStatus = {
+  active: 'active',
+  pending: 'pending',
+  disabled: 'disabled'
+} as const
+
+export type MFACredentialStatus = (typeof MFACredentialStatus)[keyof typeof MFACredentialStatus]
+
+
 export const VerificationTokenType = {
   email_verification: 'email_verification',
   password_reset: 'password_reset',

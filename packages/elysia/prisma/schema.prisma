@@ -69,6 +69,12 @@ enum MFAChallengeStatus {
     failed
 }
 
+enum MFACredentialStatus {
+    active
+    pending
+    disabled
+}
+
 enum VerificationTokenType {
     email_verification
     password_reset
@@ -223,14 +229,14 @@ model Session {
 /// ---------------------------------------------------------------------------
 
 model MfaCredential {
-    id         String    @id @default(cuid())
+    id         String              @id @default(cuid())
     userId     String
     type       MFAMethod
-    status     String
-    isPrimary  Boolean   @default(false)
-    enrolledAt DateTime  @default(now())
+    status     MFACredentialStatus
+    isPrimary  Boolean             @default(false)
+    enrolledAt DateTime            @default(now())
     verifiedAt DateTime?
-    createdAt  DateTime  @default(now())
+    createdAt  DateTime            @default(now())
     deletedAt  DateTime?
 
     user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -251,8 +257,9 @@ model MfaCredential {
 /// ---------------------------------------------------------------------------
 
 model TotpCredential {
-    credentialId String    @id
-    secretCipher String
+    id           String    @id @default(cuid())
+    credentialId String    @unique
+    secretCipher String    @db.Text
     verifiedAt   DateTime?
 
     credential MfaCredential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
@@ -263,7 +270,8 @@ model TotpCredential {
 /// ---------------------------------------------------------------------------
 
 model SmsCredential {
-    credentialId String    @id
+    id           String    @id @default(cuid())
+    credentialId String    @unique
     phoneNumber  String
     verifiedAt   DateTime?
 
@@ -277,8 +285,9 @@ model SmsCredential {
 /// ---------------------------------------------------------------------------
 
 model PushCredential {
-    credentialId String    @id
-    deviceToken  String
+    id           String    @id @default(cuid())
+    credentialId String    @unique
+    deviceToken  String    @db.Text
     platform     String
     verifiedAt   DateTime?
 

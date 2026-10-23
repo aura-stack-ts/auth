@@ -1614,6 +1614,7 @@ export type MfaCredentialScalarFieldEnum = (typeof MfaCredentialScalarFieldEnum)
 
 
 export const TotpCredentialScalarFieldEnum = {
+  id: 'id',
   credentialId: 'credentialId',
   secretCipher: 'secretCipher',
   verifiedAt: 'verifiedAt'
@@ -1623,6 +1624,7 @@ export type TotpCredentialScalarFieldEnum = (typeof TotpCredentialScalarFieldEnu
 
 
 export const SmsCredentialScalarFieldEnum = {
+  id: 'id',
   credentialId: 'credentialId',
   phoneNumber: 'phoneNumber',
   verifiedAt: 'verifiedAt'
@@ -1632,6 +1634,7 @@ export type SmsCredentialScalarFieldEnum = (typeof SmsCredentialScalarFieldEnum)
 
 
 export const PushCredentialScalarFieldEnum = {
+  id: 'id',
   credentialId: 'credentialId',
   deviceToken: 'deviceToken',
   platform: 'platform',
@@ -1893,6 +1896,20 @@ export type EnumMFAMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'MFAMethod[]'
  */
 export type ListEnumMFAMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFAMethod[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MFACredentialStatus'
+ */
+export type EnumMFACredentialStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFACredentialStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MFACredentialStatus[]'
+ */
+export type ListEnumMFACredentialStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MFACredentialStatus[]'>
     
 
 

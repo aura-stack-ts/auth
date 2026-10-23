@@ -28,7 +28,7 @@ export type MfaCredentialMinAggregateOutputType = {
   id: string | null
   userId: string | null
   type: $Enums.MFAMethod | null
-  status: string | null
+  status: $Enums.MFACredentialStatus | null
   isPrimary: boolean | null
   enrolledAt: Date | null
   verifiedAt: Date | null
@@ -40,7 +40,7 @@ export type MfaCredentialMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   type: $Enums.MFAMethod | null
-  status: string | null
+  status: $Enums.MFACredentialStatus | null
   isPrimary: boolean | null
   enrolledAt: Date | null
   verifiedAt: Date | null
@@ -175,7 +175,7 @@ export type MfaCredentialGroupByOutputType = {
   id: string
   userId: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary: boolean
   enrolledAt: Date
   verifiedAt: Date | null
@@ -208,7 +208,7 @@ export type MfaCredentialWhereInput = {
   id?: Prisma.StringFilter<"MfaCredential"> | string
   userId?: Prisma.StringFilter<"MfaCredential"> | string
   type?: Prisma.EnumMFAMethodFilter<"MfaCredential"> | $Enums.MFAMethod
-  status?: Prisma.StringFilter<"MfaCredential"> | string
+  status?: Prisma.EnumMFACredentialStatusFilter<"MfaCredential"> | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFilter<"MfaCredential"> | boolean
   enrolledAt?: Prisma.DateTimeFilter<"MfaCredential"> | Date | string
   verifiedAt?: Prisma.DateTimeNullableFilter<"MfaCredential"> | Date | string | null
@@ -247,7 +247,7 @@ export type MfaCredentialWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.MfaCredentialWhereInput | Prisma.MfaCredentialWhereInput[]
   userId?: Prisma.StringFilter<"MfaCredential"> | string
   type?: Prisma.EnumMFAMethodFilter<"MfaCredential"> | $Enums.MFAMethod
-  status?: Prisma.StringFilter<"MfaCredential"> | string
+  status?: Prisma.EnumMFACredentialStatusFilter<"MfaCredential"> | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFilter<"MfaCredential"> | boolean
   enrolledAt?: Prisma.DateTimeFilter<"MfaCredential"> | Date | string
   verifiedAt?: Prisma.DateTimeNullableFilter<"MfaCredential"> | Date | string | null
@@ -283,7 +283,7 @@ export type MfaCredentialScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"MfaCredential"> | string
   userId?: Prisma.StringWithAggregatesFilter<"MfaCredential"> | string
   type?: Prisma.EnumMFAMethodWithAggregatesFilter<"MfaCredential"> | $Enums.MFAMethod
-  status?: Prisma.StringWithAggregatesFilter<"MfaCredential"> | string
+  status?: Prisma.EnumMFACredentialStatusWithAggregatesFilter<"MfaCredential"> | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolWithAggregatesFilter<"MfaCredential"> | boolean
   enrolledAt?: Prisma.DateTimeWithAggregatesFilter<"MfaCredential"> | Date | string
   verifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MfaCredential"> | Date | string | null
@@ -294,7 +294,7 @@ export type MfaCredentialScalarWhereWithAggregatesInput = {
 export type MfaCredentialCreateInput = {
   id?: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -312,7 +312,7 @@ export type MfaCredentialUncheckedCreateInput = {
   id?: string
   userId: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -328,7 +328,7 @@ export type MfaCredentialUncheckedCreateInput = {
 export type MfaCredentialUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -346,7 +346,7 @@ export type MfaCredentialUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -363,7 +363,7 @@ export type MfaCredentialCreateManyInput = {
   id?: string
   userId: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -374,7 +374,7 @@ export type MfaCredentialCreateManyInput = {
 export type MfaCredentialUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -386,7 +386,7 @@ export type MfaCredentialUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -491,6 +491,10 @@ export type EnumMFAMethodFieldUpdateOperationsInput = {
   set?: $Enums.MFAMethod
 }
 
+export type EnumMFACredentialStatusFieldUpdateOperationsInput = {
+  set?: $Enums.MFACredentialStatus
+}
+
 export type MfaCredentialCreateNestedOneWithoutTotpCredentialInput = {
   create?: Prisma.XOR<Prisma.MfaCredentialCreateWithoutTotpCredentialInput, Prisma.MfaCredentialUncheckedCreateWithoutTotpCredentialInput>
   connectOrCreate?: Prisma.MfaCredentialCreateOrConnectWithoutTotpCredentialInput
@@ -564,7 +568,7 @@ export type MfaCredentialUpdateOneRequiredWithoutMfaChallengesNestedInput = {
 export type MfaCredentialCreateWithoutUserInput = {
   id?: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -580,7 +584,7 @@ export type MfaCredentialCreateWithoutUserInput = {
 export type MfaCredentialUncheckedCreateWithoutUserInput = {
   id?: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -626,7 +630,7 @@ export type MfaCredentialScalarWhereInput = {
   id?: Prisma.StringFilter<"MfaCredential"> | string
   userId?: Prisma.StringFilter<"MfaCredential"> | string
   type?: Prisma.EnumMFAMethodFilter<"MfaCredential"> | $Enums.MFAMethod
-  status?: Prisma.StringFilter<"MfaCredential"> | string
+  status?: Prisma.EnumMFACredentialStatusFilter<"MfaCredential"> | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFilter<"MfaCredential"> | boolean
   enrolledAt?: Prisma.DateTimeFilter<"MfaCredential"> | Date | string
   verifiedAt?: Prisma.DateTimeNullableFilter<"MfaCredential"> | Date | string | null
@@ -637,7 +641,7 @@ export type MfaCredentialScalarWhereInput = {
 export type MfaCredentialCreateWithoutTotpCredentialInput = {
   id?: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -654,7 +658,7 @@ export type MfaCredentialUncheckedCreateWithoutTotpCredentialInput = {
   id?: string
   userId: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -685,7 +689,7 @@ export type MfaCredentialUpdateToOneWithWhereWithoutTotpCredentialInput = {
 export type MfaCredentialUpdateWithoutTotpCredentialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -702,7 +706,7 @@ export type MfaCredentialUncheckedUpdateWithoutTotpCredentialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -717,7 +721,7 @@ export type MfaCredentialUncheckedUpdateWithoutTotpCredentialInput = {
 export type MfaCredentialCreateWithoutSmsCredentialInput = {
   id?: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -734,7 +738,7 @@ export type MfaCredentialUncheckedCreateWithoutSmsCredentialInput = {
   id?: string
   userId: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -765,7 +769,7 @@ export type MfaCredentialUpdateToOneWithWhereWithoutSmsCredentialInput = {
 export type MfaCredentialUpdateWithoutSmsCredentialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -782,7 +786,7 @@ export type MfaCredentialUncheckedUpdateWithoutSmsCredentialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -797,7 +801,7 @@ export type MfaCredentialUncheckedUpdateWithoutSmsCredentialInput = {
 export type MfaCredentialCreateWithoutPushCredentialInput = {
   id?: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -814,7 +818,7 @@ export type MfaCredentialUncheckedCreateWithoutPushCredentialInput = {
   id?: string
   userId: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -845,7 +849,7 @@ export type MfaCredentialUpdateToOneWithWhereWithoutPushCredentialInput = {
 export type MfaCredentialUpdateWithoutPushCredentialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -862,7 +866,7 @@ export type MfaCredentialUncheckedUpdateWithoutPushCredentialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -877,7 +881,7 @@ export type MfaCredentialUncheckedUpdateWithoutPushCredentialInput = {
 export type MfaCredentialCreateWithoutBackupCodesInput = {
   id?: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -894,7 +898,7 @@ export type MfaCredentialUncheckedCreateWithoutBackupCodesInput = {
   id?: string
   userId: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -925,7 +929,7 @@ export type MfaCredentialUpdateToOneWithWhereWithoutBackupCodesInput = {
 export type MfaCredentialUpdateWithoutBackupCodesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -942,7 +946,7 @@ export type MfaCredentialUncheckedUpdateWithoutBackupCodesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -957,7 +961,7 @@ export type MfaCredentialUncheckedUpdateWithoutBackupCodesInput = {
 export type MfaCredentialCreateWithoutMfaChallengesInput = {
   id?: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -974,7 +978,7 @@ export type MfaCredentialUncheckedCreateWithoutMfaChallengesInput = {
   id?: string
   userId: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -1005,7 +1009,7 @@ export type MfaCredentialUpdateToOneWithWhereWithoutMfaChallengesInput = {
 export type MfaCredentialUpdateWithoutMfaChallengesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1022,7 +1026,7 @@ export type MfaCredentialUncheckedUpdateWithoutMfaChallengesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1037,7 +1041,7 @@ export type MfaCredentialUncheckedUpdateWithoutMfaChallengesInput = {
 export type MfaCredentialCreateManyUserInput = {
   id?: string
   type: $Enums.MFAMethod
-  status: string
+  status: $Enums.MFACredentialStatus
   isPrimary?: boolean
   enrolledAt?: Date | string
   verifiedAt?: Date | string | null
@@ -1048,7 +1052,7 @@ export type MfaCredentialCreateManyUserInput = {
 export type MfaCredentialUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1064,7 +1068,7 @@ export type MfaCredentialUpdateWithoutUserInput = {
 export type MfaCredentialUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1080,7 +1084,7 @@ export type MfaCredentialUncheckedUpdateWithoutUserInput = {
 export type MfaCredentialUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMFAMethodFieldUpdateOperationsInput | $Enums.MFAMethod
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMFACredentialStatusFieldUpdateOperationsInput | $Enums.MFACredentialStatus
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
   enrolledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1216,7 +1220,7 @@ export type $MfaCredentialPayload<ExtArgs extends runtime.Types.Extensions.Inter
     id: string
     userId: string
     type: $Enums.MFAMethod
-    status: string
+    status: $Enums.MFACredentialStatus
     isPrimary: boolean
     enrolledAt: Date
     verifiedAt: Date | null
@@ -1654,7 +1658,7 @@ export interface MfaCredentialFieldRefs {
   readonly id: Prisma.FieldRef<"MfaCredential", 'String'>
   readonly userId: Prisma.FieldRef<"MfaCredential", 'String'>
   readonly type: Prisma.FieldRef<"MfaCredential", 'MFAMethod'>
-  readonly status: Prisma.FieldRef<"MfaCredential", 'String'>
+  readonly status: Prisma.FieldRef<"MfaCredential", 'MFACredentialStatus'>
   readonly isPrimary: Prisma.FieldRef<"MfaCredential", 'Boolean'>
   readonly enrolledAt: Prisma.FieldRef<"MfaCredential", 'DateTime'>
   readonly verifiedAt: Prisma.FieldRef<"MfaCredential", 'DateTime'>

@@ -75,10 +75,9 @@ describe("signUp (Stateful)", () => {
             image: `https://avatars.dicebear.com/api/identicon/JohnDoe.svg`,
             emailVerifiedAt: null,
             status: "active",
-            mfaEnabled: false,
-            mfaPreferredMethod: null,
             createdAt: expect.any(Date),
             updatedAt: expect.any(Date),
+            deletedAt: null,
             attributes: {},
         })
     })

@@ -23,6 +23,9 @@ CREATE TYPE "DeviceType" AS ENUM ('desktop', 'mobile', 'tablet', 'tv', 'bot', 'u
 CREATE TYPE "MFAChallengeStatus" AS ENUM ('pending', 'verified', 'expired', 'failed');
 
 -- CreateEnum
+CREATE TYPE "MFACredentialStatus" AS ENUM ('active', 'pending', 'disabled');
+
+-- CreateEnum
 CREATE TYPE "VerificationTokenType" AS ENUM ('email_verification', 'password_reset', 'email_change', 'mfa_recovery');
 
 -- CreateTable
@@ -123,7 +126,7 @@ CREATE TABLE "MfaCredential" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "type" "MFAMethod" NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "MFACredentialStatus" NOT NULL,
     "isPrimary" BOOLEAN NOT NULL DEFAULT false,
     "enrolledAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "verifiedAt" TIMESTAMP(3),
@@ -135,30 +138,33 @@ CREATE TABLE "MfaCredential" (
 
 -- CreateTable
 CREATE TABLE "TotpCredential" (
+    "id" TEXT NOT NULL,
     "credentialId" TEXT NOT NULL,
     "secretCipher" TEXT NOT NULL,
     "verifiedAt" TIMESTAMP(3),
 
-    CONSTRAINT "TotpCredential_pkey" PRIMARY KEY ("credentialId")
+    CONSTRAINT "TotpCredential_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "SmsCredential" (
+    "id" TEXT NOT NULL,
     "credentialId" TEXT NOT NULL,
     "phoneNumber" TEXT NOT NULL,
     "verifiedAt" TIMESTAMP(3),
 
-    CONSTRAINT "SmsCredential_pkey" PRIMARY KEY ("credentialId")
+    CONSTRAINT "SmsCredential_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "PushCredential" (
+    "id" TEXT NOT NULL,
     "credentialId" TEXT NOT NULL,
     "deviceToken" TEXT NOT NULL,
     "platform" TEXT NOT NULL,
     "verifiedAt" TIMESTAMP(3),
 
-    CONSTRAINT "PushCredential_pkey" PRIMARY KEY ("credentialId")
+    CONSTRAINT "PushCredential_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -289,7 +295,16 @@ CREATE INDEX "MfaCredential_userId_status_idx" ON "MfaCredential"("userId", "sta
 CREATE INDEX "MfaCredential_deletedAt_idx" ON "MfaCredential"("deletedAt");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "TotpCredential_credentialId_key" ON "TotpCredential"("credentialId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SmsCredential_credentialId_key" ON "SmsCredential"("credentialId");
+
+-- CreateIndex
 CREATE INDEX "SmsCredential_phoneNumber_idx" ON "SmsCredential"("phoneNumber");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PushCredential_credentialId_key" ON "PushCredential"("credentialId");
 
 -- CreateIndex
 CREATE INDEX "BackupCode_credentialId_idx" ON "BackupCode"("credentialId");

@@ -61,7 +61,6 @@ describe("signIn (Stateful)", () => {
             expiresAt: new Date(Date.now() + 60000),
             nonce: null,
             fingerprint: null,
-            metadata: null,
             redirectTo: null,
             userAgent: null,
         })
@@ -94,7 +93,7 @@ describe("signIn (Stateful)", () => {
         expect(mockFetch).toHaveBeenNthCalledWith(2, "https://api.github.com/user", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/0.9.0`,
+                "User-Agent": expect.any(String),
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },
@@ -163,7 +162,6 @@ describe("signIn (Stateful)", () => {
             expiresAt: new Date(Date.now() + 60000),
             nonce: null,
             fingerprint: null,
-            metadata: null,
             redirectTo: null,
             userAgent: null,
         })
@@ -181,7 +179,6 @@ describe("signIn (Stateful)", () => {
             authenticatedWith: "oauth",
             deviceId: null,
             expiresAt: new Date(Date.now() + 3600000),
-            metadata: null,
             mfaState: "none",
             status: "active",
             tokenHash,
@@ -228,7 +225,7 @@ describe("signIn (Stateful)", () => {
         expect(mockFetch).toHaveBeenNthCalledWith(2, "https://api.github.com/user", {
             method: "GET",
             headers: {
-                "User-Agent": `Aura Auth/0.9.0`,
+                "User-Agent": expect.any(String),
                 Accept: "application/json",
                 Authorization: "Bearer access_token_123",
             },

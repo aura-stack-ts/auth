@@ -192,6 +192,7 @@ export type MfaCredentialScalarFieldEnum = (typeof MfaCredentialScalarFieldEnum)
 
 
 export const TotpCredentialScalarFieldEnum = {
+  id: 'id',
   credentialId: 'credentialId',
   secretCipher: 'secretCipher',
   verifiedAt: 'verifiedAt'
@@ -201,6 +202,7 @@ export type TotpCredentialScalarFieldEnum = (typeof TotpCredentialScalarFieldEnu
 
 
 export const SmsCredentialScalarFieldEnum = {
+  id: 'id',
   credentialId: 'credentialId',
   phoneNumber: 'phoneNumber',
   verifiedAt: 'verifiedAt'
@@ -210,6 +212,7 @@ export type SmsCredentialScalarFieldEnum = (typeof SmsCredentialScalarFieldEnum)
 
 
 export const PushCredentialScalarFieldEnum = {
+  id: 'id',
   credentialId: 'credentialId',
   deviceToken: 'deviceToken',
   platform: 'platform',

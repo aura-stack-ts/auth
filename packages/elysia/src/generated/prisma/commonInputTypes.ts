@@ -308,6 +308,13 @@ export type EnumMFAMethodFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumMFAMethodFilter<$PrismaModel> | $Enums.MFAMethod
 }
 
+export type EnumMFACredentialStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MFACredentialStatus | Prisma.EnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MFACredentialStatus[] | Prisma.ListEnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MFACredentialStatus[] | Prisma.ListEnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMFACredentialStatusFilter<$PrismaModel> | $Enums.MFACredentialStatus
+}
+
 export type EnumMFAMethodWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.MFAMethod | Prisma.EnumMFAMethodFieldRefInput<$PrismaModel>
   in?: $Enums.MFAMethod[] | Prisma.ListEnumMFAMethodFieldRefInput<$PrismaModel>
@@ -316,6 +323,16 @@ export type EnumMFAMethodWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumMFAMethodFilter<$PrismaModel>
   _max?: Prisma.NestedEnumMFAMethodFilter<$PrismaModel>
+}
+
+export type EnumMFACredentialStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MFACredentialStatus | Prisma.EnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MFACredentialStatus[] | Prisma.ListEnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MFACredentialStatus[] | Prisma.ListEnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMFACredentialStatusWithAggregatesFilter<$PrismaModel> | $Enums.MFACredentialStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMFACredentialStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMFACredentialStatusFilter<$PrismaModel>
 }
 
 export type EnumMFAChallengeStatusFilter<$PrismaModel = never> = {
@@ -659,6 +676,13 @@ export type NestedEnumMFAMethodFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumMFAMethodFilter<$PrismaModel> | $Enums.MFAMethod
 }
 
+export type NestedEnumMFACredentialStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MFACredentialStatus | Prisma.EnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MFACredentialStatus[] | Prisma.ListEnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MFACredentialStatus[] | Prisma.ListEnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMFACredentialStatusFilter<$PrismaModel> | $Enums.MFACredentialStatus
+}
+
 export type NestedEnumMFAMethodWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.MFAMethod | Prisma.EnumMFAMethodFieldRefInput<$PrismaModel>
   in?: $Enums.MFAMethod[] | Prisma.ListEnumMFAMethodFieldRefInput<$PrismaModel>
@@ -667,6 +691,16 @@ export type NestedEnumMFAMethodWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumMFAMethodFilter<$PrismaModel>
   _max?: Prisma.NestedEnumMFAMethodFilter<$PrismaModel>
+}
+
+export type NestedEnumMFACredentialStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MFACredentialStatus | Prisma.EnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MFACredentialStatus[] | Prisma.ListEnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MFACredentialStatus[] | Prisma.ListEnumMFACredentialStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMFACredentialStatusWithAggregatesFilter<$PrismaModel> | $Enums.MFACredentialStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMFACredentialStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMFACredentialStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumMFAChallengeStatusFilter<$PrismaModel = never> = {
