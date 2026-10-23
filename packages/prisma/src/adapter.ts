@@ -458,21 +458,11 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             return result.map(toBackupCode)
         },
         verifyBackupCode: async (credentialId, codeHash) => {
-            const code = await client.backupCode.findFirst({
-                where: {
-                    credentialId,
-                    codeHash,
-                    used: false,
-                },
-            })
-            if (!code) {
-                return false
-            }
-            await client.backupCode.update({
-                where: { id: code.id },
+            const result = await client.backupCode.updateMany({
+                where: { credentialId, codeHash, used: false },
                 data: { used: true, usedAt: new Date() },
             })
-            return true
+            return result.count > 0
         },
         /**
          * MFA Challenges
@@ -485,7 +475,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                     credentialId: input.credentialId,
                     type: input.type,
                     status: input.status,
-                    attemptCount: input.attempCount,
+                    attemptCount: input.attemptCount,
                     expiresAt: input.expiresAt,
                 },
             })

@@ -184,6 +184,7 @@ export const toBackupCode = (code: BackupCode): BackupCodeCredentialEntity => ({
     credentialId: code.credentialId,
     codeHash: code.codeHash,
     createdAt: code.createdAt,
+    used: code.used,
     usedAt: code.usedAt,
 })
 
@@ -194,7 +195,7 @@ export const toMFAChallenge = (challenge: MfaChallenge): MFAChallengeEntity => (
     credentialId: challenge.credentialId,
     type: challenge.type,
     status: challenge.status,
-    attempCount: challenge.attemptCount,
+    attemptCount: challenge.attemptCount,
     expiresAt: challenge.expiresAt,
     createdAt: challenge.createdAt,
     verifiedAt: challenge.verifiedAt,

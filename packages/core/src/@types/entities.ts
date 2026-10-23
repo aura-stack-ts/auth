@@ -183,11 +183,11 @@ export interface BackupCodeCredentialEntity {
 export interface MFAChallengeEntity {
     id: string
     userId: string
-    sessionId: string
+    sessionId: string | null
     credentialId: string
     type: MFAMethod
     status: MFAChallengeStatus
-    attempCount: number
+    attemptCount: number
     expiresAt: Date
     createdAt: Date
     verifiedAt: Date | null
@@ -198,7 +198,7 @@ export interface VerificationTokenEntity {
     userId: string
     tokenHash: string
     type: VerificationTokenType
-    identifier: string
+    identifier: string | null
     newIdentifier: string | null
     expiresAt: Date
     revokedAt: Date | null
