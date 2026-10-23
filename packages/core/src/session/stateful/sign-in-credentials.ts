@@ -71,7 +71,6 @@ export const signInCredentials = ({ ctx, cookies, cookieManager }: InternalState
             mfaState: "none",
             tokenHash,
             expiresAt,
-            metadata: null,
         })
 
         logger?.log("STATEFUL_SESSION_CREATED", {

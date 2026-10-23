@@ -20,7 +20,6 @@ describe("getSession (Stateful)", () => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             const response = await app.handle(
                 new Request("http://localhost:3000/api/auth/session", {
@@ -78,7 +77,6 @@ describe("getSession (Stateful)", () => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
 
             const response = await app.handle(
@@ -112,7 +110,6 @@ describe("getSession (Stateful)", () => {
                 status: "revoked",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
 
             const response = await app.handle(
@@ -148,7 +145,6 @@ describe("getSession (Stateful)", () => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
 
             await adapter.deleteUser(user.id)
@@ -187,7 +183,6 @@ describe("getSession (Stateful)", () => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
 
             await adapter.revokeSession(session.id, "admin_action")
@@ -199,7 +194,7 @@ describe("getSession (Stateful)", () => {
              * When `deleteStrategy` is set to `soft`, the session is not deleted from the database
              * but is marked as revoked. This allows for auditing and tracking of session revocations without losing historical data.
              */
-            expect(await prismaClient.session.findUnique({ where: { id: session.id } })).toHaveProperty("status", "REVOKED")
+            expect(await prismaClient.session.findUnique({ where: { id: session.id } })).toHaveProperty("status", "revoked")
 
             const response = await app.handle(
                 new Request("http://localhost:3000/api/auth/session", {
@@ -235,7 +230,6 @@ describe("getSession (Stateful)", () => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
 
             await adapter.createSession({
@@ -247,7 +241,6 @@ describe("getSession (Stateful)", () => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
 
             const response1 = await app.handle(

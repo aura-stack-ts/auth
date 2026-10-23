@@ -1,3 +1,5 @@
+import type { BuiltInOAuthProvider, LiteralUnion } from "./index.ts"
+
 export type UserStatus = "active" | "suspended" | "pending_verification" | "deleted"
 
 /**
@@ -32,6 +34,12 @@ export type RevokeReason =
     | "account_suspended"
     | "max_sessions_exceeded"
 
+export type MFAChallengeStatus = "pending" | "verified" | "expired" | "failed"
+
+export type MfaCredentialStatus = "active" | "pending" | "disabled"
+
+export type VerificationTokenType = "email_verification" | "password_reset" | "email_change" | "mfa_recovery"
+
 export interface UserEntity {
     id: string
     name: string | null
@@ -39,10 +47,9 @@ export interface UserEntity {
     image: string | null
     emailVerifiedAt: Date | null
     status: UserStatus
-    mfaEnabled: boolean
-    mfaPreferredMethod: MFAMethod | null
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
     /**
      * Used to store the extra user attributes and extended by the `identity.schema`
      * configuration.
@@ -53,12 +60,13 @@ export interface UserEntity {
 export interface AccountEntity {
     id: string
     userId: string
-    provider: string
+    provider: LiteralUnion<BuiltInOAuthProvider | "credentials">
     providerUserId: string
     type: AccountType
     status: AccountStatus
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
 }
 
 export interface OAuthAccountEntity {
@@ -89,7 +97,6 @@ export interface SessionEntity {
     mfaState: MFAState
     tokenHash: string
     expiresAt: Date
-    metadata: Record<string, unknown> | null
     lastActivityAt: Date
     revokedAt: Date | null
     createdAt: Date
@@ -127,18 +134,75 @@ export interface DeviceEntity {
     trusted: boolean
     firstSeenAt: Date
     lastSeenAt: Date
-    metadata: Record<string, unknown> | null
+    deletedAt: Date | null
 }
 
 export interface MFACredentialEntity {
     id: string
     userId: string
     type: MFAMethod
-    credentialData: Record<string, unknown>
+    status: MfaCredentialStatus
     isPrimary: boolean
+    enrolledAt: Date
     verifiedAt: Date | null
     createdAt: Date
-    metadata: Record<string, unknown> | null
+    deletedAt: Date | null
+}
+
+export interface TotpCredentialEntity {
+    id: string
+    credentialId: string
+    secretCipher: string
+    verifiedAt: Date | null
+}
+
+export interface SmsCredentialEntity {
+    id: string
+    credentialId: string
+    phoneNumber: string
+    verifiedAt: Date | null
+}
+
+export interface PushCredentialEntity {
+    id: string
+    credentialId: string
+    deviceToken: string
+    platform: string
+    verifiedAt: Date | null
+}
+
+export interface BackupCodeCredentialEntity {
+    id: string
+    credentialId: string
+    codeHash: string
+    createdAt: Date
+    used: boolean
+    usedAt: Date | null
+}
+
+export interface MFAChallengeEntity {
+    id: string
+    userId: string
+    sessionId: string | null
+    credentialId: string
+    type: MFAMethod
+    status: MFAChallengeStatus
+    attemptCount: number
+    expiresAt: Date
+    createdAt: Date
+    verifiedAt: Date | null
+}
+
+export interface VerificationTokenEntity {
+    id: string
+    userId: string
+    tokenHash: string
+    type: VerificationTokenType
+    identifier: string | null
+    newIdentifier: string | null
+    expiresAt: Date
+    revokedAt: Date | null
+    createdAt: Date
 }
 
 /**
@@ -157,5 +221,4 @@ export interface OAuthTransactionEntity {
     deviceId: string | null
     createdAt: Date
     expiresAt: Date
-    metadata: Record<string, unknown> | null
 }

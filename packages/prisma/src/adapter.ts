@@ -1,23 +1,21 @@
 import type { DatabaseAdapter } from "@aura-stack/auth/types"
 import { type PrismaClient, UserStatus } from "@/generated/prisma/client.ts"
 import {
-    appendRevokeReason,
     toAccount,
-    toAccountStatus,
-    toAccountType,
+    toBackupCode,
     toCredentialAccount,
     toDevice,
-    toDeviceType,
+    toMFAChallenge,
     toMFACredential,
-    toMFAMethod,
-    toMFAStatus,
     toOAuthAccount,
     toOAuthTransaction,
+    toPushCredential,
     toSession,
-    toSessionStatus,
     toSessionWithUser,
+    toSmsCredential,
+    toTotpCredential,
     toUser,
-    toUserStatus,
+    toVerificationToken,
     toJson,
 } from "@/lib/mappers.ts"
 import { setUndefinedToNull, stripNullishValues } from "@/lib/utils.ts"
@@ -44,8 +42,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 data: {
                     ...input,
                     emailVerifiedAt: input.emailVerifiedAt ?? null,
-                    status: input.status ? toUserStatus(input.status) : undefined,
-                    mfaPreferredMethod: input.mfaPreferredMethod ? toMFAMethod(input.mfaPreferredMethod) : undefined,
+                    status: input.status,
                     attributes: toJson(input.attributes),
                 },
             })
@@ -65,13 +62,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 where: { id },
                 data: {
                     ...stripped,
-                    status: input.status ? toUserStatus(input.status) : undefined,
-                    mfaPreferredMethod:
-                        input.mfaPreferredMethod === undefined
-                            ? undefined
-                            : input.mfaPreferredMethod
-                              ? toMFAMethod(input.mfaPreferredMethod)
-                              : null,
+                    status: input.status,
                     attributes: input.attributes === undefined ? undefined : toJson(input.attributes),
                 },
             })
@@ -85,11 +76,11 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 await client.$transaction([
                     client.user.update({
                         where: { id },
-                        data: { status: UserStatus.DELETED, updatedAt: now },
+                        data: { status: UserStatus.deleted, updatedAt: now },
                     }),
                     client.session.updateMany({
-                        where: { userId: id, status: "ACTIVE" },
-                        data: { status: "REVOKED", revokedAt: now },
+                        where: { userId: id, status: "active" },
+                        data: { status: "revoked", revokedAt: now },
                     }),
                 ])
             }
@@ -104,8 +95,8 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                     userId: input.userId!,
                     provider: input.provider!,
                     providerUserId: input.providerUserId!,
-                    type: toAccountType(input.type!),
-                    status: input.status ? toAccountStatus(input.status) : undefined,
+                    type: input.type!,
+                    status: input.status,
                 },
             })
             return toAccount(account)
@@ -135,7 +126,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
         updateAccountStatus: async (id, status) => {
             const account = await client.account.update({
                 where: { id },
-                data: { status: toAccountStatus(status) },
+                data: { status: status },
             })
             return toAccount(account)
         },
@@ -144,7 +135,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 client.oAuthAccount.deleteMany({ where: { accountId: id } }),
                 client.account.update({
                     where: { id },
-                    data: { status: "UNLINKED" },
+                    data: { status: "unlinked" },
                 }),
             ])
         },
@@ -210,9 +201,8 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             const session = await client.session.create({
                 data: {
                     ...input,
-                    status: toSessionStatus(input.status),
-                    mfaState: toMFAStatus(input.mfaState),
-                    metadata: toJson(input.metadata),
+                    status: input.status,
+                    mfaState: input.mfaState,
                     lastActivityAt: new Date(),
                 },
             })
@@ -222,7 +212,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             const session = await client.session.findUnique({
                 where: {
                     tokenHash: token,
-                    status: "ACTIVE",
+                    status: "active",
                     expiresAt: { gt: new Date() },
                 },
                 include: { user: true },
@@ -230,14 +220,14 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             return session ? toSessionWithUser(session) : null
         },
         getSessionById: async (id) => {
-            const session = await client.session.findUnique({ where: { id, status: "ACTIVE" } })
+            const session = await client.session.findUnique({ where: { id, status: "active" } })
             return session ? toSession(session) : null
         },
         listSessions: async (filter) => {
             const sessions = await client.session.findMany({
                 where: {
                     userId: filter.userId,
-                    ...(filter.status !== undefined && { status: toSessionStatus(filter.status) }),
+                    ...(filter.status !== undefined && { status: filter.status }),
                     ...(filter.deviceId !== undefined && { deviceId: filter.deviceId }),
                 },
                 orderBy: { createdAt: "desc" },
@@ -250,20 +240,19 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 where: { id },
                 data: {
                     ...stripped,
-                    status: toSessionStatus(input?.status ?? "active"),
-                    mfaState: toMFAStatus(input?.mfaState ?? "none"),
-                    metadata: toJson(input.metadata),
+                    status: input?.status ?? "active",
+                    mfaState: input?.mfaState,
                 },
             })
             return toSession(session)
         },
         touchSession: async (id, lastActivityAt) => {
             await client.session.update({
-                where: { id, status: "ACTIVE" },
+                where: { id, status: "active" },
                 data: { lastActivityAt },
             })
         },
-        revokeSession: async (id, reason) => {
+        revokeSession: async (id, _reason) => {
             const existing = await client.session.findUnique({ where: { id } })
             if (!existing) {
                 return
@@ -273,17 +262,16 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             await client.session.update({
                 where: { id },
                 data: {
-                    status: "REVOKED",
+                    status: "revoked",
                     revokedAt,
-                    metadata: toJson(appendRevokeReason(existing.metadata as Record<string, unknown> | null, reason, revokedAt)),
                 },
             })
         },
-        revokeAllSessions: async (userId, reason, exceptSessionId) => {
+        revokeAllSessions: async (userId, _reason, exceptSessionId) => {
             const sessions = await client.session.findMany({
                 where: {
                     userId,
-                    status: "ACTIVE",
+                    status: "active",
                     ...(exceptSessionId ? { id: { not: exceptSessionId } } : {}),
                 },
             })
@@ -296,11 +284,8 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                     client.session.update({
                         where: { id: session.id },
                         data: {
-                            status: "REVOKED",
+                            status: "revoked",
                             revokedAt,
-                            metadata: toJson(
-                                appendRevokeReason(session.metadata as Record<string, unknown> | null, reason, revokedAt)
-                            ),
                         },
                     })
                 )
@@ -314,8 +299,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             const device = await client.device.create({
                 data: {
                     ...input,
-                    type: toDeviceType(input.type),
-                    metadata: toJson(input.metadata),
+                    type: input.type,
                 },
             })
             return toDevice(device)
@@ -343,8 +327,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 where: { id },
                 data: {
                     ...stripped,
-                    type: toDeviceType(input.type ?? "unknown"),
-                    metadata: toJson(input.metadata),
+                    type: input.type ?? "unknown",
                 },
             })
             return toDevice(device)
@@ -363,10 +346,9 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             const credential = await client.mfaCredential.create({
                 data: {
                     userId: input.userId,
-                    type: toMFAMethod(input.type),
-                    credentialData: toJson(input.credentialData),
+                    type: input.type,
                     isPrimary: input.isPrimary ?? false,
-                    metadata: toJson(input.metadata),
+                    status: input.status ?? "active",
                 },
             })
             return toMFACredential(credential)
@@ -386,7 +368,7 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             const credentials = await client.mfaCredential.findMany({
                 where: {
                     userId,
-                    type: toMFAMethod(type),
+                    type,
                 },
                 orderBy: { createdAt: "desc" },
             })
@@ -405,15 +387,154 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 where: { id },
                 data: {
                     ...stripped,
-                    type: toMFAMethod(input.type),
-                    credentialData: toJson(input.credentialData),
-                    metadata: toJson(input.metadata),
+                    type: input.type,
                 },
             })
             return toMFACredential(credential)
         },
         deleteMfaCredential: async (id) => {
             await client.mfaCredential.delete({ where: { id } })
+        },
+        createTotpCredential: async (input) => {
+            const credential = await client.totpCredential.create({
+                data: {
+                    credentialId: input.credentialId,
+                    secretCipher: input.secretCipher,
+                    verifiedAt: input.verifiedAt,
+                },
+            })
+            return toTotpCredential(credential)
+        },
+        getTotpCredentialByCredentialId: async (credentialId) => {
+            const credential = await client.totpCredential.findUnique({
+                where: { credentialId },
+            })
+            return credential ? toTotpCredential(credential) : null
+        },
+        createSmsCredential: async (input) => {
+            const credential = await client.smsCredential.create({
+                data: {
+                    credentialId: input.credentialId,
+                    phoneNumber: input.phoneNumber,
+                    verifiedAt: input.verifiedAt,
+                },
+            })
+            return toSmsCredential(credential)
+        },
+        getSmsCredentialByCredentialId: async (credentialId) => {
+            const credential = await client.smsCredential.findUnique({
+                where: { credentialId },
+            })
+            return credential ? toSmsCredential(credential) : null
+        },
+        createPushCredential: async (input) => {
+            const credential = await client.pushCredential.create({
+                data: {
+                    credentialId: input.credentialId,
+                    deviceToken: input.deviceToken,
+                    platform: input.platform,
+                    verifiedAt: input.verifiedAt,
+                },
+            })
+            return toPushCredential(credential)
+        },
+        getPushCredentialByCredentialId: async (credentialId) => {
+            const credential = await client.pushCredential.findUnique({
+                where: { credentialId },
+            })
+            return credential ? toPushCredential(credential) : null
+        },
+        createBackupCodes: async (credentialId, codes) => {
+            const result = await client.$transaction(
+                codes.map((code) =>
+                    client.backupCode.create({
+                        data: {
+                            credentialId,
+                            codeHash: code.codeHash,
+                        },
+                    })
+                )
+            )
+            return result.map(toBackupCode)
+        },
+        verifyBackupCode: async (credentialId, codeHash) => {
+            const result = await client.backupCode.updateMany({
+                where: { credentialId, codeHash, used: false },
+                data: { used: true, usedAt: new Date() },
+            })
+            return result.count > 0
+        },
+        /**
+         * MFA Challenges
+         */
+        createChallenge: async (input) => {
+            const challenge = await client.mfaChallenge.create({
+                data: {
+                    userId: input.userId,
+                    sessionId: input.sessionId,
+                    credentialId: input.credentialId,
+                    type: input.type,
+                    status: input.status,
+                    attemptCount: input.attemptCount,
+                    expiresAt: input.expiresAt,
+                },
+            })
+            return toMFAChallenge(challenge)
+        },
+        getChallengeById: async (id) => {
+            const challenge = await client.mfaChallenge.findUnique({ where: { id } })
+            return challenge ? toMFAChallenge(challenge) : null
+        },
+        incrementAttemptCount: async (id) => {
+            const challenge = await client.mfaChallenge.update({
+                where: { id },
+                data: { attemptCount: { increment: 1 } },
+            })
+            return toMFAChallenge(challenge)
+        },
+        verifyChallenge: async (id) => {
+            const challenge = await client.mfaChallenge.update({
+                where: { id },
+                data: { status: "verified", verifiedAt: new Date() },
+            })
+            return toMFAChallenge(challenge)
+        },
+        expireChallenges: async (sessionId) => {
+            await client.mfaChallenge.updateMany({
+                where: {
+                    sessionId,
+                    status: "pending",
+                },
+                data: { status: "expired" },
+            })
+        },
+        /**
+         * Verification Tokens
+         */
+        createToken: async (input) => {
+            const token = await client.verificationToken.create({
+                data: {
+                    userId: input.userId,
+                    tokenHash: input.tokenHash,
+                    type: input.type,
+                    identifier: input.identifier ?? null,
+                    newIdentifier: input.newIdentifier,
+                    expiresAt: input.expiresAt,
+                },
+            })
+            return toVerificationToken(token)
+        },
+        getTokenByHash: async (tokenHash) => {
+            const token = await client.verificationToken.findUnique({
+                where: { tokenHash },
+            })
+            return token ? toVerificationToken(token) : null
+        },
+        revokeToken: async (id) => {
+            await client.verificationToken.update({
+                where: { id },
+                data: { revokedAt: new Date() },
+            })
         },
         /**
          * OAuth Transactions
@@ -422,7 +543,6 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             const transaction = await client.oAuthTransaction.create({
                 data: {
                     ...input,
-                    metadata: toJson(input.metadata),
                 },
             })
             return toOAuthTransaction(transaction)

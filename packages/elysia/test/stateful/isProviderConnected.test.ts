@@ -28,7 +28,6 @@ describe("isProviderConnected (Stateful)", () => {
             status: "active",
             mfaState: "none",
             deviceId: null,
-            metadata: null,
         })
 
         const response = await app.handle(
@@ -64,7 +63,6 @@ describe("isProviderConnected (Stateful)", () => {
             mfaState: "none",
             status: "active",
             deviceId: null,
-            metadata: null,
         })
 
         /**
@@ -110,7 +108,6 @@ describe("isProviderConnected (Stateful)", () => {
             mfaState: "none",
             status: "active",
             deviceId: null,
-            metadata: null,
         })
 
         const account = await adapter.createAccount({
@@ -161,7 +158,6 @@ describe("isProviderConnected (Stateful)", () => {
             mfaState: "none",
             status: "active",
             deviceId: null,
-            metadata: null,
         })
 
         const account = await adapter.createAccount({
