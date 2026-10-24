@@ -401,3 +401,23 @@ export type ProviderConnectedAPIOptions = APIOptionsWithRequest
 export type ProviderConnectedData = { success: true; connected: boolean } | { success: false; connected: false }
 
 export type ProviderConnectedAPIReturn = AuthActionAPIReturn<ProviderConnectedData>
+
+export type SendVerificationEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+
+export type SendVerificationEmailData =
+    | { success: true; redirect: true; redirectURL: null }
+    | { success: true; redirect: false; redirectURL: string }
+    | { success: true; redirect: false; redirectURL: null }
+    | { success: false; redirect: false; redirectURL: null }
+
+export type SendVerificationEmailAPIReturn = AuthActionAPIReturn<SendVerificationEmailData>
+
+export type VerifyEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+
+export type VerifyEmailData =
+    | { success: true; verified: true; redirect: true; redirectURL: null }
+    | { success: true; verified: true; redirect: false; redirectURL: string }
+    | { success: true; verified: true; redirect: false; redirectURL: null }
+    | { success: false; verified: false; redirect: false; redirectURL: null }
+
+export type VerifyEmailAPIReturn = AuthActionAPIReturn<VerifyEmailData>

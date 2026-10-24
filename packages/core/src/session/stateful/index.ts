@@ -11,6 +11,8 @@ import { refreshUserInfo } from "@/session/stateful/refresh-userInfo.ts"
 import { signInCredentials } from "@/session/stateful/sign-in-credentials.ts"
 import { getProviderTokens } from "@/session/stateful/get-provider-tokens.ts"
 import { isProviderConnected } from "@/session/stateful/is-provider-connected.ts"
+import { sendVerificationEmail } from "@/session/stateful/send-verification-email.ts"
+import { verifyEmail } from "@/session/stateful/verify-email.ts"
 import type { SessionStrategy, User } from "@/@types/index.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 
@@ -22,6 +24,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>(
         signIn: signIn(ctx),
         getSession: getSession(ctx),
         revokeToken: revokeToken(ctx),
+        verifyEmail: verifyEmail(ctx),
         oauthCallback: oauthCallback(ctx),
         createSession: createSession(ctx),
         revokeSession: revokeSession(ctx),
@@ -31,5 +34,6 @@ export const createStatefulStrategy = <DefaultUser extends User = User>(
         signInCredentials: signInCredentials(ctx),
         getProviderTokens: getProviderTokens(ctx),
         isProviderConnected: isProviderConnected(ctx),
+        sendVerificationEmail: sendVerificationEmail(ctx),
     }
 }

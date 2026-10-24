@@ -82,6 +82,20 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig, useProxyHe
                 keyGenerator: (request) => getLimitKey(request, "signOut"),
                 ...config?.signOut,
             } as RateLimiterRule,
+            sendVerificationEmail: {
+                algorithm: "fixed-window",
+                limit: 5,
+                windowMs: 60 * 60 * 1000,
+                keyGenerator: (request) => getLimitKey(request, "sendVerificationEmail"),
+                ...config?.sendVerificationEmail,
+            } as RateLimiterRule,
+            verifyEmail: {
+                algorithm: "fixed-window",
+                limit: 5,
+                windowMs: 60 * 60 * 1000,
+                keyGenerator: (request) => getLimitKey(request, "verifyEmail"),
+                ...config?.verifyEmail,
+            } as RateLimiterRule,
         },
     })
 }
