@@ -121,3 +121,14 @@ export const SignUpActionResponseSchema = object({
     redirect: boolean(),
     redirectURL: union([url(), nullable()]),
 })
+
+export const VerifyEmailActionResponseSchema = object({
+    success: boolean(),
+    verified: boolean(),
+    redirect: boolean(),
+    redirectURL: union([url(), nullable()]),
+})
+
+export const VerifyEmailSearchParamsSchema = RedirectOptionsSchema.extend({
+    token: string().min(32),
+})

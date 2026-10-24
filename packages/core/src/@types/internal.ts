@@ -16,6 +16,7 @@ import type {
     CookieName,
     CookieStrategyAttributes,
     CredentialsConfig,
+    EmailVerificationConfig,
     JoseInstance,
     LogLevel,
     RateLimiterConfig,
@@ -90,6 +91,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     jwtManager: JWTManager<DefaultUser>
     rateLimiters: InferRules<Required<RateLimiterConfig>>
     sessionConfig: SessionConfig
+    emailVerification?: EmailVerificationConfig
 }
 
 export interface SchemaRegistryContext {

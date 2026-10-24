@@ -6,6 +6,7 @@ import type {
     SessionEntity,
     SessionWithUserEntity,
     UserEntity,
+    VerificationTokenEntity,
 } from "@/@types/index.ts"
 
 export const userEntity: UserEntity = {
@@ -91,4 +92,16 @@ export const oauthTransactionEntity: OAuthTransactionEntity = {
     deviceId: null,
     createdAt: new Date(),
     expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+}
+
+export const verificationTokenEntity: VerificationTokenEntity = {
+    id: "token-123",
+    userId: "user-123",
+    tokenHash: "hashed-verification-token",
+    type: "email_verification",
+    identifier: "john@example.com",
+    newIdentifier: null,
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    revokedAt: null,
+    createdAt: new Date(),
 }
