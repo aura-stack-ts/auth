@@ -2,7 +2,7 @@ import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const sendVerificationEmail = ({ ctx }: InternalStatefulContext) => {
-    const { sessionConfig, emailVerification } = ctx
+    const { sessionConfig, emailVerification, basePath } = ctx
     return async (email: string, request: Request) => {
         const user = await sessionConfig.adapter.getUserByEmail(email)
         if (!user) {
@@ -20,6 +20,6 @@ export const sendVerificationEmail = ({ ctx }: InternalStatefulContext) => {
             tokenHash,
         })
         const origin = new URL(request.url).origin
-        return { token, url: `${origin}/emailVerification?token=${token}` }
+        return { token, url: `${origin}/${basePath}/emailVerification?token=${token}` }
     }
 }
