@@ -188,6 +188,8 @@ export type AuthConfig<
      * }
      */
     rateLimiter?: RateLimiterConfig
+
+    emailVerification?: EmailVerificationConfig
 } & TrustedProxyHeadersConfig
 
 export type OAuthProvidersConfig<Identity extends Identities> =
@@ -470,6 +472,19 @@ export interface SignUpConfig<
     onCreateUser: (context: OnCreateUserContext<SignUpSchema>) => Awaitable<FromShapeToObject<NoInfer<Identity>> | null>
 }
 
+export interface EmailVerificationConfig {
+    /**
+     * Defines the expiration time for the email verification token in seconds. By default, it is
+     * set to 30 minutes (1800 seconds).
+     */
+    expiresIn?: number
+    /**
+     * Callback function to send the verification email. It receives the email address, token, and verification URL.
+     * You must implement this function to send the email using your preferred email service.
+     */
+    sendVerificationEmail?: (options: { email: string; token: string | null; url: string | null }) => Awaitable<void>
+}
+
 // #region Rate Limiter
 
 export type RateLimiterConfig = Partial<
@@ -485,7 +500,9 @@ export type RateLimiterConfig = Partial<
             | "refreshUserInfo"
             | "revokeToken"
             | "isProviderConnected"
-            | "signOut",
+            | "signOut"
+            | "sendVerificationEmail"
+            | "verifyEmail",
             RateLimiterRule
         >
     >["rules"]

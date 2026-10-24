@@ -11,6 +11,8 @@ import {
     revokeToken,
     disconnectProvider,
     isProviderConnected,
+    sendVerificationEmail,
+    verifyEmail,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -43,6 +45,10 @@ import type {
     RevokeTokenAPIReturn,
     ProviderConnectedAPIReturn,
     DisconnectProviderAPIReturn,
+    SendVerificationEmailAPIOptions,
+    SendVerificationEmailAPIReturn,
+    VerifyEmailAPIReturn,
+    VerifyEmailAPIOptions,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -267,6 +273,41 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
             options?: ProviderConnectedAPIOptions
         ): Promise<ProviderConnectedAPIReturn> => {
             return isProviderConnected(oauth, { ctx, ...options })
+        },
+        /**
+         * Sends a verification email to the specified email address on the server-side.
+         *
+         * > **NOTE**: This method only works for stateful session strategies, for stateless
+         * strategies it will throw an error.
+         *
+         * @param email - The email address to which the verification email should be sent.
+         * @param options - Options for the API call, including headers and request object.
+         * @example
+         * const { success } = await api.sendVerificationEmail("user@example.com", {
+         *   headers: getHeaders()
+         * })
+         */
+        sendVerificationEmail: async (
+            email: string,
+            options?: SendVerificationEmailAPIOptions
+        ): Promise<SendVerificationEmailAPIReturn> => {
+            return sendVerificationEmail(email, { ctx, ...options })
+        },
+        /**
+         * Verifies an email address using a verification token on the server-side.
+         *
+         * > **NOTE**: This method only works for stateful session strategies, for stateless
+         * strategies it will throw an error.
+         *
+         * @param token - The verification token received from the email.
+         * @example
+         * const { success, verified } = await api.verifyEmail("verification-token-here", {
+         *   headers: getHeaders(),
+         *   redirectTo: "/auth/verified"
+         * })
+         */
+        verifyEmail: async (token: string, options?: VerifyEmailAPIOptions): Promise<VerifyEmailAPIReturn> => {
+            return verifyEmail(token, { ctx, ...options })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for
