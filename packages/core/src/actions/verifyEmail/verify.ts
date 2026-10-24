@@ -5,8 +5,20 @@ import { VerifyEmailActionResponseSchema, VerifyEmailSearchParamsSchema } from "
 const verifyEmailConfig = () => {
     return createEndpointConfig({
         schemas: {
-            searchParams: VerifyEmailSearchParamsSchema,
             response: VerifyEmailActionResponseSchema,
+            searchParams: VerifyEmailSearchParamsSchema,
+        },
+        hooks: {
+            onError: (ctx) => {
+                return ctx.json(
+                    {
+                        type: "VALIDATION",
+                        code: "INVALID_VERIFICATION_TOKEN",
+                        message: "Invalid or expired verification token",
+                    },
+                    { status: 422 }
+                )
+            },
         },
     })
 }

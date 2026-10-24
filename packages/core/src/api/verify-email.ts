@@ -1,8 +1,8 @@
+import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyEmailAPIOptions, VerifyEmailAPIReturn } from "@/@types/api.ts"
-import { HeadersBuilder } from "@aura-stack/router"
 
 export const verifyEmail = async (
     token: string,
@@ -45,6 +45,9 @@ export const verifyEmail = async (
                     return Response.json(
                         {
                             success: false,
+                            verified: false,
+                            redirect: false,
+                            redirectURL: null,
                         },
                         { headers: secureApiHeaders, status: 400 }
                     )
