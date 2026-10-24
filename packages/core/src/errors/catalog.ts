@@ -884,6 +884,20 @@ export const ERROR_CATALOG = {
             "The requested user record could not be found in the database. The provided identifier does not match any existing user.",
         userMessage: "The user account could not be found. Please check your credentials and try again.",
     },
+    INVALID_RESET_PASSWORD_TOKEN: {
+        type: "VALIDATION",
+        statusCode: 422,
+        name: "ValidationError",
+        message: "The provided password reset token is invalid or has expired.",
+        userMessage: "Invalid or expired password reset token.",
+    },
+    NO_CREDENTIALS_ACCOUNT_FOUND: {
+        type: "AUTH_FLOW",
+        statusCode: 404,
+        name: "AuthError",
+        message: "No credential account was found for the user associated with the provided reset token.",
+        userMessage: "No credential account found for the user. Please contact support.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

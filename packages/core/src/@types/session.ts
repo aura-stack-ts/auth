@@ -355,6 +355,16 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     }>
 
     verifyEmail(options: { token: string }): Promise<void>
+
+    forgotPassword(
+        email: string,
+        request: Request
+    ): Promise<{
+        token: string | null
+        url: string | null
+    }>
+
+    resetPassword(options: { token: string; newPassword: string }): Promise<void>
 }
 
 export interface OAuthTokenPayload {

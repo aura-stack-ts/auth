@@ -142,3 +142,24 @@ export const SendVerificationEmailActionResponseSchema = object({
 export const SendVerificationEmailBodySchema = object({
     email: email(),
 })
+
+export const ForgotPasswordBodySchema = object({
+    email: email(),
+})
+
+export const ForgotPasswordResponseSchema = object({
+    success: boolean(),
+    redirect: boolean(),
+    redirectURL: string().nullable(),
+})
+
+export const ResetPasswordBodySchema = object({
+    token: string().min(32),
+    newPassword: string().min(6).max(20),
+})
+
+export const ResetPasswordResponseSchema = object({
+    success: boolean(),
+    redirect: boolean(),
+    redirectURL: string().nullable(),
+})
