@@ -43,6 +43,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         identity: getIdentityConfig(config),
         signUp: config?.signUp,
         emailVerification: getEmailVerificationConfig(config),
+        passwordReset: config?.passwordReset,
         jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
         rateLimiters: createRateLimiterInstance(config?.rateLimiter, proxyHeadersAsBoolean),
         sessionConfig: config?.session,

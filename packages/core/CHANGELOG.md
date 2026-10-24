@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Added the `forgotPassword()` and `resetPassword()` server API functions, along with the `POST /password/forgot` and `POST /password/reset` endpoints for client-side account recovery. These APIs support password recovery via email or SMS. [#292](https://github.com/aura-stack-ts/auth/pull/292)
+- Added the `forgotPassword()` and `resetPassword()` server API functions, along with the `POST /password/forgot` and `POST /password/reset` endpoints for client-side account recovery. Password reset emails are sent through the `passwordReset.sendPasswordResetEmail` callback. [#293](https://github.com/aura-stack-ts/auth/pull/293)
 
 - Added the `sendVerificationEmail()` and `verifyEmail()` server API functions, along with the `POST /emailVerification/send` and `POST /emailVerification/verify` endpoints for client-side email verification. These APIs support email verification during sign-up and lazy verification after sign-in. [#291](https://github.com/aura-stack-ts/auth/pull/291)
 
