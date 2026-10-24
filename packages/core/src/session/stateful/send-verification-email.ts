@@ -20,6 +20,6 @@ export const sendVerificationEmail = ({ ctx }: InternalStatefulContext) => {
             tokenHash,
         })
         const origin = new URL(request.url).origin
-        return { token, url: `${origin}/${basePath}/emailVerification?token=${token}` }
+        return { token, url: `${origin}${basePath}/emailVerification/verify?token=${token}` }
     }
 }
