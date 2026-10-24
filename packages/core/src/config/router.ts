@@ -13,7 +13,7 @@ import {
     revokeAction,
     disconnectAction,
     connectedAction,
-    sendVerificationEmail,
+    sendVerificationEmailAction,
     verifyEmailAction,
 } from "@/actions/index.ts"
 import { createAuthAPI } from "@/api/index.ts"
@@ -65,7 +65,7 @@ export const createAuthInstance = <
             revokeAction(config.context.oauth),
             disconnectAction(config.context.oauth),
             connectedAction(config.context.oauth),
-            sendVerificationEmail(),
+            sendVerificationEmailAction(),
             verifyEmailAction(),
         ],
         config
