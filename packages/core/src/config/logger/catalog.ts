@@ -923,4 +923,28 @@ export const LOG_MESSAGES = {
         msgId: "UPDATE_SESSION_INITIATED",
         message: "Starting session update process",
     },
+    SEND_VERIFICATION_EMAIL_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "SEND_VERIFICATION_EMAIL_INITIATED",
+        message: "Starting process to send verification email to user",
+    },
+    SEND_VERIFICATION_EMAIL_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "SEND_VERIFICATION_EMAIL_ERROR",
+        message: "Error occurred while sending verification email to user",
+    },
+    VERIFY_EMAIL_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "VERIFY_EMAIL_INITIATED",
+        message: "Starting email verification process for user",
+    },
+    VERIFY_EMAIL_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "VERIFY_EMAIL_ERROR",
+        message: "Error occurred during email verification process for user",
+    },
 } as const
