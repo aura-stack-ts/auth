@@ -421,3 +421,29 @@ export type VerifyEmailData =
     | { success: false; verified: false; redirect: false; redirectURL: null }
 
 export type VerifyEmailAPIReturn = AuthActionAPIReturn<VerifyEmailData>
+
+export type ForgotPasswordAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+
+export type ForgotPasswordData =
+    | { success: true; redirect: true; redirectURL: null }
+    | { success: true; redirect: false; redirectURL: string }
+    | { success: true; redirect: false; redirectURL: null }
+    | { success: false; redirect: false; redirectURL: null }
+
+export type ForgotPasswordAPIReturn = AuthActionAPIReturn<ForgotPasswordData>
+
+export type ResetPasswordAPIOptions = APIOptionsWithRequest &
+    APIOptionsWithRedirectTo & {
+        payload: {
+            token: string
+            newPassword: string
+        }
+    }
+
+export type ResetPasswordData =
+    | { success: true; redirect: true; redirectURL: null }
+    | { success: true; redirect: false; redirectURL: string }
+    | { success: true; redirect: false; redirectURL: null }
+    | { success: false; redirect: false; redirectURL: null }
+
+export type ResetPasswordAPIReturn = AuthActionAPIReturn<ResetPasswordData>
