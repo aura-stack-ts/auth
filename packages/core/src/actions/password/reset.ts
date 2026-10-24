@@ -9,12 +9,24 @@ const resetPasswordConfig = () => {
             searchParams: RedirectOptionsSchema,
             response: ResetPasswordResponseSchema,
         },
+        hooks: {
+            onError: (ctx) => {
+                return ctx.json(
+                    {
+                        type: "VALIDATION",
+                        code: "INVALID_VERIFICATION_TOKEN",
+                        message: "Invalid or expired verification token",
+                    },
+                    { status: 422 }
+                )
+            },
+        },
     })
 }
 
 export const resetPasswordAction = () => {
     return createEndpoint(
-        "POST",
+        "GET",
         "/password/reset",
         async (ctx) => {
             const { toResponse } = await resetPassword({

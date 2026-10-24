@@ -195,12 +195,12 @@ export type AuthConfig<
      * @example
      * passwordReset: {
      *   expiresIn: 3600, // 1 hour
-     *   sendPasswordResetEmail: async ({ email, token, resetURL }) => {
+     *   sendPasswordResetEmail: async ({ email, token, url }) => {
      *     // Implement your email sending logic here
      *     sendEmail({
      *       to: email,
      *       subject: "Password Reset",
-     *       html: `<p>Click <a href="${resetURL}">here</a> to reset your password.</p>`,
+     *       html: `<p>Click <a href="${url}">here</a> to reset your password.</p>`,
      *     })
      *   }
      * }

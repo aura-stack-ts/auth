@@ -10,7 +10,7 @@ describe("verifyEmailAction", async () => {
         const revokeTokenMock = vi.fn()
 
         const {
-            handlers: { POST },
+            handlers: { GET },
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             updateUser: updateUserMock,
@@ -20,9 +20,9 @@ describe("verifyEmailAction", async () => {
         const token = createSecretValue()
         const tokenHash = await createHash(token)
 
-        const response = await POST(
+        const response = await GET(
             new Request(`https://example.com/auth/emailVerification/verify?token=${token}`, {
-                method: "POST",
+                method: "GET",
             })
         )
 
@@ -47,16 +47,16 @@ describe("verifyEmailAction", async () => {
         const revokeTokenMock = vi.fn()
 
         const {
-            handlers: { POST },
+            handlers: { GET },
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             updateUser: updateUserMock,
             revokeToken: revokeTokenMock,
         })
 
-        const response = await POST(
+        const response = await GET(
             new Request("https://example.com/auth/emailVerification/verify?token=invalid-token", {
-                method: "POST",
+                method: "GET",
             })
         )
 
@@ -83,7 +83,7 @@ describe("verifyEmailAction", async () => {
         const revokeTokenMock = vi.fn()
 
         const {
-            handlers: { POST },
+            handlers: { GET },
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             updateUser: updateUserMock,
@@ -91,9 +91,9 @@ describe("verifyEmailAction", async () => {
         })
 
         const token = createSecretValue()
-        const output = await POST(
+        const output = await GET(
             new Request(`https://example.com/auth/emailVerification/verify?token=${token}`, {
-                method: "POST",
+                method: "GET",
             })
         )
 
@@ -121,7 +121,7 @@ describe("verifyEmailAction", async () => {
         const revokeTokenMock = vi.fn()
 
         const {
-            handlers: { POST },
+            handlers: { GET },
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             updateUser: updateUserMock,
@@ -129,9 +129,9 @@ describe("verifyEmailAction", async () => {
         })
 
         const token = createSecretValue()
-        const output = await POST(
+        const output = await GET(
             new Request(`https://example.com/auth/emailVerification/verify?token=${token}`, {
-                method: "POST",
+                method: "GET",
             })
         )
 
@@ -159,7 +159,7 @@ describe("verifyEmailAction", async () => {
         const revokeTokenMock = vi.fn()
 
         const {
-            handlers: { POST },
+            handlers: { GET },
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             updateUser: updateUserMock,
@@ -167,9 +167,9 @@ describe("verifyEmailAction", async () => {
         })
 
         const token = createSecretValue()
-        const response = await POST(
+        const response = await GET(
             new Request(`https://example.com/auth/emailVerification/verify?token=${token}`, {
-                method: "POST",
+                method: "GET",
             })
         )
 
@@ -192,7 +192,7 @@ describe("verifyEmailAction", async () => {
         const revokeTokenMock = vi.fn()
 
         const {
-            handlers: { POST },
+            handlers: { GET },
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             updateUser: updateUserMock,
@@ -202,9 +202,9 @@ describe("verifyEmailAction", async () => {
         const token = createSecretValue()
         const tokenHash = await createHash(token)
 
-        const response = await POST(
+        const response = await GET(
             new Request(`https://example.com/auth/emailVerification/verify?token=${token}&redirectTo=/auth/verified`, {
-                method: "POST",
+                method: "GET",
             })
         )
 
@@ -229,7 +229,7 @@ describe("verifyEmailAction", async () => {
         const revokeTokenMock = vi.fn()
 
         const {
-            handlers: { POST },
+            handlers: { GET },
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             updateUser: updateUserMock,
@@ -239,11 +239,11 @@ describe("verifyEmailAction", async () => {
         const token = createSecretValue()
         const tokenHash = await createHash(token)
 
-        const response = await POST(
+        const response = await GET(
             new Request(
                 `https://example.com/auth/emailVerification/verify?token=${token}&redirectTo=/auth/verified&redirect=false`,
                 {
-                    method: "POST",
+                    method: "GET",
                 }
             )
         )
