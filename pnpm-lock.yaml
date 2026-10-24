@@ -17445,10 +17445,6 @@ snapshots:
     optionalDependencies:
       srvx: 0.11.22
 
-  crossws@0.4.15(srvx@1.0.7):
-    optionalDependencies:
-      srvx: 1.0.7
-
   crossws@0.4.16(srvx@1.0.7):
     optionalDependencies:
       srvx: 1.0.7
