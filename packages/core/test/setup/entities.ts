@@ -105,3 +105,21 @@ export const verificationTokenEntity: VerificationTokenEntity = {
     revokedAt: null,
     createdAt: new Date(),
 }
+
+export const resetPasswordTokenEntity: VerificationTokenEntity = {
+    ...verificationTokenEntity,
+    type: "password_reset",
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+}
+
+export const resetPasswordAccountEntity: AccountEntity = {
+    id: "account-123",
+    userId: "user-123",
+    provider: "credentials",
+    providerUserId: "user-123",
+    status: "active",
+    type: "credentials",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+}

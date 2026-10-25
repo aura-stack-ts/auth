@@ -19,6 +19,7 @@ import type {
     EmailVerificationConfig,
     JoseInstance,
     LogLevel,
+    PasswordResetConfig,
     RateLimiterConfig,
     SignUpConfig,
     TrustedOrigin,
@@ -92,6 +93,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     rateLimiters: InferRules<Required<RateLimiterConfig>>
     sessionConfig: SessionConfig
     emailVerification?: EmailVerificationConfig
+    passwordReset?: PasswordResetConfig
 }
 
 export interface SchemaRegistryContext {

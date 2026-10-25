@@ -10,7 +10,13 @@ import { refreshUserInfo } from "@/session/stateless/refresh-userInfo.ts"
 import { signInCredentials } from "@/session/stateless/sign-in-credentials.ts"
 import { getProviderTokens } from "@/session/stateless/get-provider-tokens.ts"
 import { isProviderConnected } from "@/session/stateless/is-provider-connected.ts"
-import { sendVerificationEmail, revokeSession, verifyEmail } from "@/session/stateless/unsupported.ts"
+import {
+    sendVerificationEmail,
+    revokeSession,
+    verifyEmail,
+    forgotPassword,
+    resetPassword,
+} from "@/session/stateless/unsupported.ts"
 import type { SessionStrategy, User } from "@/@types/index.ts"
 import type { InternalStatelessContext } from "@/@types/internal.ts"
 
@@ -33,5 +39,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>(
         signInCredentials: signInCredentials(ctx),
         isProviderConnected: isProviderConnected(ctx),
         sendVerificationEmail: sendVerificationEmail(ctx),
+        forgotPassword: forgotPassword(ctx),
+        resetPassword: resetPassword(ctx),
     }
 }

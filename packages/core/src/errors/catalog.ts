@@ -838,6 +838,20 @@ export const ERROR_CATALOG = {
             "The 'baseURL' configuration value must be a valid URL string. The provided value does not meet this requirement.",
         userMessage: "Internal library configuration error. The baseURL must be a valid URL string.",
     },
+    INVALID_RESET_PASSWORD_TOKEN: {
+        type: "VALIDATION",
+        statusCode: 422,
+        name: "ValidationError",
+        message: "The provided password reset token is invalid or has expired.",
+        userMessage: "Invalid or expired password reset token.",
+    },
+    NO_CREDENTIALS_ACCOUNT_FOUND: {
+        type: "AUTH_FLOW",
+        statusCode: 404,
+        name: "AuthError",
+        message: "No credential account was found for the user associated with the provided reset token.",
+        userMessage: "No credential account found for the user. Please contact support.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

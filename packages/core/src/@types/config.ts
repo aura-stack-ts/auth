@@ -190,6 +190,22 @@ export type AuthConfig<
     rateLimiter?: RateLimiterConfig
 
     emailVerification?: EmailVerificationConfig
+    /**
+     * Password reset configuration. It includes the expiration time and the callback function to send the password reset email.
+     * @example
+     * passwordReset: {
+     *   expiresIn: 3600, // 1 hour
+     *   sendPasswordResetEmail: async ({ email, token, url }) => {
+     *     // Implement your email sending logic here
+     *     sendEmail({
+     *       to: email,
+     *       subject: "Password Reset",
+     *       html: `<p>Click <a href="${url}">here</a> to reset your password.</p>`,
+     *     })
+     *   }
+     * }
+     */
+    passwordReset?: PasswordResetConfig
 } & TrustedProxyHeadersConfig
 
 export type OAuthProvidersConfig<Identity extends Identities> =
@@ -485,6 +501,19 @@ export interface EmailVerificationConfig {
     sendVerificationEmail?: (options: { email: string; token: string | null; url: string | null }) => Awaitable<void>
 }
 
+export interface PasswordResetConfig {
+    /**
+     * Defines the expiration time for the password reset token in seconds. By default, it is
+     * set to 30 minutes (1800 seconds).
+     */
+    expiresIn?: number
+    /**
+     * Callback function to send the password reset email. It receives the email address, token, and reset URL.
+     * You must implement this function to send the email using your preferred email service.
+     */
+    sendPasswordResetEmail?: (options: { email: string; token: string | null; url: string | null }) => Awaitable<void>
+}
+
 // #region Rate Limiter
 
 export type RateLimiterConfig = Partial<
@@ -502,7 +531,10 @@ export type RateLimiterConfig = Partial<
             | "isProviderConnected"
             | "signOut"
             | "sendVerificationEmail"
-            | "verifyEmail",
+            | "verifyEmail"
+            | "forgotPassword"
+            | "resetPassword"
+            | "changePassword",
             RateLimiterRule
         >
     >["rules"]
