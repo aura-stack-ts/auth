@@ -146,7 +146,7 @@ export const ForgotPasswordResponseSchema = object({
 
 export const ResetPasswordBodySchema = object({
     token: string().min(32),
-    newPassword: string(),
+    newPassword: string().min(1),
 })
 
 export const ResetPasswordResponseSchema = object({
