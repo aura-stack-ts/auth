@@ -14,8 +14,8 @@ const resetPasswordConfig = () => {
                 return ctx.json(
                     {
                         type: "VALIDATION",
-                        code: "INVALID_VERIFICATION_TOKEN",
-                        message: "Invalid or expired verification token",
+                        code: "INVALID_RESET_PASSWORD_TOKEN",
+                        message: "Invalid or expired reset password token",
                     },
                     { status: 422 }
                 )
@@ -26,7 +26,7 @@ const resetPasswordConfig = () => {
 
 export const resetPasswordAction = () => {
     return createEndpoint(
-        "GET",
+        "POST",
         "/password/reset",
         async (ctx) => {
             const { toResponse } = await resetPassword({
