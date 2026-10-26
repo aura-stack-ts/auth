@@ -906,6 +906,13 @@ export const ERROR_CATALOG = {
             "The 'expiresIn' configuration value for password reset must be a positive integer representing the number of seconds until expiration. The provided value does not meet this requirement.",
         userMessage: "Internal library configuration error. The password reset expiration time must be a positive integer.",
     },
+    INVALID_CURRENT_PASSWORD: {
+        type: "AUTH_FLOW",
+        statusCode: 401,
+        name: "AuthError",
+        message: "The provided current password does not match the stored password for the user.",
+        userMessage: "The current password is incorrect. Please try again.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG
