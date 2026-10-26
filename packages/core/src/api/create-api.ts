@@ -15,6 +15,7 @@ import {
     verifyEmail,
     forgotPassword,
     resetPassword,
+    changePassword,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -55,6 +56,8 @@ import type {
     ForgotPasswordAPIReturn,
     ResetPasswordAPIReturn,
     ResetPasswordAPIOptions,
+    ChangePasswordAPIOptions,
+    ChangePasswordAPIReturn,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -346,6 +349,23 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          */
         resetPassword: async (options: ResetPasswordAPIOptions): Promise<ResetPasswordAPIReturn> => {
             return resetPassword({ ctx, ...options })
+        },
+        /**
+         * Changes the password for a user on the server-side. It requires the current password and the new password.
+         *
+         * > **NOTE**: This method is intended for authenticated users who want to change their password while logged in.
+         *
+         * @params options - Options for the API call, including the current password, new password, headers, and request object.
+         * @example
+         * const { success } = await api.changePassword({
+         *   payload: {
+         *     currentPassword: "current-password-here",
+         *     newPassword: "new-password-here"
+         *   },
+         * })
+         */
+        changePassword: async (options: ChangePasswordAPIOptions): Promise<ChangePasswordAPIReturn> => {
+            return changePassword({ ctx, skipCSRFCheck: true, ...options })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

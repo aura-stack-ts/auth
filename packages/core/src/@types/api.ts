@@ -447,3 +447,20 @@ export type ResetPasswordData =
     | { success: false; redirect: false; redirectURL: null }
 
 export type ResetPasswordAPIReturn = AuthActionAPIReturn<ResetPasswordData>
+
+export type ChangePasswordAPIOptions = APIOptionsWithRequest &
+    APIOptionsWithRedirectTo &
+    APIOptionsWithSkipCSRFCheck & {
+        payload: {
+            currentPassword: string
+            newPassword: string
+        }
+    }
+
+export type ChangePasswordData =
+    | { success: true; redirect: true; redirectURL: null }
+    | { success: true; redirect: false; redirectURL: string }
+    | { success: true; redirect: false; redirectURL: null }
+    | { success: false; redirect: false; redirectURL: null }
+
+export type ChangePasswordAPIReturn = AuthActionAPIReturn<ChangePasswordData>

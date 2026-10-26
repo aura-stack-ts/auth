@@ -16,6 +16,7 @@ import {
     verifyEmail,
     forgotPassword,
     resetPassword,
+    changePassword,
 } from "@/session/stateless/unsupported.ts"
 import type { SessionStrategy, User } from "@/@types/index.ts"
 import type { InternalStatelessContext } from "@/@types/internal.ts"
@@ -31,7 +32,10 @@ export const createStatelessStrategy = <DefaultUser extends User = User>(
         verifyEmail: verifyEmail(ctx),
         revokeToken: revokeToken(ctx),
         createSession: createSession(ctx),
+        resetPassword: resetPassword(ctx),
         oauthCallback: oauthCallback(ctx),
+        changePassword: changePassword(ctx),
+        forgotPassword: forgotPassword(ctx),
         refreshSession: refreshSession(ctx),
         destroySession: destroySession(ctx),
         refreshUserInfo: refreshUserInfo(ctx),
@@ -39,7 +43,5 @@ export const createStatelessStrategy = <DefaultUser extends User = User>(
         signInCredentials: signInCredentials(ctx),
         isProviderConnected: isProviderConnected(ctx),
         sendVerificationEmail: sendVerificationEmail(ctx),
-        forgotPassword: forgotPassword(ctx),
-        resetPassword: resetPassword(ctx),
     }
 }
