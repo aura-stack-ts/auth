@@ -132,6 +132,10 @@ describe("verifyEmailChange API", async () => {
 
         expect(output).toEqual({
             success: false,
+            error: {
+                code: "INVALID_EMAIL_CHANGE_TOKEN",
+                message: "Invalid or expired email change token.",
+            },
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
@@ -180,6 +184,10 @@ describe("verifyEmailChange API", async () => {
 
         expect(output).toEqual({
             success: false,
+            error: {
+                code: "INVALID_EMAIL_CHANGE_TOKEN",
+                message: "Invalid or expired email change token.",
+            },
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
@@ -227,6 +235,10 @@ describe("verifyEmailChange API", async () => {
 
         expect(output).toEqual({
             success: false,
+            error: {
+                code: "INVALID_EMAIL_CHANGE_TOKEN",
+                message: "Invalid or expired email change token.",
+            },
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
@@ -273,6 +285,10 @@ describe("verifyEmailChange API", async () => {
 
         expect(output).toEqual({
             success: false,
+            error: {
+                code: "INVALID_EMAIL_CHANGE_TOKEN",
+                message: "Invalid or expired email change token.",
+            },
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
@@ -320,6 +336,10 @@ describe("verifyEmailChange API", async () => {
 
         expect(output).toEqual({
             success: false,
+            error: {
+                code: "INVALID_EMAIL_CHANGE_TOKEN",
+                message: "Invalid or expired email change token.",
+            },
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),

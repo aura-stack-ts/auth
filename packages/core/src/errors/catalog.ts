@@ -946,6 +946,13 @@ export const ERROR_CATALOG = {
         userMessage:
             "Internal library configuration error. The custom credentials hash and verify functions must be provided together and must be valid functions.",
     },
+    INVALID_EMAIL_CHANGE_TOKEN: {
+        type: "VALIDATION",
+        statusCode: 401,
+        name: "ValidationError",
+        message: "The provided email change token is invalid or has expired.",
+        userMessage: "Invalid or expired email change token.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

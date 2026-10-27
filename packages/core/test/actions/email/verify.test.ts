@@ -131,7 +131,7 @@ describe("verifyEmailChangeAction", async () => {
             })
         )
 
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             redirect: false,
@@ -179,7 +179,7 @@ describe("verifyEmailChangeAction", async () => {
             })
         )
 
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             redirect: false,
@@ -227,7 +227,7 @@ describe("verifyEmailChangeAction", async () => {
             })
         )
 
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             redirect: false,
@@ -275,7 +275,7 @@ describe("verifyEmailChangeAction", async () => {
             })
         )
 
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             redirect: false,
