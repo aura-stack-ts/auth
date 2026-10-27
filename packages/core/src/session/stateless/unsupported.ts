@@ -29,3 +29,9 @@ export const resetPassword = (_: InternalStatelessContext) => {
         throw new Error("resetPassword is not supported in stateless mode.")
     }
 }
+
+export const changePassword = (_: InternalStatelessContext) => {
+    return async (_userId: string, _currentPassword: string, _newPassword: string): Promise<void> => {
+        throw new Error("changePassword is not supported in stateless mode.")
+    }
+}

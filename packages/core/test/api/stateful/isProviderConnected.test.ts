@@ -77,8 +77,12 @@ describe("isProviderConnected (Stateful)", () => {
             },
         })
         expect(output).toEqual({
-            success: true,
+            success: false,
             connected: false,
+            error: {
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
+            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -112,8 +116,12 @@ describe("isProviderConnected (Stateful)", () => {
             },
         })
         expect(output).toEqual({
-            success: true,
+            success: false,
             connected: false,
+            error: {
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
+            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })

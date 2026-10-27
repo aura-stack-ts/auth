@@ -852,6 +852,13 @@ export const ERROR_CATALOG = {
         message: "No credential account was found for the user associated with the provided reset token.",
         userMessage: "No credential account found for the user. Please contact support.",
     },
+    INVALID_CURRENT_PASSWORD: {
+        type: "AUTH_FLOW",
+        statusCode: 401,
+        name: "AuthError",
+        message: "The provided current password does not match the stored password for the user.",
+        userMessage: "The current password is incorrect. Please try again.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG
