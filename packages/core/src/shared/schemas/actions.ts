@@ -165,3 +165,24 @@ export const ChangePasswordResponseSchema = object({
     redirect: boolean(),
     redirectURL: string().nullable(),
 })
+
+export const ChangeEmailBodySchema = object({
+    currentPassword: string().min(1),
+    newEmail: email(),
+})
+
+export const ChangeEmailResponseSchema = object({
+    success: boolean(),
+    redirect: boolean(),
+    redirectURL: string().nullable(),
+})
+
+export const VerifyEmailChangeSearchParamsSchema = RedirectOptionsSchema.extend({
+    token: string().min(32),
+})
+
+export const VerifyEmailChangeResponseSchema = object({
+    success: boolean(),
+    redirect: boolean(),
+    redirectURL: string().nullable(),
+})

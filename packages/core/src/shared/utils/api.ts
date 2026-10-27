@@ -56,6 +56,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                         throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
                     }
                     const tokenHash = await createHash(sessionToken)
+                    console.log("token: ", sessionToken, "tokenHash: ", tokenHash)
                     const session = await ctx.sessionConfig.adapter.getSessionByToken(tokenHash)
                     if (!session || session.status !== "active" || new Date() > session.expiresAt) {
                         throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
