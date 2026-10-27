@@ -16,6 +16,7 @@ import type {
     CookieName,
     CookieStrategyAttributes,
     CredentialsConfig,
+    EmailChangeConfig,
     EmailVerificationConfig,
     JoseInstance,
     LogLevel,
@@ -94,6 +95,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     sessionConfig: SessionConfig
     emailVerification?: EmailVerificationConfig
     passwordReset?: PasswordResetConfig
+    emailChange?: EmailChangeConfig
 }
 
 export interface SchemaRegistryContext {

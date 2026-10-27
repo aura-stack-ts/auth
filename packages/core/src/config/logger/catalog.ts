@@ -983,4 +983,40 @@ export const LOG_MESSAGES = {
         msgId: "CHANGE_PASSWORD_ERROR",
         message: "Error occurred during change password process for user",
     },
+    CHANGE_EMAIL_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "CHANGE_EMAIL_INITIATED",
+        message: "Starting change email process for user",
+    },
+    CHANGE_EMAIL_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "CHANGE_EMAIL_ERROR",
+        message: "Error occurred during change email process for user",
+    },
+    VERIFY_EMAIL_CHANGE_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "VERIFY_EMAIL_CHANGE_INITIATED",
+        message: "Starting email change verification process for user",
+    },
+    VERIFY_EMAIL_CHANGE_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "VERIFY_EMAIL_CHANGE_ERROR",
+        message: "Error occurred during email change verification process for user",
+    },
+    CANCEL_EMAIL_CHANGE_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "CANCEL_EMAIL_CHANGE_INITIATED",
+        message: "Starting email change cancellation process for user",
+    },
+    CANCEL_EMAIL_CHANGE_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "CANCEL_EMAIL_CHANGE_ERROR",
+        message: "Error occurred during email change cancellation process for user",
+    },
 } as const
