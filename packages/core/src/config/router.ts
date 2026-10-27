@@ -17,6 +17,7 @@ import {
     verifyEmailAction,
     forgotPasswordAction,
     resetPasswordAction,
+    changePasswordAction,
 } from "@/actions/index.ts"
 import { createAuthAPI } from "@/api/index.ts"
 import { createContext } from "@/config/context.ts"
@@ -71,6 +72,7 @@ export const createAuthInstance = <
             verifyEmailAction(),
             forgotPasswordAction(),
             resetPasswordAction(),
+            changePasswordAction(),
         ],
         config
     )
