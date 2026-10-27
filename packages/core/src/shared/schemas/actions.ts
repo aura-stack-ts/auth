@@ -163,3 +163,14 @@ export const ResetPasswordResponseSchema = object({
     redirect: boolean(),
     redirectURL: string().nullable(),
 })
+
+export const ChangePasswordBodySchema = object({
+    currentPassword: string().min(1),
+    newPassword: string().min(1),
+})
+
+export const ChangePasswordResponseSchema = object({
+    success: boolean(),
+    redirect: boolean(),
+    redirectURL: string().nullable(),
+})
