@@ -866,6 +866,13 @@ export const ERROR_CATALOG = {
         message: "The user with the specified identifier was not found in the system.",
         userMessage: "User not found. Please check the user ID and try again.",
     },
+    INVALID_EMAIL_CHANGE_TOKEN: {
+        type: "VALIDATION",
+        statusCode: 401,
+        name: "ValidationError",
+        message: "The provided email change token is invalid or has expired.",
+        userMessage: "Invalid or expired email change token.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

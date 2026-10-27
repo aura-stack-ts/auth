@@ -211,7 +211,7 @@ export type AuthConfig<
      * @example
      * emailChange: {
      *   expiresIn: 3600, // 1 hour
-     *   sendEmailChangeConfirmation: async ({ email, token, url }) => {
+     *   sendEmailChangeConfirmation: async ({ email, newEmail, token, url }) => {
      *     // Implement your email sending logic here
      *     sendEmail({
      *      to: email,
