@@ -370,6 +370,19 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     resetPassword(token: string, newPassword: string): Promise<void>
 
     changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void>
+
+    changeEmail(
+        userId: string,
+        currentPassword: string,
+        newEmail: string,
+        request: Request
+    ): Promise<{
+        token: string
+        url: string
+        oldEmail?: string
+    }>
+
+    verifyEmailChange(token: string, request?: Request): Promise<{ success: boolean; userId?: string }>
 }
 
 export interface OAuthTokenPayload {

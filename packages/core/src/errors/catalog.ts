@@ -859,6 +859,13 @@ export const ERROR_CATALOG = {
         message: "The provided current password does not match the stored password for the user.",
         userMessage: "The current password is incorrect. Please try again.",
     },
+    USER_NOT_FOUND: {
+        type: "AUTH_FLOW",
+        statusCode: 404,
+        name: "AuthError",
+        message: "The user with the specified identifier was not found in the system.",
+        userMessage: "User not found. Please check the user ID and try again.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG
