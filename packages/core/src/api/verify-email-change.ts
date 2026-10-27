@@ -22,7 +22,7 @@ export const verifyEmailChange = async ({
                 doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
             },
         })
-        const { request, rateLimit } = await createValidation(
+        const { request, rateLimit, sessionId } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
@@ -35,7 +35,7 @@ export const verifyEmailChange = async ({
         if (rateLimit) {
             return rateLimit
         }
-        const { success, userId } = await sessionStrategy.verifyEmailChange(payload.token, request)
+        const { success } = await sessionStrategy.verifyEmailChange(payload.token, sessionId!)
 
         const headers = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
