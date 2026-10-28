@@ -31,9 +31,11 @@ export const changeEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["
         if (!user) {
             throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
         }
-
-        const token = createSecretValue()
-        const tokenHash = await createHash(token)
+        if (!user.email) {
+            throw new AuraAuthError({ code: "USER_EMAIL_NOT_FOUND" })
+        }
+        const confirmToken = createSecretValue()
+        const confirmTokenHash = await createHash(confirmToken)
         const expiresIn = ctx.emailChange?.expiresIn ?? 1800
         await sessionConfig.adapter.createToken({
             userId,
@@ -41,12 +43,25 @@ export const changeEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["
             identifier: user.email,
             newIdentifier: normalizedNewEmail,
             type: "email_change",
-            tokenHash,
+            tokenHash: confirmTokenHash,
+        })
+
+        const cancelToken = createSecretValue()
+        const cancelTokenHash = await createHash(cancelToken)
+        await sessionConfig.adapter.createToken({
+            userId,
+            expiresAt: new Date(Date.now() + expiresIn * 1000),
+            identifier: user.email,
+            newIdentifier: newEmail,
+            type: "email_change_cancel",
+            tokenHash: cancelTokenHash,
         })
         return {
-            token,
-            url: `${origin}${ctx.basePath}/email/change/verify?token=${token}`,
-            oldEmail: user.email ? user.email : undefined,
+            email: user.email,
+            confirmToken,
+            confirmURL: `${origin}${ctx.basePath}/email/change/verify?token=${confirmToken}`,
+            cancelToken,
+            cancelURL: `${origin}${ctx.basePath}/email/change/cancel?token=${cancelToken}`,
         }
     }
 }
