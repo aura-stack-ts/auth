@@ -497,3 +497,15 @@ export type VerifyEmailChangeData =
     | { success: false; redirect: false; redirectURL: null }
 
 export type VerifyEmailChangeAPIReturn = AuthActionAPIReturn<VerifyEmailChangeData>
+
+export type CancelEmailChangeAPIOptions = APIOptionsWithRequest &
+    APIOptionsWithRedirectTo &
+    APIOptionsWithSkipCSRFCheck & { payload?: { token: string } }
+
+export type CancelEmailChangeData =
+    | { success: true; redirect: true; redirectURL: null }
+    | { success: true; redirect: false; redirectURL: string }
+    | { success: true; redirect: false; redirectURL: null }
+    | { success: false; redirect: false; redirectURL: null }
+
+export type CancelEmailChangeAPIReturn = AuthActionAPIReturn<CancelEmailChangeData>

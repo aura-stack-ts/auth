@@ -18,6 +18,7 @@ import {
     changePassword,
     changeEmail,
     verifyEmailChange,
+    //cancelEmailChange,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -64,6 +65,8 @@ import type {
     ChangeEmailAPIReturn,
     VerifyEmailChangeAPIOptions,
     VerifyEmailChangeAPIReturn,
+    //CancelEmailChangeAPIOptions,
+    //CancelEmailChangeAPIReturn,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -409,6 +412,33 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
         verifyEmailChange: async (options: VerifyEmailChangeAPIOptions): Promise<VerifyEmailChangeAPIReturn> => {
             return verifyEmailChange({ ctx, skipCSRFCheck: true, ...options })
         },
+        /**
+         * Cancels an email change request on the server-side. It supports two modes of operation:
+         * - passing a `payload.token` to cancel the email change request directly (e.g., from a link in an email)
+         * - without a token, in which case it cancels the email change request for the currently authenticated user.
+         *
+         * > **NOTE**: This method is intended for authenticated users who have requested an email change and
+         * received a cancellation token or want to cancel the email change request for their own account.
+         *
+         * @param options - Options for the API call, including the cancellation token (if applicable), headers, and request object.
+         * @returns The object returned by the API call {@link CancelEmailChangeAPIReturn}
+         * @example
+         * // Cancel email change via token (e.g., from a link in an email)
+         * const response = await api.cancelEmailChange({
+         *   payload: {
+         *     token: "email-change-cancellation-token-here"
+         *   },
+         *   headers: getHeaders()
+         * })
+         *
+         * // Cancel email change via application (for the currently authenticated user)
+         * const response = await api.cancelEmailChange({
+         *   headers: getHeaders()
+         * })
+         */
+        //cancelEmailChange: async (options: CancelEmailChangeAPIOptions): Promise<CancelEmailChangeAPIReturn> => {
+        //    return cancelEmailChange({ ctx, skipCSRFCheck: true, ...options })
+        //},
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for
          * server-side calls it only verifies and validates the CSRF Token, it also provides Double-Submit

@@ -377,9 +377,11 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         newEmail: string,
         request: Request
     ): Promise<{
-        token: string
-        url: string
-        oldEmail?: string
+        email: string
+        confirmToken: string
+        confirmURL: string
+        cancelToken: string
+        cancelURL: string
     }>
 
     verifyEmailChange(token: string, userId: string, sessionId: string): Promise<{ success: boolean; userId?: string }>

@@ -543,20 +543,58 @@ export interface EmailChangeConfig {
      * token, and verification URL.
      * You must implement this function to send the email using your preferred email service.
      * @example
-     * sendEmailChangeVerification: async ({ email, token, url }) => {
+     * sendEmailChangeVerification: async ({ email, confirmToken, confirmURL }) => {
      *   // Implement your email sending logic here
      *   sendEmail({
      *     to: email,
      *     subject: "Email Change Verification",
-     *     html: `<p>Click <a href="${url}">here</a> to verify your new email address.</p>`,
+     *     html: `<p>Click <a href="${confirmURL}">here</a> to verify your new email address.</p>`,
      *   })
      * }
      */
     sendEmailChangeVerification?: (options: {
-        email?: string
+        /**
+         * The current email address of the user requesting the change.
+         */
+        email: string
+        /**
+         * The new email address that the user wants to change to.
+         */
         newEmail: string
-        token: string | null
-        url: string | null
+        /**
+         * The token generated for verifying the email change request. It can be used
+         * by `verifyEmailChange` API to confirm the email change.
+         * @example
+         * confirmToken: "abc123def456ghi789"
+         *
+         * verifyEmailChange({ token: "abc123def456ghi789" })
+         */
+        confirmToken: string
+        /**
+         * The URL that the user should visit to confirm the email change.
+         * @example
+         * confirmToken: "abc123def456ghi789"
+         *
+         * confirmURL: "https://example.com/auth/email/change/verify?token=abc123def456ghi789"
+         */
+        confirmURL: string
+        /**
+         * The token generated for canceling the email change request. It can be used by
+         * `cancelEmailChange` API to cancel the email change request.
+         * @example
+         * cancelToken: "xyz789"
+         *
+         * cancelEmailChange({ token: "xyz789" })
+         */
+        cancelToken: string
+        /**
+         * The URL that the user should visit to cancel the email change request.
+         * @example
+         * cancelToken: "xyz789"
+         *
+         * cancelURL: "https://example.com/auth/email/change/cancel?token=xyz789"
+         */
+        cancelURL: string
     }) => Awaitable<void>
 }
 
@@ -582,7 +620,8 @@ export type RateLimiterConfig = Partial<
             | "resetPassword"
             | "changePassword"
             | "changeEmail"
-            | "verifyEmailChange",
+            | "verifyEmailChange"
+            | "cancelEmailChange",
             RateLimiterRule
         >
     >["rules"]
