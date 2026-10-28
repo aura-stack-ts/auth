@@ -536,6 +536,12 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
                 data: { revokedAt: new Date() },
             })
         },
+        getTokensByUserId: async (userId) => {
+            const tokens = await client.verificationToken.findMany({
+                where: { userId },
+            })
+            return tokens.map(toVerificationToken)
+        },
         /**
          * OAuth Transactions
          */
