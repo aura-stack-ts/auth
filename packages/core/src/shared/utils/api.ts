@@ -24,6 +24,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         rateLimit?: any
         headers: Headers
         userId?: string
+        sessionId?: string
     } = { headers }
 
     const builder = {
@@ -60,6 +61,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                         throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
                     }
                     output.userId = session.userId
+                    output.sessionId = session.id
                 }
             })
             return builder
@@ -114,6 +116,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                 rateLimit: any | undefined
                 headers: Headers
                 userId?: string
+                sessionId?: string
             }
         },
     }

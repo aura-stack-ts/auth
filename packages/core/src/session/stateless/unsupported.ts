@@ -35,3 +35,15 @@ export const changePassword = (_: InternalStatelessContext) => {
         throw new Error("changePassword is not supported in stateless mode.")
     }
 }
+
+export const changeEmail = (_: InternalStatelessContext) => {
+    return async (_userId: string, _currentPassword: string, _newEmail: string): Promise<{ token: string; url: string }> => {
+        throw new Error("changeEmail is not supported in stateless mode.")
+    }
+}
+
+export const verifyEmailChange = (_: InternalStatelessContext) => {
+    return async (_token: string): Promise<{ success: boolean }> => {
+        throw new Error("verifyEmailChange is not supported in stateless mode.")
+    }
+}

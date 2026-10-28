@@ -206,6 +206,22 @@ export type AuthConfig<
      * }
      */
     passwordReset?: PasswordResetConfig
+    /**
+     * Email change configuration. It includes the expiration time and the callback function to send the email change confirmation email.
+     * @example
+     * emailChange: {
+     *   expiresIn: 3600, // 1 hour
+     *   sendEmailChangeConfirmation: async ({ email, newEmail, token, url }) => {
+     *     // Implement your email sending logic here
+     *     sendEmail({
+     *      to: email,
+     *      subject: "Email Change Confirmation",
+     *      html: `<p>Click <a href="${url}">here</a> to confirm your email change.</p>`,
+     *     })
+     *   }
+     * }
+     */
+    emailChange?: EmailChangeConfig
 } & TrustedProxyHeadersConfig
 
 export type OAuthProvidersConfig<Identity extends Identities> =
@@ -514,6 +530,36 @@ export interface PasswordResetConfig {
     sendPasswordResetEmail?: (options: { email: string; token: string | null; url: string | null }) => Awaitable<void>
 }
 
+export interface EmailChangeConfig {
+    /**
+     * Defines the expiration time for the email change verification token in seconds. By default, it is
+     * set to 30 minutes (1800 seconds).
+     * @example
+     * expiresIn: 3600
+     */
+    expiresIn?: number
+    /**
+     * Callback function to send the email change verification email. It receives the new email address,
+     * token, and verification URL.
+     * You must implement this function to send the email using your preferred email service.
+     * @example
+     * sendEmailChangeVerification: async ({ email, token, url }) => {
+     *   // Implement your email sending logic here
+     *   sendEmail({
+     *     to: email,
+     *     subject: "Email Change Verification",
+     *     html: `<p>Click <a href="${url}">here</a> to verify your new email address.</p>`,
+     *   })
+     * }
+     */
+    sendEmailChangeVerification?: (options: {
+        email?: string
+        newEmail: string
+        token: string | null
+        url: string | null
+    }) => Awaitable<void>
+}
+
 // #region Rate Limiter
 
 export type RateLimiterConfig = Partial<
@@ -534,7 +580,9 @@ export type RateLimiterConfig = Partial<
             | "verifyEmail"
             | "forgotPassword"
             | "resetPassword"
-            | "changePassword",
+            | "changePassword"
+            | "changeEmail"
+            | "verifyEmailChange",
             RateLimiterRule
         >
     >["rules"]

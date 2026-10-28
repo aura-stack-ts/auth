@@ -464,3 +464,36 @@ export type ChangePasswordData =
     | { success: false; redirect: false; redirectURL: null }
 
 export type ChangePasswordAPIReturn = AuthActionAPIReturn<ChangePasswordData>
+
+export type ChangeEmailAPIOptions = APIOptionsWithRequest &
+    APIOptionsWithRedirectTo &
+    APIOptionsWithSkipCSRFCheck & {
+        payload: {
+            currentPassword: string
+            newEmail: string
+        }
+    }
+
+export type ChangeEmailData =
+    | { success: true; redirect: true; redirectURL: null }
+    | { success: true; redirect: false; redirectURL: string }
+    | { success: true; redirect: false; redirectURL: null }
+    | { success: false; redirect: false; redirectURL: null }
+
+export type ChangeEmailAPIReturn = AuthActionAPIReturn<ChangeEmailData>
+
+export type VerifyEmailChangeAPIOptions = APIOptionsWithRequest &
+    APIOptionsWithRedirectTo &
+    APIOptionsWithSkipCSRFCheck & {
+        payload: {
+            token: string
+        }
+    }
+
+export type VerifyEmailChangeData =
+    | { success: true; redirect: true; redirectURL: null }
+    | { success: true; redirect: false; redirectURL: string }
+    | { success: true; redirect: false; redirectURL: null }
+    | { success: false; redirect: false; redirectURL: null }
+
+export type VerifyEmailChangeAPIReturn = AuthActionAPIReturn<VerifyEmailChangeData>
