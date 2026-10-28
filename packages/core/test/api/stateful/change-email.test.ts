@@ -33,9 +33,18 @@ describe("changeEmail API", async () => {
             }
         )
 
-        const token = "valid-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const confirmToken = "valid-token"
+        const confirmTokenHash = await createHash(confirmToken)
+
+        const cancelToken = "valid-cancel-token"
+        const cancelTokenHash = await createHash(cancelToken)
+
+        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue")
+            .mockReturnValueOnce(confirmToken)
+            .mockReturnValueOnce(cancelToken)
 
         const output = await api.changeEmail({
             payload: {
@@ -43,7 +52,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -55,24 +64,34 @@ describe("changeEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
         expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
-        expect(createTokenMock).toHaveBeenCalledWith({
+        expect(createTokenMock).toHaveBeenNthCalledWith(1, {
             userId: "user-123",
             identifier: "john@example.com",
             newIdentifier: "new@example.com",
             type: "email_change",
             expiresAt: expect.any(Date),
-            tokenHash,
+            tokenHash: confirmTokenHash,
+        })
+        expect(createTokenMock).toHaveBeenNthCalledWith(2, {
+            userId: "user-123",
+            identifier: "john@example.com",
+            newIdentifier: "new@example.com",
+            type: "email_change_cancel",
+            expiresAt: expect.any(Date),
+            tokenHash: cancelTokenHash,
         })
         expect(sendEmailChangeVerificationMock).toHaveBeenCalledWith({
             email: "john@example.com",
             newEmail: "new@example.com",
-            token,
-            url: `https://example.com/auth/email/change/verify?token=${token}`,
+            confirmToken: confirmToken,
+            confirmURL: `https://example.com/auth/email/change/verify?token=${confirmToken}`,
+            cancelToken: cancelToken,
+            cancelURL: `https://example.com/auth/email/change/cancel?token=${cancelToken}`,
         })
     })
 
@@ -103,9 +122,8 @@ describe("changeEmail API", async () => {
             }
         )
 
-        const token = "valid-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.changeEmail({
             payload: {
@@ -113,7 +131,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -129,7 +147,7 @@ describe("changeEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).not.toHaveBeenCalled()
         expect(getUserByIdMock).not.toHaveBeenCalled()
@@ -165,9 +183,8 @@ describe("changeEmail API", async () => {
             }
         )
 
-        const token = "valid-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.changeEmail({
             payload: {
@@ -175,7 +192,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -191,7 +208,7 @@ describe("changeEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByIdMock).not.toHaveBeenCalled()
@@ -228,9 +245,8 @@ describe("changeEmail API", async () => {
             }
         )
 
-        const token = "valid-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.changeEmail({
             payload: {
@@ -238,7 +254,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -254,7 +270,7 @@ describe("changeEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
@@ -290,9 +306,8 @@ describe("changeEmail API", async () => {
             }
         )
 
-        const token = "valid-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.changeEmail({
             payload: {
@@ -300,7 +315,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -316,7 +331,7 @@ describe("changeEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
@@ -352,9 +367,18 @@ describe("changeEmail API", async () => {
             }
         )
 
-        const token = "valid-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const confirmToken = "valid-token"
+        const confirmTokenHash = await createHash(confirmToken)
+
+        const cancelToken = "valid-cancel-token"
+        const cancelTokenHash = await createHash(cancelToken)
+
+        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue")
+            .mockReturnValueOnce(confirmToken)
+            .mockReturnValueOnce(cancelToken)
 
         const output = await api.changeEmail({
             payload: {
@@ -362,7 +386,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: true,
             redirectTo: "https://example.com/success",
@@ -376,17 +400,125 @@ describe("changeEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
         expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
-        expect(createTokenMock).toHaveBeenCalled()
+        expect(createTokenMock).toHaveBeenNthCalledWith(1, {
+            userId: "user-123",
+            identifier: "john@example.com",
+            newIdentifier: "new@example.com",
+            type: "email_change",
+            expiresAt: expect.any(Date),
+            tokenHash: confirmTokenHash,
+        })
+        expect(createTokenMock).toHaveBeenNthCalledWith(2, {
+            userId: "user-123",
+            identifier: "john@example.com",
+            newIdentifier: "new@example.com",
+            type: "email_change_cancel",
+            expiresAt: expect.any(Date),
+            tokenHash: cancelTokenHash,
+        })
         expect(sendEmailChangeVerificationMock).toHaveBeenCalledWith({
             email: "john@example.com",
             newEmail: "new@example.com",
-            token,
-            url: `https://example.com/auth/email/change/verify?token=${token}`,
+            confirmToken: confirmToken,
+            confirmURL: `https://example.com/auth/email/change/verify?token=${confirmToken}`,
+            cancelToken: cancelToken,
+            cancelURL: `https://example.com/auth/email/change/cancel?token=${cancelToken}`,
+        })
+    })
+
+    test("success changeEmail flow with redirectTo and redirect: false", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
+        const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
+        const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
+        const getUserByEmailMock = vi.fn().mockReturnValue(null)
+        const createTokenMock = vi.fn()
+        const sendEmailChangeVerificationMock = vi.fn()
+
+        const { api } = authInstance(
+            {
+                getSessionByToken: getSessionByTokenMock,
+                getAccountsByUserId: getAccountsByUserIdMock,
+                getCredentialAccount: getCredentialAccountMock,
+                getUserById: getUserByIdMock,
+                getUserByEmail: getUserByEmailMock,
+                createToken: createTokenMock,
+            },
+            {
+                emailChange: {
+                    sendEmailChangeVerification: sendEmailChangeVerificationMock,
+                },
+            }
+        )
+
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const confirmToken = "valid-token"
+        const confirmTokenHash = await createHash(confirmToken)
+
+        const cancelToken = "valid-cancel-token"
+        const cancelTokenHash = await createHash(cancelToken)
+
+        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue")
+            .mockReturnValueOnce(confirmToken)
+            .mockReturnValueOnce(cancelToken)
+
+        const output = await api.changeEmail({
+            payload: {
+                currentPassword: "current-password",
+                newEmail: "new@example.com",
+            },
+            headers: {
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+            redirect: false,
+            redirectTo: "https://example.com/success",
+        })
+
+        expect(output).toEqual({
+            success: true,
+            redirect: false,
+            redirectURL: "/success",
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
+        expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
+        expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
+        expect(createTokenMock).toHaveBeenNthCalledWith(1, {
+            userId: "user-123",
+            identifier: "john@example.com",
+            newIdentifier: "new@example.com",
+            type: "email_change",
+            expiresAt: expect.any(Date),
+            tokenHash: confirmTokenHash,
+        })
+        expect(createTokenMock).toHaveBeenNthCalledWith(2, {
+            userId: "user-123",
+            identifier: "john@example.com",
+            newIdentifier: "new@example.com",
+            type: "email_change_cancel",
+            expiresAt: expect.any(Date),
+            tokenHash: cancelTokenHash,
+        })
+        expect(sendEmailChangeVerificationMock).toHaveBeenCalledWith({
+            email: "john@example.com",
+            newEmail: "new@example.com",
+            confirmToken: confirmToken,
+            confirmURL: `https://example.com/auth/email/change/verify?token=${confirmToken}`,
+            cancelToken: cancelToken,
+            cancelURL: `https://example.com/auth/email/change/cancel?token=${cancelToken}`,
         })
     })
 })
