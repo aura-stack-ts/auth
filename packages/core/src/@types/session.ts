@@ -385,6 +385,8 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     }>
 
     verifyEmailChange(token: string, userId: string, sessionId: string): Promise<{ success: boolean; userId?: string }>
+
+    cancelEmailChange(options: { token: string; userId?: string } | { token?: string; userId: string }): Promise<void>
 }
 
 export interface OAuthTokenPayload {

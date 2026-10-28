@@ -18,7 +18,7 @@ import {
     changePassword,
     changeEmail,
     verifyEmailChange,
-    //cancelEmailChange,
+    cancelEmailChange,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -65,8 +65,8 @@ import type {
     ChangeEmailAPIReturn,
     VerifyEmailChangeAPIOptions,
     VerifyEmailChangeAPIReturn,
-    //CancelEmailChangeAPIOptions,
-    //CancelEmailChangeAPIReturn,
+    CancelEmailChangeAPIOptions,
+    CancelEmailChangeAPIReturn,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -436,9 +436,9 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          *   headers: getHeaders()
          * })
          */
-        //cancelEmailChange: async (options: CancelEmailChangeAPIOptions): Promise<CancelEmailChangeAPIReturn> => {
-        //    return cancelEmailChange({ ctx, skipCSRFCheck: true, ...options })
-        //},
+        cancelEmailChange: async (options: CancelEmailChangeAPIOptions): Promise<CancelEmailChangeAPIReturn> => {
+            return cancelEmailChange({ ctx, skipCSRFCheck: true, ...options })
+        },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for
          * server-side calls it only verifies and validates the CSRF Token, it also provides Double-Submit

@@ -51,3 +51,9 @@ export const verifyEmailChange = (_: InternalStatelessContext) => {
         throw new Error("verifyEmailChange is not supported in stateless mode.")
     }
 }
+
+export const cancelEmailChange = (_: InternalStatelessContext) => {
+    return async (_options: {}): Promise<void> => {
+        throw new Error("cancelEmailChange is not supported in stateless mode.")
+    }
+}
