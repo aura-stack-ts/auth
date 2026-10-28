@@ -21,11 +21,11 @@ export const verifyEmailChange = ({ ctx }: InternalStatefulContext) => {
         if (!timingSafeEqual(userId, verifiedToken.userId)) {
             throw new AuraAuthError({ code: "INVALID_EMAIL_CHANGE_TOKEN" })
         }
+        await sessionConfig.adapter.revokeToken(verifiedToken.id)
         await sessionConfig.adapter.updateUser(userId, {
             email: verifiedToken.newIdentifier,
             emailVerifiedAt: new Date(),
         })
-        await sessionConfig.adapter.revokeToken(verifiedToken.id)
         await sessionConfig.adapter.revokeAllSessions(userId, "email_changed", sessionId)
         return { success: true, userId: userId }
     }

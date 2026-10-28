@@ -91,7 +91,7 @@ describe("verifyEmailChange API", async () => {
         })
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
-        expect(getTokenByHashMock).not.toHaveBeenCalledWith()
+        expect(getTokenByHashMock).not.toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
         expect(revokeAllSessionsMock).not.toHaveBeenCalled()
@@ -143,7 +143,7 @@ describe("verifyEmailChange API", async () => {
         })
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
-        expect(getTokenByHashMock).not.toHaveBeenCalledWith()
+        expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
         expect(revokeAllSessionsMock).not.toHaveBeenCalled()
