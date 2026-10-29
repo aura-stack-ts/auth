@@ -8,11 +8,13 @@ import { resetPassword } from "@/session/stateful/reset-password.ts"
 import { createSession } from "@/session/stateful/create-session.ts"
 import { oauthCallback } from "@/session/stateful/oauth-callback.ts"
 import { revokeSession } from "@/session/stateful/revoke-session.ts"
+import { sendMagicLink } from "@/session/stateful/send-magic-link.ts"
 import { changePassword } from "@/session/stateful/change-password.ts"
 import { forgotPassword } from "@/session/stateful/forgot-password.ts"
 import { destroySession } from "@/session/stateful/destroy-session.ts"
 import { refreshSession } from "@/session/stateful/refresh-session.ts"
 import { refreshUserInfo } from "@/session/stateful/refresh-userInfo.ts"
+import { verifyMagicLink } from "@/session/stateful/verify-magic-link.ts"
 import { signInCredentials } from "@/session/stateful/sign-in-credentials.ts"
 import { getProviderTokens } from "@/session/stateful/get-provider-tokens.ts"
 import { verifyEmailChange } from "@/session/stateful/verify-email-change.ts"
@@ -32,6 +34,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>(
         revokeToken: revokeToken(ctx),
         verifyEmail: verifyEmail(ctx),
         changeEmail: changeEmail(ctx),
+        sendMagicLink: sendMagicLink(ctx),
         resetPassword: resetPassword(ctx),
         oauthCallback: oauthCallback(ctx),
         createSession: createSession(ctx),
@@ -41,6 +44,7 @@ export const createStatefulStrategy = <DefaultUser extends User = User>(
         refreshSession: refreshSession(ctx),
         changePassword: changePassword(ctx),
         refreshUserInfo: refreshUserInfo(ctx),
+        verifyMagicLink: verifyMagicLink(ctx),
         verifyEmailChange: verifyEmailChange(ctx),
         cancelEmailChange: cancelEmailChange(ctx),
         signInCredentials: signInCredentials(ctx),

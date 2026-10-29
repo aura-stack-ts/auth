@@ -1,3 +1,4 @@
+import type { SessionStrategy, User } from "@/@types/session.ts"
 import type { InternalStatelessContext } from "@/@types/internal.ts"
 
 export const revokeSession = (_: InternalStatelessContext) => {
@@ -55,5 +56,17 @@ export const verifyEmailChange = (_: InternalStatelessContext) => {
 export const cancelEmailChange = (_: InternalStatelessContext) => {
     return async (_options: {}): Promise<void> => {
         throw new Error("cancelEmailChange is not supported in stateless mode.")
+    }
+}
+
+export const sendMagicLink = <DefaultUser extends User>(_: InternalStatelessContext) => {
+    return async (_options: {}): ReturnType<SessionStrategy<DefaultUser>["sendMagicLink"]> => {
+        throw new Error("sendMagicLink is not supported in stateless mode.")
+    }
+}
+
+export const verifyMagicLink = <DefaultUser extends User>(_: InternalStatelessContext) => {
+    return async (_options: {}): ReturnType<SessionStrategy<DefaultUser>["verifyMagicLink"]> => {
+        throw new Error("verifyMagicLink is not supported in stateless mode.")
     }
 }

@@ -509,3 +509,19 @@ export type CancelEmailChangeData =
     | { success: false; redirect: false; redirectURL: null }
 
 export type CancelEmailChangeAPIReturn = AuthActionAPIReturn<CancelEmailChangeData>
+
+export type SendMagicLinkAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+
+export type SendMagicLinkData =
+    | { success: true; redirect: true; redirectURL: null }
+    | { success: true; redirect: false; redirectURL: string }
+    | { success: true; redirect: false; redirectURL: null }
+    | { success: false; redirect: false; redirectURL: null }
+
+export type SendMagicLinkAPIReturn = AuthActionAPIReturn<SendMagicLinkData>
+
+export type VerifyMagicLinkAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+
+export type VerifyMagicLinkData = SendMagicLinkData
+
+export type VerifyMagicLinkAPIReturn = AuthActionAPIReturn<VerifyMagicLinkData>

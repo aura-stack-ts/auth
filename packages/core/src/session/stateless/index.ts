@@ -20,6 +20,8 @@ import {
     changeEmail,
     verifyEmailChange,
     cancelEmailChange,
+    sendMagicLink,
+    verifyMagicLink,
 } from "@/session/stateless/unsupported.ts"
 import type { SessionStrategy, User } from "@/@types/index.ts"
 import type { InternalStatelessContext } from "@/@types/internal.ts"
@@ -28,13 +30,14 @@ export const createStatelessStrategy = <DefaultUser extends User = User>(
     ctx: InternalStatelessContext
 ): SessionStrategy<DefaultUser> => {
     return {
-        revokeSession: revokeSession(ctx),
         signIn: signIn(ctx),
         signUp: signUp(ctx),
         getSession: getSession(ctx),
         verifyEmail: verifyEmail(ctx),
         revokeToken: revokeToken(ctx),
         changeEmail: changeEmail(ctx),
+        revokeSession: revokeSession(ctx),
+        sendMagicLink: sendMagicLink(ctx),
         createSession: createSession(ctx),
         resetPassword: resetPassword(ctx),
         oauthCallback: oauthCallback(ctx),
@@ -42,6 +45,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>(
         forgotPassword: forgotPassword(ctx),
         refreshSession: refreshSession(ctx),
         destroySession: destroySession(ctx),
+        verifyMagicLink: verifyMagicLink(ctx),
         refreshUserInfo: refreshUserInfo(ctx),
         verifyEmailChange: verifyEmailChange(ctx),
         cancelEmailChange: cancelEmailChange(ctx),

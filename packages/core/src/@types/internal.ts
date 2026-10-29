@@ -20,6 +20,7 @@ import type {
     EmailVerificationConfig,
     JoseInstance,
     LogLevel,
+    MagicLinksConfig,
     PasswordResetConfig,
     RateLimiterConfig,
     SignUpConfig,
@@ -96,6 +97,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     emailVerification?: EmailVerificationConfig
     passwordReset?: PasswordResetConfig
     emailChange?: EmailChangeConfig
+    magicLinks?: MagicLinksConfig
 }
 
 export interface SchemaRegistryContext {
