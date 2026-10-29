@@ -186,3 +186,13 @@ export const VerifyEmailChangeResponseSchema = object({
     redirect: boolean(),
     redirectURL: string().nullable(),
 })
+
+export const CancelEmailChangeSearchParamsSchema = RedirectOptionsSchema.extend({
+    token: string().min(32).optional(),
+})
+
+export const CancelEmailChangeResponseSchema = object({
+    success: boolean(),
+    redirect: boolean(),
+    redirectURL: string().nullable(),
+})

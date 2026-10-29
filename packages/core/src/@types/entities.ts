@@ -38,7 +38,12 @@ export type MFAChallengeStatus = "pending" | "verified" | "expired" | "failed"
 
 export type MfaCredentialStatus = "active" | "pending" | "disabled"
 
-export type VerificationTokenType = "email_verification" | "password_reset" | "email_change" | "mfa_recovery"
+export type VerificationTokenType =
+    | "email_verification"
+    | "password_reset"
+    | "email_change"
+    | "mfa_recovery"
+    | "email_change_cancel"
 
 export interface UserEntity {
     id: string

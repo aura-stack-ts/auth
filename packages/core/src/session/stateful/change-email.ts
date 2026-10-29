@@ -9,7 +9,7 @@ export const changeEmail = ({ ctx }: InternalStatefulContext) => {
         currentPassword: string,
         newEmail: string,
         request: Request
-    ): Promise<{ token: string; url: string; oldEmail?: string }> => {
+    ): Promise<{ email: string; confirmToken: string; confirmURL: string; cancelToken: string; cancelURL: string }> => {
         const accounts = await sessionConfig.adapter.getAccountsByUserId(userId)
         const credentialAccount = accounts.find((acc) => acc.type === "credentials")
         if (!credentialAccount) {
@@ -31,8 +31,11 @@ export const changeEmail = ({ ctx }: InternalStatefulContext) => {
         if (!user) {
             throw new AuraAuthError({ code: "USER_NOT_FOUND" })
         }
-        const token = createSecretValue()
-        const tokenHash = await createHash(token)
+        if (!user.email) {
+            throw new AuraAuthError({ code: "USER_EMAIL_NOT_FOUND" })
+        }
+        const confirmToken = createSecretValue()
+        const confirmTokenHash = await createHash(confirmToken)
         const expiresIn = ctx.emailChange?.expiresIn ?? 1800
         await sessionConfig.adapter.createToken({
             userId,
@@ -40,13 +43,26 @@ export const changeEmail = ({ ctx }: InternalStatefulContext) => {
             identifier: user.email,
             newIdentifier: newEmail,
             type: "email_change",
-            tokenHash,
+            tokenHash: confirmTokenHash,
+        })
+
+        const cancelToken = createSecretValue()
+        const cancelTokenHash = await createHash(cancelToken)
+        await sessionConfig.adapter.createToken({
+            userId,
+            expiresAt: new Date(Date.now() + expiresIn * 1000),
+            identifier: user.email,
+            newIdentifier: newEmail,
+            type: "email_change_cancel",
+            tokenHash: cancelTokenHash,
         })
         const origin = new URL(request.url).origin
         return {
-            token,
-            url: `${origin}${ctx.basePath}/email/change/verify?token=${token}`,
-            oldEmail: user.email ? user.email : undefined,
+            email: user.email,
+            confirmToken,
+            confirmURL: `${origin}${ctx.basePath}/email/change/verify?token=${confirmToken}`,
+            cancelToken,
+            cancelURL: `${origin}${ctx.basePath}/email/change/cancel?token=${cancelToken}`,
         }
     }
 }

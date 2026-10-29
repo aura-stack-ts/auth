@@ -873,6 +873,13 @@ export const ERROR_CATALOG = {
         message: "The provided email change token is invalid or has expired.",
         userMessage: "Invalid or expired email change token.",
     },
+    USER_EMAIL_NOT_FOUND: {
+        type: "AUTH_FLOW",
+        statusCode: 404,
+        name: "AuthError",
+        message: "The user does not have an email address associated with their account.",
+        userMessage: "User email not found. Please contact support.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

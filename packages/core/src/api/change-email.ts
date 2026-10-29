@@ -35,13 +35,20 @@ export const changeEmail = async ({
         if (rateLimit) {
             return rateLimit
         }
-        const { token, url, oldEmail } = await sessionStrategy.changeEmail(
+        const { email, confirmToken, confirmURL, cancelToken, cancelURL } = await sessionStrategy.changeEmail(
             userId!,
             payload.currentPassword,
             payload.newEmail,
             request
         )
-        await emailChange?.sendEmailChangeVerification?.({ email: oldEmail, newEmail: payload.newEmail, token, url })
+        await emailChange?.sendEmailChangeVerification?.({
+            email,
+            newEmail: payload.newEmail,
+            confirmToken,
+            confirmURL,
+            cancelToken,
+            cancelURL,
+        })
 
         const headers = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)

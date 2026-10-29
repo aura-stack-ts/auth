@@ -155,3 +155,27 @@ export const emailChangeTokenEntity: VerificationTokenEntity = {
     revokedAt: null,
     createdAt: new Date(),
 }
+
+export const emailChangeCancelTokenEntity: VerificationTokenEntity = {
+    id: "token-789",
+    userId: "user-123",
+    tokenHash: "hashed-email-change-cancel-token",
+    type: "email_change_cancel",
+    identifier: "john@example.com",
+    newIdentifier: "new@example.com",
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    revokedAt: null,
+    createdAt: new Date(),
+}
+
+export const expiredEmailChangeTokenEntity: VerificationTokenEntity = {
+    id: "token-789",
+    userId: "user-123",
+    tokenHash: "hashed-expired-email-change-token",
+    type: "email_change",
+    identifier: "old@example.com",
+    newIdentifier: "new@example.com",
+    expiresAt: new Date(Date.now() - 1000),
+    revokedAt: null,
+    createdAt: new Date(),
+}

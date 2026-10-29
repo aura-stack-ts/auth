@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `cancelEmailChange()` server API function and the `GET /email/change/cancel` endpoint to allow users to cancel pending email address changes. [#296](https://github.com/aura-stack-ts/auth/pull/296)
+
 - Added the `changeEmail()` and `verifyEmailChange()` server API functions to support email address changes and email verification. [#295](https://github.com/aura-stack-ts/auth/pull/295)
 
 - Added the `changePassword()` server API function and the `POST /password/change` endpoint for client-side password changes. The endpoint implements CSRF token validation to protect against cross-site request forgery (CSRF) attacks. [#294](https://github.com/aura-stack-ts/auth/pull/294)
