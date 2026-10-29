@@ -30,15 +30,16 @@ export const cancelEmailChange = async ({
 
         if (payload?.token) {
             const { request, rateLimit } = await validation.execute()
-            await sessionStrategy.cancelEmailChange({
-                token: payload?.token,
-                userId: undefined,
-            })
             requestInit = requestInit ?? request
 
             if (rateLimit) {
                 return rateLimit
             }
+
+            await sessionStrategy.cancelEmailChange({
+                token: payload?.token,
+                userId: undefined,
+            })
         } else {
             const { request, rateLimit, userId } = await validation
                 .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)

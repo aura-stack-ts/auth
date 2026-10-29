@@ -80,6 +80,7 @@ enum VerificationTokenType {
     password_reset
     email_change
     mfa_recovery
+    email_change_cancel
 }
 
 /// ---------------------------------------------------------------------------

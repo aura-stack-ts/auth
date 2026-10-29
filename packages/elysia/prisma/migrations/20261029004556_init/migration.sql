@@ -26,7 +26,7 @@ CREATE TYPE "MFAChallengeStatus" AS ENUM ('pending', 'verified', 'expired', 'fai
 CREATE TYPE "MFACredentialStatus" AS ENUM ('active', 'pending', 'disabled');
 
 -- CreateEnum
-CREATE TYPE "VerificationTokenType" AS ENUM ('email_verification', 'password_reset', 'email_change', 'mfa_recovery');
+CREATE TYPE "VerificationTokenType" AS ENUM ('email_verification', 'password_reset', 'email_change', 'mfa_recovery', 'email_change_cancel');
 
 -- CreateTable
 CREATE TABLE "User" (
