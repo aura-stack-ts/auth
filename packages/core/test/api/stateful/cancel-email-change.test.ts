@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { emailChangeTokenEntity, sessionEntityWithUser } from "@test/setup/entities.ts"
+import { emailChangeCancelTokenEntity, emailChangeTokenEntity, sessionEntityWithUser } from "@test/setup/entities.ts"
 
 describe("cancelEmailChange API", async () => {
     const csrfToken = await createCSRF(jose)
@@ -9,11 +9,13 @@ describe("cancelEmailChange API", async () => {
     test("token-based flow: success", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const getTokenByHashMock = vi.fn().mockReturnValue(emailChangeTokenEntity)
+        const getTokenByHashMock = vi.fn().mockReturnValue(emailChangeCancelTokenEntity)
+        const getTokensByUserIdMock = vi.fn().mockReturnValue([emailChangeCancelTokenEntity])
         const revokeTokenMock = vi.fn()
 
         const { api } = authInstance({
             getTokenByHash: getTokenByHashMock,
+            getTokensByUserId: getTokensByUserIdMock,
             revokeToken: revokeTokenMock,
         })
 
@@ -33,17 +35,20 @@ describe("cancelEmailChange API", async () => {
         })
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
-        expect(revokeTokenMock).toHaveBeenCalledWith("token-456")
+        expect(getTokensByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(revokeTokenMock).toHaveBeenCalledWith("token-789")
     })
 
     test("token-based flow: invalid token", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const getTokenByHashMock = vi.fn().mockReturnValue(null)
+        const getTokensByUserIdMock = vi.fn().mockReturnValue([])
         const revokeTokenMock = vi.fn()
 
         const { api } = authInstance({
             getTokenByHash: getTokenByHashMock,
+            getTokensByUserId: getTokensByUserIdMock,
             revokeToken: revokeTokenMock,
         })
 
@@ -64,6 +69,7 @@ describe("cancelEmailChange API", async () => {
         })
 
         expect(getTokenByHashMock).toHaveBeenCalled()
+        expect(getTokensByUserIdMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
     })
 
@@ -165,11 +171,13 @@ describe("cancelEmailChange API", async () => {
     test("token-based flow: success with redirectTo and redirect: false", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const getTokenByHashMock = vi.fn().mockReturnValue(emailChangeTokenEntity)
+        const getTokenByHashMock = vi.fn().mockReturnValue(emailChangeCancelTokenEntity)
+        const getTokensByUserIdMock = vi.fn().mockReturnValue([emailChangeCancelTokenEntity])
         const revokeTokenMock = vi.fn()
 
         const { api } = authInstance({
             getTokenByHash: getTokenByHashMock,
+            getTokensByUserId: getTokensByUserIdMock,
             revokeToken: revokeTokenMock,
         })
 
@@ -178,6 +186,9 @@ describe("cancelEmailChange API", async () => {
 
         const output = await api.cancelEmailChange({
             payload: { token },
+            headers: {
+                Cookie: `aura-auth.session_token=valid-token; aura-auth.csrf_token=${csrfToken}`,
+            },
             redirect: false,
             redirectTo: "https://example.com/settings",
         })
@@ -191,17 +202,20 @@ describe("cancelEmailChange API", async () => {
         })
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
-        expect(revokeTokenMock).toHaveBeenCalledWith("token-456")
+        expect(getTokensByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(revokeTokenMock).toHaveBeenCalledWith("token-789")
     })
 
     test("token-based flow: success with redirectTo and redirect: true", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const getTokenByHashMock = vi.fn().mockReturnValue(emailChangeTokenEntity)
+        const getTokenByHashMock = vi.fn().mockReturnValue(emailChangeCancelTokenEntity)
+        const getTokensByUserIdMock = vi.fn().mockReturnValue([emailChangeCancelTokenEntity])
         const revokeTokenMock = vi.fn()
 
         const { api } = authInstance({
             getTokenByHash: getTokenByHashMock,
+            getTokensByUserId: getTokensByUserIdMock,
             revokeToken: revokeTokenMock,
         })
 
@@ -210,6 +224,9 @@ describe("cancelEmailChange API", async () => {
 
         const output = await api.cancelEmailChange({
             payload: { token },
+            headers: {
+                Cookie: `aura-auth.session_token=valid-token; aura-auth.csrf_token=${csrfToken}`,
+            },
             redirect: true,
             redirectTo: "https://example.com/settings",
         })
@@ -223,6 +240,7 @@ describe("cancelEmailChange API", async () => {
         })
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
-        expect(revokeTokenMock).toHaveBeenCalledWith("token-456")
+        expect(getTokensByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(revokeTokenMock).toHaveBeenCalledWith("token-789")
     })
 })
