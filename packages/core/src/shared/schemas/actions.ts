@@ -101,33 +101,24 @@ export const DisconnectProviderActionResponseSchema = object({
     success: boolean(),
 })
 
-export const SignInCredentialsActionResponseSchema = object({
+export const ResponseActionSchema = object({
     success: boolean(),
     redirect: boolean(),
     redirectURL: union([url(), nullable()]),
 })
+
+export const SignInCredentialsActionResponseSchema = ResponseActionSchema
 
 export const SignOutSearchParamsSchema = RedirectOptionsSchema.extend({
     token_type_hint: literal("session_token"),
 })
 
-export const SignOutActionResponseSchema = object({
-    success: boolean(),
-    redirect: boolean(),
-    redirectURL: union([url(), nullable()]),
-})
+export const SignOutActionResponseSchema = ResponseActionSchema
 
-export const SignUpActionResponseSchema = object({
-    success: boolean(),
-    redirect: boolean(),
-    redirectURL: union([url(), nullable()]),
-})
+export const SignUpActionResponseSchema = ResponseActionSchema
 
-export const VerifyEmailActionResponseSchema = object({
-    success: boolean(),
+export const VerifyEmailActionResponseSchema = ResponseActionSchema.extend({
     verified: boolean(),
-    redirect: boolean(),
-    redirectURL: union([url(), nullable()]),
 })
 
 export const VerifyEmailSearchParamsSchema = RedirectOptionsSchema.extend({
@@ -138,61 +129,47 @@ export const ForgotPasswordBodySchema = object({
     email: email(),
 })
 
-export const ForgotPasswordResponseSchema = object({
-    success: boolean(),
-    redirect: boolean(),
-    redirectURL: string().nullable(),
-})
+export const ForgotPasswordResponseSchema = ResponseActionSchema
 
 export const ResetPasswordBodySchema = object({
     token: string().min(32),
     newPassword: string().min(1),
 })
 
-export const ResetPasswordResponseSchema = object({
-    success: boolean(),
-    redirect: boolean(),
-    redirectURL: string().nullable(),
-})
+export const ResetPasswordResponseSchema = ResponseActionSchema
 
 export const ChangePasswordBodySchema = object({
     currentPassword: string().min(1),
     newPassword: string().min(1),
 })
 
-export const ChangePasswordResponseSchema = object({
-    success: boolean(),
-    redirect: boolean(),
-    redirectURL: string().nullable(),
-})
+export const ChangePasswordResponseSchema = ResponseActionSchema
 
 export const ChangeEmailBodySchema = object({
     currentPassword: string().min(1),
     newEmail: email(),
 })
 
-export const ChangeEmailResponseSchema = object({
-    success: boolean(),
-    redirect: boolean(),
-    redirectURL: string().nullable(),
-})
+export const ChangeEmailResponseSchema = ResponseActionSchema
 
 export const VerifyEmailChangeSearchParamsSchema = RedirectOptionsSchema.extend({
     token: string().min(32),
 })
 
-export const VerifyEmailChangeResponseSchema = object({
-    success: boolean(),
-    redirect: boolean(),
-    redirectURL: string().nullable(),
-})
+export const VerifyEmailChangeResponseSchema = ResponseActionSchema
 
 export const CancelEmailChangeSearchParamsSchema = RedirectOptionsSchema.extend({
     token: string().min(32).optional(),
 })
 
-export const CancelEmailChangeResponseSchema = object({
-    success: boolean(),
-    redirect: boolean(),
-    redirectURL: string().nullable(),
+export const CancelEmailChangeResponseSchema = ResponseActionSchema
+
+export const MagicLinkBodySchema = object({
+    email: email(),
+})
+
+export const MagicLinkResponseSchema = ResponseActionSchema
+
+export const MagicLinkSearchParamsSchema = RedirectOptionsSchema.extend({
+    token: string().min(32),
 })
