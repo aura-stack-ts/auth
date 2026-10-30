@@ -21,6 +21,8 @@ import {
     changeEmailAction,
     verifyEmailChangeAction,
     cancelEmailChangeAction,
+    sendMagicLinkAction,
+    verifyMagicLinkAction,
 } from "@/actions/index.ts"
 import { createAuthAPI } from "@/api/index.ts"
 import { createContext } from "@/config/context.ts"
@@ -79,6 +81,8 @@ export const createAuthInstance = <
             changeEmailAction(),
             verifyEmailChangeAction(),
             cancelEmailChangeAction(),
+            sendMagicLinkAction(),
+            verifyMagicLinkAction(),
         ],
         config
     )

@@ -1019,4 +1019,40 @@ export const LOG_MESSAGES = {
         msgId: "CANCEL_EMAIL_CHANGE_ERROR",
         message: "Error occurred during email change cancellation process for user",
     },
+    SEND_MAGIC_LINK_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "SEND_MAGIC_LINK_INITIATED",
+        message: "Starting magic link sending process for user",
+    },
+    SEND_MAGIC_LINK_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "SEND_MAGIC_LINK_ERROR",
+        message: "Error occurred during magic link sending process for user",
+    },
+    VERIFY_MAGIC_LINK_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "VERIFY_MAGIC_LINK_INITIATED",
+        message: "Starting magic link verification process for user",
+    },
+    VERIFY_MAGIC_LINK_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "VERIFY_MAGIC_LINK_ERROR",
+        message: "Error occurred during magic link verification process for user",
+    },
+    VERIFY_MAGIC_LINK_SUCCESS: {
+        facility: 4,
+        severity: "info",
+        msgId: "VERIFY_MAGIC_LINK_SUCCESS",
+        message: "Magic link verified successfully and user authenticated",
+    },
+    VERIFY_MAGIC_LINK_FAILED: {
+        facility: 4,
+        severity: "error",
+        msgId: "VERIFY_MAGIC_LINK_FAILED",
+        message: "Magic link verification failed for user",
+    },
 } as const

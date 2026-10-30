@@ -3,6 +3,7 @@ import { createJoseInstance } from "@/jose.ts"
 import { getSaltConfig } from "@/config/get-salt.ts"
 import { isStatelessStrategy } from "@/shared/assert.ts"
 import { getSecretConfig } from "@/config/get-secret.ts"
+import { getMagicLinkConfig } from "./get-magic-links.ts"
 import { getBaseURLConfig } from "@/config/get-base-url.ts"
 import { getIdentityConfig } from "@/config/get-identity.ts"
 import { getBasePathConfig } from "@/config/get-base-path.ts"
@@ -44,6 +45,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         emailVerification: config?.emailVerification,
         passwordReset: config?.passwordReset,
         emailChange: config?.emailChange,
+        magicLinks: getMagicLinkConfig(config),
         jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
         rateLimiters: createRateLimiterInstance(config?.rateLimiter, proxyHeadersAsBoolean),
         sessionConfig: config?.session,

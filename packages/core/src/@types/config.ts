@@ -222,6 +222,8 @@ export type AuthConfig<
      * }
      */
     emailChange?: EmailChangeConfig
+
+    magicLinks?: MagicLinksConfig
 } & TrustedProxyHeadersConfig
 
 export type OAuthProvidersConfig<Identity extends Identities> =
@@ -598,6 +600,54 @@ export interface EmailChangeConfig {
     }) => Awaitable<void>
 }
 
+export interface MagicLinksConfig {
+    /**
+     * Defines the expiration time for the magic link token in seconds. By default, it is
+     * set to 30 minutes (1800 seconds).
+     * @example
+     * expiresIn: 3600 // 1 hour
+     */
+    expiresIn?: number
+    /**
+     * Allow users to sign-up using magic links if they don't have an account yet. If set to `false`,
+     * only existing users can sign in using magic links. By default, it is set to `false`.
+     * @example
+     * allowSignUp: true
+     */
+    allowSignUp?: boolean
+    /**
+     * Callback function to send the magic link email. It receives the email address, token, and magic link URL.
+     * You must implement this function to send the email using your preferred email service.
+     * @example
+     * sendMagicLinkEmail: async ({ email, token, url }) => {
+     *   // Implement your email sending logic here
+     *   sendEmail({
+     *     to: email,
+     *     subject: "Your Magic Link",
+     *     html: `<p>Click <a href="${url}">here</a> to sign in.</p>`,
+     *   })
+     * }
+     */
+    sendMagicLinkEmail?: (options: {
+        /**
+         * Email address of the user requesting the magic link.
+         */
+        email: string
+        /**
+         * The token generated for the magic link. It can be used by `verifyMagicLink` API to authenticate the user.
+         * @example
+         * token: "abc123def456ghi789"
+         */
+        token: string
+        /**
+         * The URL that the user should visit to sign in using the magic link.
+         * @example
+         * url: "https://example.com/auth/signIn/magicLink/verify?token=abc123def456ghi789"
+         */
+        url: string
+    }) => Awaitable<void>
+}
+
 // #region Rate Limiter
 
 export type RateLimiterConfig = Partial<
@@ -621,7 +671,9 @@ export type RateLimiterConfig = Partial<
             | "changePassword"
             | "changeEmail"
             | "verifyEmailChange"
-            | "cancelEmailChange",
+            | "cancelEmailChange"
+            | "sendMagicLink"
+            | "verifyMagicLink",
             RateLimiterRule
         >
     >["rules"]

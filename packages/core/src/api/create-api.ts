@@ -19,6 +19,8 @@ import {
     changeEmail,
     verifyEmailChange,
     cancelEmailChange,
+    sendMagicLink,
+    verifyMagicLink,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -67,6 +69,10 @@ import type {
     VerifyEmailChangeAPIReturn,
     CancelEmailChangeAPIOptions,
     CancelEmailChangeAPIReturn,
+    SendMagicLinkAPIOptions,
+    SendMagicLinkAPIReturn,
+    VerifyMagicLinkAPIReturn,
+    VerifyMagicLinkAPIOptions,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -438,6 +444,35 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          */
         cancelEmailChange: async (options: CancelEmailChangeAPIOptions): Promise<CancelEmailChangeAPIReturn> => {
             return cancelEmailChange({ ctx, skipCSRFCheck: true, ...options })
+        },
+        /**
+         * Sends a magic link to the specified email address on the server-side.
+         * The magic link allows users to sign in without a password.
+         *
+         * @param email - The email address to which the magic link should be sent.
+         * @param options - Options for the API call, including headers and request object.
+         * @returns The object returned by the API call {@link SendMagicLinkAPIReturn}
+         * @example
+         * const { success } = await api.sendMagicLink("john@example.com", {
+         *   headers: getHeaders()
+         * })
+         */
+        sendMagicLink: async (email: string, options?: SendMagicLinkAPIOptions): Promise<SendMagicLinkAPIReturn> => {
+            return sendMagicLink(email, { ctx, skipCSRFCheck: true, ...options })
+        },
+        /**
+         * Verifies a magic link token on the server-side. It checks the validity of the token and signs in the user if valid.
+         *
+         * @param token - The magic link token received from the email.
+         * @param options - Options for the API call, including headers and request object.
+         * @returns The object returned by the API call {@link VerifyMagicLinkAPIReturn}
+         * @example
+         * const { success } = await api.verifyMagicLink("magic-link-token-here", {
+         *   headers: getHeaders()
+         * })
+         */
+        verifyMagicLink: async (token: string, options?: VerifyMagicLinkAPIOptions): Promise<VerifyMagicLinkAPIReturn> => {
+            return verifyMagicLink(token, { ctx, ...options })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

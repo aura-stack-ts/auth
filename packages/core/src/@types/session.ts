@@ -387,6 +387,17 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     verifyEmailChange(token: string, userId: string, sessionId: string): Promise<{ success: boolean; userId?: string }>
 
     cancelEmailChange(options: { token: string; userId?: string } | { token?: string; userId: string }): Promise<void>
+
+    sendMagicLink(options: {
+        email: string
+        allowSignUp: boolean
+        origin: string
+    }): Promise<{ success: true; token: string; url: string } | { success: false; token: null; url: null }>
+
+    verifyMagicLink(options: {
+        token: string
+        request: Request
+    }): Promise<{ success: true; sessionToken: string } | { success: false; sessionToken: null }>
 }
 
 export interface OAuthTokenPayload {
