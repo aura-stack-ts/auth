@@ -56,7 +56,7 @@ export const sendMagicLink = async (
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },
-                    { headers: builder.toHeaders(), status: redirect ? 302 : 200 }
+                    { headers: builder.toHeaders(), status: success ? (redirect ? 302 : 200) : 200 }
                 )
             },
         } as SendMagicLinkAPIReturn

@@ -634,7 +634,7 @@ export interface MagicLinksConfig {
          */
         email: string
         /**
-         * The token generated for the magic link. It can be used by `signInMagicLink` API to authenticate the user.
+         * The token generated for the magic link. It can be used by `verifyMagicLink` API to authenticate the user.
          * @example
          * token: "abc123def456ghi789"
          */

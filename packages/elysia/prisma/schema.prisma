@@ -23,6 +23,7 @@ enum UserStatus {
 enum AccountType {
     oauth
     credentials
+    magic_link
 }
 
 enum AccountStatus {
@@ -81,6 +82,7 @@ enum VerificationTokenType {
     email_change
     mfa_recovery
     email_change_cancel
+    magic_link
 }
 
 /// ---------------------------------------------------------------------------

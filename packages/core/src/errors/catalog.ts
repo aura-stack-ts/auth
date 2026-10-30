@@ -880,6 +880,14 @@ export const ERROR_CATALOG = {
         message: "The user does not have an email address associated with their account.",
         userMessage: "User email not found. Please contact support.",
     },
+    INVALID_MAGIC_LINK_EXPIRES_IN_VALUE: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The 'expiresIn' configuration value for magic links must be a positive integer representing the number of seconds until expiration. The provided value does not meet this requirement.",
+        userMessage: "Internal library configuration error. The magic link expiresIn must be a positive integer.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG
