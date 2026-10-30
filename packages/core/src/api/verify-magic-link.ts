@@ -30,12 +30,15 @@ export const verifyMagicLink = async (
         }
 
         const { success, sessionToken } = await sessionStrategy.verifyMagicLink({ token, request })
-        const csrfToken = await createCSRF(ctx.jose)
         logger?.log(success ? "VERIFY_MAGIC_LINK_SUCCESS" : "VERIFY_MAGIC_LINK_FAILED")
-
         const builder = new HeadersBuilder(secureApiHeaders)
-            .setCookie(cookies.csrfToken.name, success ? csrfToken : "", cookies.csrfToken.attributes)
-            .setCookie(cookies.sessionToken.name, success ? sessionToken : "", cookies.sessionToken.attributes)
+
+        if (success) {
+            const csrfToken = await createCSRF(ctx.jose)
+            builder
+                .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
+                .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
+        }
 
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
         return {

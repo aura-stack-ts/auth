@@ -104,7 +104,7 @@ export const DisconnectProviderActionResponseSchema = object({
 export const ResponseActionSchema = object({
     success: boolean(),
     redirect: boolean(),
-    redirectURL: union([url(), nullable()]),
+    redirectURL: union([string(), nullable()]),
 })
 
 export const SignInCredentialsActionResponseSchema = ResponseActionSchema

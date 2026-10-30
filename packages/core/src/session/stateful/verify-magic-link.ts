@@ -15,7 +15,11 @@ export const verifyMagicLink = ({ ctx, cookies, cookieManager }: InternalStatefu
         if (!verifiedToken || verifiedToken.type !== "magic_link" || verifiedToken.expiresAt < now || verifiedToken.revokedAt) {
             return { success: false, sessionToken: null }
         }
-        await sessionConfig.adapter.revokeToken(verifiedToken.id)
+        const isTokenRevoked = await sessionConfig.adapter.revokeToken(verifiedToken.id)
+        if (!isTokenRevoked) {
+            return { success: false, sessionToken: null }
+        }
+        await sessionConfig.adapter.revokeAllVerificationTokens(verifiedToken.userId, "magic_link")
 
         await sessionConfig.adapter.updateUser(verifiedToken.userId, {
             emailVerifiedAt: new Date(),
@@ -30,6 +34,7 @@ export const verifyMagicLink = ({ ctx, cookies, cookieManager }: InternalStatefu
                 provider: "magic_link",
                 status: "active",
                 type: "magic_link",
+                providerUserId: verifiedToken.userId,
             })
         }
 

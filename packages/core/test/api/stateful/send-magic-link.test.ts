@@ -1,8 +1,11 @@
 import { describe, test, expect, vi } from "vitest"
-import { authInstance } from "@test/setup/auth.ts"
+import { createCSRF } from "@/shared/crypto.ts"
+import { authInstance, jose } from "@test/setup/auth.ts"
 import { magicLinkTokenEntity, userEntity } from "@test/setup/entities.ts"
 
 describe("sendMagicLink API", async () => {
+    const csrfToken = await createCSRF(jose)
+
     test("success with existing user", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
@@ -27,7 +30,11 @@ describe("sendMagicLink API", async () => {
         const token = "mocked-magic-link-token"
         vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
-        const output = await api.sendMagicLink("user@example.com")
+        const output = await api.sendMagicLink("user@example.com", {
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+            },
+        })
 
         expect(output).toEqual({
             success: true,
@@ -74,7 +81,11 @@ describe("sendMagicLink API", async () => {
         const token = "mocked-magic-link-token"
         vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
-        const output = await api.sendMagicLink("new@example.com")
+        const output = await api.sendMagicLink("new@example.com", {
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+            },
+        })
 
         expect(output).toEqual({
             success: true,
@@ -104,17 +115,28 @@ describe("sendMagicLink API", async () => {
         const createTokenMock = vi.fn()
         const sendMagicLinkEmailMock = vi.fn()
 
-        const { api } = authInstance({
-            getUserByEmail: getUserByEmailMock,
-            createUser: createUserMock,
-            revokeAllVerificationTokens: revokeAllVerificationTokensMock,
-            createToken: createTokenMock,
-        })
+        const { api } = authInstance(
+            {
+                getUserByEmail: getUserByEmailMock,
+                createUser: createUserMock,
+                revokeAllVerificationTokens: revokeAllVerificationTokensMock,
+                createToken: createTokenMock,
+            },
+            {
+                magicLinks: {
+                    sendMagicLinkEmail: sendMagicLinkEmailMock,
+                },
+            }
+        )
 
         const token = "mocked-magic-link-token"
         vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
-        const output = await api.sendMagicLink("nonexistent@example.com")
+        const output = await api.sendMagicLink("nonexistent@example.com", {
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+            },
+        })
 
         expect(output).toEqual({
             success: true,
@@ -156,6 +178,9 @@ describe("sendMagicLink API", async () => {
         vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const output = await api.sendMagicLink("user@example.com", {
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+            },
             redirect: true,
             redirectTo: "https://example.com/check-email",
         })
@@ -203,6 +228,9 @@ describe("sendMagicLink API", async () => {
         vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const output = await api.sendMagicLink("user@example.com", {
+            headers: {
+                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+            },
             redirect: false,
             redirectTo: "https://example.com/check-email",
         })

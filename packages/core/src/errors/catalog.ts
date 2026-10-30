@@ -888,6 +888,14 @@ export const ERROR_CATALOG = {
             "The 'expiresIn' configuration value for magic links must be a positive integer representing the number of seconds until expiration. The provided value does not meet this requirement.",
         userMessage: "Internal library configuration error. The magic link expiresIn must be a positive integer.",
     },
+    MAGIC_LINK_SEND_EMAIL_NOT_IMPLEMENTED: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The 'sendMagicLinkEmail' function is not implemented in the magicLinks configuration. This function is required to send magic link emails.",
+        userMessage: "Internal library configuration error. The sendMagicLinkEmail function is not implemented.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

@@ -38,6 +38,7 @@ describe("sendMagicLinkAction", async () => {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ email: "user@example.com" }),
             })
@@ -95,6 +96,7 @@ describe("sendMagicLinkAction", async () => {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ email: "new@example.com" }),
             })
@@ -129,12 +131,19 @@ describe("sendMagicLinkAction", async () => {
 
         const {
             handlers: { POST },
-        } = authInstance({
-            getUserByEmail: getUserByEmailMock,
-            createUser: createUserMock,
-            revokeAllVerificationTokens: revokeAllVerificationTokensMock,
-            createToken: createTokenMock,
-        })
+        } = authInstance(
+            {
+                getUserByEmail: getUserByEmailMock,
+                createUser: createUserMock,
+                revokeAllVerificationTokens: revokeAllVerificationTokensMock,
+                createToken: createTokenMock,
+            },
+            {
+                magicLinks: {
+                    sendMagicLinkEmail: sendMagicLinkEmailMock,
+                },
+            }
+        )
 
         const token = "mocked-magic-link-token"
         vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
@@ -145,6 +154,7 @@ describe("sendMagicLinkAction", async () => {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ email: "nonexistent@example.com" }),
             })
@@ -194,8 +204,9 @@ describe("sendMagicLinkAction", async () => {
             new Request("https://example.com/auth/signIn/magicLink?redirect=true&redirectTo=/check-email", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
                     "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ email: "user@example.com" }),
             })

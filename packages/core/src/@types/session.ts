@@ -391,7 +391,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     sendMagicLink(options: {
         email: string
         allowSignUp: boolean
-        request: Request
+        origin: string
     }): Promise<{ success: true; token: string; url: string } | { success: false; token: null; url: null }>
 
     verifyMagicLink(options: {

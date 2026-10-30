@@ -510,7 +510,7 @@ export type CancelEmailChangeData =
 
 export type CancelEmailChangeAPIReturn = AuthActionAPIReturn<CancelEmailChangeData>
 
-export type SendMagicLinkAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+export type SendMagicLinkAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo & APIOptionsWithSkipCSRFCheck
 
 export type SendMagicLinkData =
     | { success: true; redirect: true; redirectURL: null }

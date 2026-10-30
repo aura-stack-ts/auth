@@ -458,7 +458,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          * })
          */
         sendMagicLink: async (email: string, options?: SendMagicLinkAPIOptions): Promise<SendMagicLinkAPIReturn> => {
-            return sendMagicLink(email, { ctx, ...options })
+            return sendMagicLink(email, { ctx, skipCSRFCheck: true, ...options })
         },
         /**
          * Verifies a magic link token on the server-side. It checks the validity of the token and signs in the user if valid.

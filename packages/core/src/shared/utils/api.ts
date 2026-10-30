@@ -19,6 +19,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
     const steps: Array<() => Promise<void>> = []
 
     const output: {
+        origin?: string
         provider?: RuntimeOAuthProvider
         request?: Request
         rateLimit?: any
@@ -88,7 +89,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                     const url = `${origin}${ctx.basePath}${endpointPath}`
                     request = new Request(url, { headers: output.headers })
                 }
-                await getOriginURL(request, ctx)
+                output.origin = await getOriginURL(request, ctx)
                 output.request = request
             })
             return builder
@@ -111,6 +112,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                 if (output.rateLimit) break
             }
             return output as {
+                origin: string
                 provider: RuntimeOAuthProvider
                 request: Request
                 rateLimit: any | undefined
