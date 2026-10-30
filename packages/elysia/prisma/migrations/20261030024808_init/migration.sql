@@ -2,7 +2,7 @@
 CREATE TYPE "UserStatus" AS ENUM ('active', 'suspended', 'pending_verification', 'deleted');
 
 -- CreateEnum
-CREATE TYPE "AccountType" AS ENUM ('oauth', 'credentials');
+CREATE TYPE "AccountType" AS ENUM ('oauth', 'credentials', 'magic_link');
 
 -- CreateEnum
 CREATE TYPE "AccountStatus" AS ENUM ('active', 'unlinked', 'suspended');
@@ -26,7 +26,7 @@ CREATE TYPE "MFAChallengeStatus" AS ENUM ('pending', 'verified', 'expired', 'fai
 CREATE TYPE "MFACredentialStatus" AS ENUM ('active', 'pending', 'disabled');
 
 -- CreateEnum
-CREATE TYPE "VerificationTokenType" AS ENUM ('email_verification', 'password_reset', 'email_change', 'mfa_recovery', 'email_change_cancel');
+CREATE TYPE "VerificationTokenType" AS ENUM ('email_verification', 'password_reset', 'email_change', 'mfa_recovery', 'email_change_cancel', 'magic_link');
 
 -- CreateTable
 CREATE TABLE "User" (
