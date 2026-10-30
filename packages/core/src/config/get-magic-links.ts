@@ -6,7 +6,7 @@ export const getMagicLinkConfig = <Identity extends Identities, SignUpSchema ext
     config: AuthConfig<Identity, SignUpSchema> | undefined
 ) => {
     const expiresIn = config?.magicLinks?.expiresIn
-    if (expiresIn && (expiresIn < 0 || !Number.isFinite(expiresIn))) {
+    if (expiresIn !== undefined && (!Number.isInteger(expiresIn) || expiresIn <= 0)) {
         throw new AuraAuthError({ code: "INVALID_MAGIC_LINK_EXPIRES_IN_VALUE" })
     }
     return config?.magicLinks

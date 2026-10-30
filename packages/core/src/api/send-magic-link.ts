@@ -1,4 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -12,9 +13,15 @@ export const sendMagicLink = async (
         request: requestInit,
         redirectTo,
         redirect: redirectInit = true,
+        skipCSRFCheck = false,
+        doubleSubmitToken = undefined,
     }: FunctionAPIContext<SendMagicLinkAPIOptions>
 ): Promise<SendMagicLinkAPIReturn> => {
     const { logger, sessionStrategy, magicLinks } = ctx
+    if (!magicLinks?.sendMagicLinkEmail) {
+        throw new AuraAuthError({ code: "MAGIC_LINK_SEND_EMAIL_NOT_IMPLEMENTED" })
+    }
+
     try {
         logger?.log("SEND_MAGIC_LINK_INITIATED", {
             structuredData: {
@@ -22,11 +29,12 @@ export const sendMagicLink = async (
                 allowSignUp: magicLinks?.allowSignUp ?? false,
             },
         })
-        const { request, rateLimit } = await createValidation(
+        const { request, rateLimit, origin } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
             .buildRequest(requestInit, "/signIn/magicLink")
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifyRateLimit("sendMagicLink")
             .execute()
         if (rateLimit) {
@@ -34,7 +42,7 @@ export const sendMagicLink = async (
         }
         const { success, token, url } = await sessionStrategy.sendMagicLink({
             email,
-            request,
+            origin,
             allowSignUp: magicLinks?.allowSignUp ?? false,
         })
 
@@ -56,7 +64,7 @@ export const sendMagicLink = async (
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },
-                    { headers: builder.toHeaders(), status: success ? (redirect ? 302 : 200) : 200 }
+                    { headers: builder.toHeaders(), status: redirect ? 302 : 200 }
                 )
             },
         } as SendMagicLinkAPIReturn

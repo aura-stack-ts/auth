@@ -1,17 +1,10 @@
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { SessionStrategy } from "@/@types/session.ts"
 
-export const sendMagicLink = ({ ctx }: InternalStatefulContext) => {
+export const sendMagicLink = ({ ctx }: InternalStatefulContext): SessionStrategy["sendMagicLink"] => {
     const { sessionConfig } = ctx
-    return async ({
-        email,
-        request,
-        allowSignUp,
-    }: {
-        email: string
-        allowSignUp: boolean
-        request: Request
-    }): Promise<{ success: true; token: string; url: string } | { success: false; token: null; url: null }> => {
+    return async ({ email, origin, allowSignUp }) => {
         let user = await sessionConfig.adapter.getUserByEmail(email)
         if (!user) {
             if (!allowSignUp) {
@@ -22,6 +15,7 @@ export const sendMagicLink = ({ ctx }: InternalStatefulContext) => {
                 emailVerifiedAt: null,
             })
         }
+
         await sessionConfig.adapter.revokeAllVerificationTokens(user.id, "magic_link")
 
         const token = createSecretValue()
@@ -35,7 +29,6 @@ export const sendMagicLink = ({ ctx }: InternalStatefulContext) => {
             type: "magic_link",
             tokenHash,
         })
-        const origin = new URL(request.url).origin
         return { success: true, token, url: `${origin}${ctx.basePath}/signIn/magicLink/verify?token=${token}` }
     }
 }

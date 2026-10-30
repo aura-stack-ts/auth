@@ -531,10 +531,11 @@ export const prismaAdapter = ({ client, deleteStrategy = "soft" }: PrismaAdapter
             return token ? toVerificationToken(token) : null
         },
         revokeToken: async (id) => {
-            await client.verificationToken.update({
-                where: { id },
+            const output = await client.verificationToken.updateMany({
+                where: { id, revokedAt: null },
                 data: { revokedAt: new Date() },
             })
+            return output.count > 0
         },
         getTokensByUserId: async (userId) => {
             const tokens = await client.verificationToken.findMany({

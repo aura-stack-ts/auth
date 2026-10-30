@@ -197,6 +197,7 @@ export const createAuthClient = <
                     "X-CSRF-Token": csrfToken,
                 },
             })
+            // @ts-ignore
             const json: any = await response.json()
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
