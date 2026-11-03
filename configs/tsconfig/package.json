@@ -16,5 +16,5 @@
   ],
   "author": "Aura Stack <aurastackjs@gmail.com> | Hernan Alvarado <hernanvid123@gmail.com>",
   "license": "MIT",
-  "packageManager": "pnpm@10.15.0"
+  "packageManager": "pnpm@12.4.0"
 }
