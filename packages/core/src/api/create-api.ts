@@ -291,7 +291,7 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
             email: string,
             options?: SendVerificationEmailAPIOptions
         ): Promise<SendVerificationEmailAPIReturn> => {
-            return sendVerificationEmail(email, { ctx, ...options })
+            return sendVerificationEmail(email, { ctx, skipCSRFCheck: true, ...options })
         },
         /**
          * Verifies an email address using a verification token on the server-side.

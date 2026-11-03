@@ -838,6 +838,30 @@ export const ERROR_CATALOG = {
             "The 'baseURL' configuration value must be a valid URL string. The provided value does not meet this requirement.",
         userMessage: "Internal library configuration error. The baseURL must be a valid URL string.",
     },
+    INVALID_EMAIL_VERIFICATION_EXPIRES_IN_VALUE: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The 'expiresIn' configuration value for email verification must be a positive integer representing the number of seconds until expiration. The provided value does not meet this requirement.",
+        userMessage: "Internal library configuration error. The email verification expiration time must be a positive integer.",
+    },
+    USER_NOT_FOUND: {
+        type: "AUTH_FLOW",
+        statusCode: 404,
+        name: "AuthError",
+        message:
+            "The requested user record could not be found in the database. The provided identifier does not match any existing user.",
+        userMessage: "The user account could not be found. Please check your credentials and try again.",
+    },
+    INVALID_EMAIL_VERIFICATION_TOKEN: {
+        type: "AUTH_FLOW",
+        statusCode: 400,
+        name: "AuthError",
+        message:
+            "The email verification token provided is invalid, expired, or has already been used. The token does not match any active verification records.",
+        userMessage: "The email verification link is invalid or has expired. Please request a new verification email.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

@@ -12,22 +12,26 @@ export const sendVerificationEmail = async (
         request: requestInit,
         redirectTo,
         redirect: redirectInit = true,
+        skipCSRFCheck = false,
+        doubleSubmitToken = undefined,
     }: FunctionAPIContext<SendVerificationEmailAPIOptions>
 ): Promise<SendVerificationEmailAPIReturn> => {
     const { logger, sessionStrategy, emailVerification } = ctx
     try {
         logger?.log("SEND_VERIFICATION_EMAIL_INITIATED")
-        const { request, rateLimit } = await createValidation(
+        const { request, rateLimit, originURL } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
             .buildRequest(requestInit, "/sendVerificationEmail")
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
+            .verifySession()
             .verifyRateLimit("sendVerificationEmail")
             .execute()
         if (rateLimit) {
             return rateLimit as SendVerificationEmailAPIReturn
         }
-        const { token, url } = await sessionStrategy.sendVerificationEmail(email, request)
+        const { token, url } = await sessionStrategy.sendVerificationEmail(email, originURL)
         await emailVerification?.sendVerificationEmail?.({ email, token, url })
 
         const builder = new HeadersBuilder(secureApiHeaders)

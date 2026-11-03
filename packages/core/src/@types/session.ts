@@ -351,13 +351,13 @@ export interface SessionStrategy<DefaultUser extends User = User> {
 
     sendVerificationEmail(
         email: string,
-        request: Request
+        origin: string
     ): Promise<{
-        token: string | null
-        url: string | null
+        token: string
+        url: string
     }>
 
-    verifyEmail(token: string): Promise<{ success: boolean; userId?: string }>
+    verifyEmail(token: string): Promise<void>
 }
 
 export interface OAuthTokenPayload {

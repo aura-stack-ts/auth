@@ -12,6 +12,7 @@ import { getOAuthProvidersConfig } from "@/config/get-oauth.ts"
 import { createProxyLogger } from "@/config/logger/create-logger.ts"
 import { createRateLimiterInstance } from "@/shared/rate-limiter.ts"
 import { getTrustedOriginsConfig } from "@/config/get-trusted-origins.ts"
+import { getEmailVerificationConfig } from "@/config/get-email-verification.ts"
 import { getTrustedProxyHeadersConfig } from "@/config/get-trusted-proxy-headers.ts"
 import type { InternalContext } from "@/@types/internal.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
@@ -41,7 +42,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         cookieConfig: { trusted, untrusted },
         identity: getIdentityConfig(config),
         signUp: config?.signUp,
-        emailVerification: config?.emailVerification,
+        emailVerification: getEmailVerificationConfig(config),
         jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
         rateLimiters: createRateLimiterInstance(config?.rateLimiter, proxyHeadersAsBoolean),
         sessionConfig: config?.session,

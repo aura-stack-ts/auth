@@ -1,61 +1,33 @@
 import { describe, test, expect, vi } from "vitest"
 import { jose } from "@test/setup/auth.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { authInstance } from "@test/setup/auth.ts"
-import { userEntity, verificationTokenEntity } from "@test/setup/entities.ts"
+import { sessionEntityWithUser, userEntity, verificationTokenEntity } from "@test/setup/entities.ts"
 
 describe("sendVerificationEmail API", async () => {
     const csrfToken = await createCSRF(jose)
+    const sessionToken = "valid-token-hash"
+    const sessionTokenHash = await createHash(sessionToken)
 
     const headers = {
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
     }
 
     test("success sendVerificationEmail flow", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getUserByEmailMock = vi.fn().mockReturnValue(userEntity)
         const createTokenMock = vi.fn().mockReturnValue(verificationTokenEntity)
-
-        const { api } = authInstance({
-            getUserByEmail: getUserByEmailMock,
-            createToken: createTokenMock,
-        })
-
-        const output = await api.sendVerificationEmail("john@example.com", {
-            headers,
-        })
-
-        expect(output).toEqual({
-            success: true,
-            redirect: false,
-            redirectURL: null,
-            headers: expect.any(Headers),
-            toResponse: expect.any(Function),
-        })
-
-        expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
-        expect(createTokenMock).toHaveBeenCalledWith({
-            userId: "user-123",
-            expiresAt: expect.any(Date),
-            identifier: "john@example.com",
-            newIdentifier: null,
-            type: "email_verification",
-            tokenHash: expect.any(String),
-        })
-    })
-
-    test("success sendVerificationEmail flow with emailVerification.sendVerificationEmail callback", async () => {
-        vi.stubEnv("BASE_URL", "https://example.com")
-
         const sendVerificationEmailMock = vi.fn()
-        const getUserByEmailMock = vi.fn().mockReturnValue(userEntity)
-        const createTokenMock = vi.fn().mockReturnValue(verificationTokenEntity)
 
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue("mocked-token")
+        const token = "email-verification-token"
+        const tokenHash = await createHash(token)
+        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {
+                getSessionByToken: getSessionByTokenMock,
                 getUserByEmail: getUserByEmailMock,
                 createToken: createTokenMock,
             },
@@ -78,6 +50,7 @@ describe("sendVerificationEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createTokenMock).toHaveBeenCalledWith({
             userId: "user-123",
@@ -85,58 +58,80 @@ describe("sendVerificationEmail API", async () => {
             identifier: "john@example.com",
             newIdentifier: null,
             type: "email_verification",
-            tokenHash: expect.any(String),
+            tokenHash,
         })
-
-        expect(sendVerificationEmailMock).toHaveBeenCalledOnce()
         expect(sendVerificationEmailMock).toHaveBeenCalledWith({
             email: "john@example.com",
-            token: "mocked-token",
-            url: "https://example.com/auth/emailVerification/verify?token=mocked-token",
+            token,
+            url: `https://example.com/auth/emailVerification/verify?token=${token}`,
         })
     })
 
     test("sendVerificationEmail with non-existent user", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const getSessionByTokenMock = vi.fn().mockReturnValue(null)
         const getUserByEmailMock = vi.fn().mockReturnValue(null)
         const createTokenMock = vi.fn()
+        const sendVerificationEmailMock = vi.fn()
 
-        const { api } = authInstance({
-            getUserByEmail: getUserByEmailMock,
-            createToken: createTokenMock,
-        })
+        const { api } = authInstance(
+            {
+                getSessionByToken: getSessionByTokenMock,
+                getUserByEmail: getUserByEmailMock,
+                createToken: createTokenMock,
+            },
+            {
+                emailVerification: {
+                    sendVerificationEmail: sendVerificationEmailMock,
+                },
+            }
+        )
 
         const output = await api.sendVerificationEmail("nonexistent@example.com", {
             headers,
         })
 
         expect(output).toEqual({
-            success: true,
+            success: false,
+            error: {
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
+            },
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
 
-        expect(getUserByEmailMock).toHaveBeenCalledWith("nonexistent@example.com")
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
+        expect(getUserByEmailMock).not.toHaveBeenCalled()
         expect(createTokenMock).not.toHaveBeenCalled()
+        expect(sendVerificationEmailMock).not.toHaveBeenCalled()
     })
 
     test("sendVerificationEmail with custom expiresIn", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getUserByEmailMock = vi.fn().mockReturnValue(userEntity)
         const createTokenMock = vi.fn().mockReturnValue(verificationTokenEntity)
+        const sendVerificationEmailMock = vi.fn()
+
+        const token = "email-verification-token"
+        const tokenHash = await createHash(token)
+        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {
+                getSessionByToken: getSessionByTokenMock,
                 getUserByEmail: getUserByEmailMock,
                 createToken: createTokenMock,
             },
             {
                 emailVerification: {
                     expiresIn: 3600,
+                    sendVerificationEmail: sendVerificationEmailMock,
                 },
             }
         )
@@ -153,6 +148,7 @@ describe("sendVerificationEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createTokenMock).toHaveBeenCalledWith({
             userId: "user-123",
@@ -160,18 +156,33 @@ describe("sendVerificationEmail API", async () => {
             identifier: "john@example.com",
             newIdentifier: null,
             type: "email_verification",
-            tokenHash: expect.any(String),
+            tokenHash,
+        })
+        expect(sendVerificationEmailMock).toHaveBeenCalledWith({
+            email: "john@example.com",
+            token,
+            url: `https://example.com/auth/emailVerification/verify?token=${token}`,
         })
     })
 
     test("sendVerificationEmail without URL configuration", async () => {
+        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getUserByEmailMock = vi.fn().mockReturnValue(userEntity)
         const createTokenMock = vi.fn()
+        const sendVerificationEmailMock = vi.fn()
 
-        const { api } = authInstance({
-            getUserByEmail: getUserByEmailMock,
-            createToken: createTokenMock,
-        })
+        const { api } = authInstance(
+            {
+                getSessionByToken: getSessionByTokenMock,
+                getUserByEmail: getUserByEmailMock,
+                createToken: createTokenMock,
+            },
+            {
+                emailVerification: {
+                    sendVerificationEmail: sendVerificationEmailMock,
+                },
+            }
+        )
 
         const output = await api.sendVerificationEmail("john@example.com", {
             headers,
@@ -189,20 +200,36 @@ describe("sendVerificationEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
+        expect(getSessionByTokenMock).not.toHaveBeenCalled()
         expect(getUserByEmailMock).not.toHaveBeenCalled()
         expect(createTokenMock).not.toHaveBeenCalled()
+        expect(sendVerificationEmailMock).not.toHaveBeenCalled()
     })
 
     test("sendVerificationEmail with redirectTo and redirect: true", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getUserByEmailMock = vi.fn().mockReturnValue(userEntity)
         const createTokenMock = vi.fn().mockReturnValue(verificationTokenEntity)
+        const sendVerificationEmailMock = vi.fn()
 
-        const { api } = authInstance({
-            getUserByEmail: getUserByEmailMock,
-            createToken: createTokenMock,
-        })
+        const token = "email-verification-token"
+        const tokenHash = await createHash(token)
+        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+
+        const { api } = authInstance(
+            {
+                getSessionByToken: getSessionByTokenMock,
+                getUserByEmail: getUserByEmailMock,
+                createToken: createTokenMock,
+            },
+            {
+                emailVerification: {
+                    sendVerificationEmail: sendVerificationEmailMock,
+                },
+            }
+        )
 
         const output = await api.sendVerificationEmail("john@example.com", {
             headers,
@@ -217,19 +244,47 @@ describe("sendVerificationEmail API", async () => {
             toResponse: expect.any(Function),
         })
 
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
+        expect(createTokenMock).toHaveBeenCalledWith({
+            userId: "user-123",
+            expiresAt: expect.any(Date),
+            identifier: "john@example.com",
+            newIdentifier: null,
+            type: "email_verification",
+            tokenHash,
+        })
+        expect(sendVerificationEmailMock).toHaveBeenCalledWith({
+            email: "john@example.com",
+            token,
+            url: `https://example.com/auth/emailVerification/verify?token=${token}`,
+        })
     })
 
     test("sendVerificationEmail with redirectTo and redirect: false", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getUserByEmailMock = vi.fn().mockReturnValue(userEntity)
         const createTokenMock = vi.fn().mockReturnValue(verificationTokenEntity)
+        const sendVerificationEmailMock = vi.fn()
 
-        const { api } = authInstance({
-            getUserByEmail: getUserByEmailMock,
-            createToken: createTokenMock,
-        })
+        const token = "email-verification-token"
+        const tokenHash = await createHash(token)
+        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+
+        const { api } = authInstance(
+            {
+                getSessionByToken: getSessionByTokenMock,
+                getUserByEmail: getUserByEmailMock,
+                createToken: createTokenMock,
+            },
+            {
+                emailVerification: {
+                    sendVerificationEmail: sendVerificationEmailMock,
+                },
+            }
+        )
 
         const output = await api.sendVerificationEmail("john@example.com", {
             headers,
@@ -246,5 +301,18 @@ describe("sendVerificationEmail API", async () => {
         })
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
+        expect(createTokenMock).toHaveBeenCalledWith({
+            userId: "user-123",
+            expiresAt: expect.any(Date),
+            identifier: "john@example.com",
+            newIdentifier: null,
+            type: "email_verification",
+            tokenHash,
+        })
+        expect(sendVerificationEmailMock).toHaveBeenCalledWith({
+            email: "john@example.com",
+            token,
+            url: `https://example.com/auth/emailVerification/verify?token=${token}`,
+        })
     })
 })

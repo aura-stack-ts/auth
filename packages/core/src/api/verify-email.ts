@@ -28,32 +28,7 @@ export const verifyEmail = async (
             return rateLimit as VerifyEmailAPIReturn
         }
 
-        const verified = await sessionStrategy.verifyEmail(token)
-
-        if (!verified.success) {
-            return {
-                success: false,
-                verified: false,
-                redirect: false,
-                redirectURL: null,
-                error: {
-                    code: "INVALID_VERIFICATION_TOKEN",
-                    message: "Invalid or expired verification token",
-                },
-                headers: new Headers(secureApiHeaders),
-                toResponse: () => {
-                    return Response.json(
-                        {
-                            success: false,
-                            verified: false,
-                            redirect: false,
-                            redirectURL: null,
-                        },
-                        { headers: secureApiHeaders, status: 400 }
-                    )
-                },
-            }
-        }
+        await sessionStrategy.verifyEmail(token)
 
         const builder = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)

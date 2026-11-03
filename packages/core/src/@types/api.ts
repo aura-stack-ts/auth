@@ -402,7 +402,7 @@ export type ProviderConnectedData = { success: true; connected: boolean } | { su
 
 export type ProviderConnectedAPIReturn = AuthActionAPIReturn<ProviderConnectedData>
 
-export type SendVerificationEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+export type SendVerificationEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo & APIOptionsWithSkipCSRFCheck
 
 export type SendVerificationEmailData =
     | { success: true; redirect: true; redirectURL: null }

@@ -69,8 +69,8 @@ describe("verifyEmail API", async () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "INVALID_VERIFICATION_TOKEN",
-                message: "Invalid or expired verification token",
+                code: "INVALID_EMAIL_VERIFICATION_TOKEN",
+                message: "The email verification link is invalid or has expired. Please request a new verification email.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -109,8 +109,8 @@ describe("verifyEmail API", async () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "INVALID_VERIFICATION_TOKEN",
-                message: "Invalid or expired verification token",
+                code: "INVALID_EMAIL_VERIFICATION_TOKEN",
+                message: "The email verification link is invalid or has expired. Please request a new verification email.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -149,8 +149,8 @@ describe("verifyEmail API", async () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "INVALID_VERIFICATION_TOKEN",
-                message: "Invalid or expired verification token",
+                code: "INVALID_EMAIL_VERIFICATION_TOKEN",
+                message: "The email verification link is invalid or has expired. Please request a new verification email.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -189,8 +189,8 @@ describe("verifyEmail API", async () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "INVALID_VERIFICATION_TOKEN",
-                message: "Invalid or expired verification token",
+                code: "INVALID_EMAIL_VERIFICATION_TOKEN",
+                message: "The email verification link is invalid or has expired. Please request a new verification email.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
