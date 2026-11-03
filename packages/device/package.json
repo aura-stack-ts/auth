@@ -84,5 +84,5 @@
       "require": "./dist/providers/*.cjs"
     }
   },
-  "packageManager": "pnpm@10.15.0"
+  "packageManager": "pnpm@12.4.0"
 }
