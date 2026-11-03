@@ -4,6 +4,16 @@ packages:
   - apps/**
   - docs
 
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  sharp: true
+  supabase: true
+  vue-demi: true
+  workerd: true
+
 catalogs:
   "@tailwindcss/vite":
     "@tailwindcss/vite": ^4.0.6
@@ -47,12 +57,6 @@ catalogs:
     zod: 3.25.76
   zod-v4:
     zod: 4.3.5
-
-ignoredBuiltDependencies:
-  - "@parcel/watcher"
-
-onlyBuiltDependencies:
-  - prisma
 
 overrides:
   brace-expansion: ^5.0.6
