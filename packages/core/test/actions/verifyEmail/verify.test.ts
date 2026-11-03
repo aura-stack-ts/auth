@@ -29,7 +29,6 @@ describe("verifyEmailAction", async () => {
         expect(response.status).toBe(200)
         expect(await response.json()).toEqual({
             success: true,
-            verified: true,
             redirect: false,
             redirectURL: null,
         })
@@ -100,7 +99,6 @@ describe("verifyEmailAction", async () => {
         expect(output.status).toBe(400)
         expect(await output.json()).toEqual({
             success: false,
-            verified: false,
             redirect: false,
             redirectURL: null,
         })
@@ -138,7 +136,6 @@ describe("verifyEmailAction", async () => {
         expect(output.status).toBe(400)
         expect(await output.json()).toEqual({
             success: false,
-            verified: false,
             redirect: false,
             redirectURL: null,
         })
@@ -176,7 +173,6 @@ describe("verifyEmailAction", async () => {
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
             success: false,
-            verified: false,
             redirect: false,
             redirectURL: null,
         })
@@ -211,7 +207,6 @@ describe("verifyEmailAction", async () => {
         expect(response.status).toBe(302)
         expect(await response.json()).toEqual({
             success: true,
-            verified: true,
             redirect: true,
             redirectURL: null,
         })
@@ -251,7 +246,6 @@ describe("verifyEmailAction", async () => {
         expect(response.status).toBe(200)
         expect(await response.json()).toEqual({
             success: true,
-            verified: true,
             redirect: false,
             redirectURL: "/auth/verified",
         })

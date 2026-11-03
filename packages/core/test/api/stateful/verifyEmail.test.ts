@@ -32,7 +32,6 @@ describe("verifyEmail API", async () => {
 
         expect(output).toEqual({
             success: true,
-            verified: true,
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
@@ -65,7 +64,6 @@ describe("verifyEmail API", async () => {
 
         expect(output).toEqual({
             success: false,
-            verified: false,
             redirect: false,
             redirectURL: null,
             error: {
@@ -105,7 +103,6 @@ describe("verifyEmail API", async () => {
 
         expect(output).toEqual({
             success: false,
-            verified: false,
             redirect: false,
             redirectURL: null,
             error: {
@@ -145,7 +142,6 @@ describe("verifyEmail API", async () => {
 
         expect(output).toEqual({
             success: false,
-            verified: false,
             redirect: false,
             redirectURL: null,
             error: {
@@ -185,7 +181,6 @@ describe("verifyEmail API", async () => {
 
         expect(output).toEqual({
             success: false,
-            verified: false,
             redirect: false,
             redirectURL: null,
             error: {
@@ -222,7 +217,6 @@ describe("verifyEmail API", async () => {
 
         expect(output).toEqual({
             success: false,
-            verified: false,
             redirect: false,
             redirectURL: null,
             error: {
@@ -262,7 +256,6 @@ describe("verifyEmail API", async () => {
 
         expect(output).toEqual({
             success: true,
-            verified: true,
             redirect: true,
             redirectURL: null,
             headers: expect.any(Headers),
@@ -300,7 +293,6 @@ describe("verifyEmail API", async () => {
 
         expect(output).toEqual({
             success: true,
-            verified: true,
             redirect: false,
             redirectURL: "/auth/verified",
             headers: expect.any(Headers),

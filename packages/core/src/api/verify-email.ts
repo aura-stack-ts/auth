@@ -35,7 +35,6 @@ export const verifyEmail = async (
 
         return {
             success: true,
-            verified: true,
             redirect,
             redirectURL: redirect ? null : redirectURL,
             headers: builder.toHeaders(),
@@ -43,7 +42,6 @@ export const verifyEmail = async (
                 return Response.json(
                     {
                         success: true,
-                        verified: true,
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },
@@ -57,7 +55,6 @@ export const verifyEmail = async (
 
         return {
             success: false,
-            verified: false,
             redirect: false,
             redirectURL: null,
             error: errors,
@@ -66,7 +63,6 @@ export const verifyEmail = async (
                 return Response.json(
                     {
                         success: false,
-                        verified: false,
                         redirect: false,
                         redirectURL: null,
                     },
