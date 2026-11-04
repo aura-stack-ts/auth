@@ -4,7 +4,9 @@ import type { SessionStrategy } from "@/@types/session.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const changePassword = ({ ctx }: InternalStatefulContext): SessionStrategy["changePassword"] => {
-    const { sessionConfig } = ctx
+    const { sessionConfig, credentials } = ctx
+    const hashPasswordFn = credentials?.hash ?? hashPassword
+    const verifyPasswordFn = credentials?.verify ?? verifyPassword
 
     return async ({ userId, currentPassword, newPassword }) => {
         const accounts = await sessionConfig.adapter.getAccountsByUserId(userId)
@@ -16,11 +18,18 @@ export const changePassword = ({ ctx }: InternalStatefulContext): SessionStrateg
         if (!credential) {
             throw new AuraAuthError({ code: "NO_CREDENTIALS_ACCOUNT_FOUND" })
         }
-        const isMatch = await verifyPassword(currentPassword, credential.passwordHash)
+        const isMatch = await verifyPasswordFn(currentPassword, credential.passwordHash)
         if (!isMatch) {
             throw new AuraAuthError({ code: "INVALID_CURRENT_PASSWORD" })
         }
-        await sessionConfig.adapter.updatePasswordHash(credentialAccount.id, await hashPassword(newPassword))
-        await sessionConfig.adapter.revokeAllSessions(userId, "password_changed")
+        const revokeSessions = await sessionConfig.adapter.revokeAllSessions(userId, "password_changed")
+        if (!revokeSessions || revokeSessions === 0) {
+            throw new AuraAuthError({ code: "FAILED_TO_REVOKE_SESSIONS_AFTER_PASSWORD_CHANGE" })
+        }
+        const passwordHash = await hashPasswordFn(newPassword)
+        const updatedCredentialAccount = await sessionConfig.adapter.updatePasswordHash(credentialAccount.id, passwordHash)
+        if (!updatedCredentialAccount) {
+            throw new AuraAuthError({ code: "INVALID_PASSWORD_HASH_IN_PASSWORD_CHANGE" })
+        }
     }
 }

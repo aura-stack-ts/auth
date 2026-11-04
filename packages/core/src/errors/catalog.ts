@@ -913,6 +913,30 @@ export const ERROR_CATALOG = {
         message: "The provided current password does not match the stored password for the user.",
         userMessage: "The current password is incorrect. Please try again.",
     },
+    INVALID_PASSWORD_HASH_IN_PASSWORD_CHANGE: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The password hashing function returned an invalid hash value during the password change operation. The hash must be a non-empty string.",
+        userMessage: "Internal library configuration error. The password hashing function returned an invalid hash.",
+    },
+    UNSUPPORTED_FUNCTION_IN_STATELESS_MODE: {
+        type: "INTERNAL",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The requested function is not supported in stateless mode. Please check your configuration and ensure that you are using a stateful session strategy for this operation.",
+        userMessage: "This operation is not supported in stateless mode. Please contact support for assistance.",
+    },
+    FAILED_TO_REVOKE_SESSIONS_AFTER_PASSWORD_CHANGE: {
+        type: "AUTH_FLOW",
+        statusCode: 500,
+        name: "AuthError",
+        message:
+            "Failed to revoke all active sessions after a password change. This may indicate a database or session management issue.",
+        userMessage: "An error occurred while updating your password. Please try again later.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

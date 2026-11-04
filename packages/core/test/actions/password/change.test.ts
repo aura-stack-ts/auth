@@ -1,17 +1,21 @@
 import { describe, test, expect, vi } from "vitest"
-import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
+import { createCSRF, createHash } from "@/shared/crypto.ts"
 import { accountEntityWithCredentials, credentialAccountEntity, sessionEntityWithUser } from "@test/setup/entities.ts"
 
 describe("changePasswordAction", async () => {
     const csrfToken = await createCSRF(jose)
 
     test("success changePassword flow", async () => {
+        const newPassword = "new-password"
+        const newPasswordHash = await createHash(newPassword)
+        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi.fn().mockReturnValue({ ...credentialAccountEntity, passwordHash: newPasswordHash })
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const {
             handlers: { POST },
@@ -25,10 +29,6 @@ describe("changePasswordAction", async () => {
 
         const token = "valid-token"
         const tokenHash = await createHash(token)
-
-        const newPassword = "new-password"
-        const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const response = await POST(
             new Request("https://example.com/auth/password/change", {
@@ -63,8 +63,8 @@ describe("changePasswordAction", async () => {
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([])
         const getCredentialAccountMock = vi.fn()
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi.fn().mockReturnValue(null)
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const {
             handlers: { POST },
@@ -112,8 +112,8 @@ describe("changePasswordAction", async () => {
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi.fn().mockReturnValue(null)
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const {
             handlers: { POST },
@@ -158,11 +158,15 @@ describe("changePasswordAction", async () => {
     })
 
     test("success changePassword with redirectTo and redirect: true", async () => {
+        const newPassword = "new-password"
+        const newPasswordHash = await createHash(newPassword)
+        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi.fn().mockReturnValue({ ...credentialAccountEntity, passwordHash: newPasswordHash })
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const {
             handlers: { POST },
@@ -176,10 +180,6 @@ describe("changePasswordAction", async () => {
 
         const token = "valid-token"
         const tokenHash = await createHash(token)
-
-        const newPassword = "new-password"
-        const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const response = await POST(
             new Request("https://example.com/auth/password/change?redirectTo=/auth/success", {
@@ -211,11 +211,15 @@ describe("changePasswordAction", async () => {
     })
 
     test("success changePassword with redirectTo and redirect: false", async () => {
+        const newPassword = "new-password"
+        const newPasswordHash = await createHash(newPassword)
+        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi.fn().mockReturnValue({ ...credentialAccountEntity, passwordHash: newPasswordHash })
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const {
             handlers: { POST },
@@ -229,10 +233,6 @@ describe("changePasswordAction", async () => {
 
         const token = "valid-token"
         const tokenHash = await createHash(token)
-
-        const newPassword = "new-password"
-        const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const response = await POST(
             new Request("https://example.com/auth/password/change?redirectTo=/auth/success&redirect=false", {

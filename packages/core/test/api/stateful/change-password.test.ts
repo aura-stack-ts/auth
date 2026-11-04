@@ -9,11 +9,15 @@ describe("changePassword API", async () => {
     test("success changePassword flow", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const newPassword = "new-password"
+        const newPasswordHash = await createHash(newPassword)
+        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi.fn().mockReturnValue({ ...credentialAccountEntity, passwordHash: newPasswordHash })
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const { api } = authInstance({
             getAccountsByUserId: getAccountsByUserIdMock,
@@ -25,10 +29,6 @@ describe("changePassword API", async () => {
 
         const token = "valid-token"
         const tokenHash = await createHash(token)
-
-        const newPassword = "new-password"
-        const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const output = await api.changePassword({
             payload: {
@@ -61,8 +61,8 @@ describe("changePassword API", async () => {
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([])
         const getCredentialAccountMock = vi.fn()
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi.fn().mockReturnValue(null)
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const { api } = authInstance({
             getAccountsByUserId: getAccountsByUserIdMock,
@@ -110,8 +110,8 @@ describe("changePassword API", async () => {
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(null)
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi.fn().mockReturnValue(null)
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const { api } = authInstance({
             getAccountsByUserId: getAccountsByUserIdMock,
@@ -159,8 +159,8 @@ describe("changePassword API", async () => {
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi.fn().mockReturnValue(null).mockReturnValue(1)
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const { api } = authInstance({
             getAccountsByUserId: getAccountsByUserIdMock,
@@ -205,11 +205,18 @@ describe("changePassword API", async () => {
     test("success changePassword flow with redirectTo and redirect: true", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const newPassword = "new-password"
+        const newPasswordHash = await createHash(newPassword)
+        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi
+            .fn()
+            .mockReturnValue({ ...credentialAccountEntity, passwordHash: newPasswordHash })
+            .mockReturnValue(1)
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const { api } = authInstance({
             getAccountsByUserId: getAccountsByUserIdMock,
@@ -221,10 +228,6 @@ describe("changePassword API", async () => {
 
         const token = "valid-token"
         const tokenHash = await createHash(token)
-
-        const newPassword = "new-password"
-        const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const output = await api.changePassword({
             payload: {
@@ -256,11 +259,18 @@ describe("changePassword API", async () => {
     test("success changePassword flow with redirectTo and redirect: false", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
+        const newPassword = "new-password"
+        const newPasswordHash = await createHash(newPassword)
+        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
-        const updatePasswordHashMock = vi.fn()
-        const revokeAllSessionsMock = vi.fn()
+        const updatePasswordHashMock = vi
+            .fn()
+            .mockReturnValue({ ...credentialAccountEntity, passwordHash: newPasswordHash })
+            .mockReturnValue(1)
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
 
         const { api } = authInstance({
             getAccountsByUserId: getAccountsByUserIdMock,
@@ -272,10 +282,6 @@ describe("changePassword API", async () => {
 
         const token = "valid-token"
         const tokenHash = await createHash(token)
-
-        const newPassword = "new-password"
-        const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const output = await api.changePassword({
             payload: {
