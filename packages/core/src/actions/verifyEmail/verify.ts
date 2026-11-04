@@ -25,7 +25,7 @@ const verifyEmailConfig = () => {
 
 export const verifyEmailAction = () => {
     return createEndpoint(
-        "POST",
+        "GET",
         "/emailVerification/verify",
         async (ctx) => {
             const { toResponse } = await verifyEmail(ctx.searchParams.token, {

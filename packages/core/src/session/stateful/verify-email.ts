@@ -5,7 +5,7 @@ import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const verifyEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["verifyEmail"] => {
     const { sessionConfig } = ctx
-    return async (token: string) => {
+    return async ({ token }) => {
         const tokenHash = await createHash(token)
         const verificationToken = await sessionConfig.adapter.getTokenByHash(tokenHash)
         if (

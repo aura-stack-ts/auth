@@ -28,7 +28,7 @@ export const verifyEmail = async (
             return rateLimit as VerifyEmailAPIReturn
         }
 
-        await sessionStrategy.verifyEmail(token)
+        await sessionStrategy.verifyEmail({ token })
 
         const builder = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)

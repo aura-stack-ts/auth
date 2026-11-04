@@ -1,16 +1,17 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { object, string } from "zod/v4"
 import { sendVerificationEmail } from "@/api/send-verification-email.ts"
-import { RedirectOptionsSchema, VerifyEmailActionResponseSchema } from "@/shared/schemas/actions.ts"
+import {
+    RedirectOptionsSchema,
+    SendVerificationEmailActionResponseSchema,
+    SendVerificationEmailBodySchema,
+} from "@/shared/schemas/actions.ts"
 
 const sendVerificationEmailConfig = () => {
     return createEndpointConfig({
         schemas: {
-            body: object({
-                email: string(),
-            }),
             searchParams: RedirectOptionsSchema,
-            response: VerifyEmailActionResponseSchema,
+            body: SendVerificationEmailBodySchema,
+            response: SendVerificationEmailActionResponseSchema,
         },
     })
 }

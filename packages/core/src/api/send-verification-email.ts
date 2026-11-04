@@ -1,4 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -17,6 +18,9 @@ export const sendVerificationEmail = async (
     }: FunctionAPIContext<SendVerificationEmailAPIOptions>
 ): Promise<SendVerificationEmailAPIReturn> => {
     const { logger, sessionStrategy, emailVerification } = ctx
+    if (!emailVerification?.sendVerificationEmail) {
+        throw new AuraAuthError({ code: "SEND_VERIFICATION_EMAIL_NOT_IMPLEMENTED" })
+    }
     try {
         logger?.log("SEND_VERIFICATION_EMAIL_INITIATED")
         const { request, rateLimit, originURL } = await createValidation(
@@ -31,8 +35,11 @@ export const sendVerificationEmail = async (
         if (rateLimit) {
             return rateLimit as SendVerificationEmailAPIReturn
         }
-        const { token, url } = await sessionStrategy.sendVerificationEmail(email, originURL)
-        await emailVerification?.sendVerificationEmail?.({ email, token, url })
+        const { token, url } = await sessionStrategy.sendVerificationEmail({
+            email,
+            origin: originURL,
+        })
+        await emailVerification.sendVerificationEmail({ email, token, url })
 
         const builder = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
