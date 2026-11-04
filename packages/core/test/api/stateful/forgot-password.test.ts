@@ -75,7 +75,11 @@ describe("forgotPassword API", async () => {
         const output = await api.forgotPassword("nonexistent@example.com")
 
         expect(output).toEqual({
-            success: true,
+            success: false,
+            error: {
+                code: "USER_NOT_FOUND",
+                message: "The user account could not be found. Please check your credentials and try again.",
+            },
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
@@ -84,7 +88,7 @@ describe("forgotPassword API", async () => {
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("nonexistent@example.com")
         expect(createTokenMock).not.toHaveBeenCalled()
-        expect(sendPasswordResetEmailMock).toHaveBeenCalled()
+        expect(sendPasswordResetEmailMock).not.toHaveBeenCalled()
     })
 
     test("forgotPassword with custom expiresIn", async () => {

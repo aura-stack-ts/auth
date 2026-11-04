@@ -85,16 +85,16 @@ describe("forgotPasswordAction", async () => {
             })
         )
 
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(404)
         expect(await response.json()).toEqual({
-            success: true,
+            success: false,
             redirect: false,
             redirectURL: null,
         })
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("nonexistent@example.com")
         expect(createTokenMock).not.toHaveBeenCalled()
-        expect(sendPasswordResetEmailMock).toHaveBeenCalled()
+        expect(sendPasswordResetEmailMock).not.toHaveBeenCalled()
     })
 
     test("forgotPassword with custom expiresIn", async () => {

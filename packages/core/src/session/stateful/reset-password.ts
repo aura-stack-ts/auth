@@ -1,10 +1,11 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, hashPassword } from "@/shared/crypto.ts"
+import type { SessionStrategy } from "@/@types/session.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 
-export const resetPassword = ({ ctx }: InternalStatefulContext) => {
+export const resetPassword = ({ ctx }: InternalStatefulContext): SessionStrategy["resetPassword"] => {
     const { sessionConfig } = ctx
-    return async (token: string, newPassword: string) => {
+    return async ({ token, newPassword }) => {
         const tokenHash = await createHash(token)
         const verificationToken = await sessionConfig.adapter.getTokenByHash(tokenHash)
 

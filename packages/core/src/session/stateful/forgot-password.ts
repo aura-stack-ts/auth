@@ -1,12 +1,14 @@
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
+import type { SessionStrategy } from "@/@types/session.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 
-export const forgotPassword = ({ ctx }: InternalStatefulContext) => {
+export const forgotPassword = ({ ctx }: InternalStatefulContext): SessionStrategy["forgotPassword"] => {
     const { sessionConfig, passwordReset, basePath } = ctx
-    return async (email: string, request: Request) => {
+    return async ({ email, origin }) => {
         const user = await sessionConfig.adapter.getUserByEmail(email)
         if (!user) {
-            return { token: null, url: null }
+            throw new AuraAuthError({ code: "USER_NOT_FOUND" })
         }
         const token = createSecretValue()
         const tokenHash = await createHash(token)
@@ -19,7 +21,6 @@ export const forgotPassword = ({ ctx }: InternalStatefulContext) => {
             type: "password_reset",
             tokenHash,
         })
-        const origin = new URL(request.url).origin
         return { token, url: `${origin}${basePath}/password/reset?token=${token}` }
     }
 }

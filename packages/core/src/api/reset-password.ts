@@ -26,7 +26,7 @@ export const resetPassword = async ({
             return rateLimit as ResetPasswordAPIReturn
         }
 
-        await sessionStrategy.resetPassword(payload.token, payload.newPassword)
+        await sessionStrategy.resetPassword(payload)
 
         const builder = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
