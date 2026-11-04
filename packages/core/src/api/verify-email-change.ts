@@ -1,5 +1,4 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -36,25 +35,25 @@ export const verifyEmailChange = async ({
         if (rateLimit) {
             return rateLimit
         }
-        const { success } = await sessionStrategy.verifyEmailChange(payload.token, userId!, sessionId!)
-
-        if (!success) {
-            throw new AuraAuthError({ code: "INVALID_EMAIL_CHANGE_TOKEN" })
-        }
+        await sessionStrategy.verifyEmailChange({
+            sessionId: sessionId!,
+            userId: userId!,
+            token: payload.token,
+        })
 
         const headers = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
         const headersList = headers.toHeaders()
 
         return {
-            success,
+            success: true,
             redirect,
             redirectURL: redirect ? null : redirectURL,
             headers: headersList,
             toResponse: () => {
                 return Response.json(
                     {
-                        success,
+                        success: true,
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },

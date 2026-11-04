@@ -365,18 +365,13 @@ export interface SessionStrategy<DefaultUser extends User = User> {
 
     changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void>
 
-    changeEmail(
-        userId: string,
-        currentPassword: string,
-        newEmail: string,
-        request: Request
-    ): Promise<{
+    changeEmail(options: { userId: string; currentPassword: string; newEmail: string; origin: string }): Promise<{
         token: string
         url: string
         oldEmail?: string
     }>
 
-    verifyEmailChange(token: string, userId: string, sessionId: string): Promise<{ success: boolean; userId?: string }>
+    verifyEmailChange(options: { token: string; userId: string; sessionId: string }): Promise<void>
 }
 
 export interface OAuthTokenPayload {

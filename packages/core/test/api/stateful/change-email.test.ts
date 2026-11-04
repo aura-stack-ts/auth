@@ -309,8 +309,8 @@ describe("changeEmail API", async () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "USER_NOT_FOUND",
-                message: "User not found. Please check the user ID and try again.",
+                code: "SILENT_USER_NOT_FOUND",
+                message: "The user account could not be found. Please check your credentials and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

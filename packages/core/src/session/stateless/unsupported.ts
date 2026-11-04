@@ -56,14 +56,14 @@ export const changePassword = (_: InternalStatelessContext): SessionStrategy["ch
     }
 }
 
-export const changeEmail = (_: InternalStatelessContext) => {
-    return async (_userId: string, _currentPassword: string, _newEmail: string): Promise<{ token: string; url: string }> => {
+export const changeEmail = (_: InternalStatelessContext): SessionStrategy["changeEmail"] => {
+    return async () => {
         throw new Error("changeEmail is not supported in stateless mode.")
     }
 }
 
-export const verifyEmailChange = (_: InternalStatelessContext) => {
-    return async (_token: string): Promise<{ success: boolean }> => {
+export const verifyEmailChange = (_: InternalStatelessContext): SessionStrategy["verifyEmailChange"] => {
+    return async () => {
         throw new Error("verifyEmailChange is not supported in stateless mode.")
     }
 }

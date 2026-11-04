@@ -1,4 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -15,6 +16,9 @@ export const changeEmail = async ({
     skipCSRFCheck = false,
 }: FunctionAPIContext<ChangeEmailAPIOptions>): Promise<ChangeEmailAPIReturn> => {
     const { logger, sessionStrategy, emailChange } = ctx
+    if (!emailChange?.sendEmailChangeVerification) {
+        throw new AuraAuthError({ code: "CHANGE_EMAIL_NOT_IMPLEMENTED" })
+    }
     try {
         logger?.log("CHANGE_EMAIL_INITIATED", {
             structuredData: {
@@ -22,7 +26,7 @@ export const changeEmail = async ({
                 doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
             },
         })
-        const { request, rateLimit, userId } = await createValidation(
+        const { request, rateLimit, userId, originURL } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
@@ -35,13 +39,13 @@ export const changeEmail = async ({
         if (rateLimit) {
             return rateLimit
         }
-        const { token, url, oldEmail } = await sessionStrategy.changeEmail(
-            userId!,
-            payload.currentPassword,
-            payload.newEmail,
-            request
-        )
-        await emailChange?.sendEmailChangeVerification?.({ email: oldEmail, newEmail: payload.newEmail, token, url })
+        const { token, url, oldEmail } = await sessionStrategy.changeEmail({
+            userId: userId!,
+            origin: originURL,
+            currentPassword: payload.currentPassword,
+            newEmail: payload.newEmail,
+        })
+        await emailChange.sendEmailChangeVerification({ email: oldEmail, newEmail: payload.newEmail, token, url })
 
         const headers = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)

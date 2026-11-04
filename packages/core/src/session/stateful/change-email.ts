@@ -1,15 +1,11 @@
-import { createHash, createSecretValue, verifyPassword } from "@/shared/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
+import { createHash, createSecretValue, verifyPassword } from "@/shared/crypto.ts"
+import type { SessionStrategy } from "@/@types/session.ts"
 import type { InternalStatefulContext } from "@/@types/internal.ts"
 
-export const changeEmail = ({ ctx }: InternalStatefulContext) => {
+export const changeEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["changeEmail"] => {
     const { sessionConfig } = ctx
-    return async (
-        userId: string,
-        currentPassword: string,
-        newEmail: string,
-        request: Request
-    ): Promise<{ token: string; url: string; oldEmail?: string }> => {
+    return async ({ userId, currentPassword, newEmail, origin }) => {
         const accounts = await sessionConfig.adapter.getAccountsByUserId(userId)
         const credentialAccount = accounts.find((acc) => acc.type === "credentials")
         if (!credentialAccount) {
@@ -29,7 +25,7 @@ export const changeEmail = ({ ctx }: InternalStatefulContext) => {
         }
         const user = await sessionConfig.adapter.getUserById(userId)
         if (!user) {
-            throw new AuraAuthError({ code: "USER_NOT_FOUND" })
+            throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
         }
         const token = createSecretValue()
         const tokenHash = await createHash(token)
@@ -42,7 +38,6 @@ export const changeEmail = ({ ctx }: InternalStatefulContext) => {
             type: "email_change",
             tokenHash,
         })
-        const origin = new URL(request.url).origin
         return {
             token,
             url: `${origin}${ctx.basePath}/email/change/verify?token=${token}`,

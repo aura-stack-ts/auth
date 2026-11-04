@@ -922,6 +922,15 @@ export const ERROR_CATALOG = {
         userMessage: "Internal library configuration error. The password hashing function returned an invalid hash.",
     },
     UNSUPPORTED_FUNCTION_IN_STATELESS_MODE: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The custom credentials hash or verify function provided in the configuration is invalid. The two functions must be provided together and must be valid functions.",
+        userMessage:
+            "Internal library configuration error. The custom credentials hash and verify functions must be provided together and must be valid functions.",
+    },
+    CHANGE_EMAIL_NOT_IMPLEMENTED: {
         type: "INTERNAL",
         statusCode: 500,
         name: "ConfigError",
@@ -943,6 +952,15 @@ export const ERROR_CATALOG = {
         name: "ConfigError",
         message:
             "The custom credentials hash or verify function provided in the configuration is invalid. The two functions must be provided together and must be valid functions.",
+        userMessage:
+            "Internal library configuration error. The custom credentials hash and verify functions must be provided together and must be valid functions.",
+    },
+    INVALID_EMAIL_CHANGE_EXPIRES_IN_VALUE: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The 'expiresIn' configuration value for email change must be a positive integer representing the number of seconds until expiration. The provided value does not meet this requirement.",
         userMessage:
             "Internal library configuration error. The custom credentials hash and verify functions must be provided together and must be valid functions.",
     },
