@@ -1,11 +1,12 @@
-import type { InternalStatefulContext } from "@/@types/internal.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { hashPassword, verifyPassword } from "@/shared/crypto.ts"
+import type { SessionStrategy } from "@/@types/session.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
-export const changePassword = ({ ctx }: InternalStatefulContext) => {
+export const changePassword = ({ ctx }: InternalStatefulContext): SessionStrategy["changePassword"] => {
     const { sessionConfig } = ctx
 
-    return async (userId: string, currentPassword: string, newPassword: string) => {
+    return async ({ userId, currentPassword, newPassword }) => {
         const accounts = await sessionConfig.adapter.getAccountsByUserId(userId)
         const credentialAccount = accounts.find((acc) => acc.type === "credentials")
         if (!credentialAccount) {
@@ -20,5 +21,6 @@ export const changePassword = ({ ctx }: InternalStatefulContext) => {
             throw new AuraAuthError({ code: "INVALID_CURRENT_PASSWORD" })
         }
         await sessionConfig.adapter.updatePasswordHash(credentialAccount.id, await hashPassword(newPassword))
+        await sessionConfig.adapter.revokeAllSessions(userId, "password_changed")
     }
 }

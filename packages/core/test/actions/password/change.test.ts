@@ -11,6 +11,7 @@ describe("changePasswordAction", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
         const updatePasswordHashMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const {
             handlers: { POST },
@@ -19,10 +20,15 @@ describe("changePasswordAction", async () => {
             getCredentialAccount: getCredentialAccountMock,
             updatePasswordHash: updatePasswordHashMock,
             getSessionByToken: getSessionByTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const token = "valid-token"
         const tokenHash = await createHash(token)
+
+        const newPassword = "new-password"
+        const newPasswordHash = await createHash(newPassword)
+        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const response = await POST(
             new Request("https://example.com/auth/password/change", {
@@ -33,8 +39,8 @@ describe("changePasswordAction", async () => {
                     Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
+                    newPassword,
                     currentPassword: "current-password",
-                    newPassword: "new-password",
                 }),
             })
         )
@@ -49,7 +55,8 @@ describe("changePasswordAction", async () => {
         expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
-        expect(updatePasswordHashMock).toHaveBeenCalledWith("account-321", expect.any(String))
+        expect(updatePasswordHashMock).toHaveBeenCalledWith("account-321", newPasswordHash)
+        expect(revokeAllSessionsMock).toHaveBeenCalledWith("user-123", "password_changed")
     })
 
     test("changePassword with no credentials account", async () => {
@@ -57,6 +64,7 @@ describe("changePasswordAction", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([])
         const getCredentialAccountMock = vi.fn()
         const updatePasswordHashMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const {
             handlers: { POST },
@@ -65,6 +73,7 @@ describe("changePasswordAction", async () => {
             getCredentialAccount: getCredentialAccountMock,
             updatePasswordHash: updatePasswordHashMock,
             getSessionByToken: getSessionByTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const token = "valid-token"
@@ -96,6 +105,7 @@ describe("changePasswordAction", async () => {
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).not.toHaveBeenCalled()
         expect(updatePasswordHashMock).not.toHaveBeenCalled()
+        expect(revokeAllSessionsMock).not.toHaveBeenCalled()
     })
 
     test("changePassword with invalid current password", async () => {
@@ -103,6 +113,7 @@ describe("changePasswordAction", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
         const updatePasswordHashMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const {
             handlers: { POST },
@@ -111,6 +122,7 @@ describe("changePasswordAction", async () => {
             getCredentialAccount: getCredentialAccountMock,
             updatePasswordHash: updatePasswordHashMock,
             getSessionByToken: getSessionByTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const token = "valid-token"
@@ -142,6 +154,7 @@ describe("changePasswordAction", async () => {
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(updatePasswordHashMock).not.toHaveBeenCalled()
+        expect(revokeAllSessionsMock).not.toHaveBeenCalled()
     })
 
     test("success changePassword with redirectTo and redirect: true", async () => {
@@ -149,6 +162,7 @@ describe("changePasswordAction", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
         const updatePasswordHashMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const {
             handlers: { POST },
@@ -157,10 +171,15 @@ describe("changePasswordAction", async () => {
             getCredentialAccount: getCredentialAccountMock,
             updatePasswordHash: updatePasswordHashMock,
             getSessionByToken: getSessionByTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const token = "valid-token"
         const tokenHash = await createHash(token)
+
+        const newPassword = "new-password"
+        const newPasswordHash = await createHash(newPassword)
+        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const response = await POST(
             new Request("https://example.com/auth/password/change?redirectTo=/auth/success", {
@@ -171,8 +190,8 @@ describe("changePasswordAction", async () => {
                     Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
+                    newPassword,
                     currentPassword: "current-password",
-                    newPassword: "new-password",
                 }),
             })
         )
@@ -187,7 +206,8 @@ describe("changePasswordAction", async () => {
         expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
-        expect(updatePasswordHashMock).toHaveBeenCalledWith("account-321", expect.any(String))
+        expect(updatePasswordHashMock).toHaveBeenCalledWith("account-321", newPasswordHash)
+        expect(revokeAllSessionsMock).toHaveBeenCalledWith("user-123", "password_changed")
     })
 
     test("success changePassword with redirectTo and redirect: false", async () => {
@@ -195,6 +215,7 @@ describe("changePasswordAction", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
         const updatePasswordHashMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const {
             handlers: { POST },
@@ -203,10 +224,15 @@ describe("changePasswordAction", async () => {
             getCredentialAccount: getCredentialAccountMock,
             updatePasswordHash: updatePasswordHashMock,
             getSessionByToken: getSessionByTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const token = "valid-token"
         const tokenHash = await createHash(token)
+
+        const newPassword = "new-password"
+        const newPasswordHash = await createHash(newPassword)
+        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const response = await POST(
             new Request("https://example.com/auth/password/change?redirectTo=/auth/success&redirect=false", {
@@ -217,8 +243,8 @@ describe("changePasswordAction", async () => {
                     Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
+                    newPassword,
                     currentPassword: "current-password",
-                    newPassword: "new-password",
                 }),
             })
         )
@@ -233,6 +259,7 @@ describe("changePasswordAction", async () => {
         expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
-        expect(updatePasswordHashMock).toHaveBeenCalledWith("account-321", expect.any(String))
+        expect(updatePasswordHashMock).toHaveBeenCalledWith("account-321", newPasswordHash)
+        expect(revokeAllSessionsMock).toHaveBeenCalledWith("user-123", "password_changed")
     })
 })

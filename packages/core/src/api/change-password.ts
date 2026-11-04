@@ -1,8 +1,8 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
-import type { ChangePasswordAPIOptions, ChangePasswordAPIReturn } from "@/@types/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
+import type { ChangePasswordAPIOptions, ChangePasswordAPIReturn } from "@/@types/api.ts"
 
 export const changePassword = async ({
     payload,
@@ -37,7 +37,11 @@ export const changePassword = async ({
             return rateLimit
         }
 
-        await sessionStrategy.changePassword(userId!, payload.currentPassword, payload.newPassword)
+        await sessionStrategy.changePassword({
+            userId: userId!,
+            currentPassword: payload.currentPassword,
+            newPassword: payload.newPassword,
+        })
 
         const headers = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)

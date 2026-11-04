@@ -31,8 +31,8 @@ export const resetPassword = (_: InternalStatelessContext): SessionStrategy["res
     }
 }
 
-export const changePassword = (_: InternalStatelessContext) => {
-    return async (_userId: string, _currentPassword: string, _newPassword: string): Promise<void> => {
+export const changePassword = (_: InternalStatelessContext): SessionStrategy["changePassword"] => {
+    return async () => {
         throw new Error("changePassword is not supported in stateless mode.")
     }
 }
