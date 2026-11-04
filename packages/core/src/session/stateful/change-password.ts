@@ -22,11 +22,11 @@ export const changePassword = ({ ctx }: InternalStatefulContext): SessionStrateg
         if (!isMatch) {
             throw new AuraAuthError({ code: "INVALID_CURRENT_PASSWORD" })
         }
+        const passwordHash = await hashPasswordFn(newPassword)
         const revokeSessions = await sessionConfig.adapter.revokeAllSessions(userId, "password_changed")
         if (!revokeSessions || revokeSessions === 0) {
             throw new AuraAuthError({ code: "FAILED_TO_REVOKE_SESSIONS_AFTER_PASSWORD_CHANGE" })
         }
-        const passwordHash = await hashPasswordFn(newPassword)
         const updatedCredentialAccount = await sessionConfig.adapter.updatePasswordHash(credentialAccount.id, passwordHash)
         if (!updatedCredentialAccount) {
             throw new AuraAuthError({ code: "INVALID_PASSWORD_HASH_IN_PASSWORD_CHANGE" })

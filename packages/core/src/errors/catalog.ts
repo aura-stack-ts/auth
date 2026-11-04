@@ -937,6 +937,15 @@ export const ERROR_CATALOG = {
             "Failed to revoke all active sessions after a password change. This may indicate a database or session management issue.",
         userMessage: "An error occurred while updating your password. Please try again later.",
     },
+    INVALID_CUSTOM_CREDENTIALS_HASH_OR_VERIFY_FUNCTION: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The custom credentials hash or verify function provided in the configuration is invalid. The two functions must be provided together and must be valid functions.",
+        userMessage:
+            "Internal library configuration error. The custom credentials hash and verify functions must be provided together and must be valid functions.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

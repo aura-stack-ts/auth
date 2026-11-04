@@ -9,6 +9,7 @@ import { getBasePathConfig } from "@/config/get-base-path.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { getOAuthProvidersConfig } from "@/config/get-oauth.ts"
+import { getCredentialsConfig } from "@/config/get-credentials.ts"
 import { createProxyLogger } from "@/config/logger/create-logger.ts"
 import { createRateLimiterInstance } from "@/shared/rate-limiter.ts"
 import { getPasswordResetConfig } from "@/config/get-password-reset.ts"
@@ -30,7 +31,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
     const { trusted, untrusted } = cookies(config, logger)
 
     const ctx = {
-        credentials: config?.credentials,
+        credentials: getCredentialsConfig(config),
         cookies: untrusted,
         jose,
         secret,

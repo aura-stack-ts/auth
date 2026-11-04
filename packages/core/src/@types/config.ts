@@ -454,8 +454,8 @@ export interface CredentialsPayload {
  * Interface for the credentials provider.
  */
 export interface CredentialsConfig<Identity extends Identities> {
-    hash?: (password: string, salt?: string, iterations?: number) => Promise<string>
-    verify?: (password: string, hashedPassword: string) => Promise<boolean>
+    hash?: (password: string, salt?: string, iterations?: number) => Awaitable<string>
+    verify?: (password: string, hashedPassword: string) => Awaitable<boolean>
     /**
      * Authenticates a user using credentials.
      * Must return a User object or the identity type if the identity schema is provided.
@@ -464,7 +464,7 @@ export interface CredentialsConfig<Identity extends Identities> {
 }
 
 export type Handlers = {
-    [method in "GET" | "POST" | "PATCH" | "DELETE" | "ALL" | "handle"]: (request: Request) => Response | Promise<Response>
+    [method in "GET" | "POST" | "PATCH" | "DELETE" | "ALL" | "handle"]: (request: Request) => Promise<Response>
 }
 
 /**
