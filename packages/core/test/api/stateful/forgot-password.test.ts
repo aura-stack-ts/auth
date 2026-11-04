@@ -49,7 +49,7 @@ describe("forgotPassword API", async () => {
         expect(sendPasswordResetEmailMock).toHaveBeenCalledWith({
             email: "john@example.com",
             token,
-            url: `https://example.com/auth/password/reset?token=${token}`,
+            url: `https://example.com/auth/password-reset?token=${token}`,
         })
     })
 
@@ -77,7 +77,7 @@ describe("forgotPassword API", async () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "USER_NOT_FOUND",
+                code: "SILENT_USER_NOT_FOUND",
                 message: "The user account could not be found. Please check your credentials and try again.",
             },
             redirect: false,
@@ -182,7 +182,7 @@ describe("forgotPassword API", async () => {
         expect(sendPasswordResetEmailMock).toHaveBeenCalledWith({
             email: "john@example.com",
             token,
-            url: `https://example.com/auth/password/reset?token=${token}`,
+            url: `https://example.com/auth/password-reset?token=${token}`,
         })
     })
 
@@ -234,7 +234,7 @@ describe("forgotPassword API", async () => {
         expect(sendPasswordResetEmailMock).toHaveBeenCalledWith({
             email: "john@example.com",
             token,
-            url: `https://example.com/auth/password/reset?token=${token}`,
+            url: `https://example.com/auth/password-reset?token=${token}`,
         })
     })
 })

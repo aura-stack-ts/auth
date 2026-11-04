@@ -54,7 +54,7 @@ describe("forgotPasswordAction", async () => {
         expect(sendPasswordResetEmailMock).toHaveBeenCalledWith({
             email: "john@example.com",
             token,
-            url: `https://example.com/auth/password/reset?token=${token}`,
+            url: `https://example.com/auth/password-reset?token=${token}`,
         })
     })
 
@@ -85,7 +85,7 @@ describe("forgotPasswordAction", async () => {
             })
         )
 
-        expect(response.status).toBe(404)
+        expect(response.status).toBe(200)
         expect(await response.json()).toEqual({
             success: false,
             redirect: false,
@@ -195,7 +195,7 @@ describe("forgotPasswordAction", async () => {
         expect(sendPasswordResetEmailMock).toHaveBeenCalledWith({
             email: "john@example.com",
             token,
-            url: `https://example.com/auth/password/reset?token=${token}`,
+            url: `https://example.com/auth/password-reset?token=${token}`,
         })
     })
 
@@ -249,7 +249,7 @@ describe("forgotPasswordAction", async () => {
         expect(sendPasswordResetEmailMock).toHaveBeenCalledWith({
             email: "john@example.com",
             token,
-            url: `https://example.com/auth/password/reset?token=${token}`,
+            url: `https://example.com/auth/password-reset?token=${token}`,
         })
     })
 })

@@ -11,6 +11,7 @@ describe("resetPassword API", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([resetPasswordAccountEntity])
         const updatePasswordHashMock = vi.fn()
         const revokeTokenMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
@@ -21,6 +22,7 @@ describe("resetPassword API", async () => {
             getAccountsByUserId: getAccountsByUserIdMock,
             updatePasswordHash: updatePasswordHashMock,
             revokeToken: revokeTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const output = await api.resetPassword({
@@ -42,6 +44,7 @@ describe("resetPassword API", async () => {
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(updatePasswordHashMock).toHaveBeenCalledWith("account-123", expect.any(String))
         expect(revokeTokenMock).toHaveBeenCalledWith("token-123")
+        expect(revokeAllSessionsMock).toHaveBeenCalledWith("user-123", "password_changed")
     })
 
     test("resetPassword with no-existing token", async () => {
@@ -51,6 +54,7 @@ describe("resetPassword API", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([])
         const updatePasswordHashMock = vi.fn()
         const revokeTokenMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
@@ -61,6 +65,7 @@ describe("resetPassword API", async () => {
             getAccountsByUserId: getAccountsByUserIdMock,
             updatePasswordHash: updatePasswordHashMock,
             revokeToken: revokeTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const output = await api.resetPassword({
@@ -86,6 +91,7 @@ describe("resetPassword API", async () => {
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
         expect(updatePasswordHashMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
+        expect(revokeAllSessionsMock).not.toHaveBeenCalled()
     })
 
     test("resetPassword with no-credentials account", async () => {
@@ -95,6 +101,7 @@ describe("resetPassword API", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([])
         const updatePasswordHashMock = vi.fn()
         const revokeTokenMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
@@ -105,6 +112,7 @@ describe("resetPassword API", async () => {
             getAccountsByUserId: getAccountsByUserIdMock,
             updatePasswordHash: updatePasswordHashMock,
             revokeToken: revokeTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const output = await api.resetPassword({
@@ -130,6 +138,7 @@ describe("resetPassword API", async () => {
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(updatePasswordHashMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
+        expect(revokeAllSessionsMock).not.toHaveBeenCalled()
     })
 
     test("resetPassword with expired token", async () => {
@@ -144,6 +153,7 @@ describe("resetPassword API", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([resetPasswordAccountEntity])
         const updatePasswordHashMock = vi.fn()
         const revokeTokenMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
@@ -154,6 +164,7 @@ describe("resetPassword API", async () => {
             getAccountsByUserId: getAccountsByUserIdMock,
             updatePasswordHash: updatePasswordHashMock,
             revokeToken: revokeTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const output = await api.resetPassword({
@@ -179,6 +190,7 @@ describe("resetPassword API", async () => {
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
         expect(updatePasswordHashMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
+        expect(revokeAllSessionsMock).not.toHaveBeenCalled()
     })
 
     test("resetPassword with revoked token", async () => {
@@ -193,6 +205,7 @@ describe("resetPassword API", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([resetPasswordAccountEntity])
         const updatePasswordHashMock = vi.fn()
         const revokeTokenMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
@@ -203,6 +216,7 @@ describe("resetPassword API", async () => {
             getAccountsByUserId: getAccountsByUserIdMock,
             updatePasswordHash: updatePasswordHashMock,
             revokeToken: revokeTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const output = await api.resetPassword({
@@ -227,6 +241,7 @@ describe("resetPassword API", async () => {
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
         expect(updatePasswordHashMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
+        expect(revokeAllSessionsMock).not.toHaveBeenCalled()
     })
 
     test("success resetPassword flow with redirectTo and redirect: true", async () => {
@@ -236,6 +251,7 @@ describe("resetPassword API", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([resetPasswordAccountEntity])
         const updatePasswordHashMock = vi.fn()
         const revokeTokenMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
@@ -246,6 +262,7 @@ describe("resetPassword API", async () => {
             getAccountsByUserId: getAccountsByUserIdMock,
             updatePasswordHash: updatePasswordHashMock,
             revokeToken: revokeTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const output = await api.resetPassword({
@@ -269,6 +286,7 @@ describe("resetPassword API", async () => {
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(updatePasswordHashMock).toHaveBeenCalledWith("account-123", expect.any(String))
         expect(revokeTokenMock).toHaveBeenCalledWith("token-123")
+        expect(revokeAllSessionsMock).toHaveBeenCalledWith("user-123", "password_changed")
     })
 
     test("success resetPassword flow with redirectTo and redirect: false", async () => {
@@ -278,6 +296,7 @@ describe("resetPassword API", async () => {
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([resetPasswordAccountEntity])
         const updatePasswordHashMock = vi.fn()
         const revokeTokenMock = vi.fn()
+        const revokeAllSessionsMock = vi.fn()
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
@@ -288,6 +307,7 @@ describe("resetPassword API", async () => {
             getAccountsByUserId: getAccountsByUserIdMock,
             updatePasswordHash: updatePasswordHashMock,
             revokeToken: revokeTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
         })
 
         const output = await api.resetPassword({
@@ -311,5 +331,6 @@ describe("resetPassword API", async () => {
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(updatePasswordHashMock).toHaveBeenCalledWith("account-123", expect.any(String))
         expect(revokeTokenMock).toHaveBeenCalledWith("token-123")
+        expect(revokeAllSessionsMock).toHaveBeenCalledWith("user-123", "password_changed")
     })
 })

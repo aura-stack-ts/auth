@@ -30,7 +30,7 @@ export const resetPassword = ({ ctx }: InternalStatefulContext): SessionStrategy
          */
         const passwordHash = await hashPassword(newPassword)
         await sessionConfig.adapter.updatePasswordHash(credentialAccount.id, passwordHash)
-
         await sessionConfig.adapter.revokeToken(verificationToken.id)
+        await sessionConfig.adapter.revokeAllSessions(verificationToken.userId, "password_changed")
     }
 }

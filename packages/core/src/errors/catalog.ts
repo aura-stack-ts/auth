@@ -898,6 +898,14 @@ export const ERROR_CATALOG = {
         message: "No credential account was found for the user associated with the provided reset token.",
         userMessage: "No credential account found for the user. Please contact support.",
     },
+    INVALID_PASSWORD_RESET_EXPIRES_IN_VALUE: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The 'expiresIn' configuration value for password reset must be a positive integer representing the number of seconds until expiration. The provided value does not meet this requirement.",
+        userMessage: "Internal library configuration error. The password reset expiration time must be a positive integer.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

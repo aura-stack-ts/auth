@@ -8,7 +8,7 @@ export const forgotPassword = ({ ctx }: InternalStatefulContext): SessionStrateg
     return async ({ email, origin }) => {
         const user = await sessionConfig.adapter.getUserByEmail(email)
         if (!user) {
-            throw new AuraAuthError({ code: "USER_NOT_FOUND" })
+            throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
         }
         const token = createSecretValue()
         const tokenHash = await createHash(token)
@@ -21,6 +21,6 @@ export const forgotPassword = ({ ctx }: InternalStatefulContext): SessionStrateg
             type: "password_reset",
             tokenHash,
         })
-        return { token, url: `${origin}${basePath}/password/reset?token=${token}` }
+        return { token, url: `${origin}${basePath}${passwordReset?.path || "/password-reset"}?token=${token}` }
     }
 }
