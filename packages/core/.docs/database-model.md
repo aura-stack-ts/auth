@@ -4,10 +4,16 @@ Users ||--o{ Accounts : "has"
 Users ||--o{ Sessions : "starts"
 Users ||--o{ Devices : "registers"
 Users ||--o{ MfaCredentials : "configures"
+Users ||--o{ VerificationTokens : "requests"
 Accounts ||--o| OAuthAccounts : "oauth"
 Accounts ||--o| CredentialAccounts : "credentials"
 Devices ||--o{ Sessions : "contains"
 Devices ||--o{ OAuthTransactions : "tracks"
+MfaCredentials ||--o| TotpCredentials : "totp"
+MfaCredentials ||--o| SmsCredentials : "sms"
+MfaCredentials ||--o| PushCredentials : "push"
+MfaCredentials ||--o{ BackupCodes : "backup"
+Sessions ||--o{ MfaChallenges : "challenges"
 
 Users {
     varchar id PK
@@ -16,12 +22,12 @@ Users {
     varchar image
     timestamp emailVerifiedAt
     varchar status
-    boolean mfaEnabled
-    varchar mfaPreferredMethod
     json attributes
     timestamp createdAt
     timestamp updatedAt
+    timestamp deletedAt
 }
+
 Accounts {
     varchar id PK
     varchar userId FK
@@ -31,8 +37,9 @@ Accounts {
     varchar status
     timestamp createdAt
     timestamp updatedAt
-    json metadata
+    timestamp deletedAt
 }
+
 OAuthAccounts {
     varchar accountId PK,FK
     text accessToken
@@ -44,12 +51,14 @@ OAuthAccounts {
     timestamp accessTokenExpiresAt
     timestamp refreshTokenExpiresAt
     timestamp updatedAt
-    }
-    CredentialAccounts {
-    varchar accountId PK,FK
-    text passwordHash
-    timestamp updatedAt
 }
+
+CredentialAccounts {
+  varchar accountId PK,FK
+  text passwordHash
+  timestamp updatedAt
+}
+
 Sessions {
     varchar id PK
     varchar userId FK
@@ -63,8 +72,8 @@ Sessions {
     timestamp revokedAt
     timestamp createdAt
     timestamp updatedAt
-    json metadata
 }
+
 Devices {
     varchar id PK
     varchar userId FK
@@ -78,18 +87,77 @@ Devices {
     boolean trusted
     timestamp firstSeenAt
     timestamp lastSeenAt
-    json metadata
+    timestamp deletedAt
 }
+
 MfaCredentials {
     varchar id PK
     varchar userId FK
     varchar type
-    json credentialData
+    varchar status
     boolean isPrimary
+    timestamp enrolledAt
     timestamp verifiedAt
     timestamp createdAt
-    json metadata
+    timestamp deletedAt
 }
+
+TotpCredentials {
+  varchar id PK
+  varchar credentialId PK,FK
+  text secretCipher
+  timestamp verifiedAt
+}
+
+SmsCredentials {
+  varchar id PK
+  varchar credentialId PK,FK
+  varchar phoneNumber
+  timestamp verifiedAt
+}
+
+PushCredentials {
+  varchar id PK
+  varchar credentialId PK,FK
+  text deviceToken
+  varchar platform
+  timestamp verifiedAt
+}
+
+BackupCodes {
+  varchar id PK
+  varchar credentialId FK
+  text codeHash
+  boolean used
+  timestamp usedAt
+  timestamp createdAt
+}
+
+MfaChallenges {
+  varchar id PK
+  varchar userId FK
+  varchar sessionId FK
+  varchar credentialId FK
+  varchar type
+  varchar status
+  int attemptCount
+  timestamp expiresAt
+  timestamp verifiedAt
+  timestamp createdAt
+}
+
+VerificationTokens {
+  varchar id PK
+  varchar userId FK
+  text tokenHash UK
+  varchar type
+  varchar identifier
+  varchar newIdentifier
+  timestamp expiresAt
+  timestamp revokedAt
+  timestamp createdAt
+}
+
 OAuthTransactions {
     varchar id PK
     varchar provider
@@ -103,6 +171,5 @@ OAuthTransactions {
     varchar deviceId FK
     timestamp createdAt
     timestamp expiresAt
-    json metadata
 }
 ```

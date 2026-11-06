@@ -31,7 +31,7 @@ export const createDevice = ({ ctx: { sessionConfig } }: InternalStatefulContext
             firstSeenAt: new Date(),
             lastSeenAt: new Date(),
             trusted: false,
-            metadata: null,
+            deletedAt: null,
         })
     }
 }

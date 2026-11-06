@@ -159,8 +159,6 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
                 image: image,
                 emailVerifiedAt: new Date(),
                 status: "active",
-                mfaEnabled: false,
-                mfaPreferredMethod: null,
                 attributes: attributes,
             })
             userId = newUser.id
@@ -225,7 +223,6 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
             mfaState: "none",
             status: "active",
             tokenHash,
-            metadata: null,
         })
 
         const csrfToken = await createCSRF(jose)

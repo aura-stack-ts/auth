@@ -65,9 +65,8 @@ describe("signUp API", async () => {
             image: "https://example.com/image.jpg",
             attributes: {},
             status: "active",
-            mfaEnabled: false,
-            mfaPreferredMethod: null,
             emailVerifiedAt: null,
+            deletedAt: null,
         })
         expect(createAccountMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -86,7 +85,6 @@ describe("signUp API", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -346,9 +344,8 @@ describe("signUp API", async () => {
             image: "https://example.com/image.jpg",
             attributes: {},
             status: "active",
-            mfaEnabled: false,
-            mfaPreferredMethod: null,
             emailVerifiedAt: null,
+            deletedAt: null,
         })
         expect(createAccountMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -371,7 +368,6 @@ describe("signUp API", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -430,9 +426,8 @@ describe("signUp API", async () => {
             image: "https://example.com/image.jpg",
             attributes: {},
             status: "active",
-            mfaEnabled: false,
-            mfaPreferredMethod: null,
             emailVerifiedAt: null,
+            deletedAt: null,
         })
         expect(createAccountMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -451,7 +446,6 @@ describe("signUp API", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -510,9 +504,8 @@ describe("signUp API", async () => {
             image: "https://example.com/image.jpg",
             attributes: {},
             status: "active",
-            mfaEnabled: false,
-            mfaPreferredMethod: null,
             emailVerifiedAt: null,
+            deletedAt: null,
         })
         expect(createAccountMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -531,7 +524,6 @@ describe("signUp API", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -590,9 +582,8 @@ describe("signUp API", async () => {
             image: "https://example.com/image.jpg",
             attributes: {},
             status: "active",
-            mfaEnabled: false,
-            mfaPreferredMethod: null,
             emailVerifiedAt: null,
+            deletedAt: null,
         })
         expect(createAccountMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -611,7 +602,6 @@ describe("signUp API", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -670,9 +660,8 @@ describe("signUp API", async () => {
             image: "https://example.com/image.jpg",
             attributes: {},
             status: "active",
-            mfaEnabled: false,
-            mfaPreferredMethod: null,
             emailVerifiedAt: null,
+            deletedAt: null,
         })
         expect(createAccountMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -691,7 +680,6 @@ describe("signUp API", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 
@@ -752,9 +740,8 @@ describe("signUp API", async () => {
             image: "https://example.com/image.jpg",
             attributes: {},
             status: "active",
-            mfaEnabled: false,
-            mfaPreferredMethod: null,
             emailVerifiedAt: null,
+            deletedAt: null,
         })
         expect(createAccountMock).toHaveBeenCalledWith({
             id: expect.any(String),
@@ -773,7 +760,6 @@ describe("signUp API", async () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
     })
 })

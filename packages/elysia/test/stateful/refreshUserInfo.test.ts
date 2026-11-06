@@ -57,7 +57,6 @@ describe("refreshUserInfo (Stateful)", () => {
             status: "active",
             mfaState: "none",
             deviceId: null,
-            metadata: null,
         })
 
         const csrfToken = await createCSRF(auth.jose)

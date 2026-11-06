@@ -127,7 +127,6 @@ describe("updateSession API", () => {
             mfaState: "none",
             tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
@@ -212,7 +211,6 @@ describe("updateSession API", () => {
             mfaState: "none",
             tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
@@ -335,7 +333,6 @@ describe("updateSession API", () => {
             mfaState: "none",
             tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
@@ -422,7 +419,6 @@ describe("updateSession API", () => {
             mfaState: "none",
             tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
@@ -512,7 +508,6 @@ describe("updateSession API", () => {
             mfaState: "none",
             tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
@@ -602,7 +597,6 @@ describe("updateSession API", () => {
             mfaState: "none",
             tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
@@ -708,7 +702,6 @@ describe("updateSession API", () => {
             mfaState: "none",
             tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })

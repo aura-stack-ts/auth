@@ -35,7 +35,6 @@ describe("getProviderTokens (Stateful)", () => {
             status: "active",
             mfaState: "none",
             deviceId: null,
-            metadata: null,
         })
 
         const response = await app.handle(

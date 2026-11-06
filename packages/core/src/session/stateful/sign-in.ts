@@ -71,7 +71,6 @@ export const signIn = ({ ctx }: InternalStatefulContext) => {
             createdAt: new Date(),
             expiresAt,
             deviceId: null,
-            metadata: null,
         })
 
         const headers = new HeadersBuilder(secureApiHeaders).setHeader("Location", authorization).toHeaders()

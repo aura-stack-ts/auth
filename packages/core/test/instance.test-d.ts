@@ -167,11 +167,13 @@ describe("createAuth", () => {
         (options: GetSessionAPIOptions) => Promise<GetSessionAPIReturn<ZodShapeToObject<UserShape>>>
     >()
     expectTypeOf(createAuth({}).api.updateSession).toEqualTypeOf<
-        (options: UpdateSessionAPIOptions<User>) => Promise<UpdateSessionAPIReturn<ZodShapeToObject<UserShape>>>
+        (
+            options: UpdateSessionAPIOptions<ZodShapeToObject<UserShape>>
+        ) => Promise<UpdateSessionAPIReturn<ZodShapeToObject<UserShape>>>
     >()
 
     expectTypeOf(createAuth({}).jose.signJWS).toEqualTypeOf<
-        (payload: TypedJWTPayload<Partial<ZodShapeToObject<UserShape>>>, options?: JWTHeaderParameters) => Promise<string>
+        (payload: TypedJWTPayload<Partial<User>>, options?: JWTHeaderParameters) => Promise<string>
     >()
     expectTypeOf(createAuth({}).jose.verifyJWS).toEqualTypeOf<
         (token: string, options?: JWTVerifyOptions) => Promise<TypedJWTPayload<ZodShapeToObject<UserShape>>>

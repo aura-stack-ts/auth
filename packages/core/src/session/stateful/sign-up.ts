@@ -56,9 +56,8 @@ export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext)
             image,
             attributes,
             status: "active",
-            mfaEnabled: false,
-            mfaPreferredMethod: null,
             emailVerifiedAt: null,
+            deletedAt: null,
         })
         logger?.log("STATEFUL_USER_CREATED", {
             structuredData: {
@@ -119,7 +118,6 @@ export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext)
             mfaState: "none",
             tokenHash,
             expiresAt,
-            metadata: null,
         })
 
         logger?.log("STATEFUL_SESSION_CREATED", {

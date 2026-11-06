@@ -123,7 +123,6 @@ export const createSession = <DefaultUser extends User>({ ctx, cookies, cookieMa
             mfaState: "none",
             tokenHash,
             expiresAt,
-            metadata: null,
         })
 
         logger?.log("STATEFUL_SESSION_CREATED", {

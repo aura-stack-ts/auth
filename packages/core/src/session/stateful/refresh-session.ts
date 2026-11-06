@@ -167,7 +167,6 @@ export const refreshSession = <DefaultUser extends User>({ ctx, cookieManager }:
                 mfaState: sessionByToken.mfaState,
                 tokenHash: sessionByToken.tokenHash,
                 expiresAt: newExpiresAt,
-                metadata: sessionByToken.metadata,
             })
 
             logger?.log("STATEFUL_SESSION_UPDATED", {

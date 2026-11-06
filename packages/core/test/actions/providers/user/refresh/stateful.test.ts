@@ -343,7 +343,6 @@ describe("refreshUserInfo action", () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
@@ -749,7 +748,6 @@ describe("refreshUserInfo action", () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })
@@ -944,7 +942,6 @@ describe("refreshUserInfo action", () => {
             mfaState: "none",
             tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
-            metadata: null,
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
     })

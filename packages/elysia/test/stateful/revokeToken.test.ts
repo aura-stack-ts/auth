@@ -58,7 +58,6 @@ describe("POST /api/auth/revokeToken", () => {
             mfaState: "none",
             status: "active",
             deviceId: null,
-            metadata: null,
         })
 
         const account = await adapter.createAccount({
