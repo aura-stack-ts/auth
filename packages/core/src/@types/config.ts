@@ -21,6 +21,7 @@ import type { ZodObject } from "zod"
 import type { SerializeOptions } from "@aura-stack/router/cookie"
 import type { CredentialsConfigContext, OnCreateUserContext } from "@/@types/internal.ts"
 import type { RateLimiterRule, RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter/types"
+import type { RoutePattern } from "@aura-stack/router"
 
 /**
  * Main configuration interface for Aura Auth.
@@ -206,6 +207,22 @@ export type AuthConfig<
      * }
      */
     emailVerification?: EmailVerificationConfig
+    /**
+     * Password reset configuration. It includes the expiration time and the callback function to send the password reset email.
+     * @example
+     * passwordReset: {
+     *   expiresIn: 3600, // 1 hour
+     *   sendPasswordResetEmail: async ({ email, token, url }) => {
+     *     // Implement your email sending logic here
+     *     sendEmail({
+     *       to: email,
+     *       subject: "Password Reset",
+     *       html: `<p>Click <a href="${url}">here</a> to reset your password.</p>`,
+     *     })
+     *   }
+     * }
+     */
+    passwordReset?: PasswordResetConfig
 } & TrustedProxyHeadersConfig
 
 export type OAuthProvidersConfig<Identity extends Identities> =
@@ -513,6 +530,37 @@ export interface EmailVerificationConfig {
     sendVerificationEmail?: (options: { email: string; token: string | null; url: string | null }) => Awaitable<void>
 }
 
+export interface PasswordResetConfig {
+    /**
+     * Defines the path for the password reset endpoint. By default, it is set to `/auth/password-reset`.
+     * You can customize this path to match your application's routing structure.
+     * @example
+     * path: "/auth/reset-password"
+     */
+    path?: RoutePattern
+    /**
+     * Defines the expiration time for the password reset token in seconds. By default, it is
+     * set to 30 minutes (1800 seconds).
+     * @example
+     * expiresIn: 3600 // 1 hour
+     */
+    expiresIn?: number
+    /**
+     * Callback function to send the password reset email. It receives the email address, token, and reset URL.
+     * You must implement this function to send the email using your preferred email service.
+     * @example
+     * sendPasswordResetEmail: async ({ email, token, url }) => {
+     *   // Send the password reset email to the user with the provided token and URL
+     *   sendEmail({
+     *     to: email,
+     *     subject: "Reset your password",
+     *     body: `Click the following link to reset your password: ${url}`,
+     *   })
+     * }
+     */
+    sendPasswordResetEmail?: (options: { email: string; token: string | null; url: string | null }) => Awaitable<void>
+}
+
 // #region Rate Limiter
 
 export type RateLimiterConfig = Partial<
@@ -530,7 +578,10 @@ export type RateLimiterConfig = Partial<
             | "isProviderConnected"
             | "signOut"
             | "sendVerificationEmail"
-            | "verifyEmail",
+            | "verifyEmail"
+            | "forgotPassword"
+            | "resetPassword"
+            | "changePassword",
             RateLimiterRule
         >
     >["rules"]

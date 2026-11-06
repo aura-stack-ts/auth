@@ -11,6 +11,7 @@ import { createJoseManager } from "@/session/jose-manager.ts"
 import { getOAuthProvidersConfig } from "@/config/get-oauth.ts"
 import { createProxyLogger } from "@/config/logger/create-logger.ts"
 import { createRateLimiterInstance } from "@/shared/rate-limiter.ts"
+import { getPasswordResetConfig } from "@/config/get-password-reset.ts"
 import { getTrustedOriginsConfig } from "@/config/get-trusted-origins.ts"
 import { getEmailVerificationConfig } from "@/config/get-email-verification.ts"
 import { getTrustedProxyHeadersConfig } from "@/config/get-trusted-proxy-headers.ts"
@@ -43,6 +44,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         identity: getIdentityConfig(config),
         signUp: config?.signUp,
         emailVerification: getEmailVerificationConfig(config),
+        passwordReset: getPasswordResetConfig(config),
         jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
         rateLimiters: createRateLimiterInstance(config?.rateLimiter, proxyHeadersAsBoolean),
         sessionConfig: config?.session,

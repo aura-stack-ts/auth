@@ -947,4 +947,40 @@ export const LOG_MESSAGES = {
         msgId: "VERIFY_EMAIL_ERROR",
         message: "Error occurred during email verification process for user",
     },
+    FORGOT_PASSWORD_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "FORGOT_PASSWORD_INITIATED",
+        message: "Starting forgot password process for user",
+    },
+    FORGOT_PASSWORD_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "FORGOT_PASSWORD_ERROR",
+        message: "Error occurred during forgot password process for user",
+    },
+    RESET_PASSWORD_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "RESET_PASSWORD_INITIATED",
+        message: "Starting reset password process for user",
+    },
+    RESET_PASSWORD_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "RESET_PASSWORD_ERROR",
+        message: "Error occurred during reset password process for user",
+    },
+    CHANGE_PASSWORD_INITIATED: {
+        facility: 4,
+        severity: "debug",
+        msgId: "CHANGE_PASSWORD_INITIATED",
+        message: "Starting change password process for user",
+    },
+    CHANGE_PASSWORD_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "CHANGE_PASSWORD_ERROR",
+        message: "Error occurred during change password process for user",
+    },
 } as const

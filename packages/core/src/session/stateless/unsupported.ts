@@ -18,3 +18,15 @@ export const verifyEmail = (_: InternalStatelessContext): SessionStrategy["verif
         throw new Error("verifyEmail is not supported in stateless mode.")
     }
 }
+
+export const forgotPassword = (_: InternalStatelessContext): SessionStrategy["forgotPassword"] => {
+    return async () => {
+        throw new Error("forgotPassword is not supported in stateless mode.")
+    }
+}
+
+export const resetPassword = (_: InternalStatelessContext): SessionStrategy["resetPassword"] => {
+    return async () => {
+        throw new Error("resetPassword is not supported in stateless mode.")
+    }
+}

@@ -13,6 +13,8 @@ import {
     isProviderConnected,
     sendVerificationEmail,
     verifyEmail,
+    forgotPassword,
+    resetPassword,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -49,6 +51,10 @@ import type {
     SendVerificationEmailAPIReturn,
     VerifyEmailAPIReturn,
     VerifyEmailAPIOptions,
+    ForgotPasswordAPIOptions,
+    ForgotPasswordAPIReturn,
+    ResetPasswordAPIReturn,
+    ResetPasswordAPIOptions,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -308,6 +314,38 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          */
         verifyEmail: async (token: string, options?: VerifyEmailAPIOptions): Promise<VerifyEmailAPIReturn> => {
             return verifyEmail(token, { ctx, ...options })
+        },
+        /**
+         * Initiates the forgot password flow on the server-side. It sends a password reset email to the specified
+         * email address.
+         *
+         * @param email - The email address to which the password reset email should be sent.
+         * @param options - Options for the API call, including headers and request object.
+         * @example
+         * const { success } = await api.forgotPassword("user@example.com", {
+         *   headers: getHeaders()
+         * })
+         */
+        forgotPassword: async (email: string, options?: ForgotPasswordAPIOptions): Promise<ForgotPasswordAPIReturn> => {
+            return forgotPassword(email, { ctx, ...options })
+        },
+        /**
+         * Resets the password for a user on the server-side. It requires a valid password reset token and the new password.
+         *
+         * > **NOTE**: This is a complementary method to `forgotPassword` and should be used after the user
+         * has received the password reset email and provided a valid token.
+         *
+         * @param options - Options for the API call, including the reset token, new password, headers, and request object.
+         * @example
+         * const { success } = await api.resetPassword({
+         *   payload: {
+         *     token: "reset-token-here",
+         *     newPassword: "new-password-here"
+         *   }
+         * })
+         */
+        resetPassword: async (options: ResetPasswordAPIOptions): Promise<ResetPasswordAPIReturn> => {
+            return resetPassword({ ctx, ...options })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for
