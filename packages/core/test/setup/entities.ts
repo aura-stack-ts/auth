@@ -1,5 +1,6 @@
 import type {
     AccountEntity,
+    CredentialAccountEntity,
     DeviceEntity,
     OAuthAccountEntity,
     OAuthTransactionEntity,
@@ -8,6 +9,7 @@ import type {
     UserEntity,
     VerificationTokenEntity,
 } from "@/@types/index.ts"
+import { hashPassword } from "@/shared/crypto.ts"
 
 export const userEntity: UserEntity = {
     id: "user-123",
@@ -122,4 +124,22 @@ export const resetPasswordAccountEntity: AccountEntity = {
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
+}
+
+export const accountEntityWithCredentials: AccountEntity = {
+    id: "account-321",
+    userId: "user-123",
+    provider: "credentials",
+    providerUserId: "unknown",
+    status: "active",
+    type: "credentials",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+}
+
+export const credentialAccountEntity: CredentialAccountEntity = {
+    accountId: "account-321",
+    passwordHash: await hashPassword("current-password"),
+    updatedAt: new Date(),
 }

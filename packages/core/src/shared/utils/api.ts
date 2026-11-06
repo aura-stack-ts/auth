@@ -23,6 +23,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         request?: Request
         rateLimit?: any
         headers: Headers
+        userId?: string
         originURL?: string
     } = { headers }
 
@@ -56,9 +57,10 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                     }
                     const tokenHash = await createHash(sessionToken)
                     const session = await ctx.sessionConfig.adapter.getSessionByToken(tokenHash)
-                    if (!session) {
+                    if (!session || session.status !== "active" || new Date() > session.expiresAt) {
                         throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
                     }
+                    output.userId = session.userId
                 }
             })
             return builder
@@ -112,6 +114,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                 request: Request
                 rateLimit: any | undefined
                 headers: Headers
+                userId?: string
                 originURL: string
             }
         },

@@ -906,6 +906,46 @@ export const ERROR_CATALOG = {
             "The 'expiresIn' configuration value for password reset must be a positive integer representing the number of seconds until expiration. The provided value does not meet this requirement.",
         userMessage: "Internal library configuration error. The password reset expiration time must be a positive integer.",
     },
+    INVALID_CURRENT_PASSWORD: {
+        type: "AUTH_FLOW",
+        statusCode: 401,
+        name: "AuthError",
+        message: "The provided current password does not match the stored password for the user.",
+        userMessage: "The current password is incorrect. Please try again.",
+    },
+    INVALID_PASSWORD_HASH_IN_PASSWORD_CHANGE: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The password hashing function returned an invalid hash value during the password change operation. The hash must be a non-empty string.",
+        userMessage: "Internal library configuration error. The password hashing function returned an invalid hash.",
+    },
+    UNSUPPORTED_FUNCTION_IN_STATELESS_MODE: {
+        type: "INTERNAL",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The requested function is not supported in stateless mode. Please check your configuration and ensure that you are using a stateful session strategy for this operation.",
+        userMessage: "This operation is not supported in stateless mode. Please contact support for assistance.",
+    },
+    FAILED_TO_REVOKE_SESSIONS_AFTER_PASSWORD_CHANGE: {
+        type: "AUTH_FLOW",
+        statusCode: 500,
+        name: "AuthError",
+        message:
+            "Failed to revoke all active sessions after a password change. This may indicate a database or session management issue.",
+        userMessage: "An error occurred while updating your password. Please try again later.",
+    },
+    INVALID_CUSTOM_CREDENTIALS_HASH_OR_VERIFY_FUNCTION: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message:
+            "The custom credentials hash or verify function provided in the configuration is invalid. The two functions must be provided together and must be valid functions.",
+        userMessage:
+            "Internal library configuration error. The custom credentials hash and verify functions must be provided together and must be valid functions.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

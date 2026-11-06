@@ -362,6 +362,8 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     }>
 
     resetPassword(options: { token: string; newPassword: string }): Promise<void>
+
+    changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void>
 }
 
 export interface OAuthTokenPayload {
