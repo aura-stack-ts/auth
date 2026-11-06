@@ -978,6 +978,13 @@ export const ERROR_CATALOG = {
         message: "The provided email value is invalid. It must be a non-empty string and a valid email format.",
         userMessage: "The provided email address is invalid. Please enter a valid email address.",
     },
+    USER_EMAIL_NOT_FOUND: {
+        type: "AUTH_FLOW",
+        statusCode: 404,
+        name: "AuthError",
+        message: "The user does not have an email address associated with their account.",
+        userMessage: "User email not found. Please contact support.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

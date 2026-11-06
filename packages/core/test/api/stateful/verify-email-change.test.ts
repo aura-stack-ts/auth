@@ -23,14 +23,16 @@ describe("verifyEmailChange API", async () => {
             revokeAllSessions: revokeAllSessionsMock,
         })
 
-        const token = "mocked-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "mocked-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const confirmToken = "mocked-confirm-token"
+        const confirmTokenHash = await createHash(confirmToken)
 
         const output = await api.verifyEmailChange({
-            payload: { token },
+            payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -42,7 +44,8 @@ describe("verifyEmailChange API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
+        expect(getTokenByHashMock).toHaveBeenCalledWith(confirmTokenHash)
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
             email: "new@example.com",
             emailVerifiedAt: expect.any(Date),
@@ -68,13 +71,15 @@ describe("verifyEmailChange API", async () => {
             revokeAllSessions: revokeAllSessionsMock,
         })
 
-        const token = "invalid-token"
-        const tokenHash = await createHash(token)
+        const sessionToken = "session-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const confirmToken = "invalid-confirm-token"
 
         const output = await api.verifyEmailChange({
-            payload: { token },
+            payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -90,7 +95,7 @@ describe("verifyEmailChange API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getTokenByHashMock).not.toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
@@ -119,14 +124,16 @@ describe("verifyEmailChange API", async () => {
             revokeAllSessions: revokeAllSessionsMock,
         })
 
-        const token = "invalid-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "session-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const confirmToken = "revoked-confirm-token"
+        const confirmTokenHash = await createHash(confirmToken)
 
         const output = await api.verifyEmailChange({
-            payload: { token },
+            payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -142,8 +149,8 @@ describe("verifyEmailChange API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
-        expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
+        expect(getTokenByHashMock).toHaveBeenCalledWith(confirmTokenHash)
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
         expect(revokeAllSessionsMock).not.toHaveBeenCalled()
@@ -171,14 +178,16 @@ describe("verifyEmailChange API", async () => {
             revokeAllSessions: revokeAllSessionsMock,
         })
 
-        const token = "mocked-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "mocked-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const confirmToken = "wrong-type-confirm-token"
+        const confirmTokenHash = await createHash(confirmToken)
 
         const output = await api.verifyEmailChange({
-            payload: { token },
+            payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -194,8 +203,8 @@ describe("verifyEmailChange API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
-        expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
+        expect(getTokenByHashMock).toHaveBeenCalledWith(confirmTokenHash)
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
         expect(revokeAllSessionsMock).not.toHaveBeenCalled()
@@ -222,14 +231,16 @@ describe("verifyEmailChange API", async () => {
             revokeAllSessions: revokeAllSessionsMock,
         })
 
-        const token = "mocked-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "mocked-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const confirmToken = "expired-confirm-token"
+        const confirmTokenHash = await createHash(confirmToken)
 
         const output = await api.verifyEmailChange({
-            payload: { token },
+            payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -245,8 +256,8 @@ describe("verifyEmailChange API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
-        expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
+        expect(getTokenByHashMock).toHaveBeenCalledWith(confirmTokenHash)
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
         expect(revokeAllSessionsMock).not.toHaveBeenCalled()
@@ -273,13 +284,15 @@ describe("verifyEmailChange API", async () => {
             revokeAllSessions: revokeAllSessionsMock,
         })
 
-        const token = "mocked-token"
-        const tokenHash = await createHash(token)
+        const sessionToken = "mocked-token"
+        const sessionTokenHash = await createHash(sessionToken)
+        const confirmToken = "expired-confirm-token"
+        const confirmTokenHash = await createHash(confirmToken)
 
         const output = await api.verifyEmailChange({
-            payload: { token },
+            payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -295,8 +308,8 @@ describe("verifyEmailChange API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
-        expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
+        expect(getTokenByHashMock).toHaveBeenCalledWith(confirmTokenHash)
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
         expect(revokeAllSessionsMock).not.toHaveBeenCalled()
@@ -323,14 +336,16 @@ describe("verifyEmailChange API", async () => {
             revokeAllSessions: revokeAllSessionsMock,
         })
 
-        const token = "mocked-token"
-        const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        const sessionToken = "mocked-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const confirmToken = "expired-confirm-token"
+        const confirmTokenHash = await createHash(confirmToken)
 
         const output = await api.verifyEmailChange({
-            payload: { token },
+            payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -346,8 +361,8 @@ describe("verifyEmailChange API", async () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
-        expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
+        expect(getTokenByHashMock).toHaveBeenCalledWith(confirmTokenHash)
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
         expect(revokeAllSessionsMock).not.toHaveBeenCalled()
