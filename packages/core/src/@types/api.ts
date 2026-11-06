@@ -199,6 +199,8 @@ export type APIFunctionReturnData =
     /** Failed */
     | { success: false; redirect: false; redirectURL: null }
 
+export type ClientSideReturnData = APIFunctionReturnData
+
 export type SignInCredentialsReturnData = APIFunctionReturnData
 
 /** Client-side credentials sign-in return type (redirect mode or manual redirect data). */

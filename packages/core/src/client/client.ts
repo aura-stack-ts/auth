@@ -37,6 +37,7 @@ import type {
     SendMagicLinkReturn,
     VerifyMagicLinkOptions,
     VerifyMagicLinkReturn,
+    ClientSideReturnData,
 } from "@/@types/index.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getEnv } from "@/shared/env.ts"
@@ -79,6 +80,13 @@ export const createAuthClient = <
             console.error("Error fetching CSRF token:", error)
             throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause: error })
         }
+    }
+
+    const clientAuthResponse = async <R extends ClientSideReturnData>(response: Response, override?: R) => {
+        if (!response.ok) {
+            return override ? override : { success: false, redirect: false, redirectURL: null }
+        }
+        return response.json()
     }
 
     /**
@@ -175,7 +183,7 @@ export const createAuthClient = <
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -218,7 +226,7 @@ export const createAuthClient = <
                 },
             })
             // @ts-ignore
-            const json: any = await response.json()
+            const json: any = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -270,7 +278,7 @@ export const createAuthClient = <
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -487,10 +495,12 @@ export const createAuthClient = <
      */
     const signOut = async <Options extends SignOutOptions>(options?: Options): Promise<SignOutReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const csrfToken = await getCSRFToken()
             const response = await client.post("/signOut", {
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    redirectTo,
                     redirect: false,
                     token_type_hint: "session_token",
                 },
@@ -498,7 +508,7 @@ export const createAuthClient = <
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -535,18 +545,20 @@ export const createAuthClient = <
         options?: Options
     ): Promise<SendVerificationEmailReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const csrfToken = await getCSRFToken()
             const response = await client.post("/emailVerification/send", {
                 body: { email },
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    redirectTo,
                     redirect: false,
                 },
                 headers: {
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -583,14 +595,16 @@ export const createAuthClient = <
         options?: Options
     ): Promise<VerifyEmailReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const response = await client.get("/emailVerification/verify", {
                 searchParams: {
                     token,
-                    redirectTo: options?.redirectTo,
+                    redirectTo,
                     redirect: false,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -625,14 +639,16 @@ export const createAuthClient = <
         options?: Options
     ): Promise<ForgotPasswordReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const response = await client.post("/password/forgot", {
                 body: { email },
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    redirectTo,
                     redirect: false,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -669,14 +685,16 @@ export const createAuthClient = <
         options: Options
     ): Promise<ResetPasswordReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const response = await client.post("/password/reset", {
                 body: options.payload,
                 searchParams: {
-                    redirectTo: options.redirectTo,
+                    redirectTo,
                     redirect: false,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -713,18 +731,20 @@ export const createAuthClient = <
         options: Options
     ): Promise<ChangePasswordReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const csrfToken = await getCSRFToken()
             const response = await client.post("/password/change", {
                 body: options.payload,
                 searchParams: {
-                    redirectTo: options.redirectTo,
+                    redirectTo,
                     redirect: false,
                 },
                 headers: {
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -759,18 +779,20 @@ export const createAuthClient = <
      */
     const changeEmail = async <Options extends ChangeEmailOptions>(options: Options): Promise<ChangeEmailReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const csrfToken = await getCSRFToken()
             const response = await client.post("/email/change", {
                 body: options.payload,
                 searchParams: {
-                    redirectTo: options.redirectTo,
+                    redirectTo,
                     redirect: false,
                 },
                 headers: {
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -807,14 +829,16 @@ export const createAuthClient = <
         options: Options
     ): Promise<VerifyEmailChangeReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const response = await client.get("/email/change/verify", {
                 searchParams: {
                     token: options.payload.token,
-                    redirectTo: options.redirectTo,
+                    redirectTo,
                     redirect: false,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -850,18 +874,19 @@ export const createAuthClient = <
         options?: Options
     ): Promise<CancelEmailChangeReturn<Options>> => {
         try {
-            const csrfToken = await getCSRFToken()
+            const { redirectTo } = options ?? {}
+
+            const token = options?.payload?.token
+            const csrfToken = token ? undefined : await getCSRFToken()
             const response = await client.get("/email/change/cancel", {
                 searchParams: {
-                    token: options?.payload?.token,
-                    redirectTo: options?.redirectTo,
+                    token,
+                    redirectTo,
                     redirect: false,
                 },
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                },
+                ...(csrfToken ? { headers: { "X-CSRF-Token": csrfToken } } : {}),
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -896,18 +921,20 @@ export const createAuthClient = <
         options?: Options
     ): Promise<SendMagicLinkReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const csrfToken = await getCSRFToken()
             const response = await client.post("/signIn/magicLink", {
                 body: { email },
                 searchParams: {
-                    redirectTo: options?.redirectTo,
+                    redirectTo,
                     redirect: false,
                 },
                 headers: {
                     "X-CSRF-Token": csrfToken,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }
@@ -944,14 +971,16 @@ export const createAuthClient = <
         options?: Options
     ): Promise<VerifyMagicLinkReturn<Options>> => {
         try {
+            const { redirectTo } = options ?? {}
+
             const response = await client.get("/signIn/magicLink/verify", {
                 searchParams: {
                     token,
-                    redirectTo: options?.redirectTo,
+                    redirectTo,
                     redirect: false,
                 },
             })
-            const json = await response.json()
+            const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
                 window.location.assign(json.redirectURL)
             }

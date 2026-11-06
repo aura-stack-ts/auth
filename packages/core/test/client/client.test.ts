@@ -286,7 +286,7 @@ describe("createAuthClient", () => {
                 "X-CSRF-Token": "csrf_token_1",
             },
         })
-        expect(response).toEqual({ success: false, redirectURL: null })
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
 
     test("updateSession without csrf token", async () => {
@@ -1361,7 +1361,6 @@ describe("createAuthClient", () => {
     test("cancelEmailChange cancels via token", async () => {
         const get = vi.fn()
 
-        get.mockResolvedValueOnce(createJSONResponse({ csrfToken: "csrf_token_1" }))
         get.mockResolvedValueOnce(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
 
         createClientMock.mockReturnValue({ get, post: vi.fn() })
@@ -1369,10 +1368,8 @@ describe("createAuthClient", () => {
         const client = createAuthClient({ baseURL: "https://example.com" })
         const response = await client.cancelEmailChange({ payload: { token: "cancel-token-abc" } })
 
-        expect(get).toHaveBeenCalledWith("/csrfToken")
         expect(get).toHaveBeenCalledWith("/email/change/cancel", {
             searchParams: { token: "cancel-token-abc", redirect: false, redirectTo: undefined },
-            headers: { "X-CSRF-Token": "csrf_token_1" },
         })
         expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
     })
@@ -1398,7 +1395,6 @@ describe("createAuthClient", () => {
     test("cancelEmailChange with redirectTo option", async () => {
         const get = vi.fn()
 
-        get.mockResolvedValueOnce(createJSONResponse({ csrfToken: "csrf_token_1" }))
         get.mockResolvedValueOnce(createJSONResponse({ success: true, redirect: false, redirectURL: "/settings" }))
 
         createClientMock.mockReturnValue({ get, post: vi.fn() })
@@ -1411,13 +1407,12 @@ describe("createAuthClient", () => {
 
         expect(get).toHaveBeenCalledWith("/email/change/cancel", {
             searchParams: { token: "cancel-token-abc", redirect: false, redirectTo: "/settings" },
-            headers: { "X-CSRF-Token": "csrf_token_1" },
         })
         expect(response).toEqual({ success: true, redirect: false, redirectURL: "/settings" })
     })
 
-    test("cancelEmailChange returns failure when CSRF token is missing", async () => {
-        const get = vi.fn().mockResolvedValue(createJSONResponse({}, 500))
+    test("cancelEmailChange via token does not require a CSRF token", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
 
         createClientMock.mockReturnValue({ get, post: vi.fn() })
 
@@ -1425,7 +1420,10 @@ describe("createAuthClient", () => {
         const response = await client.cancelEmailChange({ payload: { token: "cancel-token-abc" } })
 
         expect(get).toHaveBeenCalledTimes(1)
-        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+        expect(get).toHaveBeenCalledWith("/email/change/cancel", {
+            searchParams: { token: "cancel-token-abc", redirect: false, redirectTo: undefined },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
     })
 
     test("sendMagicLink sends magic link successfully", async () => {
