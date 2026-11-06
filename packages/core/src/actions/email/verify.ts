@@ -13,10 +13,10 @@ const verifyEmailChangeActionConfig = () => {
                 return ctx.json(
                     {
                         type: "VALIDATION",
-                        code: "INVALID_VERIFICATION_TOKEN",
-                        message: "Invalid or expired verification token",
+                        code: "INVALID_EMAIL_CHANGE_TOKEN",
+                        message: "Invalid or expired email change token.",
                     },
-                    { status: 422 }
+                    { status: 401 }
                 )
             },
         },

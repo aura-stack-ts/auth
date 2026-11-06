@@ -971,6 +971,13 @@ export const ERROR_CATALOG = {
         message: "The provided email change token is invalid or has expired.",
         userMessage: "Invalid or expired email change token.",
     },
+    INVALID_EMAIL_VALUE: {
+        type: "VALIDATION",
+        statusCode: 400,
+        name: "ValidationError",
+        message: "The provided email value is invalid. It must be a non-empty string and a valid email format.",
+        userMessage: "The provided email address is invalid. Please enter a valid email address.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

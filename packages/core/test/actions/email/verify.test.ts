@@ -82,11 +82,11 @@ describe("verifyEmailChangeAction", async () => {
             })
         )
 
-        expect(response.status).toBe(422)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             type: "VALIDATION",
-            code: "INVALID_VERIFICATION_TOKEN",
-            message: "Invalid or expired verification token",
+            code: "INVALID_EMAIL_CHANGE_TOKEN",
+            message: "Invalid or expired email change token.",
         })
 
         expect(getSessionByTokenMock).not.toHaveBeenCalled()

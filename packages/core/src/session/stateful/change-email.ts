@@ -6,6 +6,10 @@ import type { InternalStatefulContext } from "@/@types/internal.ts"
 export const changeEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["changeEmail"] => {
     const { sessionConfig } = ctx
     return async ({ userId, currentPassword, newEmail, origin }) => {
+        const normalizedNewEmail = newEmail.trim().toLowerCase()
+        if (!normalizedNewEmail) {
+            throw new AuraAuthError({ code: "INVALID_EMAIL_VALUE" })
+        }
         const accounts = await sessionConfig.adapter.getAccountsByUserId(userId)
         const credentialAccount = accounts.find((acc) => acc.type === "credentials")
         if (!credentialAccount) {
@@ -19,7 +23,7 @@ export const changeEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["
         if (!isMatch) {
             throw new AuraAuthError({ code: "INVALID_CURRENT_PASSWORD" })
         }
-        const isEmailRegistered = await sessionConfig.adapter.getUserByEmail(newEmail)
+        const isEmailRegistered = await sessionConfig.adapter.getUserByEmail(normalizedNewEmail)
         if (isEmailRegistered) {
             throw new AuraAuthError({ code: "EMAIL_ALREADY_REGISTERED" })
         }
@@ -27,6 +31,7 @@ export const changeEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["
         if (!user) {
             throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
         }
+
         const token = createSecretValue()
         const tokenHash = await createHash(token)
         const expiresIn = ctx.emailChange?.expiresIn ?? 1800
@@ -34,7 +39,7 @@ export const changeEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["
             userId,
             expiresAt: new Date(Date.now() + expiresIn * 1000),
             identifier: user.email,
-            newIdentifier: newEmail,
+            newIdentifier: normalizedNewEmail,
             type: "email_change",
             tokenHash,
         })
