@@ -19,6 +19,26 @@ import type {
     InferSignUp,
     UserFrom,
     GetProviderTokensReturn,
+    SendVerificationEmailOptions,
+    SendVerificationEmailReturn,
+    VerifyEmailOptions,
+    VerifyEmailReturn,
+    ForgotPasswordOptions,
+    ForgotPasswordReturn,
+    ResetPasswordOptions,
+    ResetPasswordReturn,
+    ChangePasswordOptions,
+    ChangePasswordReturn,
+    ChangeEmailOptions,
+    ChangeEmailReturn,
+    VerifyEmailChangeOptions,
+    VerifyEmailChangeReturn,
+    CancelEmailChangeOptions,
+    CancelEmailChangeReturn,
+    SendMagicLinkOptions,
+    SendMagicLinkReturn,
+    VerifyMagicLinkOptions,
+    VerifyMagicLinkReturn,
 } from "@/@types/index.ts"
 import { createAuth } from "@/createAuth.ts"
 import { z } from "zod/v4"
@@ -48,6 +68,28 @@ type AuthClientReturn<DefaultUser extends User = User, SignUpUser extends Record
     disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
     isProviderConnected: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
     signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
+    sendVerificationEmail: <Options extends SendVerificationEmailOptions>(
+        email: string,
+        options?: Options
+    ) => Promise<SendVerificationEmailReturn<Options>>
+    verifyEmail: <Options extends VerifyEmailOptions>(token: string, options?: Options) => Promise<VerifyEmailReturn<Options>>
+    forgotPassword: <Options extends ForgotPasswordOptions>(
+        email: string,
+        options?: Options
+    ) => Promise<ForgotPasswordReturn<Options>>
+    resetPassword: <Options extends ResetPasswordOptions>(options: Options) => Promise<ResetPasswordReturn<Options>>
+    changePassword: <Options extends ChangePasswordOptions>(options: Options) => Promise<ChangePasswordReturn<Options>>
+    changeEmail: <Options extends ChangeEmailOptions>(options: Options) => Promise<ChangeEmailReturn<Options>>
+    verifyEmailChange: <Options extends VerifyEmailChangeOptions>(options: Options) => Promise<VerifyEmailChangeReturn<Options>>
+    cancelEmailChange: <Options extends CancelEmailChangeOptions>(options?: Options) => Promise<CancelEmailChangeReturn<Options>>
+    sendMagicLink: <Options extends SendMagicLinkOptions>(
+        email: string,
+        options?: Options
+    ) => Promise<SendMagicLinkReturn<Options>>
+    verifyMagicLink: <Options extends VerifyMagicLinkOptions>(
+        token: string,
+        options?: Options
+    ) => Promise<VerifyMagicLinkReturn<Options>>
 }
 
 describe("Client Types", () => {
@@ -265,5 +307,112 @@ describe("Client Types", () => {
 
         const authClient = createAuthClient<User, SignUp>({})
         expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User, SignUp>>()
+    })
+})
+
+describe("New client method types", () => {
+    const client = createAuthClient({})
+
+    // redirect: false → returns the data object
+    // redirect: true / omitted → returns void (navigation handled automatically)
+
+    test("sendVerificationEmail — redirect: false returns data", () => {
+        expectTypeOf(client.sendVerificationEmail<{ redirect: false }>).returns.resolves.toEqualTypeOf<
+            Extract<SendVerificationEmailReturn<{ redirect: false }>, object>
+        >()
+    })
+
+    test("sendVerificationEmail — redirect: true returns void", () => {
+        expectTypeOf(client.sendVerificationEmail<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+    })
+
+    test("verifyEmail — redirect: false returns data", () => {
+        expectTypeOf(client.verifyEmail<{ redirect: false }>).returns.resolves.toEqualTypeOf<
+            Extract<VerifyEmailReturn<{ redirect: false }>, object>
+        >()
+    })
+
+    test("verifyEmail — redirect: true returns void", () => {
+        expectTypeOf(client.verifyEmail<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+    })
+
+    test("forgotPassword — redirect: false returns data", () => {
+        expectTypeOf(client.forgotPassword<{ redirect: false }>).returns.resolves.toEqualTypeOf<
+            Extract<ForgotPasswordReturn<{ redirect: false }>, object>
+        >()
+    })
+
+    test("forgotPassword — redirect: true returns void", () => {
+        expectTypeOf(client.forgotPassword<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+    })
+
+    test("resetPassword — redirect: false returns data", () => {
+        type Opts = { payload: { token: string; newPassword: string }; redirect: false }
+        expectTypeOf(client.resetPassword<Opts>).returns.resolves.toEqualTypeOf<ResetPasswordReturn<Opts>>()
+    })
+
+    test("resetPassword — redirect: true returns void", () => {
+        type Opts = { payload: { token: string; newPassword: string }; redirect: true }
+        expectTypeOf(client.resetPassword<Opts>).returns.resolves.toEqualTypeOf<void>()
+    })
+
+    test("changePassword — redirect: false returns data", () => {
+        type Opts = { payload: { currentPassword: string; newPassword: string }; redirect: false }
+        expectTypeOf(client.changePassword<Opts>).returns.resolves.toEqualTypeOf<ChangePasswordReturn<Opts>>()
+    })
+
+    test("changePassword — redirect: true returns void", () => {
+        type Opts = { payload: { currentPassword: string; newPassword: string }; redirect: true }
+        expectTypeOf(client.changePassword<Opts>).returns.resolves.toEqualTypeOf<void>()
+    })
+
+    test("changeEmail — redirect: false returns data", () => {
+        type Opts = { payload: { currentPassword: string; newEmail: string }; redirect: false }
+        expectTypeOf(client.changeEmail<Opts>).returns.resolves.toEqualTypeOf<ChangeEmailReturn<Opts>>()
+    })
+
+    test("changeEmail — redirect: true returns void", () => {
+        type Opts = { payload: { currentPassword: string; newEmail: string }; redirect: true }
+        expectTypeOf(client.changeEmail<Opts>).returns.resolves.toEqualTypeOf<void>()
+    })
+
+    test("verifyEmailChange — redirect: false returns data", () => {
+        type Opts = { payload: { token: string }; redirect: false }
+        expectTypeOf(client.verifyEmailChange<Opts>).returns.resolves.toEqualTypeOf<VerifyEmailChangeReturn<Opts>>()
+    })
+
+    test("verifyEmailChange — redirect: true returns void", () => {
+        type Opts = { payload: { token: string }; redirect: true }
+        expectTypeOf(client.verifyEmailChange<Opts>).returns.resolves.toEqualTypeOf<void>()
+    })
+
+    test("cancelEmailChange — redirect: false returns data", () => {
+        expectTypeOf(client.cancelEmailChange<{ redirect: false }>).returns.resolves.toEqualTypeOf<
+            Extract<CancelEmailChangeReturn<{ redirect: false }>, object>
+        >()
+    })
+
+    test("cancelEmailChange — redirect: true returns void", () => {
+        expectTypeOf(client.cancelEmailChange<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+    })
+
+    test("sendMagicLink — redirect: false returns data", () => {
+        expectTypeOf(client.sendMagicLink<{ redirect: false }>).returns.resolves.toEqualTypeOf<
+            Extract<SendMagicLinkReturn<{ redirect: false }>, object>
+        >()
+    })
+
+    test("sendMagicLink — redirect: true returns void", () => {
+        expectTypeOf(client.sendMagicLink<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+    })
+
+    test("verifyMagicLink — redirect: false returns data", () => {
+        expectTypeOf(client.verifyMagicLink<{ redirect: false }>).returns.resolves.toEqualTypeOf<
+            Extract<VerifyMagicLinkReturn<{ redirect: false }>, object>
+        >()
+    })
+
+    test("verifyMagicLink — redirect: true returns void", () => {
+        expectTypeOf(client.verifyMagicLink<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
     })
 })
