@@ -174,6 +174,53 @@ describe("sendMagicLinkAction", async () => {
         expect(sendMagicLinkEmailMock).not.toHaveBeenCalled()
     })
 
+    test("success with inactive existing user without sending an email", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const inactiveUser = { ...userEntity, status: "deleted" as const }
+        const getUserByEmailMock = vi.fn().mockReturnValue(inactiveUser)
+        const revokeAllVerificationTokensMock = vi.fn()
+        const createTokenMock = vi.fn()
+        const sendMagicLinkEmailMock = vi.fn()
+
+        const {
+            handlers: { POST },
+        } = authInstance(
+            {
+                getUserByEmail: getUserByEmailMock,
+                revokeAllVerificationTokens: revokeAllVerificationTokensMock,
+                createToken: createTokenMock,
+            },
+            {
+                magicLinks: {
+                    sendMagicLinkEmail: sendMagicLinkEmailMock,
+                },
+            }
+        )
+
+        const response = await POST(
+            new Request("https://example.com/auth/signIn/magicLink", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
+                },
+                body: JSON.stringify({ email: "john@example.com" }),
+            })
+        )
+
+        expect(response.status).toBe(200)
+        expect(await response.json()).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+        })
+        expect(revokeAllVerificationTokensMock).not.toHaveBeenCalled()
+        expect(createTokenMock).not.toHaveBeenCalled()
+        expect(sendMagicLinkEmailMock).not.toHaveBeenCalled()
+    })
+
     test("success with redirect query params", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 

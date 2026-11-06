@@ -34,6 +34,11 @@ export const changeEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["
         if (!user.email) {
             throw new AuraAuthError({ code: "USER_EMAIL_NOT_FOUND" })
         }
+        await Promise.all([
+            await sessionConfig.adapter.revokeAllVerificationTokens(userId, "email_change"),
+            await sessionConfig.adapter.revokeAllVerificationTokens(userId, "email_change_cancel"),
+        ])
+
         const confirmToken = createSecretValue()
         const confirmTokenHash = await createHash(confirmToken)
         const expiresIn = ctx.emailChange?.expiresIn ?? 1800

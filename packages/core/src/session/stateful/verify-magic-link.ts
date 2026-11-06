@@ -45,7 +45,7 @@ export const verifyMagicLink = ({ ctx, cookies, cookieManager }: InternalStatefu
         }
 
         const device = await createDevice(verifiedToken.userId, request)
-        const maxAge = sessionConfig.maxAge ?? 60 * 60 * 24 * 30
+        const maxAge = sessionConfig.maxAge ?? 60 * 60 * 24 * 15
         const expiresAt = new Date(Date.now() + maxAge * 1000)
 
         const sessionToken = createSecretValue(64)

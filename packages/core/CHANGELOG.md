@@ -10,7 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### BREAKING CHANGES
 
-- Updated `VerificationTokensAdapter`: custom adapters must implement `revokeAllVerificationTokens(userId, type?)`, and `revokeToken(id)` must return `Promise<boolean>` instead of `Promise<void>`. The boolean indicates whether the token was found and revoked.
+- Updated `VerificationTokensAdapter`: custom adapters must now implement `revokeAllVerificationTokens(userId, type?)`, and `revokeToken(id)` must return `Promise<boolean>` instead of `Promise<void>`. The boolean indicates whether the token was found and successfully revoked. [#297](https://github.com/aura-stack-ts/auth/pull/297)
+
+- Changed the return types of the `deriveSecret` and `verifySecret` helpers in the public `CredentialsConfigContext` to `Awaitable`. Custom implementations can now return either synchronous or asynchronous values. Consumers must not call `.then()` directly on these results without first normalizing them with `Promise.resolve()`. [#297](https://github.com/aura-stack-ts/auth/pull/297)
 
 ### Added
 

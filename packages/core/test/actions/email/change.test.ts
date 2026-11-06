@@ -12,6 +12,7 @@ describe("changeEmailAction", async () => {
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
         const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
         const getUserByEmailMock = vi.fn().mockReturnValue(null)
+        const revokeAllVerificationTokensMock = vi.fn().mockReturnValue(1)
         const createTokenMock = vi.fn()
         const sendEmailChangeVerificationMock = vi.fn()
 
@@ -24,6 +25,7 @@ describe("changeEmailAction", async () => {
                 getCredentialAccount: getCredentialAccountMock,
                 getUserById: getUserByIdMock,
                 getUserByEmail: getUserByEmailMock,
+                revokeAllVerificationTokens: revokeAllVerificationTokensMock,
                 createToken: createTokenMock,
             },
             {
@@ -73,6 +75,8 @@ describe("changeEmailAction", async () => {
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
         expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
+        expect(revokeAllVerificationTokensMock).toHaveBeenNthCalledWith(1, "user-123", "email_change")
+        expect(revokeAllVerificationTokensMock).toHaveBeenNthCalledWith(2, "user-123", "email_change_cancel")
         expect(createTokenMock).toHaveBeenNthCalledWith(1, {
             userId: "user-123",
             identifier: "john@example.com",
@@ -106,6 +110,7 @@ describe("changeEmailAction", async () => {
         const getCredentialAccountMock = vi.fn()
         const getUserByIdMock = vi.fn()
         const getUserByEmailMock = vi.fn()
+        const revokeAllVerificationTokensMock = vi.fn()
         const createTokenMock = vi.fn()
         const sendEmailChangeVerificationMock = vi.fn()
 
@@ -118,6 +123,7 @@ describe("changeEmailAction", async () => {
                 getCredentialAccount: getCredentialAccountMock,
                 getUserById: getUserByIdMock,
                 getUserByEmail: getUserByEmailMock,
+                revokeAllVerificationTokens: revokeAllVerificationTokensMock,
                 createToken: createTokenMock,
             },
             {
@@ -157,6 +163,7 @@ describe("changeEmailAction", async () => {
         expect(getCredentialAccountMock).not.toHaveBeenCalled()
         expect(getUserByEmailMock).not.toHaveBeenCalled()
         expect(getUserByIdMock).not.toHaveBeenCalled()
+        expect(revokeAllVerificationTokensMock).not.toHaveBeenCalled()
         expect(createTokenMock).not.toHaveBeenCalled()
         expect(sendEmailChangeVerificationMock).not.toHaveBeenCalled()
     })
@@ -167,6 +174,7 @@ describe("changeEmailAction", async () => {
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
         const getUserByIdMock = vi.fn()
         const getUserByEmailMock = vi.fn()
+        const revokeAllVerificationTokensMock = vi.fn()
         const createTokenMock = vi.fn()
         const sendEmailChangeVerificationMock = vi.fn()
 
@@ -179,6 +187,7 @@ describe("changeEmailAction", async () => {
                 getCredentialAccount: getCredentialAccountMock,
                 getUserById: getUserByIdMock,
                 getUserByEmail: getUserByEmailMock,
+                revokeAllVerificationTokens: revokeAllVerificationTokensMock,
                 createToken: createTokenMock,
             },
             {
@@ -218,6 +227,7 @@ describe("changeEmailAction", async () => {
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByEmailMock).not.toHaveBeenCalled()
         expect(getUserByIdMock).not.toHaveBeenCalled()
+        expect(revokeAllVerificationTokensMock).not.toHaveBeenCalled()
         expect(createTokenMock).not.toHaveBeenCalled()
         expect(sendEmailChangeVerificationMock).not.toHaveBeenCalled()
     })
@@ -228,6 +238,7 @@ describe("changeEmailAction", async () => {
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
         const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
         const getUserByEmailMock = vi.fn().mockReturnValue(userEntity)
+        const revokeAllVerificationTokensMock = vi.fn()
         const createTokenMock = vi.fn()
         const sendEmailChangeVerificationMock = vi.fn()
 
@@ -240,6 +251,7 @@ describe("changeEmailAction", async () => {
                 getCredentialAccount: getCredentialAccountMock,
                 getUserById: getUserByIdMock,
                 getUserByEmail: getUserByEmailMock,
+                revokeAllVerificationTokens: revokeAllVerificationTokensMock,
                 createToken: createTokenMock,
             },
             {
@@ -279,6 +291,7 @@ describe("changeEmailAction", async () => {
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
         expect(getUserByIdMock).not.toHaveBeenCalled()
+        expect(revokeAllVerificationTokensMock).not.toHaveBeenCalled()
         expect(createTokenMock).not.toHaveBeenCalled()
         expect(sendEmailChangeVerificationMock).not.toHaveBeenCalled()
     })
@@ -289,6 +302,7 @@ describe("changeEmailAction", async () => {
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
         const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
         const getUserByEmailMock = vi.fn().mockReturnValue(null)
+        const revokeAllVerificationTokensMock = vi.fn().mockReturnValue(1)
         const createTokenMock = vi.fn()
         const sendEmailChangeVerificationMock = vi.fn()
 
@@ -301,6 +315,7 @@ describe("changeEmailAction", async () => {
                 getCredentialAccount: getCredentialAccountMock,
                 getUserById: getUserByIdMock,
                 getUserByEmail: getUserByEmailMock,
+                revokeAllVerificationTokens: revokeAllVerificationTokensMock,
                 createToken: createTokenMock,
             },
             {
@@ -350,6 +365,8 @@ describe("changeEmailAction", async () => {
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
         expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
+        expect(revokeAllVerificationTokensMock).toHaveBeenNthCalledWith(1, "user-123", "email_change")
+        expect(revokeAllVerificationTokensMock).toHaveBeenNthCalledWith(2, "user-123", "email_change_cancel")
         expect(createTokenMock).toHaveBeenNthCalledWith(1, {
             userId: "user-123",
             identifier: "john@example.com",
@@ -383,6 +400,7 @@ describe("changeEmailAction", async () => {
         const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
         const getUserByIdMock = vi.fn().mockReturnValue(userEntity)
         const getUserByEmailMock = vi.fn().mockReturnValue(null)
+        const revokeAllVerificationTokensMock = vi.fn().mockReturnValue(1)
         const createTokenMock = vi.fn()
         const sendEmailChangeVerificationMock = vi.fn()
 
@@ -395,6 +413,7 @@ describe("changeEmailAction", async () => {
                 getCredentialAccount: getCredentialAccountMock,
                 getUserById: getUserByIdMock,
                 getUserByEmail: getUserByEmailMock,
+                revokeAllVerificationTokens: revokeAllVerificationTokensMock,
                 createToken: createTokenMock,
             },
             {
@@ -444,6 +463,8 @@ describe("changeEmailAction", async () => {
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
         expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
         expect(getUserByIdMock).toHaveBeenCalledWith("user-123")
+        expect(revokeAllVerificationTokensMock).toHaveBeenNthCalledWith(1, "user-123", "email_change")
+        expect(revokeAllVerificationTokensMock).toHaveBeenNthCalledWith(2, "user-123", "email_change_cancel")
         expect(createTokenMock).toHaveBeenNthCalledWith(1, {
             userId: "user-123",
             identifier: "john@example.com",

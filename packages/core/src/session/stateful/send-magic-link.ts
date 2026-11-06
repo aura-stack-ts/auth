@@ -18,6 +18,9 @@ export const sendMagicLink = ({ ctx }: InternalStatefulContext): SessionStrategy
         } else if (user.status !== "active") {
             throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
         }
+        if (!user.email) {
+            throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
+        }
 
         await sessionConfig.adapter.revokeAllVerificationTokens(user.id, "magic_link")
 
@@ -27,7 +30,7 @@ export const sendMagicLink = ({ ctx }: InternalStatefulContext): SessionStrategy
         await sessionConfig.adapter.createToken({
             userId: user.id,
             expiresAt: new Date(Date.now() + expiresIn * 1000),
-            identifier: email,
+            identifier: user.email,
             newIdentifier: null,
             type: "magic_link",
             tokenHash,
