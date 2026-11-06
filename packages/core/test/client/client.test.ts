@@ -948,4 +948,637 @@ describe("createAuthClient", () => {
 
         expect(() => createAuthClient({})).toThrow()
     })
+
+    // -------------------------------------------------------------------------
+    // sendVerificationEmail
+    // -------------------------------------------------------------------------
+
+    test("sendVerificationEmail sends email successfully", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.sendVerificationEmail("user@example.com")
+
+        expect(get).toHaveBeenCalledWith("/csrfToken")
+        expect(post).toHaveBeenCalledWith("/emailVerification/send", {
+            body: { email: "user@example.com" },
+            searchParams: { redirect: false, redirectTo: undefined },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("sendVerificationEmail with redirectTo option", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi
+            .fn()
+            .mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: "/verify-sent" }))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.sendVerificationEmail("user@example.com", { redirectTo: "/verify-sent" })
+
+        expect(post).toHaveBeenCalledWith("/emailVerification/send", {
+            body: { email: "user@example.com" },
+            searchParams: { redirect: false, redirectTo: "/verify-sent" },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/verify-sent" })
+    })
+
+    test("sendVerificationEmail returns failure on error", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockRejectedValue(new Error("Network error"))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.sendVerificationEmail("user@example.com")
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    test("sendVerificationEmail returns failure when CSRF token is missing", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({}, 500))
+        const post = vi.fn()
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.sendVerificationEmail("user@example.com")
+
+        expect(post).not.toHaveBeenCalled()
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    // -------------------------------------------------------------------------
+    // verifyEmail
+    // -------------------------------------------------------------------------
+
+    test("verifyEmail verifies token successfully", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyEmail("verify-token-123")
+
+        expect(get).toHaveBeenCalledWith("/emailVerification/verify", {
+            searchParams: { token: "verify-token-123", redirect: false, redirectTo: undefined },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("verifyEmail with redirectTo option", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: "/verified" }))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyEmail("verify-token-123", { redirectTo: "/verified" })
+
+        expect(get).toHaveBeenCalledWith("/emailVerification/verify", {
+            searchParams: { token: "verify-token-123", redirect: false, redirectTo: "/verified" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/verified" })
+    })
+
+    test("verifyEmail returns failure on invalid token", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ success: false, redirect: false, redirectURL: null }, 422))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyEmail("invalid-token")
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    test("verifyEmail returns failure on network error", async () => {
+        const get = vi.fn().mockRejectedValue(new Error("Network error"))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyEmail("verify-token-123")
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    // -------------------------------------------------------------------------
+    // forgotPassword
+    // -------------------------------------------------------------------------
+
+    test("forgotPassword sends reset email successfully", async () => {
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get: vi.fn(), post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.forgotPassword("user@example.com")
+
+        expect(post).toHaveBeenCalledWith("/password/forgot", {
+            body: { email: "user@example.com" },
+            searchParams: { redirect: false, redirectTo: undefined },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("forgotPassword with redirectTo option", async () => {
+        const post = vi
+            .fn()
+            .mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: "/check-email" }))
+
+        createClientMock.mockReturnValue({ get: vi.fn(), post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.forgotPassword("user@example.com", { redirectTo: "/check-email" })
+
+        expect(post).toHaveBeenCalledWith("/password/forgot", {
+            body: { email: "user@example.com" },
+            searchParams: { redirect: false, redirectTo: "/check-email" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/check-email" })
+    })
+
+    test("forgotPassword returns failure on network error", async () => {
+        const post = vi.fn().mockRejectedValue(new Error("Network error"))
+
+        createClientMock.mockReturnValue({ get: vi.fn(), post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.forgotPassword("user@example.com")
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    // -------------------------------------------------------------------------
+    // resetPassword
+    // -------------------------------------------------------------------------
+
+    test("resetPassword resets password successfully", async () => {
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get: vi.fn(), post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.resetPassword({
+            payload: { token: "reset-token-abc", newPassword: "newpassword123" },
+        })
+
+        expect(post).toHaveBeenCalledWith("/password/reset", {
+            body: { token: "reset-token-abc", newPassword: "newpassword123" },
+            searchParams: { redirect: false, redirectTo: undefined },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("resetPassword with redirectTo option", async () => {
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: "/login" }))
+
+        createClientMock.mockReturnValue({ get: vi.fn(), post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.resetPassword({
+            payload: { token: "reset-token-abc", newPassword: "newpassword123" },
+            redirectTo: "/login",
+        })
+
+        expect(post).toHaveBeenCalledWith("/password/reset", {
+            body: { token: "reset-token-abc", newPassword: "newpassword123" },
+            searchParams: { redirect: false, redirectTo: "/login" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/login" })
+    })
+
+    test("resetPassword returns failure on invalid token", async () => {
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: false, redirect: false, redirectURL: null }, 422))
+
+        createClientMock.mockReturnValue({ get: vi.fn(), post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.resetPassword({
+            payload: { token: "invalid-token", newPassword: "newpassword123" },
+        })
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    test("resetPassword returns failure on network error", async () => {
+        const post = vi.fn().mockRejectedValue(new Error("Network error"))
+
+        createClientMock.mockReturnValue({ get: vi.fn(), post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.resetPassword({
+            payload: { token: "reset-token-abc", newPassword: "newpassword123" },
+        })
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    // -------------------------------------------------------------------------
+    // changePassword
+    // -------------------------------------------------------------------------
+
+    test("changePassword changes password successfully", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.changePassword({
+            payload: { currentPassword: "oldpass", newPassword: "newpass" },
+        })
+
+        expect(get).toHaveBeenCalledWith("/csrfToken")
+        expect(post).toHaveBeenCalledWith("/password/change", {
+            body: { currentPassword: "oldpass", newPassword: "newpass" },
+            searchParams: { redirect: false, redirectTo: undefined },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("changePassword with redirectTo option", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: "/settings" }))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.changePassword({
+            payload: { currentPassword: "oldpass", newPassword: "newpass" },
+            redirectTo: "/settings",
+        })
+
+        expect(post).toHaveBeenCalledWith("/password/change", {
+            body: { currentPassword: "oldpass", newPassword: "newpass" },
+            searchParams: { redirect: false, redirectTo: "/settings" },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/settings" })
+    })
+
+    test("changePassword returns failure on wrong current password", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: false, redirect: false, redirectURL: null }, 401))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.changePassword({
+            payload: { currentPassword: "wrongpass", newPassword: "newpass" },
+        })
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    test("changePassword returns failure when CSRF token is missing", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({}, 500))
+        const post = vi.fn()
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.changePassword({
+            payload: { currentPassword: "oldpass", newPassword: "newpass" },
+        })
+
+        expect(post).not.toHaveBeenCalled()
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    // -------------------------------------------------------------------------
+    // changeEmail
+    // -------------------------------------------------------------------------
+
+    test("changeEmail changes email successfully", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.changeEmail({
+            payload: { currentPassword: "mypassword", newEmail: "new@example.com" },
+        })
+
+        expect(get).toHaveBeenCalledWith("/csrfToken")
+        expect(post).toHaveBeenCalledWith("/email/change", {
+            body: { currentPassword: "mypassword", newEmail: "new@example.com" },
+            searchParams: { redirect: false, redirectTo: undefined },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("changeEmail with redirectTo option", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: "/profile" }))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.changeEmail({
+            payload: { currentPassword: "mypassword", newEmail: "new@example.com" },
+            redirectTo: "/profile",
+        })
+
+        expect(post).toHaveBeenCalledWith("/email/change", {
+            body: { currentPassword: "mypassword", newEmail: "new@example.com" },
+            searchParams: { redirect: false, redirectTo: "/profile" },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/profile" })
+    })
+
+    test("changeEmail returns failure on wrong password", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: false, redirect: false, redirectURL: null }, 401))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.changeEmail({
+            payload: { currentPassword: "wrongpass", newEmail: "new@example.com" },
+        })
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    test("changeEmail returns failure when CSRF token is missing", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({}, 500))
+        const post = vi.fn()
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.changeEmail({
+            payload: { currentPassword: "mypassword", newEmail: "new@example.com" },
+        })
+
+        expect(post).not.toHaveBeenCalled()
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    // -------------------------------------------------------------------------
+    // verifyEmailChange
+    // -------------------------------------------------------------------------
+
+    test("verifyEmailChange verifies token successfully", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyEmailChange({ payload: { token: "change-token-abc" } })
+
+        expect(get).toHaveBeenCalledWith("/email/change/verify", {
+            searchParams: { token: "change-token-abc", redirect: false, redirectTo: undefined },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("verifyEmailChange with redirectTo option", async () => {
+        const get = vi
+            .fn()
+            .mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: "/email-updated" }))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyEmailChange({
+            payload: { token: "change-token-abc" },
+            redirectTo: "/email-updated",
+        })
+
+        expect(get).toHaveBeenCalledWith("/email/change/verify", {
+            searchParams: { token: "change-token-abc", redirect: false, redirectTo: "/email-updated" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/email-updated" })
+    })
+
+    test("verifyEmailChange returns failure on invalid token", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ success: false, redirect: false, redirectURL: null }, 401))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyEmailChange({ payload: { token: "invalid-token" } })
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    test("verifyEmailChange returns failure on network error", async () => {
+        const get = vi.fn().mockRejectedValue(new Error("Network error"))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyEmailChange({ payload: { token: "change-token-abc" } })
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    // -------------------------------------------------------------------------
+    // cancelEmailChange
+    // -------------------------------------------------------------------------
+
+    test("cancelEmailChange cancels via token", async () => {
+        const get = vi.fn()
+
+        // first call: CSRF token, second call: the actual request
+        get.mockResolvedValueOnce(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        get.mockResolvedValueOnce(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.cancelEmailChange({ payload: { token: "cancel-token-abc" } })
+
+        expect(get).toHaveBeenCalledWith("/csrfToken")
+        expect(get).toHaveBeenCalledWith("/email/change/cancel", {
+            searchParams: { token: "cancel-token-abc", redirect: false, redirectTo: undefined },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("cancelEmailChange cancels for authenticated user without token", async () => {
+        const get = vi.fn()
+
+        get.mockResolvedValueOnce(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        get.mockResolvedValueOnce(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.cancelEmailChange({})
+
+        expect(get).toHaveBeenCalledWith("/email/change/cancel", {
+            searchParams: { token: undefined, redirect: false, redirectTo: undefined },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("cancelEmailChange with redirectTo option", async () => {
+        const get = vi.fn()
+
+        get.mockResolvedValueOnce(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        get.mockResolvedValueOnce(createJSONResponse({ success: true, redirect: false, redirectURL: "/settings" }))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.cancelEmailChange({
+            payload: { token: "cancel-token-abc" },
+            redirectTo: "/settings",
+        })
+
+        expect(get).toHaveBeenCalledWith("/email/change/cancel", {
+            searchParams: { token: "cancel-token-abc", redirect: false, redirectTo: "/settings" },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/settings" })
+    })
+
+    test("cancelEmailChange returns failure when CSRF token is missing", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({}, 500))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.cancelEmailChange({ payload: { token: "cancel-token-abc" } })
+
+        // only /csrfToken was called, the cancel endpoint was not reached
+        expect(get).toHaveBeenCalledTimes(1)
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    // -------------------------------------------------------------------------
+    // sendMagicLink
+    // -------------------------------------------------------------------------
+
+    test("sendMagicLink sends magic link successfully", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.sendMagicLink("john@example.com")
+
+        expect(get).toHaveBeenCalledWith("/csrfToken")
+        expect(post).toHaveBeenCalledWith("/signIn/magicLink", {
+            body: { email: "john@example.com" },
+            searchParams: { redirect: false, redirectTo: undefined },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("sendMagicLink with redirectTo option", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi
+            .fn()
+            .mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: "/check-email" }))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.sendMagicLink("john@example.com", { redirectTo: "/check-email" })
+
+        expect(post).toHaveBeenCalledWith("/signIn/magicLink", {
+            body: { email: "john@example.com" },
+            searchParams: { redirect: false, redirectTo: "/check-email" },
+            headers: { "X-CSRF-Token": "csrf_token_1" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/check-email" })
+    })
+
+    test("sendMagicLink returns failure when CSRF token is missing", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({}, 500))
+        const post = vi.fn()
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.sendMagicLink("john@example.com")
+
+        expect(post).not.toHaveBeenCalled()
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    test("sendMagicLink returns failure on network error", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockRejectedValue(new Error("Network error"))
+
+        createClientMock.mockReturnValue({ get, post })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.sendMagicLink("john@example.com")
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    // -------------------------------------------------------------------------
+    // verifyMagicLink
+    // -------------------------------------------------------------------------
+
+    test("verifyMagicLink verifies token successfully", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyMagicLink("magic-token-xyz")
+
+        expect(get).toHaveBeenCalledWith("/signIn/magicLink/verify", {
+            searchParams: { token: "magic-token-xyz", redirect: false, redirectTo: undefined },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: null })
+    })
+
+    test("verifyMagicLink with redirectTo option", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: "/dashboard" }))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyMagicLink("magic-token-xyz", { redirectTo: "/dashboard" })
+
+        expect(get).toHaveBeenCalledWith("/signIn/magicLink/verify", {
+            searchParams: { token: "magic-token-xyz", redirect: false, redirectTo: "/dashboard" },
+        })
+        expect(response).toEqual({ success: true, redirect: false, redirectURL: "/dashboard" })
+    })
+
+    test("verifyMagicLink returns failure on invalid token", async () => {
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ success: false, redirect: false, redirectURL: null }, 422))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyMagicLink("invalid-token")
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
+
+    test("verifyMagicLink returns failure on network error", async () => {
+        const get = vi.fn().mockRejectedValue(new Error("Network error"))
+
+        createClientMock.mockReturnValue({ get, post: vi.fn() })
+
+        const client = createAuthClient({ baseURL: "https://example.com" })
+        const response = await client.verifyMagicLink("magic-token-xyz")
+
+        expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
+    })
 })

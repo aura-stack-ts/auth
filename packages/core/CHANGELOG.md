@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `sendVerificationEmail()`, `verifyEmail()`, `forgotPassword()`, `resetPassword()`, `changePassword()`, `cancelEmailChange()`, `changeEmail()`, `verifyEmailChange()`, `sendMagicLink()`, and `verifyMagicLink()` client-side API functions to `createAuthClient()`. These functions interact with the corresponding mounted HTTP endpoints to support client-side email verification, password management, email changes, and passwordless authentication via magic links. [#300](https://github.com/aura-stack-ts/auth/pull/300)
+
 - Added the `sendMagicLink()` and `verifyMagicLink()` server API functions, along with the `POST /signIn/magicLink` and `GET /signIn/magicLink/verify` endpoints for client-side passwordless authentication via magic links. [#297](https://github.com/aura-stack-ts/auth/pull/297)
 
 - Added the `cancelEmailChange()` server API function and the `GET /email/change/cancel` endpoint to allow users to cancel pending email address changes. [#296](https://github.com/aura-stack-ts/auth/pull/296)

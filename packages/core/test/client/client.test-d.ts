@@ -19,6 +19,16 @@ import type {
     InferSignUp,
     UserFrom,
     GetProviderTokensReturn,
+    SendVerificationEmailData,
+    VerifyEmailData,
+    ForgotPasswordData,
+    ResetPasswordData,
+    ChangePasswordData,
+    ChangeEmailData,
+    VerifyEmailChangeData,
+    CancelEmailChangeData,
+    SendMagicLinkData,
+    VerifyMagicLinkData,
 } from "@/@types/index.ts"
 import { createAuth } from "@/createAuth.ts"
 import { z } from "zod/v4"
@@ -48,6 +58,25 @@ type AuthClientReturn<DefaultUser extends User = User, SignUpUser extends Record
     disconnectProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
     isProviderConnected: (oauth: LiteralUnion<BuiltInOAuthProvider>) => Promise<boolean>
     signOut: <Options extends SignOutOptions>(options?: Options) => Promise<SignOutReturn<Options>>
+    sendVerificationEmail: (email: string, options?: { redirectTo?: string }) => Promise<SendVerificationEmailData>
+    verifyEmail: (token: string, options?: { redirectTo?: string }) => Promise<VerifyEmailData>
+    forgotPassword: (email: string, options?: { redirectTo?: string }) => Promise<ForgotPasswordData>
+    resetPassword: (options: {
+        payload: { token: string; newPassword: string }
+        redirectTo?: string
+    }) => Promise<ResetPasswordData>
+    changePassword: (options: {
+        payload: { currentPassword: string; newPassword: string }
+        redirectTo?: string
+    }) => Promise<ChangePasswordData>
+    changeEmail: (options: {
+        payload: { currentPassword: string; newEmail: string }
+        redirectTo?: string
+    }) => Promise<ChangeEmailData>
+    verifyEmailChange: (options: { payload: { token: string }; redirectTo?: string }) => Promise<VerifyEmailChangeData>
+    cancelEmailChange: (options?: { payload?: { token: string }; redirectTo?: string }) => Promise<CancelEmailChangeData>
+    sendMagicLink: (email: string, options?: { redirectTo?: string }) => Promise<SendMagicLinkData>
+    verifyMagicLink: (token: string, options?: { redirectTo?: string }) => Promise<VerifyMagicLinkData>
 }
 
 describe("Client Types", () => {
@@ -265,5 +294,79 @@ describe("Client Types", () => {
 
         const authClient = createAuthClient<User, SignUp>({})
         expectTypeOf(authClient).toEqualTypeOf<AuthClientReturn<User, SignUp>>()
+    })
+})
+
+describe("New client method types", () => {
+    const client = createAuthClient({})
+
+    test("sendVerificationEmail returns SendVerificationEmailData", () => {
+        expectTypeOf(client.sendVerificationEmail).toBeFunction()
+        expectTypeOf(client.sendVerificationEmail).parameters.toEqualTypeOf<[email: string, options?: { redirectTo?: string }]>()
+        expectTypeOf(client.sendVerificationEmail).returns.resolves.toEqualTypeOf<SendVerificationEmailData>()
+    })
+
+    test("verifyEmail returns VerifyEmailData", () => {
+        expectTypeOf(client.verifyEmail).toBeFunction()
+        expectTypeOf(client.verifyEmail).parameters.toEqualTypeOf<[token: string, options?: { redirectTo?: string }]>()
+        expectTypeOf(client.verifyEmail).returns.resolves.toEqualTypeOf<VerifyEmailData>()
+    })
+
+    test("forgotPassword returns ForgotPasswordData", () => {
+        expectTypeOf(client.forgotPassword).toBeFunction()
+        expectTypeOf(client.forgotPassword).parameters.toEqualTypeOf<[email: string, options?: { redirectTo?: string }]>()
+        expectTypeOf(client.forgotPassword).returns.resolves.toEqualTypeOf<ForgotPasswordData>()
+    })
+
+    test("resetPassword returns ResetPasswordData", () => {
+        expectTypeOf(client.resetPassword).toBeFunction()
+        expectTypeOf(client.resetPassword).parameters.toEqualTypeOf<
+            [options: { payload: { token: string; newPassword: string }; redirectTo?: string }]
+        >()
+        expectTypeOf(client.resetPassword).returns.resolves.toEqualTypeOf<ResetPasswordData>()
+    })
+
+    test("changePassword returns ChangePasswordData", () => {
+        expectTypeOf(client.changePassword).toBeFunction()
+        expectTypeOf(client.changePassword).parameters.toEqualTypeOf<
+            [options: { payload: { currentPassword: string; newPassword: string }; redirectTo?: string }]
+        >()
+        expectTypeOf(client.changePassword).returns.resolves.toEqualTypeOf<ChangePasswordData>()
+    })
+
+    test("changeEmail returns ChangeEmailData", () => {
+        expectTypeOf(client.changeEmail).toBeFunction()
+        expectTypeOf(client.changeEmail).parameters.toEqualTypeOf<
+            [options: { payload: { currentPassword: string; newEmail: string }; redirectTo?: string }]
+        >()
+        expectTypeOf(client.changeEmail).returns.resolves.toEqualTypeOf<ChangeEmailData>()
+    })
+
+    test("verifyEmailChange returns VerifyEmailChangeData", () => {
+        expectTypeOf(client.verifyEmailChange).toBeFunction()
+        expectTypeOf(client.verifyEmailChange).parameters.toEqualTypeOf<
+            [options: { payload: { token: string }; redirectTo?: string }]
+        >()
+        expectTypeOf(client.verifyEmailChange).returns.resolves.toEqualTypeOf<VerifyEmailChangeData>()
+    })
+
+    test("cancelEmailChange returns CancelEmailChangeData", () => {
+        expectTypeOf(client.cancelEmailChange).toBeFunction()
+        expectTypeOf(client.cancelEmailChange).parameters.toEqualTypeOf<
+            [options?: { payload?: { token: string }; redirectTo?: string }]
+        >()
+        expectTypeOf(client.cancelEmailChange).returns.resolves.toEqualTypeOf<CancelEmailChangeData>()
+    })
+
+    test("sendMagicLink returns SendMagicLinkData", () => {
+        expectTypeOf(client.sendMagicLink).toBeFunction()
+        expectTypeOf(client.sendMagicLink).parameters.toEqualTypeOf<[email: string, options?: { redirectTo?: string }]>()
+        expectTypeOf(client.sendMagicLink).returns.resolves.toEqualTypeOf<SendMagicLinkData>()
+    })
+
+    test("verifyMagicLink returns VerifyMagicLinkData", () => {
+        expectTypeOf(client.verifyMagicLink).toBeFunction()
+        expectTypeOf(client.verifyMagicLink).parameters.toEqualTypeOf<[token: string, options?: { redirectTo?: string }]>()
+        expectTypeOf(client.verifyMagicLink).returns.resolves.toEqualTypeOf<VerifyMagicLinkData>()
     })
 })
