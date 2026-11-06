@@ -138,6 +138,20 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig, useProxyHe
                 keyGenerator: (request) => getLimitKey(request, "cancelEmailChange"),
                 ...config?.cancelEmailChange,
             } as RateLimiterRule,
+            sendMagicLink: {
+                algorithm: "fixed-window",
+                limit: 5,
+                windowMs: 60 * 60 * 1000,
+                keyGenerator: (request) => getLimitKey(request, "sendMagicLink"),
+                ...config?.sendMagicLink,
+            } as RateLimiterRule,
+            verifyMagicLink: {
+                algorithm: "fixed-window",
+                limit: 5,
+                windowMs: 60 * 60 * 1000,
+                keyGenerator: (request) => getLimitKey(request, "verifyMagicLink"),
+                ...config?.verifyMagicLink,
+            } as RateLimiterRule,
         },
     })
 }

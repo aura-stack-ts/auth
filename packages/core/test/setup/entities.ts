@@ -179,3 +179,21 @@ export const expiredEmailChangeTokenEntity: VerificationTokenEntity = {
     revokedAt: null,
     createdAt: new Date(),
 }
+
+export const magicLinkTokenEntity: VerificationTokenEntity = {
+    id: "token-101",
+    userId: "user-456",
+    tokenHash: "hashed-magic-link-token",
+    type: "magic_link",
+    identifier: "alicemagiclink@example.com",
+    newIdentifier: null,
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    revokedAt: null,
+    createdAt: new Date(),
+}
+
+export const userMagicLinkEntity: Partial<UserEntity> = {
+    id: "user-456",
+    email: "alicemagiclink@example.com",
+    status: "active",
+}

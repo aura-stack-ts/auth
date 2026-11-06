@@ -150,7 +150,8 @@ export interface VerificationTokensAdapter {
     createToken(input: Omit<VerificationTokenEntity, "id" | "createdAt" | "revokedAt">): Promise<VerificationTokenEntity>
     getTokenByHash(tokenHash: string): Promise<VerificationTokenEntity | null>
     getTokensByUserId(userId: string): Promise<VerificationTokenEntity[]>
-    revokeToken(id: string): Promise<void>
+    revokeToken(id: string): Promise<boolean>
+    revokeAllVerificationTokens(userId: string, type?: VerificationTokenEntity["type"]): Promise<number>
 }
 
 /**

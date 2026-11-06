@@ -5,7 +5,7 @@ export type UserStatus = "active" | "suspended" | "pending_verification" | "dele
 /**
  * @todo: add "passkey" and "saml" to AccountType when we implement those providers
  */
-export type AccountType = "oauth" | "credentials"
+export type AccountType = "oauth" | "credentials" | "magic_link"
 
 export type AccountStatus = "active" | "unlinked" | "suspended"
 
@@ -44,6 +44,7 @@ export type VerificationTokenType =
     | "email_change"
     | "mfa_recovery"
     | "email_change_cancel"
+    | "magic_link"
 
 export interface UserEntity {
     id: string
