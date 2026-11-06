@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { authInstance } from "@test/setup/auth.ts"
 import { createSecretValue } from "@/shared/crypto.ts"
-import { deviceEntity, magicLinkTokenEntity } from "@test/setup/entities.ts"
+import { deviceEntity, magicLinkTokenEntity, userMagicLinkEntity } from "@test/setup/entities.ts"
 
 describe("verifyMagicLinkAction", async () => {
     test("success with valid token", async () => {
@@ -9,6 +9,7 @@ describe("verifyMagicLinkAction", async () => {
 
         const getTokenByHashMock = vi.fn().mockReturnValue(magicLinkTokenEntity)
         const revokeTokenMock = vi.fn().mockResolvedValue(true)
+        const getUserByIdMock = vi.fn().mockReturnValue(userMagicLinkEntity)
         const revokeAllVerificationTokensMock = vi.fn()
         const updateUserMock = vi.fn()
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([])
@@ -22,6 +23,7 @@ describe("verifyMagicLinkAction", async () => {
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             revokeToken: revokeTokenMock,
+            getUserById: getUserByIdMock,
             revokeAllVerificationTokens: revokeAllVerificationTokensMock,
             updateUser: updateUserMock,
             getAccountsByUserId: getAccountsByUserIdMock,
@@ -44,21 +46,22 @@ describe("verifyMagicLinkAction", async () => {
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(revokeTokenMock).toHaveBeenCalledWith("token-101")
-        expect(revokeAllVerificationTokensMock).toHaveBeenCalledWith("user-123", "magic_link")
-        expect(updateUserMock).toHaveBeenCalledWith("user-123", { emailVerifiedAt: expect.any(Date) })
-        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getUserByIdMock).toHaveBeenCalledWith("user-456")
+        expect(revokeAllVerificationTokensMock).toHaveBeenCalledWith("user-456", "magic_link")
+        expect(updateUserMock).toHaveBeenCalledWith("user-456", { emailVerifiedAt: expect.any(Date) })
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-456")
         expect(createAccountMock).toHaveBeenCalledWith({
-            userId: "user-123",
+            userId: "user-456",
             provider: "magic_link",
             status: "active",
             type: "magic_link",
-            providerUserId: "user-123",
+            providerUserId: "user-456",
         })
-        expect(getDeviceByFingerprintMock).toHaveBeenCalledWith("user-123", expect.any(String))
+        expect(getDeviceByFingerprintMock).toHaveBeenCalledWith("user-456", expect.any(String))
         expect(createDeviceMock).toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalledWith({
             id: expect.any(String),
-            userId: "user-123",
+            userId: "user-456",
             deviceId: "device-123",
             authenticatedWith: "magic_link",
             status: "active",
@@ -73,6 +76,7 @@ describe("verifyMagicLinkAction", async () => {
 
         const getTokenByHashMock = vi.fn().mockReturnValue(magicLinkTokenEntity)
         const revokeTokenMock = vi.fn().mockResolvedValue(true)
+        const getUserByIdMock = vi.fn().mockReturnValue(userMagicLinkEntity)
         const revokeAllVerificationTokensMock = vi.fn()
         const updateUserMock = vi.fn()
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([{ provider: "magic_link" }])
@@ -86,6 +90,7 @@ describe("verifyMagicLinkAction", async () => {
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             revokeToken: revokeTokenMock,
+            getUserById: getUserByIdMock,
             revokeAllVerificationTokens: revokeAllVerificationTokensMock,
             updateUser: updateUserMock,
             getAccountsByUserId: getAccountsByUserIdMock,
@@ -108,11 +113,12 @@ describe("verifyMagicLinkAction", async () => {
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(revokeTokenMock).toHaveBeenCalledWith("token-101")
-        expect(revokeAllVerificationTokensMock).toHaveBeenCalledWith("user-123", "magic_link")
-        expect(updateUserMock).toHaveBeenCalledWith("user-123", { emailVerifiedAt: expect.any(Date) })
-        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getUserByIdMock).toHaveBeenCalledWith("user-456")
+        expect(revokeAllVerificationTokensMock).toHaveBeenCalledWith("user-456", "magic_link")
+        expect(updateUserMock).toHaveBeenCalledWith("user-456", { emailVerifiedAt: expect.any(Date) })
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-456")
         expect(createAccountMock).not.toHaveBeenCalled()
-        expect(getDeviceByFingerprintMock).toHaveBeenCalledWith("user-123", expect.any(String))
+        expect(getDeviceByFingerprintMock).toHaveBeenCalledWith("user-456", expect.any(String))
         expect(createDeviceMock).toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalled()
     })
@@ -122,6 +128,7 @@ describe("verifyMagicLinkAction", async () => {
 
         const getTokenByHashMock = vi.fn().mockReturnValue(null)
         const revokeTokenMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
         const updateUserMock = vi.fn()
         const getAccountsByUserIdMock = vi.fn()
         const createAccountMock = vi.fn()
@@ -134,6 +141,7 @@ describe("verifyMagicLinkAction", async () => {
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             revokeToken: revokeTokenMock,
+            getUserById: getUserByIdMock,
             updateUser: updateUserMock,
             getAccountsByUserId: getAccountsByUserIdMock,
             createAccount: createAccountMock,
@@ -153,6 +161,7 @@ describe("verifyMagicLinkAction", async () => {
 
         expect(getTokenByHashMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
+        expect(getUserByIdMock).not.toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
         expect(createAccountMock).not.toHaveBeenCalled()
@@ -170,6 +179,7 @@ describe("verifyMagicLinkAction", async () => {
         }
         const getTokenByHashMock = vi.fn().mockReturnValue(wrongTypeToken)
         const revokeTokenMock = vi.fn()
+        const getUserByIdMock = vi.fn().mockReturnValue(null)
         const updateUserMock = vi.fn()
         const getAccountsByUserIdMock = vi.fn()
         const createAccountMock = vi.fn()
@@ -182,6 +192,7 @@ describe("verifyMagicLinkAction", async () => {
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             revokeToken: revokeTokenMock,
+            getUserById: getUserByIdMock,
             updateUser: updateUserMock,
             getAccountsByUserId: getAccountsByUserIdMock,
             createAccount: createAccountMock,
@@ -201,6 +212,7 @@ describe("verifyMagicLinkAction", async () => {
 
         expect(getTokenByHashMock).not.toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
+        expect(getUserByIdMock).not.toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
         expect(createAccountMock).not.toHaveBeenCalled()
@@ -214,6 +226,7 @@ describe("verifyMagicLinkAction", async () => {
 
         const getTokenByHashMock = vi.fn().mockReturnValue(magicLinkTokenEntity)
         const revokeTokenMock = vi.fn().mockResolvedValue(true)
+        const getUserByIdMock = vi.fn().mockReturnValue(userMagicLinkEntity)
         const revokeAllVerificationTokensMock = vi.fn()
         const updateUserMock = vi.fn()
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([])
@@ -227,6 +240,7 @@ describe("verifyMagicLinkAction", async () => {
         } = authInstance({
             getTokenByHash: getTokenByHashMock,
             revokeToken: revokeTokenMock,
+            getUserById: getUserByIdMock,
             revokeAllVerificationTokens: revokeAllVerificationTokensMock,
             updateUser: updateUserMock,
             getAccountsByUserId: getAccountsByUserIdMock,
@@ -251,11 +265,12 @@ describe("verifyMagicLinkAction", async () => {
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(revokeTokenMock).toHaveBeenCalledWith("token-101")
-        expect(revokeAllVerificationTokensMock).toHaveBeenCalledWith("user-123", "magic_link")
+        expect(getUserByIdMock).toHaveBeenCalledWith("user-456")
+        expect(revokeAllVerificationTokensMock).toHaveBeenCalledWith("user-456", "magic_link")
         expect(updateUserMock).toHaveBeenCalled()
-        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-456")
         expect(createAccountMock).toHaveBeenCalled()
-        expect(getDeviceByFingerprintMock).toHaveBeenCalledWith("user-123", expect.any(String))
+        expect(getDeviceByFingerprintMock).toHaveBeenCalledWith("user-456", expect.any(String))
         expect(createDeviceMock).toHaveBeenCalled()
         expect(createSessionMock).toHaveBeenCalled()
     })

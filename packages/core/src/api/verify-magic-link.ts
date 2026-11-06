@@ -29,31 +29,28 @@ export const verifyMagicLink = async (
             return rateLimit
         }
 
-        const { success, sessionToken } = await sessionStrategy.verifyMagicLink({ token, request })
-        logger?.log(success ? "VERIFY_MAGIC_LINK_SUCCESS" : "VERIFY_MAGIC_LINK_FAILED")
-        const builder = new HeadersBuilder(secureApiHeaders)
+        const { sessionToken } = await sessionStrategy.verifyMagicLink({ token, request })
+        logger?.log("VERIFY_MAGIC_LINK_SUCCESS")
 
-        if (success) {
-            const csrfToken = await createCSRF(ctx.jose)
-            builder
-                .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
-                .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
-        }
+        const csrfToken = await createCSRF(ctx.jose)
+        const builder = new HeadersBuilder(secureApiHeaders)
+            .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
+            .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
 
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
         return {
-            success,
+            success: true,
             redirect,
             redirectURL: redirect ? null : redirectURL,
             headers: builder.toHeaders(),
             toResponse: () => {
                 return Response.json(
                     {
-                        success,
+                        success: true,
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },
-                    { headers: builder.toHeaders(), status: success ? (redirect ? 302 : 200) : 200 }
+                    { headers: builder.toHeaders(), status: redirect ? 302 : 200 }
                 )
             },
         } as VerifyMagicLinkAPIReturn

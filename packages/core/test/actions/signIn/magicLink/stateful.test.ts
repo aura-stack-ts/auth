@@ -162,7 +162,7 @@ describe("sendMagicLinkAction", async () => {
 
         expect(response.status).toBe(200)
         expect(await response.json()).toEqual({
-            success: true,
+            success: false,
             redirect: false,
             redirectURL: null,
         })

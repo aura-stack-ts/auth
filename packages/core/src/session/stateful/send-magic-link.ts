@@ -1,6 +1,7 @@
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
 import type { SessionStrategy } from "@/@types/session.ts"
+import type { InternalStatefulContext } from "@/@types/internal.ts"
 
 export const sendMagicLink = ({ ctx }: InternalStatefulContext): SessionStrategy["sendMagicLink"] => {
     const { sessionConfig } = ctx
@@ -8,12 +9,14 @@ export const sendMagicLink = ({ ctx }: InternalStatefulContext): SessionStrategy
         let user = await sessionConfig.adapter.getUserByEmail(email)
         if (!user) {
             if (!allowSignUp) {
-                return { success: false, token: null, url: null }
+                throw new AuraAuthError({ code: "SIGNUP_NOT_ALLOWED_FOR_MAGIC_LINK" })
             }
             user = await sessionConfig.adapter.createUser({
                 email,
                 emailVerifiedAt: null,
             })
+        } else if (user.status !== "active") {
+            throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
         }
 
         await sessionConfig.adapter.revokeAllVerificationTokens(user.id, "magic_link")
@@ -29,6 +32,6 @@ export const sendMagicLink = ({ ctx }: InternalStatefulContext): SessionStrategy
             type: "magic_link",
             tokenHash,
         })
-        return { success: true, token, url: `${origin}${ctx.basePath}/signIn/magicLink/verify?token=${token}` }
+        return { token, url: `${origin}${ctx.basePath}/signIn/magicLink/verify?token=${token}` }
     }
 }

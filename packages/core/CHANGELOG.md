@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### BREAKING CHANGES
+
+- Updated `VerificationTokensAdapter`: custom adapters must implement `revokeAllVerificationTokens(userId, type?)`, and `revokeToken(id)` must return `Promise<boolean>` instead of `Promise<void>`. The boolean indicates whether the token was found and revoked.
+
 ### Added
 
 - Added the `sendMagicLink()` and `verifyMagicLink()` server API functions, along with the `POST /signIn/magicLink` and `GET /signIn/magicLink/verify` endpoints for client-side passwordless authentication via magic links. [#297](https://github.com/aura-stack-ts/auth/pull/297)

@@ -1,3 +1,4 @@
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import { createDevice as createDeviceRegistry } from "@/shared/utils/session-strategy.ts"
 import type { SessionStrategy } from "@/@types/session.ts"
@@ -13,12 +14,17 @@ export const verifyMagicLink = ({ ctx, cookies, cookieManager }: InternalStatefu
         const verifiedToken = await sessionConfig.adapter.getTokenByHash(tokenHash)
 
         if (!verifiedToken || verifiedToken.type !== "magic_link" || verifiedToken.expiresAt < now || verifiedToken.revokedAt) {
-            return { success: false, sessionToken: null }
+            throw new AuraAuthError({ code: "INVALID_MAGIC_LINK_TOKEN" })
         }
         const isTokenRevoked = await sessionConfig.adapter.revokeToken(verifiedToken.id)
         if (!isTokenRevoked) {
-            return { success: false, sessionToken: null }
+            throw new AuraAuthError({ code: "INVALID_MAGIC_LINK_TOKEN" })
         }
+        const user = await sessionConfig.adapter.getUserById(verifiedToken.userId)
+        if (!user || user.status !== "active" || user.email !== verifiedToken.identifier) {
+            throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
+        }
+
         await sessionConfig.adapter.revokeAllVerificationTokens(verifiedToken.userId, "magic_link")
 
         await sessionConfig.adapter.updateUser(verifiedToken.userId, {
@@ -56,9 +62,6 @@ export const verifyMagicLink = ({ ctx, cookies, cookieManager }: InternalStatefu
             expiresAt,
         })
 
-        return {
-            success: true,
-            sessionToken: sessionToken,
-        }
+        return { sessionToken }
     }
 }

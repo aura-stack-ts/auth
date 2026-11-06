@@ -139,9 +139,13 @@ describe("sendMagicLink API", async () => {
         })
 
         expect(output).toEqual({
-            success: true,
+            success: false,
             redirect: false,
             redirectURL: null,
+            error: {
+                code: "SIGNUP_NOT_ALLOWED_FOR_MAGIC_LINK",
+                message: "Sign-up is not allowed for magic link authentication. Please sign in with an existing account.",
+            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })

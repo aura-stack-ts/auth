@@ -40,15 +40,13 @@ export const sendMagicLink = async (
         if (rateLimit) {
             return rateLimit as SendMagicLinkAPIReturn
         }
-        const { success, token, url } = await sessionStrategy.sendMagicLink({
+        const { token, url } = await sessionStrategy.sendMagicLink({
             email,
             origin,
             allowSignUp: magicLinks?.allowSignUp ?? false,
         })
 
-        if (success) {
-            await magicLinks?.sendMagicLinkEmail?.({ email, token, url })
-        }
+        await magicLinks.sendMagicLinkEmail({ email, token, url })
 
         const builder = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)

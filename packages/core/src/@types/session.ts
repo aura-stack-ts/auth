@@ -365,27 +365,19 @@ export interface SessionStrategy<DefaultUser extends User = User> {
 
     changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void>
 
+    verifyEmailChange(options: { token: string; userId: string; sessionId: string }): Promise<void>
+
+    cancelEmailChange(options: { token: string; userId?: string } | { token?: string; userId: string }): Promise<void>
+
+    sendMagicLink(options: { email: string; allowSignUp: boolean; origin: string }): Promise<{ token: string; url: string }>
+
+    verifyMagicLink(options: { token: string; request: Request }): Promise<{ sessionToken: string }>
     changeEmail(options: {
         userId: string
         currentPassword: string
         newEmail: string
         origin: string
     }): Promise<{ email: string; confirmToken: string; confirmURL: string; cancelToken: string; cancelURL: string }>
-
-    verifyEmailChange(options: { token: string; userId: string; sessionId: string }): Promise<void>
-
-    cancelEmailChange(options: { token: string; userId?: string } | { token?: string; userId: string }): Promise<void>
-
-    sendMagicLink(options: {
-        email: string
-        allowSignUp: boolean
-        origin: string
-    }): Promise<{ success: true; token: string; url: string } | { success: false; token: null; url: null }>
-
-    verifyMagicLink(options: {
-        token: string
-        request: Request
-    }): Promise<{ success: true; sessionToken: string } | { success: false; sessionToken: null }>
 }
 
 export interface OAuthTokenPayload {

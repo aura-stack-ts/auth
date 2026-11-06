@@ -1001,6 +1001,20 @@ export const ERROR_CATALOG = {
             "The 'sendMagicLinkEmail' function is not implemented in the magicLinks configuration. This function is required to send magic link emails.",
         userMessage: "Internal library configuration error. The sendMagicLinkEmail function is not implemented.",
     },
+    INVALID_MAGIC_LINK_TOKEN: {
+        type: "VALIDATION",
+        statusCode: 422,
+        name: "ValidationError",
+        message: "The provided magic link token is invalid or has expired.",
+        userMessage: "Invalid or expired magic link token.",
+    },
+    SIGNUP_NOT_ALLOWED_FOR_MAGIC_LINK: {
+        type: "VALIDATION",
+        statusCode: 403,
+        name: "ValidationError",
+        message: "Sign-up is not allowed for magic link authentication. The user must already exist.",
+        userMessage: "Sign-up is not allowed for magic link authentication. Please sign in with an existing account.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG
