@@ -23,6 +23,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         request?: Request
         rateLimit?: any
         headers: Headers
+        originURL?: string
     } = { headers }
 
     const builder = {
@@ -84,7 +85,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                     const url = `${origin}${ctx.basePath}${endpointPath}`
                     request = new Request(url, { headers: output.headers })
                 }
-                await getOriginURL(request, ctx)
+                output.originURL = await getOriginURL(request, ctx)
                 output.request = request
             })
             return builder
@@ -111,6 +112,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                 request: Request
                 rateLimit: any | undefined
                 headers: Headers
+                originURL: string
             }
         },
     }

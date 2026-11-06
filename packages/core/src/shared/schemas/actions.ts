@@ -11,6 +11,7 @@ import {
     array,
     literal,
     stringbool,
+    email,
 } from "zod/v4"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
@@ -120,4 +121,24 @@ export const SignUpActionResponseSchema = object({
     success: boolean(),
     redirect: boolean(),
     redirectURL: union([url(), nullable()]),
+})
+
+export const VerifyEmailActionResponseSchema = object({
+    success: boolean(),
+    redirect: boolean(),
+    redirectURL: union([url(), nullable()]),
+})
+
+export const VerifyEmailSearchParamsSchema = RedirectOptionsSchema.extend({
+    token: string().min(32),
+})
+
+export const SendVerificationEmailActionResponseSchema = object({
+    success: boolean(),
+    redirect: boolean(),
+    redirectURL: union([url(), nullable()]),
+})
+
+export const SendVerificationEmailBodySchema = object({
+    email: email(),
 })

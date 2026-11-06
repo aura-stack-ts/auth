@@ -188,16 +188,18 @@ export interface SignInCredentialsOptions extends OptionsWithRedirectTo {
     payload: CredentialsPayload
 }
 
-export type SignInCredentialsReturnData =
+export type APIFunctionReturnData =
     /** redirect: true & redirectTo: string */
     | { success: true; redirect: true; redirectURL: null }
     /** redirect: false & redirectTo: string */
     | { success: true; redirect: false; redirectURL: string }
-    /** redirect: false & redirectTo: null | undefined (not set) */
     /** redirect: true & redirectTo: null | undefined (not set) */
+    /** redirect: false & redirectTo: null | undefined (not set) */
     | { success: true; redirect: false; redirectURL: null }
-    /** Failed credentials */
+    /** Failed */
     | { success: false; redirect: false; redirectURL: null }
+
+export type SignInCredentialsReturnData = APIFunctionReturnData
 
 /** Client-side credentials sign-in return type (redirect mode or manual redirect data). */
 export type SignInCredentialsReturn<Options extends SignInCredentialsOptions> = Options extends { redirect: false }
@@ -224,16 +226,7 @@ export type SignInCredentialsAPIReturn = AuthActionAPIReturn<SignInCredentialsRe
 /** Client-side sign-out options. */
 export interface SignOutOptions extends OptionsWithRedirectTo {}
 
-export type SignOutReturnData =
-    /** redirect: true & redirectTo: string */
-    | { success: true; redirect: true; redirectURL: null }
-    /** redirect: false & redirectTo: string */
-    | { success: true; redirect: false; redirectURL: string }
-    /** redirect: false & redirectTo: null | undefined (not set) */
-    /** redirect: true & redirectTo: null | undefined (not set) */
-    | { success: true; redirect: false; redirectURL: null }
-    /** Failed */
-    | { success: false; redirect: false; redirectURL: null }
+export type SignOutReturnData = APIFunctionReturnData
 
 /** Client-side sign-out return type (redirect mode or manual redirect data). */
 export type SignOutReturn<Options extends SignOutOptions> = Options extends { redirect: false }
@@ -298,16 +291,7 @@ export interface SignUpAPIOptions<Payload extends Record<string, any> = Record<s
     payload: Payload
 }
 
-export type SignUpReturnData =
-    /** redirect: true & redirectTo: string */
-    | { success: true; redirect: true; redirectURL: null }
-    /** redirect: false & redirectTo: string */
-    | { success: true; redirect: false; redirectURL: string }
-    /** redirect: false & redirectTo: null | undefined (not set) */
-    /** redirect: true & redirectTo: null | undefined (not set) */
-    | { success: true; redirect: false; redirectURL: null }
-    /** Failed sign-up */
-    | { success: false; redirect: false; redirectURL: null }
+export type SignUpReturnData = APIFunctionReturnData
 
 /** Programmatic sign-up result with redirect metadata and `toResponse()`. */
 export type SignUpAPIReturn = AuthActionAPIReturn<SignUpReturnData>
@@ -401,3 +385,15 @@ export type ProviderConnectedAPIOptions = APIOptionsWithRequest
 export type ProviderConnectedData = { success: true; connected: boolean } | { success: false; connected: false }
 
 export type ProviderConnectedAPIReturn = AuthActionAPIReturn<ProviderConnectedData>
+
+export type SendVerificationEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo & APIOptionsWithSkipCSRFCheck
+
+export type SendVerificationEmailData = APIFunctionReturnData
+
+export type SendVerificationEmailAPIReturn = AuthActionAPIReturn<SendVerificationEmailData>
+
+export type VerifyEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+
+export type VerifyEmailData = APIFunctionReturnData
+
+export type VerifyEmailAPIReturn = AuthActionAPIReturn<VerifyEmailData>

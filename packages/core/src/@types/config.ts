@@ -188,6 +188,24 @@ export type AuthConfig<
      * }
      */
     rateLimiter?: RateLimiterConfig
+    /**
+     * Email verification configuration for user accounts. It allows you to define the
+     * expiration time for email verification tokens and the callback function to send
+     * the verification email.
+     * @example
+     * emailVerification: {
+     *   expiresIn: 3600, // 1 hour
+     *   sendVerificationEmail: async ({ email, token, url }) => {
+     *     // Send the verification email to the user with the provided token and URL
+     *     sendEmail({
+     *       to: email,
+     *       subject: "Verify your email",
+     *       body: `Please verify your email by clicking the following link: ${url}`,
+     *     })
+     *   }
+     * }
+     */
+    emailVerification?: EmailVerificationConfig
 } & TrustedProxyHeadersConfig
 
 export type OAuthProvidersConfig<Identity extends Identities> =
@@ -470,6 +488,31 @@ export interface SignUpConfig<
     onCreateUser: (context: OnCreateUserContext<SignUpSchema>) => Awaitable<FromShapeToObject<NoInfer<Identity>> | null>
 }
 
+export interface EmailVerificationConfig {
+    /**
+     * Defines the expiration time for the email verification token in seconds. By default, it is
+     * set to 30 minutes (1800 seconds).
+     * @example
+     * expiresIn: 3600 // 1 hour
+     */
+    expiresIn?: number
+    /**
+     * Callback function to send the verification email. It receives the email address, token,
+     * and verification URL. You must implement this function to send the email using your
+     * preferred email service.
+     * @example
+     * sendVerificationEmail: async ({ email, token, url }) => {
+     *   // Send the verification email to the user with the provided token and URL
+     *   sendEmail({
+     *     to: email,
+     *     subject: "Verify your email",
+     *     body: `Please verify your email by clicking the following link: ${url}`,
+     *   })
+     * }
+     */
+    sendVerificationEmail?: (options: { email: string; token: string | null; url: string | null }) => Awaitable<void>
+}
+
 // #region Rate Limiter
 
 export type RateLimiterConfig = Partial<
@@ -485,7 +528,9 @@ export type RateLimiterConfig = Partial<
             | "refreshUserInfo"
             | "revokeToken"
             | "isProviderConnected"
-            | "signOut",
+            | "signOut"
+            | "sendVerificationEmail"
+            | "verifyEmail",
             RateLimiterRule
         >
     >["rules"]

@@ -10,23 +10,19 @@ import { refreshUserInfo } from "@/session/stateless/refresh-userInfo.ts"
 import { signInCredentials } from "@/session/stateless/sign-in-credentials.ts"
 import { getProviderTokens } from "@/session/stateless/get-provider-tokens.ts"
 import { isProviderConnected } from "@/session/stateless/is-provider-connected.ts"
+import { sendVerificationEmail, revokeSession, verifyEmail } from "@/session/stateless/unsupported.ts"
 import type { SessionStrategy, User } from "@/@types/index.ts"
 import type { InternalStatelessContext } from "@/@types/internal.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>(
     ctx: InternalStatelessContext
 ): SessionStrategy<DefaultUser> => {
-    const revokeSession = async (_sessionId: string): Promise<void> => {
-        ctx.ctx.logger?.log("STATELESS_REVOKE_SESSION_NOOP", {
-            structuredData: { strategy: "stateless", reason: "no_server_side_session_record" },
-        })
-    }
-
     return {
-        revokeSession,
+        revokeSession: revokeSession(ctx),
         signIn: signIn(ctx),
         signUp: signUp(ctx),
         getSession: getSession(ctx),
+        verifyEmail: verifyEmail(ctx),
         revokeToken: revokeToken(ctx),
         createSession: createSession(ctx),
         oauthCallback: oauthCallback(ctx),
@@ -36,5 +32,6 @@ export const createStatelessStrategy = <DefaultUser extends User = User>(
         getProviderTokens: getProviderTokens(ctx),
         signInCredentials: signInCredentials(ctx),
         isProviderConnected: isProviderConnected(ctx),
+        sendVerificationEmail: sendVerificationEmail(ctx),
     }
 }

@@ -348,6 +348,13 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     }>
 
     oauthCallback(oauth: string, request: Request, { code, state }: { code: string; state: string }): Promise<Response>
+
+    sendVerificationEmail(options: { email: string; origin: string }): Promise<{
+        token: string
+        url: string
+    }>
+
+    verifyEmail(options: { token: string }): Promise<void>
 }
 
 export interface OAuthTokenPayload {
