@@ -143,3 +143,15 @@ export const credentialAccountEntity: CredentialAccountEntity = {
     passwordHash: await hashPassword("current-password"),
     updatedAt: new Date(),
 }
+
+export const emailChangeTokenEntity: VerificationTokenEntity = {
+    id: "token-456",
+    userId: "user-123",
+    tokenHash: "hashed-email-change-token",
+    type: "email_change",
+    identifier: "old@example.com",
+    newIdentifier: "new@example.com",
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    revokedAt: null,
+    createdAt: new Date(),
+}

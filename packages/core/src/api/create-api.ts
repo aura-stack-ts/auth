@@ -16,6 +16,8 @@ import {
     forgotPassword,
     resetPassword,
     changePassword,
+    changeEmail,
+    verifyEmailChange,
 } from "@/api/index.ts"
 import type { GlobalContext, InferSchema } from "@aura-stack/router"
 import type {
@@ -58,6 +60,10 @@ import type {
     ResetPasswordAPIOptions,
     ChangePasswordAPIOptions,
     ChangePasswordAPIReturn,
+    ChangeEmailAPIOptions,
+    ChangeEmailAPIReturn,
+    VerifyEmailChangeAPIOptions,
+    VerifyEmailChangeAPIReturn,
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
@@ -366,6 +372,42 @@ export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema exte
          */
         changePassword: async (options: ChangePasswordAPIOptions): Promise<ChangePasswordAPIReturn> => {
             return changePassword({ ctx, skipCSRFCheck: true, ...options })
+        },
+        /**
+         * Changes the email address for a user on the server-side. It requires the current password
+         * and the new email address.
+         *
+         * > **NOTE**: This method is intended for authenticated users who want to change their email
+         * address while logged in.
+         *
+         * @params options - Options for the API call, including the current password, new email address, headers, and request object.
+         * @example
+         * const { success } = await api.changeEmail({
+         *   payload: {
+         *     currentPassword: "current-password-here",
+         *     newEmail: "alice@example.com"
+         *   },
+         * })
+         */
+        changeEmail: async (options: ChangeEmailAPIOptions): Promise<ChangeEmailAPIReturn> => {
+            return changeEmail({ ctx, skipCSRFCheck: true, ...options })
+        },
+        /**
+         * Verifies an email change request on the server-side. It requires a valid email change verification token.
+         *
+         * > **NOTE**: This method is intended for authenticated users who have requested an email change and
+         * received a verification token.
+         *
+         * @param options - Options for the API call, including the verification token, headers, and request object.
+         * @example
+         * const { success } = await api.verifyEmailChange({
+         *   payload: {
+         *     token: "email-change-verification-token-here"
+         *   },
+         * })
+         */
+        verifyEmailChange: async (options: VerifyEmailChangeAPIOptions): Promise<VerifyEmailChangeAPIReturn> => {
+            return verifyEmailChange({ ctx, skipCSRFCheck: true, ...options })
         },
         /**
          * Signs out the current session on the server-side. It implements CSRF Protection by default, for

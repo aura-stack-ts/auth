@@ -9,6 +9,7 @@ import { getBasePathConfig } from "@/config/get-base-path.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { getOAuthProvidersConfig } from "@/config/get-oauth.ts"
+import { getEmailChangeConfig } from "@/config/get-email-change.ts"
 import { getCredentialsConfig } from "@/config/get-credentials.ts"
 import { createProxyLogger } from "@/config/logger/create-logger.ts"
 import { createRateLimiterInstance } from "@/shared/rate-limiter.ts"
@@ -44,8 +45,9 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         cookieConfig: { trusted, untrusted },
         identity: getIdentityConfig(config),
         signUp: config?.signUp,
-        emailVerification: getEmailVerificationConfig(config),
+        emailChange: getEmailChangeConfig(config),
         passwordReset: getPasswordResetConfig(config),
+        emailVerification: getEmailVerificationConfig(config),
         jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
         rateLimiters: createRateLimiterInstance(config?.rateLimiter, proxyHeadersAsBoolean),
         sessionConfig: config?.session,

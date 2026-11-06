@@ -55,3 +55,15 @@ export const changePassword = (_: InternalStatelessContext): SessionStrategy["ch
         })
     }
 }
+
+export const changeEmail = (_: InternalStatelessContext): SessionStrategy["changeEmail"] => {
+    return async () => {
+        throw new Error("changeEmail is not supported in stateless mode.")
+    }
+}
+
+export const verifyEmailChange = (_: InternalStatelessContext): SessionStrategy["verifyEmailChange"] => {
+    return async () => {
+        throw new Error("verifyEmailChange is not supported in stateless mode.")
+    }
+}
