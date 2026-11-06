@@ -26,7 +26,7 @@ export const changeEmail = async ({
                 doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
             },
         })
-        const { request, rateLimit, userId, originURL } = await createValidation(
+        const { request, rateLimit, userId, origin } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
@@ -40,8 +40,8 @@ export const changeEmail = async ({
             return rateLimit
         }
         const { email, confirmToken, confirmURL, cancelToken, cancelURL } = await sessionStrategy.changeEmail({
+            origin,
             userId: userId!,
-            origin: originURL,
             currentPassword: payload.currentPassword,
             newEmail: payload.newEmail,
         })
