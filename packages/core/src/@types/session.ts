@@ -363,7 +363,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
 
     resetPassword(options: { token: string; newPassword: string }): Promise<void>
 
-    changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void>
+    changePassword(options: { userId: string; currentPassword: string; newPassword: string }): Promise<void>
 
     verifyEmailChange(options: { token: string; userId: string; sessionId: string }): Promise<void>
 

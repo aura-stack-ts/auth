@@ -3,7 +3,7 @@
  * types to the public API. This manuall solution was proposed because the current version
  * of tsdown does not support stripping internal types.
  */
-import type { InferSchema, Prettify, RoutePattern } from "@aura-stack/router"
+import type { Awaitable, InferSchema, Prettify, RoutePattern } from "@aura-stack/router"
 import type { ZodObject, infer as Infer } from "zod"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { identitySchema } from "@/identity/zod.ts"
@@ -159,11 +159,11 @@ export interface CredentialsConfigContext<T> {
     /**
      * Hashes a password using the internal hashing algorithm (PBKDF2).
      */
-    deriveSecret: (password: string, salt?: string, iterations?: number) => Promise<string>
+    deriveSecret: (password: string, salt?: string, iterations?: number) => Awaitable<string>
     /**
      * Verifies a password against a hashed value.
      */
-    verifySecret: (password: string, hashedPassword: string) => Promise<boolean>
+    verifySecret: (password: string, hashedPassword: string) => Awaitable<boolean>
 }
 
 export interface OnCreateUserContext<Schema extends SchemaTypes> {

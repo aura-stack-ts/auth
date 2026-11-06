@@ -23,7 +23,7 @@ export const sendVerificationEmail = async (
     }
     try {
         logger?.log("SEND_VERIFICATION_EMAIL_INITIATED")
-        const { request, rateLimit, originURL } = await createValidation(
+        const { request, rateLimit, origin } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
@@ -37,7 +37,7 @@ export const sendVerificationEmail = async (
         }
         const { token, url } = await sessionStrategy.sendVerificationEmail({
             email,
-            origin: originURL,
+            origin,
         })
         await emailVerification.sendVerificationEmail({ email, token, url })
 
