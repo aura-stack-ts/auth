@@ -949,10 +949,6 @@ describe("createAuthClient", () => {
         expect(() => createAuthClient({})).toThrow()
     })
 
-    // -------------------------------------------------------------------------
-    // sendVerificationEmail
-    // -------------------------------------------------------------------------
-
     test("sendVerificationEmail sends email successfully", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
         const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
@@ -1015,10 +1011,6 @@ describe("createAuthClient", () => {
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
 
-    // -------------------------------------------------------------------------
-    // verifyEmail
-    // -------------------------------------------------------------------------
-
     test("verifyEmail verifies token successfully", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
 
@@ -1069,10 +1061,6 @@ describe("createAuthClient", () => {
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
 
-    // -------------------------------------------------------------------------
-    // forgotPassword
-    // -------------------------------------------------------------------------
-
     test("forgotPassword sends reset email successfully", async () => {
         const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
 
@@ -1115,10 +1103,6 @@ describe("createAuthClient", () => {
 
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
-
-    // -------------------------------------------------------------------------
-    // resetPassword
-    // -------------------------------------------------------------------------
 
     test("resetPassword resets password successfully", async () => {
         const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
@@ -1180,10 +1164,6 @@ describe("createAuthClient", () => {
 
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
-
-    // -------------------------------------------------------------------------
-    // changePassword
-    // -------------------------------------------------------------------------
 
     test("changePassword changes password successfully", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
@@ -1254,10 +1234,6 @@ describe("createAuthClient", () => {
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
 
-    // -------------------------------------------------------------------------
-    // changeEmail
-    // -------------------------------------------------------------------------
-
     test("changeEmail changes email successfully", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
         const post = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
@@ -1327,10 +1303,6 @@ describe("createAuthClient", () => {
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
 
-    // -------------------------------------------------------------------------
-    // verifyEmailChange
-    // -------------------------------------------------------------------------
-
     test("verifyEmailChange verifies token successfully", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
 
@@ -1386,14 +1358,9 @@ describe("createAuthClient", () => {
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
 
-    // -------------------------------------------------------------------------
-    // cancelEmailChange
-    // -------------------------------------------------------------------------
-
     test("cancelEmailChange cancels via token", async () => {
         const get = vi.fn()
 
-        // first call: CSRF token, second call: the actual request
         get.mockResolvedValueOnce(createJSONResponse({ csrfToken: "csrf_token_1" }))
         get.mockResolvedValueOnce(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
 
@@ -1457,14 +1424,9 @@ describe("createAuthClient", () => {
         const client = createAuthClient({ baseURL: "https://example.com" })
         const response = await client.cancelEmailChange({ payload: { token: "cancel-token-abc" } })
 
-        // only /csrfToken was called, the cancel endpoint was not reached
         expect(get).toHaveBeenCalledTimes(1)
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
-
-    // -------------------------------------------------------------------------
-    // sendMagicLink
-    // -------------------------------------------------------------------------
 
     test("sendMagicLink sends magic link successfully", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
@@ -1527,10 +1489,6 @@ describe("createAuthClient", () => {
 
         expect(response).toEqual({ success: false, redirect: false, redirectURL: null })
     })
-
-    // -------------------------------------------------------------------------
-    // verifyMagicLink
-    // -------------------------------------------------------------------------
 
     test("verifyMagicLink verifies token successfully", async () => {
         const get = vi.fn().mockResolvedValue(createJSONResponse({ success: true, redirect: false, redirectURL: null }))
