@@ -6,27 +6,37 @@ import type {
     AuthClientOptions,
     AuthClient,
     SignInOptions,
+    SignInReturn,
     SignOutOptions,
+    SignOutReturn,
     User,
     UpdateSessionOptions,
-    SignInReturn,
-    SignOutReturn,
     UpdateSessionReturn,
-    SignInCredentialsReturn,
     SignInCredentialsOptions,
+    SignInCredentialsReturn,
     SignUpOptions,
     SignUpReturn,
     GetProviderTokensReturn,
-    SendVerificationEmailData,
-    VerifyEmailData,
-    ForgotPasswordData,
-    ResetPasswordData,
-    ChangePasswordData,
-    ChangeEmailData,
-    VerifyEmailChangeData,
-    CancelEmailChangeData,
-    SendMagicLinkData,
-    VerifyMagicLinkData,
+    SendVerificationEmailOptions,
+    SendVerificationEmailReturn,
+    VerifyEmailOptions,
+    VerifyEmailReturn,
+    ForgotPasswordOptions,
+    ForgotPasswordReturn,
+    ResetPasswordOptions,
+    ResetPasswordReturn,
+    ChangePasswordOptions,
+    ChangePasswordReturn,
+    ChangeEmailOptions,
+    ChangeEmailReturn,
+    VerifyEmailChangeOptions,
+    VerifyEmailChangeReturn,
+    CancelEmailChangeOptions,
+    CancelEmailChangeReturn,
+    SendMagicLinkOptions,
+    SendMagicLinkReturn,
+    VerifyMagicLinkOptions,
+    VerifyMagicLinkReturn,
 } from "@/@types/index.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getEnv } from "@/shared/env.ts"
@@ -339,7 +349,7 @@ export const createAuthClient = <
     /**
      * Refreshes the user information from making a request to the user info endpoint of the specified
      * OAuth provider. This is useful for keeping the session data up-to-date without requiring the user
-     * to re-authenticate,
+     * to re-authenticate.
      *
      *  > **NOTE**: This method is experimental and may change in future releases.
      *
@@ -407,14 +417,13 @@ export const createAuthClient = <
     }
 
     /**
-     * Disconnets the OAuth provider with the current user, removing the association between the
-     * user's account and the OAuth provider. This action does not revoke the OAuth token, but it
+     * Disconnects the OAuth provider from the current user's account, removing the association between
+     * the user's account and the OAuth provider. This action does not revoke the OAuth token, but it
      * removes the link between the user's account and the provider, effectively "disconnecting" the provider.
      *
      *  > **NOTE**: This method is experimental and may change in future releases.
      *
      * @param oauth - The OAuth provider identifier (e.g., "google", "github").
-     * @params - Additional options for the disconnect operation (currently not used).
      * @example
      * const authClient = createAuthClient({ ... })
      *
@@ -503,18 +512,28 @@ export const createAuthClient = <
     /**
      * Sends a verification email to the specified email address.
      *
-     * @param email - The email address to which the verification email should be sent.
-     * @param options - Optional options, including redirect behavior and target URL.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @param email - The email address to send the verification email to.
+     * @param options - Optional options including redirect behavior and target URL.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
-     * const { success } = await authClient.sendVerificationEmail("user@example.com")
+     * // redirect handled automatically
+     * await authClient.sendVerificationEmail("user@example.com", {
+     *   redirect: true,
+     *   redirectTo: "/verify-sent"
+     * })
+     *
+     * // manual redirect
+     * const { success, redirectURL } = await authClient.sendVerificationEmail("user@example.com", {
+     *   redirect: false
+     * })
      */
-    const sendVerificationEmail = async (
+    const sendVerificationEmail = async <Options extends SendVerificationEmailOptions>(
         email: string,
-        options?: { redirectTo?: string }
-    ): Promise<SendVerificationEmailData> => {
+        options?: Options
+    ): Promise<SendVerificationEmailReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
             const response = await client.post("/emailVerification/send", {
@@ -528,10 +547,13 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as SendVerificationEmailData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as SendVerificationEmailReturn<Options>
         } catch (error) {
             console.error("Error sending verification email:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as SendVerificationEmailReturn<Options>
         }
     }
 
@@ -539,14 +561,27 @@ export const createAuthClient = <
      * Verifies an email address using a verification token.
      *
      * @param token - The verification token received from the email.
-     * @param options - Optional options, including redirect behavior and target URL.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @param options - Optional options including redirect behavior and target URL.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
-     * const { success } = await authClient.verifyEmail("verification-token-here")
+     * // redirect handled automatically
+     * await authClient.verifyEmail("verification-token-here", {
+     *   redirect: true,
+     *   redirectTo: "/verified"
+     * })
+     *
+     * // manual redirect
+     * const { success, redirectURL } = await authClient.verifyEmail("verification-token-here", {
+     *   redirect: false
+     * })
      */
-    const verifyEmail = async (token: string, options?: { redirectTo?: string }): Promise<VerifyEmailData> => {
+    const verifyEmail = async <Options extends VerifyEmailOptions>(
+        token: string,
+        options?: Options
+    ): Promise<VerifyEmailReturn<Options>> => {
         try {
             const response = await client.get("/emailVerification/verify", {
                 searchParams: {
@@ -556,25 +591,39 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as VerifyEmailData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as VerifyEmailReturn<Options>
         } catch (error) {
             console.error("Error verifying email:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as VerifyEmailReturn<Options>
         }
     }
 
     /**
      * Initiates the forgot password flow by sending a password reset email to the specified address.
      *
-     * @param email - The email address to which the password reset email should be sent.
-     * @param options - Optional options, including redirect behavior and target URL.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @param email - The email address to send the password reset email to.
+     * @param options - Optional options including redirect behavior and target URL.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
-     * const { success } = await authClient.forgotPassword("user@example.com")
+     * // redirect handled automatically
+     * await authClient.forgotPassword("user@example.com", {
+     *   redirect: true,
+     *   redirectTo: "/check-email"
+     * })
+     *
+     * // manual redirect
+     * const { success } = await authClient.forgotPassword("user@example.com", { redirect: false })
      */
-    const forgotPassword = async (email: string, options?: { redirectTo?: string }): Promise<ForgotPasswordData> => {
+    const forgotPassword = async <Options extends ForgotPasswordOptions>(
+        email: string,
+        options?: Options
+    ): Promise<ForgotPasswordReturn<Options>> => {
         try {
             const response = await client.post("/password/forgot", {
                 body: { email },
@@ -584,10 +633,13 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as ForgotPasswordData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as ForgotPasswordReturn<Options>
         } catch (error) {
             console.error("Error during forgot password:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as ForgotPasswordReturn<Options>
         }
     }
 
@@ -595,21 +647,27 @@ export const createAuthClient = <
      * Resets the password for a user using a valid password reset token.
      *
      * @param options - Options including the reset token, new password, and optional redirect behavior.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
+     * // redirect handled automatically
+     * await authClient.resetPassword({
+     *   payload: { token: "reset-token-here", newPassword: "new-password-here" },
+     *   redirect: true,
+     *   redirectTo: "/login"
+     * })
+     *
+     * // manual redirect
      * const { success } = await authClient.resetPassword({
-     *   payload: {
-     *     token: "reset-token-here",
-     *     newPassword: "new-password-here"
-     *   }
+     *   payload: { token: "reset-token-here", newPassword: "new-password-here" },
+     *   redirect: false
      * })
      */
-    const resetPassword = async (options: {
-        payload: { token: string; newPassword: string }
-        redirectTo?: string
-    }): Promise<ResetPasswordData> => {
+    const resetPassword = async <Options extends ResetPasswordOptions>(
+        options: Options
+    ): Promise<ResetPasswordReturn<Options>> => {
         try {
             const response = await client.post("/password/reset", {
                 body: options.payload,
@@ -619,10 +677,13 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as ResetPasswordData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as ResetPasswordReturn<Options>
         } catch (error) {
             console.error("Error during reset password:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as ResetPasswordReturn<Options>
         }
     }
 
@@ -630,21 +691,27 @@ export const createAuthClient = <
      * Changes the password for the currently authenticated user.
      *
      * @param options - Options including the current password, new password, and optional redirect behavior.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
+     * // redirect handled automatically
+     * await authClient.changePassword({
+     *   payload: { currentPassword: "old-password", newPassword: "new-password" },
+     *   redirect: true,
+     *   redirectTo: "/settings"
+     * })
+     *
+     * // manual redirect
      * const { success } = await authClient.changePassword({
-     *   payload: {
-     *     currentPassword: "current-password-here",
-     *     newPassword: "new-password-here"
-     *   }
+     *   payload: { currentPassword: "old-password", newPassword: "new-password" },
+     *   redirect: false
      * })
      */
-    const changePassword = async (options: {
-        payload: { currentPassword: string; newPassword: string }
-        redirectTo?: string
-    }): Promise<ChangePasswordData> => {
+    const changePassword = async <Options extends ChangePasswordOptions>(
+        options: Options
+    ): Promise<ChangePasswordReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
             const response = await client.post("/password/change", {
@@ -658,10 +725,13 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as ChangePasswordData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as ChangePasswordReturn<Options>
         } catch (error) {
             console.error("Error during change password:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as ChangePasswordReturn<Options>
         }
     }
 
@@ -669,21 +739,25 @@ export const createAuthClient = <
      * Changes the email address for the currently authenticated user.
      *
      * @param options - Options including the current password, new email address, and optional redirect behavior.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
+     * // redirect handled automatically
+     * await authClient.changeEmail({
+     *   payload: { currentPassword: "my-password", newEmail: "alice@example.com" },
+     *   redirect: true,
+     *   redirectTo: "/profile"
+     * })
+     *
+     * // manual redirect
      * const { success } = await authClient.changeEmail({
-     *   payload: {
-     *     currentPassword: "current-password-here",
-     *     newEmail: "alice@example.com"
-     *   }
+     *   payload: { currentPassword: "my-password", newEmail: "alice@example.com" },
+     *   redirect: false
      * })
      */
-    const changeEmail = async (options: {
-        payload: { currentPassword: string; newEmail: string }
-        redirectTo?: string
-    }): Promise<ChangeEmailData> => {
+    const changeEmail = async <Options extends ChangeEmailOptions>(options: Options): Promise<ChangeEmailReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
             const response = await client.post("/email/change", {
@@ -697,10 +771,13 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as ChangeEmailData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as ChangeEmailReturn<Options>
         } catch (error) {
             console.error("Error during change email:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as ChangeEmailReturn<Options>
         }
     }
 
@@ -708,20 +785,27 @@ export const createAuthClient = <
      * Verifies an email change request using a verification token.
      *
      * @param options - Options including the verification token and optional redirect behavior.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
+     * // redirect handled automatically
+     * await authClient.verifyEmailChange({
+     *   payload: { token: "email-change-token-here" },
+     *   redirect: true,
+     *   redirectTo: "/email-updated"
+     * })
+     *
+     * // manual redirect
      * const { success } = await authClient.verifyEmailChange({
-     *   payload: {
-     *     token: "email-change-verification-token-here"
-     *   }
+     *   payload: { token: "email-change-token-here" },
+     *   redirect: false
      * })
      */
-    const verifyEmailChange = async (options: {
-        payload: { token: string }
-        redirectTo?: string
-    }): Promise<VerifyEmailChangeData> => {
+    const verifyEmailChange = async <Options extends VerifyEmailChangeOptions>(
+        options: Options
+    ): Promise<VerifyEmailChangeReturn<Options>> => {
         try {
             const response = await client.get("/email/change/verify", {
                 searchParams: {
@@ -731,35 +815,40 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as VerifyEmailChangeData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as VerifyEmailChangeReturn<Options>
         } catch (error) {
             console.error("Error verifying email change:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as VerifyEmailChangeReturn<Options>
         }
     }
 
     /**
      * Cancels an email change request. Supports two modes:
-     * - Passing a `payload.token` to cancel via a link in the email.
+     * - Passing `payload.token` to cancel via a link in the email.
      * - Without a token, cancels the email change for the currently authenticated user.
      *
      * @param options - Options including the optional cancellation token and optional redirect behavior.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
      * // Cancel via token (e.g., from a link in an email)
-     * const { success } = await authClient.cancelEmailChange({
-     *   payload: { token: "email-change-cancellation-token-here" }
+     * await authClient.cancelEmailChange({
+     *   payload: { token: "cancellation-token-here" },
+     *   redirect: true,
+     *   redirectTo: "/settings"
      * })
      *
      * // Cancel for the currently authenticated user
-     * const { success } = await authClient.cancelEmailChange({})
+     * const { success } = await authClient.cancelEmailChange({ redirect: false })
      */
-    const cancelEmailChange = async (options?: {
-        payload?: { token: string }
-        redirectTo?: string
-    }): Promise<CancelEmailChangeData> => {
+    const cancelEmailChange = async <Options extends CancelEmailChangeOptions>(
+        options?: Options
+    ): Promise<CancelEmailChangeReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
             const response = await client.get("/email/change/cancel", {
@@ -773,25 +862,39 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as CancelEmailChangeData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as CancelEmailChangeReturn<Options>
         } catch (error) {
             console.error("Error cancelling email change:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as CancelEmailChangeReturn<Options>
         }
     }
 
     /**
      * Sends a magic link to the specified email address, allowing the user to sign in without a password.
      *
-     * @param email - The email address to which the magic link should be sent.
-     * @param options - Optional options, including redirect behavior and target URL.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @param email - The email address to send the magic link to.
+     * @param options - Optional options including redirect behavior and target URL.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
-     * const { success } = await authClient.sendMagicLink("john@example.com")
+     * // redirect handled automatically
+     * await authClient.sendMagicLink("john@example.com", {
+     *   redirect: true,
+     *   redirectTo: "/check-email"
+     * })
+     *
+     * // manual redirect
+     * const { success } = await authClient.sendMagicLink("john@example.com", { redirect: false })
      */
-    const sendMagicLink = async (email: string, options?: { redirectTo?: string }): Promise<SendMagicLinkData> => {
+    const sendMagicLink = async <Options extends SendMagicLinkOptions>(
+        email: string,
+        options?: Options
+    ): Promise<SendMagicLinkReturn<Options>> => {
         try {
             const csrfToken = await getCSRFToken()
             const response = await client.post("/signIn/magicLink", {
@@ -805,10 +908,13 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as SendMagicLinkData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as SendMagicLinkReturn<Options>
         } catch (error) {
             console.error("Error sending magic link:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as SendMagicLinkReturn<Options>
         }
     }
 
@@ -816,14 +922,27 @@ export const createAuthClient = <
      * Verifies a magic link token and signs in the user if the token is valid.
      *
      * @param token - The magic link token received from the email.
-     * @param options - Optional options, including redirect behavior and target URL.
-     * @returns An object containing the result, including success status and redirect URL if applicable.
+     * @param options - Optional options including redirect behavior and target URL.
+     * @returns `void` when `redirect: true` (navigation is handled automatically), or the result
+     * object when `redirect: false` so the caller can handle navigation manually.
      * @example
      * const authClient = createAuthClient({ ... })
      *
-     * const { success } = await authClient.verifyMagicLink("magic-link-token-here")
+     * // redirect handled automatically
+     * await authClient.verifyMagicLink("magic-link-token-here", {
+     *   redirect: true,
+     *   redirectTo: "/dashboard"
+     * })
+     *
+     * // manual redirect
+     * const { success } = await authClient.verifyMagicLink("magic-link-token-here", {
+     *   redirect: false
+     * })
      */
-    const verifyMagicLink = async (token: string, options?: { redirectTo?: string }): Promise<VerifyMagicLinkData> => {
+    const verifyMagicLink = async <Options extends VerifyMagicLinkOptions>(
+        token: string,
+        options?: Options
+    ): Promise<VerifyMagicLinkReturn<Options>> => {
         try {
             const response = await client.get("/signIn/magicLink/verify", {
                 searchParams: {
@@ -833,10 +952,13 @@ export const createAuthClient = <
                 },
             })
             const json = await response.json()
-            return json as VerifyMagicLinkData
+            if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
+                window.location.assign(json.redirectURL)
+            }
+            return json as unknown as VerifyMagicLinkReturn<Options>
         } catch (error) {
             console.error("Error verifying magic link:", error)
-            return { success: false, redirect: false, redirectURL: null }
+            return { success: false, redirect: false, redirectURL: null } as unknown as VerifyMagicLinkReturn<Options>
         }
     }
 
@@ -852,6 +974,7 @@ export const createAuthClient = <
         revokeToken,
         disconnectProvider,
         isProviderConnected,
+        signOut,
         sendVerificationEmail,
         verifyEmail,
         forgotPassword,
@@ -862,6 +985,5 @@ export const createAuthClient = <
         cancelEmailChange,
         sendMagicLink,
         verifyMagicLink,
-        signOut,
     }
 }

@@ -386,28 +386,57 @@ export type ProviderConnectedData = { success: true; connected: boolean } | { su
 
 export type ProviderConnectedAPIReturn = AuthActionAPIReturn<ProviderConnectedData>
 
-export type SendVerificationEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo & APIOptionsWithSkipCSRFCheck
-
 export type SendVerificationEmailData = APIFunctionReturnData
 
+/** Programmatic options for `sendVerificationEmail` API. */
+export type SendVerificationEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo & APIOptionsWithSkipCSRFCheck
+
+/** Programmatic result for `sendVerificationEmail` API with response metadata and `toResponse()`. */
 export type SendVerificationEmailAPIReturn = AuthActionAPIReturn<SendVerificationEmailData>
 
-export type VerifyEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+/** Client-side options for `sendVerificationEmail` API. */
+export type SendVerificationEmailOptions = OptionsWithRedirectTo
+
+/** Client-side return type for `sendVerificationEmail` API. */
+export type SendVerificationEmailReturn<Options extends SendVerificationEmailOptions> = Options extends { redirect: false }
+    ? Extract<SendVerificationEmailData, { redirect: false }>
+    : void
 
 export type VerifyEmailData = APIFunctionReturnData
 
+/** Programmatic options for `verifyEmail` API. */
+export type VerifyEmailAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+
+/** Programmatic result for `verifyEmail` API with response metadata and `toResponse()`. */
 export type VerifyEmailAPIReturn = AuthActionAPIReturn<VerifyEmailData>
 
+/** Client-side options for `verifyEmail` API. */
+export type VerifyEmailOptions = OptionsWithRedirectTo
+
+/** Client-side return type for `verifyEmail` API. */
+export type VerifyEmailReturn<Options extends VerifyEmailOptions> = Options extends { redirect: false }
+    ? Extract<VerifyEmailData, { redirect: false }>
+    : void
+
+export type ForgotPasswordData = APIFunctionReturnData
+
+/** Programmatic options for `forgotPassword` API. */
 export type ForgotPasswordAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
 
-export type ForgotPasswordData =
-    | { success: true; redirect: true; redirectURL: null }
-    | { success: true; redirect: false; redirectURL: string }
-    | { success: true; redirect: false; redirectURL: null }
-    | { success: false; redirect: false; redirectURL: null }
-
+/** Programmatic result for `forgotPassword` API with response metadata and `toResponse()`. */
 export type ForgotPasswordAPIReturn = AuthActionAPIReturn<ForgotPasswordData>
 
+/** Client-side options for `forgotPassword` API. */
+export type ForgotPasswordOptions = OptionsWithRedirectTo
+
+/** Client-side return type for `forgotPassword` API. */
+export type ForgotPasswordReturn<Options extends ForgotPasswordOptions> = Options extends { redirect: false }
+    ? Extract<ForgotPasswordData, { redirect: false }>
+    : void
+
+export type ResetPasswordData = APIFunctionReturnData
+
+/** Programmatic options for `resetPassword` API. */
 export type ResetPasswordAPIOptions = APIOptionsWithRequest &
     APIOptionsWithRedirectTo & {
         payload: {
@@ -416,14 +445,24 @@ export type ResetPasswordAPIOptions = APIOptionsWithRequest &
         }
     }
 
-export type ResetPasswordData =
-    | { success: true; redirect: true; redirectURL: null }
-    | { success: true; redirect: false; redirectURL: string }
-    | { success: true; redirect: false; redirectURL: null }
-    | { success: false; redirect: false; redirectURL: null }
-
+/** Programmatic result for `resetPassword` API with response metadata and `toResponse()`. */
 export type ResetPasswordAPIReturn = AuthActionAPIReturn<ResetPasswordData>
 
+/** Client-side options for `resetPassword` API. */
+export type ResetPasswordOptions = OptionsWithRedirectTo & {
+    payload: {
+        token: string
+        newPassword: string
+    }
+}
+/** Client-side return type for `resetPassword` API. */
+export type ResetPasswordReturn<Options extends ResetPasswordOptions> = Options extends { redirect: false }
+    ? Extract<ResetPasswordData, { redirect: false }>
+    : void
+
+export type ChangePasswordData = APIFunctionReturnData
+
+/** Programmatic options for `changePassword` API. */
 export type ChangePasswordAPIOptions = APIOptionsWithRequest &
     APIOptionsWithRedirectTo &
     APIOptionsWithSkipCSRFCheck & {
@@ -433,14 +472,25 @@ export type ChangePasswordAPIOptions = APIOptionsWithRequest &
         }
     }
 
-export type ChangePasswordData =
-    | { success: true; redirect: true; redirectURL: null }
-    | { success: true; redirect: false; redirectURL: string }
-    | { success: true; redirect: false; redirectURL: null }
-    | { success: false; redirect: false; redirectURL: null }
-
+/** Programmatic result for `changePassword` API with response metadata and `toResponse()`. */
 export type ChangePasswordAPIReturn = AuthActionAPIReturn<ChangePasswordData>
 
+/** Client-side options for `changePassword` API. */
+export type ChangePasswordOptions = OptionsWithRedirectTo & {
+    payload: {
+        currentPassword: string
+        newPassword: string
+    }
+}
+
+/** Client-side return type for `changePassword` API. */
+export type ChangePasswordReturn<Options extends ChangePasswordOptions> = Options extends { redirect: false }
+    ? Extract<ChangePasswordData, { redirect: false }>
+    : void
+
+export type ChangeEmailData = APIFunctionReturnData
+
+/** Programmatic options for `changeEmail` API. */
 export type ChangeEmailAPIOptions = APIOptionsWithRequest &
     APIOptionsWithRedirectTo &
     APIOptionsWithSkipCSRFCheck & {
@@ -450,14 +500,25 @@ export type ChangeEmailAPIOptions = APIOptionsWithRequest &
         }
     }
 
-export type ChangeEmailData =
-    | { success: true; redirect: true; redirectURL: null }
-    | { success: true; redirect: false; redirectURL: string }
-    | { success: true; redirect: false; redirectURL: null }
-    | { success: false; redirect: false; redirectURL: null }
-
+/** Programmatic result for `changeEmail` API with response metadata and `toResponse()`. */
 export type ChangeEmailAPIReturn = AuthActionAPIReturn<ChangeEmailData>
 
+/** Client-side options for `changeEmail` API. */
+export type ChangeEmailOptions = OptionsWithRedirectTo & {
+    payload: {
+        currentPassword: string
+        newEmail: string
+    }
+}
+
+/** Client-side return type for `changeEmail` API. */
+export type ChangeEmailReturn<Options extends ChangeEmailOptions> = Options extends { redirect: false }
+    ? Extract<ChangeEmailData, { redirect: false }>
+    : void
+
+export type VerifyEmailChangeData = APIFunctionReturnData
+
+/** Programmatic options for `verifyEmailChange` API. */
 export type VerifyEmailChangeAPIOptions = APIOptionsWithRequest &
     APIOptionsWithRedirectTo &
     APIOptionsWithSkipCSRFCheck & {
@@ -466,38 +527,71 @@ export type VerifyEmailChangeAPIOptions = APIOptionsWithRequest &
         }
     }
 
-export type VerifyEmailChangeData =
-    | { success: true; redirect: true; redirectURL: null }
-    | { success: true; redirect: false; redirectURL: string }
-    | { success: true; redirect: false; redirectURL: null }
-    | { success: false; redirect: false; redirectURL: null }
-
+/** Programmatic result for `verifyEmailChange` API with response metadata and `toResponse()`. */
 export type VerifyEmailChangeAPIReturn = AuthActionAPIReturn<VerifyEmailChangeData>
 
+/** Client-side options for `verifyEmailChange` API. */
+export type VerifyEmailChangeOptions = OptionsWithRedirectTo & {
+    payload: {
+        token: string
+    }
+}
+
+/** Client-side return type for `verifyEmailChange` API. */
+export type VerifyEmailChangeReturn<Options extends VerifyEmailChangeOptions> = Options extends { redirect: false }
+    ? Extract<VerifyEmailChangeData, { redirect: false }>
+    : void
+
+export type CancelEmailChangeData = APIFunctionReturnData
+
+/** Programmatic options for `cancelEmailChange` API. */
 export type CancelEmailChangeAPIOptions = APIOptionsWithRequest &
     APIOptionsWithRedirectTo &
     APIOptionsWithSkipCSRFCheck & { payload?: { token: string } }
 
-export type CancelEmailChangeData =
-    | { success: true; redirect: true; redirectURL: null }
-    | { success: true; redirect: false; redirectURL: string }
-    | { success: true; redirect: false; redirectURL: null }
-    | { success: false; redirect: false; redirectURL: null }
-
+/** Programmatic result for `cancelEmailChange` API with response metadata and `toResponse()`. */
 export type CancelEmailChangeAPIReturn = AuthActionAPIReturn<CancelEmailChangeData>
 
+/** Client-side options for `cancelEmailChange` API. */
+export type CancelEmailChangeOptions = OptionsWithRedirectTo & {
+    payload?: {
+        token: string
+    }
+}
+
+/** Client-side return type for `cancelEmailChange` API. */
+export type CancelEmailChangeReturn<Options extends CancelEmailChangeOptions> = Options extends { redirect: false }
+    ? Extract<CancelEmailChangeData, { redirect: false }>
+    : void
+
+export type SendMagicLinkData = APIFunctionReturnData
+
+/** Programmatic options for `sendMagicLink` API. */
 export type SendMagicLinkAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo & APIOptionsWithSkipCSRFCheck
 
-export type SendMagicLinkData =
-    | { success: true; redirect: true; redirectURL: null }
-    | { success: true; redirect: false; redirectURL: string }
-    | { success: true; redirect: false; redirectURL: null }
-    | { success: false; redirect: false; redirectURL: null }
-
+/** Programmatic result for `sendMagicLink` API with response metadata and `toResponse()`. */
 export type SendMagicLinkAPIReturn = AuthActionAPIReturn<SendMagicLinkData>
 
-export type VerifyMagicLinkAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+/** Client-side options for `sendMagicLink` API. */
+export type SendMagicLinkOptions = OptionsWithRedirectTo
+
+/** Client-side return type for `sendMagicLink` API. */
+export type SendMagicLinkReturn<Options extends SendMagicLinkOptions> = Options extends { redirect: false }
+    ? Extract<SendMagicLinkData, { redirect: false }>
+    : void
 
 export type VerifyMagicLinkData = SendMagicLinkData
 
+/** Programmatic options for `verifyMagicLink` API. */
+export type VerifyMagicLinkAPIOptions = APIOptionsWithRequest & APIOptionsWithRedirectTo
+
+/** Programmatic result for `verifyMagicLink` API with response metadata and `toResponse()`. */
 export type VerifyMagicLinkAPIReturn = AuthActionAPIReturn<VerifyMagicLinkData>
+
+/** Client-side options for `verifyMagicLink` API. */
+export type VerifyMagicLinkOptions = OptionsWithRedirectTo
+
+/** Client-side return type for `verifyMagicLink` API. */
+export type VerifyMagicLinkReturn<Options extends VerifyMagicLinkOptions> = Options extends { redirect: false }
+    ? Extract<VerifyMagicLinkData, { redirect: false }>
+    : void
