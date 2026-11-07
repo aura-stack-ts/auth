@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### BREAKING CHANGES
 
+- Removed the `GetStatelessSessionReturn`, `GetStatefulSessionReturn`, `GetProviderTokensStatefulReturn`, and `SessionStrategy` types from the public API. These types, along with the interfaces related to `SessionStrategy`, are now internal and are no longer exported. [#301](https://github.com/aura-stack-ts/auth/pull/301)
+
 - Updated `VerificationTokensAdapter`: custom adapters must now implement `revokeAllVerificationTokens(userId, type?)`, and `revokeToken(id)` must return `Promise<boolean>` instead of `Promise<void>`. The boolean indicates whether the token was found and successfully revoked. [#297](https://github.com/aura-stack-ts/auth/pull/297)
 
 - Changed the return types of the `deriveSecret` and `verifySecret` helpers in the public `CredentialsConfigContext` to `Awaitable`. Custom implementations can now return either synchronous or asynchronous values. Consumers must not call `.then()` directly on these results without first normalizing them with `Promise.resolve()`. [#297](https://github.com/aura-stack-ts/auth/pull/297)
