@@ -15,7 +15,7 @@ export const getProviderTokens = async (
 ): Promise<GetProviderTokensAPIReturn> => {
     const initialHeaders = toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
     try {
-        const { request, rateLimit } = await createValidation(ctx, initialHeaders)
+        const { request, rateLimit, provider, session } = await createValidation(ctx, initialHeaders)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/providers/${oauthId}/tokens`)
             .verifyRateLimit("getProviderTokens")
@@ -28,6 +28,8 @@ export const getProviderTokens = async (
         const getTokens = await ctx.sessionStrategy.getProviderTokens({
             oauthId,
             request,
+            provider,
+            sessionByToken: session!,
         })
         if (getTokens.success) {
             const { success, tokens, headers } = getTokens

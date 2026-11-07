@@ -24,7 +24,7 @@ export const revokeToken = async (
             },
         })
 
-        const { headers, rateLimit } = await createValidation(
+        const { provider, headers, rateLimit, session } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
@@ -44,8 +44,10 @@ export const revokeToken = async (
 
         const revokeHeaders = await ctx.sessionStrategy.revokeToken({
             oauthId,
+            provider,
             headers,
             disconnect,
+            sessionByToken: session!,
         })
         return {
             success: true,

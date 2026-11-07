@@ -61,11 +61,8 @@ describe("connectedAction", () => {
     })
 
     test("returns connected: false when provider token cookie does not exist", async () => {
-        const getSessionByTokenMock = vi.fn()
-        const getAccountsByUserIdMock = vi.fn()
-
-        getSessionByTokenMock.mockResolvedValueOnce(sessionEntityWithUser)
-        getSessionByTokenMock.mockResolvedValueOnce(null)
+        const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
 
         const {
             handlers: { GET },
@@ -91,10 +88,9 @@ describe("connectedAction", () => {
             connected: false,
         })
 
-        expect(getSessionByTokenMock).toHaveBeenCalledTimes(2)
+        expect(getSessionByTokenMock).toHaveBeenCalledTimes(1)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
+        expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
     })
 
     test("returns connected: true when provider token cookie exists and is valid", async () => {

@@ -14,7 +14,7 @@ export const isProviderConnected = async (
             structuredData: { provider: oauthId, operation: "check_connection" },
         })
 
-        const { headers, rateLimit } = await createValidation(
+        const { headers, rateLimit, session } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
@@ -31,6 +31,7 @@ export const isProviderConnected = async (
         const connected = await ctx.sessionStrategy.isProviderConnected({
             oauthId,
             headers,
+            sessionByToken: session!,
         })
 
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {

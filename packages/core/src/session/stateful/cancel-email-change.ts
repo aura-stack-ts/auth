@@ -20,11 +20,11 @@ export const cancelEmailChange = ({ ctx }: InternalStatefulContext): SessionStra
             }
             const userTokens = await sessionConfig.adapter.getTokensByUserId(verificationToken.userId)
             const pending = userTokens.filter(
-                (t) =>
-                    (t.type === "email_change" || t.type === "email_change_cancel") &&
-                    t.newIdentifier === verificationToken.newIdentifier &&
-                    !t.revokedAt &&
-                    t.expiresAt > now
+                (token) =>
+                    (token.type === "email_change" || token.type === "email_change_cancel") &&
+                    token.newIdentifier === verificationToken.newIdentifier &&
+                    !token.revokedAt &&
+                    token.expiresAt > now
             )
             await Promise.all(pending.map((t) => sessionConfig.adapter.revokeToken(t.id)))
             return
@@ -35,8 +35,11 @@ export const cancelEmailChange = ({ ctx }: InternalStatefulContext): SessionStra
         }
         const userIdTokens = await sessionConfig.adapter.getTokensByUserId(userId)
         const pending = userIdTokens.filter(
-            (t) => (t.type === "email_change" || t.type === "email_change_cancel") && !t.revokedAt && t.expiresAt > now
+            (token) =>
+                (token.type === "email_change" || token.type === "email_change_cancel") &&
+                !token.revokedAt &&
+                token.expiresAt > now
         )
-        await Promise.all(pending.map((t) => sessionConfig.adapter.revokeToken(t.id)))
+        await Promise.all(pending.map((token) => sessionConfig.adapter.revokeToken(token.id)))
     }
 }

@@ -22,7 +22,7 @@ export const signOut = async ({
             },
         })
 
-        const { request, rateLimit } = await createValidation(ctx, responseHeaders)
+        const { request, rateLimit, session } = await createValidation(ctx, responseHeaders)
             .buildRequest(requestInit, "/signOut")
             .verifyRateLimit("signOut")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
@@ -34,7 +34,7 @@ export const signOut = async ({
         }
 
         responseHeaders = await ctx.sessionStrategy.destroySession({
-            headers: responseHeaders,
+            sessionByToken: session!,
         })
 
         const headersBuilder = new HeadersBuilder(responseHeaders)

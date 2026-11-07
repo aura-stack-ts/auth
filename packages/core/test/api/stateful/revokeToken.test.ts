@@ -112,7 +112,7 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSessionByTokenMock).toHaveBeenCalledTimes(2)
+        expect(getSessionByTokenMock).toHaveBeenCalledTimes(1)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()

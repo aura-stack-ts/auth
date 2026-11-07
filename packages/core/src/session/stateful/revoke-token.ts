@@ -1,15 +1,14 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { createHash } from "@/shared/crypto.ts"
 import { getExpiredCookie } from "@/shared/http/cookie.ts"
 import { AuraAuthError, getErrorName } from "@/errors/aura-error.ts"
 import { secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
 import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const revokeToken = ({ ctx, cookieManager }: InternalStatefulContext): SessionStrategy["revokeToken"] => {
-    const { oauth, logger, sessionConfig, cookies } = ctx
+export const revokeToken = ({ ctx }: InternalStatefulContext): SessionStrategy["revokeToken"] => {
+    const { logger, sessionConfig, cookies } = ctx
 
-    return async ({ oauthId, headers, disconnect }): Promise<Headers> => {
+    return async ({ oauthId, provider, headers, disconnect, sessionByToken }) => {
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
                 provider: oauthId,
@@ -19,27 +18,6 @@ export const revokeToken = ({ ctx, cookieManager }: InternalStatefulContext): Se
         })
 
         try {
-            const { sessionToken } = cookieManager.getCookie(headers)
-            if (!sessionToken) {
-                logger?.log("SESSION_TOKEN_MISSING", {
-                    structuredData: {
-                        reason: "no_session_token",
-                    },
-                })
-                throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
-            }
-
-            const tokenHash = await createHash(sessionToken)
-            const sessionByToken = await sessionConfig.adapter.getSessionByToken(tokenHash)
-            if (!sessionByToken || !sessionByToken.user) {
-                logger?.log("AUTH_SESSION_INVALID", {
-                    structuredData: {
-                        reason: "session_not_found_or_no_user",
-                    },
-                })
-                throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
-            }
-
             const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
             if (sessionByToken.status !== "active" || isExpired) {
                 if (isExpired) {
@@ -81,17 +59,6 @@ export const revokeToken = ({ ctx, cookieManager }: InternalStatefulContext): Se
                     },
                 })
                 throw new AuraAuthError({ code: "OAUTH_UNLINKED_ACCOUNT_ERROR" })
-            }
-
-            const provider = oauth[oauthId]
-            if (!provider) {
-                logger?.log("INVALID_OAUTH_CONFIGURATION", {
-                    structuredData: {
-                        provider: oauthId,
-                        reason: "provider_not_configured",
-                    },
-                })
-                throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
             }
 
             if (!disconnect) {

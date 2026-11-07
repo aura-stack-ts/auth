@@ -39,6 +39,7 @@ import type {
 import type { OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/shared/schemas/general.ts"
 import type { JWTPayload } from "@/jose.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
+import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { createCookieManager } from "@/session/cookie-manager.ts"
 
 // #region API
@@ -240,6 +241,8 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     getProviderTokens(options: {
         oauthId: string
         request: Request
+        provider: RuntimeOAuthProvider<any, DefaultUser>
+        sessionByToken: SessionWithUserEntity
     }): Promise<
         | { success: true; tokens: OAuthTokenPayload; headers: Headers }
         | { success: false; tokens: null; error: { code: string; message: string }; headers: Headers; statusCode: number }
@@ -262,17 +265,23 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Destroy the session attached to this request (logout).
      * Returns a response that clears cookies.
      */
-    destroySession(options: { headers: Headers }): Promise<Headers>
+    destroySession(options: { sessionByToken: SessionWithUserEntity }): Promise<Headers>
     /**
      * Revoke the access token for a specific OAuth provider.
      * @unstable This API is experimental and may change in future releases.
      */
-    revokeToken(options: { oauthId: string; headers: Headers; disconnect: boolean }): Promise<Headers>
+    revokeToken(options: {
+        oauthId: string
+        provider: RuntimeOAuthProvider<any, DefaultUser>
+        headers: Headers
+        disconnect: boolean
+        sessionByToken: SessionWithUserEntity
+    }): Promise<Headers>
     /**
      * Check if the user is connected to a specific OAuth provider.
      * @unstable This API is experimental and may change in future releases.
      */
-    isProviderConnected(options: { oauthId: string; headers: Headers }): Promise<boolean>
+    isProviderConnected(options: { oauthId: string; headers: Headers; sessionByToken: SessionWithUserEntity }): Promise<boolean>
     /**
      * Refresh the user info in the session.
      * @unstable This API is experimental and may change in future releases.
@@ -294,7 +303,12 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     /**
      * Sign in a user with the given OAuth provider and request. Returns the session token on success.
      */
-    signIn(options: { oauthId: string; request: Request; redirectTo?: string }): Promise<{
+    signIn(options: {
+        oauthId: string
+        provider: RuntimeOAuthProvider<any, DefaultUser>
+        request: Request
+        redirectTo?: string
+    }): Promise<{
         success: boolean
         headers: Headers
         signInURL: string

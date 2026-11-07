@@ -12,7 +12,7 @@ export const signIn = async (
     { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions>
 ): Promise<SignInAPIReturn> => {
     try {
-        const { request, rateLimit } = await createValidation(
+        const { request, rateLimit, provider } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
@@ -45,6 +45,7 @@ export const signIn = async (
 
         const { success, signInURL, headers } = await ctx.sessionStrategy.signIn({
             oauthId,
+            provider,
             request,
             redirectTo,
         })

@@ -1,5 +1,4 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { AuraAuthError } from "@/errors/aura-error.ts"
 import { toUnionHeaders } from "@/shared/http/headers.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { getCookie, getExpiredCookie } from "@/shared/http/cookie.ts"
@@ -7,16 +6,11 @@ import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
 import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
 export const revokeToken = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["revokeToken"] => {
-    const { logger, identity, jwtManager: jwt, oauth } = ctx
+    const { logger, identity, jwtManager: jwt } = ctx
 
-    return async ({ oauthId, disconnect, headers }) => {
+    return async ({ oauthId, provider, disconnect, headers }) => {
         const cookieName = `${cookies().accessToken.name}.${oauthId}`
         const cookie = getCookie(headers, cookieName)
-        const provider = oauth[oauthId]
-
-        if (!provider) {
-            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
-        }
 
         if (!disconnect) {
             const decodedToken = await jwt.verifyToken(cookie)

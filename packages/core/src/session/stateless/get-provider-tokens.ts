@@ -9,9 +9,9 @@ import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
 export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["getProviderTokens"] => {
-    const { oauth, logger, identity, jwtManager: jwt } = ctx
+    const { logger, identity, jwtManager: jwt } = ctx
 
-    return async ({ oauthId, request }) => {
+    return async ({ oauthId, provider, request }) => {
         logger?.log("STATELESS_GET_PROVIDER_TOKENS_START", {
             structuredData: {
                 strategy: "stateless",
@@ -21,22 +21,6 @@ export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): S
         })
 
         try {
-            const provider = oauth[oauthId]
-            if (!provider) {
-                logger?.log("STATELESS_GET_PROVIDER_TOKENS_PROVIDER_NOT_FOUND", {
-                    structuredData: {
-                        oauth_id: oauthId,
-                        reason: "provider_not_configured",
-                    },
-                })
-                const { code, message, statusCode } = handleApiError(
-                    new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" }),
-                    "PROVIDER_TOKENS_ERROR",
-                    "Failed to get provider tokens"
-                )
-                return { success: false, error: { code, message }, tokens: null, headers: request.headers, statusCode }
-            }
-
             logger?.log("STATELESS_GET_PROVIDER_TOKENS_PROVIDER_FOUND", {
                 structuredData: {
                     oauth_id: oauthId,

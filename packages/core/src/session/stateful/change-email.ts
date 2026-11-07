@@ -56,7 +56,7 @@ export const changeEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["
             userId,
             expiresAt: new Date(Date.now() + expiresIn * 1000),
             identifier: user.email,
-            newIdentifier: newEmail,
+            newIdentifier: normalizedNewEmail,
             type: "email_change_cancel",
             tokenHash: cancelTokenHash,
         })

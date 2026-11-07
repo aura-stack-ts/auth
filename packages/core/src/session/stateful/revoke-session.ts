@@ -1,6 +1,9 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
+/**
+ * Is the function beeng used ?
+ */
 export const revokeSession = ({ ctx }: InternalStatefulContext): SessionStrategy["revokeSession"] => {
     const { logger, sessionConfig } = ctx
 

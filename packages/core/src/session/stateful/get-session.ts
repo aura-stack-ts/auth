@@ -5,7 +5,7 @@ import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
 import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
-import type { User } from "@/@types/session.ts"
+import type { User } from "@/@types/index.ts"
 
 export const getSession = <DefaultUser extends User>({
     ctx,
@@ -167,7 +167,7 @@ export const getSession = <DefaultUser extends User>({
             }
             return {
                 session: {
-                    user: parsedUser,
+                    user: parsedUser as DefaultUser,
                     expires: effectiveExpiresAt.toISOString(),
                 },
                 headers: cookieManager.setCookie({ sessionToken }),

@@ -11,7 +11,7 @@ import { getCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
 import { createCSRF, createHash, verifyCSRF } from "@/shared/crypto.ts"
 import type { LOG_MESSAGES } from "@/config/logger/catalog.ts"
-import type { BuiltInOAuthProvider, LiteralUnion, RateLimiterConfig } from "@/@types/index.ts"
+import type { BuiltInOAuthProvider, LiteralUnion, RateLimiterConfig, SessionWithUserEntity } from "@/@types/index.ts"
 import type { InternalLogger, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
 
 export const createValidation = (ctx: RouterGlobalContext, headersInit?: HeadersInit) => {
@@ -26,6 +26,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         userId?: string
         sessionId?: string
         origin?: string
+        session?: SessionWithUserEntity
     } = { headers }
 
     const builder = {
@@ -63,6 +64,8 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                     }
                     output.userId = session.userId
                     output.sessionId = session.id
+                    // @unstable
+                    output.session = session
                 }
             })
             return builder
@@ -119,6 +122,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                 userId?: string
                 sessionId?: string
                 origin: string
+                session: SessionWithUserEntity | undefined
             }
         },
     }
