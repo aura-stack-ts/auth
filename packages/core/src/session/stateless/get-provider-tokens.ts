@@ -6,13 +6,12 @@ import { handleApiError } from "@/shared/utils/api.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
-import type { InternalStatelessContext } from "@/@types/internal.ts"
-import type { GetProviderTokensStatefulReturn } from "@/@types/index.ts"
+import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext) => {
+export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["getProviderTokens"] => {
     const { oauth, logger, identity, jwtManager: jwt } = ctx
 
-    return async (oauthId: string, request: Request): Promise<GetProviderTokensStatefulReturn> => {
+    return async ({ oauthId, request }) => {
         logger?.log("STATELESS_GET_PROVIDER_TOKENS_START", {
             structuredData: {
                 strategy: "stateless",

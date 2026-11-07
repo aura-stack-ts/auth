@@ -25,7 +25,9 @@ export const getSession = async <DefaultUser extends User = User>({
         toResponse: () => Response.json({ success: false, session: null }, { status: 401, headers }),
     }
     try {
-        const { session, headers } = await ctx.sessionStrategy.getSession(toStandardizedHeaders(headersInit))
+        const { session, headers } = await ctx.sessionStrategy.getSession({
+            headers: toStandardizedHeaders(headersInit),
+        })
         if (!session) return unauthorized
         const newHeaders = toUnionHeaders(headers, secureApiHeaders)
         return {

@@ -7,13 +7,13 @@ import { createCSRF, createHash, createSecretValue } from "@/shared/crypto.ts"
 import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { getOriginURL, isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/utils/get-origin-url.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
+export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulContext): SessionStrategy["oauthCallback"] => {
     const { logger, jose, oauth, sessionConfig } = ctx
     const createDevice = __createDevice({ ctx, cookies, cookieManager })
 
-    return async (oauthId: string, request: Request, { code, state }: { code: string; state: string }) => {
+    return async ({ oauthId, request, params: { state, code } }) => {
         const oauthConfig = oauth[oauthId]
         if (!oauthConfig) {
             throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })

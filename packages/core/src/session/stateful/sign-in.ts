@@ -5,12 +5,12 @@ import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { createFingerprint, getDeviceInfo } from "@/shared/http/request-metadata.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth2/authorization.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const signIn = ({ ctx }: InternalStatefulContext) => {
+export const signIn = ({ ctx }: InternalStatefulContext): SessionStrategy["signIn"] => {
     const { logger, oauth, sessionConfig } = ctx
 
-    return async (oauthId: string, request: Request, redirectTo?: string) => {
+    return async ({ oauthId, request, redirectTo }) => {
         const provider = oauth[oauthId]
         if (!provider) {
             throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })

@@ -1,16 +1,16 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue, hashPassword } from "@/shared/crypto.ts"
 import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
 /**
  * @todo Add transaction support for the signUp process to ensure atomicity and rollback in case of errors.
  */
-export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
+export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext): SessionStrategy["signUp"] => {
     const { logger, sessionConfig } = ctx
     const createDevice = __createDevice({ ctx, cookies, cookieManager })
 
-    return async (payload: Record<string, unknown>, request: Request): Promise<string> => {
+    return async ({ payload, request }): Promise<string> => {
         logger?.log("STATEFUL_CREATE_SESSION_START", {
             structuredData: {
                 strategy: "stateful",

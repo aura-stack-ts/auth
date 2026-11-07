@@ -4,13 +4,12 @@ import { handleApiError } from "@/shared/utils/api.ts"
 import { AuraAuthError, getErrorName } from "@/errors/aura-error.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import { secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
-import type { GetProviderTokensStatefulReturn } from "@/@types/index.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContext) => {
+export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContext): SessionStrategy["getProviderTokens"] => {
     const { oauth, logger, sessionConfig } = ctx
 
-    return async (oauthId: string, request: Request): Promise<GetProviderTokensStatefulReturn> => {
+    return async ({ oauthId, request }) => {
         const provider = oauth[oauthId]
         if (!provider) {
             throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })

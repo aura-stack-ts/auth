@@ -1,9 +1,8 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import type { SessionStrategy, User } from "@/@types/session.ts"
-import type { InternalStatelessContext } from "@/@types/internal.ts"
+import type { SessionStrategy, InternalStatelessContext } from "@/@types/internal.ts"
 
-export const revokeSession = (_: InternalStatelessContext) => {
-    return async (_sessionId: string): Promise<void> => {
+export const revokeSession = (_: InternalStatelessContext): SessionStrategy["revokeSession"] => {
+    return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
             cause: "revokeSession is not supported in stateless mode.",
@@ -74,8 +73,8 @@ export const verifyEmailChange = (_: InternalStatelessContext): SessionStrategy[
     }
 }
 
-export const cancelEmailChange = (_: InternalStatelessContext) => {
-    return async (_options: {}): Promise<void> => {
+export const cancelEmailChange = (_: InternalStatelessContext): SessionStrategy["cancelEmailChange"] => {
+    return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
             cause: "cancelEmailChange is not supported in stateless mode",
@@ -83,8 +82,8 @@ export const cancelEmailChange = (_: InternalStatelessContext) => {
     }
 }
 
-export const sendMagicLink = <DefaultUser extends User>(_: InternalStatelessContext) => {
-    return async (_options: {}): ReturnType<SessionStrategy<DefaultUser>["sendMagicLink"]> => {
+export const sendMagicLink = (_: InternalStatelessContext): SessionStrategy["sendMagicLink"] => {
+    return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
             cause: "sendMagicLink is not supported in stateless mode.",
@@ -92,8 +91,8 @@ export const sendMagicLink = <DefaultUser extends User>(_: InternalStatelessCont
     }
 }
 
-export const verifyMagicLink = <DefaultUser extends User>(_: InternalStatelessContext) => {
-    return async (_options: {}): ReturnType<SessionStrategy<DefaultUser>["verifyMagicLink"]> => {
+export const verifyMagicLink = (_: InternalStatelessContext): SessionStrategy["verifyMagicLink"] => {
+    return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
             cause: "verifyMagicLink is not supported in stateless mode.",

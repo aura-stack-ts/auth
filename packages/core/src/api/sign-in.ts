@@ -8,7 +8,7 @@ import type { BuiltInOAuthProvider, LiteralUnion, SignInAPIOptions, SignInAPIRet
  * Initiates the sign-in flow on the server. Called when the client invokes the `signIn` API function.
  */
 export const signIn = async (
-    oauth: LiteralUnion<BuiltInOAuthProvider>,
+    oauthId: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions>
 ): Promise<SignInAPIReturn> => {
     try {
@@ -16,8 +16,8 @@ export const signIn = async (
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
-            .verifyOAuthProvider(oauth)
-            .buildRequest(requestInit, `/signIn/${oauth}`)
+            .verifyOAuthProvider(oauthId)
+            .buildRequest(requestInit, `/signIn/${oauthId}`)
             .verifyRateLimit("signIn")
             .execute()
 
@@ -27,10 +27,10 @@ export const signIn = async (
 
         if (redirect === false) {
             ctx?.logger?.log("SIGN_IN_INITIATED", {
-                structuredData: { oauth_provider: oauth },
+                structuredData: { oauth_provider: oauthId },
             })
 
-            const signInURL = await createSignInURL({ request, oauth, ctx, redirectTo })
+            const signInURL = await createSignInURL({ request, oauth: oauthId, ctx, redirectTo })
             const headers = new Headers(secureApiHeaders)
             return {
                 success: true,
@@ -43,7 +43,11 @@ export const signIn = async (
             }
         }
 
-        const { success, signInURL, headers } = await ctx.sessionStrategy.signIn(oauth, request, redirectTo)
+        const { success, signInURL, headers } = await ctx.sessionStrategy.signIn({
+            oauthId,
+            request,
+            redirectTo,
+        })
 
         return {
             success,

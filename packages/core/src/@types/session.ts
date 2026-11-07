@@ -1,8 +1,8 @@
 import { identitySchema } from "@/identity/zod.ts"
 import type { JWK } from "@aura-stack/jose/jose"
 import type { infer as Infer } from "zod/v4/core"
+import type { Prettify } from "@/@types/index.ts"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
-import type { DeepPartial, Prettify } from "@/@types/index.ts"
 
 /** Application user type, inferred from the configured identity schema (defaults to the built-in user shape). */
 export type User = Infer<typeof identitySchema>
@@ -246,139 +246,6 @@ export interface StatefulStrategyConfig extends SessionConfigBase {
  * @default "jwt"
  */
 export type SessionConfig = StatelessStrategyConfig | StatefulStrategyConfig
-
-/** Result of reading a stateless (JWT) session from a request: session payload and outgoing header mutations. */
-export interface GetStatelessSessionReturn<DefaultUser extends User = User> {
-    session: Session<DefaultUser> | null
-    headers: Headers
-}
-
-export type GetStatefulSessionReturn<DefaultUser extends User = User> = GetStatelessSessionReturn<DefaultUser>
-
-export type GetProviderTokensStatefulReturn =
-    | { success: true; tokens: OAuthTokenPayload; headers: Headers }
-    | { success: false; tokens: null; error: { code: string; message: string }; headers: Headers; statusCode: number }
-
-/**
- * Abstraction layer for session management.
- */
-export interface SessionStrategy<DefaultUser extends User = User> {
-    /**
-     * Read and validate the session from an incoming request.
-     * Returns null if absent, invalid, or expired. Never throws on auth failure.
-     */
-    getSession(headers: Headers): Promise<GetStatelessSessionReturn<DefaultUser>>
-
-    /**
-     * Create a session after successful authentication.
-     * Signs the JWT / writes the DB row / sets cookies.
-     */
-    createSession(session: User, request: Request): Promise<string>
-
-    getProviderTokens(oauth: string, request: Request): Promise<GetProviderTokensStatefulReturn>
-
-    /**
-     * Attempt to refresh using the refresh token cookie.
-     * Returns null session + cookie-clearing response on any failure.
-     */
-    refreshSession(
-        headers: Headers,
-        session: DeepPartial<Session<DefaultUser>>
-    ): Promise<{
-        session: Session<DefaultUser> | null
-        headers: Headers
-    }>
-
-    /**
-     * Revoke a session by ID.
-     * JWT strategy: best-effort (clears cookies, no server state).
-     * Database / hybrid: marks row inactive.
-     */
-    revokeSession(sessionId: string): Promise<void>
-
-    /**
-     * Destroy the session attached to this request (logout).
-     * Returns a response that clears cookies.
-     */
-    destroySession(headers: Headers): Promise<Headers>
-
-    /**
-     * Revoke the access token for a specific OAuth provider.
-     * @unstable This API is experimental and may change in future releases.
-     */
-    revokeToken(oauth: string, headers: Headers, disconnect: boolean): Promise<Headers>
-
-    /**
-     * Check if the user is connected to a specific OAuth provider.
-     * @unstable This API is experimental and may change in future releases.
-     */
-    isProviderConnected(oauth: string, headers: Headers): Promise<boolean>
-
-    /**
-     * Refresh the user info in the session.
-     * @unstable This API is experimental and may change in future releases.
-     */
-    refreshUserInfo(
-        user: DeepPartial<DefaultUser>,
-        headers: Headers,
-        skipCSRFCheck?: boolean
-    ): Promise<{
-        session: Session<DefaultUser> | null
-        headers: Headers
-    }>
-
-    /**
-     * Sign up a new user with the given payload and request. Returns the session token on success.
-     * @unstable This API is experimental and may change in future releases.
-     */
-    signUp(payload: Record<string, unknown>, request: Request): Promise<string>
-    /**
-     * Sign in a user with the given credentials and request. Returns the session token on success.
-     * @unstable This API is experimental and may change in future releases.
-     */
-    signInCredentials(payload: Record<string, unknown>, request: Request, redirectTo?: string): Promise<string>
-    signIn(
-        oauth: string,
-        request: Request,
-        redirectTo?: string
-    ): Promise<{
-        success: boolean
-        headers: Headers
-        signInURL: string
-    }>
-
-    oauthCallback(oauth: string, request: Request, { code, state }: { code: string; state: string }): Promise<Response>
-
-    sendVerificationEmail(options: { email: string; origin: string }): Promise<{
-        token: string
-        url: string
-    }>
-
-    verifyEmail(options: { token: string }): Promise<void>
-
-    forgotPassword(options: { email: string; origin: string }): Promise<{
-        token: string
-        url: string
-    }>
-
-    resetPassword(options: { token: string; newPassword: string }): Promise<void>
-
-    changePassword(options: { userId: string; currentPassword: string; newPassword: string }): Promise<void>
-
-    verifyEmailChange(options: { token: string; userId: string; sessionId: string }): Promise<void>
-
-    cancelEmailChange(options: { token: string; userId?: string } | { token?: string; userId: string }): Promise<void>
-
-    sendMagicLink(options: { email: string; allowSignUp: boolean; origin: string }): Promise<{ token: string; url: string }>
-
-    verifyMagicLink(options: { token: string; request: Request }): Promise<{ sessionToken: string }>
-    changeEmail(options: {
-        userId: string
-        currentPassword: string
-        newEmail: string
-        origin: string
-    }): Promise<{ email: string; confirmToken: string; confirmURL: string; cancelToken: string; cancelURL: string }>
-}
 
 export interface OAuthTokenPayload {
     /**

@@ -21,8 +21,8 @@ import { verifyEmailChange } from "@/session/stateful/verify-email-change.ts"
 import { cancelEmailChange } from "@/session/stateful/cancel-email-change.ts"
 import { isProviderConnected } from "@/session/stateful/is-provider-connected.ts"
 import { sendVerificationEmail } from "@/session/stateful/send-verification-email.ts"
-import type { SessionStrategy, User } from "@/@types/index.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { User } from "@/@types/index.ts"
+import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
 
 export const createStatefulStrategy = <DefaultUser extends User = User>(
     ctx: InternalStatefulContext

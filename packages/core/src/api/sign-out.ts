@@ -33,7 +33,9 @@ export const signOut = async ({
             return rateLimit
         }
 
-        responseHeaders = await ctx.sessionStrategy.destroySession(responseHeaders)
+        responseHeaders = await ctx.sessionStrategy.destroySession({
+            headers: responseHeaders,
+        })
 
         const headersBuilder = new HeadersBuilder(responseHeaders)
         const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(

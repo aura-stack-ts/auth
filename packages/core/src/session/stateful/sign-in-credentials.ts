@@ -1,13 +1,17 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const signInCredentials = ({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
+export const signInCredentials = ({
+    ctx,
+    cookies,
+    cookieManager,
+}: InternalStatefulContext): SessionStrategy["signInCredentials"] => {
     const { logger, sessionConfig } = ctx
     const createDevice = __createDevice({ ctx, cookies, cookieManager })
 
-    return async (payload: Record<string, unknown>, request: Request): Promise<string> => {
+    return async ({ payload, request }) => {
         logger?.log("STATEFUL_SIGN_IN_CREDENTIALS_START", {
             structuredData: {
                 strategy: "stateful",

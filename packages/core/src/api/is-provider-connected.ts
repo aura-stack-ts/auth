@@ -6,20 +6,20 @@ import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ProviderConnectedAPIOptions, ProviderConnectedAPIReturn } from "@/@types/api.ts"
 
 export const isProviderConnected = async (
-    oauth: LiteralUnion<BuiltInOAuthProvider>,
+    oauthId: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, headers: headersInit, request: requestInit }: FunctionAPIContext<ProviderConnectedAPIOptions>
 ): Promise<ProviderConnectedAPIReturn> => {
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
-            structuredData: { provider: oauth, operation: "check_connection" },
+            structuredData: { provider: oauthId, operation: "check_connection" },
         })
 
         const { headers, rateLimit } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
-            .verifyOAuthProvider(oauth)
-            .buildRequest(requestInit, `/providers/${oauth}`)
+            .verifyOAuthProvider(oauthId)
+            .buildRequest(requestInit, `/providers/${oauthId}`)
             .verifyRateLimit("isProviderConnected")
             .verifySession()
             .execute()
@@ -28,10 +28,13 @@ export const isProviderConnected = async (
             return rateLimit
         }
 
-        const connected = await ctx.sessionStrategy.isProviderConnected(oauth, headers)
+        const connected = await ctx.sessionStrategy.isProviderConnected({
+            oauthId,
+            headers,
+        })
 
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
-            structuredData: { provider: oauth, connected },
+            structuredData: { provider: oauthId, connected },
         })
 
         return {

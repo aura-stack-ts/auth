@@ -1,19 +1,15 @@
 import { createHash } from "@/shared/crypto.ts"
 import { getErrorName } from "@/errors/aura-error.ts"
-import type { DeepPartial } from "@/@types/utility.ts"
 import type { Session, User } from "@/@types/index.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const refreshSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
+export const refreshSession = <DefaultUser extends User>({
+    ctx,
+    cookieManager,
+}: InternalStatefulContext): SessionStrategy<DefaultUser>["refreshSession"] => {
     const { logger, sessionConfig } = ctx
 
-    return async (
-        headers: Headers,
-        session: DeepPartial<Session<DefaultUser>>
-    ): Promise<{
-        session: Session<DefaultUser> | null
-        headers: Headers
-    }> => {
+    return async ({ headers, session }) => {
         logger?.log("STATEFUL_REFRESH_SESSION_START", {
             structuredData: {
                 strategy: "stateful",

@@ -1,11 +1,11 @@
 import { getErrorName } from "@/errors/aura-error.ts"
 import { createHash } from "@/shared/crypto.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const isProviderConnected = ({ ctx, cookieManager }: InternalStatefulContext) => {
+export const isProviderConnected = ({ ctx, cookieManager }: InternalStatefulContext): SessionStrategy["isProviderConnected"] => {
     const { logger, sessionConfig } = ctx
 
-    return async (oauthId: string, headers: Headers): Promise<boolean> => {
+    return async ({ headers, oauthId }) => {
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
                 provider: oauthId,

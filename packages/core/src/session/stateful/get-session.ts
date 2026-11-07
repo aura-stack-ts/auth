@@ -4,10 +4,13 @@ import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
-import type { GetStatefulSessionReturn, User } from "@/@types/index.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { User } from "@/@types/session.ts"
 
-export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatefulContext) => {
+export const getSession = <DefaultUser extends User>({
+    ctx,
+    cookieManager,
+}: InternalStatefulContext): SessionStrategy<DefaultUser>["getSession"] => {
     const { logger, sessionConfig } = ctx
     const maxAge = sessionConfig?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = sessionConfig?.expirationStrategy ?? "absolute"
@@ -17,7 +20,7 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
         throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
     }
 
-    return async (headers: Headers): Promise<GetStatefulSessionReturn<DefaultUser>> => {
+    return async ({ headers }) => {
         logger?.log("STATEFUL_GET_SESSION_START", {
             structuredData: {
                 strategy: "stateful",
@@ -164,7 +167,7 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
             }
             return {
                 session: {
-                    user: parsedUser as DefaultUser,
+                    user: parsedUser,
                     expires: effectiveExpiresAt.toISOString(),
                 },
                 headers: cookieManager.setCookie({ sessionToken }),

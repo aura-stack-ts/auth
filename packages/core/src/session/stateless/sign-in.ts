@@ -4,12 +4,12 @@ import { cacheControl } from "@/shared/http/headers.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth2/authorization.ts"
-import type { InternalStatelessContext } from "@/@types/internal.ts"
+import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const signIn = ({ ctx, cookies }: InternalStatelessContext) => {
+export const signIn = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["signIn"] => {
     const { oauth, logger } = ctx
 
-    return async (oauthId: string, request: Request, redirectTo?: string) => {
+    return async ({ oauthId, request, redirectTo }) => {
         const provider = oauth[oauthId]
         if (!provider) {
             throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })

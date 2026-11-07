@@ -1,11 +1,11 @@
 import { createHash } from "@/shared/crypto.ts"
 import { getErrorName } from "@/errors/aura-error.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const destroySession = ({ ctx, cookieManager }: InternalStatefulContext) => {
+export const destroySession = ({ ctx, cookieManager }: InternalStatefulContext): SessionStrategy["destroySession"] => {
     const { logger, sessionConfig } = ctx
 
-    return async (headers: Headers) => {
+    return async ({ headers }) => {
         logger?.log("STATEFUL_DESTROY_SESSION_START", {
             structuredData: {
                 strategy: "stateful",

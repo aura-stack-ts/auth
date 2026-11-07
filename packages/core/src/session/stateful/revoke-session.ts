@@ -1,10 +1,10 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const revokeSession = ({ ctx }: InternalStatefulContext) => {
+export const revokeSession = ({ ctx }: InternalStatefulContext): SessionStrategy["revokeSession"] => {
     const { logger, sessionConfig } = ctx
 
-    return async (sessionId: string): Promise<void> => {
+    return async ({ sessionId }) => {
         logger?.log("STATEFUL_REVOKE_SESSION_START", {
             structuredData: {
                 strategy: "stateful",

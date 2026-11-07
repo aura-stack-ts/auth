@@ -37,7 +37,10 @@ export const updateSession = async <DefaultUser extends User = User>({
             return rateLimit as UpdateSessionAPIReturn<DefaultUser>
         }
 
-        const { session, headers } = await ctx.sessionStrategy.refreshSession(validatedHeaders, sessionInit)
+        const { session, headers } = await ctx.sessionStrategy.refreshSession({
+            session: sessionInit,
+            headers: validatedHeaders,
+        })
         if (!session) {
             throw new AuraAuthError({ code: "UPDATE_SESSION_INVALID" })
         }

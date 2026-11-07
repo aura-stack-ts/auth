@@ -10,14 +10,14 @@ import type {
 } from "@/@types/index.ts"
 
 export const getProviderTokens = async (
-    oauth: LiteralUnion<BuiltInOAuthProvider>,
+    oauthId: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, request: requestInit, headers: headersInit }: FunctionAPIContext<GetProviderTokensAPIOptions>
 ): Promise<GetProviderTokensAPIReturn> => {
     const initialHeaders = toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
     try {
         const { request, rateLimit } = await createValidation(ctx, initialHeaders)
-            .verifyOAuthProvider(oauth)
-            .buildRequest(requestInit, `/providers/${oauth}/tokens`)
+            .verifyOAuthProvider(oauthId)
+            .buildRequest(requestInit, `/providers/${oauthId}/tokens`)
             .verifyRateLimit("getProviderTokens")
             .verifySession()
             .execute()
@@ -25,7 +25,10 @@ export const getProviderTokens = async (
         if (rateLimit) {
             return rateLimit as unknown as GetProviderTokensAPIReturn
         }
-        const getTokens = await ctx.sessionStrategy.getProviderTokens(oauth, request)
+        const getTokens = await ctx.sessionStrategy.getProviderTokens({
+            oauthId,
+            request,
+        })
         if (getTokens.success) {
             const { success, tokens, headers } = getTokens
             return {

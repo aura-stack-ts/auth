@@ -23,8 +23,8 @@ import {
     sendMagicLink,
     verifyMagicLink,
 } from "@/session/stateless/unsupported.ts"
-import type { SessionStrategy, User } from "@/@types/index.ts"
-import type { InternalStatelessContext } from "@/@types/internal.ts"
+import type { User } from "@/@types/index.ts"
+import type { SessionStrategy, InternalStatelessContext } from "@/@types/internal.ts"
 
 export const createStatelessStrategy = <DefaultUser extends User = User>(
     ctx: InternalStatelessContext
