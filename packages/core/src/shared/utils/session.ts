@@ -1,6 +1,6 @@
 import { getCookie } from "@/shared/http/cookie.ts"
 import { AuraAuthError, getErrorName } from "@/errors/aura-error.ts"
-import type { InternalCookieStoreConfig, InternalLogger, JWTManager, SchemaRegistryContext } from "@/@types/internal.ts"
+import type { InternalCookieStoreConfig, InternalLogger, JoseManager, SchemaRegistryContext } from "@/@types/internal.ts"
 
 export const getStandardSession = async ({
     sessionToken,
@@ -8,7 +8,7 @@ export const getStandardSession = async ({
     identity,
 }: {
     sessionToken: string
-    jwt: JWTManager
+    jwt: JoseManager
     identity: SchemaRegistryContext
 }) => {
     const claims = await jwt.verifyToken(sessionToken)
@@ -29,7 +29,7 @@ export const verifySessionToken = async ({
     logger,
 }: {
     headers: Headers
-    jwt: JWTManager
+    jwt: JoseManager
     cookies: InternalCookieStoreConfig
     logger: InternalLogger | undefined
 }) => {
