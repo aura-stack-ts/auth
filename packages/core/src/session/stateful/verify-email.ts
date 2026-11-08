@@ -1,8 +1,8 @@
 import { createHash } from "@/shared/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
+import type { SessionStrategy, InternalContextForStateful } from "@/@types/internal.ts"
 
-export const verifyEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["verifyEmail"] => {
+export const verifyEmail = (ctx: InternalContextForStateful): SessionStrategy["verifyEmail"] => {
     const { session } = ctx
     return async ({ token }) => {
         const tokenHash = await createHash(token)

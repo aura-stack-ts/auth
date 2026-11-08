@@ -1,8 +1,8 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
-import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const forgotPassword = ({ ctx }: InternalStatefulContext): SessionStrategy["forgotPassword"] => {
+export const forgotPassword = (ctx: InternalContextForStateful): SessionStrategy["forgotPassword"] => {
     const { session, passwordReset, basePath } = ctx
     return async ({ email, origin }) => {
         const user = await session.config.adapter.getUserByEmail(email)

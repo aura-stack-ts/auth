@@ -97,10 +97,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     trustedProxyHeaders: boolean | TrustedProxyHeadersSource[]
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
-    session: {
-        config: SessionConfig
-        strategy: SessionStrategy<DefaultUser>
-    }
+    session: InternalSessionConfig<DefaultUser>
     identity: SchemaRegistryContext
     signUp?: SignUpConfig<DefaultUser, SignUpSchema>
     /**
@@ -131,33 +128,12 @@ export type InternalContext<Identity extends Identities, SignUpSchema extends Sc
 >
 
 export type InternalContextForStateful = RouterGlobalContext<any, any> & {
-    session: {
-        config: StatefulStrategyConfig
-        strategy: SessionStrategy
-    }
+    session: InternalSessionConfig<User, StatefulStrategyConfig>
 }
 
 export type InternalContextForStateless = RouterGlobalContext<any, any> & {
-    session: {
-        config: StatelessStrategyConfig
-        strategy: SessionStrategy
-    }
+    session: InternalSessionConfig<User, StatelessStrategyConfig>
 }
-
-export interface CreateSessionStrategyOptions<Identity extends Identities> {
-    ctx: InternalContext<Identity, any>
-    cookies: () => InternalCookieStoreConfig
-}
-
-export interface InternalSessionContext<Ctx> {
-    ctx: Ctx
-    cookies: () => InternalCookieStoreConfig
-    cookieManager: CookieManager
-}
-
-export type InternalStatefulContext = InternalSessionContext<InternalContextForStateful>
-
-export type InternalStatelessContext = InternalSessionContext<InternalContextForStateless>
 
 export type InternalExpirationResult =
     | { action: "no_change" }

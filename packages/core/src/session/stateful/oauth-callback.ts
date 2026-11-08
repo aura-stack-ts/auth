@@ -7,9 +7,9 @@ import { createCSRF, createHash, createSecretValue } from "@/shared/crypto.ts"
 import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { getOriginURL, isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/utils/get-origin-url.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const oauthCallback = ({ ctx }: InternalStatefulContext): SessionStrategy["oauthCallback"] => {
+export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy["oauthCallback"] => {
     const { logger, jose, oauth, session } = ctx
     const createDevice = createDeviceHelper(ctx)
 

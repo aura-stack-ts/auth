@@ -1,8 +1,8 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { hashPassword, verifyPassword } from "@/shared/crypto.ts"
-import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const changePassword = ({ ctx }: InternalStatefulContext): SessionStrategy["changePassword"] => {
+export const changePassword = (ctx: InternalContextForStateful): SessionStrategy["changePassword"] => {
     const { session, credentials } = ctx
     const hashPasswordFn = credentials?.hash ?? hashPassword
     const verifyPasswordFn = credentials?.verify ?? verifyPassword

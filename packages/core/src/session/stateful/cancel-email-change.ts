@@ -1,8 +1,8 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash } from "@/shared/crypto.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const cancelEmailChange = ({ ctx }: InternalStatefulContext): SessionStrategy["cancelEmailChange"] => {
+export const cancelEmailChange = (ctx: InternalContextForStateful): SessionStrategy["cancelEmailChange"] => {
     const { session } = ctx
     return async ({ token, userId }): Promise<void> => {
         const now = new Date()

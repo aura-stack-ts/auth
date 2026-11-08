@@ -1,6 +1,6 @@
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const destroySession = ({ ctx }: InternalStatefulContext): SessionStrategy["destroySession"] => {
+export const destroySession = (ctx: InternalContextForStateful): SessionStrategy["destroySession"] => {
     const { logger, session } = ctx
 
     return async ({ sessionByToken }) => {

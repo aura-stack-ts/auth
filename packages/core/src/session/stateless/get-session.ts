@@ -4,11 +4,11 @@ import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const getSession = <DefaultUser extends User>({
-    ctx,
-}: InternalStatelessContext): SessionStrategy<DefaultUser>["getSession"] => {
+export const getSession = <DefaultUser extends User>(
+    ctx: InternalContextForStateless
+): SessionStrategy<DefaultUser>["getSession"] => {
     const { logger, identity, jwtManager, session } = ctx
 
     const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15

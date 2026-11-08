@@ -9,9 +9,9 @@ import { createAccessToken, getUserInfo } from "@/shared/oauth2/index.ts"
 import { getCookie, getExpiredCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { getOriginURL, isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/utils/get-origin-url.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const oauthCallback = ({ ctx }: InternalStatelessContext): SessionStrategy["oauthCallback"] => {
+export const oauthCallback = (ctx: InternalContextForStateless): SessionStrategy["oauthCallback"] => {
     return async ({ oauthId, request, params: { code, state } }) => {
         const { oauth: providers, cookies, jose, logger, trustedOrigins } = ctx
 

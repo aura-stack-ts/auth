@@ -1,9 +1,9 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import { createDevice as createDeviceRegistry } from "@/shared/utils/session-strategy.ts"
-import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const verifyMagicLink = ({ ctx }: InternalStatefulContext): SessionStrategy["verifyMagicLink"] => {
+export const verifyMagicLink = (ctx: InternalContextForStateful): SessionStrategy["verifyMagicLink"] => {
     const { session } = ctx
     const createDevice = createDeviceRegistry(ctx)
 

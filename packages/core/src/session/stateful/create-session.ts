@@ -1,9 +1,9 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const createSession = ({ ctx }: InternalStatefulContext): SessionStrategy["createSession"] => {
+export const createSession = (ctx: InternalContextForStateful): SessionStrategy["createSession"] => {
     const { logger, session: sessionConfig } = ctx
     const createDevice = createDeviceHelper(ctx)
 

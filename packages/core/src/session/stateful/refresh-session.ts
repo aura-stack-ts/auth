@@ -1,11 +1,11 @@
 import { createHash } from "@/shared/crypto.ts"
 import { getErrorName } from "@/errors/aura-error.ts"
 import type { Session, User } from "@/@types/index.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const refreshSession = <DefaultUser extends User>({
-    ctx,
-}: InternalStatefulContext): SessionStrategy<DefaultUser>["refreshSession"] => {
+export const refreshSession = <DefaultUser extends User>(
+    ctx: InternalContextForStateful
+): SessionStrategy<DefaultUser>["refreshSession"] => {
     const { logger, session: sessionConfig } = ctx
 
     return async ({ headers, session }) => {

@@ -1,11 +1,11 @@
 import { getErrorName } from "@/errors/aura-error.ts"
 import { updateExpires } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const refreshSession = <DefaultUser extends User = User>({
-    ctx,
-}: InternalStatelessContext): SessionStrategy<DefaultUser>["refreshSession"] => {
+export const refreshSession = <DefaultUser extends User = User>(
+    ctx: InternalContextForStateless
+): SessionStrategy<DefaultUser>["refreshSession"] => {
     const { logger, jwtManager: jwt, identity, session } = ctx
 
     const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15

@@ -1,9 +1,9 @@
 import type { User } from "@/@types/index.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const createSession = <DefaultUser extends User>({
-    ctx,
-}: InternalStatelessContext): SessionStrategy<DefaultUser>["createSession"] => {
+export const createSession = <DefaultUser extends User>(
+    ctx: InternalContextForStateless
+): SessionStrategy<DefaultUser>["createSession"] => {
     const { logger, identity, jwtManager } = ctx
     return async ({ session }) => {
         if (identity.skipValidation) {

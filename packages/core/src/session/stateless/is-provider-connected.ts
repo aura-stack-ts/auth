@@ -1,8 +1,8 @@
 import { getCookie } from "@/shared/http/cookie.ts"
 import { getErrorName } from "@/errors/aura-error.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const isProviderConnected = ({ ctx }: InternalStatelessContext): SessionStrategy["isProviderConnected"] => {
+export const isProviderConnected = (ctx: InternalContextForStateless): SessionStrategy["isProviderConnected"] => {
     const { logger, jwtManager: jwt } = ctx
 
     return async ({ oauthId, headers }) => {

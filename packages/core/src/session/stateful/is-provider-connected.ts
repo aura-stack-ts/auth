@@ -1,7 +1,7 @@
 import { getErrorName } from "@/errors/aura-error.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const isProviderConnected = ({ ctx }: InternalStatefulContext): SessionStrategy["isProviderConnected"] => {
+export const isProviderConnected = (ctx: InternalContextForStateful): SessionStrategy["isProviderConnected"] => {
     const { logger, session } = ctx
 
     return async ({ oauthId, sessionByToken }) => {

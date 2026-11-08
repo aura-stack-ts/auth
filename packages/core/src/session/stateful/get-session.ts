@@ -4,12 +4,12 @@ import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 import type { User } from "@/@types/index.ts"
 
-export const getSession = <DefaultUser extends User>({
-    ctx,
-}: InternalStatefulContext): SessionStrategy<DefaultUser>["getSession"] => {
+export const getSession = <DefaultUser extends User>(
+    ctx: InternalContextForStateful
+): SessionStrategy<DefaultUser>["getSession"] => {
     const { logger, session: sessionConfig } = ctx
     const maxAge = sessionConfig.config?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = sessionConfig.config?.expirationStrategy ?? "absolute"

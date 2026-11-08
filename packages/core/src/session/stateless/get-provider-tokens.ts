@@ -6,9 +6,9 @@ import { handleApiError } from "@/shared/utils/api.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const getProviderTokens = ({ ctx }: InternalStatelessContext): SessionStrategy["getProviderTokens"] => {
+export const getProviderTokens = (ctx: InternalContextForStateless): SessionStrategy["getProviderTokens"] => {
     const { logger, identity, jwtManager: jwt } = ctx
 
     return async ({ oauthId, provider, request }) => {

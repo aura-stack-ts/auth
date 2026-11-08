@@ -60,9 +60,6 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
             config: config?.session,
         },
     } as InternalContext<Identity, SignUpSchema>
-    ctx.session.strategy = createSessionStrategy<Identity>({
-        ctx,
-        cookies: () => ctx.cookies.store,
-    })
+    ctx.session.strategy = createSessionStrategy<Identity>(ctx)
     return ctx
 }

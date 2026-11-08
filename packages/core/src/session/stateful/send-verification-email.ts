@@ -1,8 +1,8 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
-import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const sendVerificationEmail = ({ ctx }: InternalStatefulContext): SessionStrategy["sendVerificationEmail"] => {
+export const sendVerificationEmail = (ctx: InternalContextForStateful): SessionStrategy["sendVerificationEmail"] => {
     const { session, emailVerification, basePath } = ctx
     return async ({ email, origin }) => {
         const user = await session.config.adapter.getUserByEmail(email)

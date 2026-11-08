@@ -3,9 +3,9 @@ import { getExpiredCookie } from "@/shared/http/cookie.ts"
 import { AuraAuthError, getErrorName } from "@/errors/aura-error.ts"
 import { secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const revokeToken = ({ ctx }: InternalStatefulContext): SessionStrategy["revokeToken"] => {
+export const revokeToken = (ctx: InternalContextForStateful): SessionStrategy["revokeToken"] => {
     const { logger, session, cookies } = ctx
 
     return async ({ oauthId, provider, headers, disconnect, sessionByToken }) => {

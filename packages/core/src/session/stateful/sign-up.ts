@@ -1,12 +1,12 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue, hashPassword } from "@/shared/crypto.ts"
 import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 /**
  * @todo Add transaction support for the signUp process to ensure atomicity and rollback in case of errors.
  */
-export const signUp = ({ ctx }: InternalStatefulContext): SessionStrategy["signUp"] => {
+export const signUp = (ctx: InternalContextForStateful): SessionStrategy["signUp"] => {
     const { logger, session } = ctx
     const createDevice = createDeviceHelper(ctx)
 
