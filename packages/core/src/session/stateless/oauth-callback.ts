@@ -96,9 +96,9 @@ export const oauthCallback = (ctx: InternalContextForStateless): SessionStrategy
 
         const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
         const session = await ctx.session.strategy.createSession({ session: userInfo, request })
-        const csrfToken = await createCSRF(jose)
+        const csrfToken = await createCSRF(jose.instance)
         const tokenPayload = transformToTokenPayload(accessToken)
-        const providerToken = await ctx.jwtManager.createToken(tokenPayload)
+        const providerToken = await jose.manager.createToken(tokenPayload)
 
         logger?.log("OAUTH_CALLBACK_SUCCESS", {
             structuredData: {

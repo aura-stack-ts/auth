@@ -7,11 +7,11 @@ import type {
     SessionStrategy,
     InternalContextForStateless,
     InternalContextForStateful,
-    RouterGlobalContext,
+    InternalContext,
 } from "@/@types/internal.ts"
 
 export const createSessionStrategy = <Identity extends Identities>(
-    ctx: RouterGlobalContext<FromShapeToObject<Identity> & User, any>
+    ctx: InternalContext<Identity, any>
 ): SessionStrategy<FromShapeToObject<Identity> & User> => {
     const strategy = ctx.session?.config?.strategy ?? "jwt"
 

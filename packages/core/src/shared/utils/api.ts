@@ -49,7 +49,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                     await verifySessionToken({
                         headers: output.headers,
                         cookies: ctx.cookies.store,
-                        jwt: ctx.jwtManager,
+                        jwt: ctx.jose.manager,
                         logger: ctx.logger,
                     })
                 } else {
@@ -73,7 +73,9 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         verifyCSRFToken: (skipCSRFCheck: boolean, doubleSubmitToken: string | undefined, generateNewToken: boolean = false) => {
             steps.push(async () => {
                 const existingCSRFToken = getOptionalCookie(output.headers, ctx.cookies.store.csrfToken.name)
-                const csrfTokenValue = generateNewToken ? await createCSRF(ctx.jose, existingCSRFToken) : existingCSRFToken
+                const csrfTokenValue = generateNewToken
+                    ? await createCSRF(ctx.jose.instance, existingCSRFToken)
+                    : existingCSRFToken
                 await internal_verifyCSRFToken({
                     ctx,
                     headers: output.headers,
@@ -202,7 +204,7 @@ export const internal_verifyCSRFToken = async ({
     }
 
     try {
-        await ctx.jose.verifyJWS(csrfToken)
+        await ctx.jose.instance.verifyJWS(csrfToken)
     } catch (cause) {
         ctx.logger?.log("CSRF_TOKEN_INVALID", {
             structuredData: {
@@ -231,7 +233,7 @@ export const internal_verifyCSRFToken = async ({
     }
 
     try {
-        await verifyCSRF(ctx.jose, csrfToken, requestToken)
+        await verifyCSRF(ctx.jose.instance, csrfToken, requestToken)
     } catch (cause) {
         ctx.logger?.log("CSRF_TOKEN_INVALID", {
             structuredData: {

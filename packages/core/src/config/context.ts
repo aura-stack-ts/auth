@@ -40,7 +40,10 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
             precomputed,
             manager: createCookieManager(() => ctx.cookies.store),
         },
-        jose,
+        jose: {
+            instance: jose,
+            manager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
+        },
         secret,
         baseURL: getBaseURLConfig(config),
         basePath: getBasePathConfig(config),
@@ -54,7 +57,6 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         passwordReset: getPasswordResetConfig(config),
         emailVerification: getEmailVerificationConfig(config),
         magicLinks: getMagicLinkConfig(config),
-        jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
         rateLimiters: createRateLimiterInstance(config?.rateLimiter, proxyHeadersAsBoolean),
         session: {
             config: config?.session,

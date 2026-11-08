@@ -1,11 +1,11 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import type { JWTManager } from "@/@types/internal.ts"
+import type { JoseManager } from "@/@types/internal.ts"
 import type { JoseInstance, User, JWTConfig } from "@/@types/index.ts"
 
 export const createJoseManager = <DefaultUser extends User = User>(
     config: JWTConfig | undefined,
     jose: JoseInstance<DefaultUser>
-): JWTManager<DefaultUser> => {
+): JoseManager<DefaultUser> => {
     const mode = config?.mode ?? "sealed"
 
     if (!["sealed", "signed", "encrypted"].includes(mode)) {

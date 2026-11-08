@@ -32,7 +32,7 @@ export const verifyMagicLink = async (
         const { sessionToken } = await session.strategy.verifyMagicLink({ token, request })
         logger?.log("VERIFY_MAGIC_LINK_SUCCESS")
 
-        const csrfToken = await createCSRF(ctx.jose)
+        const csrfToken = await createCSRF(ctx.jose.instance)
         const builder = new HeadersBuilder(secureApiHeaders)
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)

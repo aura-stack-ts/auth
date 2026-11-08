@@ -50,7 +50,7 @@ export const signInCredentials = async ({
             request,
             payload: session,
         })
-        const csrfToken = await createCSRF(ctx.jose)
+        const csrfToken = await createCSRF(ctx.jose.instance)
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")
 
         const builder = new HeadersBuilder(secureApiHeaders)

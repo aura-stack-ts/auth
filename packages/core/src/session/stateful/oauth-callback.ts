@@ -225,7 +225,7 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
             tokenHash,
         })
 
-        const csrfToken = await createCSRF(jose)
+        const csrfToken = await createCSRF(jose.instance)
 
         logger?.log("OAUTH_CALLBACK_SUCCESS", {
             structuredData: {

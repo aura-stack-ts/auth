@@ -20,7 +20,7 @@ export const csrfTokenAction = createEndpoint(
         } = ctx
         const token = getOptionalCookie(request, cookies.store.csrfToken.name)
         logger?.log("CSRF_TOKEN_REQUESTED", { structuredData: { has_token: Boolean(token) } })
-        const csrfToken = await createCSRF(jose, token)
+        const csrfToken = await createCSRF(jose.instance, token)
         logger?.log("CSRF_TOKEN_ISSUED", { structuredData: { issued: Boolean(csrfToken) } })
 
         const headers = new Headers(secureApiHeaders)

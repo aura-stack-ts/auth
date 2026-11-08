@@ -6,14 +6,14 @@ import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const revokeToken = (ctx: InternalContextForStateless): SessionStrategy["revokeToken"] => {
-    const { logger, identity, jwtManager: jwt } = ctx
+    const { logger, identity, jose } = ctx
 
     return async ({ oauthId, provider, disconnect, headers }) => {
         const cookieName = `${ctx.cookies.store.accessToken.name}.${oauthId}`
         const cookie = getCookie(headers, cookieName)
 
         if (!disconnect) {
-            const decodedToken = await jwt.verifyToken(cookie)
+            const decodedToken = await jose.manager.verifyToken(cookie)
             const tokens = await identity.schemaRegistry.parseOAuthTokens(decodedToken)
 
             logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {

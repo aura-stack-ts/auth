@@ -49,7 +49,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             request,
             payload: user,
         })
-        const csrfToken = await createCSRF(ctx.jose)
+        const csrfToken = await createCSRF(ctx.jose.instance)
         logger?.log("SIGN_UP_SUCCESS")
 
         const builder = new HeadersBuilder(secureApiHeaders)

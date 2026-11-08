@@ -9,7 +9,7 @@ import type { InternalContextForStateless, SessionStrategy } from "@/@types/inte
 export const getSession = <DefaultUser extends User>(
     ctx: InternalContextForStateless
 ): SessionStrategy<DefaultUser>["getSession"] => {
-    const { logger, identity, jwtManager, session } = ctx
+    const { logger, identity, jose, session } = ctx
 
     const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = session?.config?.expirationStrategy ?? session?.config?.jwt?.expirationStrategy ?? "absolute"
@@ -24,7 +24,7 @@ export const getSession = <DefaultUser extends User>(
             const { sessionToken } = ctx.cookies.manager.getCookie(headers)
             if (!sessionToken) return { session: null, headers: newHeaders }
 
-            const claims = await jwtManager.verifyToken(sessionToken)
+            const claims = await jose.manager.verifyToken(sessionToken)
             const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
             const { exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
             const userClaims = identity.skipValidation ? defaultPayload : await identity.schemaRegistry.parse(defaultPayload)
@@ -49,7 +49,7 @@ export const getSession = <DefaultUser extends User>(
             }
             const expiresAt = calc.expiresAt
             const issuedAt = strategy === "absolute" ? parsedClaims.iat : Math.floor(Date.now() / 1000)
-            const newSessionToken = await jwtManager.createToken({
+            const newSessionToken = await jose.manager.createToken({
                 ...userClaims,
                 exp: Math.floor(expiresAt.getTime() / 1000),
                 iat: issuedAt,

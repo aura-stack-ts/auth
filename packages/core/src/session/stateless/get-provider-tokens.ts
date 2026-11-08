@@ -9,7 +9,7 @@ import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const getProviderTokens = (ctx: InternalContextForStateless): SessionStrategy["getProviderTokens"] => {
-    const { logger, identity, jwtManager: jwt } = ctx
+    const { logger, identity, jose } = ctx
 
     return async ({ oauthId, provider, request }) => {
         logger?.log("STATELESS_GET_PROVIDER_TOKENS_START", {
@@ -53,7 +53,7 @@ export const getProviderTokens = (ctx: InternalContextForStateless): SessionStra
                 },
             })
 
-            const decodedToken = await jwt.verifyToken(cookie)
+            const decodedToken = await jose.manager.verifyToken(cookie)
             const tokens = await identity.schemaRegistry.parseOAuthTokens(decodedToken)
 
             logger?.log("STATELESS_GET_PROVIDER_TOKENS_TOKENS_DECODED", {
@@ -95,7 +95,7 @@ export const getProviderTokens = (ctx: InternalContextForStateless): SessionStra
                         },
                     })
 
-                    const encodedTokens = await jwt.createToken(refreshedTokens as any)
+                    const encodedTokens = await jose.manager.createToken(refreshedTokens as any)
                     const builder = new HeadersBuilder(secureApiHeaders)
                         .setCookie(cookieName, encodedTokens, ctx.cookies.store.accessToken.attributes)
                         .toHeaders()

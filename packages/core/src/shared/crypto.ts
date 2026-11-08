@@ -38,7 +38,7 @@ export const createPKCE = async (verifier?: string) => {
     return { codeVerifier, codeChallenge, method: "S256" }
 }
 
-export const assertCSRFTokenCookie = async (jose: RouterGlobalContext["jose"], cookie?: string) => {
+export const assertCSRFTokenCookie = async (jose: RouterGlobalContext["jose"]["instance"], cookie?: string) => {
     try {
         if (cookie) {
             await jose.verifyJWS(cookie)
@@ -54,7 +54,7 @@ export const assertCSRFTokenCookie = async (jose: RouterGlobalContext["jose"], c
  * @param csrfCookie - Optional existing CSRF cookie to verify and reuse
  * @returns Signed CSRF token
  */
-export const createCSRF = async (jose: RouterGlobalContext["jose"], csrfCookie?: string) => {
+export const createCSRF = async (jose: RouterGlobalContext["jose"]["instance"], csrfCookie?: string) => {
     try {
         if (csrfCookie) {
             await jose.verifyJWS(csrfCookie)
