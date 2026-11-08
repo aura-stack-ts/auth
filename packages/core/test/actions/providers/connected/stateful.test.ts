@@ -130,10 +130,8 @@ describe("connectedAction", () => {
     })
 
     test("returns connected: false when provider token cookie is malformed", async () => {
-        const getSessionByTokenMock = vi.fn()
-        const getAccountsByUserIdMock = vi.fn()
-
-        getSessionByTokenMock.mockResolvedValueOnce(sessionEntityWithUser)
+        const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
 
         const {
             handlers: { GET },
@@ -161,10 +159,8 @@ describe("connectedAction", () => {
     })
 
     test("returns connected: false when provider token cookie is expired", async () => {
-        const getSessionByTokenMock = vi.fn()
-        const getAccountsByUserIdMock = vi.fn()
-
-        getSessionByTokenMock.mockResolvedValueOnce(sessionEntityWithUser)
+        const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
 
         const {
             handlers: { GET },
@@ -244,10 +240,8 @@ describe("connectedAction", () => {
     })
 
     test("handles empty cookie value", async () => {
-        const getSessionByTokenMock = vi.fn()
-        const getAccountsByUserIdMock = vi.fn()
-
-        getSessionByTokenMock.mockResolvedValueOnce(sessionEntityWithUser)
+        const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
 
         const {
             handlers: { GET },
@@ -275,10 +269,8 @@ describe("connectedAction", () => {
     })
 
     test("handles multiple providers - checks correct provider", async () => {
-        const getSessionByTokenMock = vi.fn()
-        const getAccountsByUserIdMock = vi.fn()
-
-        getSessionByTokenMock.mockResolvedValueOnce(sessionEntityWithUser)
+        const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(sessionEntityWithUser)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
 
         const {
             handlers: { GET },

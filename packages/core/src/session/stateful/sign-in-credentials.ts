@@ -73,20 +73,11 @@ export const signInCredentials = (ctx: InternalContextForStateful): SessionStrat
             expiresAt,
         })
 
-        logger?.log("STATEFUL_SESSION_CREATED", {
-            structuredData: {
-                session_id: dbSession.id,
-                user_id: dbSession.userId,
-                status: dbSession.status,
-                expires_at: dbSession?.expiresAt?.toISOString(),
-            },
-        })
-
         logger?.log("STATEFUL_SIGN_IN_CREDENTIALS_SUCCESS", {
             structuredData: {
                 session_id: dbSession.id,
                 user_id: dbSession.userId,
-                token_returned: true,
+                status: dbSession.status,
             },
         })
 

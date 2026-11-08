@@ -240,10 +240,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         request: Request
         provider: RuntimeOAuthProvider<any, DefaultUser>
         sessionByToken: SessionWithUserEntity
-    }): Promise<
-        | { success: true; tokens: OAuthTokenPayload; headers: Headers }
-        | { success: false; tokens: null; error: { code: string; message: string }; headers: Headers; statusCode: number }
-    >
+    }): Promise<{ tokens: OAuthTokenPayload; headers: Headers }>
     /**
      * Attempt to refresh using the refresh token cookie.
      * Returns null session + cookie-clearing response on any failure.

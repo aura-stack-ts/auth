@@ -135,7 +135,7 @@ describe("getProviderTokens API (Stateful)", () => {
             success: false,
             tokens: null,
             error: {
-                code: "OAUTH_UNLINKED_ACCOUNT_ERROR",
+                code: "OAUTH_ACCOUNT_NOT_FOUND",
                 message: "The specified identity provider is not connected to your account.",
             },
             headers: expect.any(Headers),

@@ -15,7 +15,13 @@ export const getProviderTokens = async (
 ): Promise<GetProviderTokensAPIReturn> => {
     const initialHeaders = toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
     try {
-        const { request, rateLimit, provider, session } = await createValidation(ctx, initialHeaders)
+        const {
+            request,
+            rateLimit,
+            provider,
+            session,
+            headers: resolvedHeaders,
+        } = await createValidation(ctx, initialHeaders)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/providers/${oauthId}/tokens`)
             .verifyRateLimit("getProviderTokens")
@@ -25,33 +31,19 @@ export const getProviderTokens = async (
         if (rateLimit) {
             return rateLimit as unknown as GetProviderTokensAPIReturn
         }
-        const getTokens = await ctx.session.strategy.getProviderTokens({
+        const { tokens, headers } = await ctx.session.strategy.getProviderTokens({
             oauthId,
             request,
             provider,
             sessionByToken: session!,
         })
-        if (getTokens.success) {
-            const { success, tokens, headers } = getTokens
-            return {
-                success,
-                tokens,
-                headers,
-                toResponse: () => {
-                    return Response.json({ success, tokens }, { status: success ? 200 : 400, headers })
-                },
-            }
-        }
+        const updatedHeaders = toUnionHeaders(resolvedHeaders, headers)
         return {
-            success: false,
-            tokens: null,
-            headers: getTokens.headers,
-            error: getTokens.error,
+            success: true,
+            tokens: tokens,
+            headers: updatedHeaders,
             toResponse: () => {
-                return Response.json(
-                    { success: false, tokens: null },
-                    { status: getTokens.statusCode, headers: getTokens.headers }
-                )
+                return Response.json({ success: true, tokens: tokens }, { headers: updatedHeaders })
             },
         }
     } catch (error) {
