@@ -8,7 +8,7 @@ import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["getProviderTokens"] => {
+export const getProviderTokens = ({ ctx }: InternalStatelessContext): SessionStrategy["getProviderTokens"] => {
     const { logger, identity, jwtManager: jwt } = ctx
 
     return async ({ oauthId, provider, request }) => {
@@ -27,7 +27,7 @@ export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): S
                 },
             })
 
-            const cookieName = `${cookies().accessToken.name}.${oauthId}`
+            const cookieName = `${ctx.cookies.store.accessToken.name}.${oauthId}`
             const cookie = getCookie(request, cookieName)
 
             if (!cookie) {
@@ -97,7 +97,7 @@ export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): S
 
                     const encodedTokens = await jwt.createToken(refreshedTokens as any)
                     const builder = new HeadersBuilder(secureApiHeaders)
-                        .setCookie(cookieName, encodedTokens, cookies().accessToken.attributes)
+                        .setCookie(cookieName, encodedTokens, ctx.cookies.store.accessToken.attributes)
                         .toHeaders()
 
                     logger?.log("STATELESS_GET_PROVIDER_TOKENS_COOKIE_UPDATED", {

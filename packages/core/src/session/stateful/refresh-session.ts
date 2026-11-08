@@ -5,9 +5,8 @@ import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal
 
 export const refreshSession = <DefaultUser extends User>({
     ctx,
-    cookieManager,
 }: InternalStatefulContext): SessionStrategy<DefaultUser>["refreshSession"] => {
-    const { logger, sessionConfig } = ctx
+    const { logger, session: sessionConfig } = ctx
 
     return async ({ headers, session }) => {
         logger?.log("STATEFUL_REFRESH_SESSION_START", {
@@ -18,7 +17,7 @@ export const refreshSession = <DefaultUser extends User>({
         })
 
         try {
-            const { sessionToken } = cookieManager.getCookie(headers)
+            const { sessionToken } = ctx.cookies.manager.getCookie(headers)
             logger?.log("STATEFUL_SESSION_TOKEN_EXTRACTED", {
                 structuredData: {
                     has_token: Boolean(sessionToken),
@@ -32,11 +31,11 @@ export const refreshSession = <DefaultUser extends User>({
                         reason: "no_session_token_in_cookie",
                     },
                 })
-                return { session: null, headers: cookieManager.clear() }
+                return { session: null, headers: ctx.cookies.manager.clear() }
             }
 
             const tokenHash = await createHash(sessionToken)
-            const sessionByToken = await sessionConfig.adapter.getSessionByToken(tokenHash)
+            const sessionByToken = await sessionConfig.config.adapter.getSessionByToken(tokenHash)
             logger?.log("STATEFUL_SESSION_DB_LOOKUP", {
                 structuredData: {
                     session_found: Boolean(sessionByToken),
@@ -51,11 +50,11 @@ export const refreshSession = <DefaultUser extends User>({
                         reason: "session_not_found_or_no_user",
                     },
                 })
-                return { session: null, headers: cookieManager.clear() }
+                return { session: null, headers: ctx.cookies.manager.clear() }
             }
 
             if (sessionByToken.status !== "active") {
-                return { session: null, headers: cookieManager.clear() }
+                return { session: null, headers: ctx.cookies.manager.clear() }
             }
 
             logger?.log("STATEFUL_SESSION_EXPIRATION_CHECK", {
@@ -73,14 +72,14 @@ export const refreshSession = <DefaultUser extends User>({
                         expires_at: sessionByToken.expiresAt.toISOString(),
                     },
                 })
-                await sessionConfig.adapter.revokeSession(sessionByToken.id, "user_logout")
+                await sessionConfig.config.adapter.revokeSession(sessionByToken.id, "user_logout")
                 logger?.log("STATEFUL_EXPIRED_SESSION_REVOKED", {
                     structuredData: {
                         session_id: sessionByToken.id,
                         reason: "session_expired",
                     },
                 })
-                return { session: null, headers: cookieManager.clear() }
+                return { session: null, headers: ctx.cookies.manager.clear() }
             }
 
             const { attributes, ...spreadUser } = sessionByToken.user
@@ -136,7 +135,7 @@ export const refreshSession = <DefaultUser extends User>({
 
             if (sessionPayload && Object.keys(sessionPayload).length > 0) {
                 const { sub: _sub, ...userUpdateFields } = validatedUser
-                await sessionConfig.adapter.updateUser(sessionByToken.userId, userUpdateFields as any)
+                await sessionConfig.config.adapter.updateUser(sessionByToken.userId, userUpdateFields as any)
                 logger?.log("STATEFUL_USER_UPDATED_IN_DB", {
                     structuredData: {
                         user_id: sessionByToken.userId,
@@ -154,7 +153,7 @@ export const refreshSession = <DefaultUser extends User>({
                 },
             })
 
-            await sessionConfig.adapter.updateSession(sessionByToken.id, {
+            await sessionConfig.config.adapter.updateSession(sessionByToken.id, {
                 id: sessionByToken.id,
                 userId: sessionByToken.userId,
                 deviceId: sessionByToken.deviceId,
@@ -172,7 +171,7 @@ export const refreshSession = <DefaultUser extends User>({
                 },
             })
 
-            await sessionConfig.adapter.touchSession(sessionByToken.id, new Date())
+            await sessionConfig.config.adapter.touchSession(sessionByToken.id, new Date())
             logger?.log("STATEFUL_SESSION_TOUCHED", {
                 structuredData: {
                     session_id: sessionByToken.id,
@@ -193,7 +192,7 @@ export const refreshSession = <DefaultUser extends User>({
                 },
             })
 
-            return { session: updatedSession, headers: cookieManager.setCookie({ sessionToken }) }
+            return { session: updatedSession, headers: ctx.cookies.manager.setCookie({ sessionToken }) }
         } catch (error) {
             logger?.log("STATEFUL_REFRESH_SESSION_ERROR", {
                 structuredData: {
@@ -201,7 +200,7 @@ export const refreshSession = <DefaultUser extends User>({
                     error_message: error instanceof Error ? error.message : String(error),
                 },
             })
-            return { session: null, headers: cookieManager.clear() }
+            return { session: null, headers: ctx.cookies.manager.clear() }
         }
     }
 }

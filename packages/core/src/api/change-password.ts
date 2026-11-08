@@ -14,7 +14,7 @@ export const changePassword = async ({
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<ChangePasswordAPIOptions>): Promise<ChangePasswordAPIReturn> => {
-    const { logger, sessionStrategy } = ctx
+    const { logger, session } = ctx
     try {
         logger?.log("CHANGE_PASSWORD_INITIATED", {
             structuredData: {
@@ -37,7 +37,7 @@ export const changePassword = async ({
             return rateLimit
         }
 
-        await sessionStrategy.changePassword({
+        await session.strategy.changePassword({
             userId: userId!,
             currentPassword: payload.currentPassword,
             newPassword: payload.newPassword,

@@ -5,7 +5,7 @@ import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-pro
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth2/authorization.ts"
 import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const signIn = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["signIn"] => {
+export const signIn = ({ ctx }: InternalStatelessContext): SessionStrategy["signIn"] => {
     const { logger } = ctx
 
     return async ({ oauthId, provider, request, redirectTo }) => {
@@ -49,13 +49,13 @@ export const signIn = ({ ctx, cookies }: InternalStatelessContext): SessionStrat
 
         const headersBuilder = new HeadersBuilder(cacheControl)
             .setHeader("Location", authorization)
-            .setCookie(cookies().state.name, state, cookies().state.attributes)
-            .setCookie(cookies().redirectURI.name, redirectURI, cookies().redirectURI.attributes)
-            .setCookie(cookies().redirectTo.name, redirectToValue, cookies().redirectTo.attributes)
-            .setCookie(cookies().codeVerifier.name, codeVerifier, cookies().codeVerifier.attributes)
+            .setCookie(ctx.cookies.store.state.name, state, ctx.cookies.store.state.attributes)
+            .setCookie(ctx.cookies.store.redirectURI.name, redirectURI, ctx.cookies.store.redirectURI.attributes)
+            .setCookie(ctx.cookies.store.redirectTo.name, redirectToValue, ctx.cookies.store.redirectTo.attributes)
+            .setCookie(ctx.cookies.store.codeVerifier.name, codeVerifier, ctx.cookies.store.codeVerifier.attributes)
 
         if (nonce) {
-            headersBuilder.setCookie(cookies().nonce.name, nonce, cookies().nonce.attributes)
+            headersBuilder.setCookie(ctx.cookies.store.nonce.name, nonce, ctx.cookies.store.nonce.attributes)
         }
         return {
             success: true,

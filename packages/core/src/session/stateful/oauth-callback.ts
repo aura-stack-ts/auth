@@ -4,14 +4,14 @@ import { validateIDToken } from "@/shared/oidc/id-token.ts"
 import { getTrustedOrigins } from "@/config/get-trusted-origins.ts"
 import { createAccessToken, getUserInfo } from "@/shared/oauth2/index.ts"
 import { createCSRF, createHash, createSecretValue } from "@/shared/crypto.ts"
-import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
+import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { getOriginURL, isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/utils/get-origin-url.ts"
 import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulContext): SessionStrategy["oauthCallback"] => {
-    const { logger, jose, oauth, sessionConfig } = ctx
-    const createDevice = __createDevice({ ctx, cookies, cookieManager })
+export const oauthCallback = ({ ctx }: InternalStatefulContext): SessionStrategy["oauthCallback"] => {
+    const { logger, jose, oauth, session } = ctx
+    const createDevice = createDeviceHelper(ctx)
 
     return async ({ oauthId, request, params: { state, code } }) => {
         const oauthConfig = oauth[oauthId]
@@ -20,7 +20,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
         }
 
         const isOIDC = isOIDCProvider(oauthConfig)
-        const transaction = await sessionConfig.adapter.getOAuthTransactionByState(state)
+        const transaction = await session.config.adapter.getOAuthTransactionByState(state)
 
         if (!transaction) {
             logger?.log("OAUTH_PROTOCOL_ERROR", {
@@ -47,7 +47,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
                     expires_at: transaction.expiresAt.toISOString(),
                 },
             })
-            await sessionConfig.adapter.deleteExpiredOAuthTransactions()
+            await session.config.adapter.deleteExpiredOAuthTransactions()
             return Response.json(
                 {
                     type: "PROTOCOL",
@@ -75,7 +75,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
             )
         }
 
-        await sessionConfig.adapter.consumeOAuthTransaction(state)
+        await session.config.adapter.consumeOAuthTransaction(state)
 
         const resolvedConfig = isOIDC ? await resolveOpenIDProvider(oauthConfig) : oauthConfig
 
@@ -139,12 +139,12 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
         }
 
         let userId: string
-        const user = await sessionConfig.adapter.getUserByEmail(userInfo.email)
+        const user = await session.config.adapter.getUserByEmail(userInfo.email)
 
         if (user) {
             userId = user.id
             const { sub: _, name, email, image, ...attributes } = userInfo
-            await sessionConfig.adapter.updateUser(userId, {
+            await session.config.adapter.updateUser(userId, {
                 name,
                 email,
                 image,
@@ -152,7 +152,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
             })
         } else {
             const { sub: _sub, email, image, name, ...attributes } = userInfo
-            const newUser = await sessionConfig.adapter.createUser({
+            const newUser = await session.config.adapter.createUser({
                 id: crypto.randomUUID(),
                 email: email,
                 name: name,
@@ -165,7 +165,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
         }
 
         let accountId: string
-        const account = await sessionConfig.adapter.getAccountByProvider(oauthId, userInfo.sub)
+        const account = await session.config.adapter.getAccountByProvider(oauthId, userInfo.sub)
 
         if (account) {
             if (account.userId !== userId) {
@@ -174,7 +174,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
             }
 
             accountId = account.id
-            await sessionConfig.adapter.updateOAuthTokens(account.id, {
+            await session.config.adapter.updateOAuthTokens(account.id, {
                 accessToken: accessToken.access_token,
                 refreshToken: accessToken.refresh_token || null,
                 idToken: accessToken.id_token || null,
@@ -186,7 +186,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
                     : null,
             })
         } else {
-            const newAccount = await sessionConfig.adapter.createAccount({
+            const newAccount = await session.config.adapter.createAccount({
                 id: crypto.randomUUID(),
                 userId,
                 provider: oauthId,
@@ -196,7 +196,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
             })
             accountId = newAccount.id
 
-            await sessionConfig.adapter.createOAuthAccount({
+            await session.config.adapter.createOAuthAccount({
                 accountId,
                 accessToken: accessToken.access_token,
                 refreshToken: accessToken.refresh_token || null,
@@ -214,7 +214,7 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
         const sessionToken = createSecretValue(64)
         const tokenHash = await createHash(sessionToken)
 
-        await sessionConfig.adapter.createSession({
+        await session.config.adapter.createSession({
             id: crypto.randomUUID(),
             userId,
             deviceId: device.id,
@@ -236,8 +236,8 @@ export const oauthCallback = ({ ctx, cookies, cookieManager }: InternalStatefulC
 
         const headersBuilder = new HeadersBuilder()
             .setHeader("Location", transaction.redirectTo || "/")
-            .setCookie(cookies().sessionToken.name, sessionToken, cookies().sessionToken.attributes)
-            .setCookie(cookies().csrfToken.name, csrfToken, cookies().csrfToken.attributes)
+            .setCookie(ctx.cookies.store.sessionToken.name, sessionToken, ctx.cookies.store.sessionToken.attributes)
+            .setCookie(ctx.cookies.store.csrfToken.name, csrfToken, ctx.cookies.store.csrfToken.attributes)
 
         return Response.json({ oauth: oauthId }, { status: 302, headers: headersBuilder.toHeaders() })
     }

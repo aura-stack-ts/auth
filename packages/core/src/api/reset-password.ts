@@ -12,7 +12,7 @@ export const resetPassword = async ({
     redirectTo,
     redirect: redirectInit = true,
 }: FunctionAPIContext<ResetPasswordAPIOptions>): Promise<ResetPasswordAPIReturn> => {
-    const { logger, sessionStrategy } = ctx
+    const { logger, session } = ctx
     try {
         logger?.log("RESET_PASSWORD_INITIATED")
         const { request, rateLimit } = await createValidation(
@@ -26,7 +26,7 @@ export const resetPassword = async ({
             return rateLimit as ResetPasswordAPIReturn
         }
 
-        await sessionStrategy.resetPassword(payload)
+        await session.strategy.resetPassword(payload)
 
         const builder = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)

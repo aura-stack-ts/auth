@@ -12,6 +12,5 @@ export const onErrorHook: OnErrorHook<any, any> = ({ error, context }) => {
 
 export const onRequestHook: OnRequestHook<any> = ({ request, context }) => {
     const useSecure = isSecureConnection(request, context.trustedProxyHeaders)
-    // @ts-ignore
-    context.cookies = useSecure ? context.cookieConfig.trusted : context.cookieConfig.untrusted
+    context.cookies.store = useSecure ? context.cookies.precomputed.trusted : context.cookies.precomputed.untrusted
 }

@@ -45,20 +45,20 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         },
         verifySession: () => {
             steps.push(async () => {
-                if (isStatelessStrategy(ctx.sessionConfig)) {
+                if (isStatelessStrategy(ctx.session.config)) {
                     await verifySessionToken({
                         headers: output.headers,
-                        cookies: ctx.cookies,
+                        cookies: ctx.cookies.store,
                         jwt: ctx.jwtManager,
                         logger: ctx.logger,
                     })
                 } else {
-                    const { sessionToken } = createCookieManager(() => ctx.cookies).getCookie(new Headers(headersInit))
+                    const { sessionToken } = createCookieManager(() => ctx.cookies.store).getCookie(new Headers(headersInit))
                     if (!sessionToken) {
                         throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
                     }
                     const tokenHash = await createHash(sessionToken)
-                    const session = await ctx.sessionConfig.adapter.getSessionByToken(tokenHash)
+                    const session = await ctx.session.config.adapter.getSessionByToken(tokenHash)
                     if (!session || session.status !== "active" || new Date() > session.expiresAt) {
                         throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
                     }
@@ -72,7 +72,7 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         },
         verifyCSRFToken: (skipCSRFCheck: boolean, doubleSubmitToken: string | undefined, generateNewToken: boolean = false) => {
             steps.push(async () => {
-                const existingCSRFToken = getOptionalCookie(output.headers, ctx.cookies.csrfToken.name)
+                const existingCSRFToken = getOptionalCookie(output.headers, ctx.cookies.store.csrfToken.name)
                 const csrfTokenValue = generateNewToken ? await createCSRF(ctx.jose, existingCSRFToken) : existingCSRFToken
                 await internal_verifyCSRFToken({
                     ctx,
@@ -183,7 +183,7 @@ export const internal_verifyCSRFToken = async ({
     let csrfToken = csrfTokenValue || null
 
     try {
-        csrfToken = csrfToken || getCookie(headers, ctx.cookies.csrfToken.name)
+        csrfToken = csrfToken || getCookie(headers, ctx.cookies.store.csrfToken.name)
     } catch (cause) {
         ctx.logger?.log("CSRF_TOKEN_MISSING")
 

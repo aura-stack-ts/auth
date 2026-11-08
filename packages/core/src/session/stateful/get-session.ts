@@ -9,13 +9,12 @@ import type { User } from "@/@types/index.ts"
 
 export const getSession = <DefaultUser extends User>({
     ctx,
-    cookieManager,
 }: InternalStatefulContext): SessionStrategy<DefaultUser>["getSession"] => {
-    const { logger, sessionConfig } = ctx
-    const maxAge = sessionConfig?.maxAge ?? 60 * 60 * 24 * 15
-    const strategy = sessionConfig?.expirationStrategy ?? "absolute"
-    const slidingThreshold = sessionConfig?.slidingThreshold
-    const touchThreshold = sessionConfig?.database?.touchInterval ?? 5 * 60 * 1000
+    const { logger, session: sessionConfig } = ctx
+    const maxAge = sessionConfig.config?.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = sessionConfig.config?.expirationStrategy ?? "absolute"
+    const slidingThreshold = sessionConfig.config?.slidingThreshold
+    const touchThreshold = sessionConfig.config?.database?.touchInterval ?? 5 * 60 * 1000
     if (isInvalidSlidingThreshold(slidingThreshold)) {
         throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
     }
@@ -29,7 +28,7 @@ export const getSession = <DefaultUser extends User>({
         })
 
         try {
-            const { sessionToken } = cookieManager.getCookie(headers)
+            const { sessionToken } = ctx.cookies.manager.getCookie(headers)
 
             logger?.log("STATEFUL_SESSION_TOKEN_EXTRACTED", {
                 structuredData: {
@@ -51,7 +50,7 @@ export const getSession = <DefaultUser extends User>({
             }
 
             const tokenHash = await createHash(sessionToken)
-            const session = await sessionConfig.adapter.getSessionByToken(tokenHash)
+            const session = await sessionConfig.config.adapter.getSessionByToken(tokenHash)
             logger?.log("STATEFUL_SESSION_DB_LOOKUP", {
                 structuredData: {
                     session_found: Boolean(session),
@@ -97,7 +96,7 @@ export const getSession = <DefaultUser extends User>({
                 })
                 return {
                     session: null,
-                    headers: cookieManager.clear(),
+                    headers: ctx.cookies.manager.clear(),
                 }
             }
 
@@ -108,11 +107,11 @@ export const getSession = <DefaultUser extends User>({
                         expires_at: session.expiresAt.toISOString(),
                     },
                 })
-                await sessionConfig.adapter.revokeSession(session.id, "user_logout")
+                await sessionConfig.config.adapter.revokeSession(session.id, "user_logout")
 
                 return {
                     session: null,
-                    headers: cookieManager.clear(),
+                    headers: ctx.cookies.manager.clear(),
                 }
             }
 
@@ -149,11 +148,11 @@ export const getSession = <DefaultUser extends User>({
                 strategy,
                 expiresAt: session.expiresAt,
                 createdAt: session.createdAt,
-                maxDuration: sessionConfig.maxDuration,
+                maxDuration: sessionConfig.config.maxDuration,
                 slidingThreshold,
             })
             if (calc.action === "extend") {
-                await sessionConfig.adapter.updateSession(session.id, {
+                await sessionConfig.config.adapter.updateSession(session.id, {
                     expiresAt: calc.expiresAt,
                     lastActivityAt: new Date(),
                 })
@@ -162,7 +161,7 @@ export const getSession = <DefaultUser extends User>({
             if (calc.action === "touch") {
                 const lastActivityAt = session.lastActivityAt.getTime()
                 if (verifyDebounceLastActivity(now, lastActivityAt, touchThreshold)) {
-                    await sessionConfig.adapter.touchSession(session.id, new Date(now))
+                    await sessionConfig.config.adapter.touchSession(session.id, new Date(now))
                 }
             }
             return {
@@ -170,7 +169,7 @@ export const getSession = <DefaultUser extends User>({
                     user: parsedUser as DefaultUser,
                     expires: effectiveExpiresAt.toISOString(),
                 },
-                headers: cookieManager.setCookie({ sessionToken }),
+                headers: ctx.cookies.manager.setCookie({ sessionToken }),
             }
         } catch (error) {
             logger?.log("STATEFUL_GET_SESSION_ERROR", {
@@ -181,7 +180,7 @@ export const getSession = <DefaultUser extends User>({
             })
             return {
                 session: null,
-                headers: cookieManager.clear(),
+                headers: ctx.cookies.manager.clear(),
             }
         }
     }

@@ -5,18 +5,17 @@ import type { InternalStatelessContext, SessionStrategy } from "@/@types/interna
 
 export const refreshSession = <DefaultUser extends User = User>({
     ctx,
-    cookieManager,
 }: InternalStatelessContext): SessionStrategy<DefaultUser>["refreshSession"] => {
-    const { logger, jwtManager: jwt, identity, sessionConfig } = ctx
+    const { logger, jwtManager: jwt, identity, session } = ctx
 
-    const maxAge = sessionConfig?.maxAge ?? sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
-    const strategy = sessionConfig?.expirationStrategy ?? sessionConfig?.jwt?.expirationStrategy ?? "absolute"
+    const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = session?.config?.expirationStrategy ?? session?.config?.jwt?.expirationStrategy ?? "absolute"
 
     return async ({ session, headers }) => {
         try {
-            const { sessionToken } = cookieManager.getCookie(headers)
+            const { sessionToken } = ctx.cookies.manager.getCookie(headers)
             if (!sessionToken) {
-                return { session: null, headers: cookieManager.clear() }
+                return { session: null, headers: ctx.cookies.manager.clear() }
             }
             const claims = await jwt.verifyToken(sessionToken)
             const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
@@ -50,10 +49,10 @@ export const refreshSession = <DefaultUser extends User = User>({
                 mexp,
             })
             updatedSession.expires = new Date(updatedSession.expires).toISOString()
-            return { session: updatedSession, headers: cookieManager.setCookie({ sessionToken: newToken }) }
+            return { session: updatedSession, headers: ctx.cookies.manager.setCookie({ sessionToken: newToken }) }
         } catch (error) {
             logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
-            return { session: null, headers: cookieManager.clear() }
+            return { session: null, headers: ctx.cookies.manager.clear() }
         }
     }
 }

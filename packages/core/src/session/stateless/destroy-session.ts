@@ -1,7 +1,7 @@
 import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const destroySession = ({ cookieManager }: InternalStatelessContext): SessionStrategy["destroySession"] => {
+export const destroySession = ({ ctx }: InternalStatelessContext): SessionStrategy["destroySession"] => {
     return async () => {
-        return cookieManager.clearAll()
+        return ctx.cookies.manager.clearAll()
     }
 }

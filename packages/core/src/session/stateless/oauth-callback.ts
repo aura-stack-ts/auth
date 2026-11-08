@@ -21,18 +21,18 @@ export const oauthCallback = ({ ctx }: InternalStatelessContext): SessionStrateg
         }
 
         const isOIDC = isOIDCProvider(oauthConfig)
-        const cookieState = getCookie(request, cookies.state.name)
-        const codeVerifier = getCookie(request, cookies.codeVerifier.name)
-        const cookieNonce = isOIDC ? getOptionalCookie(request, cookies.nonce.name) : undefined
-        const cookieRedirectTo = getCookie(request, cookies.redirectTo.name)
-        const cookieRedirectURI = getCookie(request, cookies.redirectURI.name)
+        const cookieState = getCookie(request, cookies.store.state.name)
+        const codeVerifier = getCookie(request, cookies.store.codeVerifier.name)
+        const cookieNonce = isOIDC ? getOptionalCookie(request, cookies.store.nonce.name) : undefined
+        const cookieRedirectTo = getCookie(request, cookies.store.redirectTo.name)
+        const cookieRedirectURI = getCookie(request, cookies.store.redirectURI.name)
 
         const clearCookieHeaders = new HeadersBuilder(cacheControl)
-            .setCookie(cookies.state.name, "", getExpiredCookie(cookies.state.attributes))
-            .setCookie(cookies.redirectURI.name, "", getExpiredCookie(cookies.redirectURI.attributes))
-            .setCookie(cookies.redirectTo.name, "", getExpiredCookie(cookies.redirectTo.attributes))
-            .setCookie(cookies.codeVerifier.name, "", getExpiredCookie(cookies.codeVerifier.attributes))
-            .setCookie(cookies.nonce.name, "", getExpiredCookie(cookies.nonce.attributes))
+            .setCookie(cookies.store.state.name, "", getExpiredCookie(cookies.store.state.attributes))
+            .setCookie(cookies.store.redirectURI.name, "", getExpiredCookie(cookies.store.redirectURI.attributes))
+            .setCookie(cookies.store.redirectTo.name, "", getExpiredCookie(cookies.store.redirectTo.attributes))
+            .setCookie(cookies.store.codeVerifier.name, "", getExpiredCookie(cookies.store.codeVerifier.attributes))
+            .setCookie(cookies.store.nonce.name, "", getExpiredCookie(cookies.store.nonce.attributes))
 
         if (!timingSafeEqual(cookieState, state)) {
             logger?.log("MISMATCHING_STATE", {
@@ -95,7 +95,7 @@ export const oauthCallback = ({ ctx }: InternalStatelessContext): SessionStrateg
         }
 
         const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
-        const session = await ctx.sessionStrategy.createSession({ session: userInfo, request })
+        const session = await ctx.session.strategy.createSession({ session: userInfo, request })
         const csrfToken = await createCSRF(jose)
         const tokenPayload = transformToTokenPayload(accessToken)
         const providerToken = await ctx.jwtManager.createToken(tokenPayload)
@@ -108,9 +108,9 @@ export const oauthCallback = ({ ctx }: InternalStatelessContext): SessionStrateg
 
         const headers = clearCookieHeaders
             .setHeader("Location", cookieRedirectTo)
-            .setCookie(cookies.sessionToken.name, session, cookies.sessionToken.attributes)
-            .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
-            .setCookie(`${cookies.accessToken.name}.${oauthId}`, providerToken, cookies.accessToken.attributes)
+            .setCookie(cookies.store.sessionToken.name, session, cookies.store.sessionToken.attributes)
+            .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
+            .setCookie(`${cookies.store.accessToken.name}.${oauthId}`, providerToken, cookies.store.accessToken.attributes)
             .toHeaders()
 
         return Response.json({ oauth: oauthId }, { status: 302, headers: headers })

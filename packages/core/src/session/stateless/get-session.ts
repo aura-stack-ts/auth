@@ -8,13 +8,12 @@ import type { InternalStatelessContext, SessionStrategy } from "@/@types/interna
 
 export const getSession = <DefaultUser extends User>({
     ctx,
-    cookieManager,
 }: InternalStatelessContext): SessionStrategy<DefaultUser>["getSession"] => {
-    const { logger, identity, jwtManager, sessionConfig } = ctx
+    const { logger, identity, jwtManager, session } = ctx
 
-    const maxAge = sessionConfig?.maxAge ?? sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
-    const strategy = sessionConfig?.expirationStrategy ?? sessionConfig?.jwt?.expirationStrategy ?? "absolute"
-    const slidingThreshold = sessionConfig?.slidingThreshold
+    const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = session?.config?.expirationStrategy ?? session?.config?.jwt?.expirationStrategy ?? "absolute"
+    const slidingThreshold = session?.config?.slidingThreshold
     if (isInvalidSlidingThreshold(slidingThreshold)) {
         throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
     }
@@ -22,7 +21,7 @@ export const getSession = <DefaultUser extends User>({
     return async ({ headers }) => {
         const newHeaders = new Headers(secureApiHeaders)
         try {
-            const { sessionToken } = cookieManager.getCookie(headers)
+            const { sessionToken } = ctx.cookies.manager.getCookie(headers)
             if (!sessionToken) return { session: null, headers: newHeaders }
 
             const claims = await jwtManager.verifyToken(sessionToken)
@@ -62,7 +61,7 @@ export const getSession = <DefaultUser extends User>({
                     user: userClaims,
                     expires: expiresAt.toISOString(),
                 } as unknown as Session<DefaultUser>,
-                headers: cookieManager.setCookie({ sessionToken: newSessionToken }),
+                headers: ctx.cookies.manager.setCookie({ sessionToken: newSessionToken }),
             }
         } catch (error) {
             logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })

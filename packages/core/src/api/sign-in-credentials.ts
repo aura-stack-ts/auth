@@ -16,7 +16,7 @@ export const signInCredentials = async ({
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
-    const { cookies, credentials, sessionStrategy, logger } = ctx
+    const { cookies, credentials, logger, session: sessionConfig } = ctx
     try {
         ctx.logger?.log("SIGN_IN_CREDENTIALS_INITIATED", {
             structuredData: {
@@ -46,7 +46,7 @@ export const signInCredentials = async ({
         if (!session) {
             throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
         }
-        const sessionToken = await sessionStrategy.signInCredentials({
+        const sessionToken = await sessionConfig.strategy.signInCredentials({
             request,
             payload: session,
         })
@@ -54,8 +54,8 @@ export const signInCredentials = async ({
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")
 
         const builder = new HeadersBuilder(secureApiHeaders)
-            .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
-            .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
+            .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
+            .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
         const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
             ctx,
@@ -78,6 +78,7 @@ export const signInCredentials = async ({
                 ),
         } as SignInCredentialsAPIReturn
     } catch (error) {
+        console.error("CREDENTIALS_SIGN_IN_ERROR", error)
         const {
             errors: { code, message },
             statusCode,

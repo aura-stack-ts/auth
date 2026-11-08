@@ -1,14 +1,14 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue, hashPassword } from "@/shared/crypto.ts"
-import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
+import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
 import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
 /**
  * @todo Add transaction support for the signUp process to ensure atomicity and rollback in case of errors.
  */
-export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext): SessionStrategy["signUp"] => {
-    const { logger, sessionConfig } = ctx
-    const createDevice = __createDevice({ ctx, cookies, cookieManager })
+export const signUp = ({ ctx }: InternalStatefulContext): SessionStrategy["signUp"] => {
+    const { logger, session } = ctx
+    const createDevice = createDeviceHelper(ctx)
 
     return async ({ payload, request }): Promise<string> => {
         logger?.log("STATEFUL_CREATE_SESSION_START", {
@@ -42,14 +42,14 @@ export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext)
         const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : rawEmail
 
         if (email) {
-            const getEmail = await sessionConfig.adapter.getUserByEmail(email)
+            const getEmail = await session.config.adapter.getUserByEmail(email)
             if (getEmail) {
                 throw new AuraAuthError({ code: "EMAIL_ALREADY_REGISTERED" })
             }
         }
 
         const userId = createSecretValue(32)
-        const user = await sessionConfig.adapter.createUser({
+        const user = await session.config.adapter.createUser({
             id: userId,
             name,
             email,
@@ -66,7 +66,7 @@ export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext)
             },
         })
 
-        const account = await sessionConfig.adapter.createAccount({
+        const account = await session.config.adapter.createAccount({
             id: createSecretValue(32),
             userId: user.id,
             provider: "credentials",
@@ -80,7 +80,7 @@ export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext)
                 throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
             }
             const passwordHash = await hashPassword(password)
-            await sessionConfig.adapter.createCredentialAccount({
+            await session.config.adapter.createCredentialAccount({
                 accountId: account.id,
                 passwordHash,
             })
@@ -109,7 +109,7 @@ export const signUp = ({ ctx, cookies, cookieManager }: InternalStatefulContext)
             },
         })
 
-        const dbSession = await sessionConfig.adapter.createSession({
+        const dbSession = await session.config.adapter.createSession({
             id: createSecretValue(32),
             userId: user.id,
             deviceId: device.id,

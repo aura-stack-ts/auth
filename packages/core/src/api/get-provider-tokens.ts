@@ -25,7 +25,7 @@ export const getProviderTokens = async (
         if (rateLimit) {
             return rateLimit as unknown as GetProviderTokensAPIReturn
         }
-        const getTokens = await ctx.sessionStrategy.getProviderTokens({
+        const getTokens = await ctx.session.strategy.getProviderTokens({
             oauthId,
             request,
             provider,

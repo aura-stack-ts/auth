@@ -82,7 +82,14 @@ export interface InternalIdentityConfig<Schema extends SchemaTypes = typeof iden
 export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>> {
     oauth: OAuthProviderRecord<DefaultUser>
     credentials?: CredentialsConfig<any>
-    cookies: InternalCookieStoreConfig
+    cookies: {
+        store: InternalCookieStoreConfig
+        precomputed: {
+            trusted: InternalCookieStoreConfig
+            untrusted: InternalCookieStoreConfig
+        }
+        manager: CookieManager
+    }
     jose: JoseInstance<DefaultUser>
     secret?: JWTKey
     baseURL?: string
@@ -90,12 +97,17 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     trustedProxyHeaders: boolean | TrustedProxyHeadersSource[]
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
-    sessionStrategy: SessionStrategy<DefaultUser>
+    session: {
+        config: SessionConfig
+        strategy: SessionStrategy<DefaultUser>
+    }
     identity: SchemaRegistryContext
     signUp?: SignUpConfig<DefaultUser, SignUpSchema>
+    /**
+     * @todo Move into session.config.
+     */
     jwtManager: JWTManager<DefaultUser>
     rateLimiters: InferRules<Required<RateLimiterConfig>>
-    sessionConfig: SessionConfig
     emailVerification?: EmailVerificationConfig
     passwordReset?: PasswordResetConfig
     emailChange?: EmailChangeConfig
@@ -108,18 +120,28 @@ export interface SchemaRegistryContext {
     unknownKeys: "passthrough" | "strict" | "strip"
 }
 
+export type InternalSessionConfig<DefaultUser extends User, Config extends SessionConfig = SessionConfig> = {
+    config: Config
+    strategy: SessionStrategy<DefaultUser>
+}
+
 export type InternalContext<Identity extends Identities, SignUpSchema extends SchemaTypes> = RouterGlobalContext<
     FromShapeToObject<Identity>,
     SignUpSchema
-> & {
-    cookieConfig: {
-        trusted: InternalCookieStoreConfig
-        untrusted: InternalCookieStoreConfig
+>
+
+export type InternalContextForStateful = RouterGlobalContext<any, any> & {
+    session: {
+        config: StatefulStrategyConfig
+        strategy: SessionStrategy
     }
 }
 
-export type InternalContextForStateful = Omit<InternalContext<any, any>, "sessionConfig"> & {
-    sessionConfig: StatefulStrategyConfig
+export type InternalContextForStateless = RouterGlobalContext<any, any> & {
+    session: {
+        config: StatelessStrategyConfig
+        strategy: SessionStrategy
+    }
 }
 
 export interface CreateSessionStrategyOptions<Identity extends Identities> {
@@ -136,10 +158,6 @@ export interface InternalSessionContext<Ctx> {
 export type InternalStatefulContext = InternalSessionContext<InternalContextForStateful>
 
 export type InternalStatelessContext = InternalSessionContext<InternalContextForStateless>
-
-export type InternalContextForStateless = Omit<InternalContext<any, any>, "sessionConfig"> & {
-    sessionConfig: StatelessStrategyConfig
-}
 
 export type InternalExpirationResult =
     | { action: "no_change" }

@@ -14,7 +14,7 @@ export const verifyEmail = async (
         redirect: redirectInit = true,
     }: FunctionAPIContext<VerifyEmailAPIOptions>
 ): Promise<VerifyEmailAPIReturn> => {
-    const { logger, sessionStrategy } = ctx
+    const { logger, session } = ctx
     try {
         logger?.log("VERIFY_EMAIL_INITIATED")
         const { request, rateLimit } = await createValidation(
@@ -28,7 +28,7 @@ export const verifyEmail = async (
             return rateLimit as VerifyEmailAPIReturn
         }
 
-        await sessionStrategy.verifyEmail({ token })
+        await session.strategy.verifyEmail({ token })
 
         const builder = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)

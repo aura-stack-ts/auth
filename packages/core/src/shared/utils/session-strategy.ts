@@ -1,7 +1,7 @@
 import { isNullOrUndefined } from "@/shared/assert.ts"
 import { createFingerprint, getDeviceInfo } from "@/shared/http/request-metadata.ts"
 import type { ExpirationStrategy } from "@/@types/index.ts"
-import type { InternalExpirationResult, InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalContextForStateful, InternalExpirationResult } from "@/@types/internal.ts"
 
 /** Default sliding threshold: extend when less than 25% of maxAge remains. */
 export const DEFAULT_SLIDING_THRESHOLD_RATIO = 0.25
@@ -9,17 +9,17 @@ export const DEFAULT_SLIDING_THRESHOLD_RATIO = 0.25
 /** Default touch threshold: write lastActivityAt at most once per 5 minutes. */
 export const DEFAULT_TOUCH_THRESHOLD_MS = 5 * 60 * 1000
 
-export const createDevice = ({ ctx: { sessionConfig } }: InternalStatefulContext) => {
+export const createDevice = ({ session }: InternalContextForStateful) => {
     return async (userId: string, request: Request) => {
         const { userAgent, browser, platform, deviceType, ip, name } = getDeviceInfo(request)
         const fingerprint = await createFingerprint(request)
-        const device = await sessionConfig.adapter.getDeviceByFingerprint(userId, fingerprint)
+        const device = await session.config.adapter.getDeviceByFingerprint(userId, fingerprint)
         if (device) {
-            await sessionConfig.adapter.updateDevice(device.id, { lastSeenAt: new Date() })
+            await session.config.adapter.updateDevice(device.id, { lastSeenAt: new Date() })
             return device
         }
 
-        return await sessionConfig.adapter.createDevice({
+        return await session.config.adapter.createDevice({
             userId,
             userAgent,
             browser,

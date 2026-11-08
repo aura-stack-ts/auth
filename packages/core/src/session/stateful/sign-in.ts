@@ -7,7 +7,7 @@ import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/s
 import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
 export const signIn = ({ ctx }: InternalStatefulContext): SessionStrategy["signIn"] => {
-    const { logger, sessionConfig } = ctx
+    const { logger, session } = ctx
 
     return async ({ oauthId, provider, request, redirectTo }) => {
         const redirectURI = await createRedirectURI(request, oauthId, ctx)
@@ -52,7 +52,7 @@ export const signIn = ({ ctx }: InternalStatefulContext): SessionStrategy["signI
         const fingerprint = await createFingerprint(request)
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
 
-        await sessionConfig.adapter.createOAuthTransaction({
+        await session.config.adapter.createOAuthTransaction({
             id: crypto.randomUUID(),
             provider: oauthId,
             state,

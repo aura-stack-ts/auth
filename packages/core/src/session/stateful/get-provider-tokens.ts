@@ -5,8 +5,8 @@ import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import { secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContext): SessionStrategy["getProviderTokens"] => {
-    const { logger, sessionConfig } = ctx
+export const getProviderTokens = ({ ctx }: InternalStatefulContext): SessionStrategy["getProviderTokens"] => {
+    const { logger, session } = ctx
 
     return async ({ oauthId, provider, request, sessionByToken }) => {
         logger?.log("STATEFUL_GET_PROVIDER_TOKENS_START", {
@@ -21,14 +21,20 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
             const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
             if (sessionByToken.status !== "active" || isExpired) {
                 if (isExpired) {
-                    await sessionConfig.adapter.revokeSession(sessionByToken.id, "user_logout")
+                    await session.config.adapter.revokeSession(sessionByToken.id, "user_logout")
                 }
                 const { code, message, statusCode } = handleApiError(
                     new AuraAuthError({ code: "SESSION_NOT_FOUND" }),
                     "PROVIDER_TOKENS_ERROR",
                     "Failed to get provider tokens"
                 )
-                return { success: false, error: { code, message }, tokens: null, headers: cookieManager.clear(), statusCode }
+                return {
+                    success: false,
+                    error: { code, message },
+                    tokens: null,
+                    headers: ctx.cookies.manager.clear(),
+                    statusCode,
+                }
             }
 
             logger?.log("STATEFUL_GET_PROVIDER_TOKENS_SESSION_FOUND", {
@@ -38,9 +44,9 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
                 },
             })
 
-            const accounts = await sessionConfig.adapter.getAccountsByUserId(sessionByToken.userId)
+            const accounts = await session.config.adapter.getAccountsByUserId(sessionByToken.userId)
             const getAccount = accounts.find((account) => account.provider === oauthId && account.status === "active")
-            const oauthAccount = getAccount ? await sessionConfig.adapter.getOAuthAccount(getAccount?.id ?? "") : null
+            const oauthAccount = getAccount ? await session.config.adapter.getOAuthAccount(getAccount?.id ?? "") : null
             if (!oauthAccount) {
                 logger?.log("STATEFUL_GET_PROVIDER_TOKENS_OAUTH_ACCOUNT_NOT_FOUND", {
                     structuredData: {
@@ -115,7 +121,7 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
                         },
                     })
 
-                    await sessionConfig.adapter.updateOAuthTokens(getAccount?.id as string, {
+                    await session.config.adapter.updateOAuthTokens(getAccount?.id as string, {
                         accountId: oauthAccount.accountId,
                         accessToken: refreshedTokens.accessToken,
                         refreshToken: refreshedTokens.refreshToken,

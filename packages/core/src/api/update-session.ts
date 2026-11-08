@@ -37,7 +37,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             return rateLimit as UpdateSessionAPIReturn<DefaultUser>
         }
 
-        const { session, headers } = await ctx.sessionStrategy.refreshSession({
+        const { session, headers } = await ctx.session.strategy.refreshSession({
             session: sessionInit,
             headers: validatedHeaders,
         })

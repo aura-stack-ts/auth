@@ -6,7 +6,7 @@ import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
 import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
 export const revokeToken = ({ ctx }: InternalStatefulContext): SessionStrategy["revokeToken"] => {
-    const { logger, sessionConfig, cookies } = ctx
+    const { logger, session, cookies } = ctx
 
     return async ({ oauthId, provider, headers, disconnect, sessionByToken }) => {
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
@@ -21,7 +21,7 @@ export const revokeToken = ({ ctx }: InternalStatefulContext): SessionStrategy["
             const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
             if (sessionByToken.status !== "active" || isExpired) {
                 if (isExpired) {
-                    await sessionConfig.adapter.revokeSession(sessionByToken.id, "user_logout")
+                    await session.config.adapter.revokeSession(sessionByToken.id, "user_logout")
                 }
                 logger?.log("AUTH_SESSION_INVALID", {
                     structuredData: {
@@ -38,7 +38,7 @@ export const revokeToken = ({ ctx }: InternalStatefulContext): SessionStrategy["
                 },
             })
 
-            const accounts = await sessionConfig.adapter.getAccountsByUserId(sessionByToken.userId)
+            const accounts = await session.config.adapter.getAccountsByUserId(sessionByToken.userId)
             const account = accounts.find((account) => account.provider === oauthId)
             if (!account) {
                 logger?.log("OAUTH_UNLINKED_ACCOUNT_ERROR", {
@@ -50,7 +50,7 @@ export const revokeToken = ({ ctx }: InternalStatefulContext): SessionStrategy["
                 throw new AuraAuthError({ code: "OAUTH_UNLINKED_ACCOUNT_ERROR" })
             }
 
-            const oauthAccount = await sessionConfig.adapter.getOAuthAccount(account?.id)
+            const oauthAccount = await session.config.adapter.getOAuthAccount(account?.id)
             if (!oauthAccount) {
                 logger?.log("OAUTH_UNLINKED_ACCOUNT_ERROR", {
                     structuredData: {
@@ -73,7 +73,7 @@ export const revokeToken = ({ ctx }: InternalStatefulContext): SessionStrategy["
                 })
             }
 
-            await sessionConfig.adapter.updateAccountStatus(oauthAccount.accountId, "unlinked")
+            await session.config.adapter.updateAccountStatus(oauthAccount.accountId, "unlinked")
 
             logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
                 structuredData: {
@@ -82,9 +82,9 @@ export const revokeToken = ({ ctx }: InternalStatefulContext): SessionStrategy["
                 },
             })
 
-            const cookieName = `${cookies.accessToken.name}.${oauthId}`
+            const cookieName = `${cookies.store.accessToken.name}.${oauthId}`
             const builder = new HeadersBuilder(secureApiHeaders)
-                .setCookie(cookieName, "", getExpiredCookie(cookies.accessToken.attributes))
+                .setCookie(cookieName, "", getExpiredCookie(cookies.store.accessToken.attributes))
                 .toHeaders()
             return toUnionHeaders(builder, headers)
         } catch (error) {
