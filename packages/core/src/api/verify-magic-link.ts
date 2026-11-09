@@ -15,7 +15,7 @@ export const verifyMagicLink = async (
         redirect: redirectInit = true,
     }: FunctionAPIContext<VerifyMagicLinkAPIOptions>
 ): Promise<VerifyMagicLinkAPIReturn> => {
-    const { logger, sessionStrategy, cookies } = ctx
+    const { logger, session, cookies } = ctx
     try {
         logger?.log("VERIFY_MAGIC_LINK_INITIATED")
         const { request, rateLimit } = await createValidation(
@@ -29,13 +29,13 @@ export const verifyMagicLink = async (
             return rateLimit
         }
 
-        const { sessionToken } = await sessionStrategy.verifyMagicLink({ token, request })
+        const { sessionToken } = await session.strategy.verifyMagicLink({ token, request })
         logger?.log("VERIFY_MAGIC_LINK_SUCCESS")
 
-        const csrfToken = await createCSRF(ctx.jose)
+        const csrfToken = await createCSRF(ctx.jose.instance)
         const builder = new HeadersBuilder(secureApiHeaders)
-            .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
-            .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
+            .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
+            .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
         return {

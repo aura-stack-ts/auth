@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import type { SessionStrategy, InternalStatelessContext } from "@/@types/internal.ts"
+import type { SessionStrategy, InternalContextForStateless } from "@/@types/internal.ts"
 
-export const revokeSession = (_: InternalStatelessContext): SessionStrategy["revokeSession"] => {
+export const revokeSession = (_: InternalContextForStateless): SessionStrategy["revokeSession"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -10,7 +10,7 @@ export const revokeSession = (_: InternalStatelessContext): SessionStrategy["rev
     }
 }
 
-export const sendVerificationEmail = (_: InternalStatelessContext): SessionStrategy["sendVerificationEmail"] => {
+export const sendVerificationEmail = (_: InternalContextForStateless): SessionStrategy["sendVerificationEmail"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -19,7 +19,7 @@ export const sendVerificationEmail = (_: InternalStatelessContext): SessionStrat
     }
 }
 
-export const verifyEmail = (_: InternalStatelessContext): SessionStrategy["verifyEmail"] => {
+export const verifyEmail = (_: InternalContextForStateless): SessionStrategy["verifyEmail"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -28,7 +28,7 @@ export const verifyEmail = (_: InternalStatelessContext): SessionStrategy["verif
     }
 }
 
-export const forgotPassword = (_: InternalStatelessContext): SessionStrategy["forgotPassword"] => {
+export const forgotPassword = (_: InternalContextForStateless): SessionStrategy["forgotPassword"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -37,7 +37,7 @@ export const forgotPassword = (_: InternalStatelessContext): SessionStrategy["fo
     }
 }
 
-export const resetPassword = (_: InternalStatelessContext): SessionStrategy["resetPassword"] => {
+export const resetPassword = (_: InternalContextForStateless): SessionStrategy["resetPassword"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -46,7 +46,7 @@ export const resetPassword = (_: InternalStatelessContext): SessionStrategy["res
     }
 }
 
-export const changePassword = (_: InternalStatelessContext): SessionStrategy["changePassword"] => {
+export const changePassword = (_: InternalContextForStateless): SessionStrategy["changePassword"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -55,7 +55,7 @@ export const changePassword = (_: InternalStatelessContext): SessionStrategy["ch
     }
 }
 
-export const changeEmail = (_: InternalStatelessContext): SessionStrategy["changeEmail"] => {
+export const changeEmail = (_: InternalContextForStateless): SessionStrategy["changeEmail"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -64,7 +64,7 @@ export const changeEmail = (_: InternalStatelessContext): SessionStrategy["chang
     }
 }
 
-export const verifyEmailChange = (_: InternalStatelessContext): SessionStrategy["verifyEmailChange"] => {
+export const verifyEmailChange = (_: InternalContextForStateless): SessionStrategy["verifyEmailChange"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -73,7 +73,7 @@ export const verifyEmailChange = (_: InternalStatelessContext): SessionStrategy[
     }
 }
 
-export const cancelEmailChange = (_: InternalStatelessContext): SessionStrategy["cancelEmailChange"] => {
+export const cancelEmailChange = (_: InternalContextForStateless): SessionStrategy["cancelEmailChange"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -82,7 +82,7 @@ export const cancelEmailChange = (_: InternalStatelessContext): SessionStrategy[
     }
 }
 
-export const sendMagicLink = (_: InternalStatelessContext): SessionStrategy["sendMagicLink"] => {
+export const sendMagicLink = (_: InternalContextForStateless): SessionStrategy["sendMagicLink"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",
@@ -91,7 +91,7 @@ export const sendMagicLink = (_: InternalStatelessContext): SessionStrategy["sen
     }
 }
 
-export const verifyMagicLink = (_: InternalStatelessContext): SessionStrategy["verifyMagicLink"] => {
+export const verifyMagicLink = (_: InternalContextForStateless): SessionStrategy["verifyMagicLink"] => {
     return async () => {
         throw new AuraAuthError({
             code: "UNSUPPORTED_FUNCTION_IN_STATELESS_MODE",

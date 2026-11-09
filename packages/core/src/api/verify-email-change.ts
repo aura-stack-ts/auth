@@ -14,7 +14,7 @@ export const verifyEmailChange = async ({
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<VerifyEmailChangeAPIOptions>): Promise<VerifyEmailChangeAPIReturn> => {
-    const { logger, sessionStrategy } = ctx
+    const { logger, session } = ctx
     try {
         logger?.log("VERIFY_EMAIL_CHANGE_INITIATED", {
             structuredData: {
@@ -35,7 +35,7 @@ export const verifyEmailChange = async ({
         if (rateLimit) {
             return rateLimit
         }
-        await sessionStrategy.verifyEmailChange({
+        await session.strategy.verifyEmailChange({
             sessionId: sessionId!,
             userId: userId!,
             token: payload.token,

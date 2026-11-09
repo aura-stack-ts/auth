@@ -89,7 +89,7 @@ export const createAuthInstance = <
 
     return {
         handlers: router,
-        jose: config.context.jose,
+        jose: config.context.jose.instance,
         api: createAuthAPI<FromShapeToObject<Identity>, SignUpSchema>(config.context),
     }
 }

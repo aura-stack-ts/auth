@@ -1,12 +1,12 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, timingSafeEqual } from "@/shared/crypto.ts"
-import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const verifyEmailChange = ({ ctx }: InternalStatefulContext): SessionStrategy["verifyEmailChange"] => {
-    const { sessionConfig } = ctx
+export const verifyEmailChange = (ctx: InternalContextForStateful): SessionStrategy["verifyEmailChange"] => {
+    const { session } = ctx
     return async ({ userId, sessionId, token }) => {
         const tokenHash = await createHash(token)
-        const verifiedToken = await sessionConfig.adapter.getTokenByHash(tokenHash)
+        const verifiedToken = await session.config.adapter.getTokenByHash(tokenHash)
         if (
             !verifiedToken ||
             verifiedToken.type !== "email_change" ||
@@ -19,11 +19,11 @@ export const verifyEmailChange = ({ ctx }: InternalStatefulContext): SessionStra
         if (!timingSafeEqual(userId, verifiedToken.userId)) {
             throw new AuraAuthError({ code: "INVALID_EMAIL_CHANGE_TOKEN" })
         }
-        await sessionConfig.adapter.revokeToken(verifiedToken.id)
-        await sessionConfig.adapter.updateUser(userId, {
+        await session.config.adapter.revokeToken(verifiedToken.id)
+        await session.config.adapter.updateUser(userId, {
             email: verifiedToken.newIdentifier,
             emailVerifiedAt: new Date(),
         })
-        await sessionConfig.adapter.revokeAllSessions(userId, "email_changed", sessionId)
+        await session.config.adapter.revokeAllSessions(userId, "email_changed", sessionId)
     }
 }

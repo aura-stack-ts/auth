@@ -82,7 +82,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             structuredData: { provider: oauth, userId: userInfo.sub },
         })
 
-        const { session, headers: newHeaders } = await ctx.sessionStrategy.refreshUserInfo({
+        const { session, headers: newHeaders } = await ctx.session.strategy.refreshUserInfo({
             headers,
             user: userInfo,
         })

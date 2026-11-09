@@ -16,7 +16,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
-    const { signUp, cookies, sessionStrategy, logger } = ctx
+    const { signUp, cookies, session, logger } = ctx
     try {
         ctx.logger?.log("SIGN_UP_INITIATED", {
             structuredData: {
@@ -45,16 +45,16 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             throw new AuraAuthError({ code: "USER_CREATION_FAILED" })
         }
 
-        const sessionToken = await sessionStrategy.signUp({
+        const sessionToken = await session.strategy.signUp({
             request,
             payload: user,
         })
-        const csrfToken = await createCSRF(ctx.jose)
+        const csrfToken = await createCSRF(ctx.jose.instance)
         logger?.log("SIGN_UP_SUCCESS")
 
         const builder = new HeadersBuilder(secureApiHeaders)
-            .setCookie(cookies.csrfToken.name, csrfToken, cookies.csrfToken.attributes)
-            .setCookie(cookies.sessionToken.name, sessionToken, cookies.sessionToken.attributes)
+            .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
+            .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
         const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
             ctx,

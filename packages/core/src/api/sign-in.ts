@@ -43,7 +43,7 @@ export const signIn = async (
             }
         }
 
-        const { success, signInURL, headers } = await ctx.sessionStrategy.signIn({
+        const { success, signInURL, headers } = await ctx.session.strategy.signIn({
             oauthId,
             provider,
             request,

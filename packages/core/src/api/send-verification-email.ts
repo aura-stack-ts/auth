@@ -17,7 +17,7 @@ export const sendVerificationEmail = async (
         doubleSubmitToken = undefined,
     }: FunctionAPIContext<SendVerificationEmailAPIOptions>
 ): Promise<SendVerificationEmailAPIReturn> => {
-    const { logger, sessionStrategy, emailVerification } = ctx
+    const { logger, session, emailVerification } = ctx
     if (!emailVerification?.sendVerificationEmail) {
         throw new AuraAuthError({ code: "SEND_VERIFICATION_EMAIL_NOT_IMPLEMENTED" })
     }
@@ -35,7 +35,7 @@ export const sendVerificationEmail = async (
         if (rateLimit) {
             return rateLimit as SendVerificationEmailAPIReturn
         }
-        const { token, url } = await sessionStrategy.sendVerificationEmail({
+        const { token, url } = await session.strategy.sendVerificationEmail({
             email,
             origin,
         })

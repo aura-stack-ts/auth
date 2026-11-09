@@ -1,11 +1,11 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
-import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const createSession = ({ ctx, cookies, cookieManager }: InternalStatefulContext): SessionStrategy["createSession"] => {
-    const { logger, sessionConfig } = ctx
-    const createDevice = __createDevice({ ctx, cookies, cookieManager })
+export const createSession = (ctx: InternalContextForStateful): SessionStrategy["createSession"] => {
+    const { logger, session: sessionConfig } = ctx
+    const createDevice = createDeviceHelper(ctx)
 
     return async ({ session, request }) => {
         logger?.log("STATEFUL_CREATE_SESSION_START", {
@@ -57,7 +57,7 @@ export const createSession = ({ ctx, cookies, cookieManager }: InternalStatefulC
             },
         })
 
-        const expiresAt = new Date(Date.now() + (sessionConfig?.maxAge || 60 * 60 * 24 * 15) * 1000)
+        const expiresAt = new Date(Date.now() + (sessionConfig?.config.maxAge || 60 * 60 * 24 * 15) * 1000)
         logger?.log("STATEFUL_SESSION_EXPIRATION_SET", {
             structuredData: {
                 expires_at: expiresAt?.toISOString(),
@@ -68,7 +68,7 @@ export const createSession = ({ ctx, cookies, cookieManager }: InternalStatefulC
         const cryptoId = createSecretValue(32)
         const { sub: userId, email, image, name, ...attributes } = payload
 
-        let user = await sessionConfig.adapter.getUserById(userId as string)
+        let user = await sessionConfig.config.adapter.getUserById(userId as string)
         if (!user) {
             logger?.log("STATEFUL_USER_NOT_FOUND_CREATING", {
                 structuredData: {
@@ -76,7 +76,7 @@ export const createSession = ({ ctx, cookies, cookieManager }: InternalStatefulC
                     reason: "user_not_found_creating_new",
                 },
             })
-            user = await sessionConfig.adapter.createUser({
+            user = await sessionConfig.config.adapter.createUser({
                 id: userId as string,
                 name,
                 email,
@@ -96,7 +96,7 @@ export const createSession = ({ ctx, cookies, cookieManager }: InternalStatefulC
                     reason: "user_exists_updating",
                 },
             })
-            user = await sessionConfig.adapter.updateUser(userId as string, {
+            user = await sessionConfig.config.adapter.updateUser(userId as string, {
                 name,
                 email,
                 image,
@@ -112,7 +112,7 @@ export const createSession = ({ ctx, cookies, cookieManager }: InternalStatefulC
 
         const device = await createDevice(userId as string, request)
 
-        const dbSession = await sessionConfig.adapter.createSession({
+        const dbSession = await sessionConfig.config.adapter.createSession({
             id: cryptoId,
             userId: userId as string,
             deviceId: device.id,

@@ -1,11 +1,11 @@
-import { createSession as __createSession } from "@/session/stateless/create-session.ts"
+import { createSession as createSessionHelper } from "@/session/stateless/create-session.ts"
 import type { User } from "@/@types/index.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const signInCredentials = <DefaultUser extends User = User>(
-    ctx: InternalStatelessContext
+    ctx: InternalContextForStateless
 ): SessionStrategy["signInCredentials"] => {
-    const createSession = __createSession<DefaultUser>(ctx)
+    const createSession = createSessionHelper<DefaultUser>(ctx)
 
     return async ({ payload, request }): Promise<string> => {
         return await createSession({ request, session: payload as any })

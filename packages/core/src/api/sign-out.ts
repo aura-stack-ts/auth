@@ -33,7 +33,7 @@ export const signOut = async ({
             return rateLimit
         }
 
-        responseHeaders = await ctx.sessionStrategy.destroySession({
+        responseHeaders = await ctx.session.strategy.destroySession({
             sessionByToken: session!,
         })
 

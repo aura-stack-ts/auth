@@ -22,7 +22,7 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
                 searchParams: { code, state },
                 context,
             } = ctx
-            return await context.sessionStrategy.oauthCallback({
+            return await context.session.strategy.oauthCallback({
                 oauthId,
                 request,
                 params: { code, state },

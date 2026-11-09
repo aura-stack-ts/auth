@@ -3,7 +3,7 @@ import type { AuthConfig } from "@/@types/config.ts"
 import type { InternalLogger } from "@/@types/internal.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 
-export const cookies = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
+export const getPrecomputedCookies = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config: AuthConfig<Identity, SignUpSchema> | undefined,
     logger: InternalLogger | undefined
 ) => {

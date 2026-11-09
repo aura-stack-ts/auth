@@ -1,8 +1,8 @@
 import { getErrorName } from "@/errors/aura-error.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const isProviderConnected = ({ ctx }: InternalStatefulContext): SessionStrategy["isProviderConnected"] => {
-    const { logger, sessionConfig } = ctx
+export const isProviderConnected = (ctx: InternalContextForStateful): SessionStrategy["isProviderConnected"] => {
+    const { logger, session } = ctx
 
     return async ({ oauthId, sessionByToken }) => {
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
@@ -15,7 +15,7 @@ export const isProviderConnected = ({ ctx }: InternalStatefulContext): SessionSt
             const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
             if (sessionByToken.status !== "active" || isExpired) {
                 if (isExpired) {
-                    await sessionConfig.adapter.revokeSession(sessionByToken.id, "account_suspended")
+                    await session.config.adapter.revokeSession(sessionByToken.id, "account_suspended")
                 }
                 logger?.log("AUTH_SESSION_INVALID", {
                     structuredData: {
@@ -32,7 +32,7 @@ export const isProviderConnected = ({ ctx }: InternalStatefulContext): SessionSt
                 },
             })
 
-            const accounts = await sessionConfig.adapter.getAccountsByUserId(sessionByToken.userId)
+            const accounts = await session.config.adapter.getAccountsByUserId(sessionByToken.userId)
             const account = accounts.find((acc) => acc.provider === oauthId)
 
             if (!account) {

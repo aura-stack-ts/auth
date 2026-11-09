@@ -1,12 +1,12 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, hashPassword } from "@/shared/crypto.ts"
-import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const resetPassword = ({ ctx }: InternalStatefulContext): SessionStrategy["resetPassword"] => {
-    const { sessionConfig } = ctx
+export const resetPassword = (ctx: InternalContextForStateful): SessionStrategy["resetPassword"] => {
+    const { session } = ctx
     return async ({ token, newPassword }) => {
         const tokenHash = await createHash(token)
-        const verificationToken = await sessionConfig.adapter.getTokenByHash(tokenHash)
+        const verificationToken = await session.config.adapter.getTokenByHash(tokenHash)
 
         if (
             !verificationToken ||
@@ -17,7 +17,7 @@ export const resetPassword = ({ ctx }: InternalStatefulContext): SessionStrategy
             throw new AuraAuthError({ code: "INVALID_RESET_PASSWORD_TOKEN" })
         }
 
-        const accounts = await sessionConfig.adapter.getAccountsByUserId(verificationToken.userId)
+        const accounts = await session.config.adapter.getAccountsByUserId(verificationToken.userId)
         const credentialAccount = accounts.find((acc) => acc.type === "credentials")
 
         if (!credentialAccount) {
@@ -28,8 +28,8 @@ export const resetPassword = ({ ctx }: InternalStatefulContext): SessionStrategy
          * @todo should support a custom password hashing function, similar to the signInCredentials API ?
          */
         const passwordHash = await hashPassword(newPassword)
-        await sessionConfig.adapter.updatePasswordHash(credentialAccount.id, passwordHash)
-        await sessionConfig.adapter.revokeToken(verificationToken.id)
-        await sessionConfig.adapter.revokeAllSessions(verificationToken.userId, "password_changed")
+        await session.config.adapter.updatePasswordHash(credentialAccount.id, passwordHash)
+        await session.config.adapter.revokeToken(verificationToken.id)
+        await session.config.adapter.revokeAllSessions(verificationToken.userId, "password_changed")
     }
 }

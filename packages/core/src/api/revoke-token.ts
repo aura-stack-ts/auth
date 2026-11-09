@@ -42,7 +42,7 @@ export const revokeToken = async (
             return rateLimit as RevokeTokenAPIReturn
         }
 
-        const revokeHeaders = await ctx.sessionStrategy.revokeToken({
+        const revokeHeaders = await ctx.session.strategy.revokeToken({
             oauthId,
             provider,
             headers,

@@ -1,14 +1,14 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash } from "@/shared/crypto.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const cancelEmailChange = ({ ctx }: InternalStatefulContext): SessionStrategy["cancelEmailChange"] => {
-    const { sessionConfig } = ctx
+export const cancelEmailChange = (ctx: InternalContextForStateful): SessionStrategy["cancelEmailChange"] => {
+    const { session } = ctx
     return async ({ token, userId }): Promise<void> => {
         const now = new Date()
         if (token) {
             const tokenHash = await createHash(token)
-            const verificationToken = await sessionConfig.adapter.getTokenByHash(tokenHash)
+            const verificationToken = await session.config.adapter.getTokenByHash(tokenHash)
 
             if (
                 !verificationToken ||
@@ -18,7 +18,7 @@ export const cancelEmailChange = ({ ctx }: InternalStatefulContext): SessionStra
             ) {
                 throw new AuraAuthError({ code: "INVALID_EMAIL_CHANGE_TOKEN" })
             }
-            const userTokens = await sessionConfig.adapter.getTokensByUserId(verificationToken.userId)
+            const userTokens = await session.config.adapter.getTokensByUserId(verificationToken.userId)
             const pending = userTokens.filter(
                 (token) =>
                     (token.type === "email_change" || token.type === "email_change_cancel") &&
@@ -26,20 +26,20 @@ export const cancelEmailChange = ({ ctx }: InternalStatefulContext): SessionStra
                     !token.revokedAt &&
                     token.expiresAt > now
             )
-            await Promise.all(pending.map((t) => sessionConfig.adapter.revokeToken(t.id)))
+            await Promise.all(pending.map((t) => session.config.adapter.revokeToken(t.id)))
             return
         }
 
         if (!userId) {
             throw new AuraAuthError({ code: "USER_NOT_FOUND" })
         }
-        const userIdTokens = await sessionConfig.adapter.getTokensByUserId(userId)
+        const userIdTokens = await session.config.adapter.getTokensByUserId(userId)
         const pending = userIdTokens.filter(
             (token) =>
                 (token.type === "email_change" || token.type === "email_change_cancel") &&
                 !token.revokedAt &&
                 token.expiresAt > now
         )
-        await Promise.all(pending.map((token) => sessionConfig.adapter.revokeToken(token.id)))
+        await Promise.all(pending.map((token) => session.config.adapter.revokeToken(token.id)))
     }
 }

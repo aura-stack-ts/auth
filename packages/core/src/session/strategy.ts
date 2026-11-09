@@ -1,32 +1,29 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { isStatelessStrategy } from "@/shared/assert.ts"
-import { createCookieManager } from "@/session/cookie-manager.ts"
 import { createStatefulStrategy } from "@/session/stateful/index.ts"
 import { createStatelessStrategy } from "@/session/stateless/index.ts"
 import type { User, FromShapeToObject, Identities } from "@/@types/index.ts"
 import type {
     SessionStrategy,
-    CreateSessionStrategyOptions,
-    InternalStatefulContext,
-    InternalStatelessContext,
+    InternalContextForStateless,
+    InternalContextForStateful,
+    InternalContext,
 } from "@/@types/internal.ts"
 
 export const createSessionStrategy = <Identity extends Identities>(
-    config: CreateSessionStrategyOptions<Identity>
+    ctx: InternalContext<Identity, any>
 ): SessionStrategy<FromShapeToObject<Identity> & User> => {
-    const strategy = config?.ctx?.sessionConfig?.strategy ?? "jwt"
-    const cookieManager = createCookieManager(config.cookies)
-    const ctx = { ...config, cookieManager }
+    const strategy = ctx.session?.config?.strategy ?? "jwt"
 
-    if (!isStatelessStrategy(config?.ctx?.sessionConfig) && !config?.ctx?.sessionConfig?.adapter) {
+    if (!isStatelessStrategy(ctx.session?.config) && !ctx.session?.config?.adapter) {
         throw new AuraAuthError({ code: "MISSING_ADAPTER_IN_STATEFUL_STRATEGY" })
     }
 
     switch (strategy) {
         case "jwt":
-            return createStatelessStrategy(ctx as InternalStatelessContext)
+            return createStatelessStrategy(ctx as InternalContextForStateless)
         case "database":
-            return createStatefulStrategy(ctx as InternalStatefulContext)
+            return createStatefulStrategy(ctx as InternalContextForStateful)
         default:
             throw new AuraAuthError({ code: "INVALID_SESSION_STRATEGY" })
     }

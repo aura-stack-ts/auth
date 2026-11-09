@@ -6,10 +6,10 @@ import { handleApiError } from "@/shared/utils/api.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["getProviderTokens"] => {
-    const { logger, identity, jwtManager: jwt } = ctx
+export const getProviderTokens = (ctx: InternalContextForStateless): SessionStrategy["getProviderTokens"] => {
+    const { logger, identity, jose } = ctx
 
     return async ({ oauthId, provider, request }) => {
         logger?.log("STATELESS_GET_PROVIDER_TOKENS_START", {
@@ -27,7 +27,7 @@ export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): S
                 },
             })
 
-            const cookieName = `${cookies().accessToken.name}.${oauthId}`
+            const cookieName = `${ctx.cookies.store.accessToken.name}.${oauthId}`
             const cookie = getCookie(request, cookieName)
 
             if (!cookie) {
@@ -53,7 +53,7 @@ export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): S
                 },
             })
 
-            const decodedToken = await jwt.verifyToken(cookie)
+            const decodedToken = await jose.manager.verifyToken(cookie)
             const tokens = await identity.schemaRegistry.parseOAuthTokens(decodedToken)
 
             logger?.log("STATELESS_GET_PROVIDER_TOKENS_TOKENS_DECODED", {
@@ -95,9 +95,9 @@ export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): S
                         },
                     })
 
-                    const encodedTokens = await jwt.createToken(refreshedTokens as any)
+                    const encodedTokens = await jose.manager.createToken(refreshedTokens as any)
                     const builder = new HeadersBuilder(secureApiHeaders)
-                        .setCookie(cookieName, encodedTokens, cookies().accessToken.attributes)
+                        .setCookie(cookieName, encodedTokens, ctx.cookies.store.accessToken.attributes)
                         .toHeaders()
 
                     logger?.log("STATELESS_GET_PROVIDER_TOKENS_COOKIE_UPDATED", {

@@ -1,16 +1,16 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
-import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const sendMagicLink = ({ ctx }: InternalStatefulContext): SessionStrategy["sendMagicLink"] => {
-    const { sessionConfig } = ctx
+export const sendMagicLink = (ctx: InternalContextForStateful): SessionStrategy["sendMagicLink"] => {
+    const { session } = ctx
     return async ({ email, origin, allowSignUp }) => {
-        let user = await sessionConfig.adapter.getUserByEmail(email)
+        let user = await session.config.adapter.getUserByEmail(email)
         if (!user) {
             if (!allowSignUp) {
                 throw new AuraAuthError({ code: "SIGNUP_NOT_ALLOWED_FOR_MAGIC_LINK" })
             }
-            user = await sessionConfig.adapter.createUser({
+            user = await session.config.adapter.createUser({
                 email,
                 emailVerifiedAt: null,
             })
@@ -21,12 +21,12 @@ export const sendMagicLink = ({ ctx }: InternalStatefulContext): SessionStrategy
             throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
         }
 
-        await sessionConfig.adapter.revokeAllVerificationTokens(user.id, "magic_link")
+        await session.config.adapter.revokeAllVerificationTokens(user.id, "magic_link")
 
         const token = createSecretValue()
         const tokenHash = await createHash(token)
         const expiresIn = ctx.magicLinks?.expiresIn ?? 1800
-        await sessionConfig.adapter.createToken({
+        await session.config.adapter.createToken({
             userId: user.id,
             expiresAt: new Date(Date.now() + expiresIn * 1000),
             identifier: user.email,

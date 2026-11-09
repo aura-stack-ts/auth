@@ -15,7 +15,7 @@ export const changeEmail = async ({
     doubleSubmitToken = undefined,
     skipCSRFCheck = false,
 }: FunctionAPIContext<ChangeEmailAPIOptions>): Promise<ChangeEmailAPIReturn> => {
-    const { logger, sessionStrategy, emailChange } = ctx
+    const { logger, session, emailChange } = ctx
     if (!emailChange?.sendEmailChangeVerification) {
         throw new AuraAuthError({ code: "CHANGE_EMAIL_NOT_IMPLEMENTED" })
     }
@@ -39,7 +39,7 @@ export const changeEmail = async ({
         if (rateLimit) {
             return rateLimit
         }
-        const { email, confirmToken, confirmURL, cancelToken, cancelURL } = await sessionStrategy.changeEmail({
+        const { email, confirmToken, confirmURL, cancelToken, cancelURL } = await session.strategy.changeEmail({
             origin,
             userId: userId!,
             currentPassword: payload.currentPassword,

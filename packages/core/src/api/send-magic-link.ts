@@ -17,7 +17,7 @@ export const sendMagicLink = async (
         doubleSubmitToken = undefined,
     }: FunctionAPIContext<SendMagicLinkAPIOptions>
 ): Promise<SendMagicLinkAPIReturn> => {
-    const { logger, sessionStrategy, magicLinks } = ctx
+    const { logger, session, magicLinks } = ctx
     if (!magicLinks?.sendMagicLinkEmail) {
         throw new AuraAuthError({ code: "MAGIC_LINK_SEND_EMAIL_NOT_IMPLEMENTED" })
     }
@@ -40,7 +40,7 @@ export const sendMagicLink = async (
         if (rateLimit) {
             return rateLimit as SendMagicLinkAPIReturn
         }
-        const { token, url } = await sessionStrategy.sendMagicLink({
+        const { token, url } = await session.strategy.sendMagicLink({
             email,
             origin,
             allowSignUp: magicLinks?.allowSignUp ?? false,

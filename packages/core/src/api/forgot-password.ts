@@ -14,7 +14,7 @@ export const forgotPassword = async (
         redirect: redirectInit = true,
     }: FunctionAPIContext<ForgotPasswordAPIOptions>
 ): Promise<ForgotPasswordAPIReturn> => {
-    const { logger, sessionStrategy, passwordReset } = ctx
+    const { logger, session, passwordReset } = ctx
     try {
         logger?.log("FORGOT_PASSWORD_INITIATED")
         const { request, rateLimit, origin } = await createValidation(
@@ -27,7 +27,7 @@ export const forgotPassword = async (
         if (rateLimit) {
             return rateLimit as ForgotPasswordAPIReturn
         }
-        const { token, url } = await sessionStrategy.forgotPassword({ email, origin })
+        const { token, url } = await session.strategy.forgotPassword({ email, origin })
         await passwordReset?.sendPasswordResetEmail?.({ email, token, url })
 
         const builder = new HeadersBuilder(secureApiHeaders)

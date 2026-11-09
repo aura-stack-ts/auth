@@ -1,11 +1,11 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 /**
  * Is the function beeng used ?
  */
-export const revokeSession = ({ ctx }: InternalStatefulContext): SessionStrategy["revokeSession"] => {
-    const { logger, sessionConfig } = ctx
+export const revokeSession = (ctx: InternalContextForStateful): SessionStrategy["revokeSession"] => {
+    const { logger, session } = ctx
 
     return async ({ sessionId }) => {
         logger?.log("STATEFUL_REVOKE_SESSION_START", {
@@ -26,7 +26,7 @@ export const revokeSession = ({ ctx }: InternalStatefulContext): SessionStrategy
             throw new AuraAuthError({ code: "INVALID_USER_INFO" })
         }
 
-        await sessionConfig.adapter.revokeSession(sessionId, "user_logout")
+        await session.config.adapter.revokeSession(sessionId, "user_logout")
 
         logger?.log("STATEFUL_REVOKE_SESSION_SUCCESS", {
             structuredData: {

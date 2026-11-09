@@ -1,15 +1,11 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
-import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const signInCredentials = ({
-    ctx,
-    cookies,
-    cookieManager,
-}: InternalStatefulContext): SessionStrategy["signInCredentials"] => {
-    const { logger, sessionConfig } = ctx
-    const createDevice = __createDevice({ ctx, cookies, cookieManager })
+export const signInCredentials = (ctx: InternalContextForStateful): SessionStrategy["signInCredentials"] => {
+    const { logger, session } = ctx
+    const createDevice = createDeviceHelper(ctx)
 
     return async ({ payload, request }) => {
         logger?.log("STATEFUL_SIGN_IN_CREDENTIALS_START", {
@@ -37,7 +33,7 @@ export const signInCredentials = ({
 
         const { sub } = validatedPayload
 
-        const user = await sessionConfig.adapter.getUserById(sub)
+        const user = await session.config.adapter.getUserById(sub)
         if (!user) {
             throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
         }
@@ -66,7 +62,7 @@ export const signInCredentials = ({
             },
         })
 
-        const dbSession = await sessionConfig.adapter.createSession({
+        const dbSession = await session.config.adapter.createSession({
             id: createSecretValue(32),
             userId: user.id,
             deviceId: device.id,

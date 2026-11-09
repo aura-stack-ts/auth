@@ -22,10 +22,10 @@ import { cancelEmailChange } from "@/session/stateful/cancel-email-change.ts"
 import { isProviderConnected } from "@/session/stateful/is-provider-connected.ts"
 import { sendVerificationEmail } from "@/session/stateful/send-verification-email.ts"
 import type { User } from "@/@types/index.ts"
-import type { SessionStrategy, InternalStatefulContext } from "@/@types/internal.ts"
+import type { SessionStrategy, InternalContextForStateful } from "@/@types/internal.ts"
 
 export const createStatefulStrategy = <DefaultUser extends User = User>(
-    ctx: InternalStatefulContext
+    ctx: InternalContextForStateful
 ): SessionStrategy<DefaultUser> => {
     return {
         signUp: signUp(ctx),

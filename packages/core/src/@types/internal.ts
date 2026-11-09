@@ -42,39 +42,6 @@ import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { createCookieManager } from "@/session/cookie-manager.ts"
 
-// #region API
-/**
- * Utility to merge the internal router global context (`ctx`) with per-function options.
- * Used by implementation-level API functions in `src/api/*`.
- */
-export type FunctionAPIContext<Options extends object = {}> = Prettify<
-    {
-        ctx: RouterGlobalContext
-    } & Options
->
-
-// #region Config
-export type InternalCookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
-
-/**
- * Normalized internal logger with resolved level and structured log function.
- */
-export interface InternalLogger {
-    level: LogLevel
-    log: typeof createLogEntry
-}
-
-/**
- * Identity validation settings used when building session strategy and OAuth profile mapping.
- * Controls the Zod schema and how unknown keys are handled on user objects.
- */
-export interface InternalIdentityConfig<Schema extends SchemaTypes = typeof identitySchema> {
-    schema?: Schema
-    schemaAsPartial?: Schema
-    skipValidation?: boolean
-    unknownKeys?: "passthrough" | "strict" | "strip"
-}
-
 /**
  * Runtime context passed into auth actions and API handlers: OAuth map, cookies, JWT, session strategy, trusted origins, etc.
  * This is the fully resolved configuration surface after `createAuth` initializes defaults.
@@ -82,20 +49,18 @@ export interface InternalIdentityConfig<Schema extends SchemaTypes = typeof iden
 export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>> {
     oauth: OAuthProviderRecord<DefaultUser>
     credentials?: CredentialsConfig<any>
-    cookies: InternalCookieStoreConfig
-    jose: JoseInstance<DefaultUser>
+    cookies: InternalCookieConfig
+    jose: InternalJoseConfig<DefaultUser>
     secret?: JWTKey
     baseURL?: string
     basePath: RoutePattern
     trustedProxyHeaders: boolean | TrustedProxyHeadersSource[]
     trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
     logger?: InternalLogger
-    sessionStrategy: SessionStrategy<DefaultUser>
+    session: InternalSessionConfig<DefaultUser>
     identity: SchemaRegistryContext
     signUp?: SignUpConfig<DefaultUser, SignUpSchema>
-    jwtManager: JWTManager<DefaultUser>
     rateLimiters: InferRules<Required<RateLimiterConfig>>
-    sessionConfig: SessionConfig
     emailVerification?: EmailVerificationConfig
     passwordReset?: PasswordResetConfig
     emailChange?: EmailChangeConfig
@@ -108,37 +73,22 @@ export interface SchemaRegistryContext {
     unknownKeys: "passthrough" | "strict" | "strip"
 }
 
+export type InternalSessionConfig<DefaultUser extends User, Config extends SessionConfig = SessionConfig> = {
+    config: Config
+    strategy: SessionStrategy<DefaultUser>
+}
+
 export type InternalContext<Identity extends Identities, SignUpSchema extends SchemaTypes> = RouterGlobalContext<
     FromShapeToObject<Identity>,
     SignUpSchema
-> & {
-    cookieConfig: {
-        trusted: InternalCookieStoreConfig
-        untrusted: InternalCookieStoreConfig
-    }
+>
+
+export type InternalContextForStateful = RouterGlobalContext<any, any> & {
+    session: InternalSessionConfig<User, StatefulStrategyConfig>
 }
 
-export type InternalContextForStateful = Omit<InternalContext<any, any>, "sessionConfig"> & {
-    sessionConfig: StatefulStrategyConfig
-}
-
-export interface CreateSessionStrategyOptions<Identity extends Identities> {
-    ctx: InternalContext<Identity, any>
-    cookies: () => InternalCookieStoreConfig
-}
-
-export interface InternalSessionContext<Ctx> {
-    ctx: Ctx
-    cookies: () => InternalCookieStoreConfig
-    cookieManager: CookieManager
-}
-
-export type InternalStatefulContext = InternalSessionContext<InternalContextForStateful>
-
-export type InternalStatelessContext = InternalSessionContext<InternalContextForStateless>
-
-export type InternalContextForStateless = Omit<InternalContext<any, any>, "sessionConfig"> & {
-    sessionConfig: StatelessStrategyConfig
+export type InternalContextForStateless = RouterGlobalContext<any, any> & {
+    session: InternalSessionConfig<User, StatelessStrategyConfig>
 }
 
 export type InternalExpirationResult =
@@ -173,9 +123,56 @@ export interface OnCreateUserContext<Schema extends SchemaTypes> {
 }
 
 /** Minimal token issue/verify surface used by session code paths. */
-export type JWTManager<DefaultUser extends User = User> = {
+export type JoseManager<DefaultUser extends User = User> = {
     createToken(user: TypedJWTPayload<Partial<DefaultUser>>): Promise<string>
     verifyToken(token: string): Promise<TypedJWTPayload<DefaultUser>>
+}
+
+export interface InternalCookieConfig {
+    store: InternalCookieStoreConfig
+    precomputed: {
+        trusted: InternalCookieStoreConfig
+        untrusted: InternalCookieStoreConfig
+    }
+    manager: CookieManager
+}
+
+export interface InternalJoseConfig<DefaultUser extends User = User> {
+    instance: JoseInstance<DefaultUser>
+    manager: JoseManager<DefaultUser>
+}
+
+// #region API
+/**
+ * Utility to merge the internal router global context (`ctx`) with per-function options.
+ * Used by implementation-level API functions in `src/api/*`.
+ */
+export type FunctionAPIContext<Options extends object = {}> = Prettify<
+    {
+        ctx: RouterGlobalContext
+    } & Options
+>
+
+// #region Config
+export type InternalCookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
+
+/**
+ * Normalized internal logger with resolved level and structured log function.
+ */
+export interface InternalLogger {
+    level: LogLevel
+    log: typeof createLogEntry
+}
+
+/**
+ * Identity validation settings used when building session strategy and OAuth profile mapping.
+ * Controls the Zod schema and how unknown keys are handled on user objects.
+ */
+export interface InternalIdentityConfig<Schema extends SchemaTypes = typeof identitySchema> {
+    schema?: Schema
+    schemaAsPartial?: Schema
+    skipValidation?: boolean
+    unknownKeys?: "passthrough" | "strict" | "strip"
 }
 
 // #region Session

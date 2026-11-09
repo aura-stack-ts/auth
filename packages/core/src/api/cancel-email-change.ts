@@ -14,7 +14,7 @@ export const cancelEmailChange = async ({
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<CancelEmailChangeAPIOptions>): Promise<CancelEmailChangeAPIReturn> => {
-    const { logger, sessionStrategy } = ctx
+    const { logger, session } = ctx
     try {
         logger?.log("CANCEL_EMAIL_CHANGE_INITIATED", {
             structuredData: {
@@ -36,7 +36,7 @@ export const cancelEmailChange = async ({
                 return rateLimit
             }
 
-            await sessionStrategy.cancelEmailChange({
+            await session.strategy.cancelEmailChange({
                 token: payload?.token,
                 userId: undefined,
             })
@@ -51,7 +51,7 @@ export const cancelEmailChange = async ({
                 return rateLimit
             }
 
-            await sessionStrategy.cancelEmailChange({
+            await session.strategy.cancelEmailChange({
                 token: undefined,
                 userId: userId!,
             })

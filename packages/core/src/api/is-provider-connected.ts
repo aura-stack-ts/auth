@@ -28,7 +28,7 @@ export const isProviderConnected = async (
             return rateLimit
         }
 
-        const connected = await ctx.sessionStrategy.isProviderConnected({
+        const connected = await ctx.session.strategy.isProviderConnected({
             oauthId,
             headers,
             sessionByToken: session!,

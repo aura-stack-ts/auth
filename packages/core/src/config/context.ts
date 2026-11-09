@@ -1,4 +1,4 @@
-import { cookies } from "@/config/cookies.ts"
+import { getPrecomputedCookies } from "@/config/cookies.ts"
 import { createJoseInstance } from "@/jose.ts"
 import { getSaltConfig } from "@/config/get-salt.ts"
 import { isStatelessStrategy } from "@/shared/assert.ts"
@@ -10,6 +10,7 @@ import { getBasePathConfig } from "@/config/get-base-path.ts"
 import { createSessionStrategy } from "@/session/strategy.ts"
 import { createJoseManager } from "@/session/jose-manager.ts"
 import { getOAuthProvidersConfig } from "@/config/get-oauth.ts"
+import { createCookieManager } from "@/session/cookie-manager.ts"
 import { getEmailChangeConfig } from "@/config/get-email-change.ts"
 import { getCredentialsConfig } from "@/config/get-credentials.ts"
 import { createProxyLogger } from "@/config/logger/create-logger.ts"
@@ -30,12 +31,19 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
     const salt = getSaltConfig()
     const logger = createProxyLogger(config)
     const jose = createJoseInstance<FromShapeToObject<Identity>>(secret, salt, config?.session)
-    const { trusted, untrusted } = cookies(config, logger)
+    const precomputed = getPrecomputedCookies(config, logger)
 
     const ctx = {
         credentials: getCredentialsConfig(config),
-        cookies: untrusted,
-        jose,
+        cookies: {
+            store: precomputed.untrusted,
+            precomputed,
+            manager: createCookieManager(() => ctx.cookies.store),
+        },
+        jose: {
+            instance: jose,
+            manager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
+        },
         secret,
         baseURL: getBaseURLConfig(config),
         basePath: getBasePathConfig(config),
@@ -43,20 +51,17 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         trustedProxyHeaders: proxyHeaders,
         trustedOrigins: getTrustedOriginsConfig(config, proxyHeaders),
         logger,
-        cookieConfig: { trusted, untrusted },
         identity: getIdentityConfig(config),
         signUp: config?.signUp,
         emailChange: getEmailChangeConfig(config),
         passwordReset: getPasswordResetConfig(config),
         emailVerification: getEmailVerificationConfig(config),
         magicLinks: getMagicLinkConfig(config),
-        jwtManager: createJoseManager(isStatelessStrategy(config?.session) ? config?.session?.jwt : undefined, jose),
         rateLimiters: createRateLimiterInstance(config?.rateLimiter, proxyHeadersAsBoolean),
-        sessionConfig: config?.session,
+        session: {
+            config: config?.session,
+        },
     } as InternalContext<Identity, SignUpSchema>
-    ctx.sessionStrategy = createSessionStrategy<Identity>({
-        ctx,
-        cookies: () => ctx.cookies,
-    })
+    ctx.session.strategy = createSessionStrategy<Identity>(ctx)
     return ctx
 }

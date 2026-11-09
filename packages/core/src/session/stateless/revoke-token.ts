@@ -3,17 +3,17 @@ import { toUnionHeaders } from "@/shared/http/headers.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { getCookie, getExpiredCookie } from "@/shared/http/cookie.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const revokeToken = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["revokeToken"] => {
-    const { logger, identity, jwtManager: jwt } = ctx
+export const revokeToken = (ctx: InternalContextForStateless): SessionStrategy["revokeToken"] => {
+    const { logger, identity, jose } = ctx
 
     return async ({ oauthId, provider, disconnect, headers }) => {
-        const cookieName = `${cookies().accessToken.name}.${oauthId}`
+        const cookieName = `${ctx.cookies.store.accessToken.name}.${oauthId}`
         const cookie = getCookie(headers, cookieName)
 
         if (!disconnect) {
-            const decodedToken = await jwt.verifyToken(cookie)
+            const decodedToken = await jose.manager.verifyToken(cookie)
             const tokens = await identity.schemaRegistry.parseOAuthTokens(decodedToken)
 
             logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
@@ -27,7 +27,7 @@ export const revokeToken = ({ ctx, cookies }: InternalStatelessContext): Session
             })
         }
         const builder = new HeadersBuilder(secureApiHeaders)
-            .setCookie(cookieName, "", getExpiredCookie(cookies().accessToken.attributes))
+            .setCookie(cookieName, "", getExpiredCookie(ctx.cookies.store.accessToken.attributes))
             .toHeaders()
         return toUnionHeaders(builder, headers)
     }

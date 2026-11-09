@@ -4,10 +4,10 @@ import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { createFingerprint, getDeviceInfo } from "@/shared/http/request-metadata.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth2/authorization.ts"
-import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const signIn = ({ ctx }: InternalStatefulContext): SessionStrategy["signIn"] => {
-    const { logger, sessionConfig } = ctx
+export const signIn = (ctx: InternalContextForStateful): SessionStrategy["signIn"] => {
+    const { logger, session } = ctx
 
     return async ({ oauthId, provider, request, redirectTo }) => {
         const redirectURI = await createRedirectURI(request, oauthId, ctx)
@@ -52,7 +52,7 @@ export const signIn = ({ ctx }: InternalStatefulContext): SessionStrategy["signI
         const fingerprint = await createFingerprint(request)
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
 
-        await sessionConfig.adapter.createOAuthTransaction({
+        await session.config.adapter.createOAuthTransaction({
             id: crypto.randomUUID(),
             provider: oauthId,
             state,

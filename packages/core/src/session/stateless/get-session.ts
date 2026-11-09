@@ -4,17 +4,16 @@ import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const getSession = <DefaultUser extends User>({
-    ctx,
-    cookieManager,
-}: InternalStatelessContext): SessionStrategy<DefaultUser>["getSession"] => {
-    const { logger, identity, jwtManager, sessionConfig } = ctx
+export const getSession = <DefaultUser extends User>(
+    ctx: InternalContextForStateless
+): SessionStrategy<DefaultUser>["getSession"] => {
+    const { logger, identity, jose, session } = ctx
 
-    const maxAge = sessionConfig?.maxAge ?? sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
-    const strategy = sessionConfig?.expirationStrategy ?? sessionConfig?.jwt?.expirationStrategy ?? "absolute"
-    const slidingThreshold = sessionConfig?.slidingThreshold
+    const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = session?.config?.expirationStrategy ?? session?.config?.jwt?.expirationStrategy ?? "absolute"
+    const slidingThreshold = session?.config?.slidingThreshold
     if (isInvalidSlidingThreshold(slidingThreshold)) {
         throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
     }
@@ -22,10 +21,10 @@ export const getSession = <DefaultUser extends User>({
     return async ({ headers }) => {
         const newHeaders = new Headers(secureApiHeaders)
         try {
-            const { sessionToken } = cookieManager.getCookie(headers)
+            const { sessionToken } = ctx.cookies.manager.getCookie(headers)
             if (!sessionToken) return { session: null, headers: newHeaders }
 
-            const claims = await jwtManager.verifyToken(sessionToken)
+            const claims = await jose.manager.verifyToken(sessionToken)
             const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
             const { exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
             const userClaims = identity.skipValidation ? defaultPayload : await identity.schemaRegistry.parse(defaultPayload)
@@ -50,7 +49,7 @@ export const getSession = <DefaultUser extends User>({
             }
             const expiresAt = calc.expiresAt
             const issuedAt = strategy === "absolute" ? parsedClaims.iat : Math.floor(Date.now() / 1000)
-            const newSessionToken = await jwtManager.createToken({
+            const newSessionToken = await jose.manager.createToken({
                 ...userClaims,
                 exp: Math.floor(expiresAt.getTime() / 1000),
                 iat: issuedAt,
@@ -62,7 +61,7 @@ export const getSession = <DefaultUser extends User>({
                     user: userClaims,
                     expires: expiresAt.toISOString(),
                 } as unknown as Session<DefaultUser>,
-                headers: cookieManager.setCookie({ sessionToken: newSessionToken }),
+                headers: ctx.cookies.manager.setCookie({ sessionToken: newSessionToken }),
             }
         } catch (error) {
             logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })

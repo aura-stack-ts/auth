@@ -124,6 +124,20 @@ export type AuthConfig<
     logger?: boolean | Logger
     /**
      * Defines the session management strategy for Aura Auth. It determines how sessions are created, stored, and validated.
+     * @example
+     * // Stateless JWT strategy (default)
+     * session: {
+     *   strategy: "jwt",
+     *   jwt: {
+     *     issuer: "https://auth.example.com",
+     *   }
+     * }
+     *
+     * // Database-backed session strategy
+     * session: {
+     *   strategy: "database",
+     *   adapter: prismaAdapter({ client: prismaClient }),
+     * }
      */
     session?: SessionConfig
     /**

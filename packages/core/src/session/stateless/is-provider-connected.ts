@@ -1,12 +1,12 @@
 import { getCookie } from "@/shared/http/cookie.ts"
 import { getErrorName } from "@/errors/aura-error.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const isProviderConnected = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["isProviderConnected"] => {
-    const { logger, jwtManager: jwt } = ctx
+export const isProviderConnected = (ctx: InternalContextForStateless): SessionStrategy["isProviderConnected"] => {
+    const { logger, jose } = ctx
 
     return async ({ oauthId, headers }) => {
-        const cookieName = `${cookies().accessToken.name}.${oauthId}`
+        const cookieName = `${ctx.cookies.store.accessToken.name}.${oauthId}`
         let cookieValue: string
         try {
             cookieValue = getCookie(headers, cookieName)
@@ -18,7 +18,7 @@ export const isProviderConnected = ({ ctx, cookies }: InternalStatelessContext):
         }
 
         try {
-            const decodedToken = await jwt.verifyToken(cookieValue)
+            const decodedToken = await jose.manager.verifyToken(cookieValue)
             return !!decodedToken
         } catch (error) {
             logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })

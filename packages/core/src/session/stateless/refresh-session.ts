@@ -1,24 +1,23 @@
 import { getErrorName } from "@/errors/aura-error.ts"
 import { updateExpires } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const refreshSession = <DefaultUser extends User = User>({
-    ctx,
-    cookieManager,
-}: InternalStatelessContext): SessionStrategy<DefaultUser>["refreshSession"] => {
-    const { logger, jwtManager: jwt, identity, sessionConfig } = ctx
+export const refreshSession = <DefaultUser extends User = User>(
+    ctx: InternalContextForStateless
+): SessionStrategy<DefaultUser>["refreshSession"] => {
+    const { logger, jose, identity, session } = ctx
 
-    const maxAge = sessionConfig?.maxAge ?? sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
-    const strategy = sessionConfig?.expirationStrategy ?? sessionConfig?.jwt?.expirationStrategy ?? "absolute"
+    const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
+    const strategy = session?.config?.expirationStrategy ?? session?.config?.jwt?.expirationStrategy ?? "absolute"
 
     return async ({ session, headers }) => {
         try {
-            const { sessionToken } = cookieManager.getCookie(headers)
+            const { sessionToken } = ctx.cookies.manager.getCookie(headers)
             if (!sessionToken) {
-                return { session: null, headers: cookieManager.clear() }
+                return { session: null, headers: ctx.cookies.manager.clear() }
             }
-            const claims = await jwt.verifyToken(sessionToken)
+            const claims = await jose.manager.verifyToken(sessionToken)
             const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
 
             const { exp, mexp, iat, ...claimsWithoutJWTFields } = parsedClaims
@@ -43,17 +42,17 @@ export const refreshSession = <DefaultUser extends User = User>({
             }
             const verifiedPayload = await identity.schemaRegistry.parse(updatedSession.user)
             const issuedAt = strategy === "absolute" ? iat : Math.floor(Date.now() / 1000)
-            const newToken = await jwt.createToken({
+            const newToken = await jose.manager.createToken({
                 ...verifiedPayload,
                 exp: Math.floor(expiresAt.getTime() / 1000),
                 iat: issuedAt,
                 mexp,
             })
             updatedSession.expires = new Date(updatedSession.expires).toISOString()
-            return { session: updatedSession, headers: cookieManager.setCookie({ sessionToken: newToken }) }
+            return { session: updatedSession, headers: ctx.cookies.manager.setCookie({ sessionToken: newToken }) }
         } catch (error) {
             logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
-            return { session: null, headers: cookieManager.clear() }
+            return { session: null, headers: ctx.cookies.manager.clear() }
         }
     }
 }

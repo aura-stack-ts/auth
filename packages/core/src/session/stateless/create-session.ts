@@ -1,10 +1,10 @@
 import type { User } from "@/@types/index.ts"
-import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
+import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const createSession = <DefaultUser extends User>({
-    ctx,
-}: InternalStatelessContext): SessionStrategy<DefaultUser>["createSession"] => {
-    const { logger, identity, jwtManager } = ctx
+export const createSession = <DefaultUser extends User>(
+    ctx: InternalContextForStateless
+): SessionStrategy<DefaultUser>["createSession"] => {
+    const { logger, identity } = ctx
     return async ({ session }) => {
         if (identity.skipValidation) {
             logger?.log("IDENTITY_VALIDATION_DISABLED", {
@@ -14,6 +14,6 @@ export const createSession = <DefaultUser extends User>({
             })
         }
         const payload = identity.skipValidation ? session : await identity.schemaRegistry.parse(session)
-        return jwtManager.createToken(payload as unknown as DefaultUser)
+        return ctx.jose.manager.createToken(payload as unknown as DefaultUser)
     }
 }
