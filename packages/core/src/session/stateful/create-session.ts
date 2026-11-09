@@ -128,6 +128,7 @@ export const createSession = (ctx: InternalContextForStateful): SessionStrategy[
                 session_id: dbSession.id,
                 user_id: dbSession.userId,
                 status: dbSession.status,
+                expires_at: dbSession?.expiresAt?.toISOString(),
             },
         })
 

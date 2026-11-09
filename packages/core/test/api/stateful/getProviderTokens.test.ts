@@ -107,6 +107,40 @@ describe("getProviderTokens API (Stateful)", () => {
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
+    test("clears the session cookie when the session expires after validation", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        let expiresAtReads = 0
+        const sessionWithExpiringAt = {
+            ...sessionEntityWithUser,
+            get expiresAt() {
+                expiresAtReads += 1
+                return new Date(Date.now() + (expiresAtReads === 1 ? 60_000 : -1_000))
+            },
+        }
+        const revokeSessionMock = vi.fn()
+        const { api } = authInstance({
+            getSessionByToken: vi.fn().mockResolvedValue(sessionWithExpiringAt),
+            revokeSession: revokeSessionMock,
+        })
+
+        const output = await api.getProviderTokens("oauth-provider", {
+            headers: new Headers({
+                Cookie: "aura-auth.session_token=valid-session-token",
+            }),
+        })
+
+        expect(output).toMatchObject({
+            success: false,
+            error: {
+                code: "SESSION_NOT_FOUND",
+            },
+        })
+        expect(output.headers.getSetCookie()).toContainEqual(expect.stringContaining("aura-auth.session_token=;"))
+        expect(output.toResponse().headers.getSetCookie()).toContainEqual(expect.stringContaining("aura-auth.session_token=;"))
+        expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
+    })
+
     test("throws error when OAuth account does not exist", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 

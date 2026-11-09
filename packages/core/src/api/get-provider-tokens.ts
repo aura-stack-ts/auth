@@ -50,7 +50,9 @@ export const getProviderTokens = async (
         errorToLogMessage(error, "GET_PROVIDER_TOKENS_ERROR", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
-        const headers = toUnionHeaders(initialHeaders, secureApiHeaders)
+        const responseHeaders =
+            errors.code === "SESSION_NOT_FOUND" ? toUnionHeaders(ctx.cookies.manager.clear(), initialHeaders) : initialHeaders
+        const headers = toUnionHeaders(responseHeaders, secureApiHeaders)
         return {
             success: false,
             tokens: null,
