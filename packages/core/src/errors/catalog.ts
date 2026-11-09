@@ -1015,6 +1015,13 @@ export const ERROR_CATALOG = {
         message: "Sign-up is not allowed for magic link authentication. The user must already exist.",
         userMessage: "Sign-up is not allowed for magic link authentication. Please sign in with an existing account.",
     },
+    OAUTH_ACCOUNT_NOT_FOUND: {
+        type: "AUTH_FLOW",
+        statusCode: 404,
+        name: "OAuthError",
+        message: "The requested OAuth account could not be found for the current user.",
+        userMessage: "The specified identity provider is not connected to your account.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG

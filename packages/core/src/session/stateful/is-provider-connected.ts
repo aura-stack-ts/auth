@@ -1,4 +1,3 @@
-import { getErrorName } from "@/errors/aura-error.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const isProviderConnected = (ctx: InternalContextForStateful): SessionStrategy["isProviderConnected"] => {
@@ -11,61 +10,47 @@ export const isProviderConnected = (ctx: InternalContextForStateful): SessionStr
                 operation: "isProviderConnected",
             },
         })
-        try {
-            const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
-            if (sessionByToken.status !== "active" || isExpired) {
-                if (isExpired) {
-                    await session.config.adapter.revokeSession(sessionByToken.id, "account_suspended")
-                }
-                logger?.log("AUTH_SESSION_INVALID", {
-                    structuredData: {
-                        reason: "session_expired_or_inactive",
-                    },
-                })
-                return false
+        const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
+        if (sessionByToken.status !== "active" || isExpired) {
+            if (isExpired) {
+                await session.config.adapter.revokeSession(sessionByToken.id, "account_suspended")
             }
-
-            logger?.log("AUTH_SESSION_VALID", {
+            logger?.log("AUTH_SESSION_INVALID", {
                 structuredData: {
-                    user_id: sessionByToken.userId,
-                    session_id: sessionByToken.id,
-                },
-            })
-
-            const accounts = await session.config.adapter.getAccountsByUserId(sessionByToken.userId)
-            const account = accounts.find((acc) => acc.provider === oauthId)
-
-            if (!account) {
-                logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
-                    structuredData: {
-                        provider: oauthId,
-                        reason: "account_not_found_for_user",
-                    },
-                })
-                return false
-            }
-
-            const isConnected = account.status === "active"
-            logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
-                structuredData: {
-                    provider: oauthId,
-                    connected: isConnected,
-                },
-            })
-
-            return isConnected
-        } catch (error) {
-            /**
-             * @todo returns the error to the user in a structured way.
-             */
-            logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
-                structuredData: {
-                    provider: oauthId,
-                    error_type: getErrorName(error),
-                    error_message: error instanceof Error ? error.message : String(error),
+                    reason: "session_expired_or_inactive",
                 },
             })
             return false
         }
+
+        logger?.log("AUTH_SESSION_VALID", {
+            structuredData: {
+                user_id: sessionByToken.userId,
+                session_id: sessionByToken.id,
+            },
+        })
+
+        const accounts = await session.config.adapter.getAccountsByUserId(sessionByToken.userId)
+        const account = accounts.find((acc) => acc.provider === oauthId)
+
+        if (!account) {
+            logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
+                structuredData: {
+                    provider: oauthId,
+                    reason: "account_not_found_for_user",
+                },
+            })
+            return false
+        }
+
+        const isConnected = account.status === "active"
+        logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
+            structuredData: {
+                provider: oauthId,
+                connected: isConnected,
+            },
+        })
+
+        return isConnected
     }
 }

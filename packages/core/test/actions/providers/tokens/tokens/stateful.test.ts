@@ -99,7 +99,7 @@ describe("tokensAction (Stateful)", async () => {
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
-    test("should return 401 if OAuth account does not exist", async () => {
+    test("should return 404 if OAuth account does not exist", async () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
         const getOAuthAccountMock = vi.fn().mockResolvedValue(null)
@@ -125,7 +125,7 @@ describe("tokensAction (Stateful)", async () => {
                 },
             })
         )
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(404)
         expect(await response.json()).toEqual({
             success: false,
             tokens: null,

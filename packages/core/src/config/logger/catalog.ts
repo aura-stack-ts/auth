@@ -449,12 +449,6 @@ export const LOG_MESSAGES = {
         msgId: "STATEFUL_SESSION_EXPIRATION_SET",
         message: "Set session expiration time",
     },
-    STATEFUL_SESSION_CREATED: {
-        facility: 4,
-        severity: "info",
-        msgId: "STATEFUL_SESSION_CREATED",
-        message: "Session created in database",
-    },
     STATEFUL_CREATE_SESSION_SUCCESS: {
         facility: 4,
         severity: "info",
@@ -742,12 +736,6 @@ export const LOG_MESSAGES = {
         severity: "warning",
         msgId: "STATELESS_GET_PROVIDER_TOKENS_PROVIDER_NOT_FOUND",
         message: "OAuth provider not configured during stateless getProviderTokens",
-    },
-    STATELESS_GET_PROVIDER_TOKENS_PROVIDER_FOUND: {
-        facility: 4,
-        severity: "debug",
-        msgId: "STATELESS_GET_PROVIDER_TOKENS_PROVIDER_FOUND",
-        message: "OAuth provider found during stateless getProviderTokens",
     },
     STATELESS_GET_PROVIDER_TOKENS_NO_COOKIE: {
         facility: 4,

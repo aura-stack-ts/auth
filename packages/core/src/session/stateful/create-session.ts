@@ -123,20 +123,12 @@ export const createSession = (ctx: InternalContextForStateful): SessionStrategy[
             expiresAt,
         })
 
-        logger?.log("STATEFUL_SESSION_CREATED", {
+        logger?.log("STATEFUL_CREATE_SESSION_SUCCESS", {
             structuredData: {
                 session_id: dbSession.id,
                 user_id: dbSession.userId,
                 status: dbSession.status,
                 expires_at: dbSession?.expiresAt?.toISOString(),
-            },
-        })
-
-        logger?.log("STATEFUL_CREATE_SESSION_SUCCESS", {
-            structuredData: {
-                session_id: dbSession.id,
-                user_id: dbSession.userId,
-                token_returned: true,
             },
         })
 
