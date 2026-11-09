@@ -5,7 +5,7 @@
  */
 import type { Awaitable, InferSchema, Prettify, RoutePattern } from "@aura-stack/router"
 import type { ZodObject, infer as Infer } from "zod"
-import type { DeepPartial, LiteralUnion } from "@/@types/utility.ts"
+import type { AuthResponse, DeepPartial, LiteralUnion } from "@/@types/utility.ts"
 import type { identitySchema } from "@/identity/zod.ts"
 import type { createLogEntry } from "@/config/logger/create-logger.ts"
 import type { InferRules } from "@aura-stack/rate-limiter"
@@ -41,6 +41,8 @@ import type { JWTPayload } from "@/jose.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { createCookieManager } from "@/session/cookie-manager.ts"
+import type { createClient } from "@/client/client.ts"
+import type { AuthClient } from "./client.ts"
 
 /**
  * Runtime context passed into auth actions and API handlers: OAuth map, cookies, JWT, session strategy, trusted origins, etc.
@@ -152,6 +154,27 @@ export type FunctionAPIContext<Options extends object = {}> = Prettify<
         ctx: RouterGlobalContext
     } & Options
 >
+
+/**
+ * Canonical return shape for server/programmatic API functions.
+ *
+ * - Success branch includes the payload fields from `Body` plus response metadata.
+ * - Failure branch includes `error` metadata and `toResponse()` for framework adapters.
+ * - Both branches expose `headers` so callers can forward cookies and auth-related headers.
+ */
+export type AuthActionAPIReturn<Body extends object, ErrorCodes = any> =
+    | (Extract<Body, { success: true }> & { headers: Headers; toResponse: () => AuthResponse<Exclude<Body, { success: false }>> })
+    | (Extract<Body, { success: false }> & {
+          success: false
+          headers: Headers
+          /** @todo: Add `docs` property */
+          error: { code: ErrorCodes; message: string }
+          toResponse: () => AuthResponse<Exclude<Body, { success: true }>>
+      })
+
+// #region Client
+
+export type InternalAuthClient = ReturnType<typeof createClient>
 
 // #region Config
 export type InternalCookieStoreConfig = Record<CookieName, { name: string; attributes: CookieStrategyAttributes }>
