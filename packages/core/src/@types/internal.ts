@@ -5,7 +5,7 @@
  */
 import type { Awaitable, InferSchema, Prettify, RoutePattern } from "@aura-stack/router"
 import type { ZodObject, infer as Infer } from "zod"
-import type { LiteralUnion } from "@/@types/utility.ts"
+import type { DeepPartial, LiteralUnion } from "@/@types/utility.ts"
 import type { identitySchema } from "@/identity/zod.ts"
 import type { createLogEntry } from "@/config/logger/create-logger.ts"
 import type { InferRules } from "@aura-stack/rate-limiter"
@@ -29,8 +29,9 @@ import type {
 } from "@/@types/config.ts"
 import type {
     JWTKey,
+    OAuthTokenPayload,
+    Session,
     SessionConfig,
-    SessionStrategy,
     StatefulStrategyConfig,
     StatelessStrategyConfig,
     User,
@@ -38,6 +39,7 @@ import type {
 import type { OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/shared/schemas/general.ts"
 import type { JWTPayload } from "@/jose.ts"
 import type { TypedJWTPayload } from "@aura-stack/jose"
+import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { createCookieManager } from "@/session/cookie-manager.ts"
 
 // #region API
@@ -214,3 +216,158 @@ export type OAuthProviderRecord<DefaultUser extends User = User> = Record<
 export type JWTPayloadWithToken = JWTPayload & { token: string }
 
 export type CookieManager = ReturnType<typeof createCookieManager>
+
+// #region Session Strategy
+/**
+ * Abstraction layer for session management.
+ */
+export interface SessionStrategy<DefaultUser extends User = User> {
+    /**
+     * Read and validate the session from an incoming request.
+     * Returns null if absent, invalid, or expired. Never throws on auth failure.
+     */
+    getSession(options: { headers: Headers }): Promise<{
+        session: Session<DefaultUser> | null
+        headers: Headers
+    }>
+    /**
+     * Create a session after successful authentication.
+     * Signs the JWT / writes the DB row / sets cookies.
+     */
+    createSession(options: { session: User; request: Request }): Promise<string>
+    /**
+     * Get the OAuth access token for a specific provider, using the refresh token if necessary.
+     */
+    getProviderTokens(options: {
+        oauthId: string
+        request: Request
+        provider: RuntimeOAuthProvider<any, DefaultUser>
+        sessionByToken: SessionWithUserEntity
+    }): Promise<
+        | { success: true; tokens: OAuthTokenPayload; headers: Headers }
+        | { success: false; tokens: null; error: { code: string; message: string }; headers: Headers; statusCode: number }
+    >
+    /**
+     * Attempt to refresh using the refresh token cookie.
+     * Returns null session + cookie-clearing response on any failure.
+     */
+    refreshSession(options: { headers: Headers; session: DeepPartial<Session<DefaultUser>> }): Promise<{
+        session: Session<DefaultUser> | null
+        headers: Headers
+    }>
+    /**
+     * Revoke a session by ID.
+     * JWT strategy: best-effort (clears cookies, no server state).
+     * Database / hybrid: marks row inactive.
+     */
+    revokeSession(options: { sessionId: string }): Promise<void>
+    /**
+     * Destroy the session attached to this request (logout).
+     * Returns a response that clears cookies.
+     */
+    destroySession(options: { sessionByToken: SessionWithUserEntity }): Promise<Headers>
+    /**
+     * Revoke the access token for a specific OAuth provider.
+     * @unstable This API is experimental and may change in future releases.
+     */
+    revokeToken(options: {
+        oauthId: string
+        provider: RuntimeOAuthProvider<any, DefaultUser>
+        headers: Headers
+        disconnect: boolean
+        sessionByToken: SessionWithUserEntity
+    }): Promise<Headers>
+    /**
+     * Check if the user is connected to a specific OAuth provider.
+     * @unstable This API is experimental and may change in future releases.
+     */
+    isProviderConnected(options: { oauthId: string; headers: Headers; sessionByToken: SessionWithUserEntity }): Promise<boolean>
+    /**
+     * Refresh the user info in the session.
+     * @unstable This API is experimental and may change in future releases.
+     */
+    refreshUserInfo(options: { user: DeepPartial<DefaultUser>; headers: Headers; skipCSRFCheck?: boolean }): Promise<{
+        session: Session<DefaultUser> | null
+        headers: Headers
+    }>
+    /**
+     * Sign up a new user with the given payload and request. Returns the session token on success.
+     * @unstable This API is experimental and may change in future releases.
+     */
+    signUp(options: { payload: Record<string, unknown>; request: Request }): Promise<string>
+    /**
+     * Sign in a user with the given credentials and request. Returns the session token on success.
+     * @unstable This API is experimental and may change in future releases.
+     */
+    signInCredentials(options: { payload: Record<string, unknown>; request: Request; redirectTo?: string }): Promise<string>
+    /**
+     * Sign in a user with the given OAuth provider and request. Returns the session token on success.
+     */
+    signIn(options: {
+        oauthId: string
+        provider: RuntimeOAuthProvider<any, DefaultUser>
+        request: Request
+        redirectTo?: string
+    }): Promise<{
+        success: boolean
+        headers: Headers
+        signInURL: string
+    }>
+    /**
+     * Handle the OAuth callback after the user authorizes the app. Returns a response that
+     *  sets cookies and redirects to the original URL.
+     */
+    oauthCallback(options: { oauthId: string; request: Request; params: { code: string; state: string } }): Promise<Response>
+    /**
+     *  Send a verification email to the user with a token and URL.
+     */
+    sendVerificationEmail(options: { email: string; origin: string }): Promise<{
+        token: string
+        url: string
+    }>
+    /**
+     * Verify the email using the token sent to the user.
+     */
+    verifyEmail(options: { token: string }): Promise<void>
+    /**
+     * Initiate a password reset flow by sending an email with a token and URL. Returns the token and URL.
+     */
+    forgotPassword(options: { email: string; origin: string }): Promise<{
+        token: string
+        url: string
+    }>
+    /**
+     * Reset the password using the token sent to the user.
+     */
+    resetPassword(options: { token: string; newPassword: string }): Promise<void>
+    /**
+     * Change the password for a user, given the current password and new password.
+     */
+    changePassword(options: { userId: string; currentPassword: string; newPassword: string }): Promise<void>
+    /**
+     * Initiate an email change flow by sending a confirmation email to the new address
+     * and a cancellation email to the old address.
+     */
+    changeEmail(options: {
+        userId: string
+        currentPassword: string
+        newEmail: string
+        origin: string
+    }): Promise<{ email: string; confirmToken: string; confirmURL: string; cancelToken: string; cancelURL: string }>
+    /**
+     * Verify the email change request using the token sent to the user.
+     */
+    verifyEmailChange(options: { token: string; userId: string; sessionId: string }): Promise<void>
+    /**
+     * Cancel the email change request using the token sent to the user.
+     */
+    cancelEmailChange(options: { token: string; userId?: string } | { token?: string; userId: string }): Promise<void>
+    /**
+     * Initiates the magic link sign-in or sign-up flow by sending an email with a token and URL.
+     */
+    sendMagicLink(options: { email: string; allowSignUp: boolean; origin: string }): Promise<{ token: string; url: string }>
+    /**
+     * Verivy the magic link token
+     */
+    verifyMagicLink(options: { token: string; request: Request }): Promise<{ sessionToken: string }>
+}

@@ -1,10 +1,11 @@
-import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { User } from "@/@types/index.ts"
-import type { InternalStatelessContext } from "@/@types/internal.ts"
+import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const createSession = <DefaultUser extends User>({ ctx }: InternalStatelessContext) => {
+export const createSession = <DefaultUser extends User>({
+    ctx,
+}: InternalStatelessContext): SessionStrategy<DefaultUser>["createSession"] => {
     const { logger, identity, jwtManager } = ctx
-    return async (session: TypedJWTPayload<DefaultUser>) => {
+    return async ({ session }) => {
         if (identity.skipValidation) {
             logger?.log("IDENTITY_VALIDATION_DISABLED", {
                 structuredData: {

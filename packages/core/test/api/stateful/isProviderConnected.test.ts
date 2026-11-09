@@ -23,7 +23,7 @@ describe("isProviderConnected (Stateful)", () => {
     test("returns connected: false when session not found in database", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(sessionEntityWithUser).mockResolvedValueOnce(null)
+        const getSessionByTokenMock = vi.fn().mockResolvedValueOnce(null)
         const getAccountsByUserIdMock = vi.fn()
 
         const { api } = authInstance({
@@ -41,8 +41,12 @@ describe("isProviderConnected (Stateful)", () => {
             },
         })
         expect(output).toEqual({
-            success: true,
+            success: false,
             connected: false,
+            error: {
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
+            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })

@@ -3,10 +3,13 @@ import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
-import type { GetStatelessSessionReturn, Session, User } from "@/@types/index.ts"
-import type { InternalStatelessContext } from "@/@types/internal.ts"
+import type { Session, User } from "@/@types/index.ts"
+import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: InternalStatelessContext) => {
+export const getSession = <DefaultUser extends User>({
+    ctx,
+    cookieManager,
+}: InternalStatelessContext): SessionStrategy<DefaultUser>["getSession"] => {
     const { logger, identity, jwtManager, sessionConfig } = ctx
 
     const maxAge = sessionConfig?.maxAge ?? sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
@@ -16,7 +19,7 @@ export const getSession = <DefaultUser extends User>({ ctx, cookieManager }: Int
         throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
     }
 
-    return async (headers: Headers): Promise<GetStatelessSessionReturn<DefaultUser>> => {
+    return async ({ headers }) => {
         const newHeaders = new Headers(secureApiHeaders)
         try {
             const { sessionToken } = cookieManager.getCookie(headers)

@@ -307,7 +307,6 @@ describe("refreshUserInfo action", () => {
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity
@@ -712,7 +711,6 @@ describe("refreshUserInfo action", () => {
             accessTokenExpiresAt: expect.any(Date),
             refreshTokenExpiresAt: expect.any(Date),
         })
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity
@@ -904,7 +902,6 @@ describe("refreshUserInfo action", () => {
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(4, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntity

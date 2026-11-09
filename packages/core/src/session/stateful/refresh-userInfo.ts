@@ -1,12 +1,14 @@
 import { refreshSession as __refreshSession } from "@/session/stateful/refresh-session.ts"
-import type { User } from "@/@types/index.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { User } from "@/@types/session.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const refreshUserInfo = <DefaultUser extends User>(ctx: InternalStatefulContext) => {
-    const refreshSession = __refreshSession(ctx)
+export const refreshUserInfo = <DefaultUser extends User>(
+    ctx: InternalStatefulContext
+): SessionStrategy<DefaultUser>["refreshUserInfo"] => {
+    const refreshSession = __refreshSession<DefaultUser>(ctx)
 
-    return async (userInfo: Partial<DefaultUser>, headers: Headers) => {
-        const value = await refreshSession(headers, { user: userInfo })
+    return async ({ headers, user }) => {
+        const value = await refreshSession({ headers, session: { user } })
         return value as any
     }
 }

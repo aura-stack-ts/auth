@@ -1,15 +1,13 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/shared/crypto.ts"
 import { createDevice as __createDevice } from "@/shared/utils/session-strategy.ts"
-import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { User } from "@/@types/index.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const createSession = <DefaultUser extends User>({ ctx, cookies, cookieManager }: InternalStatefulContext) => {
+export const createSession = ({ ctx, cookies, cookieManager }: InternalStatefulContext): SessionStrategy["createSession"] => {
     const { logger, sessionConfig } = ctx
     const createDevice = __createDevice({ ctx, cookies, cookieManager })
 
-    return async (session: TypedJWTPayload<DefaultUser>, request: Request) => {
+    return async ({ session, request }) => {
         logger?.log("STATEFUL_CREATE_SESSION_START", {
             structuredData: {
                 strategy: "stateful",

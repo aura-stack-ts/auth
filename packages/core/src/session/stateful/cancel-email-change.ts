@@ -1,10 +1,10 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash } from "@/shared/crypto.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const cancelEmailChange = ({ ctx }: InternalStatefulContext) => {
+export const cancelEmailChange = ({ ctx }: InternalStatefulContext): SessionStrategy["cancelEmailChange"] => {
     const { sessionConfig } = ctx
-    return async ({ token, userId }: { token?: string; userId?: string }): Promise<void> => {
+    return async ({ token, userId }): Promise<void> => {
         const now = new Date()
         if (token) {
             const tokenHash = await createHash(token)
@@ -20,11 +20,11 @@ export const cancelEmailChange = ({ ctx }: InternalStatefulContext) => {
             }
             const userTokens = await sessionConfig.adapter.getTokensByUserId(verificationToken.userId)
             const pending = userTokens.filter(
-                (t) =>
-                    (t.type === "email_change" || t.type === "email_change_cancel") &&
-                    t.newIdentifier === verificationToken.newIdentifier &&
-                    !t.revokedAt &&
-                    t.expiresAt > now
+                (token) =>
+                    (token.type === "email_change" || token.type === "email_change_cancel") &&
+                    token.newIdentifier === verificationToken.newIdentifier &&
+                    !token.revokedAt &&
+                    token.expiresAt > now
             )
             await Promise.all(pending.map((t) => sessionConfig.adapter.revokeToken(t.id)))
             return
@@ -35,8 +35,11 @@ export const cancelEmailChange = ({ ctx }: InternalStatefulContext) => {
         }
         const userIdTokens = await sessionConfig.adapter.getTokensByUserId(userId)
         const pending = userIdTokens.filter(
-            (t) => (t.type === "email_change" || t.type === "email_change_cancel") && !t.revokedAt && t.expiresAt > now
+            (token) =>
+                (token.type === "email_change" || token.type === "email_change_cancel") &&
+                !token.revokedAt &&
+                token.expiresAt > now
         )
-        await Promise.all(pending.map((t) => sessionConfig.adapter.revokeToken(t.id)))
+        await Promise.all(pending.map((token) => sessionConfig.adapter.revokeToken(token.id)))
     }
 }

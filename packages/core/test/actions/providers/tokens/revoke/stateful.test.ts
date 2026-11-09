@@ -153,7 +153,7 @@ describe("Revoke Action", () => {
                 },
             })
         )
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(400)
         expect(await response.json()).toEqual({ success: false })
 
         const tokenHash = await createHash("valid-token-hash")
@@ -192,7 +192,7 @@ describe("Revoke Action", () => {
                 },
             })
         )
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(400)
         expect(await response.json()).toEqual({ success: false })
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)

@@ -18,11 +18,15 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
         async (ctx) => {
             const {
                 request,
-                params: { oauth },
+                params: { oauth: oauthId },
                 searchParams: { code, state },
                 context,
             } = ctx
-            return await context.sessionStrategy.oauthCallback(oauth, request, { code, state })
+            return await context.sessionStrategy.oauthCallback({
+                oauthId,
+                request,
+                params: { code, state },
+            })
         },
         callbackConfig(oauth)
     )

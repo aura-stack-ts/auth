@@ -1,21 +1,15 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { createFingerprint, getDeviceInfo } from "@/shared/http/request-metadata.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth2/authorization.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const signIn = ({ ctx }: InternalStatefulContext) => {
-    const { logger, oauth, sessionConfig } = ctx
+export const signIn = ({ ctx }: InternalStatefulContext): SessionStrategy["signIn"] => {
+    const { logger, sessionConfig } = ctx
 
-    return async (oauthId: string, request: Request, redirectTo?: string) => {
-        const provider = oauth[oauthId]
-        if (!provider) {
-            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
-        }
-
+    return async ({ oauthId, provider, request, redirectTo }) => {
         const redirectURI = await createRedirectURI(request, oauthId, ctx)
         const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
 

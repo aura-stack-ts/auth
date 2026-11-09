@@ -6,13 +6,12 @@ import { handleApiError } from "@/shared/utils/api.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
-import type { InternalStatelessContext } from "@/@types/internal.ts"
-import type { GetProviderTokensStatefulReturn } from "@/@types/index.ts"
+import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext) => {
-    const { oauth, logger, identity, jwtManager: jwt } = ctx
+export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext): SessionStrategy["getProviderTokens"] => {
+    const { logger, identity, jwtManager: jwt } = ctx
 
-    return async (oauthId: string, request: Request): Promise<GetProviderTokensStatefulReturn> => {
+    return async ({ oauthId, provider, request }) => {
         logger?.log("STATELESS_GET_PROVIDER_TOKENS_START", {
             structuredData: {
                 strategy: "stateless",
@@ -22,22 +21,6 @@ export const getProviderTokens = ({ ctx, cookies }: InternalStatelessContext) =>
         })
 
         try {
-            const provider = oauth[oauthId]
-            if (!provider) {
-                logger?.log("STATELESS_GET_PROVIDER_TOKENS_PROVIDER_NOT_FOUND", {
-                    structuredData: {
-                        oauth_id: oauthId,
-                        reason: "provider_not_configured",
-                    },
-                })
-                const { code, message, statusCode } = handleApiError(
-                    new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" }),
-                    "PROVIDER_TOKENS_ERROR",
-                    "Failed to get provider tokens"
-                )
-                return { success: false, error: { code, message }, tokens: null, headers: request.headers, statusCode }
-            }
-
             logger?.log("STATELESS_GET_PROVIDER_TOKENS_PROVIDER_FOUND", {
                 structuredData: {
                     oauth_id: oauthId,

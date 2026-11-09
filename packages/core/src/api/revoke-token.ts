@@ -4,7 +4,7 @@ import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { RevokeTokenAPIOptions, RevokeTokenAPIReturn, LiteralUnion, BuiltInOAuthProvider } from "@/@types/index.ts"
 
 export const revokeToken = async (
-    oauth: LiteralUnion<BuiltInOAuthProvider>,
+    oauthId: LiteralUnion<BuiltInOAuthProvider>,
     {
         ctx,
         headers: headersInit,
@@ -17,19 +17,19 @@ export const revokeToken = async (
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
-                provider: oauth,
+                provider: oauthId,
                 operation: disconnect ? "disconnect" : "revoke",
                 skipCSRFCheck: skipCSRFCheck,
                 doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
             },
         })
 
-        const { headers, rateLimit } = await createValidation(
+        const { provider, headers, rateLimit, session } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
-            .verifyOAuthProvider(oauth)
-            .buildRequest(requestInit, `/providers/${oauth}/tokens/revoke`)
+            .verifyOAuthProvider(oauthId)
+            .buildRequest(requestInit, `/providers/${oauthId}/tokens/revoke`)
             .verifyRateLimit("revokeToken")
             .verifySession()
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
@@ -37,12 +37,18 @@ export const revokeToken = async (
 
         if (rateLimit) {
             ctx.logger?.log("INVALID_REQUEST", {
-                structuredData: { provider: oauth, reason: "rate_limit_exceeded" },
+                structuredData: { provider: oauthId, reason: "rate_limit_exceeded" },
             })
             return rateLimit as RevokeTokenAPIReturn
         }
 
-        const revokeHeaders = await ctx.sessionStrategy.revokeToken(oauth, headers, disconnect)
+        const revokeHeaders = await ctx.sessionStrategy.revokeToken({
+            oauthId,
+            provider,
+            headers,
+            disconnect,
+            sessionByToken: session!,
+        })
         return {
             success: true,
             headers: revokeHeaders,

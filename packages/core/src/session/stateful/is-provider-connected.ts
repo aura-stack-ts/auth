@@ -1,40 +1,17 @@
 import { getErrorName } from "@/errors/aura-error.ts"
-import { createHash } from "@/shared/crypto.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const isProviderConnected = ({ ctx, cookieManager }: InternalStatefulContext) => {
+export const isProviderConnected = ({ ctx }: InternalStatefulContext): SessionStrategy["isProviderConnected"] => {
     const { logger, sessionConfig } = ctx
 
-    return async (oauthId: string, headers: Headers): Promise<boolean> => {
+    return async ({ oauthId, sessionByToken }) => {
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
                 provider: oauthId,
                 operation: "isProviderConnected",
             },
         })
-
         try {
-            const { sessionToken } = cookieManager.getCookie(headers)
-            if (!sessionToken) {
-                logger?.log("SESSION_TOKEN_MISSING", {
-                    structuredData: {
-                        reason: "no_session_token",
-                    },
-                })
-                return false
-            }
-
-            const tokenHash = await createHash(sessionToken)
-            const sessionByToken = await sessionConfig.adapter.getSessionByToken(tokenHash)
-            if (!sessionByToken || !sessionByToken.user) {
-                logger?.log("AUTH_SESSION_INVALID", {
-                    structuredData: {
-                        reason: "session_not_found_or_no_user",
-                    },
-                })
-                return false
-            }
-
             const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
             if (sessionByToken.status !== "active" || isExpired) {
                 if (isExpired) {

@@ -1,22 +1,18 @@
 import { getErrorName } from "@/errors/aura-error.ts"
 import { updateExpires } from "@/shared/utils/session-strategy.ts"
-import type { DeepPartial } from "@/@types/utility.ts"
 import type { Session, User } from "@/@types/index.ts"
-import type { InternalStatelessContext } from "@/@types/internal.ts"
+import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const refreshSession = <DefaultUser extends User = User>({ ctx, cookieManager }: InternalStatelessContext) => {
+export const refreshSession = <DefaultUser extends User = User>({
+    ctx,
+    cookieManager,
+}: InternalStatelessContext): SessionStrategy<DefaultUser>["refreshSession"] => {
     const { logger, jwtManager: jwt, identity, sessionConfig } = ctx
 
     const maxAge = sessionConfig?.maxAge ?? sessionConfig?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = sessionConfig?.expirationStrategy ?? sessionConfig?.jwt?.expirationStrategy ?? "absolute"
 
-    return async (
-        headers: Headers,
-        session: DeepPartial<Session<DefaultUser>>
-    ): Promise<{
-        session: Session<DefaultUser> | null
-        headers: Headers
-    }> => {
+    return async ({ session, headers }) => {
         try {
             const { sessionToken } = cookieManager.getCookie(headers)
             if (!sessionToken) {

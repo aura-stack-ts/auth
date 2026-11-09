@@ -9,10 +9,10 @@ import { createAccessToken, getUserInfo } from "@/shared/oauth2/index.ts"
 import { getCookie, getExpiredCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { getOriginURL, isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/utils/get-origin-url.ts"
-import type { InternalStatelessContext } from "@/@types/internal.ts"
+import type { InternalStatelessContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const oauthCallback = ({ ctx }: InternalStatelessContext) => {
-    return async (oauthId: string, request: Request, { code, state }: { code: string; state: string }) => {
+export const oauthCallback = ({ ctx }: InternalStatelessContext): SessionStrategy["oauthCallback"] => {
+    return async ({ oauthId, request, params: { code, state } }) => {
         const { oauth: providers, cookies, jose, logger, trustedOrigins } = ctx
 
         const oauthConfig = providers[oauthId]
@@ -95,7 +95,7 @@ export const oauthCallback = ({ ctx }: InternalStatelessContext) => {
         }
 
         const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
-        const session = await ctx.sessionStrategy.createSession(userInfo, request)
+        const session = await ctx.sessionStrategy.createSession({ session: userInfo, request })
         const csrfToken = await createCSRF(jose)
         const tokenPayload = transformToTokenPayload(accessToken)
         const providerToken = await ctx.jwtManager.createToken(tokenPayload)

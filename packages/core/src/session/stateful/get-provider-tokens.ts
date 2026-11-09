@@ -1,21 +1,14 @@
-import { createHash } from "@/shared/crypto.ts"
 import { shouldRefresh } from "@/shared/utils.ts"
 import { handleApiError } from "@/shared/utils/api.ts"
 import { AuraAuthError, getErrorName } from "@/errors/aura-error.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import { secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
-import type { InternalStatefulContext } from "@/@types/internal.ts"
-import type { GetProviderTokensStatefulReturn } from "@/@types/index.ts"
+import type { InternalStatefulContext, SessionStrategy } from "@/@types/internal.ts"
 
-export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContext) => {
-    const { oauth, logger, sessionConfig } = ctx
+export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContext): SessionStrategy["getProviderTokens"] => {
+    const { logger, sessionConfig } = ctx
 
-    return async (oauthId: string, request: Request): Promise<GetProviderTokensStatefulReturn> => {
-        const provider = oauth[oauthId]
-        if (!provider) {
-            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
-        }
-
+    return async ({ oauthId, provider, request, sessionByToken }) => {
         logger?.log("STATEFUL_GET_PROVIDER_TOKENS_START", {
             structuredData: {
                 strategy: "stateful",
@@ -25,37 +18,6 @@ export const getProviderTokens = ({ ctx, cookieManager }: InternalStatefulContex
         })
 
         try {
-            const { sessionToken } = cookieManager.getCookie(new Headers(request.headers))
-            if (!sessionToken) {
-                logger?.log("STATEFUL_GET_PROVIDER_TOKENS_NO_SESSION", {
-                    structuredData: {
-                        reason: "no_session_token",
-                    },
-                })
-                const { code, message, statusCode } = handleApiError(
-                    new AuraAuthError({ code: "SESSION_NOT_FOUND" }),
-                    "PROVIDER_TOKENS_ERROR",
-                    "Failed to get provider tokens"
-                )
-                return { success: false, error: { code, message }, tokens: null, headers: cookieManager.clear(), statusCode }
-            }
-
-            const tokenHash = await createHash(sessionToken)
-            const sessionByToken = await sessionConfig.adapter.getSessionByToken(tokenHash)
-            if (!sessionByToken || !sessionByToken.user) {
-                logger?.log("STATEFUL_GET_PROVIDER_TOKENS_SESSION_INVALID", {
-                    structuredData: {
-                        reason: "session_not_found_or_no_user",
-                    },
-                })
-                const { code, message, statusCode } = handleApiError(
-                    new AuraAuthError({ code: "SESSION_NOT_FOUND" }),
-                    "PROVIDER_TOKENS_ERROR",
-                    "Failed to get provider tokens"
-                )
-                return { success: false, error: { code, message }, tokens: null, headers: cookieManager.clear(), statusCode }
-            }
-
             const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
             if (sessionByToken.status !== "active" || isExpired) {
                 if (isExpired) {
