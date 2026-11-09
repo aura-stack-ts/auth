@@ -42,7 +42,6 @@ import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { createCookieManager } from "@/session/cookie-manager.ts"
 import type { createClient } from "@/client/client.ts"
-import type { AuthClient } from "./client.ts"
 
 /**
  * Runtime context passed into auth actions and API handlers: OAuth map, cookies, JWT, session strategy, trusted origins, etc.
