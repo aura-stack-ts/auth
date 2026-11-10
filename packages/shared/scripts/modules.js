@@ -77,9 +77,9 @@ const copyFolder = async (dirName, silentEntry = false) => {
 }
 
 try {
-    copyFolder("oauth")
-    copyFolder("identity")
-    copyFolder("exports", true)
+    await copyFolder("oauth")
+    await copyFolder("identity")
+    await copyFolder("exports", true)
 
     if (json === true) {
         const packageJson = await readFile(resolve(process.cwd(), "package.json"), "utf-8")

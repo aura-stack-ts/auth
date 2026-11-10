@@ -79,14 +79,14 @@
       "require": "./dist/generated/identity/*.cjs"
     },
     "./crypto": {
-      "types": "./dist/exports/crypto.d.ts",
-      "import": "./dist/exports/crypto.js",
-      "require": "./dist/exports/crypto.cjs"
+      "types": "./dist/generated/exports/crypto.d.ts",
+      "import": "./dist/generated/exports/crypto.js",
+      "require": "./dist/generated/exports/crypto.cjs"
     },
     "./shared": {
-      "types": "./dist/exports/shared.d.ts",
-      "import": "./dist/exports/shared.js",
-      "require": "./dist/exports/shared.cjs"
+      "types": "./dist/generated/exports/shared.d.ts",
+      "import": "./dist/generated/exports/shared.js",
+      "require": "./dist/generated/exports/shared.cjs"
     },
     "./cookies": {
       "types": "./dist/generated/exports/cookies.d.ts",
