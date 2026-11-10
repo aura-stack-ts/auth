@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF } from "@/exports/crypto.ts"
 import { GET, jose } from "@test/setup/auth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import { oauthCustomService, oauthTokens, sessionPayload } from "@test/setup/presets.ts"

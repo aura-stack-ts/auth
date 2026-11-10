@@ -2,7 +2,7 @@ import { describe, test, expect } from "vitest"
 import { z } from "zod/v4"
 import { jose, POST } from "@test/setup/auth.ts"
 import { createAuth } from "@/createAuth.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF } from "@/exports/crypto.ts"
 import { getSetCookie } from "@/shared/http/cookie.ts"
 import { identitySchema } from "@/identity/zod.ts"
 

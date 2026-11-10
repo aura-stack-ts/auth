@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createCSRF, createHash, createSecretValue } from "@/shared/crypto.ts"
+import { createCSRF, createHash, createSecretValue } from "@/exports/crypto.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
 import { emailChangeTokenEntity, sessionEntity, sessionEntityWithUser } from "@test/setup/entities.ts"
 

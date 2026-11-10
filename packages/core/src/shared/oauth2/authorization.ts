@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { setSearchParams } from "@/shared/utils/params.ts"
 import { OAuthAuthorization } from "@/shared/schemas/general.ts"
-import { createPKCE, createSecretValue } from "@/shared/crypto.ts"
+import { createPKCE, createSecretValue } from "@/exports/crypto.ts"
 import { getTrustedOrigins } from "@/config/get-trusted-origins.ts"
 import { equals, extractPath, patternToRegex } from "@/shared/utils.ts"
 import { getOriginURL, isRelativeURL, isSameOrigin, isTrustedOrigin, isValidURL } from "@/shared/utils/get-origin-url.ts"

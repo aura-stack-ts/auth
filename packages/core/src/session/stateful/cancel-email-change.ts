@@ -1,5 +1,5 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { createHash } from "@/shared/crypto.ts"
+import { createHash } from "@/exports/crypto.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const cancelEmailChange = (ctx: InternalContextForStateful): SessionStrategy["cancelEmailChange"] => {

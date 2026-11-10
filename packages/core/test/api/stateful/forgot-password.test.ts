@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createHash } from "@/shared/crypto.ts"
+import { createHash } from "@/exports/crypto.ts"
 import { authInstance } from "@test/setup/auth.ts"
 import { userEntity, verificationTokenEntity } from "@test/setup/entities.ts"
 
@@ -13,7 +13,7 @@ describe("forgotPassword API", async () => {
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {
@@ -100,7 +100,7 @@ describe("forgotPassword API", async () => {
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {
@@ -143,7 +143,7 @@ describe("forgotPassword API", async () => {
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {
@@ -195,7 +195,7 @@ describe("forgotPassword API", async () => {
 
         const token = "mocked-token"
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {

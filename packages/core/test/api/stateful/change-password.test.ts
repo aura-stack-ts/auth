@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createCSRF, createHash } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
 import { accountEntityWithCredentials, credentialAccountEntity, sessionEntityWithUser } from "@test/setup/entities.ts"
 
@@ -11,7 +11,7 @@ describe("changePassword API", async () => {
 
         const newPassword = "new-password"
         const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+        vi.spyOn(await import("@/exports/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
@@ -207,7 +207,7 @@ describe("changePassword API", async () => {
 
         const newPassword = "new-password"
         const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+        vi.spyOn(await import("@/exports/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
@@ -261,7 +261,7 @@ describe("changePassword API", async () => {
 
         const newPassword = "new-password"
         const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+        vi.spyOn(await import("@/exports/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])

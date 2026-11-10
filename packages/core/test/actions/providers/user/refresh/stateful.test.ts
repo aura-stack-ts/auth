@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { VERSION } from "@/version.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { createCSRF, createHash } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { oauthCustomService, oauthTokens } from "@test/setup/presets.ts"
 import { accountEntity, oauthAccountEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 

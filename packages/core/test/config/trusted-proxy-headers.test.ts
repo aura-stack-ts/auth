@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { oauthCustomService, sessionPayload } from "@test/setup/presets.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF } from "@/exports/crypto.ts"
 
 beforeEach(() => {
     vi.stubEnv("BASE_URL", undefined)

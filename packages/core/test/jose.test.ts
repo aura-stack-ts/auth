@@ -3,7 +3,7 @@ import { createAuth } from "@/createAuth.ts"
 import { getSecretKey } from "@/config/get-secret.ts"
 import { generateKeyPair } from "@aura-stack/jose/jose"
 import { createJoseInstance, encoder } from "@/jose.ts"
-import { createSecretValue, exportJWKKeyPair } from "@/shared/crypto.ts"
+import { createSecretValue, exportJWKKeyPair } from "@/exports/crypto.ts"
 import { RS256PEMFormat, RSAOAEP256PEMFormat } from "@test/fixtures/pem.ts"
 
 const payload = {

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createCSRF, createHash } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
 import { sessionEntityWithUser, userEntity, verificationTokenEntity } from "@test/setup/entities.ts"
 
@@ -33,7 +33,7 @@ describe("sendVerificationEmailAction", async () => {
         const token = "verification-token"
         const tokenHash = await createHash(token)
 
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const response = await POST(
             new Request("https://example.com/auth/emailVerification/send", {
@@ -98,7 +98,7 @@ describe("sendVerificationEmailAction", async () => {
         const token = "verification-token"
         const tokenHash = await createHash(token)
 
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const response = await POST(
             new Request("https://example.com/auth/emailVerification/send", {
@@ -210,7 +210,7 @@ describe("sendVerificationEmailAction", async () => {
         const token = "verification-token"
         const tokenHash = await createHash(token)
 
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const response = await POST(
             new Request("https://example.com/auth/emailVerification/send", {
@@ -277,7 +277,7 @@ describe("sendVerificationEmailAction", async () => {
         const token = "verification-token"
         const tokenHash = await createHash(token)
 
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const response = await POST(
             new Request("https://example.com/auth/emailVerification/send?redirectTo=https://example.com/auth/verify-email", {
@@ -342,7 +342,7 @@ describe("sendVerificationEmailAction", async () => {
         const token = "verification-token"
         const tokenHash = await createHash(token)
 
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const response = await POST(
             new Request(

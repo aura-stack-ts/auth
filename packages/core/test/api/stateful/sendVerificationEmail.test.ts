@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { jose } from "@test/setup/auth.ts"
-import { createCSRF, createHash } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { authInstance } from "@test/setup/auth.ts"
 import { sessionEntityWithUser, userEntity, verificationTokenEntity } from "@test/setup/entities.ts"
 
@@ -23,7 +23,7 @@ describe("sendVerificationEmail API", async () => {
 
         const token = "email-verification-token"
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {
@@ -120,7 +120,7 @@ describe("sendVerificationEmail API", async () => {
 
         const token = "email-verification-token"
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {
@@ -216,7 +216,7 @@ describe("sendVerificationEmail API", async () => {
 
         const token = "email-verification-token"
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {
@@ -271,7 +271,7 @@ describe("sendVerificationEmail API", async () => {
 
         const token = "email-verification-token"
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const { api } = authInstance(
             {

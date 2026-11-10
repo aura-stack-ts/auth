@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF } from "@/exports/crypto.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
 import { magicLinkTokenEntity, userEntity } from "@test/setup/entities.ts"
 
@@ -28,7 +28,7 @@ describe("sendMagicLink API", async () => {
         )
 
         const token = "mocked-magic-link-token"
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const output = await api.sendMagicLink("user@example.com", {
             headers: {
@@ -79,7 +79,7 @@ describe("sendMagicLink API", async () => {
         )
 
         const token = "mocked-magic-link-token"
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const output = await api.sendMagicLink("new@example.com", {
             headers: {
@@ -130,7 +130,7 @@ describe("sendMagicLink API", async () => {
         )
 
         const token = "mocked-magic-link-token"
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const output = await api.sendMagicLink("nonexistent@example.com", {
             headers: {
@@ -179,7 +179,7 @@ describe("sendMagicLink API", async () => {
         )
 
         const token = "mocked-magic-link-token"
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const output = await api.sendMagicLink("user@example.com", {
             headers: {
@@ -229,7 +229,7 @@ describe("sendMagicLink API", async () => {
         )
 
         const token = "mocked-magic-link-token"
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const output = await api.sendMagicLink("user@example.com", {
             headers: {

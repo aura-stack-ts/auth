@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { createCSRF, createHash } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { accountEntityWithCredentials, credentialAccountEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("changeEmailAction", async () => {
@@ -44,7 +44,7 @@ describe("changeEmailAction", async () => {
         const cancelToken = "valid-cancel-token"
         const cancelTokenHash = await createHash(cancelToken)
 
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue")
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue")
             .mockReturnValueOnce(confirmToken)
             .mockReturnValueOnce(cancelToken)
 
@@ -334,7 +334,7 @@ describe("changeEmailAction", async () => {
         const cancelToken = "valid-cancel-token"
         const cancelTokenHash = await createHash(cancelToken)
 
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue")
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue")
             .mockReturnValueOnce(confirmToken)
             .mockReturnValueOnce(cancelToken)
 
@@ -432,7 +432,7 @@ describe("changeEmailAction", async () => {
         const cancelToken = "valid-cancel-token"
         const cancelTokenHash = await createHash(cancelToken)
 
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue")
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue")
             .mockReturnValueOnce(confirmToken)
             .mockReturnValueOnce(cancelToken)
 

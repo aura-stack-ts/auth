@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createHash, createSecretValue } from "@/shared/crypto.ts"
+import { createHash, createSecretValue } from "@/exports/crypto.ts"
 import { authInstance } from "@test/setup/auth.ts"
 import { resetPasswordAccountEntity, resetPasswordTokenEntity } from "@test/setup/entities.ts"
 
@@ -13,7 +13,7 @@ describe("resetPasswordAction", async () => {
 
         const token = createSecretValue()
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const {
             handlers: { POST },
@@ -59,7 +59,7 @@ describe("resetPasswordAction", async () => {
 
         const token = createSecretValue()
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const {
             handlers: { POST },
@@ -105,7 +105,7 @@ describe("resetPasswordAction", async () => {
 
         const token = createSecretValue()
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const {
             handlers: { POST },
@@ -156,7 +156,7 @@ describe("resetPasswordAction", async () => {
 
         const token = createSecretValue()
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const {
             handlers: { POST },
@@ -207,7 +207,7 @@ describe("resetPasswordAction", async () => {
 
         const token = createSecretValue()
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const {
             handlers: { POST },
@@ -252,7 +252,7 @@ describe("resetPasswordAction", async () => {
 
         const token = createSecretValue()
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const {
             handlers: { POST },
@@ -295,7 +295,7 @@ describe("resetPasswordAction", async () => {
 
         const token = createSecretValue()
         const tokenHash = await createHash(token)
-        vi.spyOn(await import("@/shared/crypto.ts"), "createSecretValue").mockReturnValue(token)
+        vi.spyOn(await import("@/exports/crypto.ts"), "createSecretValue").mockReturnValue(token)
 
         const {
             handlers: { POST },

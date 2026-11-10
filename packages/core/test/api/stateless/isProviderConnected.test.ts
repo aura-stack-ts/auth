@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { api, jose } from "@test/setup/auth.ts"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF } from "@/exports/crypto.ts"
 import { oauthTokens, sessionPayload } from "@test/setup/presets.ts"
 
 describe("isProviderConnected", () => {

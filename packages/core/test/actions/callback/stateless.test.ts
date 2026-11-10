@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { VERSION } from "@/version.ts"
 import { GET, jose } from "@test/setup/auth.ts"
-import { createPKCE } from "@/shared/crypto.ts"
+import { createPKCE } from "@/exports/crypto.ts"
 import { RS256PEMFormat } from "@test/fixtures/pem.ts"
 import { clearJWKSCache } from "@/shared/oidc/jwks.ts"
 import { setCookie, getSetCookie } from "@/shared/http/cookie.ts"

@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF } from "@/exports/crypto.ts"
 import { GET, jose } from "@test/setup/auth.ts"
 import { oauthTokens, sessionPayload } from "@test/setup/presets.ts"
 
