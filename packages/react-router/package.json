@@ -91,42 +91,42 @@
       "import": "./dist/client.js",
       "require": "./dist/client.cjs"
     },
+    "./types": "./dist/@types/index.d.ts",
     "./oauth": {
-      "types": "./dist/oauth/index.d.ts",
-      "import": "./dist/oauth/index.js",
-      "require": "./dist/oauth/index.cjs"
+      "types": "./dist/generated/oauth/index.d.ts",
+      "import": "./dist/generated/oauth/index.js",
+      "require": "./dist/generated/oauth/index.cjs"
     },
     "./oauth/*": {
-      "types": "./dist/oauth/*.d.ts",
-      "import": "./dist/oauth/*.js",
-      "require": "./dist/oauth/*.cjs"
+      "types": "./dist/generated/oauth/*.d.ts",
+      "import": "./dist/generated/oauth/*.js",
+      "require": "./dist/generated/oauth/*.cjs"
     },
     "./identity": {
-      "types": "./dist/identity/index.d.ts",
-      "import": "./dist/identity/index.js",
-      "require": "./dist/identity/index.cjs"
+      "types": "./dist/generated/identity/index.d.ts",
+      "import": "./dist/generated/identity/index.js",
+      "require": "./dist/generated/identity/index.cjs"
     },
     "./identity/*": {
-      "types": "./dist/identity/*.d.ts",
-      "import": "./dist/identity/*.js",
-      "require": "./dist/identity/*.cjs"
+      "types": "./dist/generated/identity/*.d.ts",
+      "import": "./dist/generated/identity/*.js",
+      "require": "./dist/generated/identity/*.cjs"
     },
     "./crypto": {
-      "types": "./dist/exports/crypto.d.ts",
-      "import": "./dist/exports/crypto.js",
-      "require": "./dist/exports/crypto.cjs"
+      "types": "./dist/generated/exports/crypto.d.ts",
+      "import": "./dist/generated/exports/crypto.js",
+      "require": "./dist/generated/exports/crypto.cjs"
     },
     "./shared": {
-      "types": "./dist/exports/shared.d.ts",
-      "import": "./dist/exports/shared.js",
-      "require": "./dist/exports/shared.cjs"
+      "types": "./dist/generated/exports/shared.d.ts",
+      "import": "./dist/generated/exports/shared.js",
+      "require": "./dist/generated/exports/shared.cjs"
     },
     "./cookies": {
-      "types": "./dist/exports/cookies.d.ts",
-      "import": "./dist/exports/cookies.js",
-      "require": "./dist/exports/cookies.cjs"
-    },
-    "./types": "./dist/@types/index.d.ts"
+      "types": "./dist/generated/exports/cookies.d.ts",
+      "import": "./dist/generated/exports/cookies.js",
+      "require": "./dist/generated/exports/cookies.cjs"
+    }
   },
   "packageManager": "pnpm@12.4.0"
 }

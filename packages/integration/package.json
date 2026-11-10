@@ -59,19 +59,24 @@
       "require": "./dist/index.cjs"
     },
     "./oauth": {
-      "types": "./dist/oauth/index.d.ts",
-      "import": "./dist/oauth/index.js",
-      "require": "./dist/oauth/index.cjs"
+      "types": "./dist/generated/oauth/index.d.ts",
+      "import": "./dist/generated/oauth/index.js",
+      "require": "./dist/generated/oauth/index.cjs"
     },
     "./oauth/*": {
-      "types": "./dist/oauth/*.d.ts",
-      "import": "./dist/oauth/*.js",
-      "require": "./dist/oauth/*.cjs"
+      "types": "./dist/generated/oauth/*.d.ts",
+      "import": "./dist/generated/oauth/*.js",
+      "require": "./dist/generated/oauth/*.cjs"
     },
     "./identity": {
-      "types": "./dist/_core/identity.d.ts",
-      "import": "./dist/_core/identity.js",
-      "require": "./dist/_core/identity.cjs"
+      "types": "./dist/generated/identity/index.d.ts",
+      "import": "./dist/generated/identity/index.js",
+      "require": "./dist/generated/identity/index.cjs"
+    },
+    "./identity/*": {
+      "types": "./dist/generated/identity/*.d.ts",
+      "import": "./dist/generated/identity/*.js",
+      "require": "./dist/generated/identity/*.cjs"
     },
     "./crypto": {
       "types": "./dist/exports/crypto.d.ts",
@@ -84,9 +89,9 @@
       "require": "./dist/exports/shared.cjs"
     },
     "./cookies": {
-      "types": "./dist/exports/cookies.d.ts",
-      "import": "./dist/exports/cookies.js",
-      "require": "./dist/exports/cookies.cjs"
+      "types": "./dist/generated/exports/cookies.d.ts",
+      "import": "./dist/generated/exports/cookies.js",
+      "require": "./dist/generated/exports/cookies.cjs"
     }
   },
   "packageManager": "pnpm@12.4.0"

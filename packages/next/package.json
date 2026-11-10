@@ -105,6 +105,22 @@
       "import": "./dist/context.js",
       "require": "./dist/context.cjs"
     },
+    "./pages": {
+      "types": "./dist/pages/index.d.ts",
+      "import": "./dist/pages/index.js",
+      "require": "./dist/pages/index.cjs"
+    },
+    "./pages/client": {
+      "types": "./dist/pages/client.d.ts",
+      "import": "./dist/pages/client.js",
+      "require": "./dist/pages/client.cjs"
+    },
+    "./pages/context": {
+      "types": "./dist/pages/context.d.ts",
+      "import": "./dist/pages/context.js",
+      "require": "./dist/pages/context.cjs"
+    },
+    "./types": "./dist/@types/index.d.ts",
     "./oauth": {
       "types": "./dist/generated/oauth/index.d.ts",
       "import": "./dist/generated/oauth/index.js",
@@ -136,26 +152,10 @@
       "require": "./dist/generated/exports/shared.cjs"
     },
     "./cookies": {
-      "types": "./dist/exports/cookies.d.ts",
-      "import": "./dist/exports/cookies.js",
-      "require": "./dist/exports/cookies.cjs"
-    },
-    "./pages": {
-      "types": "./dist/pages/index.d.ts",
-      "import": "./dist/pages/index.js",
-      "require": "./dist/pages/index.cjs"
-    },
-    "./pages/client": {
-      "types": "./dist/pages/client.d.ts",
-      "import": "./dist/pages/client.js",
-      "require": "./dist/pages/client.cjs"
-    },
-    "./pages/context": {
-      "types": "./dist/pages/context.d.ts",
-      "import": "./dist/pages/context.js",
-      "require": "./dist/pages/context.cjs"
-    },
-    "./types": "./dist/@types/index.d.ts"
+      "types": "./dist/generated/exports/cookies.d.ts",
+      "import": "./dist/generated/exports/cookies.js",
+      "require": "./dist/generated/exports/cookies.cjs"
+    }
   },
   "packageManager": "pnpm@12.4.0"
 }

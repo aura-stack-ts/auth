@@ -9,9 +9,7 @@ export default defineConfig({
         "src/@types/index.ts",
         "src/client/index.ts",
         "src/identity/*.ts",
-        "src/exports/crypto.ts",
-        "src/exports/shared.ts",
-        "src/exports/cookies.ts",
+        "src/exports/*.ts",
     ],
     define: {
         __PACKAGE_VERSION__: JSON.stringify((await import("./package.json", { with: { type: "json" } })).default.version),
