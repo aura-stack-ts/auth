@@ -190,14 +190,10 @@ worker-configuration.d.ts
 .wrangler/*
 
 # Packages
-packages/**/_core
-packages/**/oauth
-packages/**/identity
+packages/**/generated/*
+packages/**/generated/oauth
+packages/**/generated/identity
 
-!packages/core/src/oauth/
-!packages/core/src/oauth/**
-!packages/core/src/identity/
-!packages/core/src/identity/**
-
+# Prisma ORM
 **/src/generated/prisma
 **/generated/prisma

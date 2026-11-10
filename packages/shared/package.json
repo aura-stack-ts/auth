@@ -4,38 +4,46 @@
   "private": true,
   "type": "module",
   "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf src/generated"
+  },
   "devDependencies": {
     "@aura-stack/auth": "workspace:*"
   },
   "exports": {
     "./oauth": {
-      "types": "./dist/oauth/index.d.ts",
-      "import": "./dist/oauth/index.js",
-      "require": "./dist/oauth/index.cjs"
+      "types": "./dist/generated/oauth/index.d.ts",
+      "import": "./dist/generated/oauth/index.js",
+      "require": "./dist/generated/oauth/index.cjs"
     },
     "./oauth/*": {
-      "types": "./dist/oauth/*.d.ts",
-      "import": "./dist/oauth/*.js",
-      "require": "./dist/oauth/*.cjs"
+      "types": "./dist/generated/oauth/*.d.ts",
+      "import": "./dist/generated/oauth/*.js",
+      "require": "./dist/generated/oauth/*.cjs"
     },
     "./identity": {
-      "types": "./dist/_core/identity.d.ts",
-      "import": "./dist/_core/identity.js",
-      "require": "./dist/_core/identity.cjs"
+      "types": "./dist/generated/identity/index.d.ts",
+      "import": "./dist/generated/identity/index.js",
+      "require": "./dist/generated/identity/index.cjs"
+    },
+    "./identity/*": {
+      "types": "./dist/generated/identity/*.d.ts",
+      "import": "./dist/generated/identity/*.js",
+      "require": "./dist/generated/identity/*.cjs"
     },
     "./crypto": {
-      "types": "./dist/_core/crypto.d.ts",
-      "import": "./dist/_core/crypto.js",
-      "require": "./dist/_core/crypto.cjs"
+      "types": "./dist/generated/exports/crypto.d.ts",
+      "import": "./dist/generated/exports/crypto.js",
+      "require": "./dist/generated/exports/crypto.cjs"
     },
     "./shared": {
-      "types": "./dist/_core/shared.d.ts",
-      "import": "./dist/_core/shared.js",
-      "require": "./dist/_core/shared.cjs"
+      "types": "./dist/generated/exports/shared.d.ts",
+      "import": "./dist/generated/exports/shared.js",
+      "require": "./dist/generated/exports/shared.cjs"
     },
     "./adapter": {
-      "import": "./src/adapter-suite.js",
-      "types": "./src/adapter-suite.ts"
+      "import": "./src/utils/adapter-suite.js",
+      "types": "./src/utils/adapter-suite.ts"
     }
   },
   "packageManager": "pnpm@12.4.0"

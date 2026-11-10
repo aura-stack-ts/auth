@@ -115,19 +115,19 @@
       "require": "./dist/identity/*.cjs"
     },
     "./crypto": {
-      "types": "./dist/shared/crypto.d.ts",
-      "import": "./dist/shared/crypto.js",
-      "require": "./dist/shared/crypto.cjs"
+      "types": "./dist/exports/crypto.d.ts",
+      "import": "./dist/exports/crypto.js",
+      "require": "./dist/exports/crypto.cjs"
     },
     "./shared": {
-      "types": "./dist/shared/index.d.ts",
-      "import": "./dist/shared/index.js",
-      "require": "./dist/shared/index.cjs"
+      "types": "./dist/exports/shared.d.ts",
+      "import": "./dist/exports/shared.js",
+      "require": "./dist/exports/shared.cjs"
     },
     "./cookies": {
-      "types": "./dist/shared/cookies.d.ts",
-      "import": "./dist/shared/cookies.js",
-      "require": "./dist/shared/cookies.cjs"
+      "types": "./dist/exports/cookies.d.ts",
+      "import": "./dist/exports/cookies.js",
+      "require": "./dist/exports/cookies.cjs"
     }
   }
 }
