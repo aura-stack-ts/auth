@@ -1,5 +1,5 @@
 <div align="center">
-  
+
 <h1><b>@aura-stack/next</b></h1>
 
 **Aura Auth adapter and utilities for the Next.js ecosystem**
@@ -84,9 +84,7 @@ Wrap your application with the `AuthProvider` and pass it a configured Aura Auth
 import { createAuthClient, AuthProvider } from "@aura-stack/next/client"
 import type { PropsWithChildren } from "react"
 
-const client = createAuthClient({
-  /* your config */
-})
+const client = createAuthClient({/* your config */})
 
 export const App = ({ children }: PropsWithChildren) => {
   return <AuthProvider client={client}>{children}</AuthProvider>

@@ -1,5 +1,5 @@
 <div align="center">
-  
+
 <h1><b>@aura-stack/rate-limiter</b></h1>
 
 **Rate limiting utilities for the Aura Stack ecosystem**

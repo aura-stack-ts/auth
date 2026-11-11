@@ -1,5 +1,5 @@
 <div align="center">
-  
+
 <h1><b>@aura-stack/react</b></h1>
 
 **React context and hooks for the Aura Stack authentication library**
@@ -45,9 +45,7 @@ Wrap your application with the `AuthProvider` and pass it a configured Aura Auth
 import { createAuthClient, AuthProvider } from "@aura-stack/react"
 import type { PropsWithChildren } from "react"
 
-const client = createAuthClient({
-  /* your config */
-})
+const client = createAuthClient({/* your config */})
 
 export const App = ({ children }: PropsWithChildren) => {
   return <AuthProvider client={client}>{children}</AuthProvider>
