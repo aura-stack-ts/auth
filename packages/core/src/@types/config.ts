@@ -300,7 +300,7 @@ export type TrustedProxyHeadersConfig =
            *   return [origin, "https://admin.example.com"]
            * }
            */
-          trustedOrigins: TrustedOrigin[] | ((request: Request) => Awaitable<TrustedOrigin[]>)
+          trustedOrigins: TrustedOrigins
       }
     | {
           /**
@@ -340,7 +340,7 @@ export type TrustedProxyHeadersConfig =
            * }
            *
            */
-          trustedOrigins?: TrustedOrigin[] | ((request: Request) => Awaitable<TrustedOrigin[]>)
+          trustedOrigins?: TrustedOrigins
       }
 
 /**
@@ -408,7 +408,7 @@ export interface CookieConfig {
  * - Exact: `https://example.com`
  * - Subdomain wildcard: `https://*.example.com`
  */
-export type TrustedOrigin = string
+export type TrustedOrigins = string[] | ((request: Request) => Awaitable<string[]>)
 
 /**
  * Log level for logger messages.

@@ -574,7 +574,7 @@ describe("createRedirectTo", () => {
                 trustedOrigins: ["https://api.example.com"],
                 trustedProxyHeaders: false,
             } as GlobalContext)
-            expect(redirectTo).toBe("https://api.example.com/redirect")
+            expect(redirectTo).toBe("/")
         })
 
         test("misconfigurated", async () => {
@@ -678,21 +678,18 @@ describe("getOriginURL", () => {
                 description: "with standard URL",
                 request: new Request("https://example.com/auth/signIn/github"),
                 trustedProxyHeaders: false,
-                trustedOrigins: [],
                 expected: "https://example.com",
             },
             {
                 description: "with localhost URL",
                 request: new Request("http://localhost:3000/auth/signIn/github"),
                 trustedProxyHeaders: false,
-                trustedOrigins: [],
                 expected: "http://localhost:3000",
             },
             {
                 description: "with IP address URL",
                 request: new Request("http://192.168.0.1/auth/signIn/github"),
                 trustedProxyHeaders: false,
-                trustedOrigins: [],
                 expected: "http://192.168.0.1",
             },
             {
@@ -704,7 +701,6 @@ describe("getOriginURL", () => {
                     },
                 }),
                 trustedProxyHeaders: false,
-                trustedOrigins: [],
                 expected: "http://localhost:3000",
             },
             {
@@ -788,6 +784,31 @@ describe("getOriginURL", () => {
                 }),
                 trustedOrigins: [],
                 trustedProxyHeaders: true,
+            },
+            {
+                description: "Origin not in trustedOrigins and trustedProxyHeaders disabled",
+                request: new Request("http://10.0.0.0:5858/auth/signIn/github"),
+                trustedProxyHeaders: false,
+                trustedOrigins: [],
+            },
+            {
+                description: "Origin not in trustedOrigins and trustedProxyHeaders disabled",
+                request: new Request("http://10.0.0.0:5858/auth/signIn/github"),
+                trustedProxyHeaders: false,
+                trustedOrigins: ["https://example.com"],
+            },
+            {
+                description: "Origin not in trustedOrigins and trustedProxyHeaders enabled",
+                request: new Request("http://10.0.0.0:5858/auth/signIn/github"),
+                trustedProxyHeaders: true,
+                trustedOrigins: ["https://example.com"],
+            },
+
+            {
+                description: "Origin not in trustedOrigins and trustedProxyHeaders enabled",
+                request: new Request("http://10.0.0.0:5858/auth/signIn/github"),
+                trustedProxyHeaders: true,
+                trustedOrigins: [],
             },
         ]
 

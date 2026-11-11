@@ -71,7 +71,7 @@ describe("signIn action", () => {
             handlers: { GET },
         } = createAuth({
             oauth: [oauthCustomService],
-            trustedOrigins: ["http://app.com"],
+            trustedOrigins: ["http://example.com", "http://app.com"],
         })
         const request = await GET(
             new Request("http://example.com/auth/signIn/oauth-provider?redirectTo=http://app.com/dashboard")
@@ -128,7 +128,7 @@ describe("signIn action", () => {
             handlers: { GET },
         } = createAuth({
             oauth: [oauthCustomService],
-            trustedOrigins: ["http://app.com"],
+            trustedOrigins: ["http://example.com", "http://app.com"],
         })
         const request = await GET(
             new Request("http://example.com/auth/signIn/oauth-provider", {
@@ -212,7 +212,7 @@ describe("signIn action", () => {
             trustedOrigins: ["http://*.example.com"],
         })
         const request = await GET(
-            new Request("http://example.com/auth/signIn/oauth-provider", {
+            new Request("http://sub.example.com/auth/signIn/oauth-provider", {
                 headers: {
                     Referer: "http://app.example.com/dashboard",
                 },
@@ -285,13 +285,39 @@ describe("signIn action", () => {
             trustedOrigins: ["http://*.example.com"],
         })
         const request = await GET(
-            new Request("http://example.com/auth/signIn/oauth-provider", {
+            new Request("http://sub.example.com/auth/signIn/oauth-provider", {
                 headers: {
                     Referer: "http://app.example.com/dashboard",
                 },
             })
         )
         expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("http://app.example.com/dashboard")
+    })
+
+    test("return UNTRUSTED_ORIGIN error when origin is not set in the trusted origin list", async () => {
+        const {
+            handlers: { GET },
+        } = createAuth({
+            oauth: [oauthCustomService],
+            trustedOrigins: ["http://*.example.com"],
+        })
+        const request = await GET(
+            new Request("http://example.com/auth/signIn/oauth-provider", {
+                headers: {
+                    Referer: "http://app.example.com/dashboard",
+                },
+            })
+        )
+        expect(request.status).toBe(500)
+        expect(await request.json()).toEqual({
+            success: false,
+            redirect: false,
+            signInURL: null,
+            error: {
+                code: "INVALID_TRUSTED_ORIGIN",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
+            },
+        })
     })
 
     test("builds redirect URL using request origin without proxy headers", async () => {
@@ -373,7 +399,7 @@ describe("signIn action", () => {
         })
     })
 
-    test("builds redirect URL even with empty trustedOrigins", async () => {
+    test("rejects signIn when trustedOrigins is empty", async () => {
         const {
             handlers: { GET },
         } = createAuth({
@@ -389,17 +415,16 @@ describe("signIn action", () => {
                 },
             })
         )
-        const headers = new Headers(request.headers)
-        const location = headers.get("Location")!
-        const state = getSetCookie(request, "__Secure-aura-auth.state")!
-        expect(location).toMatch(
-            new URLSearchParams({
-                response_type: "code",
-                client_id: "oauth_client_id",
-                redirect_uri: "https://example.com/auth/callback/oauth-provider",
-                state,
-            }).toString()
-        )
+        expect(request.status).toBe(500)
+        expect(await request.json()).toEqual({
+            success: false,
+            redirect: false,
+            signInURL: null,
+            error: {
+                code: "INVALID_TRUSTED_ORIGIN",
+                message: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
+            },
+        })
     })
 
     test("builds redirect URL from trusted proxy headers when origin is trusted", async () => {
