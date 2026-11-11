@@ -24,7 +24,7 @@ import type {
     PasswordResetConfig,
     RateLimiterConfig,
     SignUpConfig,
-    TrustedOrigin,
+    TrustedOrigins,
     TrustedProxyHeadersSource,
 } from "@/@types/config.ts"
 import type {
@@ -56,7 +56,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     baseURL?: string
     basePath: RoutePattern
     trustedProxyHeaders: boolean | TrustedProxyHeadersSource[]
-    trustedOrigins?: TrustedOrigin[] | ((request: Request) => Promise<TrustedOrigin[]> | TrustedOrigin[])
+    trustedOrigins?: TrustedOrigins
     logger?: InternalLogger
     session: InternalSessionConfig<DefaultUser>
     identity: SchemaRegistryContext
