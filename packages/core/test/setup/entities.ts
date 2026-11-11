@@ -9,7 +9,7 @@ import type {
     UserEntity,
     VerificationTokenEntity,
 } from "@/@types/index.ts"
-import { hashPassword } from "@/shared/crypto.ts"
+import { hashPassword } from "@/exports/crypto.ts"
 
 export const userEntity: UserEntity = {
     id: "user-123",

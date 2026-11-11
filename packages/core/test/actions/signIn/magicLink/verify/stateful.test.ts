@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { authInstance } from "@test/setup/auth.ts"
-import { createSecretValue } from "@/shared/crypto.ts"
+import { createSecretValue } from "@/exports/crypto.ts"
 import { deviceEntity, magicLinkTokenEntity, userMagicLinkEntity } from "@test/setup/entities.ts"
 
 describe("verifyMagicLinkAction", async () => {

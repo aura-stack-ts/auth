@@ -2,32 +2,36 @@ import { parseArgs } from "node:util"
 import { join, parse, resolve } from "node:path"
 import { glob, mkdir, readFile, writeFile } from "node:fs/promises"
 
-const coreModules = ["crypto", "identity", "shared", "cookies"]
 const jsonExports = [
     {
         name: "./oauth",
         entry: "/index",
-        out: "/oauth",
+        out: "/generated/oauth",
     },
     {
         name: "./oauth/*",
         entry: "/*",
-        out: "/oauth",
+        out: "/generated/oauth",
     },
     {
         name: "./identity",
-        entry: "/identity",
-        out: "/_core",
+        entry: "/index",
+        out: "/generated/identity",
+    },
+    {
+        name: "./identity/*",
+        entry: "/*",
+        out: "/generated/identity",
     },
     {
         name: "./crypto",
         entry: "/crypto",
-        out: "/_core",
+        out: "/generated/exports",
     },
     {
         name: "./shared",
         entry: "/shared",
-        out: "/_core",
+        out: "/generated/exports",
     },
 ]
 
@@ -43,10 +47,6 @@ const args = parseArgs({
             type: "string",
             default: "core",
         },
-        core: {
-            type: "boolean",
-            default: true,
-        },
         json: {
             type: "boolean",
             default: true,
@@ -54,46 +54,32 @@ const args = parseArgs({
     },
 })
 
-const { out, from, core, json } = args.values
+const { out, from, json } = args.values
 
 const resolvePackageName = (from) => {
     return from === "core" ? "auth" : from
 }
 
-const copyFolder = async (dirName, outPath = dirName) => {
-    const outDir = resolve(process.cwd(), join(out, outPath))
-    console.log("From:", resolve(process.cwd(), join("..", from)), "\nOut:", resolve(process.cwd(), out))
+const copyFolder = async (dirName, silentEntry = false) => {
+    const outDir = resolve(process.cwd(), join(out, "generated", dirName))
+    console.log("From:", resolve(process.cwd(), join("..", from)), " - Out:", resolve(process.cwd(), out), "\x1b[32m✓\x1b[0m")
     await mkdir(outDir, { recursive: true })
     for await (const file of glob(`../core/src/${dirName}/*.ts`)) {
         const oauthName = parse(file).name
         const outPath = resolve(outDir, `${oauthName}.ts`)
-        await writeFile(outPath, `export * from "@aura-stack/${resolvePackageName(from)}/${dirName}/${oauthName}"\n`, "utf-8")
+        await writeFile(
+            outPath,
+            `export * from "@aura-stack/${resolvePackageName(from)}/${silentEntry ? "" : `${dirName}/`}${oauthName}"\n`,
+            "utf-8"
+        )
     }
-    console.log(`\x1b[32m${dirName} modules were exported successfully!\x1b[0m`)
+    console.log(`\x1b[32m${dirName}/ modules were exported successfully!\x1b[0m`)
 }
 
 try {
-    //const outDir = resolve(process.cwd(), join(out, "oauth"))
-    //console.log("From:", resolve(process.cwd(), join("..", from)), "\nOut:", resolve(process.cwd(), out))
-    //await mkdir(outDir, { recursive: true })
-    //for await (const file of glob(`../core/src/oauth/*.ts`)) {
-    //    const oauthName = parse(file).name
-    //    const outPath = resolve(outDir, `${oauthName}.ts`)
-    //    await writeFile(outPath, `export * from "@aura-stack/${resolvePackageName(from)}/oauth/${oauthName}"\n`, "utf-8")
-    //}
-    //console.log("\x1b[32mOAuth modules were exported successfully!\x1b[0m")
-    copyFolder("oauth")
-    copyFolder("identity")
-
-    if (core === true) {
-        const outDirCore = resolve(process.cwd(), join(out, "_core"))
-        await mkdir(outDirCore, { recursive: true })
-        for (const moduleName of coreModules) {
-            const outPathCore = resolve(outDirCore, `${moduleName}.ts`)
-            await writeFile(outPathCore, `export * from "@aura-stack/${resolvePackageName(from)}/${moduleName}"\n`, "utf-8")
-        }
-        console.log("\x1b[32mCore modules were exported successfully!\x1b[0m")
-    }
+    await copyFolder("oauth")
+    await copyFolder("identity")
+    await copyFolder("exports", true)
 
     if (json === true) {
         const packageJson = await readFile(resolve(process.cwd(), "package.json"), "utf-8")
@@ -102,15 +88,13 @@ try {
             readJson.exports = {}
         }
         for (const { name, entry, out } of jsonExports) {
-            if (!readJson.exports[name]) {
-                Object.assign(readJson.exports, {
-                    [name]: {
-                        types: `./dist${out}${entry}.d.ts`,
-                        import: `./dist${out}${entry}.js`,
-                        require: `./dist${out}${entry}.cjs`,
-                    },
-                })
-            }
+            Object.assign(readJson.exports, {
+                [name]: {
+                    types: `./dist${out}${entry}.d.ts`,
+                    import: `./dist${out}${entry}.js`,
+                    require: `./dist${out}${entry}.cjs`,
+                },
+            })
         }
         await writeFile(resolve(process.cwd(), "package.json"), JSON.stringify(readJson, null, 2), "utf-8")
         console.log("\x1b[32mPackage.json exports were updated successfully!\x1b[0m")

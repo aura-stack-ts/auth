@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest"
 import { env } from "@/shared/env.ts"
-import { createSecretValue } from "@/shared/crypto.ts"
+import { createSecretValue } from "@/exports/crypto.ts"
 import { exportPKCS8, exportSPKI, generateKeyPair } from "@aura-stack/jose/jose"
 
 describe("env", () => {

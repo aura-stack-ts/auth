@@ -1,6 +1,6 @@
 import { getEnv } from "@/shared/env.ts"
 import { createDeriveKey } from "@aura-stack/jose"
-import { importPEMKeyPair } from "@/shared/crypto.ts"
+import { importPEMKeyPair } from "@/exports/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import type { AuthConfig } from "@/@types/config.ts"
 import type { AsymmetricKeyPairFromEnv } from "@/@types/internal.ts"

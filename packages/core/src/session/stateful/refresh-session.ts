@@ -1,4 +1,4 @@
-import { createHash } from "@/shared/crypto.ts"
+import { createHash } from "@/exports/crypto.ts"
 import { getErrorName } from "@/errors/aura-error.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest"
-import { createHash, createSecretValue } from "@/shared/crypto.ts"
+import { createHash, createSecretValue } from "@/exports/crypto.ts"
 import { authInstance } from "@test/setup/auth.ts"
 import { verificationTokenEntity } from "@test/setup/entities.ts"
 

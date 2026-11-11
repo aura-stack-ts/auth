@@ -1,5 +1,5 @@
 import { getErrorName } from "@/errors/aura-error.ts"
-import { createHash } from "@/shared/crypto.ts"
+import { createHash } from "@/exports/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"

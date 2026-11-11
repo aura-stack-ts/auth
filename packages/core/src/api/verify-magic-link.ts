@@ -1,5 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF } from "@/exports/crypto.ts"
 import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"

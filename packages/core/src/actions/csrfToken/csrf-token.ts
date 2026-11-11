@@ -1,5 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
-import { createCSRF } from "@/shared/crypto.ts"
+import { createCSRF } from "@/exports/crypto.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { setCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import { CSRFTokenActionResponseSchema } from "@/shared/schemas/actions.ts"

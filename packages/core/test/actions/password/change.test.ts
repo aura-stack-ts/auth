@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { createCSRF, createHash } from "@/shared/crypto.ts"
+import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { accountEntityWithCredentials, credentialAccountEntity, sessionEntityWithUser } from "@test/setup/entities.ts"
 
 describe("changePasswordAction", async () => {
@@ -9,7 +9,7 @@ describe("changePasswordAction", async () => {
     test("success changePassword flow", async () => {
         const newPassword = "new-password"
         const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+        vi.spyOn(await import("@/exports/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
@@ -160,7 +160,7 @@ describe("changePasswordAction", async () => {
     test("success changePassword with redirectTo and redirect: true", async () => {
         const newPassword = "new-password"
         const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+        vi.spyOn(await import("@/exports/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
@@ -213,7 +213,7 @@ describe("changePasswordAction", async () => {
     test("success changePassword with redirectTo and redirect: false", async () => {
         const newPassword = "new-password"
         const newPasswordHash = await createHash(newPassword)
-        vi.spyOn(await import("@/shared/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
+        vi.spyOn(await import("@/exports/crypto.ts"), "hashPassword").mockResolvedValue(newPasswordHash)
 
         const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
         const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])

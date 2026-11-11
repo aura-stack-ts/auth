@@ -1,5 +1,5 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { createHash, createSecretValue } from "@/shared/crypto.ts"
+import { createHash, createSecretValue } from "@/exports/crypto.ts"
 import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 

@@ -1,4 +1,4 @@
-import { createSecretValue } from "@/shared/crypto.ts"
+import { createSecretValue } from "@/exports/crypto.ts"
 import { createAuthorizationURL } from "@/shared/oauth2/authorization.ts"
 import type { GlobalContext } from "@aura-stack/router"
 import type { RuntimeOAuthProvider } from "@/@types/internal.ts"
