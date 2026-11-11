@@ -12,6 +12,7 @@ const payload = {
     email: "alice@example.com",
     image: "alice.jpg",
 }
+
 beforeEach(() => {
     /**
      * Skip environment variables because Aura Auth takes them as priority over
