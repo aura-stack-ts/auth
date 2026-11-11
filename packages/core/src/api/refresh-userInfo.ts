@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getUserInfo } from "@/shared/oauth2/get-user-info.ts"
 import { getProviderTokens } from "@/api/get-provider-tokens.ts"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders, toStandardizedHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
@@ -86,9 +86,10 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             headers,
             user: userInfo,
         })
+        toUnionHeaders(headers, newHeaders)
         return {
             success: !!session,
-            headers: newHeaders,
+            headers,
             session: session,
             toResponse: () => {
                 return Response.json(
@@ -96,7 +97,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
                         success: !!session,
                         session,
                     },
-                    { headers: newHeaders, status: 200 }
+                    { headers, status: 200 }
                 )
             },
         } as RefreshUserInfoAPIReturn<DefaultUser>

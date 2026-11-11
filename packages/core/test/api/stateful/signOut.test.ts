@@ -50,6 +50,7 @@ describe("signOut API", async () => {
         const output = await api.signOut({
             headers: {
                 Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toMatchObject({
@@ -59,6 +60,12 @@ describe("signOut API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(3)
+        expect(setCookies[0]).toContain("aura-auth.csrf_token=")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(setCookies[2]).toBe("initial-provider-cookie=initial; Path=/")
 
         const tokenHash = await createHash("valid-token-hash")
         expect(sessionTokenMock).toHaveBeenCalledWith(tokenHash)

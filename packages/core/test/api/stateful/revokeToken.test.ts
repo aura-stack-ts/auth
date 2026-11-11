@@ -138,6 +138,7 @@ describe("revokeToken (Stateful)", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toEqual({
@@ -227,6 +228,7 @@ describe("revokeToken (Stateful)", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
 
@@ -235,6 +237,11 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toContain("aura-auth.access_token.oauth-provider=")
+        expect(setCookies[1]).toContain("initial-provider-cookie=initial; Path=/")
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)

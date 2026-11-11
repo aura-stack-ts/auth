@@ -45,18 +45,17 @@ export const updateSession = async <DefaultUser extends User = User>({
             throw new AuraAuthError({ code: "UPDATE_SESSION_INVALID" })
         }
 
-        const newHeaders = toUnionHeaders(headers, secureApiHeaders)
-
         const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
             ctx,
             request,
             redirectInit,
             redirectToInit,
-            newHeaders
+            validatedHeaders
         )
 
+        toUnionHeaders(validatedHeaders, headers)
         return {
-            headers: newHeaders,
+            headers: validatedHeaders,
             session,
             success: true,
             redirect: shouldRedirectServer,
@@ -69,7 +68,7 @@ export const updateSession = async <DefaultUser extends User = User>({
                         redirect: shouldRedirectServer,
                         redirectURL: shouldRedirectServer ? null : redirectURL,
                     },
-                    { headers: newHeaders, status: shouldRedirectServer ? 302 : 200 }
+                    { headers: validatedHeaders, status: shouldRedirectServer ? 302 : 200 }
                 )
             },
         } as UpdateSessionAPIReturn<DefaultUser>

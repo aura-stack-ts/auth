@@ -1,5 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { toStandardizedHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
@@ -22,7 +22,7 @@ export const signOut = async ({
             },
         })
 
-        const { request, rateLimit, session } = await createValidation(ctx, responseHeaders)
+        const { request, rateLimit, session, headers } = await createValidation(ctx, responseHeaders)
             .buildRequest(requestInit, "/signOut")
             .verifyRateLimit("signOut")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
@@ -47,6 +47,7 @@ export const signOut = async ({
         )
 
         const headersList = headersBuilder.toHeaders()
+        toUnionHeaders(headersList, headers)
         return {
             success: true,
             headers: headersList,

@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF, hashPassword, verifyPassword } from "@/exports/crypto.ts"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders, toStandardizedHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
@@ -25,7 +25,7 @@ export const signInCredentials = async ({
             },
         })
 
-        const { request, rateLimit } = await createValidation(
+        const { request, rateLimit, headers } = await createValidation(
             ctx,
             toStandardizedHeaders(headerInit ?? requestInit?.headers ?? {})
         )
@@ -66,6 +66,7 @@ export const signInCredentials = async ({
         )
 
         const toHeaders = builder.toHeaders()
+        toUnionHeaders(toHeaders, headers)
         return {
             success: true,
             headers: toHeaders,

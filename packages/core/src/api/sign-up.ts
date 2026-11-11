@@ -1,7 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders, toStandardizedHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
@@ -25,7 +25,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             },
         })
 
-        const { request, rateLimit } = await createValidation(
+        const { request, rateLimit, headers } = await createValidation(
             ctx,
             toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
         )
@@ -65,6 +65,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         )
 
         const toHeaders = builder.toHeaders()
+        toUnionHeaders(toHeaders, headers)
         return {
             success: true,
             redirect: shouldRedirectServer,

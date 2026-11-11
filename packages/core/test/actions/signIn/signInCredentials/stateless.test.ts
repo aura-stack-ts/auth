@@ -17,7 +17,10 @@ describe("signInCredentials action", async () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials", {
                 method: "POST",
-                headers,
+                headers: {
+                    ...headers,
+                    "Set-Cookie": "initial-provider-cookie=initial; Path=/",
+                },
                 body: JSON.stringify({
                     username: "johndoe",
                     password: "1234567890",

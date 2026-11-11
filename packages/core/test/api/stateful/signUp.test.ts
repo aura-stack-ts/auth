@@ -42,7 +42,7 @@ describe("signUp API", async () => {
         })
 
         const output = await api.signUp({
-            headers,
+            headers: { ...headers, "Set-Cookie": "initial-provider-cookie=initial; Path=/" },
             payload: sessionPayload,
         })
         expect(output).toEqual({
@@ -52,6 +52,12 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(3)
+        expect(setCookies[0]).toContain("aura-auth.csrf_token=")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(setCookies[2]).toBe("initial-provider-cookie=initial; Path=/")
 
         expect(spy).toHaveBeenCalledWith({
             ...sessionPayload,

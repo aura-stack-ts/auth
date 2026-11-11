@@ -38,6 +38,7 @@ describe("signOut API", async () => {
         const out = await api.signOut({
             headers: {
                 Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(out).toMatchObject({
@@ -47,6 +48,12 @@ describe("signOut API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = out.headers.getSetCookie()
+        expect(setCookies).toHaveLength(3)
+        expect(setCookies[0]).toContain("aura-auth.csrf_token=")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(setCookies[2]).toContain("initial-provider-cookie=initial; Path=/")
     })
 
     test("signOut with baseURL from createAuth config", async () => {

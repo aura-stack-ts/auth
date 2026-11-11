@@ -112,6 +112,7 @@ describe("revokeToken", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toEqual({
@@ -144,6 +145,7 @@ describe("revokeToken", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
 
@@ -153,9 +155,9 @@ describe("revokeToken", () => {
             toResponse: expect.any(Function),
         })
 
-        const setCookieHeader = output.headers.get("set-cookie")
-        expect(setCookieHeader).toContain("aura-auth.access_token.oauth-provider=")
-        expect(setCookieHeader).toContain("Expires=")
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies[0]).toContain("aura-auth.access_token.oauth-provider=")
+        expect(setCookies[1]).toContain("initial-provider-cookie=initial; Path=/")
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/revoke_token", {
             method: "POST",

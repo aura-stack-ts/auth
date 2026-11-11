@@ -29,12 +29,13 @@ export const getSession = async <DefaultUser extends User = User>({
             headers: toStandardizedHeaders(headersInit),
         })
         if (!session) return unauthorized
-        const newHeaders = toUnionHeaders(headers, secureApiHeaders)
+        toUnionHeaders(headers, headersInit as HeadersInit)
+        toUnionHeaders(headers, secureApiHeaders)
         return {
             session,
-            headers: newHeaders,
+            headers,
             success: true,
-            toResponse: () => Response.json({ success: true, session }, { headers: newHeaders }),
+            toResponse: () => Response.json({ success: true, session }, { headers }),
         } as GetSessionAPIReturn<DefaultUser>
     } catch (error) {
         errorToLogMessage(error, "AUTH_SESSION_INVALID", ctx.logger)

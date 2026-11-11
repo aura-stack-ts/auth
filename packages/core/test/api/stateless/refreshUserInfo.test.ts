@@ -102,6 +102,7 @@ describe("refreshUserInfo", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
 
@@ -117,6 +118,12 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
+
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
@@ -438,6 +445,7 @@ describe("refreshUserInfo", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
 
@@ -453,8 +461,11 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const setCookieHeader = output.headers.get("set-cookie")
-        expect(setCookieHeader).toContain("aura-auth.session_token=")
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
     })
 
     test("handles malformed provider tokens cookie", async () => {

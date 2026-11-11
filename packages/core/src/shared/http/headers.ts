@@ -56,13 +56,11 @@ export const secureApiHeaders: HeadersInit = {
 }
 
 export const toUnionHeaders = (init: Headers, headers: HeadersInit): Headers => {
-    new Headers(headers).forEach((value, key) => {
-        if (!init.has(key)) {
-            if (key.toLowerCase() === "set-cookie") {
-                init.append(key, value)
-            } else {
-                init.set(key, value)
-            }
+    const newHeaders = new Headers(headers)
+    newHeaders.getSetCookie().forEach((cookie) => init.append("Set-Cookie", cookie))
+    newHeaders.forEach((value, key) => {
+        if (key.toLowerCase() !== "set-cookie" && !init.has(key)) {
+            init.set(key, value)
         }
     })
     return init

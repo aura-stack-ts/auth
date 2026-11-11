@@ -127,6 +127,7 @@ describe("getProviderTokens API (Stateful)", () => {
         const output = await api.getProviderTokens("oauth-provider", {
             headers: new Headers({
                 Cookie: "aura-auth.session_token=valid-session-token",
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             }),
         })
 
@@ -136,8 +137,10 @@ describe("getProviderTokens API (Stateful)", () => {
                 code: "SESSION_NOT_FOUND",
             },
         })
-        expect(output.headers.getSetCookie()).toContainEqual(expect.stringContaining("aura-auth.session_token=;"))
-        expect(output.toResponse().headers.getSetCookie()).toContainEqual(expect.stringContaining("aura-auth.session_token=;"))
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toContain("aura-auth.session_token=;")
+        expect(setCookies[1]).toContain("initial-provider-cookie=initial; Path=/")
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 

@@ -42,7 +42,10 @@ describe("getSession", () => {
             getSessionByToken: mock,
         })
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=valid-token-hash` },
+            headers: {
+                Cookie: `aura-auth.session_token=valid-token-hash`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
+            },
         })
 
         expect(output).toEqual({
@@ -65,6 +68,7 @@ describe("getSession", () => {
         const { attributes: _, ...spreadPayload } = userEntity
         expect(spy).toHaveBeenCalledWith({ sub: userEntity.id, ...spreadPayload })
         expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("valid-token-hash")
+        expect(output.headers.getSetCookie()).toContain("initial-provider-cookie=initial; Path=/")
     })
 
     test("getSession with expired session token", async () => {
