@@ -313,9 +313,6 @@ describe("Client Types", () => {
 describe("New client method types", () => {
     const client = createAuthClient({})
 
-    // redirect: false → returns the data object
-    // redirect: true / omitted → returns void (navigation handled automatically)
-
     test("sendVerificationEmail — redirect: false returns data", () => {
         expectTypeOf(client.sendVerificationEmail<{ redirect: false }>).returns.resolves.toEqualTypeOf<
             Extract<SendVerificationEmailReturn<{ redirect: false }>, object>
@@ -323,7 +320,7 @@ describe("New client method types", () => {
     })
 
     test("sendVerificationEmail — redirect: true returns void", () => {
-        expectTypeOf(client.sendVerificationEmail<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(client.sendVerificationEmail<{ redirect: true; redirectTo: "/" }>).returns.resolves.toEqualTypeOf<void>()
     })
 
     test("verifyEmail — redirect: false returns data", () => {
@@ -333,7 +330,7 @@ describe("New client method types", () => {
     })
 
     test("verifyEmail — redirect: true returns void", () => {
-        expectTypeOf(client.verifyEmail<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(client.verifyEmail<{ redirect: true; redirectTo: "/" }>).returns.resolves.toEqualTypeOf<void>()
     })
 
     test("forgotPassword — redirect: false returns data", () => {
@@ -343,7 +340,7 @@ describe("New client method types", () => {
     })
 
     test("forgotPassword — redirect: true returns void", () => {
-        expectTypeOf(client.forgotPassword<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(client.forgotPassword<{ redirect: true; redirectTo: "/" }>).returns.resolves.toEqualTypeOf<void>()
     })
 
     test("resetPassword — redirect: false returns data", () => {
@@ -352,8 +349,9 @@ describe("New client method types", () => {
     })
 
     test("resetPassword — redirect: true returns void", () => {
-        type Opts = { payload: { token: string; newPassword: string }; redirect: true }
-        expectTypeOf(client.resetPassword<Opts>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(
+            client.resetPassword<{ payload: { token: string; newPassword: string }; redirect: true; redirectTo: "/" }>
+        ).returns.resolves.toEqualTypeOf<void>()
     })
 
     test("changePassword — redirect: false returns data", () => {
@@ -362,8 +360,9 @@ describe("New client method types", () => {
     })
 
     test("changePassword — redirect: true returns void", () => {
-        type Opts = { payload: { currentPassword: string; newPassword: string }; redirect: true }
-        expectTypeOf(client.changePassword<Opts>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(
+            client.changePassword<{ payload: { currentPassword: string; newPassword: string }; redirect: true; redirectTo: "/" }>
+        ).returns.resolves.toEqualTypeOf<void>()
     })
 
     test("changeEmail — redirect: false returns data", () => {
@@ -372,8 +371,9 @@ describe("New client method types", () => {
     })
 
     test("changeEmail — redirect: true returns void", () => {
-        type Opts = { payload: { currentPassword: string; newEmail: string }; redirect: true }
-        expectTypeOf(client.changeEmail<Opts>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(
+            client.changeEmail<{ payload: { currentPassword: string; newEmail: string }; redirect: true; redirectTo: "/" }>
+        ).returns.resolves.toEqualTypeOf<void>()
     })
 
     test("verifyEmailChange — redirect: false returns data", () => {
@@ -382,8 +382,9 @@ describe("New client method types", () => {
     })
 
     test("verifyEmailChange — redirect: true returns void", () => {
-        type Opts = { payload: { token: string }; redirect: true }
-        expectTypeOf(client.verifyEmailChange<Opts>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(
+            client.verifyEmailChange<{ payload: { token: string }; redirect: true; redirectTo: "/" }>
+        ).returns.resolves.toEqualTypeOf<void>()
     })
 
     test("cancelEmailChange — redirect: false returns data", () => {
@@ -393,7 +394,7 @@ describe("New client method types", () => {
     })
 
     test("cancelEmailChange — redirect: true returns void", () => {
-        expectTypeOf(client.cancelEmailChange<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(client.cancelEmailChange<{ redirect: true; redirectTo: "/" }>).returns.resolves.toEqualTypeOf<void>()
     })
 
     test("sendMagicLink — redirect: false returns data", () => {
@@ -403,7 +404,7 @@ describe("New client method types", () => {
     })
 
     test("sendMagicLink — redirect: true returns void", () => {
-        expectTypeOf(client.sendMagicLink<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(client.sendMagicLink<{ redirect: true; redirectTo: "/" }>).returns.resolves.toEqualTypeOf<void>()
     })
 
     test("verifyMagicLink — redirect: false returns data", () => {
@@ -413,6 +414,6 @@ describe("New client method types", () => {
     })
 
     test("verifyMagicLink — redirect: true returns void", () => {
-        expectTypeOf(client.verifyMagicLink<{ redirect: true }>).returns.resolves.toEqualTypeOf<void>()
+        expectTypeOf(client.verifyMagicLink<{ redirect: true; redirectTo: "/" }>).returns.resolves.toEqualTypeOf<void>()
     })
 })

@@ -40,6 +40,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed client function return type inference when redirects are enabled. Redirect support is now determined by whether the `redirectTo` option is configured, while the `redirect` option controls whether the redirect is performed automatically or left to the user. This also fixes an issue where client functions incorrectly returned `void` when redirect support was not configured. [#306](https://github.com/aura-stack-ts/auth/pull/306)
+
 - Fixed missing exports for the `authentik`, `coinbase`, `google`, `hubspot`, and `huggingface` OAuth providers from the `@aura-stack/auth` package. All providers are now correctly exported through the `/oauth` entry point. [#290](https://github.com/aura-stack-ts/auth/pull/290)
 
 ---
