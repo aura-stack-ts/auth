@@ -1,5 +1,4 @@
-import { HeadersBuilder } from "@aura-stack/router"
-import { toStandardizedHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
@@ -13,7 +12,7 @@ export const signOut = async ({
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
-    let responseHeaders = toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
+    const initHeaders = getInitialHeaders(requestInit, headersInit)
     try {
         ctx.logger?.log("SIGN_OUT_INITIATED", {
             structuredData: {
@@ -22,7 +21,7 @@ export const signOut = async ({
             },
         })
 
-        const { request, rateLimit, session, headers } = await createValidation(ctx, responseHeaders)
+        const { request, rateLimit, session } = await createValidation(ctx, initHeaders)
             .buildRequest(requestInit, "/signOut")
             .verifyRateLimit("signOut")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
@@ -33,30 +32,28 @@ export const signOut = async ({
             return rateLimit
         }
 
-        responseHeaders = await ctx.session.strategy.destroySession({
+        const { headers } = await ctx.session.strategy.destroySession({
             sessionByToken: session!,
+            headers: initHeaders,
         })
 
-        const headersBuilder = new HeadersBuilder(responseHeaders)
         const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
             ctx,
             request,
             redirect,
             redirectTo,
-            headersBuilder
+            headers
         )
 
-        const headersList = headersBuilder.toHeaders()
-        toUnionHeaders(headersList, headers)
         return {
             success: true,
-            headers: headersList,
+            headers,
             redirect: shouldRedirectServer,
             redirectURL: redirect ? null : redirectURL,
             toResponse: () => {
                 return Response.json(
                     { success: true, redirect: shouldRedirectServer, redirectURL: shouldRedirectServer ? null : redirectURL },
-                    { headers: headersList, status: shouldRedirectServer ? 302 : 202 }
+                    { headers, status: shouldRedirectServer ? 302 : 202 }
                 )
             },
         } as SignOutAPIReturn
@@ -65,7 +62,7 @@ export const signOut = async ({
         const { errors, statusCode } = handleApiError(error, "SIGN_OUT_FAILED", "Failed to sign-out session")
         return {
             success: false,
-            headers: responseHeaders,
+            headers: initHeaders,
             redirect: false,
             redirectURL: null,
             error: errors,
@@ -76,7 +73,7 @@ export const signOut = async ({
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: responseHeaders, status: statusCode }
+                    { headers: initHeaders, status: statusCode }
                 )
             },
         }

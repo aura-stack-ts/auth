@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getUserInfo } from "@/shared/oauth2/get-user-info.ts"
 import { getProviderTokens } from "@/api/get-provider-tokens.ts"
-import { secureApiHeaders, toStandardizedHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
@@ -22,6 +22,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
         doubleSubmitToken = undefined,
     }: FunctionAPIContext<RefreshUserInfoAPIOptions>
 ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
+    const initHeaders = getInitialHeaders(requestInit, headersInit)
     try {
         ctx.logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
             structuredData: {
@@ -31,10 +32,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             },
         })
 
-        const { provider, headers, rateLimit } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
-        )
+        const { request, provider, rateLimit } = await createValidation(ctx, initHeaders)
             .verifyOAuthProvider(oauth)
             .buildRequest(requestInit, `/providers/${oauth}/user/refresh`)
             .verifyRateLimit("refreshUserInfo")
@@ -51,8 +49,8 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
 
         const { success, tokens } = await getProviderTokens(oauth, {
             ctx,
-            request: requestInit,
-            headers: headersInit,
+            request,
+            headers: initHeaders,
         })
         if (!success) {
             ctx.logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
@@ -82,11 +80,10 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             structuredData: { provider: oauth, userId: userInfo.sub },
         })
 
-        const { session, headers: newHeaders } = await ctx.session.strategy.refreshUserInfo({
-            headers,
+        const { session, headers } = await ctx.session.strategy.refreshUserInfo({
+            headers: initHeaders,
             user: userInfo,
         })
-        toUnionHeaders(headers, newHeaders)
         return {
             success: !!session,
             headers,
@@ -108,10 +105,9 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             "UNKNOWN_REFRESH_USER_INFO_ERROR",
             "Failed to refresh user information from the OAuth provider"
         )
-        const newHeaders = new Headers(secureApiHeaders)
         return {
             success: false,
-            headers: newHeaders,
+            headers: initHeaders,
             error: errors,
             session: null,
             toResponse: () => {
@@ -120,7 +116,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
                         success: false,
                         session: null,
                     },
-                    { headers: newHeaders, status: statusCode }
+                    { headers: initHeaders, status: statusCode }
                 )
             },
         }

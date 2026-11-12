@@ -1,4 +1,4 @@
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { RevokeTokenAPIOptions, RevokeTokenAPIReturn, LiteralUnion, BuiltInOAuthProvider } from "@/@types/index.ts"
@@ -14,6 +14,7 @@ export const revokeToken = async (
         disconnect = false,
     }: FunctionAPIContext<RevokeTokenAPIOptions> & { disconnect?: boolean }
 ): Promise<RevokeTokenAPIReturn> => {
+    const initHeaders = getInitialHeaders(requestInit, headersInit)
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
@@ -24,10 +25,7 @@ export const revokeToken = async (
             },
         })
 
-        const { provider, headers, rateLimit, session } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
-        )
+        const { provider, rateLimit, session } = await createValidation(ctx, initHeaders)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/providers/${oauthId}/tokens/revoke`)
             .verifyRateLimit("revokeToken")
@@ -42,18 +40,18 @@ export const revokeToken = async (
             return rateLimit as RevokeTokenAPIReturn
         }
 
-        const revokeHeaders = await ctx.session.strategy.revokeToken({
+        const { headers } = await ctx.session.strategy.revokeToken({
             oauthId,
             provider,
-            headers,
             disconnect,
+            headers: initHeaders,
             sessionByToken: session!,
         })
         return {
             success: true,
-            headers: revokeHeaders,
+            headers,
             toResponse: () => {
-                return Response.json({ success: true }, { status: 200, headers: revokeHeaders })
+                return Response.json({ success: true }, { status: 200, headers })
             },
         }
     } catch (error) {
@@ -63,13 +61,12 @@ export const revokeToken = async (
             "UNKNOWN_REVOKE_TOKEN_ERROR",
             "Failed to revoke token for the OAuth provider"
         )
-        const headers = new Headers(secureApiHeaders)
         return {
             success: false,
             error: errors,
-            headers,
+            headers: initHeaders,
             toResponse: () => {
-                return Response.json({ success: false }, { status: statusCode, headers })
+                return Response.json({ success: false }, { status: statusCode, headers: initHeaders })
             },
         }
     }

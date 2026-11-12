@@ -199,10 +199,6 @@ export const isInvalidSlidingThreshold = (value: unknown): value is number => {
     return typeof value === "number" && (Number.isNaN(value) || value < 0 || value > 1)
 }
 
-export const isHeadersInit = (value: unknown): value is HeadersInit => {
-    return typeof value === "object" && value !== null && (value instanceof Headers || Array.isArray(value) || isObject(value))
-}
-
 // #region Trusted Proxy Headers Source
 export const isTrustedProxyHeadersSource = (value: unknown): value is TrustedProxyHeadersSource => {
     return isTrustedProxyHeadersSourceURL(value) || isTrustedProxyHeadersSourceProtocolHost(value)

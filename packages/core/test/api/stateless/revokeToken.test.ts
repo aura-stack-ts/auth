@@ -156,8 +156,9 @@ describe("revokeToken", () => {
         })
 
         const setCookies = output.headers.getSetCookie()
-        expect(setCookies[0]).toContain("aura-auth.access_token.oauth-provider=")
-        expect(setCookies[1]).toContain("initial-provider-cookie=initial; Path=/")
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.access_token.oauth-provider=")
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/revoke_token", {
             method: "POST",

@@ -6,6 +6,7 @@ export const refreshUserInfo = <DefaultUser extends User = User>(
     ctx: InternalContextForStateless
 ): SessionStrategy<DefaultUser>["refreshUserInfo"] => {
     const refreshSession = refreshSessionHelper<DefaultUser>(ctx)
+
     return async ({ headers, user }) => {
         return await refreshSession({ headers, session: { user } })
     }

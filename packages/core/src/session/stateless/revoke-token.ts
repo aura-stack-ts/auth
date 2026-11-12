@@ -1,8 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { toUnionHeaders } from "@/shared/http/headers.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { getCookie, getExpiredCookie } from "@/shared/http/cookie.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
+import { getCookie, getExpiredCookie } from "@/shared/http/cookie.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const revokeToken = (ctx: InternalContextForStateless): SessionStrategy["revokeToken"] => {
@@ -26,9 +24,9 @@ export const revokeToken = (ctx: InternalContextForStateless): SessionStrategy["
                 structuredData: { provider: oauthId },
             })
         }
-        const builder = new HeadersBuilder(secureApiHeaders)
+        const builder = new HeadersBuilder(headers)
             .setCookie(cookieName, "", getExpiredCookie(ctx.cookies.store.accessToken.attributes))
             .toHeaders()
-        return toUnionHeaders(builder, headers)
+        return { headers: builder }
     }
 }

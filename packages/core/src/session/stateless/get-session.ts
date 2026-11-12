@@ -1,6 +1,6 @@
 import { getErrorName } from "@/errors/aura-error.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { toUnionHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
@@ -19,16 +19,15 @@ export const getSession = <DefaultUser extends User>(
     }
 
     return async ({ headers }) => {
-        const newHeaders = new Headers(secureApiHeaders)
         try {
             const { sessionToken } = ctx.cookies.manager.getCookie(headers)
-            if (!sessionToken) return { session: null, headers: newHeaders }
+            if (!sessionToken) return { session: null, headers }
 
             const claims = await jose.manager.verifyToken(sessionToken)
             const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
             const { exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
             const userClaims = identity.skipValidation ? defaultPayload : await identity.schemaRegistry.parse(defaultPayload)
-            if (!userClaims.sub) return { session: null, headers: newHeaders }
+            if (!userClaims.sub) return { session: null, headers }
 
             const session: Session<DefaultUser> = {
                 user: userClaims as DefaultUser,
@@ -42,7 +41,7 @@ export const getSession = <DefaultUser extends User>(
                 slidingThreshold,
             })
             if (calc.action === "invalid") {
-                return { session: null, headers: newHeaders }
+                return { session: null, headers }
             }
             if (calc.action === "no_change" || calc.action === "touch") {
                 return { session, headers }
@@ -61,11 +60,11 @@ export const getSession = <DefaultUser extends User>(
                     user: userClaims,
                     expires: expiresAt.toISOString(),
                 } as unknown as Session<DefaultUser>,
-                headers: ctx.cookies.manager.setCookie({ sessionToken: newSessionToken }),
+                headers: toUnionHeaders(headers, ctx.cookies.manager.setCookie({ sessionToken: newSessionToken })),
             }
         } catch (error) {
             logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
-            return { session: null, headers: newHeaders }
+            return { session: null, headers: toUnionHeaders(headers, ctx.cookies.manager.clearAll()) }
         }
     }
 }

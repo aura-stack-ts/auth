@@ -2,6 +2,7 @@ import { getErrorName } from "@/errors/aura-error.ts"
 import { updateExpires } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
+import { toUnionHeaders } from "@/shared/http/headers.ts"
 
 export const refreshSession = <DefaultUser extends User = User>(
     ctx: InternalContextForStateless
@@ -12,10 +13,14 @@ export const refreshSession = <DefaultUser extends User = User>(
     const strategy = session?.config?.expirationStrategy ?? session?.config?.jwt?.expirationStrategy ?? "absolute"
 
     return async ({ session, headers }) => {
+        const refreshHeaders = (newHeaders: Headers) => {
+            return toUnionHeaders(headers, newHeaders)
+        }
+
         try {
             const { sessionToken } = ctx.cookies.manager.getCookie(headers)
             if (!sessionToken) {
-                return { session: null, headers: ctx.cookies.manager.clear() }
+                return { session: null, headers: refreshHeaders(ctx.cookies.manager.clear()) }
             }
             const claims = await jose.manager.verifyToken(sessionToken)
             const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
@@ -49,10 +54,10 @@ export const refreshSession = <DefaultUser extends User = User>(
                 mexp,
             })
             updatedSession.expires = new Date(updatedSession.expires).toISOString()
-            return { session: updatedSession, headers: ctx.cookies.manager.setCookie({ sessionToken: newToken }) }
+            return { session: updatedSession, headers: refreshHeaders(ctx.cookies.manager.setCookie({ sessionToken: newToken })) }
         } catch (error) {
             logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
-            return { session: null, headers: ctx.cookies.manager.clear() }
+            return { session: null, headers: refreshHeaders(ctx.cookies.manager.clear()) }
         }
     }
 }

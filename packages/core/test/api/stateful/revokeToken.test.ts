@@ -240,8 +240,8 @@ describe("revokeToken (Stateful)", () => {
 
         const setCookies = output.headers.getSetCookie()
         expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("aura-auth.access_token.oauth-provider=")
-        expect(setCookies[1]).toContain("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.access_token.oauth-provider=")
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)

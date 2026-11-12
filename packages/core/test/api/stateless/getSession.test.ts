@@ -141,7 +141,7 @@ describe("getSession", () => {
 
         const setCookies = session.headers.getSetCookie()
         expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("aura-auth.session_token=")
-        expect(setCookies[1]).toBe("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
     })
 })

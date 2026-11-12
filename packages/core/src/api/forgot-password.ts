@@ -1,5 +1,4 @@
-import { HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ForgotPasswordAPIOptions, ForgotPasswordAPIReturn } from "@/@types/api.ts"
@@ -15,12 +14,10 @@ export const forgotPassword = async (
     }: FunctionAPIContext<ForgotPasswordAPIOptions>
 ): Promise<ForgotPasswordAPIReturn> => {
     const { logger, session, passwordReset } = ctx
+    const headers = getInitialHeaders(requestInit, headersInit)
     try {
         logger?.log("FORGOT_PASSWORD_INITIATED")
-        const { request, rateLimit, origin } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
-        )
+        const { request, rateLimit, origin } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/password/forgot")
             .verifyRateLimit("forgotPassword")
             .execute()
@@ -30,14 +27,13 @@ export const forgotPassword = async (
         const { token, url } = await session.strategy.forgotPassword({ email, origin })
         await passwordReset?.sendPasswordResetEmail?.({ email, token, url })
 
-        const builder = new HeadersBuilder(secureApiHeaders)
-        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
+        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
 
         return {
             success: true,
             redirect,
             redirectURL: redirect ? null : redirectURL,
-            headers: builder.toHeaders(),
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -45,7 +41,7 @@ export const forgotPassword = async (
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },
-                    { headers: builder.toHeaders(), status: redirect ? 302 : 200 }
+                    { headers, status: redirect ? 302 : 200 }
                 )
             },
         } as ForgotPasswordAPIReturn
@@ -62,7 +58,7 @@ export const forgotPassword = async (
             error: errors,
             redirect: false,
             redirectURL: null,
-            headers: new Headers(secureApiHeaders),
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -70,7 +66,7 @@ export const forgotPassword = async (
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: secureApiHeaders, status: statusCode }
+                    { headers, status: statusCode }
                 )
             },
         }

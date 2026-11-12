@@ -1,5 +1,5 @@
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createSignInURL } from "@/shared/oauth2/authorization.ts"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { BuiltInOAuthProvider, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
@@ -11,11 +11,9 @@ export const signIn = async (
     oauthId: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions>
 ): Promise<SignInAPIReturn> => {
+    const initHeaders = getInitialHeaders(requestInit, headersInit)
     try {
-        const { request, rateLimit, provider } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
-        )
+        const { request, rateLimit, provider } = await createValidation(ctx, initHeaders)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/signIn/${oauthId}`)
             .verifyRateLimit("signIn")
@@ -30,14 +28,13 @@ export const signIn = async (
                 structuredData: { oauth_provider: oauthId },
             })
             const signInURL = await createSignInURL({ request, oauth: oauthId, ctx, redirectTo })
-            const headers = new Headers(secureApiHeaders)
             return {
                 success: true,
                 redirect: false,
                 signInURL,
-                headers,
+                headers: initHeaders,
                 toResponse: () => {
-                    return Response.json({ success: true, redirect: false, signInURL }, { status: 200, headers })
+                    return Response.json({ success: true, redirect: false, signInURL }, { status: 200, headers: initHeaders })
                 },
             }
         }
@@ -47,6 +44,7 @@ export const signIn = async (
             provider,
             request,
             redirectTo,
+            headers: initHeaders,
         })
 
         return {
@@ -66,7 +64,7 @@ export const signIn = async (
             redirect: false,
             signInURL: null,
             error: errors,
-            headers: new Headers(secureApiHeaders),
+            headers: initHeaders,
             toResponse: () => {
                 return Response.json(
                     {
@@ -75,7 +73,7 @@ export const signIn = async (
                         signInURL: null,
                         error: errors,
                     },
-                    { status: 500, headers: secureApiHeaders }
+                    { status: 500, headers: initHeaders }
                 )
             },
         }

@@ -1,13 +1,12 @@
 import { shouldRefresh } from "@/shared/utils.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const getProviderTokens = (ctx: InternalContextForStateful): SessionStrategy["getProviderTokens"] => {
     const { logger, session } = ctx
 
-    return async ({ oauthId, provider, sessionByToken }) => {
+    return async ({ oauthId, provider, headers, sessionByToken }) => {
         logger?.log("STATEFUL_GET_PROVIDER_TOKENS_START", {
             structuredData: {
                 strategy: "stateful",
@@ -114,7 +113,7 @@ export const getProviderTokens = (ctx: InternalContextForStateful): SessionStrat
                 },
             })
 
-            return { tokens: refreshedTokens, headers: new Headers(secureApiHeaders) }
+            return { tokens: refreshedTokens, headers }
         }
 
         logger?.log("STATEFUL_GET_PROVIDER_TOKENS_SUCCESS", {
@@ -123,6 +122,6 @@ export const getProviderTokens = (ctx: InternalContextForStateful): SessionStrat
             },
         })
 
-        return { tokens: tokens, headers: new Headers(secureApiHeaders) }
+        return { tokens: tokens, headers }
     }
 }
