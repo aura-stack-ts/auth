@@ -162,7 +162,8 @@ export const resolveApiRedirect = async (
     const shouldRedirectServer = redirectInit && !!redirectURL
     return {
         redirect: shouldRedirectServer,
-        redirectURL: redirectInit ? null : redirectURL,
+        redirectURL: shouldRedirectServer ? null : redirectURL,
+        status: shouldRedirectServer ? 302 : 200,
     }
 }
 

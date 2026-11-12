@@ -11,7 +11,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     payload,
     headers: headersInit,
     request: requestInit,
-    redirect = true,
+    redirect: redirectInit = true,
     redirectTo,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
@@ -54,28 +54,22 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
-        const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
-            ctx,
-            request,
-            redirect,
-            redirectTo,
-            builder
-        )
+        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
 
         const toHeaders = builder.toHeaders()
         return {
             success: true,
-            redirect: shouldRedirectServer,
-            redirectURL: redirect ? null : redirectURL,
+            redirect,
+            redirectURL,
             headers: toHeaders,
             toResponse: () => {
                 return Response.json(
                     {
                         success: true,
-                        redirect: shouldRedirectServer,
-                        redirectURL: shouldRedirectServer ? null : redirectURL,
+                        redirect,
+                        redirectURL,
                     },
-                    { headers: toHeaders, status: shouldRedirectServer ? 302 : 200 }
+                    { headers: toHeaders, status }
                 )
             },
         } as SignUpAPIReturn
