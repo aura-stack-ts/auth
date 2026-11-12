@@ -63,9 +63,8 @@ export const isSameOrigin = (origin: string, expected: string): boolean => {
 
 export const getOriginURL = async (request: Request, context?: GlobalContext) => {
     const trustedOrigins = [...(await getTrustedOrigins(request, context?.trustedOrigins))]
-    if (!context?.trustedProxyHeaders) {
-        const requestOrigin = new URL(request.url).origin
-        if (!trustedOrigins.includes(requestOrigin)) trustedOrigins.push(requestOrigin)
+    if (!context?.trustedProxyHeaders && context?.trustedOrigins === undefined) {
+        trustedOrigins.push(new URL(request.url).origin)
     }
     const origin = await getBaseURL({ request, ctx: context })
     if (!isTrustedOrigin(origin, trustedOrigins)) {

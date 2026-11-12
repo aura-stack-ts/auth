@@ -1,5 +1,5 @@
 <div align="center">
-  
+
 <h1><b>@aura-stack/elysia</b></h1>
 
 **Elysia middleware and utilities for the Aura Stack authentication library**

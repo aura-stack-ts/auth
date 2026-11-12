@@ -1,5 +1,5 @@
 <div align="center">
-  
+
 <h1><b>@aura-stack/express</b></h1>
 
 **Type-safe Express middleware and utilities for the Aura Stack authentication library**

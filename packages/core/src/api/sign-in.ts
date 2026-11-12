@@ -29,7 +29,6 @@ export const signIn = async (
             ctx?.logger?.log("SIGN_IN_INITIATED", {
                 structuredData: { oauth_provider: oauthId },
             })
-
             const signInURL = await createSignInURL({ request, oauth: oauthId, ctx, redirectTo })
             const headers = new Headers(secureApiHeaders)
             return {
