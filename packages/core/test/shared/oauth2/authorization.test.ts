@@ -577,6 +577,15 @@ describe("createRedirectTo", () => {
             expect(redirectTo).toBe("/")
         })
 
+        test("accepts a trusted redirect from a different origin", async () => {
+            const request = new Request("https://example.com/auth/signIn/github")
+            const redirectTo = await createRedirectTo(request, "https://api.example.com/redirect", {
+                trustedOrigins: ["https://example.com", "https://api.example.com"],
+                trustedProxyHeaders: false,
+            } as GlobalContext)
+            expect(redirectTo).toBe("https://api.example.com/redirect")
+        })
+
         test("misconfigurated", async () => {
             const request = new Request("https://example.com/signIn/github")
             const redirectTo = await createRedirectTo(request, "https://api.example.com/redirect", {
