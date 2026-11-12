@@ -92,6 +92,7 @@ describe("getProviderTokens API", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toEqual({
@@ -100,6 +101,9 @@ describe("getProviderTokens API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
     })
 
     test("refreshToken config not provided", async () => {
@@ -157,6 +161,7 @@ describe("getProviderTokens API", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toEqual({
@@ -169,6 +174,11 @@ describe("getProviderTokens API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.access_token.oauth-provider=")
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
             method: "POST",
@@ -219,6 +229,7 @@ describe("getProviderTokens API", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toEqual({
@@ -231,6 +242,11 @@ describe("getProviderTokens API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.access_token.oauth-provider=")
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
             method: "POST",

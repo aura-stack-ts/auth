@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyMagicLinkAPIOptions, VerifyMagicLinkAPIReturn } from "@/@types/api.ts"
@@ -16,12 +16,10 @@ export const verifyMagicLink = async (
     }: FunctionAPIContext<VerifyMagicLinkAPIOptions>
 ): Promise<VerifyMagicLinkAPIReturn> => {
     const { logger, session, cookies } = ctx
+    const headers = getInitialHeaders(requestInit, headersInit)
     try {
         logger?.log("VERIFY_MAGIC_LINK_INITIATED")
-        const { request, rateLimit } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
-        )
+        const { request, rateLimit } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/signIn/magicLink/verify")
             .verifyRateLimit("verifyMagicLink")
             .execute()
@@ -33,7 +31,7 @@ export const verifyMagicLink = async (
         logger?.log("VERIFY_MAGIC_LINK_SUCCESS")
 
         const csrfToken = await createCSRF(ctx.jose.instance)
-        const builder = new HeadersBuilder(secureApiHeaders)
+        const builder = new HeadersBuilder(headers)
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
@@ -67,7 +65,7 @@ export const verifyMagicLink = async (
             error: errors,
             redirect: false,
             redirectURL: null,
-            headers: new Headers(secureApiHeaders),
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -75,7 +73,7 @@ export const verifyMagicLink = async (
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: secureApiHeaders, status: statusCode }
+                    { headers, status: statusCode }
                 )
             },
         }

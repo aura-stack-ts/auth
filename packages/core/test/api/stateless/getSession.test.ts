@@ -28,7 +28,7 @@ describe("getSession", () => {
     test("getSession with valid session token", async () => {
         const jwt = await jose.encodeJWT(sessionPayload)
         const session = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=${jwt}` },
+            headers: { Cookie: `aura-auth.session_token=${jwt}`, "Set-Cookie": "initial-provider-cookie=initial; Path=/" },
         })
         expect(session).toEqual({
             success: true,
@@ -39,6 +39,9 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = session.headers.getSetCookie()
+        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
     })
 
     test("getSession with expired session token", async () => {
@@ -117,7 +120,7 @@ describe("getSession", () => {
             permissions: ["read", "write"],
         })
         const session = await auth.api.getSession({
-            headers: { Cookie: `aura-auth.session_token=${jwt}` },
+            headers: { Cookie: `aura-auth.session_token=${jwt}`, "Set-Cookie": "initial-provider-cookie=initial; Path=/" },
         })
         expect(session).toEqual({
             success: true,
@@ -135,5 +138,10 @@ describe("getSession", () => {
 
         const decodeSession = await jose.decodeJWT(getSetCookie(session.headers, "aura-auth.session_token")!)
         expect(decodeSession).toMatchObject(sessionPayload)
+
+        const setCookies = session.headers.getSetCookie()
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
     })
 })

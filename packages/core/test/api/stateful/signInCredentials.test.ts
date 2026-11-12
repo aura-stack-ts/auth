@@ -35,7 +35,10 @@ describe("signInCredentials API", async () => {
         })
 
         const output = await api.signInCredentials({
-            headers,
+            headers: {
+                ...headers,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
+            },
             payload: {
                 username: "johndoe",
                 password: "1234567890",
@@ -48,6 +51,12 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(3)
+        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.csrf_token=")
+        expect(setCookies[2]).toContain("aura-auth.session_token=")
 
         expect(spyParse).toHaveBeenCalledWith({
             sub: "user-123",

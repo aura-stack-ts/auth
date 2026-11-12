@@ -2,7 +2,6 @@ import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getExpiredCookie } from "@/shared/http/cookie.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
-import { secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const revokeToken = (ctx: InternalContextForStateful): SessionStrategy["revokeToken"] => {
@@ -65,9 +64,9 @@ export const revokeToken = (ctx: InternalContextForStateful): SessionStrategy["r
         })
 
         const cookieName = `${cookies.store.accessToken.name}.${oauthId}`
-        const builder = new HeadersBuilder(secureApiHeaders)
+        const newHeaders = new HeadersBuilder(headers)
             .setCookie(cookieName, "", getExpiredCookie(cookies.store.accessToken.attributes))
             .toHeaders()
-        return toUnionHeaders(builder, headers)
+        return { headers: newHeaders }
     }
 }

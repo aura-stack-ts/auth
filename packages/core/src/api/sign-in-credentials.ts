@@ -1,7 +1,7 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
 import { HeadersBuilder } from "@aura-stack/router"
+import { AuraAuthError } from "@/errors/aura-error.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/exports/crypto.ts"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
@@ -10,13 +10,14 @@ export const signInCredentials = async ({
     ctx,
     payload,
     request: requestInit,
-    headers: headerInit,
+    headers: headersInit,
     redirect = true,
     redirectTo,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, logger, session: sessionConfig } = ctx
+    const headers = getInitialHeaders(requestInit, headersInit)
     try {
         ctx.logger?.log("SIGN_IN_CREDENTIALS_INITIATED", {
             structuredData: {
@@ -25,10 +26,7 @@ export const signInCredentials = async ({
             },
         })
 
-        const { request, rateLimit } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headerInit ?? requestInit?.headers ?? {})
-        )
+        const { request, rateLimit } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/signIn/credentials")
             .verifyRateLimit("signInCredentials")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
@@ -53,7 +51,7 @@ export const signInCredentials = async ({
         const csrfToken = await createCSRF(ctx.jose.instance)
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")
 
-        const builder = new HeadersBuilder(secureApiHeaders)
+        const builder = new HeadersBuilder(headers)
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
@@ -82,7 +80,6 @@ export const signInCredentials = async ({
             errors: { code, message },
             statusCode,
         } = handleApiError(error, "CREDENTIALS_SIGN_IN_ERROR", "An error occurred during credentials sign-in.", 401)
-        const headers = new Headers(secureApiHeaders)
         const invalidCredentials: SignInCredentialsAPIReturn = {
             success: false,
             headers,

@@ -1,11 +1,11 @@
 import { getErrorName } from "@/errors/aura-error.ts"
 import { createHash } from "@/exports/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { toUnionHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
-import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 import type { User } from "@/@types/index.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const getSession = <DefaultUser extends User>(
     ctx: InternalContextForStateful
@@ -27,6 +27,10 @@ export const getSession = <DefaultUser extends User>(
             },
         })
 
+        const refreshHeaders = (newHeaders: Headers) => {
+            return toUnionHeaders(headers, newHeaders)
+        }
+
         try {
             const { sessionToken } = ctx.cookies.manager.getCookie(headers)
 
@@ -45,7 +49,7 @@ export const getSession = <DefaultUser extends User>(
                 })
                 return {
                     session: null,
-                    headers: new Headers(secureApiHeaders),
+                    headers,
                 }
             }
 
@@ -96,7 +100,7 @@ export const getSession = <DefaultUser extends User>(
                 })
                 return {
                     session: null,
-                    headers: ctx.cookies.manager.clear(),
+                    headers: refreshHeaders(ctx.cookies.manager.clear()),
                 }
             }
 
@@ -111,7 +115,7 @@ export const getSession = <DefaultUser extends User>(
 
                 return {
                     session: null,
-                    headers: ctx.cookies.manager.clear(),
+                    headers: refreshHeaders(ctx.cookies.manager.clear()),
                 }
             }
 
@@ -169,7 +173,7 @@ export const getSession = <DefaultUser extends User>(
                     user: parsedUser as DefaultUser,
                     expires: effectiveExpiresAt.toISOString(),
                 },
-                headers: ctx.cookies.manager.setCookie({ sessionToken }),
+                headers: refreshHeaders(ctx.cookies.manager.setCookie({ sessionToken })),
             }
         } catch (error) {
             logger?.log("STATEFUL_GET_SESSION_ERROR", {
@@ -180,7 +184,7 @@ export const getSession = <DefaultUser extends User>(
             })
             return {
                 session: null,
-                headers: ctx.cookies.manager.clear(),
+                headers: refreshHeaders(ctx.cookies.manager.clear()),
             }
         }
     }

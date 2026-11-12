@@ -8,7 +8,6 @@ export const refreshUserInfo = <DefaultUser extends User>(
     const refreshSession = refreshSessionHelper<DefaultUser>(ctx)
 
     return async ({ headers, user }) => {
-        const value = await refreshSession({ headers, session: { user } })
-        return value as any
+        return await refreshSession({ headers, session: { user } })
     }
 }

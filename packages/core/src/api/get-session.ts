@@ -1,7 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { getExpiredCookie } from "@/shared/http/cookie.ts"
-import { toUnionHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { GetSessionAPIOptions, GetSessionAPIReturn, User } from "@/@types/index.ts"
@@ -10,7 +9,8 @@ export const getSession = async <DefaultUser extends User = User>({
     ctx,
     headers: headersInit,
 }: FunctionAPIContext<GetSessionAPIOptions>): Promise<GetSessionAPIReturn<DefaultUser>> => {
-    const headers = new HeadersBuilder(secureApiHeaders)
+    const initHeaders = getInitialHeaders(undefined, headersInit)
+    const headers = new HeadersBuilder(initHeaders)
         .setCookie(ctx.cookies.store.sessionToken.name, "", getExpiredCookie(ctx.cookies.store.sessionToken.attributes))
         .toHeaders()
     const unauthorizedError = {
@@ -26,15 +26,14 @@ export const getSession = async <DefaultUser extends User = User>({
     }
     try {
         const { session, headers } = await ctx.session.strategy.getSession({
-            headers: toStandardizedHeaders(headersInit),
+            headers: initHeaders,
         })
         if (!session) return unauthorized
-        const newHeaders = toUnionHeaders(headers, secureApiHeaders)
         return {
             session,
-            headers: newHeaders,
+            headers,
             success: true,
-            toResponse: () => Response.json({ success: true, session }, { headers: newHeaders }),
+            toResponse: () => Response.json({ success: true, session }, { headers }),
         } as GetSessionAPIReturn<DefaultUser>
     } catch (error) {
         errorToLogMessage(error, "AUTH_SESSION_INVALID", ctx.logger)

@@ -259,7 +259,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      */
     getProviderTokens(options: {
         oauthId: string
-        request: Request
+        headers: Headers
         provider: RuntimeOAuthProvider<any, DefaultUser>
         sessionByToken: SessionWithUserEntity
     }): Promise<{ tokens: OAuthTokenPayload; headers: Headers }>
@@ -281,7 +281,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Destroy the session attached to this request (logout).
      * Returns a response that clears cookies.
      */
-    destroySession(options: { sessionByToken: SessionWithUserEntity }): Promise<Headers>
+    destroySession(options: { sessionByToken: SessionWithUserEntity; headers: Headers }): Promise<{ headers: Headers }>
     /**
      * Revoke the access token for a specific OAuth provider.
      * @unstable This API is experimental and may change in future releases.
@@ -292,7 +292,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         headers: Headers
         disconnect: boolean
         sessionByToken: SessionWithUserEntity
-    }): Promise<Headers>
+    }): Promise<{ headers: Headers }>
     /**
      * Check if the user is connected to a specific OAuth provider.
      * @unstable This API is experimental and may change in future releases.
@@ -323,6 +323,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         oauthId: string
         provider: RuntimeOAuthProvider<any, DefaultUser>
         request: Request
+        headers: Headers
         redirectTo?: string
     }): Promise<{
         success: boolean

@@ -1,5 +1,4 @@
-import { HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyEmailAPIOptions, VerifyEmailAPIReturn } from "@/@types/api.ts"
@@ -15,12 +14,10 @@ export const verifyEmail = async (
     }: FunctionAPIContext<VerifyEmailAPIOptions>
 ): Promise<VerifyEmailAPIReturn> => {
     const { logger, session } = ctx
+    const headers = getInitialHeaders(requestInit, headersInit)
     try {
         logger?.log("VERIFY_EMAIL_INITIATED")
-        const { request, rateLimit } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
-        )
+        const { request, rateLimit } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/verifyEmail")
             .verifyRateLimit("verifyEmail")
             .execute()
@@ -30,14 +27,13 @@ export const verifyEmail = async (
 
         await session.strategy.verifyEmail({ token })
 
-        const builder = new HeadersBuilder(secureApiHeaders)
-        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
+        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
 
         return {
             success: true,
             redirect,
             redirectURL: redirect ? null : redirectURL,
-            headers: builder.toHeaders(),
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -45,7 +41,7 @@ export const verifyEmail = async (
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },
-                    { headers: builder.toHeaders(), status: redirect ? 302 : 200 }
+                    { headers, status: redirect ? 302 : 200 }
                 )
             },
         } as VerifyEmailAPIReturn
@@ -58,7 +54,7 @@ export const verifyEmail = async (
             redirect: false,
             redirectURL: null,
             error: errors,
-            headers: new Headers(secureApiHeaders),
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -66,7 +62,7 @@ export const verifyEmail = async (
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: secureApiHeaders, status: statusCode }
+                    { headers, status: statusCode }
                 )
             },
         }

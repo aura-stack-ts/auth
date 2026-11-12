@@ -11,23 +11,21 @@ import { getCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
 import { createCSRF, createHash, verifyCSRF } from "@/exports/crypto.ts"
 import type { LOG_MESSAGES } from "@/config/logger/catalog.ts"
-import type { BuiltInOAuthProvider, LiteralUnion, RateLimiterConfig, SessionWithUserEntity } from "@/@types/index.ts"
 import type { InternalLogger, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
+import type { BuiltInOAuthProvider, LiteralUnion, RateLimiterConfig, SessionWithUserEntity } from "@/@types/index.ts"
 
-export const createValidation = (ctx: RouterGlobalContext, headersInit?: HeadersInit) => {
-    const headers = new Headers(headersInit)
+export const createValidation = (ctx: RouterGlobalContext, headers: Headers) => {
     const steps: Array<() => Promise<void>> = []
 
     const output: {
         provider?: RuntimeOAuthProvider
         request?: Request
         rateLimit?: any
-        headers: Headers
         userId?: string
         sessionId?: string
         origin?: string
         session?: SessionWithUserEntity
-    } = { headers }
+    } = {}
 
     const builder = {
         verifyOAuthProvider: (oauth: LiteralUnion<BuiltInOAuthProvider>) => {
@@ -47,13 +45,13 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
             steps.push(async () => {
                 if (isStatelessStrategy(ctx.session.config)) {
                     await verifySessionToken({
-                        headers: output.headers,
+                        headers,
                         cookies: ctx.cookies.store,
                         jwt: ctx.jose.manager,
                         logger: ctx.logger,
                     })
                 } else {
-                    const { sessionToken } = createCookieManager(() => ctx.cookies.store).getCookie(new Headers(headersInit))
+                    const { sessionToken } = createCookieManager(() => ctx.cookies.store).getCookie(headers)
                     if (!sessionToken) {
                         throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
                     }
@@ -72,13 +70,13 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
         },
         verifyCSRFToken: (skipCSRFCheck: boolean, doubleSubmitToken: string | undefined, generateNewToken: boolean = false) => {
             steps.push(async () => {
-                const existingCSRFToken = getOptionalCookie(output.headers, ctx.cookies.store.csrfToken.name)
+                const existingCSRFToken = getOptionalCookie(headers, ctx.cookies.store.csrfToken.name)
                 const csrfTokenValue = generateNewToken
                     ? await createCSRF(ctx.jose.instance, existingCSRFToken)
                     : existingCSRFToken
                 await internal_verifyCSRFToken({
                     ctx,
-                    headers: output.headers,
+                    headers,
                     skipCSRFCheck,
                     doubleSubmitToken,
                     csrfTokenValue,
@@ -90,9 +88,9 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
             steps.push(async () => {
                 let request = requestInit
                 if (!request) {
-                    const origin = await getBaseURL({ ctx, headers: output.headers })
+                    const origin = await getBaseURL({ ctx, headers })
                     const url = `${origin}${ctx.basePath}${endpointPath}`
-                    request = new Request(url, { headers: output.headers })
+                    request = new Request(url, { headers })
                 }
                 output.origin = await getOriginURL(request, ctx)
                 output.request = request
@@ -120,7 +118,6 @@ export const createValidation = (ctx: RouterGlobalContext, headersInit?: Headers
                 provider: RuntimeOAuthProvider
                 request: Request
                 rateLimit: any | undefined
-                headers: Headers
                 userId?: string
                 sessionId?: string
                 origin: string

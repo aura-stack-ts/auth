@@ -1,6 +1,5 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { toUnionHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
@@ -15,6 +14,7 @@ export const updateSession = async <DefaultUser extends User = User>({
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
+    const initialHeaders = getInitialHeaders(requestInit, headersInit)
     try {
         ctx.logger?.log("UPDATE_SESSION_INITIATED", {
             structuredData: {
@@ -23,11 +23,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             },
         })
 
-        const {
-            request,
-            rateLimit,
-            headers: validatedHeaders,
-        } = await createValidation(ctx, toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {}))
+        const { request, rateLimit } = await createValidation(ctx, initialHeaders)
             .buildRequest(requestInit, "/session")
             .verifyRateLimit("updateSession")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, false)
@@ -39,24 +35,22 @@ export const updateSession = async <DefaultUser extends User = User>({
 
         const { session, headers } = await ctx.session.strategy.refreshSession({
             session: sessionInit,
-            headers: validatedHeaders,
+            headers: initialHeaders,
         })
         if (!session) {
             throw new AuraAuthError({ code: "UPDATE_SESSION_INVALID" })
         }
-
-        const newHeaders = toUnionHeaders(headers, secureApiHeaders)
 
         const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
             ctx,
             request,
             redirectInit,
             redirectToInit,
-            newHeaders
+            initialHeaders
         )
 
         return {
-            headers: newHeaders,
+            headers,
             session,
             success: true,
             redirect: shouldRedirectServer,
@@ -69,7 +63,7 @@ export const updateSession = async <DefaultUser extends User = User>({
                         redirect: shouldRedirectServer,
                         redirectURL: shouldRedirectServer ? null : redirectURL,
                     },
-                    { headers: newHeaders, status: shouldRedirectServer ? 302 : 200 }
+                    { headers, status: shouldRedirectServer ? 302 : 200 }
                 )
             },
         } as UpdateSessionAPIReturn<DefaultUser>
@@ -77,9 +71,8 @@ export const updateSession = async <DefaultUser extends User = User>({
         errorToLogMessage(error, "UPDATE_SESSION_INVALID", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
 
-        const headers = new Headers(secureApiHeaders)
         return {
-            headers,
+            headers: initialHeaders,
             session: null,
             success: false,
             redirect: false,
@@ -88,7 +81,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             toResponse: () => {
                 return Response.json(
                     { success: false, session: null, redirect: false, redirectURL: null },
-                    { status: statusCode, headers }
+                    { status: statusCode, headers: initialHeaders }
                 )
             },
         }

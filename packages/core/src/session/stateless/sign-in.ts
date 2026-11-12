@@ -1,5 +1,4 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { cacheControl } from "@/shared/http/headers.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth2/authorization.ts"
@@ -8,7 +7,7 @@ import type { InternalContextForStateless, SessionStrategy } from "@/@types/inte
 export const signIn = (ctx: InternalContextForStateless): SessionStrategy["signIn"] => {
     const { logger } = ctx
 
-    return async ({ oauthId, provider, request, redirectTo }) => {
+    return async ({ oauthId, provider, request, headers, redirectTo }) => {
         const redirectURI = await createRedirectURI(request, oauthId, ctx)
         const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
 
@@ -47,7 +46,7 @@ export const signIn = (ctx: InternalContextForStateless): SessionStrategy["signI
             structuredData: { oauth_provider: oauthId, oidc: isOIDC },
         })
 
-        const headersBuilder = new HeadersBuilder(cacheControl)
+        const headersBuilder = new HeadersBuilder(headers)
             .setHeader("Location", authorization)
             .setCookie(ctx.cookies.store.state.name, state, ctx.cookies.store.state.attributes)
             .setCookie(ctx.cookies.store.redirectURI.name, redirectURI, ctx.cookies.store.redirectURI.attributes)

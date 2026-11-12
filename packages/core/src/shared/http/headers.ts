@@ -1,4 +1,3 @@
-import { isHeadersInit } from "@/shared/assert.ts"
 import type { RequestHeaders } from "@aura-stack/router"
 
 /**
@@ -56,22 +55,18 @@ export const secureApiHeaders: HeadersInit = {
 }
 
 export const toUnionHeaders = (init: Headers, headers: HeadersInit): Headers => {
-    new Headers(headers).forEach((value, key) => {
-        if (!init.has(key)) {
-            if (key.toLowerCase() === "set-cookie") {
-                init.append(key, value)
-            } else {
-                init.set(key, value)
-            }
+    const newHeaders = new Headers(headers)
+    newHeaders.getSetCookie().forEach((cookie) => init.append("Set-Cookie", cookie))
+    newHeaders.forEach((value, key) => {
+        if (key.toLowerCase() !== "set-cookie" && !init.has(key)) {
+            init.set(key, value)
         }
     })
     return init
 }
 
-export const toStandardizedHeaders = (headers: Headers | HeadersInit | RequestHeaders): Headers => {
-    return isHeadersInit(headers)
-        ? new Headers(headers)
-        : headers instanceof Headers
-          ? headers
-          : new Headers(headers as Record<string, string>)
+export const getInitialHeaders = (requestInit?: Request, headersInit?: HeadersInit | RequestHeaders) => {
+    const newHeaders = toUnionHeaders(new Headers(requestInit?.headers), headersInit as HeadersInit)
+    toUnionHeaders(newHeaders, secureApiHeaders)
+    return newHeaders
 }

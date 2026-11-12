@@ -117,6 +117,7 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toEqual({
@@ -290,6 +291,7 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
 
@@ -307,6 +309,11 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = output.headers.getSetCookie()
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
 
         /**
          * @todo Optimize the session token verification across multiple calls.

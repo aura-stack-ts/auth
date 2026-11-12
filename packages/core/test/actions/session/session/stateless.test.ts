@@ -75,9 +75,7 @@ describe("sessionAction", () => {
         )
         expect(request.status).toBe(401)
         expect(await request.json()).toEqual({ success: false, session: null })
-        expect(() => getCookie(request.headers, "__Secure-aura-auth.session_token")).toThrow(
-            "The request pipeline expected parsing access to a 'Cookie' header block, but the raw header property evaluates to undefined."
-        )
+        expect(getSetCookie(request.headers, "__Secure-aura-auth.session_token")).toBe("")
     })
 
     test("verify cache control headers are set", async () => {
@@ -105,9 +103,11 @@ describe("sessionAction", () => {
                 },
             })
         )
-        expect(() => getCookie(request.headers, "aura-auth.session_token")).toThrow(
-            "The request pipeline expected parsing access to a 'Cookie' header block, but the raw header property evaluates to undefined."
-        )
+        expect(request.status).toBe(401)
+        expect(await request.json()).toEqual({
+            success: false,
+            session: null,
+        })
     })
 
     test("invalid access from https", async () => {
@@ -119,9 +119,11 @@ describe("sessionAction", () => {
                 },
             })
         )
-        expect(() => getCookie(request.headers, "aura-auth.session_token")).toThrow(
-            "The request pipeline expected parsing access to a 'Cookie' header block, but the raw header property evaluates to undefined."
-        )
+        expect(request.status).toBe(401)
+        expect(await request.json()).toEqual({
+            success: false,
+            session: null,
+        })
     })
 
     test("update default profile function", async () => {

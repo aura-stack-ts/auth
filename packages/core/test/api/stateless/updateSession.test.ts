@@ -139,6 +139,7 @@ describe("updateSession API", () => {
         const updated = await api.updateSession({
             headers: new Headers({
                 Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             }),
             session: {
                 user: { role: "superadmin", department: "Executive" },
@@ -163,6 +164,11 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        const setCookies = updated.headers.getSetCookie()
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
     })
 
     test("updates user session with invalid user data", async () => {

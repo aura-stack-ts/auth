@@ -1,7 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
@@ -17,6 +17,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
     const { signUp, cookies, session, logger } = ctx
+    const headers = getInitialHeaders(requestInit, headersInit)
     try {
         ctx.logger?.log("SIGN_UP_INITIATED", {
             structuredData: {
@@ -25,10 +26,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             },
         })
 
-        const { request, rateLimit } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
-        )
+        const { request, rateLimit } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/signUp")
             .verifyRateLimit("signUp")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
@@ -52,7 +50,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         const csrfToken = await createCSRF(ctx.jose.instance)
         logger?.log("SIGN_UP_SUCCESS")
 
-        const builder = new HeadersBuilder(secureApiHeaders)
+        const builder = new HeadersBuilder(headers)
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
@@ -89,7 +87,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             success: false,
             error: errors,
             redirect: false,
-            headers: new Headers(secureApiHeaders),
+            headers,
             redirectURL: null,
             toResponse: () => {
                 return Response.json(
@@ -98,7 +96,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: secureApiHeaders, status: statusCode }
+                    { headers, status: statusCode }
                 )
             },
         }

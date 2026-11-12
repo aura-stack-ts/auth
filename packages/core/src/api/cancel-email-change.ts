@@ -1,5 +1,4 @@
-import { HeadersBuilder } from "@aura-stack/router"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { CancelEmailChangeAPIOptions, CancelEmailChangeAPIReturn } from "@/@types/api.ts"
@@ -15,6 +14,7 @@ export const cancelEmailChange = async ({
     doubleSubmitToken = undefined,
 }: FunctionAPIContext<CancelEmailChangeAPIOptions>): Promise<CancelEmailChangeAPIReturn> => {
     const { logger, session } = ctx
+    const headers = getInitialHeaders(requestInit, headersInit)
     try {
         logger?.log("CANCEL_EMAIL_CHANGE_INITIATED", {
             structuredData: {
@@ -23,8 +23,7 @@ export const cancelEmailChange = async ({
                 hasToken: Boolean(payload?.token),
             },
         })
-
-        const validation = createValidation(ctx, toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {}))
+        const validation = createValidation(ctx, headers)
             .buildRequest(requestInit, "/email/change/cancel")
             .verifyRateLimit("cancelEmailChange")
 
@@ -57,15 +56,13 @@ export const cancelEmailChange = async ({
             })
         }
 
-        const headers = new HeadersBuilder(secureApiHeaders)
         const { redirect, redirectURL } = await resolveApiRedirect(ctx, requestInit, redirectInit, redirectTo, headers)
-        const headersList = headers.toHeaders()
 
         return {
             success: true,
             redirect,
             redirectURL: redirectInit ? null : redirectURL,
-            headers: headersList,
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -73,7 +70,7 @@ export const cancelEmailChange = async ({
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },
-                    { headers: headersList, status: redirect ? 302 : 200 }
+                    { headers, status: redirect ? 302 : 200 }
                 )
             },
         } as CancelEmailChangeAPIReturn
@@ -89,7 +86,7 @@ export const cancelEmailChange = async ({
             error: errors,
             redirect: false,
             redirectURL: null,
-            headers: new Headers(secureApiHeaders),
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -97,7 +94,7 @@ export const cancelEmailChange = async ({
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: secureApiHeaders, status: statusCode }
+                    { headers, status: statusCode }
                 )
             },
         }

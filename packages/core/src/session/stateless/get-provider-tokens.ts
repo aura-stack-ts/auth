@@ -1,14 +1,13 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { shouldRefresh } from "@/shared/utils.ts"
 import { getCookie } from "@/shared/http/cookie.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const getProviderTokens = (ctx: InternalContextForStateless): SessionStrategy["getProviderTokens"] => {
     const { logger, identity, jose } = ctx
 
-    return async ({ oauthId, provider, request }) => {
+    return async ({ oauthId, provider, headers }) => {
         logger?.log("STATELESS_GET_PROVIDER_TOKENS_START", {
             structuredData: {
                 strategy: "stateless",
@@ -18,7 +17,7 @@ export const getProviderTokens = (ctx: InternalContextForStateless): SessionStra
         })
 
         const cookieName = `${ctx.cookies.store.accessToken.name}.${oauthId}`
-        const cookie = getCookie(request, cookieName)
+        const cookie = getCookie(headers, cookieName)
 
         const decodedToken = await jose.manager.verifyToken(cookie)
         const tokens = await identity.schemaRegistry.parseOAuthTokens(decodedToken)
@@ -62,7 +61,7 @@ export const getProviderTokens = (ctx: InternalContextForStateless): SessionStra
             })
 
             const encodedTokens = await jose.manager.createToken(refreshedTokens as any)
-            const builder = new HeadersBuilder(secureApiHeaders)
+            const builder = new HeadersBuilder(headers)
                 .setCookie(cookieName, encodedTokens, ctx.cookies.store.accessToken.attributes)
                 .toHeaders()
 
@@ -88,7 +87,7 @@ export const getProviderTokens = (ctx: InternalContextForStateless): SessionStra
 
         return {
             tokens,
-            headers: new Headers(secureApiHeaders),
+            headers,
         }
     }
 }

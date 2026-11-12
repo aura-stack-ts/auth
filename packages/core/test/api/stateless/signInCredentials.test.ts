@@ -15,7 +15,10 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const signIn = await api.signInCredentials({
-            headers,
+            headers: {
+                ...headers,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
+            },
             payload: {
                 username: "johndoe",
                 password: "1234567890",
@@ -35,6 +38,12 @@ describe("signInCredentials API", async () => {
             name: "johndoe",
             image: "https://example.com/image.jpg",
         })
+
+        const setCookies = signIn.headers.getSetCookie()
+        expect(setCookies).toHaveLength(3)
+        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
+        expect(setCookies[1]).toContain("aura-auth.csrf_token=")
+        expect(setCookies[2]).toContain("aura-auth.session_token=")
     })
 
     test("invalid authorize return", async () => {

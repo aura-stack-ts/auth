@@ -1,6 +1,5 @@
-import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SendVerificationEmailAPIOptions, SendVerificationEmailAPIReturn } from "@/@types/api.ts"
@@ -21,12 +20,10 @@ export const sendVerificationEmail = async (
     if (!emailVerification?.sendVerificationEmail) {
         throw new AuraAuthError({ code: "SEND_VERIFICATION_EMAIL_NOT_IMPLEMENTED" })
     }
+    const headers = getInitialHeaders(requestInit, headersInit)
     try {
         logger?.log("SEND_VERIFICATION_EMAIL_INITIATED")
-        const { request, rateLimit, origin } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
-        )
+        const { request, rateLimit, origin } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/sendVerificationEmail")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifySession()
@@ -41,14 +38,13 @@ export const sendVerificationEmail = async (
         })
         await emailVerification.sendVerificationEmail({ email, token, url })
 
-        const builder = new HeadersBuilder(secureApiHeaders)
-        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
+        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
 
         return {
             success: true,
             redirect,
             redirectURL: redirect ? null : redirectURL,
-            headers: builder.toHeaders(),
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -56,7 +52,7 @@ export const sendVerificationEmail = async (
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },
-                    { headers: builder.toHeaders(), status: redirect ? 302 : 200 }
+                    { headers, status: redirect ? 302 : 200 }
                 )
             },
         } as SendVerificationEmailAPIReturn
@@ -73,7 +69,7 @@ export const sendVerificationEmail = async (
             error: errors,
             redirect: false,
             redirectURL: null,
-            headers: new Headers(secureApiHeaders),
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -81,7 +77,7 @@ export const sendVerificationEmail = async (
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: secureApiHeaders, status: statusCode }
+                    { headers, status: statusCode }
                 )
             },
         }

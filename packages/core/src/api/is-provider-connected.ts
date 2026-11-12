@@ -1,4 +1,4 @@
-import { secureApiHeaders, toStandardizedHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
@@ -9,15 +9,13 @@ export const isProviderConnected = async (
     oauthId: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, headers: headersInit, request: requestInit }: FunctionAPIContext<ProviderConnectedAPIOptions>
 ): Promise<ProviderConnectedAPIReturn> => {
+    const headers = getInitialHeaders(requestInit, headersInit)
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: { provider: oauthId, operation: "check_connection" },
         })
 
-        const { headers, rateLimit, session } = await createValidation(
-            ctx,
-            toStandardizedHeaders(headersInit ?? requestInit?.headers ?? {})
-        )
+        const { rateLimit, session } = await createValidation(ctx, headers)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/providers/${oauthId}`)
             .verifyRateLimit("isProviderConnected")

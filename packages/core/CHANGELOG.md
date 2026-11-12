@@ -40,6 +40,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Fixed `Set-Cookie` header merging across API functions and client-side endpoints. Headers from the incoming request are now preserved and merged with those returned by the resolved flows. This prevents headers, including `Set-Cookie`, from being silently dropped when they are not explicitly modified by a flow, ensuring that all relevant cookies and headers are retained in the final response. [#311](https://github.com/aura-stack-ts/auth/pull/311)
+
 - Fixed origin resolution when both `trustedOrigins` and `trustedProxyHeaders` are configured. Incoming request origins are now consistently validated against the `trustedOrigins` list to verify that requests originate from trusted sources. When neither option is configured, the request URL is used as the public origin. Otherwise, users must explicitly define the allowed public origins through `trustedOrigins`. [#310](https://github.com/aura-stack-ts/auth/pull/310)
 
 - Fixed client function return type inference when redirects are enabled. Redirect support is now determined by whether the `redirectTo` option is configured, while the `redirect` option controls whether the redirect is performed automatically or left to the user. This also fixes an issue where client functions incorrectly returned `void` when redirect support was not configured. [#306](https://github.com/aura-stack-ts/auth/pull/306)

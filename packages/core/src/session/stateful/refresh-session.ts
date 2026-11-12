@@ -2,6 +2,7 @@ import { createHash } from "@/exports/crypto.ts"
 import { getErrorName } from "@/errors/aura-error.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
+import { toUnionHeaders } from "@/shared/http/headers.ts"
 
 export const refreshSession = <DefaultUser extends User>(
     ctx: InternalContextForStateful
@@ -9,6 +10,10 @@ export const refreshSession = <DefaultUser extends User>(
     const { logger, session: sessionConfig } = ctx
 
     return async ({ headers, session }) => {
+        const refreshHeaders = (newHeaders: Headers) => {
+            return toUnionHeaders(headers, newHeaders)
+        }
+
         logger?.log("STATEFUL_REFRESH_SESSION_START", {
             structuredData: {
                 strategy: "stateful",
@@ -31,7 +36,7 @@ export const refreshSession = <DefaultUser extends User>(
                         reason: "no_session_token_in_cookie",
                     },
                 })
-                return { session: null, headers: ctx.cookies.manager.clear() }
+                return { session: null, headers: refreshHeaders(ctx.cookies.manager.clear()) }
             }
 
             const tokenHash = await createHash(sessionToken)
@@ -50,11 +55,11 @@ export const refreshSession = <DefaultUser extends User>(
                         reason: "session_not_found_or_no_user",
                     },
                 })
-                return { session: null, headers: ctx.cookies.manager.clear() }
+                return { session: null, headers: refreshHeaders(ctx.cookies.manager.clear()) }
             }
 
             if (sessionByToken.status !== "active") {
-                return { session: null, headers: ctx.cookies.manager.clear() }
+                return { session: null, headers: refreshHeaders(ctx.cookies.manager.clear()) }
             }
 
             logger?.log("STATEFUL_SESSION_EXPIRATION_CHECK", {
@@ -79,7 +84,7 @@ export const refreshSession = <DefaultUser extends User>(
                         reason: "session_expired",
                     },
                 })
-                return { session: null, headers: ctx.cookies.manager.clear() }
+                return { session: null, headers: refreshHeaders(ctx.cookies.manager.clear()) }
             }
 
             const { attributes, ...spreadUser } = sessionByToken.user
@@ -192,7 +197,7 @@ export const refreshSession = <DefaultUser extends User>(
                 },
             })
 
-            return { session: updatedSession, headers: ctx.cookies.manager.setCookie({ sessionToken }) }
+            return { session: updatedSession, headers: refreshHeaders(ctx.cookies.manager.setCookie({ sessionToken })) }
         } catch (error) {
             logger?.log("STATEFUL_REFRESH_SESSION_ERROR", {
                 structuredData: {
@@ -200,7 +205,7 @@ export const refreshSession = <DefaultUser extends User>(
                     error_message: error instanceof Error ? error.message : String(error),
                 },
             })
-            return { session: null, headers: ctx.cookies.manager.clear() }
+            return { session: null, headers: refreshHeaders(ctx.cookies.manager.clear()) }
         }
     }
 }
