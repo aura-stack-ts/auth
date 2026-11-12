@@ -129,6 +129,30 @@ describe("signOut API", async () => {
         })
     })
 
+    test("signOut per-call fallbackRedirectTo overrides the global fallback", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const configuredApi = createAuth({
+            baseURL: "https://example.com",
+            fallbackRedirectTo: "/global-safe",
+        }).api
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const out = await configuredApi.signOut({
+            headers: {
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+            redirect: false,
+            redirectTo: "https://untrusted.example/redirect",
+            fallbackRedirectTo: "/specific-safe",
+        })
+
+        expect(out).toMatchObject({
+            success: true,
+            redirect: false,
+            redirectURL: "/specific-safe",
+        })
+    })
+
     test("signOut with doubleSubmitToken", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 

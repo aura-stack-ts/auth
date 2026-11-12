@@ -522,6 +522,11 @@ describe("createRedirectTo", () => {
                 request: new Request(signInURL),
                 redirectTo: "ht!tp://invalid-url",
             },
+            {
+                description: "when redirectTo is not valid urlqq",
+                request: new Request(signInURL),
+                redirectTo: "https://app.com:99999/dashboard",
+            },
         ]
 
         for (const { description, request, redirectTo } of testCases) {

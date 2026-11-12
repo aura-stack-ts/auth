@@ -12,6 +12,7 @@ export const verifyEmailChange = async ({
     redirect: redirectInit = true,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
+    fallbackRedirectTo = undefined,
 }: FunctionAPIContext<VerifyEmailChangeAPIOptions>): Promise<VerifyEmailChangeAPIReturn> => {
     const { logger, session } = ctx
     const headers = getInitialHeaders(requestInit, headersInit)
@@ -38,7 +39,14 @@ export const verifyEmailChange = async ({
             token: payload.token,
         })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers,
+            fallbackRedirectTo,
+        })
 
         return {
             success: true,

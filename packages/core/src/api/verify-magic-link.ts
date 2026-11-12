@@ -13,6 +13,7 @@ export const verifyMagicLink = async (
         request: requestInit,
         redirectTo,
         redirect: redirectInit = true,
+        fallbackRedirectTo = undefined,
     }: FunctionAPIContext<VerifyMagicLinkAPIOptions>
 ): Promise<VerifyMagicLinkAPIReturn> => {
     const { logger, session, cookies } = ctx
@@ -35,7 +36,14 @@ export const verifyMagicLink = async (
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers: builder,
+            fallbackRedirectTo,
+        })
         return {
             success: true,
             redirect,

@@ -14,6 +14,7 @@ export const sendVerificationEmail = async (
         redirect: redirectInit = true,
         skipCSRFCheck = false,
         doubleSubmitToken = undefined,
+        fallbackRedirectTo = undefined,
     }: FunctionAPIContext<SendVerificationEmailAPIOptions>
 ): Promise<SendVerificationEmailAPIReturn> => {
     const { logger, session, emailVerification } = ctx
@@ -38,7 +39,14 @@ export const sendVerificationEmail = async (
         })
         await emailVerification.sendVerificationEmail({ email, token, url })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers,
+            fallbackRedirectTo,
+        })
 
         return {
             success: true,

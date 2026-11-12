@@ -12,6 +12,7 @@ export const cancelEmailChange = async ({
     redirect: redirectInit = true,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
+    fallbackRedirectTo = undefined,
 }: FunctionAPIContext<CancelEmailChangeAPIOptions>): Promise<CancelEmailChangeAPIReturn> => {
     const { logger, session } = ctx
     const headers = getInitialHeaders(requestInit, headersInit)
@@ -56,7 +57,14 @@ export const cancelEmailChange = async ({
             })
         }
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, requestInit, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request: requestInit,
+            redirectInit,
+            redirectTo,
+            headers,
+            fallbackRedirectTo,
+        })
 
         return {
             success: true,

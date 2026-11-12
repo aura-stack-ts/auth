@@ -14,6 +14,7 @@ export const sendMagicLink = async (
         redirect: redirectInit = true,
         skipCSRFCheck = false,
         doubleSubmitToken = undefined,
+        fallbackRedirectTo = undefined,
     }: FunctionAPIContext<SendMagicLinkAPIOptions>
 ): Promise<SendMagicLinkAPIReturn> => {
     const { logger, session, magicLinks } = ctx
@@ -44,7 +45,14 @@ export const sendMagicLink = async (
 
         await magicLinks.sendMagicLinkEmail({ email, token, url })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers,
+            fallbackRedirectTo,
+        })
         return {
             success: true,
             redirect,

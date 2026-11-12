@@ -15,6 +15,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     redirectTo,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
+    fallbackRedirectTo = undefined,
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
     const { signUp, cookies, session, logger } = ctx
     const headers = getInitialHeaders(requestInit, headersInit)
@@ -54,7 +55,14 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers: builder,
+            fallbackRedirectTo,
+        })
 
         const toHeaders = builder.toHeaders()
         return {

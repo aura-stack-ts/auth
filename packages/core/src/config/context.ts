@@ -57,6 +57,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
         passwordReset: getPasswordResetConfig(config),
         emailVerification: getEmailVerificationConfig(config),
         magicLinks: getMagicLinkConfig(config),
+        fallbackRedirectTo: config?.fallbackRedirectTo,
         rateLimiters: createRateLimiterInstance(config?.rateLimiter, proxyHeadersAsBoolean),
         session: {
             config: config?.session,

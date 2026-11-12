@@ -66,6 +66,7 @@ export interface RouterGlobalContext<DefaultUser extends User = User, SignUpSche
     passwordReset?: PasswordResetConfig
     emailChange?: EmailChangeConfig
     magicLinks?: MagicLinksConfig
+    fallbackRedirectTo?: string
 }
 
 export interface SchemaRegistryContext {

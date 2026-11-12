@@ -141,15 +141,23 @@ export const handleApiError = (error: unknown, defaultCode: string, defaultMessa
     return { code, message, errors: { code, message }, statusCode }
 }
 
-export const resolveApiRedirect = async (
-    ctx: RouterGlobalContext,
-    request: Request,
-    redirectInit: boolean,
-    redirectToInit: string | undefined,
+export const resolveApiRedirect = async ({
+    ctx,
+    headers,
+    redirectInit,
+    redirectTo,
+    request,
+    fallbackRedirectTo,
+}: {
+    ctx: RouterGlobalContext
+    request: Request
+    redirectInit: boolean
+    redirectTo: string | undefined
     headers: Headers | HeadersBuilder
-) => {
-    let redirectURL: string | null = await createRedirectTo(request, redirectToInit, ctx)
-    redirectURL = redirectToInit ? redirectURL : redirectURL === "/" ? null : redirectURL
+    fallbackRedirectTo: string | undefined
+}) => {
+    let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx, fallbackRedirectTo)
+    redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
 
     if (redirectInit && redirectURL) {
         if (headers instanceof HeadersBuilder) {

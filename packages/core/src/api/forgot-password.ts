@@ -11,6 +11,7 @@ export const forgotPassword = async (
         request: requestInit,
         redirectTo,
         redirect: redirectInit = true,
+        fallbackRedirectTo = undefined,
     }: FunctionAPIContext<ForgotPasswordAPIOptions>
 ): Promise<ForgotPasswordAPIReturn> => {
     const { logger, session, passwordReset } = ctx
@@ -27,7 +28,14 @@ export const forgotPassword = async (
         const { token, url } = await session.strategy.forgotPassword({ email, origin })
         await passwordReset?.sendPasswordResetEmail?.({ email, token, url })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers,
+            fallbackRedirectTo,
+        })
 
         return {
             success: true,
