@@ -38,21 +38,21 @@ export const verifyEmailChange = async ({
             token: payload.token,
         })
 
-        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
 
         return {
             success: true,
             redirect,
-            redirectURL: redirect ? null : redirectURL,
+            redirectURL,
             headers,
             toResponse: () => {
                 return Response.json(
                     {
                         success: true,
                         redirect,
-                        redirectURL: redirect ? null : redirectURL,
+                        redirectURL,
                     },
-                    { headers, status: redirect ? 302 : 200 }
+                    { headers, status }
                 )
             },
         } as VerifyEmailChangeAPIReturn

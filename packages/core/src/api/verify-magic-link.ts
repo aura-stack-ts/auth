@@ -35,20 +35,20 @@ export const verifyMagicLink = async (
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
-        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
+        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
         return {
             success: true,
             redirect,
-            redirectURL: redirect ? null : redirectURL,
+            redirectURL,
             headers: builder.toHeaders(),
             toResponse: () => {
                 return Response.json(
                     {
                         success: true,
                         redirect,
-                        redirectURL: redirect ? null : redirectURL,
+                        redirectURL,
                     },
-                    { headers: builder.toHeaders(), status: redirect ? 302 : 200 }
+                    { headers: builder.toHeaders(), status }
                 )
             },
         } as VerifyMagicLinkAPIReturn

@@ -56,12 +56,12 @@ export const cancelEmailChange = async ({
             })
         }
 
-        const { redirect, redirectURL } = await resolveApiRedirect(ctx, requestInit, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, requestInit, redirectInit, redirectTo, headers)
 
         return {
             success: true,
             redirect,
-            redirectURL: redirectInit ? null : redirectURL,
+            redirectURL,
             headers,
             toResponse: () => {
                 return Response.json(
@@ -70,7 +70,7 @@ export const cancelEmailChange = async ({
                         redirect,
                         redirectURL: redirect ? null : redirectURL,
                     },
-                    { headers, status: redirect ? 302 : 200 }
+                    { headers, status }
                 )
             },
         } as CancelEmailChangeAPIReturn
