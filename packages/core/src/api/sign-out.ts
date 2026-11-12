@@ -37,7 +37,7 @@ export const signOut = async ({
             headers: initHeaders,
         })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
 
         return {
             success: true,
@@ -45,7 +45,7 @@ export const signOut = async ({
             redirect,
             redirectURL,
             toResponse: () => {
-                return Response.json({ success: true, redirect, redirectURL }, { headers, status })
+                return Response.json({ success: true, redirect, redirectURL }, { headers, status: redirect ? 302 : 202 })
             },
         } as SignOutAPIReturn
     } catch (error) {
