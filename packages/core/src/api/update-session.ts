@@ -41,13 +41,13 @@ export const updateSession = async <DefaultUser extends User = User>({
             throw new AuraAuthError({ code: "UPDATE_SESSION_INVALID" })
         }
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
             ctx,
             request,
             redirectInit,
-            redirectToInit,
-            initialHeaders
-        )
+            redirectTo: redirectToInit,
+            headers: initialHeaders,
+        })
 
         return {
             headers,

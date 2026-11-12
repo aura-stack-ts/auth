@@ -54,7 +54,13 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, builder)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers: builder,
+        })
 
         const toHeaders = builder.toHeaders()
         return {

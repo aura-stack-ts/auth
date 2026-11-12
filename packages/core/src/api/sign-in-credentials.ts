@@ -55,13 +55,13 @@ export const signInCredentials = async ({
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
-        const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect(
+        const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect({
             ctx,
             request,
-            redirect,
+            redirectInit: redirect,
             redirectTo,
-            builder
-        )
+            headers: builder,
+        })
 
         const toHeaders = builder.toHeaders()
         return {

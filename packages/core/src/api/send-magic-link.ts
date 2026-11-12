@@ -44,7 +44,13 @@ export const sendMagicLink = async (
 
         await magicLinks.sendMagicLinkEmail({ email, token, url })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers,
+        })
         return {
             success: true,
             redirect,

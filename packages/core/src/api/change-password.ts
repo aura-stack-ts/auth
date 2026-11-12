@@ -40,7 +40,13 @@ export const changePassword = async ({
             newPassword: payload.newPassword,
         })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers,
+        })
 
         return {
             success: true,

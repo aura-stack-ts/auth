@@ -255,6 +255,13 @@ export type AuthConfig<
     emailChange?: EmailChangeConfig
 
     magicLinks?: MagicLinksConfig
+    /**
+     * Global fallback redirect destination used when a target redirect URL is untrusted or invalid.
+     * Can be overridden per call via the API function or client-side `fallbackRedirectTo` option.
+     *
+     * @default "/"
+     */
+    fallbackRedirectTo?: string
 } & TrustedProxyHeadersConfig
 
 export type OAuthProvidersConfig<Identity extends Identities> =

@@ -11,6 +11,7 @@ export const signOut = async ({
     redirectTo,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
+    fallbackRedirectTo = undefined,
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
     const initHeaders = getInitialHeaders(requestInit, headersInit)
     try {
@@ -37,7 +38,14 @@ export const signOut = async ({
             headers: initHeaders,
         })
 
-        const { redirect, redirectURL } = await resolveApiRedirect(ctx, request, redirectInit, redirectTo, headers)
+        const { redirect, redirectURL } = await resolveApiRedirect({
+            ctx,
+            request,
+            redirectInit,
+            redirectTo,
+            headers,
+            fallbackRedirectTo,
+        })
 
         return {
             success: true,

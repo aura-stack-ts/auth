@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added the `fallbackRedirectTo` option to `createAuth()` and individual API function calls. This option allows users to configure a fallback redirect destination when the initial `redirectTo` value is invalid or untrusted. It can be configured globally to apply across all authentication flows or overridden per API call for flow-specific control. Each fallback URL is validated against the trusted origins configuration. If neither fallback is valid, the redirect defaults to `/`. [#314](https://github.com/aura-stack-ts/auth/pull/314)
+
 - Added the `sendVerificationEmail()`, `verifyEmail()`, `forgotPassword()`, `resetPassword()`, `changePassword()`, `cancelEmailChange()`, `changeEmail()`, `verifyEmailChange()`, `sendMagicLink()`, and `verifyMagicLink()` client-side API functions to `createAuthClient()`. These functions interact with the corresponding mounted HTTP endpoints to support client-side email verification, password management, email changes, and passwordless authentication via magic links. [#300](https://github.com/aura-stack-ts/auth/pull/300)
 
 - Added the `sendMagicLink()` and `verifyMagicLink()` server API functions, along with the `POST /signIn/magicLink` and `GET /signIn/magicLink/verify` endpoints for client-side passwordless authentication via magic links. [#297](https://github.com/aura-stack-ts/auth/pull/297)

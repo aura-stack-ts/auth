@@ -51,14 +51,19 @@ export const createSignInURL = async ({
  * @param context Global context containing configuration and utilities
  * @returns A safe URL to redirect to after authentication, or "/" if the URL is not considered safe.
  */
-export const createRedirectTo = async (request: Request, redirectTo?: string, context?: GlobalContext) => {
+export const createRedirectTo = async (
+    request: Request,
+    redirectTo?: string,
+    context?: GlobalContext,
+    fallbackRedirectTo?: string
+) => {
     try {
         const headers = request.headers
         const requestOrigin = await getOriginURL(request, context)
         const origins = await getTrustedOrigins(request, context?.trustedOrigins)
 
-        const validateURL = (url: string): string => {
-            if (!isRelativeURL(url) && !isValidURL(url)) return "/"
+        const validateURL = (url: string): string | null => {
+            if (!isRelativeURL(url) && !isValidURL(url)) return null
             if (isRelativeURL(url)) return url
 
             if (origins.length > 0) {
@@ -73,15 +78,27 @@ export const createRedirectTo = async (request: Request, redirectTo?: string, co
                     }
                 }
                 context?.logger?.log("OPEN_REDIRECT_ATTACK")
-                return "/"
+                return null
             }
             if (isSameOrigin(url, requestOrigin)) {
                 return extractPath(url)
             }
             context?.logger?.log("OPEN_REDIRECT_ATTACK")
-            return "/"
+            return null
         }
-        return validateURL(redirectTo ?? headers.get("Referer") ?? headers.get("Origin") ?? "/")
+        const target = redirectTo ?? headers.get("Referer") ?? headers.get("Origin") ?? "/"
+        const validatedTarget = validateURL(target)
+        if (validatedTarget !== null) return validatedTarget
+
+        if (fallbackRedirectTo !== undefined) {
+            const url = validateURL(fallbackRedirectTo)
+            if (url) return url
+        }
+        if (context?.fallbackRedirectTo !== undefined) {
+            const url = validateURL(context.fallbackRedirectTo)
+            if (url) return url
+        }
+        return "/"
     } catch {
         context?.logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED")
         return "/"

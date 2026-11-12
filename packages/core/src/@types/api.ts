@@ -40,6 +40,13 @@ export interface APIOptionsWithRedirectTo {
      * })
      */
     redirectTo?: string
+    /**
+     * Fallback redirect destination used when a target redirect URL is untrusted or invalid.
+     * Overrides the global `fallbackRedirectTo` option configured in `createAuth`.
+     *
+     * @default "/"
+     */
+    fallbackRedirectTo?: string
 }
 
 export interface APIOptionsWithRequest {
