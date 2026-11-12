@@ -11,6 +11,7 @@ export const forgotPassword = async (
         request: requestInit,
         redirectTo,
         redirect: redirectInit = true,
+        fallbackRedirectTo = undefined,
     }: FunctionAPIContext<ForgotPasswordAPIOptions>
 ): Promise<ForgotPasswordAPIReturn> => {
     const { logger, session, passwordReset } = ctx
@@ -33,6 +34,7 @@ export const forgotPassword = async (
             redirectInit,
             redirectTo,
             headers,
+            fallbackRedirectTo,
         })
 
         return {

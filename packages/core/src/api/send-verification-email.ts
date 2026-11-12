@@ -14,6 +14,7 @@ export const sendVerificationEmail = async (
         redirect: redirectInit = true,
         skipCSRFCheck = false,
         doubleSubmitToken = undefined,
+        fallbackRedirectTo = undefined,
     }: FunctionAPIContext<SendVerificationEmailAPIOptions>
 ): Promise<SendVerificationEmailAPIReturn> => {
     const { logger, session, emailVerification } = ctx
@@ -44,6 +45,7 @@ export const sendVerificationEmail = async (
             redirectInit,
             redirectTo,
             headers,
+            fallbackRedirectTo,
         })
 
         return {

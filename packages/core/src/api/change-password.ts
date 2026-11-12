@@ -12,6 +12,7 @@ export const changePassword = async ({
     redirect: redirectInit = true,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
+    fallbackRedirectTo = undefined,
 }: FunctionAPIContext<ChangePasswordAPIOptions>): Promise<ChangePasswordAPIReturn> => {
     const { logger, session } = ctx
     const headers = getInitialHeaders(requestInit, headersInit)
@@ -46,6 +47,7 @@ export const changePassword = async ({
             redirectInit,
             redirectTo,
             headers,
+            fallbackRedirectTo,
         })
 
         return {

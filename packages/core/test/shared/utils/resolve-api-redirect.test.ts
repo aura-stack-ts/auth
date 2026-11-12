@@ -12,6 +12,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: false,
                 redirectTo: "/dashboard",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -30,6 +31,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: true,
                 redirectTo: "/",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: true,
@@ -50,6 +52,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: true,
                 redirectTo: undefined,
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -68,6 +71,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: true,
                 redirectTo: "/dashboard",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: true,
@@ -88,6 +92,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: false,
                 redirectTo: "/dashboard",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -106,6 +111,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: true,
                 redirectTo: "https://app.com/admin/dashboard",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: true,
@@ -126,6 +132,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: false,
                 redirectTo: "https://app.com/admin/dashboard",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -144,6 +151,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: true,
                 redirectTo: "https://devil.com/admin",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: true,
@@ -164,6 +172,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: false,
                 redirectTo: "https://devil.com/admin",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -182,6 +191,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: false,
                 redirectTo: "https://devil.com/admin",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -200,6 +210,7 @@ describe("resolveApiRedirect", () => {
                 request: new Request("https://app.com"),
                 redirectInit: false,
                 redirectTo: "https://devil.com/admin",
+                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,

@@ -154,7 +154,7 @@ export const resolveApiRedirect = async ({
     redirectInit: boolean
     redirectTo: string | undefined
     headers: Headers | HeadersBuilder
-    fallbackRedirectTo?: string | undefined
+    fallbackRedirectTo: string | undefined
 }) => {
     let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx, fallbackRedirectTo)
     redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL

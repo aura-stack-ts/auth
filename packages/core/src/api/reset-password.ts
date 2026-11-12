@@ -10,6 +10,7 @@ export const resetPassword = async ({
     payload,
     redirectTo,
     redirect: redirectInit = true,
+    fallbackRedirectTo = undefined,
 }: FunctionAPIContext<ResetPasswordAPIOptions>): Promise<ResetPasswordAPIReturn> => {
     const { logger, session } = ctx
     const headers = getInitialHeaders(requestInit, headersInit)
@@ -31,6 +32,7 @@ export const resetPassword = async ({
             redirectInit,
             redirectTo,
             headers,
+            fallbackRedirectTo,
         })
 
         return {

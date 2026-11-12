@@ -11,6 +11,7 @@ export const verifyEmail = async (
         request: requestInit,
         redirectTo,
         redirect: redirectInit = true,
+        fallbackRedirectTo = undefined,
     }: FunctionAPIContext<VerifyEmailAPIOptions>
 ): Promise<VerifyEmailAPIReturn> => {
     const { logger, session } = ctx
@@ -33,6 +34,7 @@ export const verifyEmail = async (
             redirectInit,
             redirectTo,
             headers,
+            fallbackRedirectTo,
         })
 
         return {

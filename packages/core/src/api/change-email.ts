@@ -13,6 +13,7 @@ export const changeEmail = async ({
     redirect: redirectInit = true,
     doubleSubmitToken = undefined,
     skipCSRFCheck = false,
+    fallbackRedirectTo = undefined,
 }: FunctionAPIContext<ChangeEmailAPIOptions>): Promise<ChangeEmailAPIReturn> => {
     const { logger, session, emailChange } = ctx
     if (!emailChange?.sendEmailChangeVerification) {
@@ -57,6 +58,7 @@ export const changeEmail = async ({
             redirectInit,
             redirectTo,
             headers,
+            fallbackRedirectTo,
         })
 
         return {

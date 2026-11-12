@@ -15,6 +15,7 @@ export const signInCredentials = async ({
     redirectTo,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
+    fallbackRedirectTo = undefined,
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, logger, session: sessionConfig } = ctx
     const headers = getInitialHeaders(requestInit, headersInit)
@@ -61,6 +62,7 @@ export const signInCredentials = async ({
             redirectInit: redirect,
             redirectTo,
             headers: builder,
+            fallbackRedirectTo,
         })
 
         const toHeaders = builder.toHeaders()

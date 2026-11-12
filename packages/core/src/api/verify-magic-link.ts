@@ -13,6 +13,7 @@ export const verifyMagicLink = async (
         request: requestInit,
         redirectTo,
         redirect: redirectInit = true,
+        fallbackRedirectTo = undefined,
     }: FunctionAPIContext<VerifyMagicLinkAPIOptions>
 ): Promise<VerifyMagicLinkAPIReturn> => {
     const { logger, session, cookies } = ctx
@@ -41,6 +42,7 @@ export const verifyMagicLink = async (
             redirectInit,
             redirectTo,
             headers: builder,
+            fallbackRedirectTo,
         })
         return {
             success: true,

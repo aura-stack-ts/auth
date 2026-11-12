@@ -13,6 +13,7 @@ export const updateSession = async <DefaultUser extends User = User>({
     redirectTo: redirectToInit,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
+    fallbackRedirectTo = undefined,
 }: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
     const initialHeaders = getInitialHeaders(requestInit, headersInit)
     try {
@@ -47,6 +48,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             redirectInit,
             redirectTo: redirectToInit,
             headers: initialHeaders,
+            fallbackRedirectTo,
         })
 
         return {
