@@ -1,10 +1,10 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { setSearchParams } from "@/shared/utils/params.ts"
+import { getSafeURL } from "@/shared/utils/get-safe-url.ts"
+import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
 import { OAuthAuthorization } from "@/shared/schemas/general.ts"
 import { createPKCE, createSecretValue } from "@/exports/crypto.ts"
 import { getTrustedOrigins } from "@/config/get-trusted-origins.ts"
-import { equals, extractPath, patternToRegex } from "@/shared/utils.ts"
-import { getOriginURL, isRelativeURL, isSameOrigin, isTrustedOrigin, isValidURL } from "@/shared/utils/get-origin-url.ts"
 import type { OAuthProvider } from "@/@types/oauth.ts"
 import type { GlobalContext } from "@aura-stack/router"
 
@@ -59,46 +59,21 @@ export const createRedirectTo = async (
 ) => {
     try {
         const headers = request.headers
-        const requestOrigin = await getOriginURL(request, context)
-        const origins = await getTrustedOrigins(request, context?.trustedOrigins)
+        const baseURL = await getOriginURL(request, context)
+        const trustedOrigins = await getTrustedOrigins(request, context?.trustedOrigins)
 
-        const validateURL = (url: string): string | null => {
-            if (!isRelativeURL(url) && !isValidURL(url)) return null
-            if (isRelativeURL(url)) return url
-
-            if (origins.length > 0) {
-                if (isTrustedOrigin(url, origins)) {
-                    const urlOrigin = new URL(url).origin
-                    for (const pattern of origins) {
-                        const regex = patternToRegex(pattern)
-                        if (regex?.test(urlOrigin)) {
-                            return isSameOrigin(url, request.url) ? extractPath(url) : url
-                        }
-                        if (isValidURL(pattern) && equals(new URL(pattern).origin, urlOrigin)) return url
-                    }
-                }
+        const validateURL = (url: string | null | undefined) => {
+            if (!url) return null
+            const validated = getSafeURL({ baseURL, trustedOrigins, url })
+            if (!validated) {
                 context?.logger?.log("OPEN_REDIRECT_ATTACK")
-                return null
             }
-            if (isSameOrigin(url, requestOrigin)) {
-                return extractPath(url)
-            }
-            context?.logger?.log("OPEN_REDIRECT_ATTACK")
-            return null
+            return validated
         }
-        const target = redirectTo ?? headers.get("Referer") ?? headers.get("Origin") ?? "/"
-        const validatedTarget = validateURL(target)
-        if (validatedTarget !== null) return validatedTarget
 
-        if (fallbackRedirectTo !== undefined) {
-            const url = validateURL(fallbackRedirectTo)
-            if (url) return url
-        }
-        if (context?.fallbackRedirectTo !== undefined) {
-            const url = validateURL(context.fallbackRedirectTo)
-            if (url) return url
-        }
-        return "/"
+        const target = redirectTo ?? headers.get("Referer") ?? headers.get("Origin")
+
+        return validateURL(target) || validateURL(fallbackRedirectTo) || validateURL(context?.fallbackRedirectTo) || "/"
     } catch {
         context?.logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED")
         return "/"

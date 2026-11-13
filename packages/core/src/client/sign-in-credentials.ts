@@ -1,13 +1,13 @@
 import { clientAuthResponse, getCSRFToken } from "@/shared/utils/client.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { SignInCredentialsOptions, SignInCredentialsReturn } from "@/@types/client.ts"
 
-export const signInCredentials = (client: InternalAuthClient) => {
+export const signInCredentials = (ctx: ClientContext) => {
     return async <Options extends SignInCredentialsOptions>(options: Options): Promise<SignInCredentialsReturn<Options>> => {
         try {
-            const csrfToken = await getCSRFToken(client)
-            const { redirectTo } = options ?? {}
-            const response = await client.post("/signIn/credentials", {
+            const csrfToken = await getCSRFToken(ctx)
+            const redirectTo = ctx.getSafeRedirect(options)
+            const response = await ctx.client.post("/signIn/credentials", {
                 body: options.payload,
                 searchParams: {
                     redirectTo,

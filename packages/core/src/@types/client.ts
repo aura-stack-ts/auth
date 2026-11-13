@@ -32,7 +32,33 @@ export type AuthClient = ReturnType<typeof createAuthInstance>["handlers"]
  */
 export type AuthClientOptions = Prettify<
     Omit<ClientOptions, "baseURL"> & {
+        /**
+         * The base URL of the application
+         *
+         * @example
+         * baseURL: "https://app.com"
+         */
         baseURL?: string
+        /**
+         * List of trusted origins allowed for redirection to prevent open redirect attacks.
+         * Use this option when your application redirects users to external domains.
+         *
+         * @remarks
+         * By default, the origin of the `baseURL` option is automatically trusted.
+         *
+         * @example
+         * trustedOrigins: ["https://adminapp.com", "https://bankapp.com"]
+         */
+        trustedOrigins?: string[]
+        /**
+         * Global fallback redirect destination used when a target redirect URL is untrusted or invalid.
+         * Can be overridden per call via `createAuthClient` methods using the `fallbackRedirectTo` option.
+         *
+         * @default "/"
+         * @example
+         * fallbackRedirectTo: "/home"
+         */
+        fallbackRedirectTo?: string
     }
 >
 
@@ -66,6 +92,15 @@ export interface OptionsWithRedirectTo {
      * redirectTo: "https://example.com/dashboard"
      */
     redirectTo?: string
+    /**
+     * Fallback redirect destination used when a target redirect URL is untrusted or invalid.
+     * Overrides the global `fallbackRedirectTo` option configured in `createAuth`.
+     *
+     * @default "/"
+     * @example
+     * fallbackRedirectTo: "/dashboard"
+     */
+    fallbackRedirectTo?: string
 }
 
 /**

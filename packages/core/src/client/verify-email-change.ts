@@ -1,11 +1,11 @@
 import { clientAuthResponse } from "@/shared/utils/client.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { VerifyEmailChangeOptions, VerifyEmailChangeReturn } from "@/@types/index.ts"
 
-export const verifyEmailChange = (client: InternalAuthClient) => {
+export const verifyEmailChange = ({ client, getSafeRedirect }: ClientContext) => {
     return async <Options extends VerifyEmailChangeOptions>(options: Options): Promise<VerifyEmailChangeReturn<Options>> => {
         try {
-            const { redirectTo } = options ?? {}
+            const redirectTo = getSafeRedirect(options)
             const response = await client.get("/email/change/verify", {
                 searchParams: { token: options.payload.token, redirectTo, redirect: false },
             })

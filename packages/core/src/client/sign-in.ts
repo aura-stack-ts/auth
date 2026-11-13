@@ -1,15 +1,15 @@
+import type { ClientContext } from "@/client/context.ts"
 import type { LiteralUnion } from "@/@types/index.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
 import type { SignInOptions, SignInReturn } from "@/@types/client.ts"
 
-export const signIn = (client: InternalAuthClient) => {
+export const signIn = ({ client, getSafeRedirect }: ClientContext) => {
     return async <Options extends SignInOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
     ): Promise<SignInReturn<Options>> => {
         try {
-            const { redirectTo } = options ?? {}
+            const redirectTo = getSafeRedirect(options)
             // @ts-ignore
             const response = await client.get("/signIn/:oauth", {
                 params: {

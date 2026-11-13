@@ -1,11 +1,11 @@
 import { clientAuthResponse } from "@/shared/utils/client.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { ResetPasswordOptions, ResetPasswordReturn } from "@/@types/index.ts"
 
-export const resetPassword = (client: InternalAuthClient) => {
+export const resetPassword = ({ client, getSafeRedirect }: ClientContext) => {
     return async <Options extends ResetPasswordOptions>(options: Options): Promise<ResetPasswordReturn<Options>> => {
         try {
-            const { redirectTo } = options ?? {}
+            const redirectTo = getSafeRedirect(options)
             const response = await client.post("/password/reset", {
                 body: options.payload,
                 searchParams: { redirectTo, redirect: false },

@@ -1,14 +1,14 @@
 import { clientAuthResponse, getCSRFToken } from "@/shared/utils/client.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { CancelEmailChangeOptions, CancelEmailChangeReturn } from "@/@types/index.ts"
 
-export const cancelEmailChange = (client: InternalAuthClient) => {
+export const cancelEmailChange = (ctx: ClientContext) => {
     return async <Options extends CancelEmailChangeOptions>(options?: Options): Promise<CancelEmailChangeReturn<Options>> => {
         try {
-            const { redirectTo } = options ?? {}
+            const redirectTo = ctx.getSafeRedirect(options)
             const token = options?.payload?.token
-            const csrfToken = token ? undefined : await getCSRFToken(client)
-            const response = await client.get("/email/change/cancel", {
+            const csrfToken = token ? undefined : await getCSRFToken(ctx)
+            const response = await ctx.client.get("/email/change/cancel", {
                 searchParams: { token, redirectTo, redirect: false },
                 ...(csrfToken ? { headers: { "X-CSRF-Token": csrfToken } } : {}),
             })
