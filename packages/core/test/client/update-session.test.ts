@@ -130,3 +130,148 @@ test("updateSession with redirectTo option", async () => {
     })
     expect(response).toEqual({ success: true, session: { user: { id: "user_1", name: "Alice" } }, redirectURL: "/dashboard" })
 })
+
+test("updateSession with redirect: false & redirectTo", async () => {
+    vi.stubGlobal("window", { location: { assign: vi.fn() } })
+
+    const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+    const patch = vi.fn().mockResolvedValue(
+        createJSONResponse({
+            success: true,
+            session: { user: { id: "user_1", name: "Alice" } },
+            redirect: false,
+            redirectURL: "/dashboard",
+        })
+    )
+    createClientMock.mockReturnValue({ get, patch })
+
+    const client = createAuthClient({ baseURL: "https://example.com" })
+    const expires = new Date(Date.now() + 60_000).toISOString()
+    const response = await client.updateSession({
+        session: { user: { name: "Alice" }, expires },
+        redirect: false,
+        redirectTo: "/dashboard",
+    })
+
+    expect(patch).toHaveBeenCalledWith("/session", {
+        body: { user: { name: "Alice" }, expires: new Date(expires) },
+        headers: { "X-CSRF-Token": "csrf_token_1" },
+        searchParams: { redirectTo: "/dashboard", redirect: false },
+    })
+    expect(response).toEqual({
+        success: true,
+        session: { user: { id: "user_1", name: "Alice" } },
+        redirect: false,
+        redirectURL: "/dashboard",
+    })
+    expect(window.location.assign).not.toHaveBeenCalled()
+})
+
+test("updateSession with redirect: true & redirectTo", async () => {
+    vi.stubGlobal("window", { location: { assign: vi.fn() } })
+
+    const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+    const patch = vi.fn().mockResolvedValue(
+        createJSONResponse({
+            success: true,
+            session: { user: { id: "user_1", name: "Alice" } },
+            redirect: true,
+            redirectURL: "/dashboard",
+        })
+    )
+    createClientMock.mockReturnValue({ get, patch })
+
+    const client = createAuthClient({ baseURL: "https://example.com" })
+    const expires = new Date(Date.now() + 60_000).toISOString()
+    const response = await client.updateSession({
+        session: { user: { name: "Alice" }, expires },
+        redirect: true,
+        redirectTo: "/dashboard",
+    })
+
+    expect(patch).toHaveBeenCalledWith("/session", {
+        body: { user: { name: "Alice" }, expires: new Date(expires) },
+        headers: { "X-CSRF-Token": "csrf_token_1" },
+        searchParams: { redirectTo: "/dashboard", redirect: false },
+    })
+    expect(response).toEqual({
+        success: true,
+        session: { user: { id: "user_1", name: "Alice" } },
+        redirect: true,
+        redirectURL: "/dashboard",
+    })
+    expect(window.location.assign).toHaveBeenCalledWith("/dashboard")
+})
+
+test("updateSession prefers the per-call fallbackRedirectTo over the global fallback", async () => {
+    vi.stubGlobal("window", { location: { assign: vi.fn() } })
+
+    const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+    const patch = vi.fn().mockResolvedValue(
+        createJSONResponse({
+            success: true,
+            session: { user: { id: "user_1", name: "Alice" } },
+            redirect: true,
+            redirectURL: "/admin/settings",
+        })
+    )
+    createClientMock.mockReturnValue({ get, patch })
+
+    const client = createAuthClient({ baseURL: "https://example.com", fallbackRedirectTo: "/admin/settings" })
+    const session = { user: { name: "Alice" }, expires: new Date(Date.now() + 60_000).toISOString() }
+    const response = await client.updateSession({
+        session,
+        redirect: true,
+        redirectTo: "https://untrusted.example/dashboard",
+        fallbackRedirectTo: "/home",
+    })
+
+    expect(patch).toHaveBeenCalledWith("/session", {
+        body: { user: { name: "Alice" }, expires: new Date(session.expires) },
+        headers: { "X-CSRF-Token": "csrf_token_1" },
+        searchParams: { redirectTo: "/home", redirect: false },
+    })
+    expect(window.location.assign).toHaveBeenCalledWith("/admin/settings")
+    expect(response).toEqual({
+        success: true,
+        session: { user: { id: "user_1", name: "Alice" } },
+        redirect: true,
+        redirectURL: "/admin/settings",
+    })
+})
+
+test("updateSession uses the global fallbackRedirectTo", async () => {
+    vi.stubGlobal("window", { location: { assign: vi.fn() } })
+
+    const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+    const patch = vi.fn().mockResolvedValue(
+        createJSONResponse({
+            success: true,
+            session: { user: { id: "user_1", name: "Alice" } },
+            redirect: true,
+            redirectURL: "/home",
+        })
+    )
+    createClientMock.mockReturnValue({ get, patch })
+
+    const client = createAuthClient({ baseURL: "https://example.com", fallbackRedirectTo: "/home" })
+    const expires = new Date(Date.now() + 60_000).toISOString()
+    const response = await client.updateSession({
+        session: { user: { name: "Alice" }, expires },
+        redirect: true,
+        redirectTo: "https://untrusted.example/dashboard",
+    })
+
+    expect(patch).toHaveBeenCalledWith("/session", {
+        body: { user: { name: "Alice" }, expires: new Date(expires) },
+        headers: { "X-CSRF-Token": "csrf_token_1" },
+        searchParams: { redirectTo: "/home", redirect: false },
+    })
+    expect(window.location.assign).toHaveBeenCalledWith("/home")
+    expect(response).toEqual({
+        success: true,
+        session: { user: { id: "user_1", name: "Alice" } },
+        redirect: true,
+        redirectURL: "/home",
+    })
+})

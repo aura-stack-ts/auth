@@ -39,8 +39,10 @@ export const getSafeRedirectTo = ({
     fallbackRedirectTo: string | undefined
 }) => {
     return <Options extends OptionsWithRedirectTo>(options?: Options) => {
-        return [options?.redirectTo, options?.fallbackRedirectTo, fallbackRedirectTo].find((redirectTo) =>
+        const safeRedirectTo = [options?.redirectTo, options?.fallbackRedirectTo, fallbackRedirectTo].find((redirectTo) =>
             getSafeURL({ baseURL, url: redirectTo!, trustedOrigins })
         )
+        if (safeRedirectTo === undefined && options?.redirectTo !== undefined) return "/"
+        return safeRedirectTo
     }
 }

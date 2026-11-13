@@ -7,8 +7,8 @@ import type { AuthClient, AuthClientOptions } from "@/@types/client.ts"
 export const createClient = createClientAPI<AuthClient>
 
 export const createClientContext = (options?: AuthClientOptions) => {
-    const baseURL = getEnv("BASE_URL") || options?.baseURL || window.location.origin
-    if (typeof window === "undefined" && !baseURL) {
+    const baseURL = getEnv("BASE_URL") || options?.baseURL || (typeof window !== "undefined" && window.location.origin)
+    if (!baseURL) {
         throw new AuraAuthError({ code: "CLIENT_BASE_URL_MISSING" })
     }
 
