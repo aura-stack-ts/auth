@@ -1,11 +1,16 @@
 import { createJoseInstance } from "@/jose.ts"
 import { createAuthAPI } from "@/api/create-api.ts"
+import type { RoutePattern } from "@aura-stack/router"
+import type { SerializeOptions } from "@aura-stack/router/cookie"
+import type { ZodObject } from "zod"
+import type { EditableShape } from "@/@types/identity.ts"
+import type { ConfigSchema, CredentialsConfigContext, OnCreateUserContext } from "@/@types/internal.ts"
+import type { RateLimiterRule, RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter/types"
 import type {
     OpenIDProvider,
     BuiltInOAuthProvider,
     Identities,
     SchemaTypes,
-    ConfigSchema,
     FromShapeToObject,
     Prettify,
     OAuthProviderCredentials,
@@ -14,14 +19,8 @@ import type {
     User,
     Awaitable,
     ZodIdentitySchema,
-    EditableShape,
     LiteralUnion,
 } from "@/@types/index.ts"
-import type { ZodObject } from "zod"
-import type { SerializeOptions } from "@aura-stack/router/cookie"
-import type { CredentialsConfigContext, OnCreateUserContext } from "@/@types/internal.ts"
-import type { RateLimiterRule, RateLimiterConfig as RaterLimiterBaseConfig } from "@aura-stack/rate-limiter/types"
-import type { RoutePattern } from "@aura-stack/router"
 
 /**
  * Main configuration interface for Aura Auth.

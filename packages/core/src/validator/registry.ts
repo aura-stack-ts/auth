@@ -1,16 +1,16 @@
 import * as valibot from "valibot"
 import { z } from "zod/v4"
 import { type } from "arktype"
+import { IsObject, Type as Typebox } from "typebox"
 import { identitySchema } from "@/identity/zod.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { IsObject, Type as Typebox } from "typebox"
-import { OAuthTokenPayloadSchema } from "@/shared/schemas/general.ts"
 import { createValidator } from "@aura-stack/router/validator"
+import { OAuthTokenPayloadSchema } from "@/shared/schemas/general.ts"
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
 import type { OAuthTokenPayload } from "@/@types/session.ts"
+import type { EditableToSchema } from "@/@types/identity.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
-import type { InternalIdentityConfig } from "@/@types/internal.ts"
-import type { EditableToSchema, ReturnUpdateSessionShape } from "@/@types/utility.ts"
+import type { InternalIdentityConfig, ReturnUpdateSessionShape } from "@/@types/internal.ts"
 
 export const deriveSchema = <Schema extends SchemaTypes>(
     schema: Schema,

@@ -1,6 +1,6 @@
 import { Object, String, Optional, Union, Null } from "typebox"
 import type { Identities } from "@/identity/index.ts"
-import type { EditableShapeTypebox } from "@/@types/utility.ts"
+import type { EditableShapeTypebox } from "@/@types/identity.ts"
 
 export * as typebox from "typebox"
 

@@ -1,6 +1,6 @@
 import { object, string, optional, nullable, pipe, email } from "valibot"
 import type { Identities } from "@/identity/index.ts"
-import type { EditableShapeValibot } from "@/@types/utility.ts"
+import type { EditableShapeValibot } from "@/@types/identity.ts"
 
 export * as valibot from "valibot"
 

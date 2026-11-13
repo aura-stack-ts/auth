@@ -1,15 +1,7 @@
-import { Type } from "arktype"
 import type { InferSchema, Prettify } from "@aura-stack/router"
-import type { IsZod } from "@/identity/zod.ts"
-import type { IsArkType } from "@/identity/arktype.ts"
+import type { SchemaTypes } from "@/identity/index.ts"
 import type { AuthInstance } from "@/@types/config.ts"
 import type { Session, User } from "@/@types/session.ts"
-import type { TProperties, TObject, TSchema } from "typebox"
-import type { Identities, SchemaTypes } from "@/identity/index.ts"
-import type { IdentityShape as TypeboxIdentitySchema } from "@/identity/typebox.ts"
-import type { IdentityShape as ValibotIdentitySchema } from "@/identity/valibot.ts"
-import type { ZodObject, ZodRawShape, ZodTypeAny, infer as Infer, ZodOptional } from "zod/v4"
-import type { ObjectSchema, BaseSchema, AnySchema as AnyValibotSchema, ObjectEntries, InferOutput } from "valibot"
 
 export type { Prettify }
 
@@ -21,88 +13,6 @@ export type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never
 
 /** Merges type `B` over `A`, replacing overlapping keys with `B`. */
 export type Merge<A, B> = Omit<A, keyof B> & B
-
-/**
- * Transforms a Zod raw shape so nested `ZodObject` fields become editable (same structure, for config authoring).
- */
-export type EditableShape<T extends ZodRawShape> = {
-    [K in keyof T]: T[K] extends ZodObject<infer Inner extends ZodRawShape> ? ZodObject<EditableShape<Inner>> : ZodTypeAny
-}
-
-export type EditableShapeZod<T extends ZodRawShape> = EditableShape<T>
-
-export type EditableShapeValibot<T extends ObjectEntries> = {
-    [K in keyof T]: T[K] extends ObjectSchema<infer Inner extends Record<string, AnyValibotSchema>, undefined>
-        ? ObjectSchema<EditableShapeValibot<Inner>, undefined>
-        : BaseSchema<any, any, any>
-}
-
-export type EditableShapeTypebox<T extends TProperties> = {
-    [K in keyof T]: T[K] extends TObject ? Wrap<EditableShapeTypebox<T[K]["properties"]>> : TSchema
-}
-
-export type EditableUser = {
-    [K in keyof User]: any
-}
-
-export type ConfigSchema<T extends Identities> =
-    IsZod<T> extends true
-        ? ZodObject<T & ZodRawShape>
-        : T extends EditableShapeValibot<ValibotIdentitySchema>
-          ? ObjectSchema<T & ObjectEntries, undefined>
-          : IsArkType<T> extends true
-            ? T
-            : T extends EditableShapeTypebox<TypeboxIdentitySchema>
-              ? TObject<T & TProperties>
-              : never
-
-/**
- * Infers the runtime object type from a Zod `shape` and intersects it with {@link User}
- * so identity fields always include the base user contract.
- */
-export type ZodShapeToObject<S extends ZodRawShape = ZodRawShape> = Merge<Infer<ZodObject<S>>, User>
-
-export type ValibotShapeToObject<S extends ObjectEntries> = Merge<InferOutput<ObjectSchema<S, undefined>>, User>
-
-export type ArktypeShapeToObject<S extends Type> = S extends Type<infer Shape> ? Wrap<Merge<Shape, User>> : never
-
-export type TypeboxShapeToObject<S> = Wrap<Merge<S, User>>
-
-export type EditableShapeArkType<T extends Type> = T extends Type<infer Shape> ? Type<{ [K in keyof Shape]: any }> : never
-
-export type FromShapeToObject<S> = S extends ZodRawShape
-    ? ZodShapeToObject<S>
-    : S extends ObjectEntries
-      ? ValibotShapeToObject<S>
-      : S extends Type
-        ? ArktypeShapeToObject<S>
-        : S extends TProperties
-          ? TypeboxShapeToObject<S>
-          : S extends User
-            ? S
-            : never
-
-export type EditableToSchema<T> =
-    T extends EditableShape<infer S>
-        ? ZodObject<S>
-        : T extends EditableShapeValibot<infer S>
-          ? ObjectSchema<S, undefined>
-          : T extends EditableShapeTypebox<infer S>
-            ? TObject<S>
-            : T extends EditableShapeArkType<any>
-              ? T
-              : never
-
-export type ReturnUpdateSessionShape<T> =
-    T extends EditableShape<infer S>
-        ? ZodObject<{ user?: ZodObject<S>; expires?: ZodOptional<ZodTypeAny> }>
-        : T extends EditableShapeValibot<infer S>
-          ? ObjectSchema<{ user?: ObjectSchema<S, undefined>; expires?: BaseSchema<any, any, any> }, undefined>
-          : T extends EditableShapeArkType<any>
-            ? Type<{ user?: T; expires?: Type<string> }>
-            : T extends EditableShapeTypebox<infer S>
-              ? TObject<{ user?: TObject<S>; expires?: TSchema }>
-              : never
 
 /** Recursively makes every property optional. */
 export type DeepPartial<T> = T extends (...args: any[]) => any
@@ -204,18 +114,3 @@ export type InferSignUp<Config> =
 export type RemoveIndexSignature<T> = {
     [K in keyof T as string extends K ? never : number extends K ? never : symbol extends K ? never : K]: T[K]
 }
-
-/**
- * HTTP `Response` with `json()` typed to resolve to `Body` (defaults to `unknown`).
- */
-export type AuthResponse<Body = unknown> = Prettify<
-    Omit<Response, "json"> & {
-        json(): Promise<Body>
-    }
->
-
-export type RequiredKeys<Obj extends object, Keys extends keyof Obj = keyof Obj> = Wrap<
-    {
-        [K in Keys]-?: Obj[K]
-    } & Omit<Obj, Keys>
->

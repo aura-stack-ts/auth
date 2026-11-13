@@ -1,6 +1,6 @@
 import { type } from "arktype"
 import type { Identities } from "@/identity/index.ts"
-import type { EditableShapeArkType } from "@/@types/utility.ts"
+import type { EditableShapeArkType } from "@/@types/identity.ts"
 
 export * as arktype from "arktype"
 

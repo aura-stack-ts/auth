@@ -3,15 +3,44 @@
  * types to the public API. This manuall solution was proposed because the current version
  * of tsdown does not support stripping internal types.
  */
+import { Type } from "arktype"
 import type { Awaitable, InferSchema, Prettify, RoutePattern } from "@aura-stack/router"
-import type { ZodObject, infer as Infer } from "zod"
-import type { AuthResponse, DeepPartial, LiteralUnion } from "@/@types/utility.ts"
-import type { identitySchema } from "@/identity/zod.ts"
-import type { createLogEntry } from "@/config/logger/create-logger.ts"
+import type { TObject, TProperties, TSchema } from "typebox"
+import type { ObjectSchema, BaseSchema, ObjectEntries } from "valibot"
+import type { ZodObject, ZodTypeAny, infer as Infer, ZodOptional, ZodRawShape } from "zod/v4"
+// Identity
+import type { IdentityShape as ValibotShape } from "@/identity/valibot.ts"
+import type { IdentityShape as TypeboxShape } from "@/identity/typebox.ts"
+import type { IsArkType, IdentityShape as ArkTypeShape } from "@/identity/arktype.ts"
+import type { identitySchema, IsZod, IdentityShape as ZodShape } from "@/identity/zod.ts"
+import type { JWTPayload } from "@/jose.ts"
+import type { createClient } from "@/client/client.ts"
+import type { TypedJWTPayload } from "@aura-stack/jose"
 import type { InferRules } from "@aura-stack/rate-limiter"
+import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { createSchemaRegistry } from "@/validator/registry.ts"
+import type { createCookieManager } from "@/session/cookie-manager.ts"
+import type { createLogEntry } from "@/config/logger/create-logger.ts"
+import type { DeepPartial, LiteralUnion, Wrap } from "@/@types/utility.ts"
 import type { FromShapeToObject, Identities, SchemaTypes } from "@/identity/index.ts"
+import type { OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/shared/schemas/general.ts"
 import type { AccessTokenContext, BuiltInOAuthProvider, OAuthProviderConfig, OAuthProviderCredentials } from "@/@types/oauth.ts"
+import type {
+    EditableShape,
+    EditableShapeArkType,
+    EditableShapeTypebox,
+    EditableShapeValibot,
+    EditableUser,
+} from "@/@types/identity.ts"
+import type {
+    JWTKey,
+    OAuthTokenPayload,
+    Session,
+    SessionConfig,
+    StatefulStrategyConfig,
+    StatelessStrategyConfig,
+    User,
+} from "@/@types/session.ts"
 import type {
     CookieName,
     CookieStrategyAttributes,
@@ -27,21 +56,6 @@ import type {
     TrustedOrigins,
     TrustedProxyHeadersSource,
 } from "@/@types/config.ts"
-import type {
-    JWTKey,
-    OAuthTokenPayload,
-    Session,
-    SessionConfig,
-    StatefulStrategyConfig,
-    StatelessStrategyConfig,
-    User,
-} from "@/@types/session.ts"
-import type { OAuthAccessTokenResponse, OIDCAccessTokenResponseSchema } from "@/shared/schemas/general.ts"
-import type { JWTPayload } from "@/jose.ts"
-import type { TypedJWTPayload } from "@aura-stack/jose"
-import type { SessionWithUserEntity } from "@/@types/entities.ts"
-import type { createCookieManager } from "@/session/cookie-manager.ts"
-import type { createClient } from "@/client/client.ts"
 
 /**
  * Runtime context passed into auth actions and API handlers: OAuth map, cookies, JWT, session strategy, trusted origins, etc.
@@ -153,6 +167,15 @@ export type FunctionAPIContext<Options extends object = {}> = Prettify<
     {
         ctx: RouterGlobalContext
     } & Options
+>
+
+/**
+ * HTTP `Response` with `json()` typed to resolve to `Body` (defaults to `unknown`).
+ */
+export type AuthResponse<Body = unknown> = Prettify<
+    Omit<Response, "json"> & {
+        json(): Promise<Body>
+    }
 >
 
 /**
@@ -389,3 +412,46 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      */
     verifyMagicLink(options: { token: string; request: Request }): Promise<{ sessionToken: string }>
 }
+
+// #region Identities
+export type ReturnUpdateSessionShape<T> =
+    T extends EditableShape<infer S>
+        ? ZodObject<{ user?: ZodObject<S>; expires?: ZodOptional<ZodTypeAny> }>
+        : T extends EditableShapeValibot<infer S>
+          ? ObjectSchema<{ user?: ObjectSchema<S, undefined>; expires?: BaseSchema<any, any, any> }, undefined>
+          : T extends EditableShapeArkType<any>
+            ? Type<{ user?: T; expires?: Type<string> }>
+            : T extends EditableShapeTypebox<infer S>
+              ? TObject<{ user?: TObject<S>; expires?: TSchema }>
+              : never
+
+export type ConfigSchema<T extends Identities> =
+    IsZod<T> extends true
+        ? ZodObject<T & ZodRawShape>
+        : T extends EditableShapeValibot<ValibotShape>
+          ? ObjectSchema<T & ObjectEntries, undefined>
+          : IsArkType<T> extends true
+            ? T
+            : T extends EditableShapeTypebox<TypeboxShape>
+              ? TObject<T & TProperties>
+              : never
+
+export type ReturnShapeType<T> =
+    T extends EditableShape<ZodShape>
+        ? ZodObject<T>
+        : T extends EditableShapeValibot<ValibotShape>
+          ? ObjectSchema<T, undefined>
+          : T extends EditableShapeArkType<ArkTypeShape>
+            ? T
+            : T extends EditableShapeTypebox<TypeboxShape>
+              ? TObject<T>
+              : T extends EditableUser
+                ? ZodObject<T>
+                : never
+
+// #region Utility Types
+export type RequiredKeys<Obj extends object, Keys extends keyof Obj = keyof Obj> = Wrap<
+    {
+        [K in Keys]-?: Obj[K]
+    } & Omit<Obj, Keys>
+>
