@@ -1,7 +1,7 @@
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { BuiltInOAuthProvider, LiteralUnion } from "@/@types/index.ts"
 
-export const isProviderConnected = (client: InternalAuthClient) => {
+export const isProviderConnected = ({ client }: ClientContext) => {
     return async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<boolean> => {
         try {
             const response = await client.get("/providers/:oauth", { params: { oauth } })

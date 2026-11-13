@@ -1,12 +1,12 @@
 import { getCSRFToken } from "@/shared/utils/client.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { BuiltInOAuthProvider, GetProviderTokensReturn, LiteralUnion } from "@/@types/index.ts"
 
-export const getProviderTokens = (client: InternalAuthClient) => {
+export const getProviderTokens = (ctx: ClientContext) => {
     return async (oauth: LiteralUnion<BuiltInOAuthProvider>): Promise<GetProviderTokensReturn> => {
         try {
-            const csrfToken = await getCSRFToken(client)
-            const response = await client.get("/providers/:oauth/tokens", {
+            const csrfToken = await getCSRFToken(ctx)
+            const response = await ctx.client.get("/providers/:oauth/tokens", {
                 params: { oauth },
                 headers: { "X-CSRF-Token": csrfToken },
             })

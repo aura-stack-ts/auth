@@ -1,16 +1,16 @@
 import { clientAuthResponse, getCSRFToken } from "@/shared/utils/client.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { SendVerificationEmailOptions, SendVerificationEmailReturn } from "@/@types/index.ts"
 
-export const sendVerificationEmail = (client: InternalAuthClient) => {
+export const sendVerificationEmail = (ctx: ClientContext) => {
     return async <Options extends SendVerificationEmailOptions>(
         email: string,
         options?: Options
     ): Promise<SendVerificationEmailReturn<Options>> => {
         try {
-            const { redirectTo } = options ?? {}
-            const csrfToken = await getCSRFToken(client)
-            const response = await client.post("/emailVerification/send", {
+            const redirectTo = ctx.getSafeRedirect(options)
+            const csrfToken = await getCSRFToken(ctx)
+            const response = await ctx.client.post("/emailVerification/send", {
                 body: { email },
                 searchParams: { redirectTo, redirect: false },
                 headers: { "X-CSRF-Token": csrfToken },

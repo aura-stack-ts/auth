@@ -1,19 +1,20 @@
 import { clientAuthResponse, getCSRFToken } from "@/shared/utils/client.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { UpdateSessionOptions, UpdateSessionReturn, User } from "@/@types/index.ts"
 
-export const updateSession = <DefaultUser extends User = User>(client: InternalAuthClient) => {
+export const updateSession = <DefaultUser extends User = User>(ctx: ClientContext) => {
     return async <Options extends UpdateSessionOptions<DefaultUser>>(
         options: Options
     ): Promise<UpdateSessionReturn<Options, DefaultUser>> => {
         try {
-            const csrfToken = await getCSRFToken(client)
-            const { session, redirectTo } = options ?? {}
+            const csrfToken = await getCSRFToken(ctx)
+            const { session } = options ?? {}
+            const redirectTo = ctx.getSafeRedirect(options)
             if (!session) {
                 return { success: false, session: null } as UpdateSessionReturn<Options, DefaultUser>
             }
             const user = session.user ?? {}
-            const response = await client.patch("/session", {
+            const response = await ctx.client.patch("/session", {
                 body: {
                     // @ts-ignore - Fix type here - go to @aura-stack/router.
                     user,

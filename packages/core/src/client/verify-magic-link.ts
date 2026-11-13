@@ -1,14 +1,14 @@
 import { clientAuthResponse } from "@/shared/utils/client.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { VerifyMagicLinkOptions, VerifyMagicLinkReturn } from "@/@types/index.ts"
 
-export const verifyMagicLink = (client: InternalAuthClient) => {
+export const verifyMagicLink = ({ client, getSafeRedirect }: ClientContext) => {
     return async <Options extends VerifyMagicLinkOptions>(
         token: string,
         options?: Options
     ): Promise<VerifyMagicLinkReturn<Options>> => {
         try {
-            const { redirectTo } = options ?? {}
+            const redirectTo = getSafeRedirect(options)
             const response = await client.get("/signIn/magicLink/verify", {
                 searchParams: { token, redirectTo, redirect: false },
             })

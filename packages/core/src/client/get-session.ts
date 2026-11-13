@@ -1,7 +1,7 @@
 import type { Session, User } from "@/@types/session.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 
-export const getSession = <DefaultUser extends User = User>(client: InternalAuthClient) => {
+export const getSession = <DefaultUser extends User = User>({ client }: ClientContext) => {
     return async (): Promise<Session<DefaultUser> | null> => {
         try {
             const response = await client.get("/session")

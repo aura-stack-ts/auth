@@ -1,16 +1,16 @@
 import { clientAuthResponse, getCSRFToken } from "@/shared/utils/client.ts"
-import type { InternalAuthClient } from "@/@types/internal.ts"
+import type { ClientContext } from "@/client/context.ts"
 import type { SendMagicLinkOptions, SendMagicLinkReturn } from "@/@types/index.ts"
 
-export const sendMagicLink = (client: InternalAuthClient) => {
+export const sendMagicLink = (ctx: ClientContext) => {
     return async <Options extends SendMagicLinkOptions>(
         email: string,
         options?: Options
     ): Promise<SendMagicLinkReturn<Options>> => {
         try {
-            const { redirectTo } = options ?? {}
-            const csrfToken = await getCSRFToken(client)
-            const response = await client.post("/signIn/magicLink", {
+            const redirectTo = ctx.getSafeRedirect(options)
+            const csrfToken = await getCSRFToken(ctx)
+            const response = await ctx.client.post("/signIn/magicLink", {
                 body: { email },
                 searchParams: { redirectTo, redirect: false },
                 headers: { "X-CSRF-Token": csrfToken },

@@ -1,6 +1,5 @@
 import { createClient as createClientAPI } from "@aura-stack/router"
-import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getEnv } from "@/shared/env.ts"
+import { createClientContext } from "@/client/context.ts"
 import { signIn } from "@/client/sign-in.ts"
 import { signUp } from "@/client/sign-up.ts"
 import { signOut } from "@/client/sign-out.ts"
@@ -35,17 +34,7 @@ export const createAuthClient = <
 >(
     options?: AuthClientOptions
 ) => {
-    const baseURL = getEnv("BASE_URL") || options?.baseURL
-    if (typeof window === "undefined" && !baseURL) {
-        throw new AuraAuthError({ code: "CLIENT_BASE_URL_MISSING" })
-    }
-
-    const client = createClient({
-        cache: "no-store",
-        credentials: "include",
-        baseURL: baseURL ?? window.location.origin,
-        ...options,
-    })
+    const context = createClientContext(options)
 
     return {
         /**
@@ -57,7 +46,7 @@ export const createAuthClient = <
          *
          * const session = await authClient.getSession()
          */
-        getSession: getSession<DefaultUser>(client),
+        getSession: getSession<DefaultUser>(context),
         /**
          * Initiates the sign-in process for a specified OAuth provider.
          *
@@ -72,7 +61,7 @@ export const createAuthClient = <
          *   redirectTo: "/dashboard"
          * })
          */
-        signIn: signIn(client),
+        signIn: signIn(context),
         /**
          * Initiates the sign-in process using user credentials (e.g., email and password).
          *
@@ -88,7 +77,7 @@ export const createAuthClient = <
          *   }
          * })
          */
-        signInCredentials: signInCredentials(client),
+        signInCredentials: signInCredentials(context),
         /**
          * Initiates the sign-up process for a new user with the provided payload.
          *
@@ -105,7 +94,7 @@ export const createAuthClient = <
          *   },
          * })
          */
-        signUp: signUp<SignUpPayload>(client),
+        signUp: signUp<SignUpPayload>(context),
         /**
          * Updates the current session with new information, such as user data or expiration time.
          *
@@ -122,7 +111,7 @@ export const createAuthClient = <
          *   }
          * })
          */
-        updateSession: updateSession<DefaultUser>(client),
+        updateSession: updateSession<DefaultUser>(context),
         /**
          * Fetches the OAuth tokens for a specified provider, if available.
          *
@@ -147,7 +136,7 @@ export const createAuthClient = <
          *   }
          * }
          */
-        getProviderTokens: getProviderTokens(client),
+        getProviderTokens: getProviderTokens(context),
         /**
          * Retrieves the access token for a specific OAuth provider, if available.
          *
@@ -165,7 +154,7 @@ export const createAuthClient = <
          * // Expected:
          * "access_token_value" or null
          */
-        getAccessToken: getAccessToken(client),
+        getAccessToken: getAccessToken(context),
         /**
          * Refreshes the user information from making a request to the user info endpoint of the specified
          * OAuth provider. This is useful for keeping the session data up-to-date without requiring the user
@@ -187,7 +176,7 @@ export const createAuthClient = <
          *   image: "https://example.com/avatar.jpg",
          * }
          */
-        refreshUserInfo: refreshUserInfo<DefaultUser>(client),
+        refreshUserInfo: refreshUserInfo<DefaultUser>(context),
         /**
          * Revokes the OAuth token for a specified provider. It doesn't sign out the user, but it invalidates
          * the access token, preventing further use of the token for API requests.
@@ -203,7 +192,7 @@ export const createAuthClient = <
          * // Expected:
          * true or false
          */
-        revokeToken: revokeToken(client),
+        revokeToken: revokeToken(context),
         /**
          * Disconnects the OAuth provider from the current user's account, removing the association between
          * the user's account and the OAuth provider. This action does not revoke the OAuth token, but it
@@ -218,7 +207,7 @@ export const createAuthClient = <
          * // Expected: true or false
          * const success = await authClient.disconnectProvider("google")
          */
-        disconnectProvider: disconnectProvider(client),
+        disconnectProvider: disconnectProvider(context),
         /**
          * Verifies if the specified OAuth provider is connected to the current user's account.
          *
@@ -231,7 +220,7 @@ export const createAuthClient = <
          * // Expected: true or false
          * const isConnected = await authClient.isProviderConnected("google")
          */
-        isProviderConnected: isProviderConnected(client),
+        isProviderConnected: isProviderConnected(context),
         /**
          * Signs out the current user, ending their session and optionally redirecting them to a specified URL.
          *
@@ -245,7 +234,7 @@ export const createAuthClient = <
          *   redirectTo: "/goodbye"
          * })
          */
-        signOut: signOut(client),
+        signOut: signOut(context),
         /**
          * Sends a verification email to the specified email address.
          *
@@ -267,7 +256,7 @@ export const createAuthClient = <
          *   redirect: false
          * })
          */
-        sendVerificationEmail: sendVerificationEmail(client),
+        sendVerificationEmail: sendVerificationEmail(context),
         /**
          * Verifies an email address using a verification token.
          *
@@ -289,7 +278,7 @@ export const createAuthClient = <
          *   redirect: false
          * })
          */
-        verifyEmail: verifyEmail(client),
+        verifyEmail: verifyEmail(context),
         /**
          * Initiates the forgot password flow by sending a password reset email to the specified address.
          *
@@ -309,7 +298,7 @@ export const createAuthClient = <
          * // manual redirect
          * const { success } = await authClient.forgotPassword("user@example.com", { redirect: false })
          */
-        forgotPassword: forgotPassword(client),
+        forgotPassword: forgotPassword(context),
         /**
          * Resets the password for a user using a valid password reset token.
          *
@@ -332,7 +321,7 @@ export const createAuthClient = <
          *   redirect: false
          * })
          */
-        resetPassword: resetPassword(client),
+        resetPassword: resetPassword(context),
         /**
          * Changes the password for the currently authenticated user.
          *
@@ -355,7 +344,7 @@ export const createAuthClient = <
          *   redirect: false
          * })
          */
-        changePassword: changePassword(client),
+        changePassword: changePassword(context),
         /**
          * Changes the email address for the currently authenticated user.
          *
@@ -378,7 +367,7 @@ export const createAuthClient = <
          *   redirect: false
          * })
          */
-        changeEmail: changeEmail(client),
+        changeEmail: changeEmail(context),
         /**
          * Verifies an email change request using a verification token.
          *
@@ -401,7 +390,7 @@ export const createAuthClient = <
          *   redirect: false
          * })
          */
-        verifyEmailChange: verifyEmailChange(client),
+        verifyEmailChange: verifyEmailChange(context),
         /**
          * Cancels an email change request. Supports two modes:
          * - Passing `payload.token` to cancel via a link in the email.
@@ -423,7 +412,7 @@ export const createAuthClient = <
          * // Cancel for the currently authenticated user
          * const { success } = await authClient.cancelEmailChange({ redirect: false })
          */
-        cancelEmailChange: cancelEmailChange(client),
+        cancelEmailChange: cancelEmailChange(context),
         /**
          * Sends a magic link to the specified email address, allowing the user to sign in without a password.
          *
@@ -443,7 +432,7 @@ export const createAuthClient = <
          * // manual redirect
          * const { success } = await authClient.sendMagicLink("john@example.com", { redirect: false })
          */
-        sendMagicLink: sendMagicLink(client),
+        sendMagicLink: sendMagicLink(context),
         /**
          * Verifies a magic link token and signs in the user if the token is valid.
          *
@@ -465,6 +454,6 @@ export const createAuthClient = <
          *   redirect: false
          * })
          */
-        verifyMagicLink: verifyMagicLink(client),
+        verifyMagicLink: verifyMagicLink(context),
     }
 }
