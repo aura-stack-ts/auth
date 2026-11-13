@@ -15,18 +15,18 @@ export const getSafeURL = ({
         if (isRelativeURL(url)) return url
         if (trustedOrigins.length > 0) {
             if (isTrustedOrigin(url, trustedOrigins)) {
-                const urlOrigin = new URL(url).origin
-                for (const pattern of trustedOrigins) {
-                    const regex = patternToRegex(pattern)
-                    if (regex?.test(urlOrigin)) {
+                const originURL = new URL(url).origin
+                for (const safeOrigin of trustedOrigins) {
+                    const regex = patternToRegex(safeOrigin)
+                    if (regex?.test(originURL)) {
                         return isSameOrigin(url, baseURL) ? extractPath(url) : url
                     }
-                    if (isValidURL(pattern) && equals(new URL(pattern).origin, urlOrigin)) return url
+                    if (isValidURL(safeOrigin) && equals(new URL(safeOrigin).origin, originURL)) return url
                 }
             }
             return null
         }
-        if (isSameOrigin(baseURL, url)) {
+        if (isSameOrigin(url, baseURL)) {
             return extractPath(url)
         }
         return null

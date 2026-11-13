@@ -18,6 +18,13 @@ describe("getSafeURL", () => {
             expected: "/dashboard",
         },
         {
+            description: "converts a same-origin absolute URL from subdomain to a relative path",
+            baseURL: "https://app.example.com",
+            url: "https://app.example.com/dashboard",
+            trustedOrigins: ["https://*.example.com"],
+            expected: "/dashboard",
+        },
+        {
             description: "allows an absolute URL from a trusted origin",
             baseURL: "https://app.com",
             url: "https://subapp.com/dashboard",
@@ -38,6 +45,7 @@ describe("getSafeURL", () => {
             trustedOrigins: [],
             expected: null,
         },
+
         /**
          * Local baseURL
          */

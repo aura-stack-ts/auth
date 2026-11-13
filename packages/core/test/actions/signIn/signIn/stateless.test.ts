@@ -185,7 +185,7 @@ describe("signIn action", () => {
                 },
             })
         )
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("http://app.com/dashboard")
+        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("/dashboard")
     })
 
     test("rejects subdomain Referer when wildcard origin is not trusted", async () => {

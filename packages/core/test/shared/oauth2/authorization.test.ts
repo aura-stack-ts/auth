@@ -666,6 +666,20 @@ describe("createRedirectTo", () => {
                 trustedOrigins: ["https://*.example.com"],
                 trustedProxyHeaders: true,
             } as GlobalContext)
+            expect(redirectTo).toBe("/dashboard")
+        })
+
+        test("with wildcard pattern with dangerous origin from trustedProxyHeaders when origins are not the same", async () => {
+            const request = new Request("https://app.example.com/auth/signIn/github", {
+                headers: {
+                    "X-Forwarded-Proto": "https",
+                    "X-Forwarded-Host": "superdevil.example.com",
+                },
+            })
+            const redirectTo = await createRedirectTo(request, "https://evil.example.com/dashboard", {
+                trustedOrigins: ["https://*.example.com"],
+                trustedProxyHeaders: true,
+            } as GlobalContext)
             expect(redirectTo).toBe("https://evil.example.com/dashboard")
         })
 
