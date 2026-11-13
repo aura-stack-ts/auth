@@ -1,5 +1,5 @@
 import { z } from "zod/v4"
-import type { EditableShape } from "@/@types/utility.ts"
+import type { EditableShape } from "@/@types/identity.ts"
 import type { Identities } from "@/identity/index.ts"
 
 export * as zod from "zod/v4"

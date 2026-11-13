@@ -10,10 +10,11 @@ import { identitySchema as UserIdentityArkType } from "@/identity/arktype.ts"
 import { identitySchema as UserIdentityTypeBox } from "@/identity/typebox.ts"
 import { identitySchema as UserIdentityValibot, type IdentityShape as UserShapeValibot } from "@/identity/valibot.ts"
 import type { Session, User } from "@/index.ts"
+import type { InferSignUp, Wrap } from "@/@types/utility.ts"
 import type { InferSession, InferUser, UserShape } from "@/identity/index.ts"
 import type { JWTHeaderParameters, JWTVerifyOptions, Prettify } from "@aura-stack/jose"
 import type { AuthInstance, TypedJWTPayload, ZodIdentitySchema } from "@/@types/index.ts"
-import type { InferSignUp, ValibotShapeToObject, Wrap, ZodShapeToObject } from "@/@types/utility.ts"
+import type { ValibotShapeToObject, ZodShapeToObject } from "@/@types/identity.ts"
 import type {
     GetSessionAPIOptions,
     GetSessionAPIReturn,

@@ -1,8 +1,8 @@
+import type { DeepPartial } from "@/@types/utility.ts"
 import type { CredentialsPayload } from "@/@types/config.ts"
 import type { RequestHeaders } from "@aura-stack/router/types"
-import type { AuthActionAPIReturn } from "@/@types/internal.ts"
-import type { DeepPartial, RequiredKeys } from "@/@types/utility.ts"
 import type { OAuthTokenPayload, Session, User } from "@/@types/session.ts"
+import type { AuthActionAPIReturn, RequiredKeys } from "@/@types/internal.ts"
 
 export interface APIOptionsWithRedirectTo {
     /**

@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### BREAKING CHANGES
 
+- Removed `AuthResponse`, `ReturnUpdateSessionShape`, `ConfigSchema`, `ReturnShapeType`, and `RequiredKeys` from the public `/types` entry point. These types are now internal and are no longer available for import by package consumers. [#316](https://github.com/aura-stack-ts/auth/pull/316)
+
 - Removed the `GetStatelessSessionReturn`, `GetStatefulSessionReturn`, `GetProviderTokensStatefulReturn`, and `SessionStrategy` types from the public API. These types, along with the interfaces related to `SessionStrategy`, are now internal and are no longer exported. [#301](https://github.com/aura-stack-ts/auth/pull/301)
 
 - Updated `VerificationTokensAdapter`: custom adapters must now implement `revokeAllVerificationTokens(userId, type?)`, and `revokeToken(id)` must return `Promise<boolean>` instead of `Promise<void>`. The boolean indicates whether the token was found and successfully revoked. [#297](https://github.com/aura-stack-ts/auth/pull/297)
