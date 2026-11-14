@@ -1096,7 +1096,7 @@ export const createAdapterSuite = (adapter) => {
                 ])
             )
 
-            const verified = await adapter.verifyBackupCode(mfaCredential.id)
+            const verified = await adapter.verifyBackupCode(mfaCredential.id, "code-hash-1")
             expect(verified).toBe(true)
         })
     })

@@ -16,7 +16,7 @@ export const prismaClient = new PrismaClient({
 })
 
 export const adapter = prismaAdapter({
-    client: prismaClient as any,
+    client: prismaClient,
     deleteStrategy: "soft",
 })
 
