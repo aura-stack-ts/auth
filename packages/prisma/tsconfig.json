@@ -6,6 +6,6 @@
       "@test/*": ["./test/*"]
     }
   },
-  "include": ["src", "src/generated", "test"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src", "test"],
+  "exclude": ["dist", "node_modules", "src/generated"]
 }
