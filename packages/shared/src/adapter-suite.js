@@ -1,5 +1,9 @@
 import { describe, test, expect } from "vitest"
 
+/**
+ *
+ * @param {import("@aura-stack/auth/types").DatabaseAdapter } adapter
+ */
 export const createAdapterSuite = (adapter) => {
     describe("Users", () => {
         test("createUser", async () => {
@@ -15,10 +19,9 @@ export const createAdapterSuite = (adapter) => {
                 image: "https://example.com/john.jpg",
                 emailVerifiedAt: null,
                 status: "active",
-                mfaEnabled: false,
-                mfaPreferredMethod: null,
                 createdAt: expect.any(Date),
                 updatedAt: expect.any(Date),
+                deletedAt: null,
                 attributes: null,
             })
         })
@@ -46,17 +49,19 @@ export const createAdapterSuite = (adapter) => {
                 name: "Alice Johnson",
                 email: "alice@example.com",
             })
+            const emailVerifiedAt = new Date()
             const updated = await adapter.updateUser(created.id, {
                 name: "Alice Updated",
-                emailVerifiedAt: new Date(),
-                mfaEnabled: true,
-                mfaPreferredMethod: "totp",
+                emailVerifiedAt,
             })
-            expect(updated.id).toBe(created.id)
-            expect(updated.name).toBe("Alice Updated")
-            expect(updated.emailVerifiedAt).not.toBeNull()
-            expect(updated.mfaEnabled).toBe(true)
-            expect(updated.mfaPreferredMethod).toBe("totp")
+            expect(updated).toEqual(
+                expect.objectContaining({
+                    id: created.id,
+                    name: "Alice Updated",
+                    email: "alice@example.com",
+                    emailVerifiedAt,
+                })
+            )
         })
 
         test("deleteUser - soft delete", async () => {
@@ -66,7 +71,14 @@ export const createAdapterSuite = (adapter) => {
             })
             await adapter.deleteUser(created.id)
             const user = await adapter.getUserById(created.id)
-            expect(user?.status).toBe("deleted")
+            expect(user).toEqual(
+                expect.objectContaining({
+                    id: created.id,
+                    name: "Soft Delete User",
+                    email: "soft@example.com",
+                    status: "deleted",
+                })
+            )
         })
     })
 
@@ -91,6 +103,7 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 createdAt: expect.any(Date),
                 updatedAt: expect.any(Date),
+                deletedAt: null,
             })
         })
 
@@ -141,8 +154,38 @@ export const createAdapterSuite = (adapter) => {
                 providerUserId: "github-1",
                 type: "oauth",
             })
+            await adapter.createAccount({
+                userId: user.id,
+                provider: "credentials",
+                providerUserId: user.id,
+                type: "credentials",
+                status: "active",
+            })
+
             const accounts = await adapter.getAccountsByUserId(user.id)
-            expect(accounts).toHaveLength(2)
+            expect(accounts).toHaveLength(3)
+            expect(accounts).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        userId: user.id,
+                        provider: "google",
+                        providerUserId: "google-1",
+                        type: "oauth",
+                    }),
+                    expect.objectContaining({
+                        userId: user.id,
+                        provider: "github",
+                        providerUserId: "github-1",
+                        type: "oauth",
+                    }),
+                    expect.objectContaining({
+                        userId: user.id,
+                        provider: "credentials",
+                        providerUserId: user.id,
+                        status: "active",
+                    }),
+                ])
+            )
         })
 
         test("updateAccountStatus", async () => {
@@ -157,7 +200,15 @@ export const createAdapterSuite = (adapter) => {
                 type: "oauth",
             })
             const updated = await adapter.updateAccountStatus(created.id, "suspended")
-            expect(updated.status).toBe("suspended")
+            expect(updated).toEqual(
+                expect.objectContaining({
+                    userId: user.id,
+                    provider: "linkedin",
+                    providerUserId: "linkedin-123",
+                    type: "oauth",
+                    status: "suspended",
+                })
+            )
         })
 
         test("unlinkAccount", async () => {
@@ -173,7 +224,15 @@ export const createAdapterSuite = (adapter) => {
             })
             await adapter.unlinkAccount(created.id)
             const account = await adapter.getAccountById(created.id)
-            expect(account?.status).toBe("unlinked")
+            expect(account).toEqual(
+                expect.objectContaining({
+                    userId: user.id,
+                    provider: "facebook",
+                    providerUserId: "facebook-123",
+                    type: "oauth",
+                    status: "unlinked",
+                })
+            )
         })
     })
 
@@ -249,8 +308,12 @@ export const createAdapterSuite = (adapter) => {
                 accessToken: "new-access",
                 refreshToken: "new-refresh",
             })
-            expect(updated.accessToken).toBe("new-access")
-            expect(updated.refreshToken).toBe("new-refresh")
+            expect(updated).toEqual(
+                expect.objectContaining({
+                    accessToken: "new-access",
+                    refreshToken: "new-refresh",
+                })
+            )
         })
     })
 
@@ -312,7 +375,13 @@ export const createAdapterSuite = (adapter) => {
                 passwordHash: "old-hash",
             })
             const updated = await adapter.updatePasswordHash(account.id, "new-hash")
-            expect(updated.passwordHash).toBe("new-hash")
+            expect(updated).toEqual(
+                expect.objectContaining({
+                    accountId: account.id,
+                    passwordHash: "new-hash",
+                    updatedAt: expect.any(Date),
+                })
+            )
         })
     })
 
@@ -331,7 +400,6 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             expect(session).toEqual({
                 id: expect.any(String),
@@ -342,7 +410,6 @@ export const createAdapterSuite = (adapter) => {
                 mfaState: "none",
                 tokenHash: "token-hash-123",
                 expiresAt: expect.any(Date),
-                metadata: null,
                 lastActivityAt: expect.any(Date),
                 revokedAt: null,
                 createdAt: expect.any(Date),
@@ -364,7 +431,6 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             const session = await adapter.getSessionById(created.id)
             expect(session).toEqual(created)
@@ -384,7 +450,6 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             await adapter.createSession({
                 id: "session-2",
@@ -395,7 +460,6 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             const sessions = await adapter.listSessions({ userId: user.id, status: "active", deviceId: null })
             expect(sessions).toHaveLength(2)
@@ -415,7 +479,6 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             const activeSessions = await adapter.listSessions({ userId: user.id, status: "active", deviceId: null })
             expect(activeSessions).toHaveLength(1)
@@ -435,20 +498,25 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
+            const lastActivityAt = new Date()
             const updated = await adapter.updateSession(created.id, {
                 id: created.id,
                 userId: user.id,
                 authenticatedWith: "credentials",
-                tokenHash: "token-hash",
+                tokenHash: "token-hash-updated",
                 expiresAt: new Date(Date.now() + 3600000),
                 status: "active",
                 mfaState: "completed",
-                deviceId: null,
-                metadata: null,
+                lastActivityAt,
             })
-            expect(updated.mfaState).toBe("completed")
+            expect(updated).toEqual(
+                expect.objectContaining({
+                    mfaState: "completed",
+                    tokenHash: "token-hash-updated",
+                    lastActivityAt,
+                })
+            )
         })
 
         test("touchSession", async () => {
@@ -465,12 +533,15 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             const newActivityTime = new Date()
             await adapter.touchSession(created.id, newActivityTime)
             const session = await adapter.getSessionById(created.id)
-            expect(session?.lastActivityAt.getTime()).toBeGreaterThanOrEqual(newActivityTime.getTime())
+            expect(session).toEqual(
+                expect.objectContaining({
+                    lastActivityAt: newActivityTime,
+                })
+            )
         })
 
         test("revokeSession", async () => {
@@ -487,7 +558,6 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             await adapter.revokeSession(created.id, "user_logout")
             expect(await adapter.getSessionById(created.id)).toBeNull()
@@ -507,7 +577,6 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             const session2 = await adapter.createSession({
                 id: "session-revoke-2",
@@ -518,7 +587,6 @@ export const createAdapterSuite = (adapter) => {
                 status: "active",
                 mfaState: "none",
                 deviceId: null,
-                metadata: null,
             })
             const count = await adapter.revokeAllSessions(user.id, "password_changed")
             expect(count).toBe(2)
@@ -546,7 +614,6 @@ export const createAdapterSuite = (adapter) => {
                 trusted: false,
                 firstSeenAt: new Date(),
                 lastSeenAt: new Date(),
-                metadata: null,
             })
             expect(device).toEqual({
                 id: expect.any(String),
@@ -559,9 +626,9 @@ export const createAdapterSuite = (adapter) => {
                 fingerprint: "fp-123",
                 lastIp: "192.168.1.1",
                 trusted: false,
+                deletedAt: null,
                 firstSeenAt: expect.any(Date),
                 lastSeenAt: expect.any(Date),
-                metadata: null,
             })
         })
 
@@ -583,7 +650,6 @@ export const createAdapterSuite = (adapter) => {
                 trusted: false,
                 firstSeenAt: new Date(),
                 lastSeenAt: new Date(),
-                metadata: null,
             })
             const device = await adapter.getDeviceById(created.id)
             expect(device).toEqual(created)
@@ -607,7 +673,6 @@ export const createAdapterSuite = (adapter) => {
                 trusted: false,
                 firstSeenAt: new Date(),
                 lastSeenAt: new Date(),
-                metadata: null,
             })
             const device = await adapter.getDeviceByFingerprint(user.id, "fp-unique-123")
             expect(device).toEqual(created)
@@ -631,7 +696,6 @@ export const createAdapterSuite = (adapter) => {
                 trusted: false,
                 firstSeenAt: new Date(),
                 lastSeenAt: new Date(),
-                metadata: null,
             })
             await adapter.createDevice({
                 id: "device-2",
@@ -646,7 +710,6 @@ export const createAdapterSuite = (adapter) => {
                 trusted: false,
                 firstSeenAt: new Date(),
                 lastSeenAt: new Date(),
-                metadata: null,
             })
             const devices = await adapter.getDevicesByUserId(user.id)
             expect(devices).toHaveLength(2)
@@ -670,7 +733,6 @@ export const createAdapterSuite = (adapter) => {
                 trusted: false,
                 firstSeenAt: new Date(),
                 lastSeenAt: new Date(),
-                metadata: null,
             })
             const updated = await adapter.updateDevice(created.id, {
                 id: created.id,
@@ -685,10 +747,13 @@ export const createAdapterSuite = (adapter) => {
                 trusted: true,
                 firstSeenAt: new Date(),
                 lastSeenAt: new Date(),
-                metadata: null,
             })
-            expect(updated.name).toBe("New Name")
-            expect(updated.trusted).toBe(true)
+            expect(updated).toEqual(
+                expect.objectContaining({
+                    name: "New Name",
+                    trusted: true,
+                })
+            )
         })
 
         test("trustDevice", async () => {
@@ -709,10 +774,16 @@ export const createAdapterSuite = (adapter) => {
                 trusted: false,
                 firstSeenAt: new Date(),
                 lastSeenAt: new Date(),
-                metadata: null,
             })
             const trusted = await adapter.trustDevice(created.id, true)
-            expect(trusted.trusted).toBe(true)
+            expect(trusted).toEqual(
+                expect.objectContaining({
+                    id: "device-trust",
+                    name: "Work Laptop",
+                    type: "desktop",
+                    trusted: true,
+                })
+            )
         })
 
         test("deleteDevice", async () => {
@@ -733,7 +804,6 @@ export const createAdapterSuite = (adapter) => {
                 trusted: false,
                 firstSeenAt: new Date(),
                 lastSeenAt: new Date(),
-                metadata: null,
             })
             await adapter.deleteDevice(created.id)
             const device = await adapter.getDeviceById(created.id)
@@ -750,20 +820,19 @@ export const createAdapterSuite = (adapter) => {
             const credential = await adapter.createMfaCredential({
                 userId: user.id,
                 type: "totp",
-                credentialData: { secret: "secret-123" },
                 isPrimary: true,
                 createdAt: new Date(),
-                metadata: null,
             })
             expect(credential).toEqual({
                 id: expect.any(String),
                 userId: user.id,
                 type: "totp",
-                credentialData: { secret: "secret-123" },
+                status: "active",
                 isPrimary: true,
                 verifiedAt: null,
+                deletedAt: null,
+                enrolledAt: expect.any(Date),
                 createdAt: expect.any(Date),
-                metadata: null,
             })
         })
 
@@ -775,10 +844,8 @@ export const createAdapterSuite = (adapter) => {
             const created = await adapter.createMfaCredential({
                 userId: user.id,
                 type: "totp",
-                credentialData: { secret: "secret" },
                 isPrimary: false,
                 createdAt: new Date(),
-                metadata: null,
             })
             const credential = await adapter.getMfaCredentialById(created.id)
             expect(credential).toEqual(created)
@@ -792,18 +859,14 @@ export const createAdapterSuite = (adapter) => {
             await adapter.createMfaCredential({
                 userId: user.id,
                 type: "totp",
-                credentialData: { secret: "secret-1" },
                 isPrimary: false,
                 createdAt: new Date(),
-                metadata: null,
             })
             await adapter.createMfaCredential({
                 userId: user.id,
                 type: "email",
-                credentialData: { email: "test@example.com" },
                 isPrimary: false,
                 createdAt: new Date(),
-                metadata: null,
             })
             const credentials = await adapter.getMfaCredentialsByUserId(user.id)
             expect(credentials).toHaveLength(2)
@@ -817,22 +880,18 @@ export const createAdapterSuite = (adapter) => {
             await adapter.createMfaCredential({
                 userId: user.id,
                 type: "totp",
-                credentialData: { secret: "secret" },
                 isPrimary: false,
                 createdAt: new Date(),
-                metadata: null,
             })
             await adapter.createMfaCredential({
                 userId: user.id,
                 type: "email",
-                credentialData: { email: "test@example.com" },
                 isPrimary: false,
                 createdAt: new Date(),
-                metadata: null,
             })
             const totpCredentials = await adapter.getMfaCredentialsByType(user.id, "totp")
             expect(totpCredentials).toHaveLength(1)
-            expect(totpCredentials[0].type).toBe("totp")
+            expect(totpCredentials).toEqual(expect.arrayContaining([expect.objectContaining({ type: "totp", isPrimary: false })]))
         })
 
         test("verifyMfaCredential", async () => {
@@ -843,13 +902,18 @@ export const createAdapterSuite = (adapter) => {
             const created = await adapter.createMfaCredential({
                 userId: user.id,
                 type: "totp",
-                credentialData: { secret: "secret" },
                 isPrimary: false,
                 createdAt: new Date(),
-                metadata: null,
             })
             const verified = await adapter.verifyMfaCredential(created.id)
-            expect(verified.verifiedAt).not.toBeNull()
+            expect(verified).toEqual(
+                expect.objectContaining({
+                    userId: user.id,
+                    type: "totp",
+                    status: "active",
+                    verifiedAt: expect.any(Date),
+                })
+            )
         })
 
         test("updateMfaCredential", async () => {
@@ -860,21 +924,23 @@ export const createAdapterSuite = (adapter) => {
             const created = await adapter.createMfaCredential({
                 userId: user.id,
                 type: "totp",
-                credentialData: { secret: "old-secret" },
+                status: "active",
                 isPrimary: false,
                 createdAt: new Date(),
-                metadata: null,
             })
+            const enrolledAt = new Date()
             const updated = await adapter.updateMfaCredential(created.id, {
-                userId: user.id,
-                type: "totp",
-                credentialData: { secret: "new-secret" },
+                status: "pending",
+                enrolledAt,
                 isPrimary: true,
-                createdAt: new Date(),
-                metadata: null,
             })
-            expect(updated.credentialData).toEqual({ secret: "new-secret" })
-            expect(updated.isPrimary).toBe(true)
+            expect(updated).toEqual(
+                expect.objectContaining({
+                    enrolledAt,
+                    isPrimary: true,
+                    status: "pending",
+                })
+            )
         })
 
         test("deleteMfaCredential", async () => {
@@ -885,14 +951,479 @@ export const createAdapterSuite = (adapter) => {
             const created = await adapter.createMfaCredential({
                 userId: user.id,
                 type: "totp",
-                credentialData: { secret: "secret" },
                 isPrimary: false,
                 createdAt: new Date(),
-                metadata: null,
             })
             await adapter.deleteMfaCredential(created.id)
             const credential = await adapter.getMfaCredentialById(created.id)
             expect(credential).toBeNull()
+        })
+
+        test("createTotpCredential & getTotpCredentialByCredentialId", async () => {
+            const user = await adapter.createUser({
+                name: "Delete MFA User",
+                email: "deletemfa@example.com",
+            })
+            const mfaCredential = await adapter.createMfaCredential({
+                userId: user.id,
+                type: "totp",
+                isPrimary: true,
+                status: "active",
+                createdAt: new Date(),
+            })
+
+            const verifiedAt = new Date()
+            const created = await adapter.createTotpCredential({
+                verifiedAt,
+                credentialId: mfaCredential.id,
+                secretCipher: "secret-cipher",
+            })
+            expect(created).toEqual({
+                id: expect.any(String),
+                verifiedAt,
+                credentialId: mfaCredential.id,
+                secretCipher: "secret-cipher",
+            })
+
+            const getTotp = await adapter.getTotpCredentialByCredentialId(mfaCredential.id)
+            expect(getTotp).toEqual({
+                id: created.id,
+                verifiedAt,
+                credentialId: mfaCredential.id,
+                secretCipher: "secret-cipher",
+            })
+        })
+
+        test("createSmsCredential & getSmsCredentialByCredentialId", async () => {
+            const user = await adapter.createUser({
+                name: "Delete MFA User",
+                email: "deletemfa@example.com",
+            })
+            const mfaCredential = await adapter.createMfaCredential({
+                userId: user.id,
+                type: "totp",
+                isPrimary: true,
+                status: "active",
+                createdAt: new Date(),
+            })
+
+            const verifiedAt = new Date()
+            const created = await adapter.createSmsCredential({
+                verifiedAt,
+                phoneNumber: "12345678",
+                credentialId: mfaCredential.id,
+            })
+            expect(created).toEqual({
+                id: expect.any(String),
+                verifiedAt,
+                phoneNumber: "12345678",
+                credentialId: mfaCredential.id,
+            })
+
+            const getSMS = await adapter.getSmsCredentialByCredentialId(mfaCredential.id)
+            expect(getSMS).toEqual({
+                id: created.id,
+                verifiedAt,
+                phoneNumber: "12345678",
+                credentialId: mfaCredential.id,
+            })
+        })
+
+        test("createPushCredential & getPushCredentialByCredentialId", async () => {
+            const user = await adapter.createUser({
+                name: "Delete MFA User",
+                email: "deletemfa@example.com",
+            })
+            const mfaCredential = await adapter.createMfaCredential({
+                userId: user.id,
+                type: "totp",
+                isPrimary: true,
+                status: "active",
+                createdAt: new Date(),
+            })
+
+            const verifiedAt = new Date()
+            const created = await adapter.createPushCredential({
+                verifiedAt,
+                credentialId: mfaCredential.id,
+                deviceToken: "device-token",
+                platform: "platform-1",
+            })
+            expect(created).toEqual({
+                id: expect.any(String),
+                verifiedAt,
+                credentialId: mfaCredential.id,
+                deviceToken: "device-token",
+                platform: "platform-1",
+            })
+
+            const getSMS = await adapter.getPushCredentialByCredentialId(mfaCredential.id)
+            expect(getSMS).toEqual({
+                id: created.id,
+                verifiedAt,
+                credentialId: mfaCredential.id,
+                deviceToken: "device-token",
+                platform: "platform-1",
+            })
+        })
+
+        test("createBackupCodes & verifyBackupCode", async () => {
+            const user = await adapter.createUser({
+                name: "Delete MFA User",
+                email: "deletemfa@example.com",
+            })
+            const mfaCredential = await adapter.createMfaCredential({
+                userId: user.id,
+                type: "totp",
+                isPrimary: true,
+                status: "active",
+                createdAt: new Date(),
+            })
+
+            const created = await adapter.createBackupCodes(mfaCredential.id, [
+                {
+                    codeHash: "code-hash-1",
+                },
+            ])
+            expect(created).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        id: expect.any(String),
+                        used: false,
+                        usedAt: null,
+                        codeHash: "code-hash-1",
+                    }),
+                ])
+            )
+
+            const verified = await adapter.verifyBackupCode(mfaCredential.id)
+            expect(verified).toBe(true)
+        })
+    })
+
+    describe("MFA Challenges", () => {
+        test("createChallenge", async () => {
+            const user = await adapter.createUser({
+                name: "MFA Challenge User",
+                email: "mfachallenge@example.com",
+            })
+            const credential = await adapter.createMfaCredential({
+                userId: user.id,
+                type: "totp",
+                isPrimary: true,
+                createdAt: new Date(),
+            })
+            const expiresAt = new Date(Date.now() + 300000)
+            const challenge = await adapter.createChallenge({
+                userId: user.id,
+                sessionId: null,
+                credentialId: credential.id,
+                type: "totp",
+                status: "pending",
+                attemptCount: 0,
+                expiresAt,
+            })
+
+            expect(challenge).toEqual({
+                id: expect.any(String),
+                userId: user.id,
+                sessionId: "",
+                credentialId: credential.id,
+                type: "totp",
+                status: "pending",
+                attemptCount: 0,
+                expiresAt,
+                createdAt: expect.any(Date),
+                verifiedAt: null,
+            })
+        })
+
+        test("getChallengeById", async () => {
+            const user = await adapter.createUser({
+                name: "Get MFA Challenge User",
+                email: "getmfachallenge@example.com",
+            })
+            const credential = await adapter.createMfaCredential({
+                userId: user.id,
+                type: "totp",
+                isPrimary: true,
+                createdAt: new Date(),
+            })
+            const created = await adapter.createChallenge({
+                userId: user.id,
+                sessionId: null,
+                credentialId: credential.id,
+                type: "totp",
+                status: "pending",
+                attemptCount: 0,
+                expiresAt: new Date(Date.now() + 300000),
+            })
+
+            expect(await adapter.getChallengeById(created.id)).toEqual(created)
+            expect(await adapter.getChallengeById("missing-challenge")).toBeNull()
+        })
+
+        test("incrementAttemptCount", async () => {
+            const user = await adapter.createUser({
+                name: "Increment MFA Challenge User",
+                email: "incrementmfachallenge@example.com",
+            })
+            const credential = await adapter.createMfaCredential({
+                userId: user.id,
+                type: "totp",
+                isPrimary: true,
+                createdAt: new Date(),
+            })
+            const created = await adapter.createChallenge({
+                userId: user.id,
+                sessionId: null,
+                credentialId: credential.id,
+                type: "totp",
+                status: "pending",
+                attemptCount: 0,
+                expiresAt: new Date(Date.now() + 300000),
+            })
+
+            const updated = await adapter.incrementAttemptCount(created.id)
+            expect(updated).toEqual(
+                expect.objectContaining({
+                    id: created.id,
+                    attemptCount: 1,
+                    status: "pending",
+                    verifiedAt: null,
+                })
+            )
+        })
+
+        test("verifyChallenge", async () => {
+            const user = await adapter.createUser({
+                name: "Verify MFA Challenge User",
+                email: "verifymfachallenge@example.com",
+            })
+            const credential = await adapter.createMfaCredential({
+                userId: user.id,
+                type: "totp",
+                isPrimary: true,
+                createdAt: new Date(),
+            })
+            const created = await adapter.createChallenge({
+                userId: user.id,
+                sessionId: null,
+                credentialId: credential.id,
+                type: "totp",
+                status: "pending",
+                attemptCount: 0,
+                expiresAt: new Date(Date.now() + 300000),
+            })
+
+            const verified = await adapter.verifyChallenge(created.id)
+            expect(verified).toEqual(
+                expect.objectContaining({
+                    id: created.id,
+                    status: "verified",
+                    verifiedAt: expect.any(Date),
+                })
+            )
+        })
+
+        test("expireChallenges", async () => {
+            const user = await adapter.createUser({
+                name: "Expire MFA Challenge User",
+                email: "expiremfachallenge@example.com",
+            })
+            const credential = await adapter.createMfaCredential({
+                userId: user.id,
+                type: "totp",
+                isPrimary: true,
+                createdAt: new Date(),
+            })
+            const session = await adapter.createSession({
+                userId: user.id,
+                authenticatedWith: "credentials",
+                tokenHash: "expire-mfa-challenge-session",
+                expiresAt: new Date(Date.now() + 3600000),
+                status: "active",
+                mfaState: "pending",
+                deviceId: null,
+            })
+            const expiresAt = new Date(Date.now() + 300000)
+            const createChallenge = (sessionId, status = "pending") =>
+                adapter.createChallenge({
+                    userId: user.id,
+                    sessionId,
+                    credentialId: credential.id,
+                    type: "totp",
+                    status,
+                    attemptCount: 0,
+                    expiresAt,
+                })
+            const pending = await createChallenge(session.id)
+            const verified = await createChallenge(session.id)
+            const otherSession = await adapter.createSession({
+                userId: user.id,
+                authenticatedWith: "credentials",
+                tokenHash: "other-mfa-challenge-session",
+                expiresAt: new Date(Date.now() + 3600000),
+                status: "active",
+                mfaState: "pending",
+                deviceId: null,
+            })
+            const unaffected = await createChallenge(otherSession.id)
+            await adapter.verifyChallenge(verified.id)
+
+            await adapter.expireChallenges(session.id)
+
+            expect(await adapter.getChallengeById(pending.id)).toEqual(expect.objectContaining({ status: "expired" }))
+            expect(await adapter.getChallengeById(verified.id)).toEqual(expect.objectContaining({ status: "verified" }))
+            expect(await adapter.getChallengeById(unaffected.id)).toEqual(expect.objectContaining({ status: "pending" }))
+        })
+    })
+
+    describe("Verification Tokens", () => {
+        test("createToken", async () => {
+            const user = await adapter.createUser({
+                name: "Verification Token User",
+                email: "verificationtoken@example.com",
+            })
+            const expiresAt = new Date(Date.now() + 300000)
+            const token = await adapter.createToken({
+                userId: user.id,
+                tokenHash: "verification-token-hash",
+                type: "email_verification",
+                identifier: null,
+                newIdentifier: null,
+                expiresAt,
+            })
+
+            expect(token).toEqual({
+                id: expect.any(String),
+                userId: user.id,
+                tokenHash: "verification-token-hash",
+                type: "email_verification",
+                identifier: "",
+                newIdentifier: null,
+                expiresAt,
+                revokedAt: null,
+                createdAt: expect.any(Date),
+            })
+        })
+
+        test("getTokenByHash", async () => {
+            const user = await adapter.createUser({
+                name: "Get Verification Token User",
+                email: "getverificationtoken@example.com",
+            })
+            const created = await adapter.createToken({
+                userId: user.id,
+                tokenHash: "get-verification-token-hash",
+                type: "password_reset",
+                identifier: "getverificationtoken@example.com",
+                newIdentifier: null,
+                expiresAt: new Date(Date.now() + 300000),
+            })
+
+            expect(await adapter.getTokenByHash(created.tokenHash)).toEqual(created)
+            expect(await adapter.getTokenByHash("missing-token-hash")).toBeNull()
+        })
+
+        test("getTokensByUserId", async () => {
+            const user = await adapter.createUser({
+                name: "List Verification Tokens User",
+                email: "listverificationtokens@example.com",
+            })
+            const otherUser = await adapter.createUser({
+                name: "Other Verification Token User",
+                email: "otherverificationtoken@example.com",
+            })
+            const expiresAt = new Date(Date.now() + 300000)
+            const first = await adapter.createToken({
+                userId: user.id,
+                tokenHash: "first-verification-token-hash",
+                type: "email_verification",
+                identifier: "listverificationtokens@example.com",
+                newIdentifier: null,
+                expiresAt,
+            })
+            const second = await adapter.createToken({
+                userId: user.id,
+                tokenHash: "second-verification-token-hash",
+                type: "magic_link",
+                identifier: null,
+                newIdentifier: null,
+                expiresAt,
+            })
+            await adapter.createToken({
+                userId: otherUser.id,
+                tokenHash: "other-verification-token-hash",
+                type: "email_verification",
+                identifier: "otherverificationtoken@example.com",
+                newIdentifier: null,
+                expiresAt,
+            })
+
+            expect(await adapter.getTokensByUserId(user.id)).toEqual(expect.arrayContaining([first, second]))
+            expect(await adapter.getTokensByUserId(user.id)).toHaveLength(2)
+        })
+
+        test("revokeToken", async () => {
+            const user = await adapter.createUser({
+                name: "Revoke Verification Token User",
+                email: "revokeverificationtoken@example.com",
+            })
+            const created = await adapter.createToken({
+                userId: user.id,
+                tokenHash: "revoke-verification-token-hash",
+                type: "password_reset",
+                identifier: "revokeverificationtoken@example.com",
+                newIdentifier: null,
+                expiresAt: new Date(Date.now() + 300000),
+            })
+
+            expect(await adapter.revokeToken(created.id)).toBe(true)
+            expect(await adapter.revokeToken(created.id)).toBe(false)
+            expect(await adapter.getTokenByHash(created.tokenHash)).toEqual(
+                expect.objectContaining({
+                    id: created.id,
+                    revokedAt: expect.any(Date),
+                })
+            )
+        })
+
+        test("revokeAllVerificationTokens", async () => {
+            const user = await adapter.createUser({
+                name: "Revoke All Verification Tokens User",
+                email: "revokeallverificationtokens@example.com",
+            })
+            const expiresAt = new Date(Date.now() + 300000)
+            const matchingTokens = await Promise.all(
+                ["password-reset-token-1", "password-reset-token-2"].map((tokenHash) =>
+                    adapter.createToken({
+                        userId: user.id,
+                        tokenHash,
+                        type: "password_reset",
+                        identifier: "revokeallverificationtokens@example.com",
+                        newIdentifier: null,
+                        expiresAt,
+                    })
+                )
+            )
+            const otherType = await adapter.createToken({
+                userId: user.id,
+                tokenHash: "email-verification-token",
+                type: "email_verification",
+                identifier: "revokeallverificationtokens@example.com",
+                newIdentifier: null,
+                expiresAt,
+            })
+
+            expect(await adapter.revokeAllVerificationTokens(user.id, "password_reset")).toBe(2)
+            const tokens = await adapter.getTokensByUserId(user.id)
+            expect(tokens).toEqual(
+                expect.arrayContaining([
+                    ...matchingTokens.map((token) => expect.objectContaining({ id: token.id, revokedAt: expect.any(Date) })),
+                    expect.objectContaining({ id: otherType.id, revokedAt: null }),
+                ])
+            )
         })
     })
 
@@ -911,7 +1442,6 @@ export const createAdapterSuite = (adapter) => {
                 fingerprint: null,
                 deviceId: null,
                 createdAt: new Date(),
-                metadata: null,
             })
             expect(transaction).toEqual({
                 id: expect.any(String),
@@ -926,7 +1456,6 @@ export const createAdapterSuite = (adapter) => {
                 deviceId: null,
                 createdAt: expect.any(Date),
                 expiresAt: expect.any(Date),
-                metadata: null,
             })
         })
 
@@ -944,7 +1473,6 @@ export const createAdapterSuite = (adapter) => {
                 fingerprint: null,
                 deviceId: null,
                 createdAt: new Date(),
-                metadata: null,
             })
             const transaction = await adapter.getOAuthTransactionByState("state-456")
             expect(transaction).toEqual(created)
@@ -964,7 +1492,6 @@ export const createAdapterSuite = (adapter) => {
                 fingerprint: null,
                 deviceId: null,
                 createdAt: new Date(),
-                metadata: null,
             })
             const consumed = await adapter.consumeOAuthTransaction("state-789")
             expect(consumed).toEqual(created)
@@ -986,7 +1513,6 @@ export const createAdapterSuite = (adapter) => {
                 fingerprint: null,
                 deviceId: null,
                 createdAt: new Date(),
-                metadata: null,
             })
             await adapter.createOAuthTransaction({
                 id: "transaction-valid",
@@ -1001,7 +1527,6 @@ export const createAdapterSuite = (adapter) => {
                 fingerprint: null,
                 deviceId: null,
                 createdAt: new Date(),
-                metadata: null,
             })
             const count = await adapter.deleteExpiredOAuthTransactions()
             expect(count).toBe(1)
