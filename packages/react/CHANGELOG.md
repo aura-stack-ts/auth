@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added the `useSendVerificationEmail()`, `useVerifyEmail()`, `useForgotPassword()`, `useResetPassword()`, `useChangePassword()`, `useChangeEmail()`, `useVerifyEmailChange()`, `useCancelEmailChange()`, `useSendMagicLink()`, and `useVerifyMagicLink()` hooks. These hooks bring the package's client-side API in sync with the latest authentication features introduced in the core package. [#320](https://github.com/aura-stack-ts/auth/pull/320)
+
 ---
 
 ## [0.4.1] - 2026-10-17
