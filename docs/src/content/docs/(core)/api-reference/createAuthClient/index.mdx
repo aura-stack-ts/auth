@@ -86,6 +86,22 @@ export const authClient = createAuthClient({
 })
 ```
 
+### `redirect`
+
+A custom `redirect` handler for the auth client to use instead of the default `window.location.assign()` function when client methods perform a redirection.
+
+```ts title="lib/auth-client.ts" lineNumbers
+import { createAuthClient } from "@aura-stack/auth/client"
+
+export const authClient = createAuthClient({
+  baseURL: "https://api.example.com",
+  redirect: (to) => {
+    // Custom redirect logic (e.g., framework router integration)
+    router.push(to)
+  },
+})
+```
+
 ### `cache`
 
 Sets the [Fetch API `cache` mode](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#cache) used for requests (`"default"`, `"no-store"`, `"reload"`, `"no-cache"`, `"force-cache"`, or `"only-if-cached"`). Defaults to `"no-store"`, the standard browser HTTP cache behavior.
