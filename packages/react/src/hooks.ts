@@ -1023,6 +1023,9 @@ export const useVerifyMagicLink = () => {
                 if (options?.redirect === true) {
                     await performRedirect(redirect, value.redirectURL)
                 }
+                if (value.success) {
+                    broadcast({ type: "session:sync" })
+                }
                 return value as VerifyMagicLinkReturn<Options>
             })
         },
