@@ -12,6 +12,15 @@ vi.mock(import("@aura-stack/router"), async (importOriginal) => {
 
 const createClientMock = vi.mocked(createClient)
 
+const createJSONResponse = (body: unknown, status = 200) => {
+    return new Response(JSON.stringify(body), {
+        status,
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+}
+
 describe("createAuthClient", () => {
     beforeEach(() => {
         vi.clearAllMocks()
@@ -105,5 +114,32 @@ describe("createAuthClient", () => {
         vi.stubGlobal("window", undefined)
 
         expect(() => createAuthClient({})).toThrow()
+    })
+
+    test("set custom redirect callback", async () => {
+        vi.stubGlobal("window", { location: { assign: vi.fn() } })
+
+        const get = vi.fn().mockResolvedValue(createJSONResponse({ csrfToken: "csrf_token_1" }))
+        const post = vi.fn().mockResolvedValue(createJSONResponse({ redirect: true, redirectURL: "/logout" }, 202))
+
+        createClientMock.mockReturnValue({
+            get,
+            post,
+        })
+
+        const redirectCallback = vi.fn()
+
+        const client = createAuthClient({
+            redirect: redirectCallback,
+            baseURL: "http://locahost:1000",
+        })
+
+        await client.signOut({
+            redirect: true,
+            redirectTo: "/logout",
+        })
+
+        expect(window.location.assign).not.toHaveBeenCalled()
+        expect(redirectCallback).toHaveBeenCalledWith("/logout")
     })
 })

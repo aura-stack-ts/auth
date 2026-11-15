@@ -2,7 +2,7 @@ import { clientAuthResponse } from "@/shared/utils/client.ts"
 import type { ClientContext } from "@/client/context.ts"
 import type { ForgotPasswordOptions, ForgotPasswordReturn } from "@/@types/index.ts"
 
-export const forgotPassword = ({ client, getSafeRedirect }: ClientContext) => {
+export const forgotPassword = ({ client, getSafeRedirect, redirectFn }: ClientContext) => {
     return async <Options extends ForgotPasswordOptions>(
         email: string,
         options?: Options
@@ -15,7 +15,7 @@ export const forgotPassword = ({ client, getSafeRedirect }: ClientContext) => {
             })
             const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
-                window.location.assign(json.redirectURL)
+                await redirectFn(json.redirectURL)
             }
             return json as unknown as ForgotPasswordReturn<Options>
         } catch (error) {

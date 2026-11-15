@@ -17,7 +17,7 @@ export const signOut = (ctx: ClientContext) => {
             })
             const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
-                window.location.assign(json.redirectURL)
+                await ctx.redirectFn(json.redirectURL)
             }
             return json as unknown as SignOutReturn<Options>
         } catch (error) {

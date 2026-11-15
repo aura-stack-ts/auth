@@ -2,7 +2,7 @@ import { clientAuthResponse } from "@/shared/utils/client.ts"
 import type { ClientContext } from "@/client/context.ts"
 import type { VerifyMagicLinkOptions, VerifyMagicLinkReturn } from "@/@types/index.ts"
 
-export const verifyMagicLink = ({ client, getSafeRedirect }: ClientContext) => {
+export const verifyMagicLink = ({ client, getSafeRedirect, redirectFn }: ClientContext) => {
     return async <Options extends VerifyMagicLinkOptions>(
         token: string,
         options?: Options
@@ -14,7 +14,7 @@ export const verifyMagicLink = ({ client, getSafeRedirect }: ClientContext) => {
             })
             const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
-                window.location.assign(json.redirectURL)
+                await redirectFn(json.redirectURL)
             }
             return json as unknown as VerifyMagicLinkReturn<Options>
         } catch (error) {

@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Added a custom redirect handler option to `createAuthClient()`. This allows users to override the default `window.location.assign()` behavior with a custom redirect function, enabling integration with framework-specific navigation APIs. [#322](https://github.com/aura-stack-ts/auth/pull/322)
+
 - Added the `trustedOrigins` and `fallbackRedirectTo` options to `createAuthClient()` to secure redirects during client-side interactions with mounted endpoints. The `trustedOrigins` option validates redirect destinations against the configured list of trusted origins, ensuring that client-side redirects only target trusted URLs. The `fallbackRedirectTo` option allows users to configure a fallback destination globally or override it per API call when the requested `redirectTo` value is invalid or untrusted. This follows the same validation and fallback logic introduced in `createAuth()` for server-side flows. [#315](https://github.com/aura-stack-ts/auth/pull/315)
 
 - Added the `fallbackRedirectTo` option to `createAuth()` and individual API function calls. This option allows users to configure a fallback redirect destination when the initial `redirectTo` value is invalid or untrusted. It can be configured globally to apply across all authentication flows or overridden per API call for flow-specific control. Each fallback URL is validated against the trusted origins configuration. If neither fallback is valid, the redirect defaults to `/`. [#314](https://github.com/aura-stack-ts/auth/pull/314)

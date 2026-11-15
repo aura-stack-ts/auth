@@ -14,7 +14,7 @@ export const cancelEmailChange = (ctx: ClientContext) => {
             })
             const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
-                window.location.assign(json.redirectURL)
+                await ctx.redirectFn(json.redirectURL)
             }
             return json as unknown as CancelEmailChangeReturn<Options>
         } catch (error) {

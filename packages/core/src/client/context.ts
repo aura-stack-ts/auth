@@ -1,7 +1,7 @@
 import { createClient as createClientAPI } from "@aura-stack/router"
 import { getEnv } from "@/shared/env.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getSafeRedirectTo } from "@/shared/utils/client.ts"
+import { defaultRedirect, getSafeRedirectTo } from "@/shared/utils/client.ts"
 import type { AuthClient, AuthClientOptions } from "@/@types/client.ts"
 
 export const createClient = createClientAPI<AuthClient>
@@ -21,10 +21,13 @@ export const createClientContext = (options?: AuthClientOptions) => {
     const trustedOrigins = [...(options?.trustedOrigins ? options.trustedOrigins : []), baseURL]
 
     const getSafeRedirect = getSafeRedirectTo({ baseURL, trustedOrigins, fallbackRedirectTo: options?.fallbackRedirectTo })
+    const redirectFn = options?.redirect ?? defaultRedirect
+
     return {
         client,
         options,
         getSafeRedirect,
+        redirectFn,
     }
 }
 
