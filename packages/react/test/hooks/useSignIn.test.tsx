@@ -1,7 +1,7 @@
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { useSignIn } from "@/hooks.ts"
+import { useSignIn } from "@/hooks/index.ts"
 import { createMockClient, wrapper } from "@test/hooks/presets.tsx"
 
 const redirectMock = vi.fn()

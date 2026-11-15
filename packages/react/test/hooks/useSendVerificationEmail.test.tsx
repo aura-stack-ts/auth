@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { createMockClient, wrapper } from "@test/hooks/presets.tsx"
-import { useSendVerificationEmail } from "@/hooks.ts"
+import { useSendVerificationEmail } from "@/hooks/index.ts"
 
 const redirectMock = vi.fn()
 

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 import { createMockClient, mockSession, wrapper } from "@test/hooks/presets.tsx"
 import { userEvent } from "@testing-library/user-event"
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
-import { useUpdateSession } from "@/hooks.ts"
+import { useUpdateSession } from "@/hooks/index.ts"
 import type { SubmitEvent } from "react"
 
 afterEach(() => {

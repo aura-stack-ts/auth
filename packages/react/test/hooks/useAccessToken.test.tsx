@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 import { createMockClient, mockSession, wrapper } from "@test/hooks/presets.tsx"
 import { userEvent } from "@testing-library/user-event"
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
-import { useAccessToken } from "@/hooks.ts" // Adjust path to where your hook is exported
+import { useAccessToken } from "@/hooks/index.ts"
 
 afterEach(() => {
     vi.clearAllMocks()
