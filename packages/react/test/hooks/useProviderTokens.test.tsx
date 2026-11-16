@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
-import { useProviderTokens } from "@/hooks.ts"
+import { useProviderTokens } from "@/hooks/index.ts"
 import { createMockClient, mockSession, providerTokens, wrapper } from "@test/hooks/presets.tsx"
 import { userEvent } from "@testing-library/user-event"
 

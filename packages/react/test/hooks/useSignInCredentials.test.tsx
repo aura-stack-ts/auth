@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { useSignInCredentials } from "@/hooks.ts"
+import { useSignInCredentials } from "@/hooks/index.ts"
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
 import { createMockClient, wrapper } from "@test/hooks/presets.tsx"
 import { userEvent } from "@testing-library/user-event"

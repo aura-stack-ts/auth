@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { render, renderHook, screen, waitFor } from "@testing-library/react"
-import { useSession } from "@/hooks.ts"
+import { useSession } from "@/hooks/index.ts"
 import { createMockClient, mockSession, wrapper } from "@test/hooks/presets.tsx"
 
 afterEach(() => {

@@ -6,7 +6,7 @@ export default defineConfig({
     entry: [
         "src/index.tsx",
         "src/server.ts",
-        "src/hooks.ts",
+        "src/hooks/index.ts",
         "src/context.tsx",
         "src/@types/index.ts",
         "src/generated/oauth/*.ts",

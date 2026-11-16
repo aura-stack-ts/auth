@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 import { createMockClient, mockSession, wrapper } from "@test/hooks/presets.tsx"
 import { userEvent } from "@testing-library/user-event"
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
-import { useRefreshUserInfo } from "@/hooks.ts"
+import { useRefreshUserInfo } from "@/hooks/index.ts"
 
 afterEach(() => {
     vi.clearAllMocks()

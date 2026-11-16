@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { useSignOut } from "@/hooks.ts"
+import { useSignOut } from "@/hooks/index.ts"
 import { userEvent } from "@testing-library/user-event"
 import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
 import { createMockClient, mockSession, wrapper } from "@test/hooks/presets.tsx"
