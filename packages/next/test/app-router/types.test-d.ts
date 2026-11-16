@@ -32,6 +32,13 @@ describe("createAuth", () => {
         const { api } = auth
         type Identity = ZodShapeToObject<ZodIdentitySchema & { role: zod.ZodString; nickname: zod.ZodOptional<zod.ZodString> }>
 
+        api.changeEmail({
+            payload: {
+                newEmail: "",
+                currentPassword: "",
+            },
+        })
+
         test("Infer Types", () => {
             expectTypeOf<InferUser<typeof auth>>().toEqualTypeOf<Wrap<Identity>>()
             expectTypeOf<InferSession<typeof auth>>().toEqualTypeOf<Session<Wrap<Identity>>>()

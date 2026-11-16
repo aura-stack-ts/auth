@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added the `sendVerificationEmail()`, `verifyEmail()`, `forgotPassword()`, `resetPassword()`, `changePassword()`, `changeEmail()`, `verifyEmailChange()`, `cancelEmailChange()`, `sendMagicLink()`, and `verifyMagicLink()` API functions to the `createAuth().api` object. These built-in API functions are available for Next.js App Router integrations, while Next.js Pages Router continues to use the API functions provided by the core package. This brings the package's API in sync with the latest authentication features introduced in the core package. [#325](https://github.com/aura-stack-ts/auth/pull/325)
+
 ---
 
 ## [0.4.1] - 2026-10-17

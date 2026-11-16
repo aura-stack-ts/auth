@@ -4,6 +4,8 @@ import type { RequestHeaders } from "@aura-stack/router/types"
 import type { OAuthTokenPayload, Session, User } from "@/@types/session.ts"
 import type { AuthActionAPIReturn, RequiredKeys } from "@/@types/internal.ts"
 
+export type { ResolveOptionsWithRedirect as ResolveAPIOptionsWithRedirect } from "@/@types/client.ts"
+
 export interface APIOptionsWithRedirectTo {
     /**
      * Optional redirect strategy for server/programmatic API functions.
