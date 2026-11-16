@@ -16,6 +16,26 @@ import type {
     UpdateSessionOptions,
     UpdateSessionReturn,
     GetProviderTokensReturn,
+    SendVerificationEmailOptions,
+    SendVerificationEmailReturn,
+    VerifyEmailOptions,
+    VerifyEmailReturn,
+    ForgotPasswordOptions,
+    ForgotPasswordReturn,
+    ResetPasswordOptions,
+    ResetPasswordReturn,
+    ChangePasswordOptions,
+    ChangePasswordReturn,
+    ChangeEmailOptions,
+    ChangeEmailReturn,
+    VerifyEmailChangeOptions,
+    VerifyEmailChangeReturn,
+    CancelEmailChangeOptions,
+    CancelEmailChangeReturn,
+    SendMagicLinkOptions,
+    SendMagicLinkReturn,
+    VerifyMagicLinkOptions,
+    VerifyMagicLinkReturn,
 } from "@aura-stack/auth/types"
 import type { Context } from "@/@types/types.ts"
 
@@ -560,6 +580,459 @@ export const useRefreshUserInfo = <DefaultUser extends User = User>() => {
     )
 
     return { refreshUserInfo, isPending } as const
+}
+
+/**
+ * Sends a verification email to the specified email address.
+ *
+ * The returned action accepts an email and optional redirect settings. It disables
+ * the client's automatic redirect and uses the `AuthProvider` redirect handler
+ * when called with `redirect: true`.
+ *
+ * @returns An object containing the `sendVerificationEmail` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { sendVerificationEmail, isPending } = useSendVerificationEmail()
+ *
+ *   return (
+ *     <button
+ *       disabled={isPending}
+ *       onClick={() => sendVerificationEmail("user@example.com", { redirect: true, redirectTo: "/verify-sent" })}
+ *     >
+ *       Send verification email
+ *     </button>
+ *   )
+ * }
+ */
+export const useSendVerificationEmail = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const sendVerificationEmail = useCallback(
+        <Options extends SendVerificationEmailOptions>(
+            email: string,
+            options?: Options
+        ): Promise<SendVerificationEmailReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.sendVerificationEmail(email, {
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                return value as SendVerificationEmailReturn<Options>
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { sendVerificationEmail, isPending } as const
+}
+
+/**
+ * Verifies an email address using a verification token.
+ *
+ * The returned action accepts a token and optional redirect settings. It disables
+ * the client's automatic redirect and uses the `AuthProvider` redirect handler
+ * when called with `redirect: true`.
+ *
+ * @returns An object containing the `verifyEmail` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { verifyEmail, isPending } = useVerifyEmail()
+ *
+ *   return (
+ *     <button disabled={isPending} onClick={() => verifyEmail("verification-token", { redirect: true })}>
+ *       Verify email
+ *     </button>
+ *   )
+ * }
+ */
+export const useVerifyEmail = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const verifyEmail = useCallback(
+        <Options extends VerifyEmailOptions>(token: string, options?: Options): Promise<VerifyEmailReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.verifyEmail(token, {
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                return value as VerifyEmailReturn<Options>
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { verifyEmail, isPending } as const
+}
+
+/**
+ * Initiates the forgot password flow by sending a password reset email to the specified address.
+ *
+ * The returned action accepts an email and optional redirect settings. It disables
+ * the client's automatic redirect and uses the `AuthProvider` redirect handler
+ * when called with `redirect: true`.
+ *
+ * @returns An object containing the `forgotPassword` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { forgotPassword, isPending } = useForgotPassword()
+ *
+ *   return (
+ *     <button disabled={isPending} onClick={() => forgotPassword("user@example.com", { redirectTo: "/check-email" })}>
+ *       Send password reset email
+ *     </button>
+ *   )
+ * }
+ */
+export const useForgotPassword = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const forgotPassword = useCallback(
+        <Options extends ForgotPasswordOptions>(email: string, options?: Options): Promise<ForgotPasswordReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.forgotPassword(email, {
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                return value as ForgotPasswordReturn<Options>
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { forgotPassword, isPending } as const
+}
+
+/**
+ * Resets the password for a user using a valid password reset token.
+ *
+ * The returned action accepts a payload containing the reset token and new password,
+ * along with optional redirect settings. It disables the client's automatic redirect
+ * and uses the `AuthProvider` redirect handler when called with `redirect: true`.
+ *
+ * @returns An object containing the `resetPassword` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { resetPassword, isPending } = useResetPassword()
+ *
+ *   const handleReset = () =>
+ *     resetPassword({
+ *       payload: { token: "reset-token", newPassword: "new-password" },
+ *       redirect: true,
+ *       redirectTo: "/sign-in",
+ *     })
+ *
+ *   return <button disabled={isPending} onClick={handleReset}>Reset password</button>
+ * }
+ */
+export const useResetPassword = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const resetPassword = useCallback(
+        <Options extends ResetPasswordOptions>(options: Options): Promise<ResetPasswordReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.resetPassword({
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                return value as ResetPasswordReturn<Options>
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { resetPassword, isPending } as const
+}
+
+/**
+ * Changes the password for the currently authenticated user.
+ *
+ * The returned action accepts a payload containing the current and new passwords,
+ * along with optional redirect settings. It disables the client's automatic redirect
+ * and uses the `AuthProvider` redirect handler when called with `redirect: true`.
+ *
+ * @returns An object containing the `changePassword` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { changePassword, isPending } = useChangePassword()
+ *
+ *   const handleChange = () =>
+ *     changePassword({
+ *       payload: { currentPassword: "current-password", newPassword: "new-password" },
+ *       redirect: true,
+ *       redirectTo: "/settings",
+ *     })
+ *
+ *   return <button disabled={isPending} onClick={handleChange}>Change password</button>
+ * }
+ */
+export const useChangePassword = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const changePassword = useCallback(
+        <Options extends ChangePasswordOptions>(options: Options): Promise<ChangePasswordReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.changePassword({
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                return value
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { changePassword, isPending } as const
+}
+
+/**
+ * Changes the email address for the currently authenticated user.
+ *
+ * The returned action accepts a payload containing the current password and new
+ * email address, along with optional redirect settings. It disables the client's
+ * automatic redirect and uses the `AuthProvider` redirect handler when called with
+ * `redirect: true`.
+ *
+ * @returns An object containing the `changeEmail` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { changeEmail, isPending } = useChangeEmail()
+ *
+ *   const handleChange = () =>
+ *     changeEmail({
+ *       payload: { currentPassword: "current-password", newEmail: "new@example.com" },
+ *       redirect: true,
+ *       redirectTo: "/settings",
+ *     })
+ *
+ *   return <button disabled={isPending} onClick={handleChange}>Change email</button>
+ * }
+ */
+export const useChangeEmail = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const changeEmail = useCallback(
+        <Options extends ChangeEmailOptions>(options: Options): Promise<ChangeEmailReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.changeEmail({
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                return value
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { changeEmail, isPending } as const
+}
+
+/**
+ * Verifies an email change request using a verification token.
+ *
+ * The returned action accepts a payload containing the verification token, along
+ * with optional redirect settings. It disables the client's automatic redirect and
+ * uses the `AuthProvider` redirect handler when called with `redirect: true`.
+ *
+ * @returns An object containing the `verifyEmailChange` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { verifyEmailChange, isPending } = useVerifyEmailChange()
+ *
+ *   const handleVerify = () =>
+ *     verifyEmailChange({
+ *       payload: { token: "email-change-token" },
+ *       redirect: true,
+ *       redirectTo: "/settings",
+ *     })
+ *
+ *   return <button disabled={isPending} onClick={handleVerify}>Verify email change</button>
+ * }
+ */
+export const useVerifyEmailChange = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const verifyEmailChange = useCallback(
+        <Options extends VerifyEmailChangeOptions>(options: Options): Promise<VerifyEmailChangeReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.verifyEmailChange({
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                return value
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { verifyEmailChange, isPending } as const
+}
+
+/**
+ * Cancels an email change request. Supports two modes:
+ * - Passing `payload.token` to cancel via a link in the email.
+ * - Without a token, cancels the email change for the currently authenticated user.
+ *
+ * The returned action accepts optional redirect settings in either mode. It disables
+ * the client's automatic redirect and uses the `AuthProvider` redirect handler when
+ * called with `redirect: true`.
+ *
+ * @returns An object containing the `cancelEmailChange` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { cancelEmailChange, isPending } = useCancelEmailChange()
+ *
+ *   return (
+ *     <button
+ *       disabled={isPending}
+ *       onClick={() => cancelEmailChange({ payload: { token: "email-change-token" }, redirect: true })}
+ *     >
+ *       Cancel email change
+ *     </button>
+ *   )
+ * }
+ */
+export const useCancelEmailChange = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const cancelEmailChange = useCallback(
+        <Options extends CancelEmailChangeOptions>(options?: Options): Promise<CancelEmailChangeReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.cancelEmailChange({
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                return value as CancelEmailChangeReturn<Options>
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { cancelEmailChange, isPending } as const
+}
+
+/**
+ * Sends a magic link to the specified email address, allowing the user to sign in without a password.
+ *
+ * The returned action accepts an email and optional redirect settings. It disables
+ * the client's automatic redirect and uses the `AuthProvider` redirect handler
+ * when called with `redirect: true`.
+ *
+ * @returns An object containing the `sendMagicLink` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { sendMagicLink, isPending } = useSendMagicLink()
+ *
+ *   return (
+ *     <button
+ *       disabled={isPending}
+ *       onClick={() => sendMagicLink("user@example.com", { redirect: true, redirectTo: "/check-email" })}
+ *     >
+ *       Send magic link
+ *     </button>
+ *   )
+ * }
+ */
+export const useSendMagicLink = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const sendMagicLink = useCallback(
+        <Options extends SendMagicLinkOptions>(email: string, options?: Options): Promise<SendMagicLinkReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.sendMagicLink(email, {
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                return value as SendMagicLinkReturn<Options>
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { sendMagicLink, isPending } as const
+}
+
+/**
+ * Verifies a magic link token and signs in the user if the token is valid.
+ *
+ * The returned action accepts a token and optional redirect settings. It disables
+ * the client's automatic redirect and uses the `AuthProvider` redirect handler
+ * when called with `redirect: true`.
+ *
+ * @returns An object containing the `verifyMagicLink` action and its `isPending` state.
+ * @example
+ * const Page = () => {
+ *   const { verifyMagicLink, isPending } = useVerifyMagicLink()
+ *
+ *   return (
+ *     <button
+ *       disabled={isPending}
+ *       onClick={() => verifyMagicLink("magic-link-token", { redirect: true, redirectTo: "/" })}
+ *     >
+ *       Verify magic link
+ *     </button>
+ *   )
+ * }
+ */
+export const useVerifyMagicLink = () => {
+    const { client, redirect } = useAssertContext()
+    const { execute, isPending } = useAsyncAction()
+
+    const verifyMagicLink = useCallback(
+        <Options extends VerifyMagicLinkOptions>(token: string, options?: Options): Promise<VerifyMagicLinkReturn<Options>> => {
+            return execute(async () => {
+                const value = await client.verifyMagicLink(token, {
+                    ...options,
+                    redirect: false,
+                })
+                if (options?.redirect === true) {
+                    await performRedirect(redirect, value.redirectURL)
+                }
+                if (value.success) {
+                    broadcast({ type: "session:sync" })
+                }
+                return value as VerifyMagicLinkReturn<Options>
+            })
+        },
+        [client, execute, redirect]
+    )
+
+    return { verifyMagicLink, isPending } as const
 }
 
 /**
