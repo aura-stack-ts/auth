@@ -50,6 +50,7 @@ describe("createAuth", () => {
                 redirectTo?: string | undefined
                 skipCSRFCheck?: boolean | undefined
                 doubleSubmitToken?: string | undefined
+                fallbackRedirectTo?: string
             }>()
             expectTypeOf(api.updateSession).toEqualTypeOf<
                 <Options extends ReactRouterUpdateSessionAPIOptions<Identity>>(
@@ -71,6 +72,7 @@ describe("createAuth", () => {
                 redirectTo?: string | undefined
                 skipCSRFCheck?: boolean | undefined
                 doubleSubmitToken?: string | undefined
+                fallbackRedirectTo?: string
             }>()
             expectTypeOf(api.signUp).toEqualTypeOf<
                 <Options extends ReactRouterSignUpAPIOptions<InferSignUp<typeof auth>>>(
@@ -117,6 +119,7 @@ describe("createAuth", () => {
                 redirectTo?: string | undefined
                 skipCSRFCheck?: boolean | undefined
                 doubleSubmitToken?: string | undefined
+                fallbackRedirectTo?: string
             }>()
             expectTypeOf(api.updateSession).toEqualTypeOf<
                 <Options extends ReactRouterUpdateSessionAPIOptions<Identity>>(
@@ -142,6 +145,7 @@ describe("createAuth", () => {
                 redirectTo?: string | undefined
                 skipCSRFCheck?: boolean | undefined
                 doubleSubmitToken?: string | undefined
+                fallbackRedirectTo?: string
             }>()
             expectTypeOf(api.signUp).toEqualTypeOf<
                 <Options extends ReactRouterSignUpAPIOptions<InferSignUp<typeof auth>>>(
@@ -194,6 +198,7 @@ describe("createAuth", () => {
                 redirectTo?: string | undefined
                 skipCSRFCheck?: boolean | undefined
                 doubleSubmitToken?: string | undefined
+                fallbackRedirectTo?: string
             }>()
             expectTypeOf(api.updateSession).toEqualTypeOf<
                 <Options extends ReactRouterUpdateSessionAPIOptions<Identity>>(
@@ -219,6 +224,7 @@ describe("createAuth", () => {
                 redirectTo?: string | undefined
                 skipCSRFCheck?: boolean | undefined
                 doubleSubmitToken?: string | undefined
+                fallbackRedirectTo?: string
             }>()
             expectTypeOf(api.signUp).toEqualTypeOf<
                 <Options extends ReactRouterSignUpAPIOptions<InferSignUp<typeof auth>>>(

@@ -14,6 +14,26 @@ import type {
     ReactRouterRevokeTokenAPIOptions,
     ReactRouterDisconnectProviderAPIOptions,
     ReactRouterProviderConnectedAPIOptions,
+    ReactRouterSendVerificationEmailAPIOptions,
+    ReactRouterSendVerificationEmailReturn,
+    ReactRouterVerifyEmailAPIOptions,
+    ReactRouterVerifyEmailReturn,
+    ReactRouterForgotPasswordAPIOptions,
+    ReactRouterForgotPasswordReturn,
+    ReactRouterResetPasswordAPIOptions,
+    ReactRouterResetPasswordReturn,
+    ReactRouterChangePasswordAPIOptions,
+    ReactRouterChangePasswordReturn,
+    ReactRouterChangeEmailAPIOptions,
+    ReactRouterChangeEmailReturn,
+    ReactRouterVerifyEmailChangeAPIOptions,
+    ReactRouterVerifyEmailChangeReturn,
+    ReactRouterCancelEmailChangeAPIOptions,
+    ReactRouterCancelEmailChangeReturn,
+    ReactRouterSendMagicLinkAPIOptions,
+    ReactRouterSendMagicLinkReturn,
+    ReactRouterVerifyMagicLinkAPIOptions,
+    ReactRouterVerifyMagicLinkReturn,
 } from "@/@types/api"
 import type { zod } from "@aura-stack/react/identity/zod"
 import type { AuthInstance, Session, User } from "@aura-stack/react"
@@ -80,8 +100,8 @@ export const updateSession = <DefaultUser extends User = User>({ api }: AuthInst
         options: Options
     ): Promise<ReactRouterUpdateSessionReturn<Options, DefaultUser>> => {
         const updated = await api.updateSession({
-            headers: options.request.headers,
             ...options,
+            headers: options.request.headers,
         })
         if (options?.redirect === false) {
             return updated as ReactRouterUpdateSessionReturn<Options, DefaultUser>
@@ -115,6 +135,161 @@ export const signOut = <DefaultUser extends User = User>({ api }: AuthInstance<D
             return out as ReactRouterSignOutReturn<Options>
         }
         return out.toResponse() as ReactRouterSignOutReturn<Options>
+    }
+}
+
+export const sendVerificationEmail = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterSendVerificationEmailAPIOptions>(
+        email: string,
+        options: Options
+    ): Promise<ReactRouterSendVerificationEmailReturn<Options>> => {
+        const result = await api.sendVerificationEmail(email, {
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterSendVerificationEmailReturn<Options>
+        }
+        return result.toResponse() as ReactRouterSendVerificationEmailReturn<Options>
+    }
+}
+
+export const verifyEmail = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterVerifyEmailAPIOptions>(
+        token: string,
+        options: Options
+    ): Promise<ReactRouterVerifyEmailReturn<Options>> => {
+        const result = await api.verifyEmail(token, {
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterVerifyEmailReturn<Options>
+        }
+        return result.toResponse() as ReactRouterVerifyEmailReturn<Options>
+    }
+}
+
+export const forgotPassword = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterForgotPasswordAPIOptions>(
+        email: string,
+        options: Options
+    ): Promise<ReactRouterForgotPasswordReturn<Options>> => {
+        const result = await api.forgotPassword(email, {
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterForgotPasswordReturn<Options>
+        }
+        return result.toResponse() as ReactRouterForgotPasswordReturn<Options>
+    }
+}
+
+export const resetPassword = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterResetPasswordAPIOptions>(
+        options: Options
+    ): Promise<ReactRouterResetPasswordReturn<Options>> => {
+        const result = await api.resetPassword({
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterResetPasswordReturn<Options>
+        }
+        return result.toResponse() as ReactRouterResetPasswordReturn<Options>
+    }
+}
+
+export const changePassword = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterChangePasswordAPIOptions>(
+        options: Options
+    ): Promise<ReactRouterChangePasswordReturn<Options>> => {
+        const result = await api.changePassword({
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterChangePasswordReturn<Options>
+        }
+        return result.toResponse() as ReactRouterChangePasswordReturn<Options>
+    }
+}
+
+export const changeEmail = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterChangeEmailAPIOptions>(
+        options: Options
+    ): Promise<ReactRouterChangeEmailReturn<Options>> => {
+        const result = await api.changeEmail({
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterChangeEmailReturn<Options>
+        }
+        return result.toResponse() as ReactRouterChangeEmailReturn<Options>
+    }
+}
+
+export const verifyEmailChange = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterVerifyEmailChangeAPIOptions>(
+        options: Options
+    ): Promise<ReactRouterVerifyEmailChangeReturn<Options>> => {
+        const result = await api.verifyEmailChange({
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterVerifyEmailChangeReturn<Options>
+        }
+        return result.toResponse() as ReactRouterVerifyEmailChangeReturn<Options>
+    }
+}
+
+export const cancelEmailChange = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterCancelEmailChangeAPIOptions>(
+        options: Options
+    ): Promise<ReactRouterCancelEmailChangeReturn<Options>> => {
+        const result = await api.cancelEmailChange({
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterCancelEmailChangeReturn<Options>
+        }
+        return result.toResponse() as ReactRouterCancelEmailChangeReturn<Options>
+    }
+}
+
+export const sendMagicLink = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterSendMagicLinkAPIOptions>(
+        email: string,
+        options: Options
+    ): Promise<ReactRouterSendMagicLinkReturn<Options>> => {
+        const result = await api.sendMagicLink(email, {
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterSendMagicLinkReturn<Options>
+        }
+        return result.toResponse() as ReactRouterSendMagicLinkReturn<Options>
+    }
+}
+
+export const verifyMagicLink = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ReactRouterVerifyMagicLinkAPIOptions>(
+        token: string,
+        options: Options
+    ): Promise<ReactRouterVerifyMagicLinkReturn<Options>> => {
+        const result = await api.verifyMagicLink(token, {
+            headers: options.request.headers,
+            ...options,
+        })
+        if (options.redirect === false) {
+            return result as ReactRouterVerifyMagicLinkReturn<Options>
+        }
+        return result.toResponse() as ReactRouterVerifyMagicLinkReturn<Options>
     }
 }
 
@@ -414,5 +589,167 @@ export const api = <DefaultUser extends User = User, SignUpSchema extends Schema
          * }
          */
         isProviderConnected: isProviderConnected<DefaultUser>(config),
+        /**
+         * Sends an email verification link from a loader or action.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param email - Email address to verify.
+         * @param options - Request and optional redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const action = async ({ request }) =>
+         *   api.sendVerificationEmail("user@example.com", { request, redirectTo: "/verify-sent" })
+         */
+        sendVerificationEmail: sendVerificationEmail<DefaultUser>(config),
+        /**
+         * Verifies an email address using its verification token.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param token - Verification token received by email.
+         * @param options - Request and optional redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const loader = async ({ request }) =>
+         *   api.verifyEmail("verification-token", { request, redirectTo: "/verified" })
+         */
+        verifyEmail: verifyEmail<DefaultUser>(config),
+        /**
+         * Starts the password-reset flow by sending a reset email.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param email - Email address associated with the account.
+         * @param options - Request and optional redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const action = async ({ request }) =>
+         *   api.forgotPassword("user@example.com", { request, redirectTo: "/check-email" })
+         */
+        forgotPassword: forgotPassword<DefaultUser>(config),
+        /**
+         * Resets a user's password with a valid reset token.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param options - Reset token, new password, request, and optional redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const action = async ({ request }) =>
+         *   api.resetPassword({
+         *     request,
+         *     payload: { token: "reset-token", newPassword: "new-password" },
+         *     redirectTo: "/sign-in",
+         *   })
+         */
+        resetPassword: resetPassword<DefaultUser>(config),
+        /**
+         * Changes the password for the currently authenticated user.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param options - Current/new password payload, request, and optional redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const action = async ({ request }) =>
+         *   api.changePassword({
+         *     request,
+         *     payload: { currentPassword: "current-password", newPassword: "new-password" },
+         *     redirectTo: "/settings",
+         *   })
+         */
+        changePassword: changePassword<DefaultUser>(config),
+        /**
+         * Requests an email-address change for the currently authenticated user.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param options - Current password/new email payload, request, and optional redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const action = async ({ request }) =>
+         *   api.changeEmail({
+         *     request,
+         *     payload: { currentPassword: "current-password", newEmail: "new@example.com" },
+         *     redirectTo: "/settings",
+         *   })
+         */
+        changeEmail: changeEmail<DefaultUser>(config),
+        /**
+         * Verifies a requested email-address change using its verification token.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param options - Verification token, request, and optional redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const loader = async ({ request }) =>
+         *   api.verifyEmailChange({
+         *     request,
+         *     payload: { token: "email-change-token" },
+         *     redirectTo: "/settings",
+         *   })
+         */
+        verifyEmailChange: verifyEmailChange<DefaultUser>(config),
+        /**
+         * Cancels a pending email-address change, using an email token or the current
+         * authenticated user's session.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param options - Request, optional cancellation token, and redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const action = async ({ request }) =>
+         *   api.cancelEmailChange({ request, payload: { token: "cancel-token" }, redirectTo: "/settings" })
+         */
+        cancelEmailChange: cancelEmailChange<DefaultUser>(config),
+        /**
+         * Sends a passwordless sign-in link to an email address.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param email - Email address to receive the magic link.
+         * @param options - Request and optional redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const action = async ({ request }) =>
+         *   api.sendMagicLink("user@example.com", { request, redirectTo: "/check-email" })
+         */
+        sendMagicLink: sendMagicLink<DefaultUser>(config),
+        /**
+         * Verifies a magic-link token and signs in the user when it is valid.
+         *
+         * Pass the current `Request` so Aura Auth can validate redirect targets and
+         * read the request headers. By default, the result is converted to a React
+         * Router `Response`; set `redirect: false` to receive the API result directly.
+         *
+         * @param token - Magic-link token received by email.
+         * @param options - Request and optional redirect settings.
+         * @returns A `Response` by default, or the API result when `redirect` is `false`.
+         * @example
+         * export const loader = async ({ request }) =>
+         *   api.verifyMagicLink("magic-link-token", { request, redirectTo: "/" })
+         */
+        verifyMagicLink: verifyMagicLink<DefaultUser>(config),
     } satisfies ReactRouterAPI<DefaultUser, SignUpSchema>
 }
