@@ -1,6 +1,6 @@
 import type { Session, User } from "@/@types/session.ts"
 import type { createAuthInstance } from "@/config/router.ts"
-import type { ClientOptions, Prettify } from "@aura-stack/router/types"
+import type { Awaitable, ClientOptions, Prettify } from "@aura-stack/router/types"
 import type { CredentialsPayload, DeepPartial } from "@/@types/index.ts"
 import type {
     CancelEmailChangeData,
@@ -59,6 +59,17 @@ export type AuthClientOptions = Prettify<
          * fallbackRedirectTo: "/home"
          */
         fallbackRedirectTo?: string
+        /**
+         * Custom redirect handler for client-side navigation. Overrides the default
+         * `window.location.assign` behavior.
+         *
+         * @param to - The target URL or path for the redirect.
+         * @example
+         * redirect: (to) => {
+         *   customRouter.push(to);
+         * }
+         */
+        redirect?: (to: string) => Awaitable<void>
     }
 >
 

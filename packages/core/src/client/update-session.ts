@@ -31,7 +31,7 @@ export const updateSession = <DefaultUser extends User = User>(ctx: ClientContex
             })
             const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
-                window.location.assign(json.redirectURL)
+                await ctx.redirectFn(json.redirectURL)
             }
             return json as unknown as UpdateSessionReturn<Options, DefaultUser>
         } catch (error) {

@@ -2,7 +2,7 @@ import { clientAuthResponse } from "@/shared/utils/client.ts"
 import type { ClientContext } from "@/client/context.ts"
 import type { VerifyEmailChangeOptions, VerifyEmailChangeReturn } from "@/@types/index.ts"
 
-export const verifyEmailChange = ({ client, getSafeRedirect }: ClientContext) => {
+export const verifyEmailChange = ({ client, getSafeRedirect, redirectFn }: ClientContext) => {
     return async <Options extends VerifyEmailChangeOptions>(options: Options): Promise<VerifyEmailChangeReturn<Options>> => {
         try {
             const redirectTo = getSafeRedirect(options)
@@ -11,7 +11,7 @@ export const verifyEmailChange = ({ client, getSafeRedirect }: ClientContext) =>
             })
             const json = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
-                window.location.assign(json.redirectURL)
+                await redirectFn(json.redirectURL)
             }
             return json as unknown as VerifyEmailChangeReturn<Options>
         } catch (error) {

@@ -46,3 +46,7 @@ export const getSafeRedirectTo = ({
         return safeRedirectTo
     }
 }
+
+export const defaultRedirect = (url: string) => {
+    window.location.assign(url)
+}

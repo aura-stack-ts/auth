@@ -3,7 +3,7 @@ import type { LiteralUnion } from "@/@types/index.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { SignInOptions, SignInReturn } from "@/@types/client.ts"
 
-export const signIn = ({ client, getSafeRedirect }: ClientContext) => {
+export const signIn = ({ client, getSafeRedirect, redirectFn }: ClientContext) => {
     return async <Options extends SignInOptions>(
         oauth: LiteralUnion<BuiltInOAuthProvider>,
         options?: Options
@@ -22,7 +22,7 @@ export const signIn = ({ client, getSafeRedirect }: ClientContext) => {
             })
             const json = await response.json()
             if (options?.redirect === true && typeof window !== "undefined" && json?.signInURL) {
-                window.location.assign(json.signInURL)
+                await redirectFn(json.signInURL)
             }
             return json as unknown as SignInReturn<Options>
         } catch (error) {

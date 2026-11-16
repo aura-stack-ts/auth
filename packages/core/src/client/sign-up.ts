@@ -21,7 +21,7 @@ export const signUp = <SignUpPayload extends Record<string, any> = Record<string
             // @ts-ignore
             const json: any = await clientAuthResponse(response)
             if (options?.redirect === true && typeof window !== "undefined" && json?.redirectURL) {
-                window.location.assign(json.redirectURL)
+                await ctx.redirectFn(json.redirectURL)
             }
             return json as unknown as SignUpReturn<Options>
         } catch (error) {
