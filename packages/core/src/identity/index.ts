@@ -5,12 +5,16 @@ import { isArkType, isTypeboxEntries, isValibotEntries, isZodEntries } from "@/s
 import type { Identities } from "@/@types/identity.ts"
 import type { ReturnShapeType } from "@/@types/internal.ts"
 
-/**
- * Re-exports the identity inference types.
- */
-export type { InferSchema, ToInferSchema } from "@aura-stack/router/types"
 export type { InferUser, InferSession, UserFrom, SessionFrom } from "@/@types/utility.ts"
-export type { EditableToSchema, FromShapeToObject, Identities, UserShape, SchemaTypes } from "@/@types/identity.ts"
+export type {
+    EditableToSchema,
+    FromShapeToObject,
+    Identities,
+    UserShape,
+    SchemaTypes,
+    InferSchema,
+    ToInferSchema,
+} from "@/@types/identity.ts"
 
 export const createIdentity = <S extends Identities>(shape: S): ReturnShapeType<S> => {
     if (isArkType(shape)) {

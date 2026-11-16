@@ -16,6 +16,8 @@ export type {
     ZodShape as UserShape,
 }
 
+export type { InferSchema, ToInferSchema } from "@aura-stack/router/types"
+
 export type SchemaTypes = ZodObject<any> | ObjectSchema<any, undefined> | Type<{}> | TObject<{}>
 
 /**
