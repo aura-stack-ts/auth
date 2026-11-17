@@ -10,6 +10,16 @@ import type {
     NextUpdateSessionReturn,
     NextAPI,
     NextSignUpReturn,
+    NextSendVerificationEmailReturn,
+    NextVerifyEmailReturn,
+    NextForgotPasswordReturn,
+    NextResetPasswordReturn,
+    NextChangePasswordReturn,
+    NextChangeEmailReturn,
+    NextVerifyEmailChangeReturn,
+    NextCancelEmailChangeReturn,
+    NextSendMagicLinkReturn,
+    NextVerifyMagicLinkReturn,
 } from "@/@types/api"
 import type {
     GetSessionAPIOptions,
@@ -25,6 +35,16 @@ import type {
     RevokeTokenAPIOptions,
     DisconnectProviderAPIOptions,
     ProviderConnectedAPIOptions,
+    SendVerificationEmailAPIOptions,
+    VerifyEmailAPIOptions,
+    ForgotPasswordAPIOptions,
+    ResetPasswordAPIOptions,
+    ChangePasswordAPIOptions,
+    ChangeEmailAPIOptions,
+    VerifyEmailChangeAPIOptions,
+    CancelEmailChangeAPIOptions,
+    SendMagicLinkAPIOptions,
+    VerifyMagicLinkAPIOptions,
     SchemaTypes,
 } from "@aura-stack/react/types"
 import type { zod } from "@aura-stack/react/identity/zod"
@@ -39,6 +59,16 @@ const setCookies = async (responseHeaders: Headers) => {
         const { name, value, ...options } = parseSetCookie(cookieStr)
         cookieStore.set(name, value ?? "", options)
     }
+}
+
+const handleActionResponse = async <Result extends { success: boolean; redirectURL: string | null; headers: Headers }>(
+    result: Result
+): Promise<Result> => {
+    await setCookies(result.headers)
+    if (result.success && result.redirectURL) {
+        return redirect(result.redirectURL)
+    }
+    return result
 }
 
 export const getSession = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
@@ -154,6 +184,135 @@ export const signUp = <DefaultUser extends User = User>({ api }: AuthInstance<De
     }
 }
 
+export const sendVerificationEmail = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends SendVerificationEmailAPIOptions = SendVerificationEmailAPIOptions>(
+        email: string,
+        options?: Options
+    ): Promise<NextSendVerificationEmailReturn<Options>> => {
+        const result = await api.sendVerificationEmail(email, {
+            headers: await headers(),
+            ...options,
+            redirect: !!options?.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextSendVerificationEmailReturn<Options>>
+    }
+}
+
+export const verifyEmail = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends VerifyEmailAPIOptions = VerifyEmailAPIOptions>(
+        token: string,
+        options?: Options
+    ): Promise<NextVerifyEmailReturn<Options>> => {
+        const result = await api.verifyEmail(token, {
+            headers: await headers(),
+            ...options,
+            redirect: !!options?.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextVerifyEmailReturn<Options>>
+    }
+}
+
+export const forgotPassword = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ForgotPasswordAPIOptions = ForgotPasswordAPIOptions>(
+        email: string,
+        options?: Options
+    ): Promise<NextForgotPasswordReturn<Options>> => {
+        const result = await api.forgotPassword(email, {
+            headers: await headers(),
+            ...options,
+            redirect: !!options?.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextForgotPasswordReturn<Options>>
+    }
+}
+
+export const resetPassword = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ResetPasswordAPIOptions>(options: Options): Promise<NextResetPasswordReturn<Options>> => {
+        const result = await api.resetPassword({
+            headers: await headers(),
+            ...options,
+            redirect: !!options.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextResetPasswordReturn<Options>>
+    }
+}
+
+export const changePassword = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ChangePasswordAPIOptions>(options: Options): Promise<NextChangePasswordReturn<Options>> => {
+        const result = await api.changePassword({
+            headers: await headers(),
+            ...options,
+            redirect: !!options.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextChangePasswordReturn<Options>>
+    }
+}
+
+export const changeEmail = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends ChangeEmailAPIOptions>(options: Options): Promise<NextChangeEmailReturn<Options>> => {
+        const result = await api.changeEmail({
+            headers: await headers(),
+            ...options,
+            redirect: !!options.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextChangeEmailReturn<Options>>
+    }
+}
+
+export const verifyEmailChange = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends VerifyEmailChangeAPIOptions>(
+        options: Options
+    ): Promise<NextVerifyEmailChangeReturn<Options>> => {
+        const result = await api.verifyEmailChange({
+            headers: await headers(),
+            ...options,
+            redirect: !!options.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextVerifyEmailChangeReturn<Options>>
+    }
+}
+
+export const cancelEmailChange = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends CancelEmailChangeAPIOptions>(
+        options: Options
+    ): Promise<NextCancelEmailChangeReturn<Options>> => {
+        const result = await api.cancelEmailChange({
+            headers: await headers(),
+            ...options,
+            redirect: !!options.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextCancelEmailChangeReturn<Options>>
+    }
+}
+
+export const sendMagicLink = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends SendMagicLinkAPIOptions = SendMagicLinkAPIOptions>(
+        email: string,
+        options?: Options
+    ): Promise<NextSendMagicLinkReturn<Options>> => {
+        const result = await api.sendMagicLink(email, {
+            headers: await headers(),
+            ...options,
+            redirect: !!options?.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextSendMagicLinkReturn<Options>>
+    }
+}
+
+export const verifyMagicLink = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
+    return async <Options extends VerifyMagicLinkAPIOptions = VerifyMagicLinkAPIOptions>(
+        token: string,
+        options?: Options
+    ): Promise<NextVerifyMagicLinkReturn<Options>> => {
+        const result = await api.verifyMagicLink(token, {
+            headers: await headers(),
+            ...options,
+            redirect: !!options?.redirect,
+        })
+        return handleActionResponse(result) as Promise<NextVerifyMagicLinkReturn<Options>>
+    }
+}
+
 export const refreshUserInfo = <DefaultUser extends User = User>({ api }: AuthInstance<DefaultUser>) => {
     return async <Options extends RefreshUserInfoAPIOptions>(oauth: LiteralUnion<BuiltInOAuthProvider>, options?: Options) => {
         const refresh = await api.refreshUserInfo(oauth, {
@@ -198,7 +357,7 @@ export const isProviderConnected = <DefaultUser extends User = User>({ api }: Au
 
 export const api = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = zod.ZodObject<any>>(
     config: AuthInstance<DefaultUser, SignUpSchema>
-) => {
+): NextAPI<DefaultUser, SignUpSchema> => {
     return {
         /**
          * Retrieves the current session data from the server-side.
@@ -394,5 +553,134 @@ export const api = <DefaultUser extends User = User, SignUpSchema extends Schema
          * })
          */
         isProviderConnected: isProviderConnected<DefaultUser>(config),
-    } satisfies NextAPI<DefaultUser, SignUpSchema>
+        /**
+         * Sends an email verification link from a server context. The current Next.js
+         * request headers are forwarded, and response cookies are synchronized with
+         * the Next.js cookie store. A successful response with a redirect URL invokes
+         * Next.js `redirect()`.
+         *
+         * @param email - Email address to verify.
+         * @param options - Optional request and redirect options.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.sendVerificationEmail("user@example.com", { redirectTo: "/verify-sent" })
+         */
+        sendVerificationEmail: sendVerificationEmail<DefaultUser>(config),
+        /**
+         * Verifies an email address using its verification token. Response cookies
+         * are synchronized with the Next.js cookie store, and a successful response
+         * with a redirect URL invokes Next.js `redirect()`.
+         *
+         * @param token - Verification token received by email.
+         * @param options - Optional request and redirect options.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.verifyEmail("verification-token", { redirectTo: "/verified" })
+         */
+        verifyEmail: verifyEmail<DefaultUser>(config),
+        /**
+         * Sends a password-reset email from a server context. Response cookies are
+         * synchronized with the Next.js cookie store, and a successful response with
+         * a redirect URL invokes Next.js `redirect()`.
+         *
+         * @param email - Email address associated with the account.
+         * @param options - Optional request and redirect options.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.forgotPassword("user@example.com", { redirectTo: "/check-email" })
+         */
+        forgotPassword: forgotPassword<DefaultUser>(config),
+        /**
+         * Resets a user's password using a valid reset token. Response cookies are
+         * synchronized with the Next.js cookie store, and a successful response with
+         * a redirect URL invokes Next.js `redirect()`.
+         *
+         * @param options - Reset token, new password, and optional request/redirect settings.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.resetPassword({
+         *   payload: { token: "reset-token", newPassword: "new-password" },
+         *   redirectTo: "/sign-in",
+         * })
+         */
+        resetPassword: resetPassword<DefaultUser>(config),
+        /**
+         * Changes the password for the currently authenticated user. Response cookies
+         * are synchronized with the Next.js cookie store, and a successful response
+         * with a redirect URL invokes Next.js `redirect()`.
+         *
+         * @param options - Current/new password payload and optional request/redirect settings.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.changePassword({
+         *   payload: { currentPassword: "current-password", newPassword: "new-password" },
+         *   redirectTo: "/settings",
+         * })
+         */
+        changePassword: changePassword<DefaultUser>(config),
+        /**
+         * Requests an email-address change for the currently authenticated user.
+         * Response cookies are synchronized with the Next.js cookie store, and a
+         * successful response with a redirect URL invokes Next.js `redirect()`.
+         *
+         * @param options - Current password/new email payload and optional request/redirect settings.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.changeEmail({
+         *   payload: { currentPassword: "current-password", newEmail: "new@example.com" },
+         *   redirectTo: "/settings",
+         * })
+         */
+        changeEmail: changeEmail<DefaultUser>(config),
+        /**
+         * Verifies an email-address change using its verification token. Response
+         * cookies are synchronized with the Next.js cookie store, and a successful
+         * response with a redirect URL invokes Next.js `redirect()`.
+         *
+         * @param options - Verification token and optional request/redirect settings.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.verifyEmailChange({
+         *   payload: { token: "email-change-token" },
+         *   redirectTo: "/settings",
+         * })
+         */
+        verifyEmailChange: verifyEmailChange<DefaultUser>(config),
+        /**
+         * Cancels a pending email-address change, either with an email cancellation
+         * token or for the authenticated user. Response cookies are synchronized with
+         * the Next.js cookie store, and a successful response with a redirect URL
+         * invokes Next.js `redirect()`.
+         *
+         * @param options - Optional cancellation token and request/redirect settings.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.cancelEmailChange({ headers: await headers() })
+         */
+        cancelEmailChange: cancelEmailChange<DefaultUser>(config),
+        /**
+         * Sends a passwordless sign-in link to an email address. Response cookies are
+         * synchronized with the Next.js cookie store, and a successful response with
+         * a redirect URL invokes Next.js `redirect()`.
+         *
+         * @param email - Email address to receive the magic link.
+         * @param options - Optional request and redirect options.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.sendMagicLink("user@example.com", { redirectTo: "/check-email" })
+         */
+        sendMagicLink: sendMagicLink<DefaultUser>(config),
+        /**
+         * Verifies a magic-link token and signs in the user. Session cookies are
+         * synchronized with the Next.js cookie store, and a successful response with
+         * a redirect URL invokes Next.js `redirect()`.
+         *
+         * @param token - Magic-link token received by email.
+         * @param options - Optional request and redirect options.
+         * @returns The core API result, or `never` when the call redirects.
+         * @example
+         * await api.verifyMagicLink("magic-link-token", { redirectTo: "/" })
+         */
+        verifyMagicLink: verifyMagicLink<DefaultUser>(config),
+    }
 }

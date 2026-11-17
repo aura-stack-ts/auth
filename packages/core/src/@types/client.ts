@@ -76,10 +76,11 @@ export type AuthClientOptions = Prettify<
 export type ResolveOptionsWithRedirect<
     Options extends OptionsWithRedirectTo,
     ReturnData extends { redirect: boolean },
+    DefaultRedirectValue = void,
 > = Options extends { redirect: false }
     ? Extract<ReturnData, { redirect: false }>
     : Options extends { redirectTo: any }
-      ? void
+      ? DefaultRedirectValue
       : Extract<ReturnData, { redirect: false }>
 
 export interface OptionsWithRedirectTo {
