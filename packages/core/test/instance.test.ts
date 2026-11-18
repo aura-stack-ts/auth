@@ -32,14 +32,13 @@ describe("createAuth", () => {
             expect(response.status).toBe(403)
         })
 
-        test("returns 404 for unsupported methods", async () => {
+        test("returns 405 for unsupported methods", async () => {
             const response = await auth.handlers.ALL(new Request("https://example.com/auth/csrfToken", { method: "PUT" }))
-            expect(response.status).toBe(404)
+            expect(response.status).toBe(405)
             expect(await response.json()).toEqual({
                 type: "ROUTER_FLOW",
-                code: "NOT_FOUND",
-                message:
-                    "The requested route address cannot be found or is unavailable on this application endpoint server context.",
+                code: "METHOD_NOT_ALLOWED",
+                message: "The requested resource does not support the submitted HTTP execution method request verb.",
             })
         })
     })

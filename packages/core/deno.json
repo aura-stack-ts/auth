@@ -44,7 +44,7 @@
   },
   "imports": {
     "@/": "./src/",
-    "@aura-stack/router": "npm:@aura-stack/router@^0.11.4",
+    "@aura-stack/router": "npm:@aura-stack/router@^0.12.0",
     "zod": "npm:zod@4.3.5",
     "arktype": "npm:arktype@2.2.0",
     "valibot": "npm:valibot@1.4.0",
