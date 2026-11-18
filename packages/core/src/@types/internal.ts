@@ -285,13 +285,18 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         oauthId: string
         headers: Headers
         provider: RuntimeOAuthProvider<any, DefaultUser>
-        sessionByToken: SessionWithUserEntity
+        rawSession: TypedJWTPayload<User> | SessionWithUserEntity
     }): Promise<{ tokens: OAuthTokenPayload; headers: Headers }>
     /**
      * Attempt to refresh using the refresh token cookie.
      * Returns null session + cookie-clearing response on any failure.
      */
-    refreshSession(options: { headers: Headers; session: DeepPartial<Session<DefaultUser>> }): Promise<{
+    refreshSession(options: {
+        headers: Headers
+        session: DeepPartial<Session<DefaultUser>>
+        sessionToken: string
+        rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+    }): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
     }>
@@ -305,7 +310,10 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Destroy the session attached to this request (logout).
      * Returns a response that clears cookies.
      */
-    destroySession(options: { sessionByToken: SessionWithUserEntity; headers: Headers }): Promise<{ headers: Headers }>
+    destroySession(options: {
+        rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        headers: Headers
+    }): Promise<{ headers: Headers }>
     /**
      * Revoke the access token for a specific OAuth provider.
      * @unstable This API is experimental and may change in future releases.
@@ -315,18 +323,28 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         provider: RuntimeOAuthProvider<any, DefaultUser>
         headers: Headers
         disconnect: boolean
-        sessionByToken: SessionWithUserEntity
+        rawSession: TypedJWTPayload<User> | SessionWithUserEntity
     }): Promise<{ headers: Headers }>
     /**
      * Check if the user is connected to a specific OAuth provider.
      * @unstable This API is experimental and may change in future releases.
      */
-    isProviderConnected(options: { oauthId: string; headers: Headers; sessionByToken: SessionWithUserEntity }): Promise<boolean>
+    isProviderConnected(options: {
+        oauthId: string
+        headers: Headers
+        rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+    }): Promise<boolean>
     /**
      * Refresh the user info in the session.
      * @unstable This API is experimental and may change in future releases.
      */
-    refreshUserInfo(options: { user: DeepPartial<DefaultUser>; headers: Headers; skipCSRFCheck?: boolean }): Promise<{
+    refreshUserInfo(options: {
+        user: DeepPartial<DefaultUser>
+        headers: Headers
+        skipCSRFCheck?: boolean
+        sessionToken: string
+        rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+    }): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
     }>

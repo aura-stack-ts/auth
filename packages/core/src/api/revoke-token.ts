@@ -25,7 +25,7 @@ export const revokeToken = async (
             },
         })
 
-        const { provider, rateLimit, session } = await createValidation(ctx, initHeaders)
+        const { provider, rateLimit, rawSession } = await createValidation(ctx, initHeaders)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/providers/${oauthId}/tokens/revoke`)
             .verifyRateLimit("revokeToken")
@@ -45,7 +45,7 @@ export const revokeToken = async (
             provider,
             disconnect,
             headers: initHeaders,
-            sessionByToken: session!,
+            rawSession,
         })
         return {
             success: true,

@@ -22,8 +22,8 @@ describe("updateSession API", () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "CSRF_TOKEN_MISSING",
-                message: "The CSRF token is missing. Please refresh and try again.",
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
             },
             toResponse: expect.any(Function),
         })
@@ -405,6 +405,82 @@ describe("updateSession API", () => {
         const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
         expect(decoded.exp).not.toEqual(attackerExpiration)
         expect(decoded.exp).toBeLessThanOrEqual(fifteenDaysFromNow)
+    })
+
+    test("improperly controlled modification of dynamically-determined object attributes", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const csrfToken = await createCSRF(jose)
+
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: {
+                user: {
+                    sub: "0987-alter-claims",
+                    role: "admin",
+                    cash: 10000,
+                    emailVerified: true,
+                } as any,
+            },
+        })
+
+        expect(updated).toEqual({
+            session: {
+                user: sessionPayload,
+                expires: expect.any(String),
+            },
+            success: true,
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
+        expect(decoded).toEqual({
+            ...sessionPayload,
+            exp: expect.any(Number),
+            iat: expect.any(Number),
+            nbf: expect.any(Number),
+            jti: expect.any(String),
+        })
+    })
+
+    test("invalid user data type", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+        const csrfToken = await createCSRF(jose)
+
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: {
+                user: {
+                    name: false as any,
+                },
+            },
+        })
+
+        expect(updated).toEqual({
+            success: false,
+            session: null,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "SCHEMA_PARSER_FAILED",
+                message:
+                    "An internal schema parsing error occurred. Please verify your schema configuration and validation adapter setup.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(getSetCookie(updated.headers, "aura-auth.session_token")).toBe("")
     })
 
     test("updateSession with doubleSubmitToken", async () => {

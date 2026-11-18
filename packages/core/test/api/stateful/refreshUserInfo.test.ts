@@ -320,8 +320,6 @@ describe("refreshUserInfo API (Stateful)", () => {
          */
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -353,13 +351,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -672,8 +663,6 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -714,13 +703,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -905,8 +887,6 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -938,13 +918,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -1085,8 +1058,6 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -1118,13 +1089,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -1247,8 +1211,6 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -1280,13 +1242,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))

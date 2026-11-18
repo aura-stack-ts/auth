@@ -1,53 +1,22 @@
-import { getCookie } from "@/shared/http/cookie.ts"
-import { AuraAuthError, getErrorName } from "@/errors/aura-error.ts"
-import type { InternalCookieStoreConfig, InternalLogger, JoseManager, SchemaRegistryContext } from "@/@types/internal.ts"
-
-export const getStandardSession = async ({
-    sessionToken,
-    jwt,
-    identity,
-}: {
-    sessionToken: string
-    jwt: JoseManager
-    identity: SchemaRegistryContext
-}) => {
-    const claims = await jwt.verifyToken(sessionToken)
-    const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
-    const { exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
-    const userClaims = await identity.schemaRegistry.parse(defaultPayload)
-    if (!userClaims.sub) return null
-    return {
-        user: userClaims,
-        expires: new Date(exp * 1000).toISOString(),
-    }
-}
+import { AuraAuthError } from "@/errors/aura-error.ts"
+import { getOptionalCookie } from "@/shared/http/cookie.ts"
+import type { InternalCookieStoreConfig, JoseManager } from "@/@types/internal.ts"
 
 export const verifySessionToken = async ({
     headers,
     cookies,
     jwt,
-    logger,
 }: {
     headers: Headers
     jwt: JoseManager
     cookies: InternalCookieStoreConfig
-    logger: InternalLogger | undefined
 }) => {
-    let session = null
+    const token = getOptionalCookie(headers, cookies.sessionToken.name)
+    if (!token) throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
     try {
-        session = getCookie(headers, cookies.sessionToken.name)
+        const session = await jwt.verifyToken(token)
+        return { session, sessionToken: token }
     } catch (cause) {
-        logger?.log("SESSION_NOT_FOUND")
-        throw new AuraAuthError({ code: "SESSION_NOT_FOUND", cause })
-    }
-    if (!session) {
-        logger?.log("SESSION_NOT_FOUND")
-        throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
-    }
-    try {
-        await jwt.verifyToken(session)
-    } catch (error) {
-        logger?.log("INVALID_JWT_TOKEN", { structuredData: { error_type: getErrorName(error) } })
-        throw new AuraAuthError({ code: "SESSION_INVALID", cause: error })
+        throw new AuraAuthError({ code: "SESSION_INVALID", cause })
     }
 }

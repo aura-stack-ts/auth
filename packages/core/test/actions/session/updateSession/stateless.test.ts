@@ -18,7 +18,7 @@ describe("updateSession action", () => {
                 body: JSON.stringify({}),
             })
         )
-        expect(response.status).toBe(403)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             session: null,
             success: false,

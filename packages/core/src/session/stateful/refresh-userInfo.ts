@@ -7,7 +7,7 @@ export const refreshUserInfo = <DefaultUser extends User>(
 ): SessionStrategy<DefaultUser>["refreshUserInfo"] => {
     const refreshSession = refreshSessionHelper<DefaultUser>(ctx)
 
-    return async ({ headers, user }) => {
-        return await refreshSession({ headers, session: { user } })
+    return async ({ headers, user, rawSession, sessionToken }) => {
+        return await refreshSession({ headers, session: { user }, rawSession, sessionToken })
     }
 }

@@ -12,7 +12,14 @@ import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
 import { createCSRF, createHash, verifyCSRF } from "@/exports/crypto.ts"
 import type { LOG_MESSAGES } from "@/config/logger/catalog.ts"
 import type { InternalLogger, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
-import type { BuiltInOAuthProvider, LiteralUnion, RateLimiterConfig, SessionWithUserEntity } from "@/@types/index.ts"
+import type {
+    BuiltInOAuthProvider,
+    LiteralUnion,
+    RateLimiterConfig,
+    SessionWithUserEntity,
+    TypedJWTPayload,
+    User,
+} from "@/@types/index.ts"
 
 export const createValidation = (ctx: RouterGlobalContext, headers: Headers) => {
     const steps: Array<() => Promise<void>> = []
@@ -24,7 +31,8 @@ export const createValidation = (ctx: RouterGlobalContext, headers: Headers) => 
         userId?: string
         sessionId?: string
         origin?: string
-        session?: SessionWithUserEntity
+        rawSession?: TypedJWTPayload<User> | SessionWithUserEntity
+        sessionToken?: string
     } = {}
 
     const builder = {
@@ -44,12 +52,13 @@ export const createValidation = (ctx: RouterGlobalContext, headers: Headers) => 
         verifySession: () => {
             steps.push(async () => {
                 if (isStatelessStrategy(ctx.session.config)) {
-                    await verifySessionToken({
+                    const { session, sessionToken } = await verifySessionToken({
                         headers,
                         cookies: ctx.cookies.store,
                         jwt: ctx.jose.manager,
-                        logger: ctx.logger,
                     })
+                    output.rawSession = session
+                    output.sessionToken = sessionToken
                 } else {
                     const { sessionToken } = createCookieManager(() => ctx.cookies.store).getCookie(headers)
                     if (!sessionToken) {
@@ -63,7 +72,8 @@ export const createValidation = (ctx: RouterGlobalContext, headers: Headers) => 
                     output.userId = session.userId
                     output.sessionId = session.id
                     // @unstable
-                    output.session = session
+                    output.rawSession = session
+                    output.sessionToken = sessionToken
                 }
             })
             return builder
@@ -121,7 +131,8 @@ export const createValidation = (ctx: RouterGlobalContext, headers: Headers) => 
                 userId?: string
                 sessionId?: string
                 origin: string
-                session: SessionWithUserEntity | undefined
+                rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+                sessionToken: string
             }
         },
     }
