@@ -343,7 +343,7 @@
     },
     "packages/elysia": {
       "name": "@aura-stack/elysia",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
       },
@@ -366,7 +366,7 @@
     },
     "packages/express": {
       "name": "@aura-stack/express",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
       },
@@ -450,7 +450,7 @@
     },
     "packages/oak": {
       "name": "@aura-stack/oak",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
         "path-to-regexp": "6.3.0",
@@ -490,7 +490,7 @@
     },
     "packages/react": {
       "name": "@aura-stack/react",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
         "@aura-stack/auth": "workspace:*",
       },

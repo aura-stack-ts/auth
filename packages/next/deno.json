@@ -47,10 +47,18 @@
     "@/": "./src/",
     "next": "npm:next@16.1.6",
     "react": "npm:react@19.2.3",
-    "@aura-stack/react": "npm:@aura-stack/react@^0.4.1"
+    "@aura-stack/react": "npm:@aura-stack/react@^0.5.1"
   },
   "publish": {
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/_core", "src/oauth", "src/identity", "README.md", "CHANGELOG.md"]
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "src/generated/exports",
+      "src/generated/oauth",
+      "src/generated/identity",
+      "README.md",
+      "CHANGELOG.md"
+    ]
   },
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules", "src/generated/prisma"]
 }

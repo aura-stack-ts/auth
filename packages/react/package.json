@@ -1,6 +1,6 @@
 {
   "name": "@aura-stack/react",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": false,
   "type": "module",
   "description": "React authentication utilities including providers, hooks and OAuth flows for client-side and hybrid applications powered by Aura Auth.",
@@ -91,9 +91,9 @@
       "require": "./dist/server.cjs"
     },
     "./hooks": {
-      "types": "./dist/hooks.d.ts",
-      "import": "./dist/hooks.js",
-      "require": "./dist/hooks.cjs"
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js",
+      "require": "./dist/hooks/index.cjs"
     },
     "./context": {
       "types": "./dist/context.d.ts",
