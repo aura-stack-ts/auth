@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+---
+
+## [0.11.0] - 2026-11-18
+
 ### BREAKING CHANGES
 
 - Removed `AuthResponse`, `ReturnUpdateSessionShape`, `ConfigSchema`, `ReturnShapeType`, and `RequiredKeys` from the public `/types` entry point. These types are now internal and are no longer available for import by package consumers. [#316](https://github.com/aura-stack-ts/auth/pull/316)

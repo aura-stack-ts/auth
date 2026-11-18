@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.5.0] - 2026-10-18
+
+### Changed
+
+- Updated the `@aura-stack/auth` dependency to `v0.12.0`. [#329](https://github.com/aura-stack-ts/auth/pull/329)
+
+---
+
 ## [0.3.2] - 2026-08-30
 
 ### Changed
