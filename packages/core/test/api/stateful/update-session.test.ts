@@ -5,6 +5,7 @@ import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 import { sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
+import { getCookie, getSetCookie } from "@/shared/http/cookie.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
@@ -46,6 +47,62 @@ describe("updateSession API", () => {
         expect(sessionByTokenMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateSessionMock).not.toHaveBeenCalled()
+    })
+
+    test("clears the session cookie when the session is invalid", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(null)
+        const { api } = authInstance({ getSessionByToken: getSessionByTokenMock })
+
+        const updated = await api.updateSession({
+            headers: {
+                Cookie: "aura-auth.session_token=invalid-session-token",
+            },
+            session: {},
+        })
+
+        expect(updated).toEqual({
+            session: null,
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(getSetCookie(updated.headers, "aura-auth.session_token")).toBe("")
+    })
+
+    test("preserves the session cookie when CSRF validation fails", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const { api } = authInstance({ getSessionByToken: getSessionByTokenMock })
+        const csrfToken = await createCSRF(jose)
+
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=valid-session-token; aura-auth.csrf_token=${csrfToken}`,
+                "X-CSRF-Token": "invalid-csrf-token",
+            }),
+            session: {},
+        })
+
+        expect(updated).toEqual({
+            session: null,
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "UPDATE_SESSION_INVALID",
+                message: "Failed to update session.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(getCookie(updated.headers, "aura-auth.session_token")).toContain("valid-session-token")
     })
 
     test("updates user session with skipCSRFCheck", async () => {
@@ -310,9 +367,6 @@ describe("updateSession API", () => {
             ...payload,
         })
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
-            name: "John Doe",
-            email: "john@example.com",
-            image: "https://example.com/image.jpg",
             role: "superadmin",
             department: "Executive",
         })
@@ -474,8 +528,6 @@ describe("updateSession API", () => {
         })
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
             ...payload,
-            email: "john@example.com",
-            image: "https://example.com/image.jpg",
         })
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
             expiresAt: expect.any(Date),
@@ -555,8 +607,6 @@ describe("updateSession API", () => {
             ...payload,
         })
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
-            email: "john@example.com",
-            image: "https://example.com/image.jpg",
             ...payload,
         })
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
@@ -652,11 +702,7 @@ describe("updateSession API", () => {
             email: "john@example.com",
             image: "https://example.com/image.jpg",
         })
-        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
-            name: "John Doe",
-            email: "john@example.com",
-            image: "https://example.com/image.jpg",
-        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {})
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
             expiresAt: expect.any(Date),
         })

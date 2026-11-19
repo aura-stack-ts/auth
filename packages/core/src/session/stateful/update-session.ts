@@ -2,10 +2,12 @@ import { toUnionHeaders } from "@/shared/http/headers.ts"
 import type { Session, SessionWithUserEntity, User } from "@/@types/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
-export const refreshSession = <DefaultUser extends User>(
+export const updateSession = <DefaultUser extends User>(
     ctx: InternalContextForStateful
-): SessionStrategy<DefaultUser>["refreshSession"] => {
+): SessionStrategy<DefaultUser>["updateSession"] => {
     const { logger, session: sessionConfig } = ctx
+
+    const maxAge = sessionConfig?.config?.maxAge ?? 60 * 60 * 24 * 15
 
     return async ({ headers, session, sessionToken, rawSession }) => {
         const refreshHeaders = (newHeaders: Headers) => {
@@ -37,7 +39,9 @@ export const refreshSession = <DefaultUser extends User>(
         const verifiedPayload = await ctx.identity.schemaRegistry.parse(updatedUser)
 
         if (sessionPayload && Object.keys(sessionPayload).length > 0) {
-            const { sub: _sub, ...userUpdateFields } = verifiedPayload
+            const userUpdateFields = Object.fromEntries(
+                Object.entries(verifiedPayload).filter(([field]) => field !== "sub" && Object.hasOwn(sessionPayload, field))
+            )
             await sessionConfig.config.adapter.updateUser(sessionByToken.userId, userUpdateFields as any)
             logger?.log("STATEFUL_USER_UPDATED_IN_DB", {
                 structuredData: {
@@ -47,23 +51,26 @@ export const refreshSession = <DefaultUser extends User>(
             })
         }
 
-        const newExpiresAt = new Date(Date.now() + 60 * 60 * 24 * 15 * 1000)
+        const now = Date.now()
+        const expiresAt = session.expires
+            ? new Date(Math.min(now + maxAge * 1000, new Date(session.expires).getTime()))
+            : new Date(now + maxAge * 1000)
         logger?.log("STATEFUL_SESSION_EXPIRATION_UPDATE", {
             structuredData: {
                 session_id: sessionByToken.id,
                 old_expires_at: sessionByToken.expiresAt.toISOString(),
-                new_expires_at: newExpiresAt.toISOString(),
+                new_expires_at: expiresAt.toISOString(),
             },
         })
 
         await sessionConfig.config.adapter.updateSession(sessionByToken.id, {
-            expiresAt: newExpiresAt,
+            expiresAt,
         })
 
         logger?.log("STATEFUL_SESSION_UPDATED", {
             structuredData: {
                 session_id: sessionByToken.id,
-                new_expires_at: newExpiresAt.toISOString(),
+                new_expires_at: expiresAt.toISOString(),
             },
         })
 
@@ -77,14 +84,14 @@ export const refreshSession = <DefaultUser extends User>(
 
         const updatedSession: Session<DefaultUser> = {
             user: verifiedPayload,
-            expires: newExpiresAt.toISOString(),
+            expires: expiresAt.toISOString(),
         }
 
         logger?.log("STATEFUL_REFRESH_SESSION_SUCCESS", {
             structuredData: {
                 session_id: sessionByToken.id,
                 user_id: sessionByToken.userId,
-                expires_at: newExpiresAt.toISOString(),
+                expires_at: expiresAt.toISOString(),
             },
         })
 

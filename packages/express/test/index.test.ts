@@ -127,7 +127,7 @@ describe("PATCH /api/auth/session", () => {
             .send({ user: { name: "Jane Doe" } })
             .set("X-CSRF-Token", csrfToken)
             .set("Cookie", `aura-auth.csrf_token=${csrfToken}`)
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(401)
         expect(response.body).toMatchObject({
             session: null,
             success: false,

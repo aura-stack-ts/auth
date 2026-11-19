@@ -3,7 +3,7 @@ import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/setup/auth.ts"
 import { createCSRF } from "@/exports/crypto.ts"
-import { getSetCookie } from "@/shared/http/cookie.ts"
+import { getCookie, getSetCookie } from "@/shared/http/cookie.ts"
 import { sessionPayload } from "@test/setup/presets.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 
@@ -480,7 +480,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getSetCookie(updated.headers, "aura-auth.session_token")).toBe("")
+        expect(getCookie(updated.headers, "aura-auth.session_token")).toContain(sessionToken)
     })
 
     test("updateSession with doubleSubmitToken", async () => {

@@ -240,7 +240,6 @@ export const internalPrismaAdapter = ({ client, deleteStrategy = "soft" }: Inter
                 where: { id },
                 data: {
                     ...stripped,
-                    status: input?.status ?? "active",
                     mfaState: input?.mfaState,
                 },
             })

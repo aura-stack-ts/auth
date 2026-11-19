@@ -291,7 +291,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Attempt to refresh using the refresh token cookie.
      * Returns null session + cookie-clearing response on any failure.
      */
-    refreshSession(options: {
+    updateSession(options: {
         headers: Headers
         session: DeepPartial<Session<DefaultUser>>
         sessionToken: string

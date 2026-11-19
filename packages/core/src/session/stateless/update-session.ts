@@ -3,9 +3,9 @@ import { updateExpires } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
-export const refreshSession = <DefaultUser extends User = User>(
+export const updateSession = <DefaultUser extends User = User>(
     ctx: InternalContextForStateless
-): SessionStrategy<DefaultUser>["refreshSession"] => {
+): SessionStrategy<DefaultUser>["updateSession"] => {
     const { jose, identity, session } = ctx
 
     const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
