@@ -124,6 +124,8 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Inter
     const jwtValidator = createValidator<z.output<typeof jwtClaims>>(jwtClaims)
     const oauthTokensValidator = createValidator<OAuthTokenPayload>(oauthTokens)
 
+    const expiresAt = createValidator<string>(z.coerce.date().optional())
+
     const parse = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = validator.validate(data)
         if (!success) {
@@ -156,5 +158,13 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Inter
         return output
     }
 
-    return { parse, parseAsPartial, parseWithJWT, parseOAuthTokens, schema, schemaAsPartial }
+    const parseExpiresAt = async (expires: unknown): Promise<string> => {
+        const { data: output, success, error } = expiresAt.validate(expires)
+        if (!success) {
+            throw new AuraAuthError({ code: "SCHEMA_PARSER_FAILED", cause: error })
+        }
+        return output
+    }
+
+    return { parse, parseAsPartial, parseWithJWT, parseOAuthTokens, parseExpiresAt, schema, schemaAsPartial }
 }

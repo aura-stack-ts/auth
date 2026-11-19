@@ -1,7 +1,8 @@
 import { isNullOrUndefined } from "@/shared/assert.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createFingerprint, getDeviceInfo } from "@/shared/http/request-metadata.ts"
 import type { ExpirationStrategy } from "@/@types/index.ts"
-import type { InternalContextForStateful, InternalExpirationResult } from "@/@types/internal.ts"
+import type { InternalContextForStateful, InternalExpirationResult, RouterGlobalContext } from "@/@types/internal.ts"
 
 /** Default sliding threshold: extend when less than 25% of maxAge remains. */
 export const DEFAULT_SLIDING_THRESHOLD_RATIO = 0.25
@@ -55,7 +56,7 @@ export const updateExpires = ({
             return new Date((now + maxAge) * 1000)
         case "sliding": {
             const threshold = maxAge * 0.25
-            if (exp - now < threshold) {
+            if (exp - now <= threshold) {
                 return new Date((now + maxAge) * 1000)
             }
             return null
@@ -196,4 +197,29 @@ export const calcStatefulExpiration = ({
         createdAt: createdAt?.getTime(),
         maxDuration: maxDuration !== undefined ? maxDuration * 1000 : undefined,
     })
+}
+
+export const getExpiresAt = async ({
+    expires,
+    maxAge,
+    ctx,
+    strategy,
+    exp,
+}: {
+    exp: number
+    expires: string | undefined
+    maxAge: number
+    ctx: RouterGlobalContext
+    strategy: ExpirationStrategy
+}) => {
+    const now = Date.now()
+    if (!expires) {
+        return updateExpires({ exp, maxAge, strategy }) ?? new Date(now + maxAge * 1000)
+    }
+    const parsedExpires = await ctx.identity.schemaRegistry.parseExpiresAt(expires)
+    const expiresAt = new Date(parsedExpires)
+    if (isNaN(expiresAt.getTime()) || expiresAt.getTime() <= now) {
+        throw new AuraAuthError({ code: "INVALID_SESSION_EXPIRES_VALUE" })
+    }
+    return new Date(Math.min(now + maxAge * 1000, expiresAt.getTime()))
 }

@@ -220,7 +220,7 @@ describe("updateSession API", () => {
             email: "johndoe@example.com",
         })
         const csrfToken = await createCSRF(jose)
-        const expiresAt = new Date(Date.now() - 100_000).toISOString()
+        const expiresAt = new Date(Date.now() + 60 * 60 * 2).toISOString()
         const updated = await api.updateSession({
             headers: new Headers({
                 Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
@@ -228,7 +228,6 @@ describe("updateSession API", () => {
             session: {
                 expires: expiresAt,
             },
-            skipCSRFCheck: true,
         })
         expect(updated).toEqual({
             session: {
@@ -242,6 +241,38 @@ describe("updateSession API", () => {
             success: true,
             redirect: false,
             redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
+
+    test("updates invalid expiry on valid session", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const sessionToken = await jose.encodeJWT({
+            sub: "1234567890",
+            name: "John Doe",
+            email: "johndoe@example.com",
+        })
+        const csrfToken = await createCSRF(jose)
+        const expiresAt = new Date(Date.now() - 100_000).toISOString()
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: {
+                expires: expiresAt,
+            },
+        })
+        expect(updated).toEqual({
+            session: null,
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "INVALID_SESSION_EXPIRES_VALUE",
+                message: "The provided session expiration value is invalid. Please supply a valid future date.",
+            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
@@ -481,6 +512,7 @@ describe("updateSession API", () => {
         })
 
         expect(getCookie(updated.headers, "aura-auth.session_token")).toContain(sessionToken)
+        expect(() => getSetCookie(updated.headers, "aura-auth.session_token")).toThrow()
     })
 
     test("updateSession with doubleSubmitToken", async () => {

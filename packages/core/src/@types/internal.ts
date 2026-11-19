@@ -297,7 +297,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         sessionToken: string
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
     }): Promise<{
-        session: Session<DefaultUser> | null
+        session: Session<DefaultUser>
         headers: Headers
     }>
     /**

@@ -455,12 +455,6 @@ export const LOG_MESSAGES = {
         msgId: "STATEFUL_CREATE_SESSION_SUCCESS",
         message: "Stateful session created successfully",
     },
-    STATEFUL_REFRESH_SESSION_START: {
-        facility: 4,
-        severity: "debug",
-        msgId: "STATEFUL_REFRESH_SESSION_START",
-        message: "Starting stateful session refresh process",
-    },
     STATEFUL_REFRESH_TOKEN_MISSING: {
         facility: 4,
         severity: "warning",
@@ -508,18 +502,6 @@ export const LOG_MESSAGES = {
         severity: "debug",
         msgId: "STATEFUL_SESSION_EXPIRATION_UPDATE",
         message: "Updating session expiration time",
-    },
-    STATEFUL_SESSION_UPDATED: {
-        facility: 4,
-        severity: "debug",
-        msgId: "STATEFUL_SESSION_UPDATED",
-        message: "Session updated in database",
-    },
-    STATEFUL_SESSION_TOUCHED: {
-        facility: 4,
-        severity: "debug",
-        msgId: "STATEFUL_SESSION_TOUCHED",
-        message: "Session last activity timestamp updated",
     },
     STATEFUL_REFRESH_SESSION_SUCCESS: {
         facility: 4,

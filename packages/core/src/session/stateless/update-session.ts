@@ -1,5 +1,5 @@
 import { toUnionHeaders } from "@/shared/http/headers.ts"
-import { updateExpires } from "@/shared/utils/session-strategy.ts"
+import { getExpiresAt } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
@@ -21,11 +21,19 @@ export const updateSession = <DefaultUser extends User = User>(
         const defaultPayload = identity.skipValidation ? rawSession : await identity.schemaRegistry.parse(rawSession)
 
         const { sub } = defaultPayload
+        /**
+         * Removes `skipValidation` support in the next major version.
+         * It introduces privilege escalation attacks
+         */
         const sessionPayload = identity.skipValidation ? session.user : await identity.schemaRegistry.parseAsPartial(session.user)
 
-        const expiresAt = session.expires
-            ? new Date(Math.min(now + maxAge * 1000, new Date(session.expires).getTime()))
-            : (updateExpires({ exp, maxAge, strategy }) ?? new Date(now + maxAge * 1000))
+        const expiresAt = await getExpiresAt({
+            ctx,
+            exp,
+            maxAge,
+            strategy,
+            expires: session.expires,
+        })
 
         const updatedSession: Session<DefaultUser> = {
             user: {
@@ -43,6 +51,9 @@ export const updateSession = <DefaultUser extends User = User>(
             iat: issuedAt,
             mexp,
         })
-        return { session: updatedSession, headers: refreshHeaders(ctx.cookies.manager.setCookie({ sessionToken })) }
+        return {
+            session: { expires: updatedSession.expires, user: verifiedPayload },
+            headers: refreshHeaders(ctx.cookies.manager.setCookie({ sessionToken })),
+        }
     }
 }
