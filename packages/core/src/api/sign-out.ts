@@ -25,8 +25,8 @@ export const signOut = async ({
         const { request, rateLimit, rawSession } = await createValidation(ctx, initHeaders)
             .buildRequest(requestInit, "/signOut")
             .verifyRateLimit("signOut")
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifySession()
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .execute()
 
         if (rateLimit) {

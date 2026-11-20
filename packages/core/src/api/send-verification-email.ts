@@ -26,9 +26,9 @@ export const sendVerificationEmail = async (
         logger?.log("SEND_VERIFICATION_EMAIL_INITIATED")
         const { request, rateLimit, origin } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/sendVerificationEmail")
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
-            .verifySession()
             .verifyRateLimit("sendVerificationEmail")
+            .verifySession()
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .execute()
         if (rateLimit) {
             return rateLimit as SendVerificationEmailAPIReturn

@@ -30,9 +30,9 @@ export const changeEmail = async ({
         const { request, rateLimit, userId, origin } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/email/change")
             .verifyRateLimit("changeEmail")
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifySession()
             .verifyUserStatus("SILENT_USER_NOT_FOUND")
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .execute()
 
         if (rateLimit) {
