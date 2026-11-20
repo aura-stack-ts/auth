@@ -1,9 +1,9 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { cacheControl } from "@/shared/http/headers.ts"
-import { validateIDToken } from "@/shared/oidc/id-token.ts"
 import { transformToTokenPayload } from "@/shared/utils.ts"
 import { createCSRF, timingSafeEqual } from "@/exports/crypto.ts"
+import { verifyOIDCConfig } from "@/shared/oidc/verify-oidc-config.ts"
 import { getCookie, getExpiredCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAccessToken, createRedirectTo, getUserInfo } from "@/shared/oauth2/index.ts"
@@ -16,7 +16,7 @@ export const oauthCallback = (ctx: InternalContextForStateless): SessionStrategy
         const isOIDC = isOIDCProvider(provider)
         const cookieState = getCookie(request, cookies.store.state.name)
         const codeVerifier = getCookie(request, cookies.store.codeVerifier.name)
-        const cookieNonce = isOIDC ? getOptionalCookie(request, cookies.store.nonce.name) : undefined
+        const cookieNonce = isOIDC ? getOptionalCookie(request, cookies.store.nonce.name) : null
         const cookieRedirectTo = getCookie(request, cookies.store.redirectTo.name)
         const cookieRedirectURI = getCookie(request, cookies.store.redirectURI.name)
 
@@ -34,21 +34,12 @@ export const oauthCallback = (ctx: InternalContextForStateless): SessionStrategy
         const resolvedConfig = isOIDC ? await resolveOpenIDProvider(provider) : provider
         const accessToken = await createAccessToken(resolvedConfig, cookieRedirectURI, code, codeVerifier, logger)
 
-        if (isOIDC) {
-            if (!accessToken.id_token) {
-                throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
-            }
-            const { issuer, jwks_uri } = resolvedConfig.oidc!
-            if (!jwks_uri || !cookieNonce || !resolvedConfig.clientId) {
-                throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
-            }
-            await validateIDToken(accessToken.id_token, {
-                issuer,
-                clientId: resolvedConfig.clientId,
-                nonce: cookieNonce,
-                jwks_uri,
-            })
-        }
+        await verifyOIDCConfig({
+            isOIDC,
+            accessToken,
+            config: resolvedConfig,
+            nonce: cookieNonce,
+        })
 
         const redirectTo = await createRedirectTo(request, cookieRedirectTo, ctx)
 

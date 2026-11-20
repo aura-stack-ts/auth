@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { validateIDToken } from "@/shared/oidc/id-token.ts"
+import { verifyOIDCConfig } from "@/shared/oidc/verify-oidc-config.ts"
 import { createCSRF, createHash, createSecretValue } from "@/exports/crypto.ts"
 import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
@@ -43,21 +43,12 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
             logger
         )
 
-        if (isOIDC) {
-            if (!accessToken.id_token) {
-                throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
-            }
-            const { issuer, jwks_uri } = resolvedConfig.oidc!
-            if (!jwks_uri || !transaction.nonce || !resolvedConfig.clientId) {
-                throw new AuraAuthError({ code: "OIDC_ID_TOKEN_INVALID" })
-            }
-            await validateIDToken(accessToken.id_token as string, {
-                issuer,
-                clientId: resolvedConfig.clientId,
-                nonce: transaction.nonce,
-                jwks_uri,
-            })
-        }
+        await verifyOIDCConfig({
+            isOIDC,
+            accessToken,
+            nonce: transaction.nonce,
+            config: resolvedConfig,
+        })
 
         const redirectTo = transaction.redirectTo ? await createRedirectTo(request, transaction.redirectTo, ctx) : "/"
         const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)

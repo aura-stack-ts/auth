@@ -70,7 +70,6 @@ export const createAccessToken = async (
             }).toString(),
         })
         if (!response.ok) {
-            logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
             throw new AuraAuthError({ code: "INVALID_OAUTH_ACCESS_TOKEN_RESPONSE" })
         }
         assertContentTypeResponse(response, logger)
@@ -78,17 +77,10 @@ export const createAccessToken = async (
         const tokenSchema = isOIDCProvider(oauthConfig) ? OIDCAccessTokenResponseSchema : OAuthAccessTokenResponse
         const token = tokenSchema.safeParse(json)
         if (!token.success) {
-            const { success, data } = OAuthAccessTokenErrorResponse.safeParse(json)
+            const { success } = OAuthAccessTokenErrorResponse.safeParse(json)
             if (!success) {
-                logger?.log("INVALID_OAUTH_ACCESS_TOKEN_RESPONSE")
                 throw new AuraAuthError({ code: "INVALID_OAUTH_ACCESS_TOKEN_RES_FORMAT" })
             }
-            logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
-                structuredData: {
-                    error: data.error,
-                    error_description: data.error_description ?? "",
-                },
-            })
             throw new AuraAuthError({ code: "INVALID_OAUTH_ACCESS_TOKEN_RES_FORMAT" })
         }
 
@@ -98,7 +90,6 @@ export const createAccessToken = async (
         if (isAuraAuthError(error)) {
             throw error
         }
-        logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_FAILED")
         throw new AuraAuthError({ code: "UNKNOWN_OAUTH_ACCESS_TOKEN_ERROR", cause: error })
     }
 }
