@@ -1,15 +1,18 @@
+import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const isProviderConnected = (ctx: InternalContextForStateful): SessionStrategy["isProviderConnected"] => {
     const { logger, session } = ctx
 
-    return async ({ oauthId, sessionByToken }) => {
+    return async ({ oauthId, rawSession }) => {
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
                 provider: oauthId,
                 operation: "isProviderConnected",
             },
         })
+        const sessionByToken = rawSession as SessionWithUserEntity
+
         const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
         if (sessionByToken.status !== "active" || isExpired) {
             if (isExpired) {

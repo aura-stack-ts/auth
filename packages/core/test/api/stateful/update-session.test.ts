@@ -5,6 +5,7 @@ import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 import { sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
+import { getCookie, getSetCookie } from "@/shared/http/cookie.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
@@ -27,7 +28,7 @@ describe("updateSession API", () => {
         })
 
         const updated = await api.updateSession({
-            headers: new Headers(),
+            headers: {},
             session: {},
         })
         expect(updated).toEqual({
@@ -37,8 +38,8 @@ describe("updateSession API", () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "CSRF_TOKEN_MISSING",
-                message: "The CSRF token is missing. Please refresh and try again.",
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
             },
             toResponse: expect.any(Function),
         })
@@ -46,6 +47,62 @@ describe("updateSession API", () => {
         expect(sessionByTokenMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateSessionMock).not.toHaveBeenCalled()
+    })
+
+    test("clears the session cookie when the session is invalid", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(null)
+        const { api } = authInstance({ getSessionByToken: getSessionByTokenMock })
+
+        const updated = await api.updateSession({
+            headers: {
+                Cookie: "aura-auth.session_token=invalid-session-token",
+            },
+            session: {},
+        })
+
+        expect(updated).toEqual({
+            session: null,
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(getSetCookie(updated.headers, "aura-auth.session_token")).toBe("")
+    })
+
+    test("preserves the session cookie when CSRF validation fails", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const { api } = authInstance({ getSessionByToken: getSessionByTokenMock })
+        const csrfToken = await createCSRF(jose)
+
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=valid-session-token; aura-auth.csrf_token=${csrfToken}`,
+                "X-CSRF-Token": "invalid-csrf-token",
+            }),
+            session: {},
+        })
+
+        expect(updated).toEqual({
+            session: null,
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "UPDATE_SESSION_INVALID",
+                message: "Failed to update session.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(getCookie(updated.headers, "aura-auth.session_token")).toContain("valid-session-token")
     })
 
     test("updates user session with skipCSRFCheck", async () => {
@@ -125,13 +182,6 @@ describe("updateSession API", () => {
         })
         expect(updateUserMock).toHaveBeenCalledWith("user-123", newUser)
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: "session-123",
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -209,13 +259,6 @@ describe("updateSession API", () => {
         })
         expect(updateUserMock).toHaveBeenCalledWith("user-123", newUser)
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: "session-123",
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -324,20 +367,10 @@ describe("updateSession API", () => {
             ...payload,
         })
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
-            name: "John Doe",
-            email: "john@example.com",
-            image: "https://example.com/image.jpg",
             role: "superadmin",
             department: "Executive",
         })
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: "session-123",
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -417,13 +450,6 @@ describe("updateSession API", () => {
         })
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: "session-123",
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -502,17 +528,8 @@ describe("updateSession API", () => {
         })
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
             ...payload,
-            email: "john@example.com",
-            image: "https://example.com/image.jpg",
         })
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: "session-123",
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -590,18 +607,9 @@ describe("updateSession API", () => {
             ...payload,
         })
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
-            email: "john@example.com",
-            image: "https://example.com/image.jpg",
             ...payload,
         })
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: "session-123",
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -694,21 +702,120 @@ describe("updateSession API", () => {
             email: "john@example.com",
             image: "https://example.com/image.jpg",
         })
-        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
-            name: "John Doe",
-            email: "john@example.com",
-            image: "https://example.com/image.jpg",
-        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {})
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: "session-123",
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: "hashed-token",
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
+    })
+
+    test("arbitrary session lifetime extension is prevented when updating session", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const sessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const { api, jose } = authInstance(
+            {
+                getSessionByToken: sessionByTokenMock,
+                updateSession: updateSessionMock,
+                touchSession: touchSessionMock,
+            },
+            { identity: { skipValidation: true } }
+        )
+
+        const csrfToken = await createCSRF(jose)
+        const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: {
+                expires: new Date(attackerExpiration * 1000).toISOString(),
+            },
+        })
+
+        expect(updated).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe",
+                    email: "john@example.com",
+                    image: "https://example.com/image.jpg",
+                },
+                expires: expect.any(String),
+            },
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        const sessionExpiration = new Date(updated.session!.expires!).getTime()
+        const persistedExpiration = updateSessionMock.mock.calls[0][1].expiresAt as Date
+        const maximumExpiration = Date.now() + 60 * 60 * 24 * 15 * 1000 + 1000
+
+        expect(sessionExpiration).not.toBe(attackerExpiration * 1000)
+        expect(sessionExpiration).toBeLessThanOrEqual(maximumExpiration)
+        expect(persistedExpiration.getTime()).toBe(sessionExpiration)
+        expect(persistedExpiration.getTime()).toBeLessThanOrEqual(maximumExpiration)
+    })
+
+    test("improperly controlled user attributes are not persisted during session updates", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+
+        const sessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const { api, jose } = authInstance({
+            getSessionByToken: sessionByTokenMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
+        const updated = await api.updateSession({
+            headers: new Headers({
+                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+            }),
+            session: {
+                user: {
+                    sub: "0987-alter-claims",
+                    role: "admin",
+                    cash: 10000,
+                    emailVerified: true,
+                } as any,
+            },
+        })
+
+        expect(updated).toEqual({
+            success: true,
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe",
+                    email: "john@example.com",
+                    image: "https://example.com/image.jpg",
+                },
+                expires: expect.any(String),
+            },
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(updateUserMock).not.toHaveBeenCalledWith(
+            "user-123",
+            expect.objectContaining({
+                role: "admin",
+                cash: 10000,
+                emailVerified: true,
+            })
+        )
     })
 })

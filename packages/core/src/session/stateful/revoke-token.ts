@@ -2,12 +2,13 @@ import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getExpiredCookie } from "@/shared/http/cookie.ts"
 import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
+import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const revokeToken = (ctx: InternalContextForStateful): SessionStrategy["revokeToken"] => {
     const { logger, session, cookies } = ctx
 
-    return async ({ oauthId, provider, headers, disconnect, sessionByToken }) => {
+    return async ({ oauthId, provider, headers, disconnect, rawSession }) => {
         logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
                 provider: oauthId,
@@ -15,6 +16,7 @@ export const revokeToken = (ctx: InternalContextForStateful): SessionStrategy["r
                 disconnect,
             },
         })
+        const sessionByToken = rawSession as SessionWithUserEntity
 
         const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
         if (sessionByToken.status !== "active" || isExpired) {

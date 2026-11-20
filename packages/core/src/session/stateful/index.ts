@@ -12,7 +12,7 @@ import { sendMagicLink } from "@/session/stateful/send-magic-link.ts"
 import { changePassword } from "@/session/stateful/change-password.ts"
 import { forgotPassword } from "@/session/stateful/forgot-password.ts"
 import { destroySession } from "@/session/stateful/destroy-session.ts"
-import { refreshSession } from "@/session/stateful/refresh-session.ts"
+import { updateSession } from "@/session/stateful/update-session.ts"
 import { refreshUserInfo } from "@/session/stateful/refresh-userInfo.ts"
 import { verifyMagicLink } from "@/session/stateful/verify-magic-link.ts"
 import { signInCredentials } from "@/session/stateful/sign-in-credentials.ts"
@@ -39,9 +39,9 @@ export const createStatefulStrategy = <DefaultUser extends User = User>(
         oauthCallback: oauthCallback(ctx),
         createSession: createSession(ctx),
         revokeSession: revokeSession(ctx),
+        updateSession: updateSession(ctx),
         forgotPassword: forgotPassword(ctx),
         destroySession: destroySession(ctx),
-        refreshSession: refreshSession(ctx),
         changePassword: changePassword(ctx),
         refreshUserInfo: refreshUserInfo(ctx),
         verifyMagicLink: verifyMagicLink(ctx),

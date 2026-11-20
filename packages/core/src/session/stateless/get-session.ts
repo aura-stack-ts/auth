@@ -23,15 +23,15 @@ export const getSession = <DefaultUser extends User>(
             const { sessionToken } = ctx.cookies.manager.getCookie(headers)
             if (!sessionToken) return { session: null, headers }
 
-            const claims = await jose.manager.verifyToken(sessionToken)
-            const parsedClaims = identity.skipValidation ? claims : await identity.schemaRegistry.parseWithJWT(claims)
-            const { exp, iat: _iat, mexp: _mexp, ...defaultPayload } = parsedClaims
-            const userClaims = identity.skipValidation ? defaultPayload : await identity.schemaRegistry.parse(defaultPayload)
-            if (!userClaims.sub) return { session: null, headers }
+            const payload = await jose.manager.verifyToken(sessionToken)
+            const { exp, iat, mexp } = await identity.schemaRegistry.parseWithJWT(payload)
+
+            const sessionPayload = identity.skipValidation ? payload : await identity.schemaRegistry.parse(payload)
+            if (!sessionPayload.sub) return { session: null, headers }
 
             const session: Session<DefaultUser> = {
-                user: userClaims as DefaultUser,
-                expires: parsedClaims.exp ? new Date(exp * 1000).toISOString() : "",
+                user: sessionPayload,
+                expires: new Date(exp * 1000).toISOString(),
             }
 
             const calc = calcStatelessExpiration({
@@ -47,19 +47,19 @@ export const getSession = <DefaultUser extends User>(
                 return { session, headers }
             }
             const expiresAt = calc.expiresAt
-            const issuedAt = strategy === "absolute" ? parsedClaims.iat : Math.floor(Date.now() / 1000)
+            const issuedAt = strategy === "absolute" ? iat : Math.floor(Date.now() / 1000)
             const newSessionToken = await jose.manager.createToken({
-                ...userClaims,
+                ...sessionPayload,
                 exp: Math.floor(expiresAt.getTime() / 1000),
                 iat: issuedAt,
-                mexp: parsedClaims.mexp,
+                mexp,
             })
             logger?.log("SESSION_REFRESHED", { structuredData: { strategy: "stateless", expiresAt: expiresAt.toISOString() } })
             return {
                 session: {
-                    user: userClaims,
+                    user: sessionPayload,
                     expires: expiresAt.toISOString(),
-                } as unknown as Session<DefaultUser>,
+                },
                 headers: toUnionHeaders(headers, ctx.cookies.manager.setCookie({ sessionToken: newSessionToken })),
             }
         } catch (error) {

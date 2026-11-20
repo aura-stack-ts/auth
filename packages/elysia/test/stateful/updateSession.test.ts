@@ -23,7 +23,7 @@ describe("updateSession (Stateful)", () => {
                 }),
             })
         )
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             session: null,
@@ -52,7 +52,7 @@ describe("updateSession (Stateful)", () => {
                 }),
             })
         )
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             session: null,
@@ -123,7 +123,7 @@ describe("updateSession (Stateful)", () => {
             id: "session-csrf-fail",
             userId: user.id,
             authenticatedWith: "credentials",
-            tokenHash: "token-hash-csrf",
+            tokenHash: await createHash("token-hash-csrf"),
             expiresAt: new Date(Date.now() + 3600000),
             status: "active",
             mfaState: "none",

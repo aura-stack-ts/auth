@@ -1,11 +1,11 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { getExpiredCookie, getCookie as getCookieByName } from "@/shared/http/cookie.ts"
+import { getExpiredCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import type { InternalCookieStoreConfig } from "@/@types/internal.ts"
 
 export const createCookieManager = (store: () => InternalCookieStoreConfig) => {
     const getCookie = (request: Request | Headers) => {
-        const sessionToken = getCookieByName(request, store().sessionToken.name)
+        const sessionToken = getOptionalCookie(request, store().sessionToken.name)
         return {
             sessionToken,
         }

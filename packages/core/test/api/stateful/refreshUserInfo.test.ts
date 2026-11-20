@@ -1,10 +1,86 @@
 import { describe, test, expect, vi } from "vitest"
+import { z } from "zod/v4"
 import { authInstance, jose } from "@test/setup/auth.ts"
 import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { accountEntity, oauthAccountEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
+import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 
 describe("refreshUserInfo API (Stateful)", () => {
+    test("preserves current user attributes omitted by the OAuth provider response", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const rawSession = {
+            ...sessionEntityWithUser,
+            user: {
+                ...userEntity,
+                attributes: { role: "stale-role" },
+            },
+        }
+        const getSessionByTokenMock = vi.fn().mockResolvedValue(rawSession)
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
+        const getOAuthAccountMock = vi.fn().mockResolvedValue(oauthAccountEntity)
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const { api } = authInstance(
+            {
+                getSessionByToken: getSessionByTokenMock,
+                getAccountsByUserId: getAccountsByUserIdMock,
+                getOAuthAccount: getOAuthAccountMock,
+                updateUser: updateUserMock,
+                updateSession: updateSessionMock,
+                touchSession: touchSessionMock,
+            },
+            {
+                identity: {
+                    // @ts-ignore
+                    schema: UserIdentity.extend({ role: z.string() }),
+                },
+            }
+        )
+
+        const csrfToken = await createCSRF(jose)
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockImplementation(async () => {
+                return {
+                    ok: true,
+                    headers: new Headers({ "Content-Type": "application/json" }),
+                    json: async () => ({
+                        id: "1234567890",
+                        email: "john.updated@example.com",
+                        name: "John Doe Updated",
+                    }),
+                }
+            })
+        )
+
+        const output = await api.refreshUserInfo("oauth-provider", {
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-session-token`,
+            },
+        })
+
+        expect(output).toMatchObject({
+            success: true,
+            session: {
+                user: {
+                    sub: "user-123",
+                    name: "John Doe Updated",
+                    email: "john.updated@example.com",
+                    role: "stale-role",
+                },
+            },
+        })
+        expect(updateUserMock).toHaveBeenCalledWith("user-123", {
+            email: "john.updated@example.com",
+            name: "John Doe Updated",
+        })
+    })
+
     test("throws error when provider is missing", async () => {
         const getSessionByTokenMock = vi.fn()
         const getOAuthAccountMock = vi.fn()
@@ -320,8 +396,6 @@ describe("refreshUserInfo API (Stateful)", () => {
          */
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -353,13 +427,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -672,8 +739,6 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -714,13 +779,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -905,8 +963,6 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -938,13 +994,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -1085,8 +1134,6 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -1118,13 +1165,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))
@@ -1247,8 +1287,6 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const tokenHash = await createHash(sessionToken)
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(2, tokenHash)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(3, tokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -1280,13 +1318,6 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         expect(updateSessionMock).toHaveBeenCalledWith("session-123", {
-            id: expect.any(String),
-            userId: "user-123",
-            deviceId: null,
-            authenticatedWith: "credentials",
-            status: "active",
-            mfaState: "none",
-            tokenHash: expect.any(String),
             expiresAt: expect.any(Date),
         })
         expect(touchSessionMock).toHaveBeenCalledWith("session-123", expect.any(Date))

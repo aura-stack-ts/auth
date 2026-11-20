@@ -37,8 +37,8 @@ describe("revokeToken (Stateful)", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "COOKIE_NOT_FOUND",
-                message: "No cookies found. There is no active session.",
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

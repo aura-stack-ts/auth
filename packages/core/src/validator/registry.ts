@@ -65,68 +65,12 @@ export const deriveSchema = <Schema extends SchemaTypes>(
     throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
-export const deriveSchemaWithJWT = <Schema extends SchemaTypes>(schema: Schema): any => {
-    if (isValibotSchema(schema)) {
-        return valibot.object({
-            ...schema.entries,
-            exp: valibot.number(),
-            iat: valibot.number(),
-            jti: valibot.string(),
-            nbf: valibot.number(),
-            aud: valibot.optional(valibot.string()),
-            iss: valibot.optional(valibot.string()),
-            mexp: valibot.optional(valibot.number()),
-        })
-    }
-    if (isArkType(schema)) {
-        return schema.and({
-            exp: "number",
-            iat: "number",
-            jti: "string",
-            nbf: "number",
-            aud: "string?",
-            iss: "string?",
-            mexp: "number?",
-        })
-    }
-    if (IsObject(schema)) {
-        return Typebox.Object(
-            {
-                ...schema.properties,
-                exp: Typebox.Number(),
-                iat: Typebox.Number(),
-                jti: Typebox.String(),
-                nbf: Typebox.Number(),
-                aud: Typebox.Optional(Typebox.String()),
-                iss: Typebox.Optional(Typebox.String()),
-                mexp: Typebox.Optional(Typebox.Number()),
-            },
-            {
-                ...schema,
-            }
-        )
-    }
-    if (isZodSchema(schema)) {
-        return schema.extend({
-            exp: z.number(),
-            iat: z.number(),
-            jti: z.string(),
-            nbf: z.number(),
-            aud: z.string().optional(),
-            iss: z.string().optional(),
-            mexp: z.number().optional(),
-        })
-    }
-    throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
-}
-
 export const getFullSchema = <Identity extends Identities, Schema = EditableToSchema<Identity>>(
     schema: Schema
 ): ReturnUpdateSessionShape<Schema> => {
     if (isValibotSchema(schema)) {
         // @ts-ignore Deep type instantiation with external schemas
         return valibot.object({
-            // @ts-ignore ArkType schema property type mismatch
             user: schema,
             expires: valibot.optional(
                 valibot.pipe(
@@ -162,16 +106,25 @@ export const getFullSchema = <Identity extends Identities, Schema = EditableToSc
     throw new AuraAuthError({ code: "SCHEMA_UNSUPPORTED" })
 }
 
+const jwtClaims = z.object({
+    exp: z.number(),
+    iat: z.number(),
+    nbf: z.number(),
+    jti: z.string(),
+    mexp: z.number().optional(),
+})
+
 export const createSchemaRegistry = <Identity extends SchemaTypes>(config: InternalIdentityConfig<Identity>) => {
     const schema = deriveSchema(config?.schema ?? identitySchema, config.unknownKeys)
     const schemaAsPartial = deriveSchema(config?.schema ?? identitySchema, "partial")
-    const schemaWithJWT = deriveSchemaWithJWT(config?.schema ?? identitySchema)
     const oauthTokens = deriveSchema(OAuthTokenPayloadSchema)
 
     const validator = createValidator(schema)
     const partialValidator = createValidator(schemaAsPartial)
-    const jwtValidator = createValidator(schemaWithJWT)
+    const jwtValidator = createValidator<z.output<typeof jwtClaims>>(jwtClaims)
     const oauthTokensValidator = createValidator<OAuthTokenPayload>(oauthTokens)
+
+    const expiresAt = createValidator<string>(z.coerce.date().optional())
 
     const parse = async (data: unknown = {}): Promise<any> => {
         const { data: output, success, error } = validator.validate(data)
@@ -189,7 +142,7 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Inter
         return output
     }
 
-    const parseWithJWT = async (data: unknown = {}): Promise<any> => {
+    const parseWithJWT = async (data: unknown = {}) => {
         const { data: output, success, error } = jwtValidator.validate(data)
         if (!success) {
             throw new AuraAuthError({ code: "SCHEMA_PARSER_FAILED", cause: error })
@@ -205,5 +158,13 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Inter
         return output
     }
 
-    return { parse, parseAsPartial, parseWithJWT, parseOAuthTokens, schema, schemaAsPartial, schemaWithJWT }
+    const parseExpiresAt = async (expires: unknown): Promise<string> => {
+        const { data: output, success, error } = expiresAt.validate(expires)
+        if (!success) {
+            throw new AuraAuthError({ code: "SCHEMA_PARSER_FAILED", cause: error })
+        }
+        return output
+    }
+
+    return { parse, parseAsPartial, parseWithJWT, parseOAuthTokens, parseExpiresAt, schema, schemaAsPartial }
 }

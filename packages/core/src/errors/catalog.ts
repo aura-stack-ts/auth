@@ -184,6 +184,13 @@ export const ERROR_CATALOG = {
             "The internal call to 'refreshSession' completed, but returned a nullish value, meaning token mutation could not finish cleanly.",
         userMessage: "Failed to update session parameters.",
     },
+    INVALID_SESSION_EXPIRES_VALUE: {
+        type: "VALIDATION",
+        statusCode: 400,
+        name: "SessionError",
+        message: "The provided 'session.expires' value is not a valid date string or represents a date that has already passed.",
+        userMessage: "The provided session expiration value is invalid. Please supply a valid future date.",
+    },
     INVALID_SESSION_STRATEGY: {
         type: "VALIDATION",
         statusCode: 500,

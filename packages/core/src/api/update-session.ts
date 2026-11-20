@@ -1,5 +1,5 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
+import { isAuraAuthError } from "@/errors/aura-error.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
@@ -24,9 +24,10 @@ export const updateSession = async <DefaultUser extends User = User>({
             },
         })
 
-        const { request, rateLimit } = await createValidation(ctx, initialHeaders)
+        const { request, rateLimit, sessionToken, rawSession } = await createValidation(ctx, initialHeaders)
             .buildRequest(requestInit, "/session")
             .verifyRateLimit("updateSession")
+            .verifySession()
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, false)
             .execute()
 
@@ -34,13 +35,12 @@ export const updateSession = async <DefaultUser extends User = User>({
             return rateLimit as UpdateSessionAPIReturn<DefaultUser>
         }
 
-        const { session, headers } = await ctx.session.strategy.refreshSession({
+        const { session, headers } = await ctx.session.strategy.updateSession({
             session: sessionInit,
             headers: initialHeaders,
+            rawSession,
+            sessionToken,
         })
-        if (!session) {
-            throw new AuraAuthError({ code: "UPDATE_SESSION_INVALID" })
-        }
 
         const { redirect, redirectURL, status } = await resolveApiRedirect({
             ctx,
@@ -73,8 +73,15 @@ export const updateSession = async <DefaultUser extends User = User>({
         errorToLogMessage(error, "UPDATE_SESSION_INVALID", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
 
+        const shouldClearSessionCookie =
+            isAuraAuthError(error) &&
+            ["SESSION_NOT_FOUND", "SESSION_INVALID", "SESSION_EXPIRED", "SESSION_REVOKED"].includes(error.code)
+        const resolvedHeaders = shouldClearSessionCookie
+            ? toUnionHeaders(ctx.cookies.manager.clear(), initialHeaders)
+            : initialHeaders
+
         return {
-            headers: initialHeaders,
+            headers: resolvedHeaders,
             session: null,
             success: false,
             redirect: false,
@@ -83,7 +90,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             toResponse: () => {
                 return Response.json(
                     { success: false, session: null, redirect: false, redirectURL: null },
-                    { status: statusCode, headers: initialHeaders }
+                    { status: statusCode, headers: resolvedHeaders }
                 )
             },
         }

@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Security
+
+- Strengthened session validation in the stateful session strategy to prevent improper modification of dynamically determined object attributes (CWE-915). Previously, session data, JWT claims, and incoming updates were validated, but the final session data was not validated against the identity configuration. This could allow unauthorized attribute modifications when users skipped certain validations. The updated implementation validates session data and payloads against the identity configuration and always validates the final session output before returning it. [#330](https://github.com/aura-stack-ts/auth/pull/330)
+
 ---
 
 ## [0.11.0] - 2026-11-18

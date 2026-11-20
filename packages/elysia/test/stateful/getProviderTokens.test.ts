@@ -45,7 +45,7 @@ describe("getProviderTokens (Stateful)", () => {
             })
         )
 
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(404)
         const body = await response.json()
         expect(body).toMatchObject({
             success: false,

@@ -5,7 +5,7 @@ import { revokeToken } from "@/session/stateless/revoke-token.ts"
 import { oauthCallback } from "@/session/stateless/oauth-callback.ts"
 import { createSession } from "@/session/stateless/create-session.ts"
 import { destroySession } from "@/session/stateless/destroy-session.ts"
-import { refreshSession } from "@/session/stateless/refresh-session.ts"
+import { updateSession } from "@/session/stateless/update-session.ts"
 import { refreshUserInfo } from "@/session/stateless/refresh-userInfo.ts"
 import { signInCredentials } from "@/session/stateless/sign-in-credentials.ts"
 import { getProviderTokens } from "@/session/stateless/get-provider-tokens.ts"
@@ -43,7 +43,7 @@ export const createStatelessStrategy = <DefaultUser extends User = User>(
         oauthCallback: oauthCallback(ctx),
         changePassword: changePassword(ctx),
         forgotPassword: forgotPassword(ctx),
-        refreshSession: refreshSession(ctx),
+        updateSession: updateSession(ctx),
         destroySession: destroySession(ctx),
         verifyMagicLink: verifyMagicLink(ctx),
         refreshUserInfo: refreshUserInfo(ctx),

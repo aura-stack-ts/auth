@@ -1,12 +1,13 @@
 import { shouldRefresh } from "@/shared/utils.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
+import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const getProviderTokens = (ctx: InternalContextForStateful): SessionStrategy["getProviderTokens"] => {
     const { logger, session } = ctx
 
-    return async ({ oauthId, provider, headers, sessionByToken }) => {
+    return async ({ oauthId, provider, headers, rawSession }) => {
         logger?.log("STATEFUL_GET_PROVIDER_TOKENS_START", {
             structuredData: {
                 strategy: "stateful",
@@ -14,7 +15,7 @@ export const getProviderTokens = (ctx: InternalContextForStateful): SessionStrat
                 oauth_id: oauthId,
             },
         })
-
+        const sessionByToken = rawSession as SessionWithUserEntity
         const isExpired = Date.now() > sessionByToken.expiresAt.getTime()
         if (sessionByToken.status !== "active" || isExpired) {
             if (isExpired) {
