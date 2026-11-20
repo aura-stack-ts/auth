@@ -28,6 +28,7 @@ export const verifyEmailChange = async ({
             .verifyRateLimit("verifyEmailChange")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifySession()
+            .verifyUserStatus()
             .execute()
 
         if (rateLimit) {

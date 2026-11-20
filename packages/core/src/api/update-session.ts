@@ -28,6 +28,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             .buildRequest(requestInit, "/session")
             .verifyRateLimit("updateSession")
             .verifySession()
+            .verifyUserStatus()
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, false)
             .execute()
 

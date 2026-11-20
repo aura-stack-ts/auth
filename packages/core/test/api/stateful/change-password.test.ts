@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { accountEntityWithCredentials, credentialAccountEntity, sessionEntityWithUser } from "@test/setup/entities.ts"
+import { accountEntityWithCredentials, credentialAccountEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("changePassword API", async () => {
     const csrfToken = await createCSRF(jose)
@@ -149,6 +149,61 @@ describe("changePassword API", async () => {
         expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getCredentialAccountMock).toHaveBeenCalledWith("account-321")
+        expect(updatePasswordHashMock).not.toHaveBeenCalled()
+        expect(revokeAllSessionsMock).not.toHaveBeenCalled()
+    })
+
+    test("changePassword with inactive user", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const getSessionByTokenMock = vi.fn().mockReturnValue({
+            ...sessionEntityWithUser,
+            user: {
+                ...userEntity,
+                status: "deleted",
+            },
+        })
+        const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
+        const getCredentialAccountMock = vi.fn().mockReturnValue(null)
+        const updatePasswordHashMock = vi.fn().mockReturnValue(null)
+        const revokeAllSessionsMock = vi.fn().mockReturnValue(1)
+
+        const { api } = authInstance({
+            getAccountsByUserId: getAccountsByUserIdMock,
+            getCredentialAccount: getCredentialAccountMock,
+            updatePasswordHash: updatePasswordHashMock,
+            getSessionByToken: getSessionByTokenMock,
+            revokeAllSessions: revokeAllSessionsMock,
+        })
+
+        const token = "valid-token"
+        const tokenHash = await createHash(token)
+
+        const output = await api.changePassword({
+            payload: {
+                currentPassword: "current-password",
+                newPassword: "new-password",
+            },
+            headers: {
+                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+            },
+        })
+
+        expect(output).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "ACCOUNT_INACTIVE",
+                message: "This account is inactive. Please contact support.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
+        expect(getCredentialAccountMock).not.toHaveBeenCalled()
         expect(updatePasswordHashMock).not.toHaveBeenCalled()
         expect(revokeAllSessionsMock).not.toHaveBeenCalled()
     })

@@ -20,7 +20,7 @@ export const signIn = ({ client, getSafeRedirect, redirectFn }: ClientContext) =
                     redirect: false,
                 },
             })
-            const json = await response.json()
+            const json: any = await response.json()
             if (options?.redirect === true && typeof window !== "undefined" && json?.signInURL) {
                 await redirectFn(json.signInURL)
             }

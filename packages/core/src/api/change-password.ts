@@ -29,6 +29,7 @@ export const changePassword = async ({
             .verifyRateLimit("changePassword")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifySession()
+            .verifyUserStatus()
             .execute()
 
         if (rateLimit) {

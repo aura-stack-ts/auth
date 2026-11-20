@@ -4,7 +4,7 @@ import { authInstance, jose } from "@test/setup/auth.ts"
 import { createBasicAuthHeader } from "@/shared/utils.ts"
 import { oauthCustomService } from "@test/setup/presets.ts"
 import { createCSRF, createHash } from "@/exports/crypto.ts"
-import { accountEntity, oauthAccountEntity, sessionEntityWithUser } from "@test/setup/entities.ts"
+import { accountEntity, oauthAccountEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 import type { DatabaseAdapter } from "@/@types/adapter.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"
 
@@ -678,5 +678,52 @@ describe("getProviderTokens API (Stateful)", () => {
             accessTokenExpiresAt: expect.any(Date),
             refreshTokenExpiresAt: expect.any(Date),
         })
+    })
+
+    test("throws error when user is inactive", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const getSessionByTokenMock = vi.fn().mockResolvedValue({
+            ...sessionEntityWithUser,
+            user: {
+                ...userEntity,
+                status: "deleted",
+            },
+        })
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([accountEntity])
+        const getOAuthAccountMock = vi.fn().mockResolvedValue(null)
+        const updateOAuthTokensMock = vi.fn()
+
+        const { api } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
+            getOAuthAccount: getOAuthAccountMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = "valid-session-token"
+
+        const output = await api.getProviderTokens("oauth-provider", {
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+            },
+        })
+        expect(output).toEqual({
+            success: false,
+            tokens: null,
+            error: {
+                code: "ACCOUNT_INACTIVE",
+                message: "This account is inactive. Please contact support.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 })

@@ -6,6 +6,7 @@ import { createDevice as createDeviceHelper } from "@/shared/utils/session-strat
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAccessToken, createRedirectTo, getUserInfo } from "@/shared/oauth2/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
+import { assertUserStatus } from "@/shared/utils/stateful.ts"
 
 export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy["oauthCallback"] => {
     const { logger, jose, session } = ctx
@@ -61,9 +62,7 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
         const user = await session.config.adapter.getUserByEmail(userInfo.email)
 
         if (user) {
-            if (user.status === "deleted" || user.status === "suspended") {
-                throw new AuraAuthError({ code: "ACCOUNT_INACTIVE" })
-            }
+            assertUserStatus(user)
             userId = user.id
 
             const { sub: _, name, email, image, ...attributes } = userInfo
