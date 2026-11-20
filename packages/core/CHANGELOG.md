@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
+- Fixed an authorization bypass vulnerability (CWE-863) in the OAuth sign-in flow. Previously, the database OAuth callback could create an active session for an existing user based solely on their email address, without verifying their account status. This allowed suspended or soft-deleted users to regain access through an OAuth provider. The OAuth flow now validates the status of existing users and rejects sign-ins for accounts that are suspended or deleted. New users are still created with an active session when no existing account matches the provider email. [#331](https://github.com/aura-stack-ts/auth/pull/331)
+
 - Strengthened session validation in the stateful session strategy to prevent improper modification of dynamically determined object attributes (CWE-915). Previously, session data, JWT claims, and incoming updates were validated, but the final session data was not validated against the identity configuration. This could allow unauthorized attribute modifications when users skipped certain validations. The updated implementation validates session data and payloads against the identity configuration and always validates the final session output before returning it. [#330](https://github.com/aura-stack-ts/auth/pull/330)
 
 ---

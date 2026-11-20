@@ -1,86 +1,38 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { validateIDToken } from "@/shared/oidc/id-token.ts"
-import { getTrustedOrigins } from "@/config/get-trusted-origins.ts"
-import { createAccessToken, getUserInfo } from "@/shared/oauth2/index.ts"
 import { createCSRF, createHash, createSecretValue } from "@/exports/crypto.ts"
 import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
-import { getOriginURL, isRelativeURL, isSameOrigin, isTrustedOrigin } from "@/shared/utils/get-origin-url.ts"
+import { createAccessToken, createRedirectTo, getUserInfo } from "@/shared/oauth2/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy["oauthCallback"] => {
-    const { logger, jose, oauth, session } = ctx
+    const { logger, jose, session } = ctx
     const createDevice = createDeviceHelper(ctx)
 
-    return async ({ oauthId, request, params: { state, code } }) => {
-        const oauthConfig = oauth[oauthId]
-        if (!oauthConfig) {
-            throw new AuraAuthError({ code: "UNSUPPORTED_OAUTH_CONFIGURATION" })
-        }
-
-        const isOIDC = isOIDCProvider(oauthConfig)
+    return async ({ oauthId, provider, request, params: { state, code } }) => {
+        const isOIDC = isOIDCProvider(provider)
         const transaction = await session.config.adapter.getOAuthTransactionByState(state)
 
         if (!transaction) {
-            logger?.log("OAUTH_PROTOCOL_ERROR", {
-                structuredData: {
-                    oauth_provider: oauthId,
-                    state,
-                },
-            })
-            return Response.json(
-                {
-                    type: "PROTOCOL",
-                    code: "AUTH_MISMATCHING_STATE",
-                    message: "The provided state passed in the OAuth response does not match the stored token state.",
-                },
-                { status: 400 }
-            )
+            throw new AuraAuthError({ code: "AUTH_MISMATCHING_STATE" })
         }
 
         if (new Date() > transaction.expiresAt) {
-            logger?.log("OAUTH_PROTOCOL_ERROR", {
-                structuredData: {
-                    oauth_provider: oauthId,
-                    state,
-                    expires_at: transaction.expiresAt.toISOString(),
-                },
-            })
             await session.config.adapter.deleteExpiredOAuthTransactions()
-            return Response.json(
-                {
-                    type: "PROTOCOL",
-                    code: "AUTH_TRANSACTION_EXPIRED",
-                    message: "The OAuth transaction has expired. Please try signing in again.",
-                },
-                { status: 400 }
-            )
+            throw new AuraAuthError({ code: "AUTH_TRANSACTION_EXPIRED" })
         }
 
         if (transaction.provider !== oauthId) {
-            logger?.log("OAUTH_PROTOCOL_ERROR", {
-                structuredData: {
-                    expected_provider: transaction.provider,
-                    provided_provider: oauthId,
-                },
-            })
-            return Response.json(
-                {
-                    type: "PROTOCOL",
-                    code: "AUTH_PROVIDER_MISMATCH",
-                    message: "The OAuth provider does not match the stored transaction.",
-                },
-                { status: 400 }
-            )
+            throw new AuraAuthError({ code: "AUTH_PROVIDER_MISMATCH" })
         }
 
         await session.config.adapter.consumeOAuthTransaction(state)
-
-        const resolvedConfig = isOIDC ? await resolveOpenIDProvider(oauthConfig) : oauthConfig
+        const resolvedConfig = isOIDC ? await resolveOpenIDProvider(provider) : provider
 
         if (!transaction.codeVerifier) {
-            throw new AuraAuthError({ code: "DATABASE_TOKEN_HASH_NOT_FOUND" as any })
+            throw new AuraAuthError({ code: "DATABASE_TOKEN_HASH_NOT_FOUND" })
         }
 
         const accessToken = await createAccessToken(
@@ -107,31 +59,7 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
             })
         }
 
-        if (transaction.redirectTo && !isRelativeURL(transaction.redirectTo)) {
-            const origins = await getTrustedOrigins(request, ctx.trustedOrigins)
-            const requestOrigin = await getOriginURL(request, ctx)
-            let isValid = false
-            try {
-                isValid =
-                    origins.length > 0
-                        ? isTrustedOrigin(transaction.redirectTo, origins)
-                        : isSameOrigin(transaction.redirectTo, requestOrigin)
-            } catch {
-                isValid = false
-            }
-            if (!isValid) {
-                logger?.log("POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED", {
-                    structuredData: {
-                        redirect_path: transaction.redirectTo,
-                        provider: oauthId,
-                        has_trusted_origins: origins.length > 0,
-                        request_origin: requestOrigin,
-                    },
-                })
-                throw new AuraAuthError({ code: "POTENTIAL_OPEN_REDIRECT_ATTACK_DETECTED" })
-            }
-        }
-
+        const redirectTo = transaction.redirectTo ? await createRedirectTo(request, transaction.redirectTo, ctx) : "/"
         const userInfo = await getUserInfo(resolvedConfig, accessToken, logger)
 
         if (!userInfo.email) {
@@ -142,7 +70,11 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
         const user = await session.config.adapter.getUserByEmail(userInfo.email)
 
         if (user) {
+            if (user.status === "deleted" || user.status === "suspended") {
+                throw new AuraAuthError({ code: "ACCOUNT_INACTIVE" })
+            }
             userId = user.id
+
             const { sub: _, name, email, image, ...attributes } = userInfo
             await session.config.adapter.updateUser(userId, {
                 name,
@@ -169,7 +101,6 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
 
         if (account) {
             if (account.userId !== userId) {
-                logger?.log("OAUTH_ACCOUNT_USER_MISMATCH")
                 throw new AuraAuthError({ code: "OAUTH_ACCOUNT_USER_MISMATCH" })
             }
 
@@ -234,11 +165,12 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
             },
         })
 
-        const headersBuilder = new HeadersBuilder()
-            .setHeader("Location", transaction.redirectTo || "/")
+        const headers = new HeadersBuilder()
+            .setHeader("Location", redirectTo)
             .setCookie(ctx.cookies.store.sessionToken.name, sessionToken, ctx.cookies.store.sessionToken.attributes)
             .setCookie(ctx.cookies.store.csrfToken.name, csrfToken, ctx.cookies.store.csrfToken.attributes)
+            .toHeaders()
 
-        return Response.json({ oauth: oauthId }, { status: 302, headers: headersBuilder.toHeaders() })
+        return { headers }
     }
 }

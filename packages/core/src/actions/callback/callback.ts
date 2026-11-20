@@ -1,4 +1,5 @@
 import { createEndpoint, createEndpointConfig } from "@aura-stack/router"
+import { oauthCallback } from "@/api/oauth-callback.ts"
 import { SearchParamsCallbackSchema, OAuthProviderListSchema } from "@/shared/schemas/actions.ts"
 import type { OAuthProviderRecord } from "@/@types/internal.ts"
 
@@ -18,15 +19,21 @@ export const callbackAction = (oauth: OAuthProviderRecord) => {
         async (ctx) => {
             const {
                 request,
+                context,
                 params: { oauth: oauthId },
                 searchParams: { code, state },
-                context,
             } = ctx
-            return await context.session.strategy.oauthCallback({
-                oauthId,
+            const { toResponse } = await oauthCallback({
+                ctx: context,
+                payload: {
+                    oauthId,
+                    code,
+                    state,
+                },
                 request,
-                params: { code, state },
+                headers: request.headers,
             })
+            return toResponse()
         },
         callbackConfig(oauth)
     )

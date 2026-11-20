@@ -1,8 +1,9 @@
 import type { DeepPartial } from "@/@types/utility.ts"
 import type { CredentialsPayload } from "@/@types/config.ts"
-import type { RequestHeaders } from "@aura-stack/router/types"
+import type { LiteralUnion, RequestHeaders } from "@aura-stack/router/types"
 import type { OAuthTokenPayload, Session, User } from "@/@types/session.ts"
 import type { AuthActionAPIReturn, RequiredKeys } from "@/@types/internal.ts"
+import type { BuiltInOAuthProvider } from "./oauth.ts"
 
 export type { ResolveOptionsWithRedirect as ResolveAPIOptionsWithRedirect } from "@/@types/client.ts"
 
@@ -384,3 +385,13 @@ export type VerifyMagicLinkAPIOptions = APIOptionsWithRequest & APIOptionsWithRe
 
 /** Programmatic result for `verifyMagicLink` API with response metadata and `toResponse()`. */
 export type VerifyMagicLinkAPIReturn = AuthActionAPIReturn<VerifyMagicLinkData>
+
+export type OAuthCallbackAPIOptions = APIOptionsWithRequest & {
+    payload: {
+        oauthId: LiteralUnion<BuiltInOAuthProvider>
+        state: string
+        code: string
+    }
+}
+
+export type OAuthCallbackAPIReturn = AuthActionAPIReturn<{ success: true } | { success: false }>

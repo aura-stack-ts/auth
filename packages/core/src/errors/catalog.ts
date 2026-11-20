@@ -1029,6 +1029,27 @@ export const ERROR_CATALOG = {
         message: "The requested OAuth account could not be found for the current user.",
         userMessage: "The specified identity provider is not connected to your account.",
     },
+    AUTH_PROVIDER_MISMATCH: {
+        type: "AUTH_FLOW",
+        statusCode: 400,
+        name: "OAuthError",
+        message: "The OAuth provider does not match the stored transaction.",
+        userMessage: "The OAuth provider does not match the stored transaction.",
+    },
+    AUTH_TRANSACTION_EXPIRED: {
+        type: "AUTH_FLOW",
+        statusCode: 400,
+        name: "OAuthError",
+        message: "The OAuth transaction has expired. Please try signing in again.",
+        userMessage: "The OAuth transaction has expired. Please try signing in again.",
+    },
+    ACCOUNT_INACTIVE: {
+        type: "AUTH_FLOW",
+        statusCode: 403,
+        name: "AccountError",
+        message: "The account is inactive and cannot be used for authentication.",
+        userMessage: "This account is inactive. Please contact support.",
+    },
 } satisfies Record<string, CatalogEntry>
 
 export type AuraErrorCode = keyof typeof ERROR_CATALOG
