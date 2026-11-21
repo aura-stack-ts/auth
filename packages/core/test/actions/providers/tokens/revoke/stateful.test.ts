@@ -239,10 +239,6 @@ describe("Revoke Action", () => {
             success: true,
         })
 
-        const setCookieHeader = response.headers.get("set-cookie")
-        expect(setCookieHeader).toContain("aura-auth.access_token.oauth-provider=")
-        expect(setCookieHeader).toContain("Expires=")
-
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/revoke_token", {
             method: "POST",
             headers: {

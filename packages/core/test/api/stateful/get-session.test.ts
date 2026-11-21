@@ -14,7 +14,13 @@ describe("getSession", () => {
             success: false,
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("getSession with invalid session token", async () => {
@@ -29,7 +35,13 @@ describe("getSession", () => {
             success: false,
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("getSession with valid session token", async () => {

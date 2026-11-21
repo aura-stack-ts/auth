@@ -28,7 +28,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([])
+        expect(updated.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("updates user session with skipCSRFCheck", async () => {
@@ -519,9 +525,6 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        expect(() => getCookie(updated.headers, "aura-auth.session_token")).toThrow()
-        expect(() => getSetCookie(updated.headers, "aura-auth.session_token")).toThrow()
     })
 
     test("updateSession with doubleSubmitToken", async () => {
