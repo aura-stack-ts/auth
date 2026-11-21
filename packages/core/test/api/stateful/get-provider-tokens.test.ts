@@ -138,9 +138,8 @@ describe("getProviderTokens API (Stateful)", () => {
             },
         })
         const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
+        expect(setCookies).toHaveLength(1)
         expect(setCookies[0]).toContain("aura-auth.session_token=;")
-        expect(setCookies[1]).toContain("initial-provider-cookie=initial; Path=/")
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 

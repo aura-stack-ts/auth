@@ -1,5 +1,5 @@
-import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { createSignInURL } from "@/shared/oauth2/authorization.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { BuiltInOAuthProvider, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
@@ -11,9 +11,9 @@ export const signIn = async (
     oauthId: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, request: requestInit, headers: headersInit, redirect, redirectTo }: FunctionAPIContext<SignInAPIOptions>
 ): Promise<SignInAPIReturn> => {
-    const initHeaders = getInitialHeaders(requestInit, headersInit)
+    const initHeaders = new Headers(secureApiHeaders)
     try {
-        const { request, rateLimit, provider } = await createValidation(ctx, initHeaders)
+        const { request, rateLimit, provider } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/signIn/${oauthId}`)
             .verifyRateLimit("signIn")

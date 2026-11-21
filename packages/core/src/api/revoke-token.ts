@@ -1,4 +1,4 @@
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { RevokeTokenAPIOptions, RevokeTokenAPIReturn, LiteralUnion, BuiltInOAuthProvider } from "@/@types/index.ts"
@@ -14,7 +14,7 @@ export const revokeToken = async (
         disconnect = false,
     }: FunctionAPIContext<RevokeTokenAPIOptions> & { disconnect?: boolean }
 ): Promise<RevokeTokenAPIReturn> => {
-    const initHeaders = getInitialHeaders(requestInit, headersInit)
+    const initHeaders = new Headers(secureApiHeaders)
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: {
@@ -25,7 +25,7 @@ export const revokeToken = async (
             },
         })
 
-        const { provider, rateLimit, rawSession } = await createValidation(ctx, initHeaders)
+        const { provider, rateLimit, rawSession } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/providers/${oauthId}/tokens/revoke`)
             .verifyRateLimit("revokeToken")
@@ -44,7 +44,7 @@ export const revokeToken = async (
             oauthId,
             provider,
             disconnect,
-            headers: initHeaders,
+            headers: getInitialHeaders(requestInit, headersInit),
             rawSession,
         })
         return {

@@ -1,7 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getUserInfo } from "@/shared/oauth2/get-user-info.ts"
 import { getProviderTokens } from "@/api/get-provider-tokens.ts"
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
@@ -22,7 +22,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
         doubleSubmitToken = undefined,
     }: FunctionAPIContext<RefreshUserInfoAPIOptions>
 ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
-    const initHeaders = getInitialHeaders(requestInit, headersInit)
+    const initHeaders = new Headers(secureApiHeaders)
     try {
         ctx.logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
             structuredData: {
@@ -32,7 +32,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             },
         })
 
-        const { request, provider, rateLimit, rawSession, sessionToken } = await createValidation(ctx, initHeaders)
+        const { request, provider, rateLimit, rawSession, sessionToken } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauth)
             .buildRequest(requestInit, `/providers/${oauth}/user/refresh`)
             .verifyRateLimit("refreshUserInfo")
@@ -51,7 +51,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
         const { success, tokens } = await getProviderTokens(oauth, {
             ctx,
             request,
-            headers: initHeaders,
+            headers: getInitialHeaders(requestInit, headersInit),
         })
         if (!success) {
             ctx.logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {

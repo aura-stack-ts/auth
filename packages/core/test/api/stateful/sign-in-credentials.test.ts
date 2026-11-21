@@ -53,10 +53,9 @@ describe("signInCredentials API", async () => {
         })
 
         const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(3)
-        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.csrf_token=")
-        expect(setCookies[2]).toContain("aura-auth.session_token=")
+        expect(setCookies).toHaveLength(2)
+        expect(setCookies[0]).toContain("aura-auth.csrf_token=")
+        expect(setCookies[1]).toContain("aura-auth.session_token=")
 
         expect(spyParse).toHaveBeenCalledWith({
             sub: "user-123",

@@ -1,5 +1,5 @@
-import { getInitialHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { isAuraAuthError } from "@/errors/aura-error.ts"
+import { secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
@@ -15,7 +15,7 @@ export const updateSession = async <DefaultUser extends User = User>({
     doubleSubmitToken = undefined,
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
-    const initialHeaders = getInitialHeaders(requestInit, headersInit)
+    const initialHeaders = new Headers(secureApiHeaders)
     try {
         ctx.logger?.log("UPDATE_SESSION_INITIATED", {
             structuredData: {
@@ -24,7 +24,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             },
         })
 
-        const { request, rateLimit, sessionToken, rawSession } = await createValidation(ctx, initialHeaders)
+        const { request, rateLimit, sessionToken, rawSession } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/session")
             .verifyRateLimit("updateSession")
             .verifySession()
@@ -38,7 +38,6 @@ export const updateSession = async <DefaultUser extends User = User>({
 
         const { session, headers } = await ctx.session.strategy.updateSession({
             session: sessionInit,
-            headers: initialHeaders,
             rawSession,
             sessionToken,
         })
@@ -46,9 +45,9 @@ export const updateSession = async <DefaultUser extends User = User>({
         const { redirect, redirectURL, status } = await resolveApiRedirect({
             ctx,
             request,
+            headers,
             redirectInit,
             redirectTo: redirectToInit,
-            headers: initialHeaders,
             fallbackRedirectTo,
         })
 

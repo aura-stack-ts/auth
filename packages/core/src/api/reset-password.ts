@@ -1,4 +1,4 @@
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ResetPasswordAPIOptions, ResetPasswordAPIReturn } from "@/@types/api.ts"
@@ -13,10 +13,10 @@ export const resetPassword = async ({
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<ResetPasswordAPIOptions>): Promise<ResetPasswordAPIReturn> => {
     const { logger, session } = ctx
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         logger?.log("RESET_PASSWORD_INITIATED")
-        const { request, rateLimit } = await createValidation(ctx, headers)
+        const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/password/reset")
             .verifyRateLimit("resetPassword")
             .execute()

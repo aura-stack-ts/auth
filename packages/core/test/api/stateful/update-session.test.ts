@@ -102,7 +102,7 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getCookie(updated.headers, "aura-auth.session_token")).toContain("valid-session-token")
+        expect(() => getCookie(updated.headers, "aura-auth.session_token")).toThrow()
     })
 
     test("updates user session with skipCSRFCheck", async () => {
@@ -162,9 +162,8 @@ describe("updateSession API", () => {
         })
 
         const setCookies = updated.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(setCookies).toHaveLength(1)
+        expect(setCookies[0]).toContain("aura-auth.session_token=")
 
         const tokenHash = await createHash("valid-token-hash")
         expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)

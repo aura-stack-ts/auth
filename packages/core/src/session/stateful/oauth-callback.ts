@@ -7,6 +7,7 @@ import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-pro
 import { createAccessToken, createRedirectTo, getUserInfo } from "@/shared/oauth2/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 import { assertUserStatus } from "@/shared/utils/stateful.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 
 export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy["oauthCallback"] => {
     const { logger, jose, session } = ctx
@@ -155,7 +156,7 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
             },
         })
 
-        const headers = new HeadersBuilder()
+        const headers = new HeadersBuilder(secureApiHeaders)
             .setHeader("Location", redirectTo)
             .setCookie(ctx.cookies.store.sessionToken.name, sessionToken, ctx.cookies.store.sessionToken.attributes)
             .setCookie(ctx.cookies.store.csrfToken.name, csrfToken, ctx.cookies.store.csrfToken.attributes)

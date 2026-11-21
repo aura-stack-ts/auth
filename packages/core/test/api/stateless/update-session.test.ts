@@ -166,9 +166,9 @@ describe("updateSession API", () => {
         })
 
         const setCookies = updated.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        console.log("set-Cookies: ", setCookies)
+        expect(setCookies).toHaveLength(1)
+        expect(setCookies[0]).toContain("aura-auth.session_token=")
     })
 
     test("updates user session with invalid user data", async () => {
@@ -511,7 +511,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        expect(getCookie(updated.headers, "aura-auth.session_token")).toContain(sessionToken)
+        expect(() => getCookie(updated.headers, "aura-auth.session_token")).toThrow()
         expect(() => getSetCookie(updated.headers, "aura-auth.session_token")).toThrow()
     })
 

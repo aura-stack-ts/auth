@@ -1,4 +1,4 @@
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { CancelEmailChangeAPIOptions, CancelEmailChangeAPIReturn } from "@/@types/api.ts"
@@ -15,7 +15,7 @@ export const cancelEmailChange = async ({
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<CancelEmailChangeAPIOptions>): Promise<CancelEmailChangeAPIReturn> => {
     const { logger, session } = ctx
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         logger?.log("CANCEL_EMAIL_CHANGE_INITIATED", {
             structuredData: {
@@ -24,7 +24,7 @@ export const cancelEmailChange = async ({
                 hasToken: Boolean(payload?.token),
             },
         })
-        const validation = createValidation(ctx, headers)
+        const validation = createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/email/change/cancel")
             .verifyRateLimit("cancelEmailChange")
 

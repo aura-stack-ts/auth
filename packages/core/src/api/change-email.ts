@@ -1,5 +1,5 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ChangeEmailAPIOptions, ChangeEmailAPIReturn } from "@/@types/api.ts"
@@ -19,7 +19,7 @@ export const changeEmail = async ({
     if (!emailChange?.sendEmailChangeVerification) {
         throw new AuraAuthError({ code: "CHANGE_EMAIL_NOT_IMPLEMENTED" })
     }
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         logger?.log("CHANGE_EMAIL_INITIATED", {
             structuredData: {
@@ -27,7 +27,7 @@ export const changeEmail = async ({
                 doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
             },
         })
-        const { request, rateLimit, userId, origin } = await createValidation(ctx, headers)
+        const { request, rateLimit, userId, origin } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/email/change")
             .verifyRateLimit("changeEmail")
             .verifySession()

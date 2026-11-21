@@ -292,7 +292,6 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Returns null session + cookie-clearing response on any failure.
      */
     updateSession(options: {
-        headers: Headers
         session: DeepPartial<Session<DefaultUser>>
         sessionToken: string
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity

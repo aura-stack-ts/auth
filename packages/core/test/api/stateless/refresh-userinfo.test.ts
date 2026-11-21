@@ -120,9 +120,8 @@ describe("refreshUserInfo", () => {
         })
 
         const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(setCookies).toHaveLength(1)
+        expect(setCookies[0]).toContain("aura-auth.session_token=")
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -463,9 +462,8 @@ describe("refreshUserInfo", () => {
         })
 
         const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(setCookies).toHaveLength(1)
+        expect(setCookies[0]).toContain("aura-auth.session_token=")
     })
 
     test("handles malformed provider tokens cookie", async () => {

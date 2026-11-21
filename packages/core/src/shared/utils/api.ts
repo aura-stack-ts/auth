@@ -3,6 +3,8 @@ import { getErrorName } from "@/errors/aura-error.ts"
 import { getBaseURL } from "@/config/get-base-url.ts"
 import { isStatelessStrategy } from "@/shared/assert.ts"
 import { verifyRateLimit } from "@/shared/rate-limiter.ts"
+import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { assertUserStatus } from "@/shared/utils/stateful.ts"
 import { verifySessionToken } from "@/shared/utils/session.ts"
 import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
@@ -10,21 +12,22 @@ import { createRedirectTo } from "@/shared/oauth2/authorization.ts"
 import { getCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
 import { createCSRF, createHash, verifyCSRF } from "@/exports/crypto.ts"
+import type { AuraErrorCode } from "@/errors/catalog.ts"
 import type { LOG_MESSAGES } from "@/config/logger/catalog.ts"
 import type { InternalLogger, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
 import type {
     BuiltInOAuthProvider,
     LiteralUnion,
     RateLimiterConfig,
+    RequestHeaders,
     SessionWithUserEntity,
     TypedJWTPayload,
     User,
 } from "@/@types/index.ts"
-import { assertUserStatus } from "./stateful.ts"
-import type { AuraErrorCode } from "@/errors/catalog.ts"
 
-export const createValidation = (ctx: RouterGlobalContext, headers: Headers) => {
+export const createValidation = (ctx: RouterGlobalContext, requestInit?: Request, headersInit?: HeadersInit | RequestHeaders) => {
     const steps: Array<() => Promise<void>> = []
+    const headers = getInitialHeaders(requestInit, headersInit)
 
     const output: {
         provider?: RuntimeOAuthProvider

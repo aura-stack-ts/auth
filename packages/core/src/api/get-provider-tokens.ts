@@ -1,4 +1,4 @@
-import { getInitialHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
+import { getInitialHeaders, secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
@@ -12,9 +12,8 @@ export const getProviderTokens = async (
     oauthId: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, request: requestInit, headers: headersInit }: FunctionAPIContext<GetProviderTokensAPIOptions>
 ): Promise<GetProviderTokensAPIReturn> => {
-    const initHeaders = getInitialHeaders(requestInit, headersInit)
     try {
-        const { rateLimit, provider, rawSession } = await createValidation(ctx, initHeaders)
+        const { rateLimit, provider, rawSession } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/providers/${oauthId}/tokens`)
             .verifyRateLimit("getProviderTokens")
@@ -29,7 +28,7 @@ export const getProviderTokens = async (
             oauthId,
             provider,
             rawSession,
-            headers: initHeaders,
+            headers: getInitialHeaders(requestInit, headersInit),
         })
         return {
             success: true,
@@ -40,11 +39,12 @@ export const getProviderTokens = async (
             },
         }
     } catch (error) {
+        const headers = new Headers(secureApiHeaders)
         errorToLogMessage(error, "GET_PROVIDER_TOKENS_ERROR", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
         const resolvedHeaders =
-            errors.code === "SESSION_NOT_FOUND" ? toUnionHeaders(ctx.cookies.manager.clear(), initHeaders) : initHeaders
+            errors.code === "SESSION_NOT_FOUND" ? toUnionHeaders(ctx.cookies.manager.clear(), headers) : headers
 
         return {
             success: false,

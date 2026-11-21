@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { cacheControl } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { transformToTokenPayload } from "@/shared/utils.ts"
 import { createCSRF, timingSafeEqual } from "@/exports/crypto.ts"
 import { verifyOIDCConfig } from "@/shared/oidc/verify-oidc-config.ts"
@@ -20,7 +20,7 @@ export const oauthCallback = (ctx: InternalContextForStateless): SessionStrategy
         const cookieRedirectTo = getCookie(request, cookies.store.redirectTo.name)
         const cookieRedirectURI = getCookie(request, cookies.store.redirectURI.name)
 
-        const clearCookieHeaders = new HeadersBuilder(cacheControl)
+        const clearCookieHeaders = new HeadersBuilder(secureApiHeaders)
             .setCookie(cookies.store.state.name, "", getExpiredCookie(cookies.store.state.attributes))
             .setCookie(cookies.store.redirectURI.name, "", getExpiredCookie(cookies.store.redirectURI.attributes))
             .setCookie(cookies.store.redirectTo.name, "", getExpiredCookie(cookies.store.redirectTo.attributes))

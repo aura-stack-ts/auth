@@ -1,4 +1,4 @@
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyEmailAPIOptions, VerifyEmailAPIReturn } from "@/@types/api.ts"
@@ -15,10 +15,10 @@ export const verifyEmail = async (
     }: FunctionAPIContext<VerifyEmailAPIOptions>
 ): Promise<VerifyEmailAPIReturn> => {
     const { logger, session } = ctx
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         logger?.log("VERIFY_EMAIL_INITIATED")
-        const { request, rateLimit } = await createValidation(ctx, headers)
+        const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/verifyEmail")
             .verifyRateLimit("verifyEmail")
             .execute()
