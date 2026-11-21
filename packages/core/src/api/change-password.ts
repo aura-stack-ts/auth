@@ -27,9 +27,9 @@ export const changePassword = async ({
         const { request, rateLimit, userId } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/password/change")
             .verifyRateLimit("changePassword")
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifySession()
             .verifyUserStatus()
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .execute()
 
         if (rateLimit) {

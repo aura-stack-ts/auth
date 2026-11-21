@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
+- Fixed the validation order for session and CSRF tokens. Session validation is now performed before CSRF token verification, ensuring that the session is validated before enforcing CSRF protection. [#332](https://github.com/aura-stack-ts/auth/pull/332)
+
 - Fixed an authorization bypass vulnerability (CWE-863) by enforcing user account status validation across authentication and account-management flows. Previously, some operations could proceed without verifying whether the associated user account was active, potentially allowing suspended or soft-deleted users to perform authenticated actions. User status is now validated before executing the following operations: OAuth sign-in, email changes, password changes, provider token retrieval, access token retrieval, user info refresh, session updates, and email change verification. Suspended and deleted accounts are rejected, preventing unauthorized access through these flows. [#331](https://github.com/aura-stack-ts/auth/pull/331)
 
 - Strengthened session validation in the stateful session strategy to prevent improper modification of dynamically determined object attributes (CWE-915). Previously, session data, JWT claims, and incoming updates were validated, but the final session data was not validated against the identity configuration. This could allow unauthorized attribute modifications when users skipped certain validations. The updated implementation validates session data and payloads against the identity configuration and always validates the final session output before returning it. [#330](https://github.com/aura-stack-ts/auth/pull/330)

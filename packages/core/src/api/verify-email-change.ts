@@ -26,9 +26,9 @@ export const verifyEmailChange = async ({
         const { request, rateLimit, userId, sessionId } = await createValidation(ctx, headers)
             .buildRequest(requestInit, "/email/change/verify")
             .verifyRateLimit("verifyEmailChange")
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifySession()
             .verifyUserStatus()
+            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .execute()
 
         if (rateLimit) {

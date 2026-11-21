@@ -25,8 +25,8 @@ describe("signOut API", async () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "CSRF_TOKEN_MISSING",
-                message: "The CSRF token is missing. Please refresh and try again.",
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

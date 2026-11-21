@@ -29,7 +29,7 @@ describe("createAuth", () => {
                 })
             )
 
-            expect(response.status).toBe(403)
+            expect(response.status).toBe(401)
         })
 
         test("returns 405 for unsupported methods", async () => {

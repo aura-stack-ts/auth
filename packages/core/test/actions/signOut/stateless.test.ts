@@ -14,7 +14,7 @@ describe("signOut action", async () => {
                 headers: {},
             })
         )
-        expect(response.status).toBe(403)
+        expect(response.status).toBe(401)
         expect(response.headers.get("Location")).toBeNull()
         expect(await response.json()).toEqual({
             success: false,
@@ -30,7 +30,7 @@ describe("signOut action", async () => {
                 headers: { Cookie: `__Host-aura-auth.csrf_token=${csrf}` },
             })
         )
-        expect(response.status).toBe(403)
+        expect(response.status).toBe(401)
         expect(response.headers.get("Location")).toBeNull()
         expect(await response.json()).toEqual({
             success: false,
@@ -49,7 +49,7 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(response.status).toBe(403)
+        expect(response.status).toBe(401)
         expect(response.headers.get("Location")).toBeNull()
         expect(await response.json()).toEqual({
             success: false,
@@ -67,7 +67,7 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(response.status).toBe(403)
+        expect(response.status).toBe(401)
         expect(response.headers.get("Location")).toBeNull()
         expect(await response.json()).toEqual({
             success: false,
@@ -85,7 +85,7 @@ describe("signOut action", async () => {
                 },
             })
         )
-        expect(request.status).toBe(403)
+        expect(request.status).toBe(401)
         expect(request.headers.get("Location")).toBeNull()
         expect(await request.json()).toEqual({
             success: false,
