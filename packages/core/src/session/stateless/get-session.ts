@@ -1,6 +1,6 @@
 import { getErrorName } from "@/errors/aura-error.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { toUnionHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
@@ -18,9 +18,10 @@ export const getSession = <DefaultUser extends User>(
         throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
     }
 
-    return async ({ headers }) => {
+    return async ({ headers: incomingHeaders }) => {
+        const headers = new Headers(secureApiHeaders)
         try {
-            const { sessionToken } = ctx.cookies.manager.getCookie(headers)
+            const { sessionToken } = ctx.cookies.manager.getCookie(incomingHeaders)
             if (!sessionToken) return { session: null, headers }
 
             const payload = await jose.manager.verifyToken(sessionToken)
@@ -60,11 +61,11 @@ export const getSession = <DefaultUser extends User>(
                     user: sessionPayload,
                     expires: expiresAt.toISOString(),
                 },
-                headers: toUnionHeaders(headers, ctx.cookies.manager.setCookie({ sessionToken: newSessionToken })),
+                headers: ctx.cookies.manager.setCookie({ sessionToken: newSessionToken }),
             }
         } catch (error) {
             logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
-            return { session: null, headers: toUnionHeaders(headers, ctx.cookies.manager.clearAll()) }
+            return { session: null, headers: ctx.cookies.manager.clearAll() }
         }
     }
 }

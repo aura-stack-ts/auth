@@ -3,7 +3,7 @@ import { z } from "zod/v4"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/setup/auth.ts"
 import { createCSRF } from "@/exports/crypto.ts"
-import { getCookie, getSetCookie } from "@/shared/http/cookie.ts"
+import { getSetCookie } from "@/shared/http/cookie.ts"
 import { sessionPayload } from "@test/setup/presets.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 
@@ -27,6 +27,8 @@ describe("updateSession API", () => {
             },
             toResponse: expect.any(Function),
         })
+        expect(updated.headers).toHaveValidSecurityHeaders()
+        expect(updated.headers).toHaveValidSetCookies([])
     })
 
     test("updates user session with skipCSRFCheck", async () => {
@@ -69,6 +71,8 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(updated.headers).toHaveValidSecurityHeaders()
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
     })
 
     test("updates user session with disabled skipCSRFCheck", async () => {
@@ -112,6 +116,8 @@ describe("updateSession API", () => {
             success: true,
             toResponse: expect.any(Function),
         })
+        expect(updated.headers).toHaveValidSecurityHeaders()
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
     })
 
     test("updates user session with generic user type", async () => {
@@ -164,10 +170,8 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        const setCookies = updated.headers.getSetCookie()
-        expect(setCookies).toHaveLength(1)
-        expect(setCookies[0]).toContain("aura-auth.session_token=")
+        expect(updated.headers).toHaveValidSecurityHeaders()
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
     })
 
     test("updates user session with invalid user data", async () => {
@@ -208,6 +212,8 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(updated.headers).toHaveValidSecurityHeaders()
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
     })
 
     test("updates expiry on valid session", async () => {
@@ -243,6 +249,8 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(updated.headers).toHaveValidSecurityHeaders()
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
     })
 
     test("updates invalid expiry on valid session", async () => {
@@ -275,6 +283,8 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(updated.headers).toHaveValidSecurityHeaders()
+        expect(updated.headers).toHaveValidSetCookies([])
     })
 
     test("updateSession with redirect: true and redirectTo", async () => {

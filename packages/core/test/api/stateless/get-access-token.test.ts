@@ -19,6 +19,8 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when session token is missing", async () => {
@@ -35,6 +37,15 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+                sameSite: "lax",
+            }),
+        ])
     })
 
     test("throws error when provider token does not exist", async () => {
@@ -58,6 +69,8 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("successfully gets provider tokens", async () => {
@@ -79,6 +92,8 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("refreshToken config not provided", async () => {
@@ -111,6 +126,8 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("refreshToken successfully refreshes tokens", async () => {
@@ -144,6 +161,14 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+        ])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
             method: "POST",
@@ -202,6 +227,14 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+        ])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
             method: "POST",
@@ -252,6 +285,8 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("refreshToken handles unexpected network exceptions gracefully", async () => {
@@ -284,6 +319,8 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("returns current tokens without refreshing when close to expiry but outside the refresh window", async () => {
@@ -313,6 +350,9 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(mockFetch).not.toHaveBeenCalled()
     })
 
@@ -351,6 +391,14 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+        ])
         expect(mockFetch).toHaveBeenCalledTimes(1)
     })
 })

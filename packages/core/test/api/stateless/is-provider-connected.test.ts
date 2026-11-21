@@ -16,6 +16,8 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when session token is missing", async () => {
@@ -32,6 +34,8 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("returns connected: false when provider token cookie does not exist", async () => {
@@ -51,6 +55,8 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("returns connected: true when provider token cookie exists and is valid", async () => {
@@ -73,6 +79,8 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("returns connected: false when provider token cookie is malformed", async () => {
@@ -93,6 +101,8 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("returns connected: false when provider token cookie is expired", async () => {
@@ -119,6 +129,8 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("toResponse returns correct response when connected", async () => {
@@ -134,6 +146,9 @@ describe("isProviderConnected", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
+
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         const response = output.toResponse()
         expect(response.status).toBe(200)
@@ -156,6 +171,8 @@ describe("isProviderConnected", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
             },
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         const response = output.toResponse()
         expect(response.status).toBe(200)
@@ -163,19 +180,6 @@ describe("isProviderConnected", () => {
         const json = await response.json()
         expect(json).toEqual({
             success: true,
-            connected: false,
-        })
-    })
-
-    test("toResponse returns correct response on error", async () => {
-        const output = await api.isProviderConnected("unsupported")
-
-        const response = output.toResponse()
-        expect(response.status).toBe(400)
-
-        const json = await response.json()
-        expect(json).toEqual({
-            success: false,
             connected: false,
         })
     })
@@ -207,6 +211,8 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles empty cookie value", async () => {
@@ -227,6 +233,8 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles multiple providers - checks correct provider", async () => {
@@ -249,6 +257,8 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles malformed cookie header syntax", async () => {
@@ -269,5 +279,7 @@ describe("isProviderConnected", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 })

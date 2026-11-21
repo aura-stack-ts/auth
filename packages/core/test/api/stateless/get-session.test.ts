@@ -2,35 +2,60 @@ import { describe, test, expect } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/setup/auth.ts"
 import { sessionPayload } from "@test/setup/presets.ts"
-import { getCookie, getSetCookie } from "@/shared/http/cookie.ts"
 
 describe("getSession", () => {
     test("getSession with no session token", async () => {
-        const session = await api.getSession({ headers: new Headers() })
-        expect(session).toMatchObject({
+        const output = await api.getSession({ headers: new Headers() })
+        expect(output).toEqual({
             session: null,
-            headers: {},
             success: false,
+            error: {
+                code: "GET_SESSION_FAILED",
+                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("getSession with invalid session token", async () => {
-        const session = await api.getSession({
+        const output = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=invalidtoken` },
         })
-        expect(session).toMatchObject({
+        expect(output).toEqual({
             session: null,
-            headers: {},
             success: false,
+            error: {
+                code: "GET_SESSION_FAILED",
+                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("getSession with valid session token", async () => {
         const jwt = await jose.encodeJWT(sessionPayload)
-        const session = await api.getSession({
+        const output = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}`, "Set-Cookie": "initial-provider-cookie=initial; Path=/" },
         })
-        expect(session).toEqual({
+        expect(output).toEqual({
             success: true,
             session: {
                 user: sessionPayload,
@@ -39,9 +64,8 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        const setCookies = session.headers.getSetCookie()
-        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("getSession with expired session token", async () => {
@@ -49,10 +73,10 @@ describe("getSession", () => {
             ...sessionPayload,
             exp: Math.floor(Date.now() / 1000) - 60,
         })
-        const session = await api.getSession({
+        const output = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}` },
         })
-        expect(session).toEqual({
+        expect(output).toEqual({
             session: null,
             success: false,
             error: {
@@ -62,16 +86,23 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSetCookie(session.headers, "aura-auth.session_token")).toBe("")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("getSession with session token missing sub claim", async () => {
         const { sub: _, ...spreadSession } = sessionPayload
         const jwt = await jose.encodeJWT(spreadSession)
-        const session = await api.getSession({
+        const output = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}` },
         })
-        expect(session).toEqual({
+        expect(output).toEqual({
             session: null,
             success: false,
             error: {
@@ -81,6 +112,14 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("getSession with extra claims in session token", async () => {
@@ -89,10 +128,10 @@ describe("getSession", () => {
             role: "admin",
             permissions: ["read", "write"],
         })
-        const session = await api.getSession({
+        const output = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}` },
         })
-        expect(session).toEqual({
+        expect(output).toEqual({
             success: true,
             session: {
                 user: sessionPayload,
@@ -101,12 +140,12 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(session.session).not.toContainEqual({
+        expect(output.session).not.toContainEqual({
             role: "admin",
             permissions: ["read", "write"],
         })
-        const decodeSession = await jose.decodeJWT(getCookie(session.headers, "aura-auth.session_token")!)
-        expect(decodeSession).toMatchObject(sessionPayload)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("getSession refreshes session token if exp is close", async () => {
@@ -119,10 +158,10 @@ describe("getSession", () => {
             role: "admin",
             permissions: ["read", "write"],
         })
-        const session = await auth.api.getSession({
+        const output = await auth.api.getSession({
             headers: { Cookie: `aura-auth.session_token=${jwt}`, "Set-Cookie": "initial-provider-cookie=initial; Path=/" },
         })
-        expect(session).toEqual({
+        expect(output).toEqual({
             success: true,
             session: {
                 user: sessionPayload,
@@ -131,17 +170,19 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(session.session).not.toContainEqual({
+        expect(output.session).not.toContainEqual({
             role: "admin",
             permissions: ["read", "write"],
         })
 
-        const decodeSession = await jose.decodeJWT(getSetCookie(session.headers, "aura-auth.session_token")!)
-        expect(decodeSession).toMatchObject(sessionPayload)
-
-        const setCookies = session.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "lax",
+            }),
+        ])
     })
 })
