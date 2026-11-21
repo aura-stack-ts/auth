@@ -11,7 +11,7 @@ export const signInCredentials = async ({
     payload,
     request: requestInit,
     headers: headersInit,
-    redirect = true,
+    redirect: redirectInit = true,
     redirectTo,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
@@ -56,10 +56,10 @@ export const signInCredentials = async ({
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
-        const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect({
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
             ctx,
             request,
-            redirectInit: redirect,
+            redirectInit,
             redirectTo,
             headers: builder,
             fallbackRedirectTo,
@@ -69,13 +69,11 @@ export const signInCredentials = async ({
         return {
             success: true,
             headers: toHeaders,
-            redirect: shouldRedirectServer,
+            redirect,
             redirectURL: redirect ? null : redirectURL,
-            toResponse: () =>
-                Response.json(
-                    { success: true, redirect: shouldRedirectServer, redirectURL: shouldRedirectServer ? null : redirectURL },
-                    { headers: toHeaders, status: shouldRedirectServer ? 302 : 200 }
-                ),
+            toResponse: () => {
+                return Response.json({ success: true, redirect, redirectURL }, { headers: toHeaders, status })
+            },
         } as SignInCredentialsAPIReturn
     } catch (error) {
         const {

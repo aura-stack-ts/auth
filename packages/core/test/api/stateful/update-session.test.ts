@@ -27,11 +27,11 @@ describe("updateSession API", () => {
             updateSession: updateSessionMock,
         })
 
-        const updated = await api.updateSession({
+        const output = await api.updateSession({
             headers: {},
             session: {},
         })
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: null,
             headers: expect.any(Headers),
             success: false,
@@ -43,6 +43,16 @@ describe("updateSession API", () => {
             },
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+                sameSite: "lax",
+            }),
+        ])
+
         expect(spy).not.toHaveBeenCalled()
         expect(sessionByTokenMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -54,14 +64,14 @@ describe("updateSession API", () => {
         const getSessionByTokenMock = vi.fn().mockResolvedValue(null)
         const { api } = authInstance({ getSessionByToken: getSessionByTokenMock })
 
-        const updated = await api.updateSession({
+        const output = await api.updateSession({
             headers: {
                 Cookie: "aura-auth.session_token=invalid-session-token",
             },
             session: {},
         })
 
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: null,
             success: false,
             redirect: false,
@@ -73,7 +83,15 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(getSetCookie(updated.headers, "aura-auth.session_token")).toBe("")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+                sameSite: "lax",
+            }),
+        ])
     })
 
     test("preserves the session cookie when CSRF validation fails", async () => {
@@ -82,7 +100,7 @@ describe("updateSession API", () => {
         const { api } = authInstance({ getSessionByToken: getSessionByTokenMock })
         const csrfToken = await createCSRF(jose)
 
-        const updated = await api.updateSession({
+        const output = await api.updateSession({
             headers: new Headers({
                 Cookie: `aura-auth.session_token=valid-session-token; aura-auth.csrf_token=${csrfToken}`,
                 "X-CSRF-Token": "invalid-csrf-token",
@@ -90,7 +108,7 @@ describe("updateSession API", () => {
             session: {},
         })
 
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: null,
             success: false,
             redirect: false,
@@ -102,7 +120,8 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        expect(() => getCookie(updated.headers, "aura-auth.session_token")).toThrow()
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("updates user session with skipCSRFCheck", async () => {
@@ -136,9 +155,12 @@ describe("updateSession API", () => {
         }
 
         const csrfToken = await createCSRF(jose)
-        const updated = await api.updateSession({
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             }),
             session: {
@@ -146,7 +168,7 @@ describe("updateSession API", () => {
             },
             skipCSRFCheck: true,
         })
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: {
                 user: {
                     sub: "user-123",
@@ -160,13 +182,10 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const setCookies = updated.headers.getSetCookie()
-        expect(setCookies).toHaveLength(1)
-        expect(setCookies[0]).toContain("aura-auth.session_token=")
-
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -217,9 +236,12 @@ describe("updateSession API", () => {
         }
 
         const csrfToken = await createCSRF(jose)
-        const updated = await api.updateSession({
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 "X-CSRF-Token": csrfToken,
             }),
             session: {
@@ -227,7 +249,7 @@ describe("updateSession API", () => {
             },
             skipCSRFCheck: false,
         })
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: {
                 user: {
                     sub: "user-123",
@@ -241,9 +263,10 @@ describe("updateSession API", () => {
             success: true,
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -318,9 +341,12 @@ describe("updateSession API", () => {
             department: "Executive",
         }
         const csrfToken = await createCSRF(jose)
-        const updated = await api.updateSession({
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: payload as any,
@@ -328,7 +354,7 @@ describe("updateSession API", () => {
             skipCSRFCheck: true,
         })
 
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: {
                 user: {
                     sub: "user-123",
@@ -346,9 +372,10 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
 
         const { attributes, ...spreadUser } = userEntityWithAttributes
@@ -400,21 +427,24 @@ describe("updateSession API", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
+
         const payload = {
             role: "superadmin",
             money: "100000",
         } as any
 
-        const updated = await api.updateSession({
+        const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: payload,
             },
             skipCSRFCheck: true,
         })
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: {
                 user: {
                     sub: "user-123",
@@ -430,9 +460,10 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -479,20 +510,22 @@ describe("updateSession API", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
+
         const payload = {
             name: "Alice",
         }
 
-        const updated = await api.updateSession({
+        const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: payload },
             redirectTo: "/dashboard",
             skipCSRFCheck: true,
         })
-        expect(updated.headers.get("Location")).toBe("/dashboard")
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: {
                 user: {
                     sub: "user-123",
@@ -508,9 +541,10 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -559,11 +593,13 @@ describe("updateSession API", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const payload = {
             name: "Alice",
         }
-        const updated = await api.updateSession({
+        const output = await api.updateSession({
             headers: new Headers({
                 Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
             }),
@@ -572,7 +608,7 @@ describe("updateSession API", () => {
             redirectTo: "/dashboard",
             skipCSRFCheck: true,
         })
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: {
                 user: {
                     sub: "user-123",
@@ -588,9 +624,10 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -639,11 +676,13 @@ describe("updateSession API", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
-        const updated = await api.updateSession({
+        const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: {
@@ -654,7 +693,7 @@ describe("updateSession API", () => {
             },
         })
 
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: {
                 user: {
                     sub: "user-123",
@@ -670,19 +709,10 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        expect(updated.session).toMatchObject({
-            user: {
-                sub: "user-123",
-                name: "John Doe",
-                email: "john@example.com",
-                image: "https://example.com/image.jpg",
-            },
-        })
-        expect(updated.headers.get("Set-Cookie")).toContain("aura-auth.session_token=")
-
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
         expect(spyParse).toHaveBeenNthCalledWith(1, {
@@ -726,7 +756,7 @@ describe("updateSession API", () => {
 
         const csrfToken = await createCSRF(jose)
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
-        const updated = await api.updateSession({
+        const output = await api.updateSession({
             headers: new Headers({
                 Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
             }),
@@ -735,7 +765,7 @@ describe("updateSession API", () => {
             },
         })
 
-        expect(updated).toEqual({
+        expect(output).toEqual({
             success: true,
             session: {
                 user: {
@@ -751,8 +781,10 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const sessionExpiration = new Date(updated.session!.expires!).getTime()
+        const sessionExpiration = new Date(output.session!.expires!).getTime()
         const persistedExpiration = updateSessionMock.mock.calls[0][1].expiresAt as Date
         const maximumExpiration = Date.now() + 60 * 60 * 24 * 15 * 1000 + 1000
 
@@ -778,7 +810,7 @@ describe("updateSession API", () => {
         })
 
         const csrfToken = await createCSRF(jose)
-        const updated = await api.updateSession({
+        const output = await api.updateSession({
             headers: new Headers({
                 Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
             }),
@@ -792,7 +824,7 @@ describe("updateSession API", () => {
             },
         })
 
-        expect(updated).toEqual({
+        expect(output).toEqual({
             success: true,
             session: {
                 user: {
@@ -808,6 +840,9 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(updateUserMock).not.toHaveBeenCalledWith(
             "user-123",
             expect.objectContaining({
@@ -836,14 +871,17 @@ describe("updateSession API", () => {
         })
 
         const csrfToken = await createCSRF(jose)
-        const updated = await api.updateSession({
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const output = await api.updateSession({
             headers: {
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
             session: {},
         })
 
-        expect(updated).toEqual({
+        expect(output).toEqual({
             session: null,
             success: false,
             redirect: false,
@@ -855,8 +893,10 @@ describe("updateSession API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(await createHash("valid-token-hash"))
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(updateUserMock).not.toHaveBeenCalled()
         expect(updateSessionMock).not.toHaveBeenCalled()
         expect(touchSessionMock).not.toHaveBeenCalled()

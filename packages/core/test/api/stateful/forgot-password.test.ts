@@ -36,6 +36,8 @@ describe("forgotPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createTokenMock).toHaveBeenCalledWith({
@@ -85,6 +87,8 @@ describe("forgotPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("nonexistent@example.com")
         expect(createTokenMock).not.toHaveBeenCalled()
@@ -123,6 +127,9 @@ describe("forgotPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createTokenMock).toHaveBeenCalledWith({
             userId: "user-123",
@@ -169,6 +176,7 @@ describe("forgotPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/auth/password-reset" })
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createTokenMock).toHaveBeenCalledWith({
@@ -221,6 +229,8 @@ describe("forgotPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createTokenMock).toHaveBeenCalledWith({

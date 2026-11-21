@@ -59,7 +59,7 @@ catalogs:
     zod: 4.6.7
 
 minimumReleaseAgeExclude:
-  - '@aura-stack/router@0.12.0'
+  - "@aura-stack/router@0.12.0"
 
 overrides:
   brace-expansion: ^5.0.12

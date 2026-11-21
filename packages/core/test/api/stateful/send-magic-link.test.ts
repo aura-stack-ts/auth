@@ -43,6 +43,8 @@ describe("sendMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("user@example.com")
         expect(revokeAllVerificationTokensMock).toHaveBeenCalledWith("user-123", "magic_link")
@@ -94,6 +96,8 @@ describe("sendMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("new@example.com")
         expect(createUserMock).toHaveBeenCalled()
@@ -149,6 +153,8 @@ describe("sendMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("nonexistent@example.com")
         expect(createUserMock).not.toHaveBeenCalled()
@@ -196,6 +202,8 @@ describe("sendMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/check-email" })
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("user@example.com")
         expect(revokeAllVerificationTokensMock).toHaveBeenCalledWith("user-123", "magic_link")
@@ -246,6 +254,8 @@ describe("sendMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("user@example.com")
         expect(revokeAllVerificationTokensMock).toHaveBeenCalledWith("user-123", "magic_link")

@@ -49,6 +49,8 @@ describe("sendVerificationEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
@@ -103,6 +105,8 @@ describe("sendVerificationEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getUserByEmailMock).not.toHaveBeenCalled()
@@ -147,6 +151,8 @@ describe("sendVerificationEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
@@ -199,6 +205,8 @@ describe("sendVerificationEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).not.toHaveBeenCalled()
         expect(getUserByEmailMock).not.toHaveBeenCalled()
@@ -243,6 +251,8 @@ describe("sendVerificationEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/auth/verify-email" })
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
@@ -299,6 +309,8 @@ describe("sendVerificationEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getUserByEmailMock).toHaveBeenCalledWith("john@example.com")
         expect(createTokenMock).toHaveBeenCalledWith({

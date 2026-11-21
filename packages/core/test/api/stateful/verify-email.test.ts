@@ -37,6 +37,8 @@ describe("verifyEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
@@ -73,6 +75,8 @@ describe("verifyEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
@@ -112,6 +116,8 @@ describe("verifyEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
@@ -151,6 +157,8 @@ describe("verifyEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
@@ -190,6 +198,8 @@ describe("verifyEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
@@ -226,6 +236,8 @@ describe("verifyEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
@@ -261,6 +273,8 @@ describe("verifyEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/auth/verified" })
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
@@ -298,6 +312,8 @@ describe("verifyEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {

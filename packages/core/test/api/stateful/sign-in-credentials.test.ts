@@ -51,11 +51,23 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("aura-auth.csrf_token=")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "strict",
+                httpOnly: true,
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "lax",
+                httpOnly: true,
+            }),
+        ])
 
         expect(spyParse).toHaveBeenCalledWith({
             sub: "user-123",
@@ -118,6 +130,9 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(spyParse).not.toHaveBeenCalled()
         expect(createSessionMock).not.toHaveBeenCalled()
         expect(createUserMock).not.toHaveBeenCalled()
@@ -175,6 +190,9 @@ describe("signInCredentials API", async () => {
             },
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(spyParse).toHaveBeenCalledWith({
             name: "John Doe",
             email: "johndoe@example.com",
@@ -221,6 +239,9 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(spyParse).not.toHaveBeenCalled()
         expect(createUserMock).not.toHaveBeenCalled()
         expect(updateUserMock).not.toHaveBeenCalled()
@@ -259,7 +280,6 @@ describe("signInCredentials API", async () => {
             redirect: true,
             redirectTo: "https://example.com/dashboard",
         })
-        expect(output.headers.get("Location")).toBe("/dashboard")
         expect(output).toEqual({
             success: true,
             redirect: true,
@@ -267,6 +287,25 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({
+            location: "/dashboard",
+        })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "strict",
+                httpOnly: true,
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "lax",
+                httpOnly: true,
+            }),
+        ])
 
         expect(spyParse).toHaveBeenCalledWith({
             sub: "user-123",
@@ -319,7 +358,6 @@ describe("signInCredentials API", async () => {
             redirect: false,
             redirectTo: "https://example.com/dashboard",
         })
-        expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
             success: true,
             redirect: false,
@@ -327,6 +365,23 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "strict",
+                httpOnly: true,
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "lax",
+                httpOnly: true,
+            }),
+        ])
 
         expect(spyParse).toHaveBeenCalledWith({
             sub: "user-123",
@@ -379,7 +434,6 @@ describe("signInCredentials API", async () => {
             redirect: true,
             redirectTo: "https://malicious.com/phishing",
         })
-        expect(output.headers.get("Location")).toBe("/")
         expect(output).toEqual({
             success: true,
             redirect: true,
@@ -387,6 +441,23 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/" })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "strict",
+                httpOnly: true,
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "lax",
+                httpOnly: true,
+            }),
+        ])
 
         expect(spyParse).toHaveBeenCalledWith({
             sub: "user-123",
@@ -439,7 +510,6 @@ describe("signInCredentials API", async () => {
             redirect: false,
             redirectTo: "https://malicious.com/phishing",
         })
-        expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
             success: true,
             redirect: false,
@@ -447,6 +517,23 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "strict",
+                httpOnly: true,
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                path: "/",
+                sameSite: "lax",
+                httpOnly: true,
+            }),
+        ])
 
         expect(spyParse).toHaveBeenCalledWith({
             sub: "user-123",

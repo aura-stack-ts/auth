@@ -18,6 +18,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when session token is missing", async () => {
@@ -43,6 +45,9 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getSessionByTokenMock).not.toHaveBeenCalled()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -75,6 +80,9 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getSessionByTokenMock).toHaveBeenCalled()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -112,6 +120,9 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getSessionByTokenMock).toHaveBeenCalledTimes(1)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
@@ -133,6 +144,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
@@ -150,8 +162,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
     })
@@ -173,6 +187,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
@@ -189,8 +204,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -216,6 +233,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -237,14 +255,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.access_token.oauth-provider=")
-
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -290,6 +304,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -310,9 +325,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -347,6 +363,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn().mockRejectedValueOnce(new Error("Network connection lost"))
         vi.stubGlobal("fetch", mockFetch)
@@ -367,8 +384,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -402,6 +421,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: false,
@@ -425,8 +445,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -460,6 +482,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -483,8 +506,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -521,6 +546,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -535,6 +561,8 @@ describe("revokeToken (Stateful)", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
             },
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         const response = output.toResponse()
         expect(response.status).toBe(200)
@@ -544,8 +572,7 @@ describe("revokeToken (Stateful)", () => {
             success: true,
         })
 
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -595,6 +622,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
@@ -612,8 +640,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
@@ -641,6 +671,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
@@ -658,8 +689,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
     })
@@ -720,8 +753,15 @@ describe("revokeToken (Stateful)", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
             },
         })
+        expect(output).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
 
-        expect(output.success).toBe(true)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(mockFetch).toHaveBeenCalledWith("https://custom.example.com/revoke", expect.any(Object))
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -793,8 +833,15 @@ describe("revokeToken (Stateful)", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
             },
         })
+        expect(output).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
 
-        expect(output.success).toBe(true)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(mockFetch).toHaveBeenCalledWith(
             "https://custom.example.com/revoke",
             expect.objectContaining({
@@ -844,6 +891,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -864,9 +912,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -916,6 +965,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledOnce()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
@@ -958,6 +1009,7 @@ describe("revokeToken (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -979,9 +1031,10 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateAccountStatusMock).toHaveBeenCalledWith("account-123", "unlinked")
@@ -1032,6 +1085,8 @@ describe("revokeToken (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledOnce()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()

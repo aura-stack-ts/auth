@@ -31,6 +31,8 @@ describe("signOut API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(sessionTokenMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -46,10 +48,12 @@ describe("signOut API", async () => {
             revokeSession: revokeSessionMock,
             getSessionByToken: sessionTokenMock,
         })
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -60,14 +64,21 @@ describe("signOut API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: "",
+                expires: new Date(0),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
-        const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("aura-auth.csrf_token=")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
-
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 
@@ -82,10 +93,12 @@ describe("signOut API", async () => {
             },
             { baseURL: "http://localhost:3000" }
         )
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
         expect(output).toMatchObject({
@@ -95,9 +108,21 @@ describe("signOut API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: "",
+                expires: new Date(0),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 
@@ -111,14 +136,15 @@ describe("signOut API", async () => {
             revokeSession: revokeSessionMock,
             getSessionByToken: sessionTokenMock,
         })
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
             redirectTo: "/dashboard",
         })
-        expect(output.headers.get("Location")).toBe("/dashboard")
         expect(output).toEqual({
             success: true,
             redirect: true,
@@ -126,9 +152,23 @@ describe("signOut API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({
+            location: "/dashboard",
+        })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: "",
+                expires: new Date(0),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 
@@ -142,10 +182,12 @@ describe("signOut API", async () => {
             revokeSession: revokeSessionMock,
             getSessionByToken: sessionTokenMock,
         })
+        const sessionToken = "valid-token-hash"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             redirectTo: "/dashboard",
@@ -157,9 +199,21 @@ describe("signOut API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: "",
+                expires: new Date(0),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(sessionTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(sessionTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
     })
 })

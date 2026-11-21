@@ -43,6 +43,19 @@ describe("verifyMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeTokenMock).toHaveBeenCalledWith(token)
@@ -110,6 +123,19 @@ describe("verifyMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeTokenMock).toHaveBeenCalledWith(token)
@@ -170,6 +196,8 @@ describe("verifyMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
@@ -224,6 +252,8 @@ describe("verifyMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(revokeTokenMock).not.toHaveBeenCalled()
@@ -278,6 +308,19 @@ describe("verifyMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeTokenMock).toHaveBeenCalledWith(token)
@@ -348,6 +391,19 @@ describe("verifyMagicLink API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeTokenMock).toHaveBeenCalledWith(token)

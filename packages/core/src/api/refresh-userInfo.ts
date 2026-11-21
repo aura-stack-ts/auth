@@ -84,7 +84,6 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
         const { session, headers } = await ctx.session.strategy.refreshUserInfo({
             rawSession,
             sessionToken,
-            headers: initHeaders,
             user: userInfo,
         })
         return {

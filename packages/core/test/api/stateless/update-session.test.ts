@@ -166,7 +166,6 @@ describe("updateSession API", () => {
         })
 
         const setCookies = updated.headers.getSetCookie()
-        console.log("set-Cookies: ", setCookies)
         expect(setCookies).toHaveLength(1)
         expect(setCookies[0]).toContain("aura-auth.session_token=")
     })

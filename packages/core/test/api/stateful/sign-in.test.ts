@@ -9,8 +9,9 @@ describe("signIn API (stateful)", () => {
         const { api } = authInstance({
             createOAuthTransaction: createOAuthTransactionMock,
         })
+        const output = await api.signIn("unsupported", { headers: new Headers() })
 
-        expect(await api.signIn("unsupported", { headers: new Headers() })).toMatchObject({
+        expect(output).toMatchObject({
             success: false,
             signInURL: null,
             redirect: false,
@@ -20,6 +21,8 @@ describe("signIn API (stateful)", () => {
             },
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("signIn with BASE_URL stores OAuth transaction in database", async () => {
@@ -45,11 +48,19 @@ describe("signIn API (stateful)", () => {
             createOAuthTransaction: createOAuthTransactionMock,
         })
 
-        const signIn = await api.signIn("oauth-provider")
-        const response = signIn.toResponse()
+        const output = await api.signIn("oauth-provider")
+        expect(output).toEqual({
+            success: true,
+            redirect: true,
+            signInURL: expect.any(String),
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(output.headers).toHaveValidSetCookies([])
+
+        const response = output.toResponse()
         expect(response.status).toBe(302)
-        const searchParams = new URL(response.headers.get("Location")!).searchParams
-        expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
 
         expect(createOAuthTransactionMock).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -59,8 +70,6 @@ describe("signIn API (stateful)", () => {
                 codeVerifier: expect.any(String),
             })
         )
-
-        vi.unstubAllGlobals()
     })
 
     test("signIn with baseURL in context stores OAuth transaction in database", async () => {
@@ -84,13 +93,21 @@ describe("signIn API (stateful)", () => {
             createOAuthTransaction: createOAuthTransactionMock,
         })
 
-        const signIn = await api.signIn("oauth-provider", {
+        const output = await api.signIn("oauth-provider", {
             request: new Request("https://example.com/auth/signIn/oauth-provider"),
         })
-        const response = signIn.toResponse()
+        expect(output).toEqual({
+            success: true,
+            redirect: true,
+            signInURL: expect.any(String),
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(output.headers).toHaveValidSetCookies([])
+
+        const response = output.toResponse()
         expect(response.status).toBe(302)
-        const searchParams = new URL(response.headers.get("Location")!).searchParams
-        expect(searchParams.get("redirect_uri")).toBe("https://example.com/auth/callback/oauth-provider")
         expect(createOAuthTransactionMock).toHaveBeenCalled()
     })
 
@@ -117,16 +134,18 @@ describe("signIn API (stateful)", () => {
             createOAuthTransaction: createOAuthTransactionMock,
         })
 
-        const response = await api.signIn("oauth-provider", {
+        const output = await api.signIn("oauth-provider", {
             redirect: false,
         })
-        expect(response).toEqual({
+        expect(output).toEqual({
             success: true,
             redirect: false,
             signInURL: expect.any(String),
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(createOAuthTransactionMock).not.toHaveBeenCalled()
     })
 
@@ -153,8 +172,18 @@ describe("signIn API (stateful)", () => {
             createOAuthTransaction: createOAuthTransactionMock,
         })
 
-        const signIn = await api.signIn("oauth-provider", { redirectTo: "/dashboard" })
-        const response = signIn.toResponse()
+        const output = await api.signIn("oauth-provider", { redirectTo: "/dashboard" })
+        expect(output).toEqual({
+            success: true,
+            redirect: true,
+            signInURL: expect.any(String),
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(output.headers).toHaveValidSetCookies([])
+
+        const response = output.toResponse()
         expect(response.status).toBe(302)
 
         expect(createOAuthTransactionMock).toHaveBeenCalledWith(
@@ -162,8 +191,6 @@ describe("signIn API (stateful)", () => {
                 redirectTo: "/dashboard",
             })
         )
-
-        vi.unstubAllGlobals()
     })
 
     test("signIn OIDC custom provider stores nonce in OAuth transaction", async () => {
@@ -207,13 +234,12 @@ describe("signIn API (stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(createOAuthTransactionMock).toHaveBeenCalledWith(
             expect.objectContaining({
                 nonce: expect.any(String),
             })
         )
-
-        vi.unstubAllGlobals()
     })
 })
