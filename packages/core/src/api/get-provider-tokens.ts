@@ -19,6 +19,7 @@ export const getProviderTokens = async (
             .buildRequest(requestInit, `/providers/${oauthId}/tokens`)
             .verifyRateLimit("getProviderTokens")
             .verifySession()
+            .verifyUserStatus()
             .execute()
 
         if (rateLimit) {

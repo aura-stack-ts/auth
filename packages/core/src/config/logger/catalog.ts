@@ -1025,4 +1025,10 @@ export const LOG_MESSAGES = {
         msgId: "VERIFY_MAGIC_LINK_FAILED",
         message: "Magic link verification failed for user",
     },
+    OAUTH_CALLBACK_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "OAUTH_CALLBACK_ERROR",
+        message: "Error occurred during oauth callback process",
+    },
 } as const

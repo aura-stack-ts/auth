@@ -20,6 +20,8 @@ import type {
     TypedJWTPayload,
     User,
 } from "@/@types/index.ts"
+import { assertUserStatus } from "./stateful.ts"
+import type { AuraErrorCode } from "@/errors/catalog.ts"
 
 export const createValidation = (ctx: RouterGlobalContext, headers: Headers) => {
     const steps: Array<() => Promise<void>> = []
@@ -75,6 +77,17 @@ export const createValidation = (ctx: RouterGlobalContext, headers: Headers) => 
                     output.rawSession = session
                     output.sessionToken = sessionToken
                 }
+            })
+            return builder
+        },
+        verifyUserStatus: (error?: AuraErrorCode) => {
+            steps.push(async () => {
+                if (!output.rawSession) {
+                    throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
+                }
+                if (isStatelessStrategy(ctx.session.config)) return
+                const session = output.rawSession as SessionWithUserEntity
+                assertUserStatus(session.user, { error })
             })
             return builder
         },

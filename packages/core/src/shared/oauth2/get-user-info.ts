@@ -1,6 +1,6 @@
 import { fetchAsync } from "@/shared/http/fetch-async.ts"
 import { isOIDCProvider } from "@/shared/oidc/resolve-provider.ts"
-import { AuraAuthError, getErrorName, isAuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
 import { VERSION } from "@/version.ts"
 
 import { assertContentTypeResponse, isCustomUserInfoFunction } from "@/shared/assert.ts"
@@ -59,21 +59,13 @@ const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: s
             },
         })
         if (!response.ok) {
-            logger?.log("OAUTH_USERINFO_INVALID_RESPONSE")
             throw new AuraAuthError({ code: "INVALID_OAUTH_USER_INFO_RESPONSE" })
         }
 
         assertContentTypeResponse(response, logger)
         const json = await response.json()
-        const { success, data } = OAuthErrorResponse.safeParse(json)
+        const { success } = OAuthErrorResponse.safeParse(json)
         if (success) {
-            logger?.log("OAUTH_USERINFO_ERROR", {
-                message: "Error response received from OAuth userinfo endpoint",
-                structuredData: {
-                    error: data.error,
-                    error_description: data.error_description ?? "",
-                },
-            })
             throw new AuraAuthError({ code: "INVALID_OAUTH_USER_INFO_RES_FORMAT" })
         }
         logger?.log("OAUTH_USERINFO_SUCCESS")
@@ -83,7 +75,6 @@ const createUserInfoRequest = async (oauthConfig: ProviderConfig, accessToken: s
         if (isAuraAuthError(error)) {
             throw error
         }
-        logger?.log("OAUTH_USERINFO_REQUEST_FAILED")
         throw new AuraAuthError({ code: "UNKNOWN_OAUTH_USER_INFO_ERROR", cause: error })
     }
 }
@@ -138,7 +129,6 @@ export const getUserInfo = async (
         if (isAuraAuthError(error)) {
             throw error
         }
-        logger?.log("OAUTH_USERINFO_REQUEST_FAILED", { structuredData: { error_type: getErrorName(error) } })
         throw new AuraAuthError({ code: "UNKNOWN_CUSTOM_USER_INFO_ERROR", cause: error })
     }
 }

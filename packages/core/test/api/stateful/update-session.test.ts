@@ -818,4 +818,48 @@ describe("updateSession API", () => {
             })
         )
     })
+
+    test("throws error when user is inactive", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        const getSessionByTokenMock = vi.fn().mockResolvedValue({
+            ...sessionEntityWithUser,
+            user: { ...userEntity, status: "deleted" },
+        })
+        const updateUserMock = vi.fn()
+        const updateSessionMock = vi.fn()
+        const touchSessionMock = vi.fn()
+
+        const { api } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            updateUser: updateUserMock,
+            updateSession: updateSessionMock,
+            touchSession: touchSessionMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
+        const updated = await api.updateSession({
+            headers: {
+                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+            },
+            session: {},
+        })
+
+        expect(updated).toEqual({
+            session: null,
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "ACCOUNT_INACTIVE",
+                message: "This account is inactive. Please contact support.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(await createHash("valid-token-hash"))
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(updateSessionMock).not.toHaveBeenCalled()
+        expect(touchSessionMock).not.toHaveBeenCalled()
+    })
 })

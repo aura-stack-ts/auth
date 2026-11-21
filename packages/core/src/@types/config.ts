@@ -740,7 +740,8 @@ export type RateLimiterConfig = Partial<
             | "verifyEmailChange"
             | "cancelEmailChange"
             | "sendMagicLink"
-            | "verifyMagicLink",
+            | "verifyMagicLink"
+            | "oauthCallback",
             RateLimiterRule
         >
     >["rules"]

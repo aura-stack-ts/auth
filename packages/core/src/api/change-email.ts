@@ -32,6 +32,7 @@ export const changeEmail = async ({
             .verifyRateLimit("changeEmail")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifySession()
+            .verifyUserStatus("SILENT_USER_NOT_FOUND")
             .execute()
 
         if (rateLimit) {

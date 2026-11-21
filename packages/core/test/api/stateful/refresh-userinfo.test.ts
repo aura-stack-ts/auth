@@ -317,6 +317,62 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(updateUserMock).not.toHaveBeenCalled()
     })
 
+    test("throws error when user is inactive", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const getSessionByTokenMock = vi.fn().mockResolvedValue({
+            ...sessionEntityWithUser,
+            user: { ...userEntity, status: "deleted" },
+        })
+        const getAccountsByUserIdMock = vi.fn().mockResolvedValue([])
+        const getOAuthAccountMock = vi.fn().mockResolvedValue(null)
+        const updateOAuthTokensMock = vi.fn()
+        const getUserByIdMock = vi.fn()
+        const createUserMock = vi.fn()
+        const createSessionMock = vi.fn()
+        const updateUserMock = vi.fn()
+
+        const { api } = authInstance({
+            getSessionByToken: getSessionByTokenMock,
+            getAccountsByUserId: getAccountsByUserIdMock,
+            getOAuthAccount: getOAuthAccountMock,
+            updateOAuthTokens: updateOAuthTokensMock,
+            getUserById: getUserByIdMock,
+            createUser: createUserMock,
+            createSession: createSessionMock,
+            updateUser: updateUserMock,
+        })
+
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = "valid-session-token"
+
+        const output = await api.refreshUserInfo("oauth-provider", {
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+            },
+        })
+        expect(output).toEqual({
+            success: false,
+            session: null,
+            error: {
+                code: "ACCOUNT_INACTIVE",
+                message: "This account is inactive. Please contact support.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        const tokenHash = await createHash(sessionToken)
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
+        expect(getOAuthAccountMock).not.toHaveBeenCalled()
+        expect(updateOAuthTokensMock).not.toHaveBeenCalled()
+        expect(getUserByIdMock).not.toHaveBeenCalled()
+        expect(createUserMock).not.toHaveBeenCalled()
+        expect(createSessionMock).not.toHaveBeenCalled()
+        expect(updateUserMock).not.toHaveBeenCalled()
+    })
+
     test("successfully refreshes user info", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 

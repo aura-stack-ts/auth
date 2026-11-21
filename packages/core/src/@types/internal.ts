@@ -376,7 +376,12 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Handle the OAuth callback after the user authorizes the app. Returns a response that
      *  sets cookies and redirects to the original URL.
      */
-    oauthCallback(options: { oauthId: string; request: Request; params: { code: string; state: string } }): Promise<Response>
+    oauthCallback(options: {
+        oauthId: string
+        provider: RuntimeOAuthProvider
+        request: Request
+        params: { code: string; state: string }
+    }): Promise<{ headers: Headers }>
     /**
      *  Send a verification email to the user with a token and URL.
      */

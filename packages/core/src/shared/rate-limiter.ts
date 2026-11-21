@@ -152,6 +152,13 @@ export const createRateLimiterInstance = (config?: RateLimiterConfig, useProxyHe
                 keyGenerator: (request) => getLimitKey(request, "verifyMagicLink"),
                 ...config?.verifyMagicLink,
             } as RateLimiterRule,
+            oauthCallback: {
+                algorithm: "fixed-window",
+                limit: 5,
+                windowMs: 60 * 60 * 1000,
+                keyGenerator: (request) => getLimitKey(request, "oauthCallback"),
+                ...config?.oauthCallback,
+            } as RateLimiterRule,
         },
     })
 }

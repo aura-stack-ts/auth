@@ -5,6 +5,7 @@ export interface AuraErrorOptions extends ErrorOptions {
     message?: string
     statusCode?: number
     userMessage?: string
+    headers?: HeadersInit
 }
 
 interface V8ErrorConstructor extends ErrorConstructor {
@@ -24,8 +25,9 @@ export class AuraAuthError extends Error {
     readonly type: AuraErrorType
     readonly userMessage: string
     readonly statusCode: number
+    readonly headers: HeadersInit
 
-    constructor({ code, message, cause, statusCode, userMessage }: AuraErrorOptions) {
+    constructor({ code, message, cause, statusCode, userMessage, headers }: AuraErrorOptions) {
         const entry = ERROR_CATALOG[code]
         const finalInternalMessage = message ?? entry.message
         super(finalInternalMessage, { cause })
@@ -33,6 +35,7 @@ export class AuraAuthError extends Error {
         this.name = entry.name
         this.code = code
         this.type = entry.type
+        this.headers = headers ?? {}
         this.statusCode = statusCode ?? entry.statusCode
         this.userMessage = userMessage ?? entry.userMessage
 
@@ -45,7 +48,7 @@ export class AuraAuthError extends Error {
     toResponse() {
         return Response.json(
             { type: this.type, code: this.code, message: this.userMessage },
-            { status: this.statusCode, statusText: this.code }
+            { status: this.statusCode, statusText: this.code, headers: this.headers }
         )
     }
 }

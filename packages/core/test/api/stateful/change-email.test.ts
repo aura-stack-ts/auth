@@ -355,6 +355,75 @@ describe("changeEmail API", async () => {
         expect(sendEmailChangeVerificationMock).not.toHaveBeenCalled()
     })
 
+    test("changeEmail with inactive user", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+
+        const getSessionByTokenMock = vi.fn().mockReturnValue({
+            ...sessionEntityWithUser,
+            user: {
+                ...userEntity,
+                status: "deleted",
+            },
+        })
+        const getAccountsByUserIdMock = vi.fn().mockReturnValue([accountEntityWithCredentials])
+        const getCredentialAccountMock = vi.fn().mockReturnValue(credentialAccountEntity)
+        const getUserByIdMock = vi.fn().mockReturnValue({ ...userEntity, status: "deleted" })
+        const getUserByEmailMock = vi.fn()
+        const revokeAllVerificationTokensMock = vi.fn()
+        const createTokenMock = vi.fn()
+        const sendEmailChangeVerificationMock = vi.fn()
+
+        const { api } = authInstance(
+            {
+                getSessionByToken: getSessionByTokenMock,
+                getAccountsByUserId: getAccountsByUserIdMock,
+                getCredentialAccount: getCredentialAccountMock,
+                getUserById: getUserByIdMock,
+                getUserByEmail: getUserByEmailMock,
+                createToken: createTokenMock,
+            },
+            {
+                emailChange: {
+                    sendEmailChangeVerification: sendEmailChangeVerificationMock,
+                },
+            }
+        )
+
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
+        const output = await api.changeEmail({
+            payload: {
+                currentPassword: "current-password",
+                newEmail: "new@example.com",
+            },
+            headers: {
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+            },
+        })
+
+        expect(output).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "SILENT_USER_NOT_FOUND",
+                message: "The user account could not be found. Please check your credentials and try again.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
+        expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
+        expect(getCredentialAccountMock).not.toHaveBeenCalled()
+        expect(getUserByEmailMock).not.toHaveBeenCalled()
+        expect(getUserByIdMock).not.toHaveBeenCalled()
+        expect(revokeAllVerificationTokensMock).not.toHaveBeenCalled()
+        expect(createTokenMock).not.toHaveBeenCalled()
+        expect(sendEmailChangeVerificationMock).not.toHaveBeenCalled()
+    })
+
     test("success changeEmail flow with redirectTo and redirect: true", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 

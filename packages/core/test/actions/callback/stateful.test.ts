@@ -91,9 +91,11 @@ describe("callbackAction (stateful)", () => {
         const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=123&state=abc"))
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
-            type: "PROTOCOL",
-            code: "AUTH_MISMATCHING_STATE",
-            message: "The provided state passed in the OAuth response does not match the stored token state.",
+            success: false,
+            error: {
+                code: "AUTH_MISMATCHING_STATE",
+                message: "The provided state passed in the OAuth response does not match the stored token state.",
+            },
         })
         expect(getOAuthTransactionByStateMock).toHaveBeenCalledWith("abc")
     })
@@ -128,9 +130,11 @@ describe("callbackAction (stateful)", () => {
         const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=123&state=abc"))
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
-            type: "PROTOCOL",
-            code: "AUTH_TRANSACTION_EXPIRED",
-            message: "The OAuth transaction has expired. Please try signing in again.",
+            success: false,
+            error: {
+                code: "AUTH_TRANSACTION_EXPIRED",
+                message: "The OAuth transaction has expired. Please try signing in again.",
+            },
         })
         expect(deleteExpiredOAuthTransactionsMock).toHaveBeenCalled()
     })
@@ -163,9 +167,11 @@ describe("callbackAction (stateful)", () => {
         const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=123&state=abc"))
         expect(response.status).toBe(400)
         expect(await response.json()).toEqual({
-            type: "PROTOCOL",
-            code: "AUTH_PROVIDER_MISMATCH",
-            message: "The OAuth provider does not match the stored transaction.",
+            success: false,
+            error: {
+                code: "AUTH_PROVIDER_MISMATCH",
+                message: "The OAuth provider does not match the stored transaction.",
+            },
         })
     })
 
@@ -420,6 +426,130 @@ describe("callbackAction (stateful)", () => {
         expect(createDeviceMock).toHaveBeenCalled()
         expect(response.status).toBe(302)
         expect(response.headers.get("Location")).toBe("/auth")
+    })
+
+    test("callback action workflow with existing user with 'deleted' status", async () => {
+        const mockFetch = vi.fn()
+
+        vi.stubGlobal("fetch", mockFetch)
+
+        const accessTokenMock = {
+            access_token: "access_123",
+            token_type: "Bearer",
+        }
+
+        const userInfoMock = {
+            id: "user_123",
+            email: "john.doe@example.com",
+            name: "John Doe",
+            picture: "https://example.com/john-doe.jpg",
+        }
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => accessTokenMock,
+        })
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            json: async () => userInfoMock,
+        })
+
+        const getOAuthTransactionByStateMock = vi.fn().mockResolvedValue(oauthTransactionEntity)
+        const consumeOAuthTransactionMock = vi.fn().mockResolvedValue(oauthTransactionEntity)
+        const deleteExpiredOAuthTransactionsMock = vi.fn().mockResolvedValue(1)
+        const createUserMock = vi.fn().mockResolvedValue(userEntity)
+        const getUserByEmailMock = vi.fn().mockResolvedValue({ ...userEntity, status: "deleted" })
+        const updateUserMock = vi.fn()
+        const getAccountByProviderMock = vi.fn()
+        const updatedOAuthTokensMock = vi.fn()
+        const createAccountMock = vi.fn()
+        const createOAuthAccountMock = vi.fn()
+        const createDeviceMock = vi.fn()
+        const createSessionMock = vi.fn()
+        const getDeviceByFingerprintMock = vi.fn()
+
+        const {
+            handlers: { GET },
+        } = authInstance(
+            {
+                getOAuthTransactionByState: getOAuthTransactionByStateMock,
+                consumeOAuthTransaction: consumeOAuthTransactionMock,
+                deleteExpiredOAuthTransactions: deleteExpiredOAuthTransactionsMock,
+                getUserByEmail: getUserByEmailMock,
+                createUser: createUserMock,
+                updateUser: updateUserMock,
+                getAccountByProvider: getAccountByProviderMock,
+                updateOAuthTokens: updatedOAuthTokensMock,
+                createAccount: createAccountMock,
+                createOAuthAccount: createOAuthAccountMock,
+                createSession: createSessionMock,
+                createDevice: createDeviceMock,
+                getDeviceByFingerprint: getDeviceByFingerprintMock,
+            },
+            {
+                oauth: [oauthCustomService],
+            }
+        )
+
+        const response = await GET(new Request("https://example.com/auth/callback/oauth-provider?code=auth_code_123&state=abc"))
+
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/access_token", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+                client_id: "oauth_client_id",
+                client_secret: "oauth_client_secret",
+                code: "auth_code_123",
+                redirect_uri: "https://example.com/auth/callback/oauth-provider",
+                grant_type: "authorization_code",
+                code_verifier: "verifier_123",
+            }).toString(),
+            signal: expect.any(AbortSignal),
+        })
+        expect(fetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
+            method: "GET",
+            headers: {
+                "User-Agent": `Aura Auth/${VERSION}`,
+                Accept: "application/json",
+                Authorization: "Bearer access_123",
+            },
+            signal: expect.any(AbortSignal),
+        })
+        expect(fetch).toHaveBeenCalledTimes(2)
+
+        expect(response.status).toBe(403)
+        expect(await response.json()).toEqual({
+            success: false,
+            error: {
+                code: "ACCOUNT_INACTIVE",
+                message: "This account is inactive. Please contact support.",
+            },
+        })
+
+        expect(getOAuthTransactionByStateMock).toHaveBeenCalledWith("abc")
+        expect(getOAuthTransactionByStateMock).toHaveReturnedWith(Promise.resolve(oauthTransactionEntity))
+        expect(deleteExpiredOAuthTransactionsMock).not.toHaveBeenCalled()
+        expect(consumeOAuthTransactionMock).toHaveBeenCalledWith("abc")
+        expect(getUserByEmailMock).toHaveBeenCalledWith("john.doe@example.com")
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(createUserMock).not.toHaveBeenCalled()
+        expect(getAccountByProviderMock).not.toHaveBeenCalled()
+        expect(getAccountByProviderMock).not.toHaveBeenCalled()
+        expect(updatedOAuthTokensMock).not.toHaveBeenCalled()
+        expect(createAccountMock).not.toHaveBeenCalled()
+        expect(createOAuthAccountMock).not.toHaveBeenCalled()
+        expect(getDeviceByFingerprintMock).not.toHaveBeenCalled()
+        expect(createDeviceMock).not.toHaveBeenCalled()
     })
 
     test("callback action workflow with existing user and same device", async () => {

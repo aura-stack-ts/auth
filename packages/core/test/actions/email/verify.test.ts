@@ -294,7 +294,7 @@ describe("verifyEmailChangeAction", async () => {
         const updateUserMock = vi.fn()
         const revokeTokenMock = vi.fn()
         const revokeAllSessionsMock = vi.fn()
-        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntity)
+        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const {
             handlers: { GET },
@@ -341,7 +341,7 @@ describe("verifyEmailChangeAction", async () => {
         const updateUserMock = vi.fn()
         const revokeTokenMock = vi.fn()
         const revokeAllSessionsMock = vi.fn()
-        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntity)
+        const getSessionByTokenMock = vi.fn().mockReturnValue(sessionEntityWithUser)
 
         const {
             handlers: { GET },
