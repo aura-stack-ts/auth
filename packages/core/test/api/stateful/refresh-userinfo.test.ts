@@ -75,6 +75,15 @@ describe("refreshUserInfo API (Stateful)", () => {
                 },
             },
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-session-token",
+                sameSite: "lax",
+            }),
+        ])
+
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
             email: "john.updated@example.com",
             name: "John Doe Updated",
@@ -111,6 +120,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getSessionByTokenMock).not.toHaveBeenCalled()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -156,6 +168,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getSessionByTokenMock).toHaveBeenCalledOnce()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -188,6 +203,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
@@ -206,8 +222,10 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getUserByIdMock).not.toHaveBeenCalled()
@@ -238,6 +256,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         })
 
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
@@ -254,8 +273,10 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
         expect(getUserByIdMock).not.toHaveBeenCalled()
@@ -289,6 +310,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
@@ -306,8 +328,10 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -345,6 +369,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
@@ -362,8 +387,10 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -405,6 +432,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -441,17 +469,16 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
-        const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
-
-        /**
-         * @todo Optimize the session token verification across multiple calls.
-         */
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -534,6 +561,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles getUserInfo invalid response from provider", async () => {
@@ -585,6 +614,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles getUserInfo OAuth error response", async () => {
@@ -640,6 +671,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles getUserInfo missing required user fields", async () => {
@@ -695,11 +728,16 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("toResponse returns correct response on failure", async () => {
         const { api } = authInstance({})
         const output = await api.refreshUserInfo("unsupported")
+
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         const response = output.toResponse()
         expect(response.status).toBe(400)
@@ -747,6 +785,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -792,9 +831,16 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -865,6 +911,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -896,8 +943,10 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
     })
@@ -945,6 +994,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("toResponse returns correct response on success", async () => {
@@ -979,6 +1030,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -999,6 +1051,14 @@ describe("refreshUserInfo API (Stateful)", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
             },
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
         const response = output.toResponse()
         expect(response.status).toBe(200)
@@ -1017,8 +1077,7 @@ describe("refreshUserInfo API (Stateful)", () => {
             },
         })
 
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -1085,6 +1144,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -1114,8 +1174,10 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
     })
@@ -1152,6 +1214,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValueOnce({
@@ -1187,9 +1250,16 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -1268,6 +1338,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -1303,8 +1376,9 @@ describe("refreshUserInfo API (Stateful)", () => {
             touchSession: touchSessionMock,
         })
 
-        const sessionToken = "valid-session-token"
         const csrfToken = await createCSRF(jose)
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn()
         mockFetch.mockResolvedValue({
@@ -1340,9 +1414,16 @@ describe("refreshUserInfo API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, tokenHash)
+        expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")

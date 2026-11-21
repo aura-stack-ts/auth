@@ -1,5 +1,5 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SendMagicLinkAPIOptions, SendMagicLinkAPIReturn } from "@/@types/api.ts"
@@ -21,7 +21,7 @@ export const sendMagicLink = async (
     if (!magicLinks?.sendMagicLinkEmail) {
         throw new AuraAuthError({ code: "MAGIC_LINK_SEND_EMAIL_NOT_IMPLEMENTED" })
     }
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         logger?.log("SEND_MAGIC_LINK_INITIATED", {
             structuredData: {
@@ -29,7 +29,7 @@ export const sendMagicLink = async (
                 allowSignUp: magicLinks?.allowSignUp ?? false,
             },
         })
-        const { request, rateLimit, origin } = await createValidation(ctx, headers)
+        const { request, rateLimit, origin } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/signIn/magicLink")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifyRateLimit("sendMagicLink")

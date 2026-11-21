@@ -1,4 +1,4 @@
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { OAuthCallbackAPIOptions, OAuthCallbackAPIReturn } from "@/@types/api.ts"
@@ -10,9 +10,8 @@ export const oauthCallback = async ({
     request: requestInit,
 }: FunctionAPIContext<OAuthCallbackAPIOptions>): Promise<OAuthCallbackAPIReturn> => {
     const { logger } = ctx
-    const initHeaders = getInitialHeaders(requestInit, headersInit)
     try {
-        const { request, rateLimit, provider } = await createValidation(ctx, initHeaders)
+        const { request, rateLimit, provider } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(payload.oauthId)
             .buildRequest(requestInit, `/callback/${payload.oauthId}`)
             .verifyRateLimit("oauthCallback")
@@ -36,20 +35,21 @@ export const oauthCallback = async ({
             },
         }
     } catch (error) {
+        const headers = new Headers(secureApiHeaders)
         errorToLogMessage(error, "OAUTH_CALLBACK_ERROR", logger)
         const { errors, statusCode } = handleApiError(error, "OAUTH_CALLBACK_ERROR", "An error occurred on callback process")
 
         return {
             success: false,
             error: errors,
-            headers: initHeaders,
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
                         success: false,
                         error: errors,
                     },
-                    { headers: initHeaders, status: statusCode }
+                    { headers, status: statusCode }
                 )
             },
         }

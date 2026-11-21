@@ -6,12 +6,12 @@ import { createBasicAuthHeader } from "@/shared/utils.ts"
 import { oauthCustomService, oauthTokens, sessionPayload } from "@test/setup/presets.ts"
 import type { OAuthProviderConfig } from "@/@types/oauth.ts"
 
-describe("getAccessToken API", () => {
+describe("getProviderTokens API", () => {
     test("throws error when provider is missing", async () => {
-        const output = await api.getAccessToken("unsuppported", { headers: new Headers() })
+        const output = await api.getProviderTokens("unsuppported", { headers: new Headers() })
         expect(output).toEqual({
             success: false,
-            accessToken: null,
+            tokens: null,
             error: {
                 code: "UNSUPPORTED_OAUTH_CONFIGURATION",
                 message: "The targeted OAuth provider has not been configured in the initialization parameters.",
@@ -19,15 +19,17 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when session token is missing", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const output = await api.getAccessToken("oauth-provider", { headers: new Headers() })
+        const output = await api.getProviderTokens("oauth-provider", { headers: new Headers() })
         expect(output).toEqual({
             success: false,
-            accessToken: null,
+            tokens: null,
             error: {
                 code: "SESSION_NOT_FOUND",
                 message: "The session token is not found. There is no active session.",
@@ -35,6 +37,15 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+                sameSite: "lax",
+            }),
+        ])
     })
 
     test("throws error when provider token does not exist", async () => {
@@ -42,7 +53,7 @@ describe("getAccessToken API", () => {
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
-        const output = await api.getAccessToken("oauth-provider", {
+        const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
@@ -50,7 +61,7 @@ describe("getAccessToken API", () => {
         })
         expect(output).toEqual({
             success: false,
-            accessToken: null,
+            tokens: null,
             error: {
                 code: "COOKIE_INVALID_VALUE",
                 message: "Expected configuration cookie not found or contains an empty value.",
@@ -58,6 +69,38 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+    })
+
+    test("throws error when session token is missing", async () => {
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
+
+        const output = await api.getProviderTokens("oauth-provider", {
+            headers: {
+                Cookie: `aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+        })
+        expect(output).toEqual({
+            success: false,
+            tokens: null,
+            error: {
+                code: "SESSION_NOT_FOUND",
+                message: "The session token is not found. There is no active session.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+                sameSite: "lax",
+            }),
+        ])
     })
 
     test("successfully gets provider tokens", async () => {
@@ -67,18 +110,21 @@ describe("getAccessToken API", () => {
 
         const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
 
-        const output = await api.getAccessToken("oauth-provider", {
+        const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toEqual({
             success: true,
-            accessToken: oauthTokens.accessToken,
+            tokens: oauthTokens,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("refreshToken config not provided", async () => {
@@ -94,7 +140,7 @@ describe("getAccessToken API", () => {
         const { refreshToken: _, ...spread } = oauthCustomService
         const { api } = createAuth({ oauth: [spread] })
 
-        const output = await api.getAccessToken("oauth-provider", {
+        const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
@@ -102,7 +148,7 @@ describe("getAccessToken API", () => {
         })
         expect(output).toEqual({
             success: false,
-            accessToken: null,
+            tokens: null,
             error: {
                 code: "OAUTH_INVALID_REFRESH_TOKEN_CONFIG",
                 message:
@@ -111,6 +157,8 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("refreshToken successfully refreshes tokens", async () => {
@@ -132,18 +180,32 @@ describe("getAccessToken API", () => {
             expiresAt: Math.floor(Date.now() / 1000) - 3600,
         } as unknown as Record<string, unknown>)
 
-        const output = await api.getAccessToken("oauth-provider", {
+        const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toEqual({
             success: true,
-            accessToken: oauthTokens.accessToken,
+            tokens: {
+                ...oauthTokens,
+                expiresAt: expect.any(Number),
+                issuedAt: expect.any(Number),
+            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+        ])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
             method: "POST",
@@ -190,18 +252,32 @@ describe("getAccessToken API", () => {
             oauth: [provider],
         })
 
-        const output = await api.getAccessToken("oauth-provider", {
+        const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
         expect(output).toEqual({
             success: true,
-            accessToken: oauthTokens.accessToken,
+            tokens: {
+                ...oauthTokens,
+                expiresAt: expect.any(Number),
+                issuedAt: expect.any(Number),
+            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+        ])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
             method: "POST",
@@ -235,7 +311,7 @@ describe("getAccessToken API", () => {
             expiresAt: Math.floor(Date.now() / 1000) - 3600,
         } as unknown as Record<string, unknown>)
 
-        const output = await api.getAccessToken("oauth-provider", {
+        const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
@@ -244,7 +320,7 @@ describe("getAccessToken API", () => {
 
         expect(output).toEqual({
             success: false,
-            accessToken: null,
+            tokens: null,
             error: {
                 code: "OAUTH_INVALID_REFRESH_TOKEN_RESPONSE",
                 message: "Your secure session renewal failed. Please sign in again to continue.",
@@ -252,6 +328,8 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("refreshToken handles unexpected network exceptions gracefully", async () => {
@@ -267,7 +345,7 @@ describe("getAccessToken API", () => {
             expiresAt: Math.floor(Date.now() / 1000) - 3600,
         } as unknown as Record<string, unknown>)
 
-        const output = await api.getAccessToken("oauth-provider", {
+        const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
@@ -276,7 +354,7 @@ describe("getAccessToken API", () => {
 
         expect(output).toEqual({
             success: false,
-            accessToken: null,
+            tokens: null,
             error: {
                 code: "PROVIDER_TOKENS_ERROR",
                 message: "Failed to get provider tokens",
@@ -284,6 +362,8 @@ describe("getAccessToken API", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("returns current tokens without refreshing when close to expiry but outside the refresh window", async () => {
@@ -300,7 +380,7 @@ describe("getAccessToken API", () => {
             expiresAt: currentTime + 600,
         } as unknown as Record<string, unknown>)
 
-        const output = await api.getAccessToken("oauth-provider", {
+        const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
@@ -309,10 +389,16 @@ describe("getAccessToken API", () => {
 
         expect(output).toEqual({
             success: true,
-            accessToken: oauthTokens.accessToken,
+            tokens: {
+                ...oauthTokens,
+                expiresAt: currentTime + 600,
+            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(mockFetch).not.toHaveBeenCalled()
     })
 
@@ -338,7 +424,7 @@ describe("getAccessToken API", () => {
             expiresAt: currentTime + 120,
         } as unknown as Record<string, unknown>)
 
-        const output = await api.getAccessToken("oauth-provider", {
+        const output = await api.getProviderTokens("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
@@ -347,10 +433,55 @@ describe("getAccessToken API", () => {
 
         expect(output).toEqual({
             success: true,
-            accessToken: "brand-new-refreshed-token",
+            tokens: {
+                ...oauthTokens,
+                accessToken: "brand-new-refreshed-token",
+                expiresAt: expect.any(Number),
+                issuedAt: expect.any(Number),
+            },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: expect.any(String),
+                sameSite: "strict",
+            }),
+        ])
+
         expect(mockFetch).toHaveBeenCalledTimes(1)
+    })
+
+    test("missing expires_in", async () => {
+        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        const csrfToken = await createCSRF(jose)
+        const sessionToken = await jose.encodeJWT(sessionPayload)
+
+        const encodedTokens = await jose.encodeJWT({
+            accessToken: "access-token",
+            scopes: ["read:user,read:email"],
+            tokenType: "bearer",
+        } as unknown as Record<string, unknown>)
+
+        const output = await api.getProviderTokens("oauth-provider", {
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+            },
+        })
+        expect(output).toEqual({
+            success: true,
+            tokens: {
+                accessToken: "access-token",
+                scopes: ["read:user,read:email"],
+                tokenType: "Bearer",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 })

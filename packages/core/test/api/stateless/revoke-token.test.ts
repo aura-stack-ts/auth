@@ -16,6 +16,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when session token is missing", async () => {
@@ -31,6 +33,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when CSRF token is missing", async () => {
@@ -52,6 +56,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when CSRF token is invalid", async () => {
@@ -74,6 +80,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when provider token cookie does not exist", async () => {
@@ -96,6 +104,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when provider does not have revoke token configured", async () => {
@@ -125,6 +135,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("successfully revokes token", async () => {
@@ -154,11 +166,15 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.access_token.oauth-provider=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: "",
+                expires: new Date(0),
+                sameSite: "strict",
+            }),
+        ])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/revoke_token", {
             method: "POST",
@@ -191,8 +207,20 @@ describe("revokeToken", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
-
-        expect(output.success).toBe(true)
+        expect(output).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: "",
+                expires: new Date(0),
+                sameSite: "strict",
+            }),
+        ])
     })
 
     test("handles network error during revocation", async () => {
@@ -221,6 +249,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles provider returning error response", async () => {
@@ -252,6 +282,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles provider returning unexpected status code", async () => {
@@ -283,6 +315,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("toResponse returns correct response on success", async () => {
@@ -305,6 +339,15 @@ describe("revokeToken", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: "",
+                expires: new Date(0),
+                sameSite: "strict",
+            }),
+        ])
 
         const response = output.toResponse()
         expect(response.status).toBe(200)
@@ -348,6 +391,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles expired session token", async () => {
@@ -376,6 +421,8 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles provider with custom revoke token URL", async () => {
@@ -404,8 +451,21 @@ describe("revokeToken", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
+        expect(output).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: "",
+                expires: new Date(0),
+                sameSite: "strict",
+            }),
+        ])
 
-        expect(output.success).toBe(true)
         expect(mockFetch).toHaveBeenCalledWith("https://custom.example.com/revoke", expect.any(Object))
     })
 
@@ -445,7 +505,21 @@ describe("revokeToken", () => {
             },
         })
 
-        expect(output.success).toBe(true)
+        expect(output).toEqual({
+            success: true,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: "",
+                expires: new Date(0),
+                sameSite: "strict",
+            }),
+        ])
+
         expect(mockFetch).toHaveBeenCalledWith(
             "https://custom.example.com/revoke",
             expect.objectContaining({
@@ -483,10 +557,15 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        const setCookieHeader = output.headers.get("set-cookie")
-        expect(setCookieHeader).toContain("aura-auth.access_token.oauth-provider=")
-        expect(setCookieHeader).toContain("Expires=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: "",
+                expires: new Date(0),
+                sameSite: "strict",
+            }),
+        ])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/revoke_token", {
             method: "POST",
@@ -529,9 +608,9 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const setCookieHeader = output.headers.get("set-cookie")
-        expect(setCookieHeader).toBeNull()
         expect(mockFetch).not.toHaveBeenCalled()
     })
 
@@ -563,9 +642,15 @@ describe("revokeToken", () => {
             toResponse: expect.any(Function),
         })
 
-        const setCookieHeader = output.headers.get("set-cookie")
-        expect(setCookieHeader).toContain("aura-auth.access_token.oauth-provider=")
-        expect(setCookieHeader).toContain("Expires=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.access_token.oauth-provider",
+                value: "",
+                expires: new Date(0),
+                sameSite: "strict",
+            }),
+        ])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/revoke_token", {
             method: "POST",
@@ -609,9 +694,9 @@ describe("revokeToken", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
-        const setCookieHeader = output.headers.get("set-cookie")
-        expect(setCookieHeader).toBeNull()
         expect(mockFetch).not.toHaveBeenCalled()
     })
 })

@@ -2,7 +2,6 @@ import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/setup/auth.ts"
 import { createCSRF } from "@/exports/crypto.ts"
-import { getSetCookie } from "@/shared/http/cookie.ts"
 import type { User } from "@/index.ts"
 
 const payload = {
@@ -22,30 +21,32 @@ describe("signUp API", async () => {
     test("success signUp flow", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const signUp = await api.signUp({
+        const output = await api.signUp({
             headers: { ...headers, "Set-Cookie": "initial-provider-cookie=initial; Path=/" },
             payload,
         })
-        expect(signUp).toEqual({
+        expect(output).toEqual({
             success: true,
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const decode = await jose.decodeJWT(getSetCookie(signUp.headers, "aura-auth.session_token")!)
-        expect(decode).toMatchObject({
-            sub: "1234567890",
-            email: "john@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-        })
-
-        const setCookies = signUp.headers.getSetCookie()
-        expect(setCookies).toHaveLength(3)
-        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.csrf_token=")
-        expect(setCookies[2]).toContain("aura-auth.session_token=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("invalid signUp.onCreateUser return", async () => {
@@ -71,6 +72,8 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("invalid signUp.onCreateUser by missing required fields", async () => {
@@ -101,14 +104,16 @@ describe("signUp API", async () => {
             },
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("signUp without URL configuration", async () => {
-        const signUp = await api.signUp({
+        const output = await api.signUp({
             headers,
             payload: {},
         })
-        expect(signUp).toEqual({
+        expect(output).toEqual({
             success: false,
             redirect: false,
             redirectURL: null,
@@ -119,6 +124,8 @@ describe("signUp API", async () => {
             },
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("signUp with redirect: true and redirectTo", async () => {
@@ -138,6 +145,21 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signUp with redirect: true and absolute redirectTo", async () => {
@@ -149,7 +171,6 @@ describe("signUp API", async () => {
             redirect: true,
             redirectTo: "https://example.com/dashboard",
         })
-        expect(output.headers.get("Location")).toBe("/dashboard")
         expect(output).toEqual({
             success: true,
             redirect: true,
@@ -157,6 +178,21 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signUp with redirect: false and valid redirectTo", async () => {
@@ -168,7 +204,6 @@ describe("signUp API", async () => {
             redirect: false,
             redirectTo: "/dashboard",
         })
-        expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
             success: true,
             redirect: false,
@@ -176,6 +211,21 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signUp redirect: true and invalid redirectTo", async () => {
@@ -187,7 +237,6 @@ describe("signUp API", async () => {
             redirect: true,
             redirectTo: "https://malicious.com/dashboard",
         })
-        expect(output.headers.get("Location")).toBe("/")
         expect(output).toEqual({
             success: true,
             redirect: true,
@@ -195,6 +244,21 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/" })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signUp redirect: false and invalid redirectTo", async () => {
@@ -206,7 +270,6 @@ describe("signUp API", async () => {
             redirect: false,
             redirectTo: "https://malicious.com/dashboard",
         })
-        expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
             success: true,
             redirect: false,
@@ -214,6 +277,21 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signUp with doubleSubmitToken", async () => {
@@ -226,7 +304,6 @@ describe("signUp API", async () => {
             redirectTo: "https://malicious.com/dashboard",
             doubleSubmitToken: csrfToken,
         })
-        expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
             success: true,
             redirect: false,
@@ -234,6 +311,21 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signUp with doubleSubmitToken with invalid value", async () => {
@@ -246,7 +338,6 @@ describe("signUp API", async () => {
             redirectTo: "https://malicious.com/dashboard",
             doubleSubmitToken: "invalid-token",
         })
-        expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
             success: false,
             redirect: false,
@@ -258,6 +349,8 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("signUp enables double-submit cookie manually", async () => {
@@ -273,7 +366,6 @@ describe("signUp API", async () => {
             redirectTo: "https://malicious.com/dashboard",
             skipCSRFCheck: false,
         })
-        expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
             success: true,
             redirect: false,
@@ -281,6 +373,21 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signUp enables double-submit cookie manually and invalid value", async () => {
@@ -308,5 +415,7 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 })

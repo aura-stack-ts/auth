@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/exports/crypto.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -11,14 +11,14 @@ export const signInCredentials = async ({
     payload,
     request: requestInit,
     headers: headersInit,
-    redirect = true,
+    redirect: redirectInit = true,
     redirectTo,
     skipCSRFCheck = false,
     doubleSubmitToken = undefined,
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
     const { cookies, credentials, logger, session: sessionConfig } = ctx
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         ctx.logger?.log("SIGN_IN_CREDENTIALS_INITIATED", {
             structuredData: {
@@ -27,7 +27,7 @@ export const signInCredentials = async ({
             },
         })
 
-        const { request, rateLimit } = await createValidation(ctx, headers)
+        const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/signIn/credentials")
             .verifyRateLimit("signInCredentials")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
@@ -56,10 +56,10 @@ export const signInCredentials = async ({
             .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
             .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
 
-        const { redirect: shouldRedirectServer, redirectURL } = await resolveApiRedirect({
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
             ctx,
             request,
-            redirectInit: redirect,
+            redirectInit,
             redirectTo,
             headers: builder,
             fallbackRedirectTo,
@@ -69,13 +69,11 @@ export const signInCredentials = async ({
         return {
             success: true,
             headers: toHeaders,
-            redirect: shouldRedirectServer,
+            redirect,
             redirectURL: redirect ? null : redirectURL,
-            toResponse: () =>
-                Response.json(
-                    { success: true, redirect: shouldRedirectServer, redirectURL: shouldRedirectServer ? null : redirectURL },
-                    { headers: toHeaders, status: shouldRedirectServer ? 302 : 200 }
-                ),
+            toResponse: () => {
+                return Response.json({ success: true, redirect, redirectURL }, { headers: toHeaders, status })
+            },
         } as SignInCredentialsAPIReturn
     } catch (error) {
         const {

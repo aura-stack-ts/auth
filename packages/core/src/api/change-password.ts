@@ -1,4 +1,4 @@
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ChangePasswordAPIOptions, ChangePasswordAPIReturn } from "@/@types/api.ts"
@@ -15,7 +15,7 @@ export const changePassword = async ({
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<ChangePasswordAPIOptions>): Promise<ChangePasswordAPIReturn> => {
     const { logger, session } = ctx
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         logger?.log("CHANGE_PASSWORD_INITIATED", {
             structuredData: {
@@ -24,7 +24,7 @@ export const changePassword = async ({
             },
         })
 
-        const { request, rateLimit, userId } = await createValidation(ctx, headers)
+        const { request, rateLimit, userId } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/password/change")
             .verifyRateLimit("changePassword")
             .verifySession()

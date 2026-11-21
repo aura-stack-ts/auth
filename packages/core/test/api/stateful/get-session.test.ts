@@ -1,32 +1,47 @@
 import { describe, test, expect, vi } from "vitest"
 import { createHash } from "@/exports/crypto.ts"
 import { authInstance } from "@test/setup/auth.ts"
-import { getSetCookie } from "@/shared/http/cookie.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("getSession", () => {
     test("getSession with no session token", async () => {
         const { api } = authInstance({})
-        const session = await api.getSession({ headers: new Headers() })
-        expect(session).toMatchObject({
+        const output = await api.getSession({ headers: {} })
+        expect(output).toMatchObject({
             session: null,
             headers: {},
             success: false,
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("getSession with invalid session token", async () => {
         const { api } = authInstance({})
 
-        const session = await api.getSession({
+        const output = await api.getSession({
             headers: { Cookie: `aura-auth.session_token=invalidtoken` },
         })
-        expect(session).toMatchObject({
+        expect(output).toMatchObject({
             session: null,
             headers: {},
             success: false,
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("getSession with valid session token", async () => {
@@ -41,9 +56,12 @@ describe("getSession", () => {
         const { api } = authInstance({
             getSessionByToken: mock,
         })
+        const sessionToken = "valid-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
         const output = await api.getSession({
             headers: {
-                Cookie: `aura-auth.session_token=valid-token-hash`,
+                Cookie: `aura-auth.session_token=${sessionToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -62,16 +80,18 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(mock).toHaveBeenCalledWith(tokenHash)
+        expect(mock).toHaveBeenCalledWith(sessionTokenHash)
         const { attributes: _, ...spreadPayload } = userEntity
         expect(spy).toHaveBeenCalledWith({ sub: userEntity.id, ...spreadPayload })
-
-        const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.session_token=valid-token-hash")
     })
 
     test("getSession with expired session token", async () => {
@@ -104,13 +124,19 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         const tokenHash = await createHash("valid-token-hash")
         expect(sessionByTokenMock).toHaveBeenCalledWith(tokenHash)
         expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
         expect(spy).not.toHaveBeenCalled()
-        expect(() => getSetCookie(output.headers, "aura-auth.csrf_token")).toThrow()
-        expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("")
     })
 
     test("getSession with session token missing sub claim", async () => {
@@ -136,7 +162,7 @@ describe("getSession", () => {
             headers: { Cookie: `aura-auth.session_token=valid-token-hash` },
         })
 
-        expect(output).toMatchObject({
+        expect(output).toEqual({
             session: null,
             success: false,
             error: {
@@ -146,6 +172,14 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         const tokenHash = await createHash("valid-token-hash")
         expect(mock).toHaveBeenCalledWith(tokenHash)
@@ -156,11 +190,9 @@ describe("getSession", () => {
             sub: undefined,
             name: undefined,
         })
-        expect(() => getSetCookie(output.headers, "aura-auth.csrf_token")).toThrow()
-        expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("")
     })
 
-    test("getSession with extra claims in session token", async () => {
+    test("getSession with extra attributes in database", async () => {
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -181,8 +213,11 @@ describe("getSession", () => {
         const { api } = authInstance({
             getSessionByToken: mock,
         })
+        const sessionToken = "valid-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=valid-token-hash` },
+            headers: { Cookie: `aura-auth.session_token=${sessionToken}` },
         })
 
         expect(output).toEqual({
@@ -199,9 +234,16 @@ describe("getSession", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token",
+                sameSite: "lax",
+            }),
+        ])
 
-        const tokenHash = await createHash("valid-token-hash")
-        expect(mock).toHaveBeenCalledWith(tokenHash)
+        expect(mock).toHaveBeenCalledWith(sessionTokenHash)
         const { attributes: _, ...spreadPayload } = userEntity
         expect(spy).toHaveBeenCalledWith({
             ...spreadPayload,
@@ -209,6 +251,5 @@ describe("getSession", () => {
             role: "admin",
             permissions: ["read", "write"],
         })
-        expect(getSetCookie(output.headers, "aura-auth.session_token")).toBe("valid-token-hash")
     })
 })

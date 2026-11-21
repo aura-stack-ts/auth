@@ -44,7 +44,7 @@ export default defineConfig({
             include: ["test/**/*.test-d.ts"],
             exclude: ["test/**/*.test.ts"],
         },
-        setupFiles: ["./test/setup/rate-limiter.setup.ts", "./test/setup/actions.setup.ts"],
+        setupFiles: ["./test/setup/rate-limiter.setup.ts", "./test/setup/extend.setup.ts", "./test/setup/actions.setup.ts"],
     },
     resolve,
 })

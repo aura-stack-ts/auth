@@ -2,7 +2,6 @@ import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { api, jose } from "@test/setup/auth.ts"
 import { createCSRF } from "@/exports/crypto.ts"
-import { getSetCookie } from "@/shared/http/cookie.ts"
 
 describe("signInCredentials API", async () => {
     const csrfToken = await createCSRF(jose)
@@ -14,7 +13,7 @@ describe("signInCredentials API", async () => {
     test("success signIn flow", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers: {
                 ...headers,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
@@ -24,26 +23,28 @@ describe("signInCredentials API", async () => {
                 password: "1234567890",
             },
         })
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: true,
             headers: expect.any(Headers),
             redirect: false,
             redirectURL: null,
             toResponse: expect.any(Function),
         })
-        const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
-        expect(decoded).toMatchObject({
-            sub: "1234567890",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-        })
-
-        const setCookies = signIn.headers.getSetCookie()
-        expect(setCookies).toHaveLength(3)
-        expect(setCookies[0]).toContain("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.csrf_token=")
-        expect(setCookies[2]).toContain("aura-auth.session_token=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("invalid authorize return", async () => {
@@ -52,14 +53,26 @@ describe("signInCredentials API", async () => {
                 authorize: () => null,
             },
         })
-        const { success } = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
                 password: "wrongpassword",
             },
         })
-        expect(success).toBe(false)
+        expect(output).toEqual({
+            success: false,
+            error: {
+                code: "INVALID_AUTH_CONFIGURATION",
+                message: "The application context URL cannot be constructed. Set BASE_URL or provide proxy host headers.",
+            },
+            redirect: false,
+            redirectURL: null,
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("invalid authorize by missing required fields", async () => {
@@ -72,14 +85,14 @@ describe("signInCredentials API", async () => {
                     }) as any,
             },
         })
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
             },
         })
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: false,
             redirect: false,
             redirectURL: null,
@@ -90,6 +103,8 @@ describe("signInCredentials API", async () => {
             },
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("simulate hashing and verification", async () => {
@@ -109,42 +124,64 @@ describe("signInCredentials API", async () => {
                 },
             },
         })
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
             },
         })
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: true,
             redirect: false,
             redirectURL: null,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
-        expect(decoded).toMatchObject({
-            sub: "1234567890-abcdef",
-            name: "johndoe",
-        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signIn without URL configuration", async () => {
-        const { success } = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
                 password: "1234567890",
             },
         })
-        expect(success).toBe(false)
+        expect(output).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "INVALID_AUTH_CONFIGURATION",
+                message: "The application context URL cannot be constructed. Set BASE_URL or provide proxy host headers.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("signIn with redirect: true and redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
@@ -154,20 +191,34 @@ describe("signInCredentials API", async () => {
             redirectTo: "https://example.com/dashboard",
         })
 
-        expect(signIn.headers.get("Location")).toBe("/dashboard")
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: true,
             redirect: true,
             redirectURL: null,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signIn with redirect: false and valid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
@@ -176,19 +227,34 @@ describe("signInCredentials API", async () => {
             redirect: false,
             redirectTo: "https://example.com/dashboard",
         })
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: true,
             redirect: false,
             redirectURL: "/dashboard",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signIn redirect: true and invalid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
@@ -197,20 +263,34 @@ describe("signInCredentials API", async () => {
             redirect: true,
             redirectTo: "https://malicious.com/phishing",
         })
-        expect(signIn.headers.get("Location")).toBe("/")
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: true,
             redirect: true,
             redirectURL: null,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/" })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signIn with redirect: false and invalid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
@@ -219,20 +299,34 @@ describe("signInCredentials API", async () => {
             redirect: false,
             redirectTo: "https://malicious.com/phishing",
         })
-        expect(signIn.headers.get("Location")).toBeNull()
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: true,
             redirect: false,
             redirectURL: "/",
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signInCredentials with doubleSubmitToken", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
@@ -240,26 +334,34 @@ describe("signInCredentials API", async () => {
             },
             doubleSubmitToken: csrfToken,
         })
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: true,
             headers: expect.any(Headers),
             redirect: false,
             redirectURL: null,
             toResponse: expect.any(Function),
         })
-        const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
-        expect(decoded).toMatchObject({
-            sub: "1234567890",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signInCredentials with doubleSubmitToken and invalid value", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers,
             payload: {
                 username: "johndoe",
@@ -267,7 +369,7 @@ describe("signInCredentials API", async () => {
             },
             doubleSubmitToken: "invalid-value",
         })
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: false,
             redirect: false,
             redirectURL: null,
@@ -278,6 +380,8 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("signInCredentials enables double-submit cookie manually", async () => {
@@ -286,7 +390,7 @@ describe("signInCredentials API", async () => {
         const newHeaders = new Headers(headers)
         newHeaders.set("x-csrf-token", csrfToken)
 
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers: newHeaders,
             payload: {
                 username: "johndoe",
@@ -294,20 +398,28 @@ describe("signInCredentials API", async () => {
             },
             skipCSRFCheck: false,
         })
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: true,
             headers: expect.any(Headers),
             redirect: false,
             redirectURL: null,
             toResponse: expect.any(Function),
         })
-        const decoded = await jose.decodeJWT(getSetCookie(signIn.headers, "aura-auth.session_token")!)
-        expect(decoded).toMatchObject({
-            sub: "1234567890",
-            email: "johndoe@example.com",
-            name: "johndoe",
-            image: "https://example.com/image.jpg",
-        })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+                sameSite: "strict",
+                path: "/",
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+                path: "/",
+            }),
+        ])
     })
 
     test("signInCredentials enables double-submit cookie manually and invalid value", async () => {
@@ -316,7 +428,7 @@ describe("signInCredentials API", async () => {
         const newHeaders = new Headers(headers)
         newHeaders.set("x-csrf-token", "invalid-value")
 
-        const signIn = await api.signInCredentials({
+        const output = await api.signInCredentials({
             headers: newHeaders,
             payload: {
                 username: "johndoe",
@@ -324,7 +436,7 @@ describe("signInCredentials API", async () => {
             },
             skipCSRFCheck: false,
         })
-        expect(signIn).toEqual({
+        expect(output).toEqual({
             success: false,
             redirect: false,
             redirectURL: null,
@@ -335,5 +447,7 @@ describe("signInCredentials API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 })

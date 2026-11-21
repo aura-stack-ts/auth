@@ -9,13 +9,13 @@ export const isProviderConnected = async (
     oauthId: LiteralUnion<BuiltInOAuthProvider>,
     { ctx, headers: headersInit, request: requestInit }: FunctionAPIContext<ProviderConnectedAPIOptions>
 ): Promise<ProviderConnectedAPIReturn> => {
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
             structuredData: { provider: oauthId, operation: "check_connection" },
         })
 
-        const { rateLimit, rawSession } = await createValidation(ctx, headers)
+        const { rateLimit, rawSession } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauthId)
             .buildRequest(requestInit, `/providers/${oauthId}`)
             .verifyRateLimit("isProviderConnected")
@@ -28,7 +28,7 @@ export const isProviderConnected = async (
 
         const connected = await ctx.session.strategy.isProviderConnected({
             oauthId,
-            headers,
+            headers: getInitialHeaders(requestInit, headersInit),
             rawSession,
         })
 
@@ -44,9 +44,8 @@ export const isProviderConnected = async (
         }
     } catch (error) {
         errorToLogMessage(error, "OAUTH_PROVIDER_CONNECTED_ERROR", ctx.logger)
-        const { errors, statusCode } = handleApiError(error, "OAUTH_PROVIDER_CONNECTED_ERROR", "")
+        const { errors, statusCode } = handleApiError(error, "OAUTH_PROVIDER_CONNECTED_ERROR", "Provider connected error.")
 
-        const headers = new Headers(secureApiHeaders)
         return {
             success: false,
             connected: false,

@@ -65,6 +65,8 @@ describe("changeEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
@@ -152,6 +154,8 @@ describe("changeEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
@@ -216,6 +220,8 @@ describe("changeEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
@@ -281,6 +287,8 @@ describe("changeEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
@@ -344,6 +352,8 @@ describe("changeEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
@@ -413,6 +423,8 @@ describe("changeEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
@@ -484,6 +496,9 @@ describe("changeEmail API", async () => {
             redirectURL: null,
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
+        })
+        expect(output.headers).toHaveValidSecurityHeaders({
+            location: "/success",
         })
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
@@ -580,6 +595,8 @@ describe("changeEmail API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")

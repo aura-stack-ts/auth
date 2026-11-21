@@ -18,6 +18,8 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("returns connected: false when session not found in database", async () => {
@@ -33,6 +35,7 @@ describe("isProviderConnected (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
@@ -50,8 +53,10 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
     })
 
@@ -73,6 +78,7 @@ describe("isProviderConnected (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
@@ -90,8 +96,10 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
     })
 
@@ -112,6 +120,7 @@ describe("isProviderConnected (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
@@ -129,8 +138,10 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
     })
 
@@ -147,6 +158,7 @@ describe("isProviderConnected (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
@@ -160,8 +172,9 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith(sessionEntityWithUser.userId)
     })
 
@@ -189,6 +202,7 @@ describe("isProviderConnected (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
@@ -202,8 +216,10 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith(sessionEntityWithUser.userId)
     })
 
@@ -231,6 +247,7 @@ describe("isProviderConnected (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
@@ -244,8 +261,9 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith(sessionEntityWithUser.userId)
     })
 
@@ -273,6 +291,7 @@ describe("isProviderConnected (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
@@ -286,8 +305,10 @@ describe("isProviderConnected (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith(sessionEntityWithUser.userId)
     })
 
@@ -322,6 +343,8 @@ describe("isProviderConnected (Stateful)", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
             },
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         const response = output.toResponse()
         expect(response.status).toBe(200)
@@ -353,6 +376,8 @@ describe("isProviderConnected (Stateful)", () => {
                 Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
             },
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         const response = output.toResponse()
         expect(response.status).toBe(200)
@@ -367,6 +392,8 @@ describe("isProviderConnected (Stateful)", () => {
     test("toResponse returns correct response on error", async () => {
         const { api } = authInstance({})
         const output = await api.isProviderConnected("unsupported")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         const response = output.toResponse()
         expect(response.status).toBe(400)

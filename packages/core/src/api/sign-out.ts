@@ -1,4 +1,4 @@
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
@@ -13,7 +13,7 @@ export const signOut = async ({
     doubleSubmitToken = undefined,
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<SignOutAPIOptions>): Promise<SignOutAPIReturn> => {
-    const initHeaders = getInitialHeaders(requestInit, headersInit)
+    const initHeaders = new Headers(secureApiHeaders)
     try {
         ctx.logger?.log("SIGN_OUT_INITIATED", {
             structuredData: {
@@ -22,7 +22,7 @@ export const signOut = async ({
             },
         })
 
-        const { request, rateLimit, rawSession } = await createValidation(ctx, initHeaders)
+        const { request, rateLimit, rawSession } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/signOut")
             .verifyRateLimit("signOut")
             .verifySession()

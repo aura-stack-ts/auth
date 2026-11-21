@@ -1,5 +1,4 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { toUnionHeaders } from "@/shared/http/headers.ts"
 import { getExpiresAt } from "@/shared/utils/session-strategy.ts"
 import type { Session, SessionWithUserEntity, User } from "@/@types/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
@@ -12,11 +11,7 @@ export const updateSession = <DefaultUser extends User>(
     const maxAge = sessionConfig?.config?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = sessionConfig.config.expirationStrategy ?? "absolute"
 
-    return async ({ headers, session, sessionToken, rawSession }) => {
-        const refreshHeaders = (newHeaders: Headers) => {
-            return toUnionHeaders(headers, newHeaders)
-        }
-
+    return async ({ session, rawSession, sessionToken }) => {
         const sessionByToken = rawSession as SessionWithUserEntity
         if (new Date() > sessionByToken.expiresAt) {
             throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
@@ -85,6 +80,6 @@ export const updateSession = <DefaultUser extends User>(
             },
         })
 
-        return { session: updatedSession, headers: refreshHeaders(ctx.cookies.manager.setCookie({ sessionToken })) }
+        return { session: updatedSession, headers: ctx.cookies.manager.setCookie({ sessionToken }) }
     }
 }

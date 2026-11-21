@@ -34,6 +34,9 @@ describe("cancelEmailChange API", async () => {
             toResponse: expect.any(Function),
         })
 
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getTokensByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(revokeTokenMock).toHaveBeenCalledWith("token-789")
@@ -67,6 +70,8 @@ describe("cancelEmailChange API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalled()
         expect(getTokensByUserIdMock).not.toHaveBeenCalled()
@@ -99,6 +104,8 @@ describe("cancelEmailChange API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokensByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(revokeTokenMock).toHaveBeenCalledWith("token-456")
@@ -130,6 +137,8 @@ describe("cancelEmailChange API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokensByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(revokeTokenMock).not.toHaveBeenCalled()
@@ -163,6 +172,8 @@ describe("cancelEmailChange API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/settings" })
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokensByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(revokeTokenMock).toHaveBeenCalledWith("token-456")
@@ -200,6 +211,8 @@ describe("cancelEmailChange API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getTokensByUserIdMock).toHaveBeenCalledWith("user-123")
@@ -238,6 +251,8 @@ describe("cancelEmailChange API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/settings" })
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getTokensByUserIdMock).toHaveBeenCalledWith("user-123")

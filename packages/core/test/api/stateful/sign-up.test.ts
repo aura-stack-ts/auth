@@ -52,12 +52,17 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(3)
-        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.csrf_token=")
-        expect(setCookies[2]).toContain("aura-auth.session_token=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+            }),
+        ])
 
         expect(spy).toHaveBeenCalledWith({
             ...sessionPayload,
@@ -132,6 +137,9 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(spy).not.toHaveBeenCalled()
         expect(createUserMock).not.toHaveBeenCalled()
         expect(createSessionMock).not.toHaveBeenCalled()
@@ -185,6 +193,9 @@ describe("signUp API", async () => {
             },
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(spy).toHaveBeenCalledWith({
             name: "John Doe",
             email: "johndoe@example.com",
@@ -228,6 +239,9 @@ describe("signUp API", async () => {
             },
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(spy).not.toHaveBeenCalled()
         expect(createSessionMock).not.toHaveBeenCalled()
         expect(createUserMock).not.toHaveBeenCalled()
@@ -274,6 +288,8 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(spy).toHaveBeenCalledWith({
             ...sessionPayload,
@@ -336,6 +352,17 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+            }),
+        ])
 
         expect(spy).toHaveBeenCalledWith({
             ...sessionPayload,
@@ -411,7 +438,6 @@ describe("signUp API", async () => {
             redirect: true,
             redirectTo: "/dashboard",
         })
-        expect(output.headers.get("Location")).toBe("/dashboard")
         expect(output).toEqual({
             success: true,
             redirect: true,
@@ -419,6 +445,17 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+            }),
+        ])
 
         expect(spy).toHaveBeenCalledWith({
             ...sessionPayload,
@@ -489,7 +526,6 @@ describe("signUp API", async () => {
             redirect: true,
             redirectTo: "https://example.com/dashboard",
         })
-        expect(output.headers.get("Location")).toBe("/dashboard")
         expect(output).toEqual({
             success: true,
             redirect: true,
@@ -497,6 +533,17 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+            }),
+        ])
 
         expect(spy).toHaveBeenCalledWith({
             ...sessionPayload,
@@ -567,7 +614,6 @@ describe("signUp API", async () => {
             redirect: false,
             redirectTo: "/dashboard",
         })
-        expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
             success: true,
             redirect: false,
@@ -575,6 +621,17 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+            }),
+        ])
 
         expect(spy).toHaveBeenCalledWith({
             ...sessionPayload,
@@ -645,7 +702,6 @@ describe("signUp API", async () => {
             redirect: true,
             redirectTo: "https://malicious.com/dashboard",
         })
-        expect(output.headers.get("Location")).toBe("/")
         expect(output).toEqual({
             success: true,
             redirect: true,
@@ -653,6 +709,19 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({
+            location: "/",
+        })
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+            }),
+        ])
 
         expect(spy).toHaveBeenCalledWith({
             ...sessionPayload,
@@ -725,7 +794,6 @@ describe("signUp API", async () => {
             redirect: false,
             redirectTo: "https://malicious.com/dashboard",
         })
-        expect(output.headers.get("Location")).toBeNull()
         expect(output).toEqual({
             success: true,
             redirect: false,
@@ -733,6 +801,17 @@ describe("signUp API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.csrf_token",
+                value: expect.any(String),
+            }),
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+            }),
+        ])
 
         expect(spy).toHaveBeenCalledWith({
             ...sessionPayload,

@@ -39,6 +39,8 @@ describe("resetPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
@@ -86,6 +88,8 @@ describe("resetPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
@@ -133,6 +137,8 @@ describe("resetPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
@@ -185,6 +191,8 @@ describe("resetPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
@@ -237,6 +245,9 @@ describe("resetPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
         expect(updatePasswordHashMock).not.toHaveBeenCalled()
@@ -281,6 +292,10 @@ describe("resetPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders({
+            location: "/success",
+        })
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
@@ -326,6 +341,8 @@ describe("resetPassword API", async () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(getTokenByHashMock).toHaveBeenCalledWith(tokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")

@@ -41,8 +41,6 @@ describe("sessionAction", () => {
             success: true,
             session: { user: sessionPayload, expires: expect.any(String) },
         })
-        const decodedToken = await jose.decodeJWT(getCookie(request.headers, "__Secure-aura-auth.session_token")!)
-        expect(decodedToken).toMatchObject(sessionPayload)
     })
 
     test("valid sessionToken cookie in insecure connection", async () => {
@@ -60,8 +58,6 @@ describe("sessionAction", () => {
             success: true,
             session: { user: sessionPayload, expires: expect.any(String) },
         })
-        const decodedToken = await jose.decodeJWT(getCookie(request.headers, "aura-auth.session_token")!)
-        expect(decodedToken).toMatchObject(sessionPayload)
     })
 
     test("expired sessionToken cookie", async () => {

@@ -1,4 +1,4 @@
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyEmailChangeAPIOptions, VerifyEmailChangeAPIReturn } from "@/@types/api.ts"
@@ -15,7 +15,7 @@ export const verifyEmailChange = async ({
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<VerifyEmailChangeAPIOptions>): Promise<VerifyEmailChangeAPIReturn> => {
     const { logger, session } = ctx
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         logger?.log("VERIFY_EMAIL_CHANGE_INITIATED", {
             structuredData: {
@@ -23,7 +23,7 @@ export const verifyEmailChange = async ({
                 doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
             },
         })
-        const { request, rateLimit, userId, sessionId } = await createValidation(ctx, headers)
+        const { request, rateLimit, userId, sessionId } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/email/change/verify")
             .verifyRateLimit("verifyEmailChange")
             .verifySession()

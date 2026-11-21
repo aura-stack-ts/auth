@@ -1,6 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { shouldRefresh } from "@/shared/utils.ts"
 import { getCookie } from "@/shared/http/cookie.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
@@ -61,7 +62,7 @@ export const getProviderTokens = (ctx: InternalContextForStateless): SessionStra
             })
 
             const encodedTokens = await jose.manager.createToken(refreshedTokens as any)
-            const builder = new HeadersBuilder(headers)
+            const builder = new HeadersBuilder(secureApiHeaders)
                 .setCookie(cookieName, encodedTokens, ctx.cookies.store.accessToken.attributes)
                 .toHeaders()
 
@@ -87,7 +88,7 @@ export const getProviderTokens = (ctx: InternalContextForStateless): SessionStra
 
         return {
             tokens,
-            headers,
+            headers: new Headers(secureApiHeaders),
         }
     }
 }

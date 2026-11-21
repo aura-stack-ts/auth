@@ -31,6 +31,9 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getSessionByTokenMock).not.toHaveBeenCalled()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -64,6 +67,15 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
+
         expect(getSessionByTokenMock).toHaveBeenCalledOnce()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -84,6 +96,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
@@ -101,8 +114,27 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
+
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "",
+                maxAge: 0,
+                path: "/",
+                expires: expect.any(Date),
+                httpOnly: true,
+                sameSite: "lax",
+            }),
+        ])
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
@@ -124,6 +156,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
@@ -141,8 +174,10 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -165,6 +200,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
@@ -178,8 +214,10 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-        const tokenHash = await createHash(sessionToken)
-        expect(getSessionByTokenMock).toHaveBeenCalledWith(tokenHash)
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -231,6 +269,9 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -289,6 +330,8 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
             method: "POST",
@@ -383,6 +426,8 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/refresh_token", {
             method: "POST",
@@ -457,6 +502,9 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(mockFetch).toHaveBeenCalledTimes(1)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -503,6 +551,9 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
     })
 
@@ -544,6 +595,9 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(mockFetch).not.toHaveBeenCalled()
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")
@@ -601,6 +655,9 @@ describe("getAccessToken API (Stateful)", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(mockFetch).toHaveBeenCalledTimes(1)
         expect(getAccountsByUserIdMock).toHaveBeenCalledWith("user-123")
         expect(getOAuthAccountMock).toHaveBeenCalledWith("account-123")

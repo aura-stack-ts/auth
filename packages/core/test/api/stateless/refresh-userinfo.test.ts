@@ -18,6 +18,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("invalid operation when the session token is missing", async () => {
@@ -34,6 +36,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when CSRF token is missing", async () => {
@@ -55,6 +59,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when provider token does not exist", async () => {
@@ -78,6 +84,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("successfully refreshes user info", async () => {
@@ -118,11 +126,14 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
 
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
@@ -162,6 +173,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles getUserInfo invalid response from provider", async () => {
@@ -194,6 +207,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles getUserInfo OAuth error response", async () => {
@@ -230,6 +245,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles getUserInfo missing required user fields", async () => {
@@ -265,6 +282,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("toResponse returns correct response on failure", async () => {
@@ -309,6 +328,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles expired access token with successful refresh", async () => {
@@ -357,6 +378,15 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
+
         expect(mockFetch).toHaveBeenCalledTimes(2)
     })
 
@@ -397,6 +427,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("handles session token verification failure", async () => {
@@ -421,6 +453,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("updates session cookie with new session token", async () => {
@@ -461,11 +495,14 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
-
-        const setCookies = output.headers.getSetCookie()
-        expect(setCookies).toHaveLength(2)
-        expect(setCookies[0]).toBe("initial-provider-cookie=initial; Path=/")
-        expect(setCookies[1]).toContain("aura-auth.session_token=")
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
     })
 
     test("handles malformed provider tokens cookie", async () => {
@@ -490,6 +527,8 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("successfully refreshes with custom profile function", async () => {
@@ -528,6 +567,14 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
     })
 
     test("toResponse returns correct response on success", async () => {
@@ -568,6 +615,14 @@ describe("refreshUserInfo", () => {
                 expires: expect.any(String),
             },
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
     })
 
     test("refreshUserInfo with doubleSubmitToken", async () => {
@@ -607,6 +662,15 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
+
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
@@ -653,6 +717,9 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(mockFetch).not.toHaveBeenCalled()
     })
 
@@ -694,6 +761,15 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: expect.any(String),
+                sameSite: "lax",
+            }),
+        ])
+
         expect(mockFetch).toHaveBeenCalledWith("https://example.com/oauth/userinfo", {
             method: "GET",
             headers: {
@@ -741,6 +817,9 @@ describe("refreshUserInfo", () => {
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
+        expect(output.headers).toHaveValidSecurityHeaders()
+        expect(output.headers).toHaveValidSetCookies([])
+
         expect(mockFetch).not.toHaveBeenCalled()
     })
 })

@@ -1,7 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getInitialHeaders } from "@/shared/http/headers.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
@@ -18,7 +18,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
     const { signUp, cookies, session, logger } = ctx
-    const headers = getInitialHeaders(requestInit, headersInit)
+    const headers = new Headers(secureApiHeaders)
     try {
         ctx.logger?.log("SIGN_UP_INITIATED", {
             structuredData: {
@@ -27,7 +27,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             },
         })
 
-        const { request, rateLimit } = await createValidation(ctx, headers)
+        const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest(requestInit, "/signUp")
             .verifyRateLimit("signUp")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
