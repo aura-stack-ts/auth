@@ -169,7 +169,7 @@ export const getSession = <DefaultUser extends User>(
                     user: parsedUser as DefaultUser,
                     expires: effectiveExpiresAt.toISOString(),
                 },
-                headers: new Headers(secureApiHeaders),
+                headers: ctx.cookies.manager.setCookie({ sessionToken }),
             }
         } catch (error) {
             logger?.log("STATEFUL_GET_SESSION_ERROR", {

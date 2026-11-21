@@ -183,7 +183,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token-hash",
+                sameSite: "lax",
+            }),
+        ])
 
         expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -264,7 +270,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token-hash",
+                sameSite: "lax",
+            }),
+        ])
 
         expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -373,7 +385,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token-hash",
+                sameSite: "lax",
+            }),
+        ])
 
         expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -461,7 +479,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token-hash",
+                sameSite: "lax",
+            }),
+        ])
 
         expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -542,7 +566,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token-hash",
+                sameSite: "lax",
+            }),
+        ])
 
         expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -625,7 +655,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token-hash",
+                sameSite: "lax",
+            }),
+        ])
 
         expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -710,7 +746,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token-hash",
+                sameSite: "lax",
+            }),
+        ])
 
         expect(sessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -782,7 +824,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token-hash",
+                sameSite: "lax",
+            }),
+        ])
 
         const sessionExpiration = new Date(output.session!.expires!).getTime()
         const persistedExpiration = updateSessionMock.mock.calls[0][1].expiresAt as Date
@@ -841,7 +889,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-token-hash",
+                sameSite: "lax",
+            }),
+        ])
 
         expect(updateUserMock).not.toHaveBeenCalledWith(
             "user-123",

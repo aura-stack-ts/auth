@@ -76,7 +76,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             },
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: "valid-session-token",
+                sameSite: "lax",
+            }),
+        ])
 
         expect(updateUserMock).toHaveBeenCalledWith("user-123", {
             email: "john.updated@example.com",
@@ -464,7 +470,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -820,7 +832,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -1034,7 +1052,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             },
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
         const response = output.toResponse()
         expect(response.status).toBe(200)
@@ -1227,7 +1251,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -1385,7 +1415,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "aura-auth.session_token",
+                value: sessionToken,
+                sameSite: "lax",
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenNthCalledWith(1, sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
