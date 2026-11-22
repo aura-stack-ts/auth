@@ -10,7 +10,7 @@ describe("signInCredentials action", async () => {
     const headers = {
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken,
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
     }
 
     test("success signIn flow", async () => {
@@ -34,7 +34,7 @@ describe("signInCredentials action", async () => {
             getDeviceByFingerprint: getDeviceByFingerprintMock,
         })
         const response = await handlers.POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -95,7 +95,7 @@ describe("signInCredentials action", async () => {
             }
         )
         const response = await handlers.POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -150,7 +150,7 @@ describe("signInCredentials action", async () => {
         )
 
         const response = await handlers.POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -197,7 +197,7 @@ describe("signInCredentials action", async () => {
         })
 
         const response = await handlers.POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -255,7 +255,7 @@ describe("signInCredentials action", async () => {
         })
 
         const response = await handlers.POST(
-            new Request("http://localhost:3000/auth/signIn/credentials?redirectTo=/dashboard", {
+            new Request("https://example.com/auth/signIn/credentials?redirectTo=/dashboard", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -313,7 +313,7 @@ describe("signInCredentials action", async () => {
         })
 
         const response = await handlers.POST(
-            new Request("http://localhost:3000/auth/signIn/credentials?redirect=false", {
+            new Request("https://example.com/auth/signIn/credentials?redirect=false", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -371,7 +371,7 @@ describe("signInCredentials action", async () => {
         })
 
         const response = await handlers.POST(
-            new Request("http://localhost:3000/auth/signIn/credentials?redirect=false&redirectTo=/dashboard", {
+            new Request("https://example.com/auth/signIn/credentials?redirect=false&redirectTo=/dashboard", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({

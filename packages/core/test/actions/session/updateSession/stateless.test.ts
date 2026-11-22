@@ -10,7 +10,7 @@ import { identitySchema as UserIdentityValibot } from "@/identity/valibot.ts"
 describe("updateSession action", () => {
     test("invalid session", async () => {
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -31,11 +31,11 @@ describe("updateSession action", () => {
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
                 body: JSON.stringify({}),
             })
@@ -54,12 +54,12 @@ describe("updateSession action", () => {
         const csrfToken = await createCSRF(jose)
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": "invalid-csrf-token",
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({}),
             })
@@ -89,12 +89,12 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -131,12 +131,12 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -172,12 +172,12 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirectTo=/dashboard", {
+            new Request("https://example.com/auth/session?redirectTo=/dashboard", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -214,12 +214,12 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false&redirectTo=/dashboard", {
+            new Request("https://example.com/auth/session?redirect=false&redirectTo=/dashboard", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -261,12 +261,12 @@ describe("updateSession action", () => {
         }
 
         const response = await handlers.PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -306,12 +306,12 @@ describe("updateSession action", () => {
         }
 
         const response = await handlers.PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -347,11 +347,11 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -383,12 +383,12 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -420,12 +420,12 @@ describe("updateSession action", () => {
 
         const expiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
                     user: {
@@ -452,7 +452,7 @@ describe("updateSession action", () => {
             redirectURL: null,
         })
 
-        const decoded = await jose.decodeJWT(getSetCookie(response, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
         expect(decoded.sub).toBe(sessionPayload.sub)
         expect(decoded.sub).not.toBe("0987-alter-claims")
         // It contains the original claims but not the escalated ones
@@ -471,12 +471,12 @@ describe("updateSession action", () => {
 
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
                     expires: new Date(attackerExpiration * 1000).toISOString(),
@@ -501,7 +501,7 @@ describe("updateSession action", () => {
         expect(sessionExpiration).not.toBe(attackerExpiration)
         expect(sessionExpiration).toBeLessThanOrEqual(fifteenDaysFromNow)
 
-        const decoded = await jose.decodeJWT(getSetCookie(response, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
         expect(decoded.exp).not.toEqual(attackerExpiration)
         expect(decoded.exp).toBeLessThanOrEqual(fifteenDaysFromNow)
     })

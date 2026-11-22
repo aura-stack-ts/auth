@@ -36,7 +36,7 @@ describe("changePassword API", async () => {
                 currentPassword: "current-password",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -83,7 +83,7 @@ describe("changePassword API", async () => {
                 newPassword: "new-password",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -134,7 +134,7 @@ describe("changePassword API", async () => {
                 newPassword: "new-password",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -191,7 +191,7 @@ describe("changePassword API", async () => {
                 newPassword: "new-password",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -242,7 +242,7 @@ describe("changePassword API", async () => {
                 newPassword: "new-password",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -300,7 +300,7 @@ describe("changePassword API", async () => {
                 currentPassword: "current-password",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: true,
             redirectTo: "https://example.com/success",
@@ -355,7 +355,7 @@ describe("changePassword API", async () => {
                 currentPassword: "current-password",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${token}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${token}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             redirectTo: "https://example.com/success",

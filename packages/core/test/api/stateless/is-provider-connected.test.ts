@@ -46,7 +46,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -69,7 +69,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -91,7 +91,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=invalid-token`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=invalid-token`,
             },
         })
 
@@ -119,7 +119,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedExpiredTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedExpiredTokens}`,
             },
         })
 
@@ -143,7 +143,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -168,7 +168,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output.headers).toHaveValidSecurityHeaders()
@@ -197,7 +197,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${expiredSessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${expiredSessionToken}`,
             },
         })
 
@@ -223,7 +223,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=`,
             },
         })
 
@@ -247,7 +247,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-profile", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -269,7 +269,7 @@ describe("isProviderConnected", () => {
         const output = await api.isProviderConnected("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; malformed-cookie`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; malformed-cookie`,
             },
         })
 

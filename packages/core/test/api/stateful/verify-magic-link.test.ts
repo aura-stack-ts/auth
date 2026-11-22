@@ -46,12 +46,12 @@ describe("verifyMagicLink API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
                 sameSite: "strict",
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -126,12 +126,12 @@ describe("verifyMagicLink API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
                 sameSite: "strict",
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -311,12 +311,12 @@ describe("verifyMagicLink API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
                 sameSite: "strict",
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -394,12 +394,12 @@ describe("verifyMagicLink API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
                 sameSite: "strict",
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),

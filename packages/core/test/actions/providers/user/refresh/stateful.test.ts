@@ -83,11 +83,14 @@ describe("refreshUserInfo action", () => {
             touchSession: touchSessionMock,
         })
 
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
+
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-auth.session_token=valid-token-hash`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -99,7 +102,7 @@ describe("refreshUserInfo action", () => {
         expect(spyParse).not.toHaveBeenCalled()
         expect(spyParseAsPartial).not.toHaveBeenCalled()
 
-        expect(getSessionByTokenMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -137,12 +140,14 @@ describe("refreshUserInfo action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const response = await POST(
             new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-token-hash`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
                     "X-CSRF-Token": "invalid-token",
                 },
             })
@@ -155,7 +160,7 @@ describe("refreshUserInfo action", () => {
         expect(spyParse).not.toHaveBeenCalled()
         expect(spyParseAsPartial).not.toHaveBeenCalled()
 
-        expect(getSessionByTokenMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()
@@ -761,6 +766,8 @@ describe("refreshUserInfo action", () => {
         })
 
         const csrfToken = await createCSRF(jose)
+        const sessionToken = "valid-session-token"
+        const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -779,7 +786,7 @@ describe("refreshUserInfo action", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-token-hash`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -792,7 +799,7 @@ describe("refreshUserInfo action", () => {
         expect(spyParse).not.toHaveBeenCalled()
         expect(spyParseAsPartial).not.toHaveBeenCalled()
 
-        expect(getSessionByTokenMock).not.toHaveBeenCalled()
+        expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(revokeSessionMock).not.toHaveBeenCalled()
         expect(updateOAuthTokensMock).not.toHaveBeenCalled()

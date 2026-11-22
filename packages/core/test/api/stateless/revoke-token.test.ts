@@ -22,6 +22,7 @@ describe("revokeToken", () => {
 
     test("throws error when session token is missing", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
 
         const output = await api.revokeToken("oauth-provider", { headers: new Headers() })
         expect(output).toEqual({
@@ -39,12 +40,13 @@ describe("revokeToken", () => {
 
     test("throws error when CSRF token is missing", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
 
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -62,12 +64,14 @@ describe("revokeToken", () => {
 
     test("throws error when CSRF token is invalid", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
                 "X-CSRF-Token": "invalid-token",
             },
         })
@@ -92,7 +96,7 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -121,7 +125,7 @@ describe("revokeToken", () => {
         const output = await apiWithoutRevoke.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -141,6 +145,8 @@ describe("revokeToken", () => {
 
     test("successfully revokes token", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -156,7 +162,7 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -169,7 +175,7 @@ describe("revokeToken", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: "",
                 expires: new Date(0),
                 sameSite: "strict",
@@ -189,6 +195,8 @@ describe("revokeToken", () => {
 
     test("successfully revokes token with 204 status", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -204,7 +212,7 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output).toEqual({
@@ -215,7 +223,7 @@ describe("revokeToken", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: "",
                 expires: new Date(0),
                 sameSite: "strict",
@@ -225,6 +233,8 @@ describe("revokeToken", () => {
 
     test("handles network error during revocation", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -236,7 +246,7 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -255,6 +265,8 @@ describe("revokeToken", () => {
 
     test("handles provider returning error response", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -269,7 +281,7 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -288,6 +300,8 @@ describe("revokeToken", () => {
 
     test("handles provider returning unexpected status code", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -302,7 +316,7 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -321,6 +335,8 @@ describe("revokeToken", () => {
 
     test("toResponse returns correct response on success", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -336,13 +352,13 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: "",
                 expires: new Date(0),
                 sameSite: "strict",
@@ -372,13 +388,15 @@ describe("revokeToken", () => {
 
     test("handles malformed provider token cookie", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=invalid-token`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=invalid-token`,
             },
         })
 
@@ -397,6 +415,8 @@ describe("revokeToken", () => {
 
     test("handles expired session token", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
 
         const expiredSessionPayload = {
@@ -408,7 +428,7 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${expiredSessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${expiredSessionToken}`,
             },
         })
 
@@ -448,7 +468,7 @@ describe("revokeToken", () => {
         const output = await customApi.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output).toEqual({
@@ -459,7 +479,7 @@ describe("revokeToken", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: "",
                 expires: new Date(0),
                 sameSite: "strict",
@@ -501,7 +521,7 @@ describe("revokeToken", () => {
         const output = await customApi.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -513,7 +533,7 @@ describe("revokeToken", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: "",
                 expires: new Date(0),
                 sameSite: "strict",
@@ -533,6 +553,8 @@ describe("revokeToken", () => {
 
     test("revokeToken with doubleSubmitToken", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -547,7 +569,7 @@ describe("revokeToken", () => {
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
             doubleSubmitToken: csrfToken,
         })
@@ -560,7 +582,7 @@ describe("revokeToken", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: "",
                 expires: new Date(0),
                 sameSite: "strict",
@@ -580,6 +602,8 @@ describe("revokeToken", () => {
 
     test("revokeToken with doubleSubmitToken and invalid value", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -594,7 +618,7 @@ describe("revokeToken", () => {
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
             doubleSubmitToken: "invalid-token",
         })
@@ -616,6 +640,8 @@ describe("revokeToken", () => {
 
     test("revokeToken enables double-submit cookie manually", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -631,7 +657,7 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
             skipCSRFCheck: false,
         })
@@ -645,7 +671,7 @@ describe("revokeToken", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: "",
                 expires: new Date(0),
                 sameSite: "strict",
@@ -665,6 +691,8 @@ describe("revokeToken", () => {
 
     test("revokeToken enables double-submit cookie manually and invalid token", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -680,7 +708,7 @@ describe("revokeToken", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": "invalid-token",
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
             skipCSRFCheck: false,
         })

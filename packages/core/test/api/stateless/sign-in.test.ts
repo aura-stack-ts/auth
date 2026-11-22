@@ -108,7 +108,7 @@ describe("signIn API", () => {
             redirect: true,
             signInURL: expect.any(String),
         })
-        expect(getSetCookie(response, "aura-auth.state")).toBeDefined()
+        expect(getSetCookie(response, "__Secure-aura-auth.state")).toBeDefined()
     })
 
     test("signIn with valid redirectTo", async () => {
@@ -117,7 +117,7 @@ describe("signIn API", () => {
         const signIn = await api.signIn("oauth-provider", { redirectTo: "/dashboard" })
         const response = signIn.toResponse()
         expect(response.status).toBe(302)
-        expect(getSetCookie(response, "aura-auth.redirect_to")).toBe("/dashboard")
+        expect(getSetCookie(response, "__Secure-aura-auth.redirect_to")).toBe("/dashboard")
     })
 
     test("signIn with invalid redirectTo", async () => {
@@ -126,7 +126,7 @@ describe("signIn API", () => {
         const signIn = await api.signIn("oauth-provider", { redirectTo: "https://malicious.com" })
         const response = signIn.toResponse()
         expect(response.status).toBe(302)
-        expect(getSetCookie(response, "aura-auth.redirect_to")).toBe("/")
+        expect(getSetCookie(response, "__Secure-aura-auth.redirect_to")).toBe("/")
     })
 
     test("signIn OIDC custom provider", async () => {
@@ -153,6 +153,6 @@ describe("signIn API", () => {
         const response = output.toResponse()
         expect(response).toBeInstanceOf(Response)
         expect(response.status).toBe(302)
-        expect(getSetCookie(response, "aura-auth.nonce")).toBeDefined()
+        expect(getSetCookie(response, "__Secure-aura-auth.nonce")).toBeDefined()
     })
 })

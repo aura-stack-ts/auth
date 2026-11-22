@@ -93,7 +93,7 @@ describe("cancelEmailChange API", async () => {
 
         const output = await api.cancelEmailChange({
             headers: {
-                Cookie: `aura-auth.session_token=valid-token; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=valid-token; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -126,7 +126,7 @@ describe("cancelEmailChange API", async () => {
 
         const output = await api.cancelEmailChange({
             headers: {
-                Cookie: `aura-auth.session_token=valid-token; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=valid-token; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -159,7 +159,7 @@ describe("cancelEmailChange API", async () => {
 
         const output = await api.cancelEmailChange({
             headers: {
-                Cookie: `aura-auth.session_token=valid-token; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=valid-token; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: true,
             redirectTo: "https://example.com/settings",
@@ -198,7 +198,7 @@ describe("cancelEmailChange API", async () => {
         const output = await api.cancelEmailChange({
             payload: { token },
             headers: {
-                Cookie: `aura-auth.session_token=valid-token; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=valid-token; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             redirectTo: "https://example.com/settings",
@@ -238,7 +238,7 @@ describe("cancelEmailChange API", async () => {
         const output = await api.cancelEmailChange({
             payload: { token },
             headers: {
-                Cookie: `aura-auth.session_token=valid-token; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=valid-token; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: true,
             redirectTo: "https://example.com/settings",

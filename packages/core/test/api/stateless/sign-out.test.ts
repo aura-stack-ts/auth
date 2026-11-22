@@ -39,7 +39,7 @@ describe("signOut API", async () => {
 
         const output = await api.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -53,13 +53,13 @@ describe("signOut API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: "",
                 sameSite: "strict",
                 expires: new Date(0),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 sameSite: "lax",
                 expires: new Date(0),
@@ -68,7 +68,7 @@ describe("signOut API", async () => {
     })
 
     test("signOut with baseURL from createAuth config", async () => {
-        const api = createAuth({ baseURL: "http://localhost:3000" }).api
+        const { api } = createAuth({ baseURL: "http://localhost:3000" })
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -116,7 +116,7 @@ describe("signOut API", async () => {
 
         const output = await api.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirectTo: "/dashboard",
         })
@@ -130,13 +130,13 @@ describe("signOut API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: "",
                 sameSite: "strict",
                 expires: new Date(0),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 sameSite: "lax",
                 expires: new Date(0),
@@ -155,7 +155,7 @@ describe("signOut API", async () => {
 
         const output = await api.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             redirectTo: "/dashboard",
@@ -170,13 +170,13 @@ describe("signOut API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: "",
                 sameSite: "strict",
                 expires: new Date(0),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 sameSite: "lax",
                 expires: new Date(0),
@@ -194,7 +194,7 @@ describe("signOut API", async () => {
 
         const out = await configuredApi.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             redirectTo: "https://untrusted.example/redirect",
@@ -209,13 +209,13 @@ describe("signOut API", async () => {
         expect(out.headers).toHaveValidSecurityHeaders()
         expect(out.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: "",
                 sameSite: "strict",
                 expires: new Date(0),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 sameSite: "lax",
                 expires: new Date(0),
@@ -230,7 +230,7 @@ describe("signOut API", async () => {
 
         const output = await api.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             doubleSubmitToken: csrfToken,
@@ -246,13 +246,13 @@ describe("signOut API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: "",
                 sameSite: "strict",
                 expires: new Date(0),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 sameSite: "lax",
                 expires: new Date(0),
@@ -267,7 +267,7 @@ describe("signOut API", async () => {
 
         const output = await api.signOut({
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             doubleSubmitToken: "invalid-token",
@@ -296,7 +296,7 @@ describe("signOut API", async () => {
         const output = await api.signOut({
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             skipCSRFCheck: false,
@@ -312,13 +312,13 @@ describe("signOut API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: "",
                 sameSite: "strict",
                 expires: new Date(0),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 sameSite: "lax",
                 expires: new Date(0),
@@ -334,7 +334,7 @@ describe("signOut API", async () => {
         const output = await api.signOut({
             headers: {
                 "X-CSRF-Token": "invalid-token",
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             skipCSRFCheck: false,

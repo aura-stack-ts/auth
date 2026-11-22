@@ -10,7 +10,7 @@ describe("signUp API", async () => {
     const csrfToken = await createCSRF(jose)
 
     const headers = {
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
     }
 
     test("success signUp flow", async () => {
@@ -55,11 +55,11 @@ describe("signUp API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
             }),
         ])
@@ -355,11 +355,11 @@ describe("signUp API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
             }),
         ])
@@ -448,11 +448,11 @@ describe("signUp API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
             }),
         ])
@@ -536,11 +536,11 @@ describe("signUp API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
             }),
         ])
@@ -624,11 +624,11 @@ describe("signUp API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
             }),
         ])
@@ -714,11 +714,11 @@ describe("signUp API", async () => {
         })
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
             }),
         ])
@@ -804,11 +804,11 @@ describe("signUp API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.csrf_token",
+                name: "__Host-aura-auth.csrf_token",
                 value: expect.any(String),
             }),
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
             }),
         ])

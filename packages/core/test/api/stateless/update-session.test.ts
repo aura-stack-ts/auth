@@ -9,7 +9,7 @@ import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const updated = await api.updateSession({
             headers: new Headers(),
@@ -30,7 +30,7 @@ describe("updateSession API", () => {
         expect(updated.headers).toHaveValidSecurityHeaders()
         expect(updated.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -38,7 +38,7 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with skipCSRFCheck", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -56,7 +56,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: newUser,
@@ -78,11 +78,11 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates user session with disabled skipCSRFCheck", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -100,7 +100,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 "X-CSRF-Token": csrfToken,
             }),
             session: {
@@ -123,11 +123,11 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates user session with generic user type", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const { jose, api } = createAuth({
             identity: {
@@ -150,7 +150,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             }),
             session: {
@@ -177,11 +177,11 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates user session with invalid user data", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const { jose, api } = createAuth({})
 
@@ -195,7 +195,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: { role: "superadmin", money: "100000" } as any,
@@ -219,11 +219,11 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates expiry on valid session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -234,7 +234,7 @@ describe("updateSession API", () => {
         const expiresAt = new Date(Date.now() + 60 * 60 * 2).toISOString()
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 expires: expiresAt,
@@ -256,11 +256,11 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates invalid expiry on valid session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -271,7 +271,7 @@ describe("updateSession API", () => {
         const expiresAt = new Date(Date.now() - 100_000).toISOString()
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 expires: expiresAt,
@@ -294,7 +294,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with redirect: true and redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -305,7 +305,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: { name: "Alice" } },
             redirectTo: "/dashboard",
@@ -330,7 +330,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with redirect: false and redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -341,7 +341,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: { name: "Alice" } },
             redirect: false,
@@ -366,7 +366,7 @@ describe("updateSession API", () => {
     })
 
     test("privilege escalation attempt is prevented when updating session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const originalExpiration = new Date(Date.now() + 1000 * 60 * 60).getTime() / 1000
         const sessionToken = await jose.encodeJWT({
@@ -379,7 +379,7 @@ describe("updateSession API", () => {
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: {
@@ -402,7 +402,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "__Secure-aura-auth.session_token")!)
         expect(decoded.sub).toBe(sessionPayload.sub)
         expect(decoded.sub).not.toBe("0987-alter-claims")
         // It contains the original claims but not the escalated ones
@@ -411,7 +411,7 @@ describe("updateSession API", () => {
     })
 
     test("arbitrary session lifetime extension is prevented when updating session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const originalExpiration = new Date(Date.now() + 1000 * 60 * 60).getTime() / 1000
         const sessionToken = await jose.encodeJWT({
@@ -423,7 +423,7 @@ describe("updateSession API", () => {
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 expires: new Date(attackerExpiration * 1000).toISOString(),
@@ -448,20 +448,20 @@ describe("updateSession API", () => {
         expect(sessionExpiration).not.toBe(attackerExpiration)
         expect(sessionExpiration).toBeLessThanOrEqual(fifteenDaysFromNow)
 
-        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "__Secure-aura-auth.session_token")!)
         expect(decoded.exp).not.toEqual(attackerExpiration)
         expect(decoded.exp).toBeLessThanOrEqual(fifteenDaysFromNow)
     })
 
     test("improperly controlled modification of dynamically-determined object attributes", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT(sessionPayload)
         const csrfToken = await createCSRF(jose)
 
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: {
@@ -485,7 +485,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "__Secure-aura-auth.session_token")!)
         expect(decoded).toEqual({
             ...sessionPayload,
             exp: expect.any(Number),
@@ -496,14 +496,14 @@ describe("updateSession API", () => {
     })
 
     test("invalid user data type", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT(sessionPayload)
         const csrfToken = await createCSRF(jose)
 
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: {
@@ -528,7 +528,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with doubleSubmitToken", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -539,7 +539,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: { name: "Alice" } },
             redirectTo: "/dashboard",
@@ -564,7 +564,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with doubleSubmitToken and invalid value", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -575,7 +575,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: { name: "Alice" } },
             redirectTo: "/dashboard",

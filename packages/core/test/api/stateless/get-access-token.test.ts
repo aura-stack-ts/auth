@@ -40,7 +40,7 @@ describe("getAccessToken API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
                 sameSite: "lax",
@@ -56,7 +56,7 @@ describe("getAccessToken API", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -74,7 +74,7 @@ describe("getAccessToken API", () => {
     })
 
     test("successfully gets provider tokens", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -83,7 +83,7 @@ describe("getAccessToken API", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output).toEqual({
@@ -112,7 +112,7 @@ describe("getAccessToken API", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output).toEqual({
@@ -152,7 +152,7 @@ describe("getAccessToken API", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output).toEqual({
@@ -164,7 +164,7 @@ describe("getAccessToken API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: expect.any(String),
                 sameSite: "strict",
             }),
@@ -218,7 +218,7 @@ describe("getAccessToken API", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
         expect(output).toEqual({
@@ -230,7 +230,7 @@ describe("getAccessToken API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: expect.any(String),
                 sameSite: "strict",
             }),
@@ -271,7 +271,7 @@ describe("getAccessToken API", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -305,7 +305,7 @@ describe("getAccessToken API", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -340,7 +340,7 @@ describe("getAccessToken API", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -381,7 +381,7 @@ describe("getAccessToken API", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -394,7 +394,7 @@ describe("getAccessToken API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.access_token.oauth-provider",
+                name: "__Host-aura-auth.access_token.oauth-provider",
                 value: expect.any(String),
                 sameSite: "strict",
             }),

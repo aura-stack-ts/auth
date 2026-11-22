@@ -54,7 +54,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -139,7 +139,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -205,7 +205,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -272,7 +272,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -337,7 +337,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -408,7 +408,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -484,7 +484,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: true,
             redirectTo: "https://example.com/success",
@@ -582,7 +582,7 @@ describe("changeEmail API", async () => {
                 newEmail: "new@example.com",
             },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             redirectTo: "https://example.com/success",

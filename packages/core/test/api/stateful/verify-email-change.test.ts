@@ -32,7 +32,7 @@ describe("verifyEmailChange API", async () => {
         const output = await api.verifyEmailChange({
             payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -81,7 +81,7 @@ describe("verifyEmailChange API", async () => {
         const output = await api.verifyEmailChange({
             payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -137,7 +137,7 @@ describe("verifyEmailChange API", async () => {
         const output = await api.verifyEmailChange({
             payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -193,7 +193,7 @@ describe("verifyEmailChange API", async () => {
         const output = await api.verifyEmailChange({
             payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -248,7 +248,7 @@ describe("verifyEmailChange API", async () => {
         const output = await api.verifyEmailChange({
             payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -302,7 +302,7 @@ describe("verifyEmailChange API", async () => {
         const output = await api.verifyEmailChange({
             payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -357,7 +357,7 @@ describe("verifyEmailChange API", async () => {
         const output = await api.verifyEmailChange({
             payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -410,7 +410,7 @@ describe("verifyEmailChange API", async () => {
         const output = await api.verifyEmailChange({
             payload: { token: confirmToken },
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 

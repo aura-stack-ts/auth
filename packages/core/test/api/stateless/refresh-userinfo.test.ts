@@ -24,6 +24,7 @@ describe("refreshUserInfo", () => {
 
     test("invalid operation when the session token is missing", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
 
         const output = await api.refreshUserInfo("oauth-provider", { headers: new Headers() })
         expect(output).toEqual({
@@ -41,12 +42,14 @@ describe("refreshUserInfo", () => {
     })
 
     test("throws error when CSRF token is missing", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -65,13 +68,15 @@ describe("refreshUserInfo", () => {
 
     test("throws error when provider token does not exist", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -90,6 +95,8 @@ describe("refreshUserInfo", () => {
 
     test("successfully refreshes user info", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -109,7 +116,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -129,7 +136,7 @@ describe("refreshUserInfo", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -148,6 +155,8 @@ describe("refreshUserInfo", () => {
 
     test("handles getUserInfo network error gracefully", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -159,7 +168,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -179,6 +188,8 @@ describe("refreshUserInfo", () => {
 
     test("handles getUserInfo invalid response from provider", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -193,7 +204,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -213,6 +224,8 @@ describe("refreshUserInfo", () => {
 
     test("handles getUserInfo OAuth error response", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -231,7 +244,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -251,6 +264,8 @@ describe("refreshUserInfo", () => {
 
     test("handles getUserInfo missing required user fields", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -268,7 +283,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -314,7 +329,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -334,6 +349,8 @@ describe("refreshUserInfo", () => {
 
     test("handles expired access token with successful refresh", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -362,7 +379,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -381,7 +398,7 @@ describe("refreshUserInfo", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -392,6 +409,8 @@ describe("refreshUserInfo", () => {
 
     test("handles invalid user info response with missing content type", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -412,7 +431,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -433,13 +452,15 @@ describe("refreshUserInfo", () => {
 
     test("handles session token verification failure", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const invalidSessionToken = "invalid.session.token"
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${invalidSessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${invalidSessionToken}`,
             },
         })
 
@@ -459,6 +480,8 @@ describe("refreshUserInfo", () => {
 
     test("updates session cookie with new session token", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -478,7 +501,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -498,7 +521,7 @@ describe("refreshUserInfo", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -507,13 +530,15 @@ describe("refreshUserInfo", () => {
 
     test("handles malformed provider tokens cookie", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=malformed-token`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=malformed-token`,
             },
         })
 
@@ -533,6 +558,8 @@ describe("refreshUserInfo", () => {
 
     test("successfully refreshes with custom profile function", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -554,7 +581,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-profile", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-profile=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-profile=${encodedTokens}`,
             },
         })
 
@@ -570,7 +597,7 @@ describe("refreshUserInfo", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -579,6 +606,8 @@ describe("refreshUserInfo", () => {
 
     test("toResponse returns correct response on success", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -598,7 +627,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
         })
 
@@ -618,7 +647,7 @@ describe("refreshUserInfo", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -627,6 +656,8 @@ describe("refreshUserInfo", () => {
 
     test("refreshUserInfo with doubleSubmitToken", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -645,7 +676,7 @@ describe("refreshUserInfo", () => {
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
             doubleSubmitToken: csrfToken,
         })
@@ -665,7 +696,7 @@ describe("refreshUserInfo", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -684,6 +715,8 @@ describe("refreshUserInfo", () => {
 
     test("refreshUserInfo with doubleSubmitToken and invalid value", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -702,7 +735,7 @@ describe("refreshUserInfo", () => {
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
             doubleSubmitToken: "invalid-token",
         })
@@ -725,6 +758,8 @@ describe("refreshUserInfo", () => {
 
     test("refreshUserInfo enables double-submit cookie manually", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -744,7 +779,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
             skipCSRFCheck: false,
         })
@@ -764,7 +799,7 @@ describe("refreshUserInfo", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 sameSite: "lax",
             }),
@@ -783,6 +818,8 @@ describe("refreshUserInfo", () => {
 
     test("refreshUserInfo enables double-submit cookie manually and invalid token", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+        const { api } = await import("@test/setup/auth.ts")
+
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -802,7 +839,7 @@ describe("refreshUserInfo", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": "invalid-token",
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}; aura-auth.access_token.oauth-provider=${encodedTokens}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.access_token.oauth-provider=${encodedTokens}`,
             },
             skipCSRFCheck: false,
         })

@@ -26,7 +26,7 @@ import {
 } from "@/actions/index.ts"
 import { createAuthAPI } from "@/api/index.ts"
 import { createContext } from "@/config/context.ts"
-import { onErrorHook, onRequestHook } from "@/config/hooks.ts"
+import { onErrorHook } from "@/config/hooks.ts"
 import type { ZodObject } from "zod"
 import type { EditableShape } from "@/@types/identity.ts"
 import type { ZodIdentitySchema } from "@/@types/index.ts"
@@ -45,7 +45,6 @@ const createInternalConfig = <
         basePath: context.basePath,
         context: context as unknown as RouterConfig["context"],
         hooks: {
-            onRequest: onRequestHook,
             onError: onErrorHook,
         },
     }

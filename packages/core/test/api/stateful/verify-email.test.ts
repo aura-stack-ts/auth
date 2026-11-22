@@ -7,7 +7,7 @@ describe("verifyEmail API", async () => {
     const csrfToken = await createCSRF(jose)
 
     const headers = {
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
     }
 
     test("success verifyEmail flow", async () => {

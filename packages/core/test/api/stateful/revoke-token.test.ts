@@ -68,7 +68,7 @@ describe("revokeToken (Stateful)", () => {
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.session_token=valid-token-hash`,
+                Cookie: `__Secure-aura-auth.session_token=valid-token-hash`,
             },
         })
         expect(output).toEqual({
@@ -107,7 +107,7 @@ describe("revokeToken (Stateful)", () => {
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-token-hash`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 "X-CSRF-Token": "invalid-token",
             },
         })
@@ -149,7 +149,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -192,7 +192,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -245,7 +245,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -316,7 +316,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.disconnectProvider("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -371,7 +371,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -432,7 +432,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -493,7 +493,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -558,7 +558,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output.headers).toHaveValidSecurityHeaders()
@@ -627,7 +627,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -676,7 +676,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -750,7 +750,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -830,7 +830,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -902,7 +902,7 @@ describe("revokeToken (Stateful)", () => {
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
             doubleSubmitToken: csrfToken,
         })
@@ -951,7 +951,7 @@ describe("revokeToken (Stateful)", () => {
 
         const output = await api.revokeToken("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
             doubleSubmitToken: "invalid-token",
         })
@@ -1021,7 +1021,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
             skipCSRFCheck: false,
         })
@@ -1071,7 +1071,7 @@ describe("revokeToken (Stateful)", () => {
         const output = await api.revokeToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": "invalid-token",
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
             skipCSRFCheck: false,
         })

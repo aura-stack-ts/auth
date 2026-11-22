@@ -16,7 +16,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -27,7 +27,7 @@ describe("getSession", () => {
         const { api } = authInstance({})
 
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=invalidtoken` },
+            headers: { Cookie: `__Secure-aura-auth.session_token=invalidtoken` },
         })
         expect(output).toMatchObject({
             session: null,
@@ -37,7 +37,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -61,7 +61,7 @@ describe("getSession", () => {
 
         const output = await api.getSession({
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -83,7 +83,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: sessionToken,
                 sameSite: "lax",
             }),
@@ -112,7 +112,7 @@ describe("getSession", () => {
             revokeSession: revokeSessionMock,
         })
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=valid-token-hash` },
+            headers: { Cookie: `__Secure-aura-auth.session_token=valid-token-hash` },
         })
         expect(output).toEqual({
             session: null,
@@ -127,7 +127,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -159,7 +159,7 @@ describe("getSession", () => {
             getSessionByToken: mock,
         })
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=valid-token-hash` },
+            headers: { Cookie: `__Secure-aura-auth.session_token=valid-token-hash` },
         })
 
         expect(output).toEqual({
@@ -175,7 +175,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -217,7 +217,7 @@ describe("getSession", () => {
         const sessionTokenHash = await createHash(sessionToken)
 
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=${sessionToken}` },
+            headers: { Cookie: `__Secure-aura-auth.session_token=${sessionToken}` },
         })
 
         expect(output).toEqual({
@@ -237,7 +237,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token",
                 sameSite: "lax",
             }),

@@ -10,12 +10,12 @@ describe("signInCredentials action", async () => {
     const headers = {
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken,
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
     }
 
     test("success signIn flow", async () => {
         const response = await POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 headers: {
                     ...headers,
@@ -33,7 +33,7 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             email: "johndoe@example.com",
@@ -71,7 +71,7 @@ describe("signInCredentials action", async () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
                     username: "johndoe",
@@ -96,7 +96,7 @@ describe("signInCredentials action", async () => {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": "invalid-token",
-                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
                     username: "johndoe",
@@ -121,7 +121,7 @@ describe("signInCredentials action", async () => {
             },
         })
         const response = await POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -151,7 +151,7 @@ describe("signInCredentials action", async () => {
             },
         })
         const response = await POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -187,7 +187,7 @@ describe("signInCredentials action", async () => {
             },
         })
         const response = await POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -197,7 +197,7 @@ describe("signInCredentials action", async () => {
             })
         )
         expect(response.status).toBe(200)
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890-abcdef",
             name: "johndoe",
@@ -211,7 +211,7 @@ describe("signInCredentials action", async () => {
 
     test("credentials with redirect: true (by default)", async () => {
         const response = await POST(
-            new Request("http://localhost:3000/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -227,7 +227,7 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             name: "alice",
@@ -238,7 +238,7 @@ describe("signInCredentials action", async () => {
 
     test("credentials with redirect: true and redirectTo", async () => {
         const response = await POST(
-            new Request("http://localhost:3000/auth/signIn/credentials?redirectTo=/dashboard", {
+            new Request("https://example.com/auth/signIn/credentials?redirectTo=/dashboard", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -254,7 +254,7 @@ describe("signInCredentials action", async () => {
             redirect: true,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             name: "alice",
@@ -265,7 +265,7 @@ describe("signInCredentials action", async () => {
 
     test("credentials with redirect: false", async () => {
         const response = await POST(
-            new Request("http://localhost:3000/auth/signIn/credentials?redirect=false", {
+            new Request("https://example.com/auth/signIn/credentials?redirect=false", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({
@@ -281,7 +281,7 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             name: "alice",
@@ -294,7 +294,11 @@ describe("signInCredentials action", async () => {
         const response = await POST(
             new Request("http://localhost:3000/auth/signIn/credentials?redirect=false&redirectTo=/dashboard", {
                 method: "POST",
-                headers,
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({
                     username: "alice",
                     password: "1234567890",

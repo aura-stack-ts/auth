@@ -10,7 +10,7 @@ describe("sendVerificationEmail API", async () => {
     const sessionTokenHash = await createHash(sessionToken)
 
     const headers = {
-        Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
     }
 
     test("success sendVerificationEmail flow", async () => {

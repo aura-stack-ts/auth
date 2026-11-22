@@ -54,7 +54,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         const output = await api.getAccessToken("oauth-provider", {
             headers: new Headers({
-                Cookie: "aura-auth.session_token=invalid-token",
+                Cookie: "__Secure-aura-auth.session_token=invalid-token",
             }),
         })
         expect(output).toEqual({
@@ -70,7 +70,7 @@ describe("getAccessToken API (Stateful)", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -101,7 +101,7 @@ describe("getAccessToken API (Stateful)", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -117,7 +117,7 @@ describe("getAccessToken API (Stateful)", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -125,7 +125,7 @@ describe("getAccessToken API (Stateful)", () => {
 
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 maxAge: 0,
                 path: "/",
@@ -161,7 +161,7 @@ describe("getAccessToken API (Stateful)", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -255,7 +255,7 @@ describe("getAccessToken API (Stateful)", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -321,7 +321,7 @@ describe("getAccessToken API (Stateful)", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -417,7 +417,7 @@ describe("getAccessToken API (Stateful)", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -488,7 +488,7 @@ describe("getAccessToken API (Stateful)", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -537,7 +537,7 @@ describe("getAccessToken API (Stateful)", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -585,7 +585,7 @@ describe("getAccessToken API (Stateful)", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -645,7 +645,7 @@ describe("getAccessToken API (Stateful)", () => {
         const output = await api.getAccessToken("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-token-hash`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
             },
         })
 

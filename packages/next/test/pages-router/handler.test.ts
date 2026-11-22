@@ -24,34 +24,6 @@ describe("toHandler", () => {
         expect(res._getJSONData()).toEqual({ error: "Method TRACE Not Allowed" })
     })
 
-    test("GET /auth/session - http connection", async () => {
-        const payload = {
-            sub: "1234567890",
-            name: "John Doe",
-            email: "john.doe@example.com",
-            image: "https://example.com/john-doe.jpg",
-        }
-
-        const sessionToken = await auth.jose.encodeJWT(payload)
-
-        const { res } = await createHandler({
-            method: "GET",
-            url: "/auth/session",
-            headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}`,
-                Host: "localhost:3000",
-            },
-        })
-        expect(res.statusCode).toBe(200)
-        expect(res._getJSONData()).toEqual({
-            session: {
-                user: payload,
-                expires: expect.any(String),
-            },
-            success: true,
-        })
-    })
-
     test("GET /auth/session - https connection", async () => {
         const payload = {
             sub: "1234567890",
