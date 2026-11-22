@@ -60,12 +60,14 @@ describe("updateSession API", () => {
 
     test("clears the session cookie when the session is invalid", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
+
         const getSessionByTokenMock = vi.fn().mockResolvedValue(null)
+
         const { api } = authInstance({ getSessionByToken: getSessionByTokenMock })
 
         const output = await api.updateSession({
             headers: {
-                Cookie: "aura-auth.session_token=invalid-session-token",
+                Cookie: "__Secure-aura-auth.session_token=invalid-session-token",
             },
             session: {},
         })
@@ -91,6 +93,7 @@ describe("updateSession API", () => {
                 sameSite: "lax",
             }),
         ])
+        expect(getSessionByTokenMock).toHaveBeenCalled()
     })
 
     test("preserves the session cookie when CSRF validation fails", async () => {

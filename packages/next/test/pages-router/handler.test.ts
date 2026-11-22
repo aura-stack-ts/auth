@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { createMocks, createResponse, type RequestOptions, type ResponseOptions } from "node-mocks-http"
 import { auth } from "@test/pages-router/preset"
 import { createCSRF } from "@aura-stack/react/crypto"
@@ -25,6 +25,8 @@ describe("toHandler", () => {
     })
 
     test("GET /auth/session - http connection", async () => {
+        vi.stubEnv("http://localhost:3000", "TEST")
+
         const payload = {
             sub: "1234567890",
             name: "John Doe",
