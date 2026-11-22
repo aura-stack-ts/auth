@@ -121,7 +121,7 @@ describe("sessionAction", () => {
         const request = await handlers.GET(
             new Request("http://example.com/auth/session", {
                 headers: {
-                    Cookie: `aura-auth.session_token=valid-token-hash`,
+                    Cookie: `__Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -242,7 +242,7 @@ describe("sessionAction", () => {
         const request = await handlers.GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )

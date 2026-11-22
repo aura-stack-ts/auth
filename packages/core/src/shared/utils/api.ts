@@ -24,6 +24,7 @@ import type {
     TypedJWTPayload,
     User,
 } from "@/@types/index.ts"
+import { isSecureConnection } from "../http/secure-connection.ts"
 
 export const createValidation = (ctx: RouterGlobalContext, requestInit?: Request, headersInit?: HeadersInit | RequestHeaders) => {
     const steps: Array<() => Promise<void>> = []
@@ -120,6 +121,8 @@ export const createValidation = (ctx: RouterGlobalContext, requestInit?: Request
                 }
                 output.origin = await getOriginURL(request, ctx)
                 output.request = request
+                const isSecure = isSecureConnection(request, ctx.trustedProxyHeaders)
+                ctx.cookies.store = isSecure ? ctx.cookies.precomputed.trusted : ctx.cookies.precomputed.untrusted
             })
             return builder
         },
@@ -220,31 +223,16 @@ export const internal_verifyCSRFToken = async ({
     try {
         csrfToken = csrfToken || getCookie(headers, ctx.cookies.store.csrfToken.name)
     } catch (cause) {
-        ctx.logger?.log("CSRF_TOKEN_MISSING")
-
-        throw new AuraAuthError({
-            code: "CSRF_TOKEN_MISSING",
-            cause,
-        })
+        throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
     }
 
     if (!csrfToken) {
-        ctx.logger?.log("CSRF_TOKEN_MISSING")
-
-        throw new AuraAuthError({
-            code: "CSRF_TOKEN_MISSING",
-        })
+        throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
     }
 
     try {
         await ctx.jose.instance.verifyJWS(csrfToken)
     } catch (cause) {
-        ctx.logger?.log("CSRF_TOKEN_INVALID", {
-            structuredData: {
-                error_type: getErrorName(cause),
-            },
-        })
-
         throw new AuraAuthError({
             code: "CSRF_TOKEN_MISMATCH",
             cause,
@@ -258,26 +246,13 @@ export const internal_verifyCSRFToken = async ({
     const requestToken = doubleSubmitToken ?? headers.get("X-CSRF-Token")
 
     if (!requestToken) {
-        ctx.logger?.log("CSRF_HEADER_MISSING")
-
-        throw new AuraAuthError({
-            code: "CSRF_DOUBLE_SUBMIT_FAILED",
-        })
+        throw new AuraAuthError({ code: "CSRF_DOUBLE_SUBMIT_FAILED" })
     }
 
     try {
         await verifyCSRF(ctx.jose.instance, csrfToken, requestToken)
     } catch (cause) {
-        ctx.logger?.log("CSRF_TOKEN_INVALID", {
-            structuredData: {
-                error_type: getErrorName(cause),
-            },
-        })
-
-        throw new AuraAuthError({
-            code: "CSRF_TOKEN_MISMATCH",
-            cause,
-        })
+        throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH", cause })
     }
 
     ctx.logger?.log("CSRF_TOKEN_VERIFIED")

@@ -3,7 +3,7 @@ import { VERSION } from "@/version.ts"
 import { createPKCE } from "@/exports/crypto.ts"
 import { GET, jose } from "@test/setup/auth.ts"
 import { sessionPayload } from "@test/setup/presets.ts"
-import { setCookie, getSetCookie, createCookieStore, getCookie } from "@/shared/http/cookie.ts"
+import { setCookie, getSetCookie, createCookieStore } from "@/shared/http/cookie.ts"
 
 describe("sessionAction", () => {
     const { encodeJWT } = jose
@@ -49,7 +49,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("http://example.com/auth/session", {
                 headers: {
-                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -111,7 +111,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
             })
         )

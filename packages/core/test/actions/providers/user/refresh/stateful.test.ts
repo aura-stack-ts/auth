@@ -87,7 +87,7 @@ describe("refreshUserInfo action", () => {
             new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-auth.session_token=valid-token-hash`,
+                    Cookie: `__Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )
@@ -142,7 +142,7 @@ describe("refreshUserInfo action", () => {
             new Request("https://example.com/auth/providers/oauth-provider/user/refresh", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-token-hash`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                     "X-CSRF-Token": "invalid-token",
                 },
             })
@@ -779,7 +779,7 @@ describe("refreshUserInfo action", () => {
                 method: "POST",
                 headers: {
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-token-hash`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-token-hash`,
                 },
             })
         )

@@ -30,7 +30,7 @@ describe("updateSession API", () => {
         expect(updated.headers).toHaveValidSecurityHeaders()
         expect(updated.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -56,7 +56,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: newUser,
@@ -78,7 +78,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates user session with disabled skipCSRFCheck", async () => {
@@ -100,7 +100,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 "X-CSRF-Token": csrfToken,
             }),
             session: {
@@ -123,7 +123,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates user session with generic user type", async () => {
@@ -150,7 +150,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             }),
             session: {
@@ -177,7 +177,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates user session with invalid user data", async () => {
@@ -195,7 +195,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: { role: "superadmin", money: "100000" } as any,
@@ -219,7 +219,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates expiry on valid session", async () => {
@@ -234,7 +234,7 @@ describe("updateSession API", () => {
         const expiresAt = new Date(Date.now() + 60 * 60 * 2).toISOString()
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 expires: expiresAt,
@@ -256,7 +256,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "aura-auth.session_token" })])
+        expect(updated.headers).toHaveValidSetCookies([expect.objectContaining({ name: "__Secure-aura-auth.session_token" })])
     })
 
     test("updates invalid expiry on valid session", async () => {
@@ -271,7 +271,7 @@ describe("updateSession API", () => {
         const expiresAt = new Date(Date.now() - 100_000).toISOString()
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 expires: expiresAt,
@@ -305,7 +305,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: { name: "Alice" } },
             redirectTo: "/dashboard",
@@ -341,7 +341,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: { name: "Alice" } },
             redirect: false,
@@ -379,7 +379,7 @@ describe("updateSession API", () => {
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: {
@@ -402,7 +402,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "__Secure-aura-auth.session_token")!)
         expect(decoded.sub).toBe(sessionPayload.sub)
         expect(decoded.sub).not.toBe("0987-alter-claims")
         // It contains the original claims but not the escalated ones
@@ -423,7 +423,7 @@ describe("updateSession API", () => {
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 expires: new Date(attackerExpiration * 1000).toISOString(),
@@ -448,7 +448,7 @@ describe("updateSession API", () => {
         expect(sessionExpiration).not.toBe(attackerExpiration)
         expect(sessionExpiration).toBeLessThanOrEqual(fifteenDaysFromNow)
 
-        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "__Secure-aura-auth.session_token")!)
         expect(decoded.exp).not.toEqual(attackerExpiration)
         expect(decoded.exp).toBeLessThanOrEqual(fifteenDaysFromNow)
     })
@@ -461,7 +461,7 @@ describe("updateSession API", () => {
 
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: {
@@ -485,7 +485,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
 
-        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(updated.headers, "__Secure-aura-auth.session_token")!)
         expect(decoded).toEqual({
             ...sessionPayload,
             exp: expect.any(Number),
@@ -503,7 +503,7 @@ describe("updateSession API", () => {
 
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: {
@@ -539,7 +539,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: { name: "Alice" } },
             redirectTo: "/dashboard",
@@ -575,7 +575,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const updated = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: { name: "Alice" } },
             redirectTo: "/dashboard",

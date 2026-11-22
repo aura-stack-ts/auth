@@ -36,7 +36,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
     const ctx = {
         credentials: getCredentialsConfig(config),
         cookies: {
-            store: precomputed.untrusted,
+            store: precomputed.trusted,
             precomputed,
             manager: createCookieManager(() => ctx.cookies.store),
         },

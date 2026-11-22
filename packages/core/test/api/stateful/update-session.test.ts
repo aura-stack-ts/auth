@@ -5,11 +5,10 @@ import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { createSchemaRegistry } from "@/validator/registry.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 import { sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
-import { getCookie, getSetCookie } from "@/shared/http/cookie.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
@@ -46,7 +45,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
                 sameSite: "lax",
@@ -60,7 +59,7 @@ describe("updateSession API", () => {
     })
 
     test("clears the session cookie when the session is invalid", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
         const getSessionByTokenMock = vi.fn().mockResolvedValue(null)
         const { api } = authInstance({ getSessionByToken: getSessionByTokenMock })
 
@@ -86,7 +85,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
                 sameSite: "lax",
@@ -95,14 +94,14 @@ describe("updateSession API", () => {
     })
 
     test("preserves the session cookie when CSRF validation fails", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
         const getSessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const { api } = authInstance({ getSessionByToken: getSessionByTokenMock })
         const csrfToken = await createCSRF(jose)
 
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-session-token; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=valid-session-token; __Host-aura-auth.csrf_token=${csrfToken}`,
                 "X-CSRF-Token": "invalid-csrf-token",
             }),
             session: {},
@@ -125,7 +124,7 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with skipCSRFCheck", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
@@ -160,7 +159,7 @@ describe("updateSession API", () => {
 
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             }),
             session: {
@@ -185,7 +184,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token-hash",
                 sameSite: "lax",
             }),
@@ -212,7 +211,7 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with disabled skipCSRFCheck", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
@@ -247,7 +246,7 @@ describe("updateSession API", () => {
 
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 "X-CSRF-Token": csrfToken,
             }),
             session: {
@@ -272,7 +271,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token-hash",
                 sameSite: "lax",
             }),
@@ -299,7 +298,7 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with generic user type", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const extendedIdentitySchema = UserIdentity.extend({
             role: z.string(),
@@ -358,7 +357,7 @@ describe("updateSession API", () => {
 
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: payload as any,
@@ -387,7 +386,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token-hash",
                 sameSite: "lax",
             }),
@@ -421,7 +420,7 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with invalid user data", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
@@ -455,7 +454,7 @@ describe("updateSession API", () => {
 
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: payload,
@@ -481,7 +480,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token-hash",
                 sameSite: "lax",
             }),
@@ -510,7 +509,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with redirect: true and redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
@@ -543,7 +542,7 @@ describe("updateSession API", () => {
 
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: payload },
             redirectTo: "/dashboard",
@@ -568,7 +567,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders({ location: "/dashboard" })
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token-hash",
                 sameSite: "lax",
             }),
@@ -599,7 +598,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with redirect: false and redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
@@ -631,7 +630,7 @@ describe("updateSession API", () => {
         }
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=valid-token-hash; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: { user: payload },
             redirect: false,
@@ -657,7 +656,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token-hash",
                 sameSite: "lax",
             }),
@@ -688,7 +687,7 @@ describe("updateSession API", () => {
     })
 
     test("privilege escalation attempt is prevented when updating session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
@@ -718,7 +717,7 @@ describe("updateSession API", () => {
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: {
@@ -748,7 +747,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token-hash",
                 sameSite: "lax",
             }),
@@ -781,7 +780,7 @@ describe("updateSession API", () => {
     })
 
     test("arbitrary session lifetime extension is prevented when updating session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const updateSessionMock = vi.fn()
@@ -800,7 +799,7 @@ describe("updateSession API", () => {
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=valid-token-hash; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 expires: new Date(attackerExpiration * 1000).toISOString(),
@@ -826,7 +825,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token-hash",
                 sameSite: "lax",
             }),
@@ -843,7 +842,7 @@ describe("updateSession API", () => {
     })
 
     test("improperly controlled user attributes are not persisted during session updates", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
         const updateUserMock = vi.fn()
@@ -860,7 +859,7 @@ describe("updateSession API", () => {
         const csrfToken = await createCSRF(jose)
         const output = await api.updateSession({
             headers: new Headers({
-                Cookie: `aura-auth.session_token=valid-token-hash; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=valid-token-hash; __Host-aura-auth.csrf_token=${csrfToken}`,
             }),
             session: {
                 user: {
@@ -891,7 +890,7 @@ describe("updateSession API", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-token-hash",
                 sameSite: "lax",
             }),
@@ -908,7 +907,7 @@ describe("updateSession API", () => {
     })
 
     test("throws error when user is inactive", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
         const getSessionByTokenMock = vi.fn().mockResolvedValue({
             ...sessionEntityWithUser,
             user: { ...userEntity, status: "deleted" },
@@ -930,7 +929,7 @@ describe("updateSession API", () => {
 
         const output = await api.updateSession({
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             session: {},
         })

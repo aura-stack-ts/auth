@@ -60,7 +60,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=valid-session-token`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=valid-session-token`,
             },
         })
 
@@ -78,7 +78,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "valid-session-token",
                 sameSite: "lax",
             }),
@@ -155,7 +155,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: new Headers({
-                Cookie: "aura-auth.session_token=invalid-token",
+                Cookie: "__Secure-aura-auth.session_token=invalid-token",
             }),
         })
         expect(output).toEqual({
@@ -208,7 +208,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -260,7 +260,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -315,7 +315,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -374,7 +374,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output).toEqual({
@@ -450,7 +450,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
                 "Set-Cookie": "initial-provider-cookie=initial; Path=/",
             },
         })
@@ -472,7 +472,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: sessionToken,
                 sameSite: "lax",
             }),
@@ -547,7 +547,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -600,7 +600,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -657,7 +657,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -714,7 +714,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -813,7 +813,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -834,7 +834,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: sessionToken,
                 sameSite: "lax",
             }),
@@ -928,7 +928,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -980,7 +980,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${invalidSessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${invalidSessionToken}`,
             },
         })
 
@@ -1048,13 +1048,13 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: sessionToken,
                 sameSite: "lax",
             }),
@@ -1160,7 +1160,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
                 "X-CSRF-Token": csrfToken,
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
         })
 
@@ -1231,7 +1231,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
             doubleSubmitToken: csrfToken,
         })
@@ -1253,7 +1253,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: sessionToken,
                 sameSite: "lax",
             }),
@@ -1323,7 +1323,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}; aura-auth.session_token=${sessionToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}; __Secure-aura-auth.session_token=${sessionToken}`,
             },
             doubleSubmitToken: "invalid-token",
         })
@@ -1395,7 +1395,7 @@ describe("refreshUserInfo API (Stateful)", () => {
 
         const output = await api.refreshUserInfo("oauth-provider", {
             headers: {
-                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
             },
             skipCSRFCheck: true,
         })
@@ -1417,7 +1417,7 @@ describe("refreshUserInfo API (Stateful)", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: sessionToken,
                 sameSite: "lax",
             }),

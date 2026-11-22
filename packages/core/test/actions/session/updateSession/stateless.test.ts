@@ -35,7 +35,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
                 body: JSON.stringify({}),
             })
@@ -59,7 +59,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": "invalid-csrf-token",
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({}),
             })
@@ -94,7 +94,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -136,7 +136,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -177,7 +177,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -219,7 +219,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -266,7 +266,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -311,7 +311,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -351,7 +351,7 @@ describe("updateSession action", () => {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -388,7 +388,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({ user: newUser }),
             })
@@ -425,7 +425,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
                     user: {
@@ -452,7 +452,7 @@ describe("updateSession action", () => {
             redirectURL: null,
         })
 
-        const decoded = await jose.decodeJWT(getSetCookie(response, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
         expect(decoded.sub).toBe(sessionPayload.sub)
         expect(decoded.sub).not.toBe("0987-alter-claims")
         // It contains the original claims but not the escalated ones
@@ -476,7 +476,7 @@ describe("updateSession action", () => {
                 headers: {
                     "X-CSRF-Token": csrfToken,
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
                     expires: new Date(attackerExpiration * 1000).toISOString(),
@@ -501,7 +501,7 @@ describe("updateSession action", () => {
         expect(sessionExpiration).not.toBe(attackerExpiration)
         expect(sessionExpiration).toBeLessThanOrEqual(fifteenDaysFromNow)
 
-        const decoded = await jose.decodeJWT(getSetCookie(response, "aura-auth.session_token")!)
+        const decoded = await jose.decodeJWT(getSetCookie(response, "__Secure-aura-auth.session_token")!)
         expect(decoded.exp).not.toEqual(attackerExpiration)
         expect(decoded.exp).toBeLessThanOrEqual(fifteenDaysFromNow)
     })

@@ -168,7 +168,7 @@ describe("signOut action", async () => {
             new Request("http://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrf}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,
                     "X-CSRF-Token": csrf,
                 },
             })

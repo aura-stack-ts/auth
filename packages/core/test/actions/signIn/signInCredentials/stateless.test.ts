@@ -10,7 +10,7 @@ describe("signInCredentials action", async () => {
     const headers = {
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken,
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
     }
 
     test("success signIn flow", async () => {
@@ -33,7 +33,7 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             email: "johndoe@example.com",
@@ -71,7 +71,7 @@ describe("signInCredentials action", async () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
                     username: "johndoe",
@@ -96,7 +96,7 @@ describe("signInCredentials action", async () => {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-Token": "invalid-token",
-                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
                 body: JSON.stringify({
                     username: "johndoe",
@@ -197,7 +197,7 @@ describe("signInCredentials action", async () => {
             })
         )
         expect(response.status).toBe(200)
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890-abcdef",
             name: "johndoe",
@@ -227,7 +227,7 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             name: "alice",
@@ -254,7 +254,7 @@ describe("signInCredentials action", async () => {
             redirect: true,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             name: "alice",
@@ -281,7 +281,7 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: null,
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             name: "alice",
@@ -308,7 +308,7 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: "/dashboard",
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             name: "alice",

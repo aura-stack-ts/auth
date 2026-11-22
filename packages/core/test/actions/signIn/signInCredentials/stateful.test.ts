@@ -10,7 +10,7 @@ describe("signInCredentials action", async () => {
     const headers = {
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken,
-        Cookie: `aura-auth.csrf_token=${csrfToken}`,
+        Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
     }
 
     test("success signIn flow", async () => {

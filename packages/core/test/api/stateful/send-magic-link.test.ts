@@ -32,7 +32,7 @@ describe("sendMagicLink API", async () => {
 
         const output = await api.sendMagicLink("user@example.com", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -85,7 +85,7 @@ describe("sendMagicLink API", async () => {
 
         const output = await api.sendMagicLink("new@example.com", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -138,7 +138,7 @@ describe("sendMagicLink API", async () => {
 
         const output = await api.sendMagicLink("nonexistent@example.com", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
             },
         })
 
@@ -189,7 +189,7 @@ describe("sendMagicLink API", async () => {
 
         const output = await api.sendMagicLink("user@example.com", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: true,
             redirectTo: "https://example.com/check-email",
@@ -241,7 +241,7 @@ describe("sendMagicLink API", async () => {
 
         const output = await api.sendMagicLink("user@example.com", {
             headers: {
-                Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
             },
             redirect: false,
             redirectTo: "https://example.com/check-email",

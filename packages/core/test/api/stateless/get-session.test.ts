@@ -19,7 +19,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -28,7 +28,7 @@ describe("getSession", () => {
 
     test("getSession with invalid session token", async () => {
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=invalidtoken` },
+            headers: { Cookie: `__Secure-aura-auth.session_token=invalidtoken` },
         })
         expect(output).toEqual({
             session: null,
@@ -43,7 +43,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -53,7 +53,10 @@ describe("getSession", () => {
     test("getSession with valid session token", async () => {
         const jwt = await jose.encodeJWT(sessionPayload)
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=${jwt}`, "Set-Cookie": "initial-provider-cookie=initial; Path=/" },
+            headers: {
+                Cookie: `__Secure-aura-auth.session_token=${jwt}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
+            },
         })
         expect(output).toEqual({
             success: true,
@@ -74,7 +77,7 @@ describe("getSession", () => {
             exp: Math.floor(Date.now() / 1000) - 60,
         })
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=${jwt}` },
+            headers: { Cookie: `__Secure-aura-auth.session_token=${jwt}` },
         })
         expect(output).toEqual({
             session: null,
@@ -89,7 +92,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -100,7 +103,7 @@ describe("getSession", () => {
         const { sub: _, ...spreadSession } = sessionPayload
         const jwt = await jose.encodeJWT(spreadSession)
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=${jwt}` },
+            headers: { Cookie: `__Secure-aura-auth.session_token=${jwt}` },
         })
         expect(output).toEqual({
             session: null,
@@ -115,7 +118,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: "",
                 expires: new Date(0),
             }),
@@ -129,7 +132,7 @@ describe("getSession", () => {
             permissions: ["read", "write"],
         })
         const output = await api.getSession({
-            headers: { Cookie: `aura-auth.session_token=${jwt}` },
+            headers: { Cookie: `__Secure-aura-auth.session_token=${jwt}` },
         })
         expect(output).toEqual({
             success: true,
@@ -159,7 +162,10 @@ describe("getSession", () => {
             permissions: ["read", "write"],
         })
         const output = await auth.api.getSession({
-            headers: { Cookie: `aura-auth.session_token=${jwt}`, "Set-Cookie": "initial-provider-cookie=initial; Path=/" },
+            headers: {
+                Cookie: `__Secure-aura-auth.session_token=${jwt}`,
+                "Set-Cookie": "initial-provider-cookie=initial; Path=/",
+            },
         })
         expect(output).toEqual({
             success: true,
@@ -178,7 +184,7 @@ describe("getSession", () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "aura-auth.session_token",
+                name: "__Secure-aura-auth.session_token",
                 value: expect.any(String),
                 path: "/",
                 sameSite: "lax",

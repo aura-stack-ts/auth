@@ -36,7 +36,7 @@ describe("Rate Limiter", async () => {
                     "Content-Type": "application/json",
                     "x-forwarded-for": "192.168.1.50",
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
             })
         await createRequest(makeRequest, 10, 8)
@@ -55,7 +55,7 @@ describe("Rate Limiter", async () => {
                     "Content-Type": "application/json",
                     "x-forwarded-for": "192.168.1.50",
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Host-aura-auth.csrf_token=${csrfToken}`,
                 },
             })
         await createRequest(makeRequest, 7, 5)
@@ -76,7 +76,7 @@ describe("Rate Limiter", async () => {
                     "Content-Type": "application/json",
                     "x-forwarded-for": "192.168.1.50",
                     "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
+                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
                 },
             })
         await createRequest(makeRequest, 12, 10)
