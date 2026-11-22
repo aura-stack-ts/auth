@@ -165,7 +165,7 @@ describe("signOut action", async () => {
     test("valid sessionToken cookie with valid csrfToken in an insecure connection", async () => {
         const sessionToken = await encodeJWT(sessionPayload)
         const request = await POST(
-            new Request("http://example.com/auth/signOut?token_type_hint=session_token", {
+            new Request("https://example.com/auth/signOut?token_type_hint=session_token", {
                 method: "POST",
                 headers: {
                     Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrf}`,

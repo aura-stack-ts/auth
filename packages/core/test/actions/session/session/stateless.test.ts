@@ -18,7 +18,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: "aura-auth.session_token=invalidtoken",
+                    Cookie: "__Secure-aura-auth.session_token=invalidtoken",
                 },
             })
         )
@@ -47,7 +47,7 @@ describe("sessionAction", () => {
         const sessionToken = await encodeJWT(sessionPayload)
 
         const request = await GET(
-            new Request("http://example.com/auth/session", {
+            new Request("https://example.com/auth/session", {
                 headers: {
                     Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
                 },
@@ -93,9 +93,9 @@ describe("sessionAction", () => {
     test("invalid access from http", async () => {
         const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
-            new Request("http://example.com/auth/session", {
+            new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
+                    Cookie: `aura-auth.session_token=${sessionToken}`,
                 },
             })
         )
@@ -111,7 +111,7 @@ describe("sessionAction", () => {
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
-                    Cookie: `__Secure-aura-auth.session_token=${sessionToken}`,
+                    Cookie: `aura-auth.session_token=${sessionToken}`,
                 },
             })
         )

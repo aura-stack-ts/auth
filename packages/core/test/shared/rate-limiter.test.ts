@@ -26,7 +26,7 @@ describe("Rate Limiter", async () => {
 
     test("signInCredentials", async () => {
         const makeRequest = () =>
-            new Request("http://localhost/auth/signIn/credentials", {
+            new Request("https://example.com/auth/signIn/credentials", {
                 method: "POST",
                 body: JSON.stringify({
                     username: "Alice",
@@ -44,7 +44,7 @@ describe("Rate Limiter", async () => {
 
     test("signUp", async () => {
         const makeRequest = () =>
-            new Request("http://localhost/auth/signUp", {
+            new Request("https://example.com/auth/signUp", {
                 method: "POST",
                 body: JSON.stringify({
                     name: "Alice",
@@ -65,7 +65,7 @@ describe("Rate Limiter", async () => {
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const makeRequest = () =>
-            new Request("http://localhost/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 body: JSON.stringify({
                     user: {

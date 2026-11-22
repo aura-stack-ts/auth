@@ -10,7 +10,7 @@ import { identitySchema as UserIdentityValibot } from "@/identity/valibot.ts"
 describe("updateSession action", () => {
     test("invalid session", async () => {
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -31,7 +31,7 @@ describe("updateSession action", () => {
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -54,7 +54,7 @@ describe("updateSession action", () => {
         const csrfToken = await createCSRF(jose)
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": "invalid-csrf-token",
@@ -89,7 +89,7 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -131,7 +131,7 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -172,7 +172,7 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirectTo=/dashboard", {
+            new Request("https://example.com/auth/session?redirectTo=/dashboard", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -214,7 +214,7 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false&redirectTo=/dashboard", {
+            new Request("https://example.com/auth/session?redirect=false&redirectTo=/dashboard", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -261,7 +261,7 @@ describe("updateSession action", () => {
         }
 
         const response = await handlers.PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -306,7 +306,7 @@ describe("updateSession action", () => {
         }
 
         const response = await handlers.PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -347,7 +347,7 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session", {
+            new Request("https://example.com/auth/session", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -383,7 +383,7 @@ describe("updateSession action", () => {
         }
 
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -420,7 +420,7 @@ describe("updateSession action", () => {
 
         const expiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,
@@ -471,7 +471,7 @@ describe("updateSession action", () => {
 
         const attackerExpiration = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 * 2
         const response = await PATCH(
-            new Request("http://localhost:3000/auth/session?redirect=false", {
+            new Request("https://example.com/auth/session?redirect=false", {
                 method: "PATCH",
                 headers: {
                     "X-CSRF-Token": csrfToken,

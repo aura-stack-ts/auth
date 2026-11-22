@@ -9,7 +9,7 @@ import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 
 describe("updateSession API", () => {
     test("invalid session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const updated = await api.updateSession({
             headers: new Headers(),
@@ -38,7 +38,7 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with skipCSRFCheck", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -82,7 +82,7 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with disabled skipCSRFCheck", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -127,7 +127,7 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with generic user type", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const { jose, api } = createAuth({
             identity: {
@@ -181,7 +181,7 @@ describe("updateSession API", () => {
     })
 
     test("updates user session with invalid user data", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const { jose, api } = createAuth({})
 
@@ -223,7 +223,7 @@ describe("updateSession API", () => {
     })
 
     test("updates expiry on valid session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -260,7 +260,7 @@ describe("updateSession API", () => {
     })
 
     test("updates invalid expiry on valid session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -294,7 +294,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with redirect: true and redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -330,7 +330,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with redirect: false and redirectTo", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -366,7 +366,7 @@ describe("updateSession API", () => {
     })
 
     test("privilege escalation attempt is prevented when updating session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const originalExpiration = new Date(Date.now() + 1000 * 60 * 60).getTime() / 1000
         const sessionToken = await jose.encodeJWT({
@@ -411,7 +411,7 @@ describe("updateSession API", () => {
     })
 
     test("arbitrary session lifetime extension is prevented when updating session", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const originalExpiration = new Date(Date.now() + 1000 * 60 * 60).getTime() / 1000
         const sessionToken = await jose.encodeJWT({
@@ -454,7 +454,7 @@ describe("updateSession API", () => {
     })
 
     test("improperly controlled modification of dynamically-determined object attributes", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT(sessionPayload)
         const csrfToken = await createCSRF(jose)
@@ -496,7 +496,7 @@ describe("updateSession API", () => {
     })
 
     test("invalid user data type", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT(sessionPayload)
         const csrfToken = await createCSRF(jose)
@@ -528,7 +528,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with doubleSubmitToken", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -564,7 +564,7 @@ describe("updateSession API", () => {
     })
 
     test("updateSession with doubleSubmitToken and invalid value", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",

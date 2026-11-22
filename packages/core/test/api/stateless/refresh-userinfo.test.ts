@@ -42,7 +42,7 @@ describe("refreshUserInfo", () => {
     })
 
     test("throws error when CSRF token is missing", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
         const { api } = await import("@test/setup/auth.ts")
 
         const sessionToken = await jose.encodeJWT(sessionPayload)

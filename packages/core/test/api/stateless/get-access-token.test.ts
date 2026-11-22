@@ -74,7 +74,7 @@ describe("getAccessToken API", () => {
     })
 
     test("successfully gets provider tokens", async () => {
-        vi.stubEnv("BASE_URL", "http://localhost:3000")
+        vi.stubEnv("BASE_URL", "https://example.com")
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
 

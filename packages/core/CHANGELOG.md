@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
+- Enabled secure cookies by default in `createAuth()`. Cookie configurations now use secure settings, including the `__Secure-` and `__Host-` prefixes and their respective required attributes. This reinforces the library's security-first philosophy by adopting a **secure by default** approach. [#334](https://github.com/aura-stack-ts/auth/pull/334)
+
 - Fixed a sensitive information exposure vulnerability (CWE-200) caused by reflecting incoming request headers in HTTP responses. Previously, incoming headers were propagated to the response, potentially exposing the `Cookie` header to same-origin JavaScript and undermining the protection provided by `HttpOnly` cookies. Responses now include only explicitly configured security-related headers, such as `Cache-Control`, `Pragma`, `Expires`, `Vary`, and `Content-Security-Policy`, preventing sensitive request headers from being unintentionally exposed. [#333](https://github.com/aura-stack-ts/auth/pull/333)
 
 - Fixed the validation order for session and CSRF tokens. Session validation is now performed before CSRF token verification, ensuring that the session is validated before enforcing CSRF protection. [#332](https://github.com/aura-stack-ts/auth/pull/332)

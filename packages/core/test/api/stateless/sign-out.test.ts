@@ -68,7 +68,7 @@ describe("signOut API", async () => {
     })
 
     test("signOut with baseURL from createAuth config", async () => {
-        const api = createAuth({ baseURL: "http://localhost:3000" }).api
+        const { api } = createAuth({ baseURL: "http://localhost:3000" })
 
         const sessionToken = await jose.encodeJWT({
             sub: "1234567890",
@@ -78,7 +78,7 @@ describe("signOut API", async () => {
 
         const output = await api.signOut({
             headers: {
-                Cookie: `__Secure-aura-auth.session_token=${sessionToken}; __Host-aura-auth.csrf_token=${csrfToken}`,
+                Cookie: `aura-auth.session_token=${sessionToken}; aura-auth.csrf_token=${csrfToken}`,
             },
         })
         expect(output).toMatchObject({
@@ -91,13 +91,13 @@ describe("signOut API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([
             expect.objectContaining({
-                name: "__Host-aura-auth.csrf_token",
+                name: "aura-auth.csrf_token",
                 value: "",
                 sameSite: "strict",
                 expires: new Date(0),
             }),
             expect.objectContaining({
-                name: "__Secure-aura-auth.session_token",
+                name: "aura-auth.session_token",
                 value: "",
                 sameSite: "lax",
                 expires: new Date(0),

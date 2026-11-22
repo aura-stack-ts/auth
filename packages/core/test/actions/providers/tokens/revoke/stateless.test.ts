@@ -64,7 +64,7 @@ describe("Revoke Action", () => {
                 },
             })
         )
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(403)
         expect(await response.json()).toEqual({ success: false })
     })
 
@@ -103,7 +103,7 @@ describe("Revoke Action", () => {
                 },
             })
         )
-        expect(response.status).toBe(401)
+        expect(response.status).toBe(500)
         expect(await response.json()).toEqual({ success: false })
     })
 
