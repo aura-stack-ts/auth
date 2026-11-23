@@ -1,5 +1,5 @@
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ForgotPasswordAPIOptions, ForgotPasswordAPIReturn } from "@/@types/api.ts"
 
@@ -19,7 +19,7 @@ export const forgotPassword = async (
     try {
         logger?.log("FORGOT_PASSWORD_INITIATED")
         const { request, rateLimit, origin } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/password/forgot")
+            .buildRequest("/password/forgot")
             .verifyRateLimit("forgotPassword")
             .execute()
         if (rateLimit) {

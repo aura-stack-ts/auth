@@ -146,6 +146,7 @@ export type JoseManager<DefaultUser extends User = User> = {
 
 export interface InternalCookieConfig {
     store: InternalCookieStoreConfig
+    secureCookies: "trusted" | "untrusted" | "dynamic"
     precomputed: {
         trusted: InternalCookieStoreConfig
         untrusted: InternalCookieStoreConfig

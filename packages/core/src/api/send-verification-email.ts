@@ -1,6 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SendVerificationEmailAPIOptions, SendVerificationEmailAPIReturn } from "@/@types/api.ts"
 
@@ -25,7 +26,7 @@ export const sendVerificationEmail = async (
     try {
         logger?.log("SEND_VERIFICATION_EMAIL_INITIATED")
         const { request, rateLimit, origin } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/sendVerificationEmail")
+            .buildRequest("/sendVerificationEmail")
             .verifyRateLimit("sendVerificationEmail")
             .verifySession()
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)

@@ -1,5 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { VERSION } from "@/version.ts"
+import { createAuth } from "@/createAuth.ts"
 import { createPKCE } from "@/exports/crypto.ts"
 import { GET, jose } from "@test/setup/auth.ts"
 import { sessionPayload } from "@test/setup/presets.ts"
@@ -27,7 +28,13 @@ describe("sessionAction", () => {
     })
 
     test("valid sessionToken cookie with correct version", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const sessionToken = await encodeJWT(sessionPayload)
+
+        const {
+            handlers: { GET },
+        } = createAuth({})
 
         const request = await GET(
             new Request("https://example.com/auth/session", {
@@ -44,7 +51,13 @@ describe("sessionAction", () => {
     })
 
     test("valid sessionToken cookie in insecure connection", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const sessionToken = await encodeJWT(sessionPayload)
+
+        const {
+            handlers: { GET },
+        } = createAuth({})
 
         const request = await GET(
             new Request("https://example.com/auth/session", {
@@ -61,7 +74,17 @@ describe("sessionAction", () => {
     })
 
     test("expired sessionToken cookie", async () => {
-        const sessionToken = await encodeJWT({ exp: Math.floor(Date.now() / 1000) - 3600, ...sessionPayload }) // expired 1 hour ago
+        vi.stubEnv("NODE_ENV", "production")
+
+        const sessionToken = await encodeJWT({
+            exp: Math.floor(Date.now() / 1000) - 3600,
+            ...sessionPayload,
+        }) // expired 1 hour ago
+
+        const {
+            handlers: { GET },
+        } = createAuth({})
+
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
@@ -91,7 +114,13 @@ describe("sessionAction", () => {
     })
 
     test("invalid access from http", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const sessionToken = await encodeJWT(sessionPayload)
+        const {
+            handlers: { GET },
+        } = createAuth({})
+
         const request = await GET(
             new Request("https://example.com/auth/session", {
                 headers: {
@@ -107,6 +136,12 @@ describe("sessionAction", () => {
     })
 
     test("invalid access from https", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
+        const {
+            handlers: { GET },
+        } = createAuth({})
+
         const sessionToken = await encodeJWT(sessionPayload)
         const request = await GET(
             new Request("https://example.com/auth/session", {

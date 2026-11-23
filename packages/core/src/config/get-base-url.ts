@@ -41,7 +41,9 @@ export const getBaseURL = async ({
         }
         const protocol = getProtoFromForwarded(headers) ?? headers?.get("X-Forwarded-Proto") ?? "http"
         const host = headers?.get("Host") ?? getHostFromForwarded(headers) ?? headers?.get("X-Forwarded-Host") ?? null
-        if (host) return `${protocol}://${host}`
+        if (host && URL.canParse(`${protocol}://${host}`)) {
+            return `${protocol}://${host}`
+        }
         throw new AuraAuthError({ code: "INVALID_AUTH_CONFIGURATION" })
     }
     try {

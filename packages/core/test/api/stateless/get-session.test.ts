@@ -1,10 +1,14 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
-import { api, jose } from "@test/setup/auth.ts"
+import { jose } from "@test/setup/auth.ts"
 import { sessionPayload } from "@test/setup/presets.ts"
 
 describe("getSession", () => {
     test("getSession with no session token", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
+        const { api } = createAuth({})
+
         const output = await api.getSession({ headers: new Headers() })
         expect(output).toEqual({
             session: null,
@@ -27,6 +31,10 @@ describe("getSession", () => {
     })
 
     test("getSession with invalid session token", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
+        const { api } = createAuth({})
+
         const output = await api.getSession({
             headers: { Cookie: `__Secure-aura-auth.session_token=invalidtoken` },
         })
@@ -51,6 +59,10 @@ describe("getSession", () => {
     })
 
     test("getSession with valid session token", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
+        const { api } = createAuth({})
+
         const jwt = await jose.encodeJWT(sessionPayload)
         const output = await api.getSession({
             headers: {
@@ -72,6 +84,10 @@ describe("getSession", () => {
     })
 
     test("getSession with expired session token", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
+        const { api } = createAuth({})
+
         const jwt = await jose.encodeJWT({
             ...sessionPayload,
             exp: Math.floor(Date.now() / 1000) - 60,
@@ -100,6 +116,10 @@ describe("getSession", () => {
     })
 
     test("getSession with session token missing sub claim", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
+        const { api } = createAuth({})
+
         const { sub: _, ...spreadSession } = sessionPayload
         const jwt = await jose.encodeJWT(spreadSession)
         const output = await api.getSession({
@@ -126,6 +146,10 @@ describe("getSession", () => {
     })
 
     test("getSession with extra claims in session token", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
+        const { api } = createAuth({})
+
         const jwt = await jose.encodeJWT({
             ...sessionPayload,
             role: "admin",
@@ -152,6 +176,8 @@ describe("getSession", () => {
     })
 
     test("getSession refreshes session token if exp is close", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const auth = createAuth({ session: { expirationStrategy: "rolling" } })
 
         const jwt = await auth.jose.encodeJWT({

@@ -1,5 +1,6 @@
 import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -17,7 +18,7 @@ export const isProviderConnected = async (
 
         const { rateLimit, rawSession } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauthId)
-            .buildRequest(requestInit, `/providers/${oauthId}`)
+            .buildRequest(`/providers/${oauthId}`)
             .verifyRateLimit("isProviderConnected")
             .verifySession()
             .execute()

@@ -1,6 +1,7 @@
 import { isAuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
@@ -25,7 +26,7 @@ export const updateSession = async <DefaultUser extends User = User>({
         })
 
         const { request, rateLimit, sessionToken, rawSession } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/session")
+            .buildRequest("/session")
             .verifyRateLimit("updateSession")
             .verifySession()
             .verifyUserStatus()

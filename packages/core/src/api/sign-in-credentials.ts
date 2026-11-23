@@ -1,8 +1,9 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/exports/crypto.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
 
@@ -28,7 +29,7 @@ export const signInCredentials = async ({
         })
 
         const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/signIn/credentials")
+            .buildRequest("/signIn/credentials")
             .verifyRateLimit("signInCredentials")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
             .execute()

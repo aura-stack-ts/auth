@@ -1,9 +1,16 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { GET } from "@test/setup/auth.ts"
 import { setCookie } from "@/shared/http/cookie.ts"
+import { createAuth } from "@/createAuth.ts"
 
 describe("csrfTokenAction", () => {
     test("generates a CSRF token and sets it in a cookie", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
+        const {
+            handlers: { GET },
+        } = createAuth({})
+
         const response = await GET(new Request("https://example.com/auth/csrfToken"))
         const token = await response.json()
 
@@ -13,6 +20,11 @@ describe("csrfTokenAction", () => {
     })
 
     test("returns the same CSRF token if the cookie is valid", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+        const {
+            handlers: { GET },
+        } = createAuth({})
+
         const response = await GET(new Request("https://example.com/auth/csrfToken"))
         const token = await response.json()
 
@@ -30,7 +42,13 @@ describe("csrfTokenAction", () => {
     })
 
     test("generates a new CSRF token if the cookie is invalid", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const invalidCookie = "invalidToken|invalidHash"
+        const {
+            handlers: { GET },
+        } = createAuth({})
+
         const response = await GET(
             new Request("https://example.com/auth/csrfToken", {
                 method: "GET",

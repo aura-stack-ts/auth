@@ -1,5 +1,6 @@
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { OAuthCallbackAPIOptions, OAuthCallbackAPIReturn } from "@/@types/api.ts"
 
@@ -13,7 +14,7 @@ export const oauthCallback = async ({
     try {
         const { request, rateLimit, provider } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(payload.oauthId)
-            .buildRequest(requestInit, `/callback/${payload.oauthId}`)
+            .buildRequest(`/callback/${payload.oauthId}`)
             .verifyRateLimit("oauthCallback")
             .execute()
 

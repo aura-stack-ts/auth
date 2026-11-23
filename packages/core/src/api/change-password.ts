@@ -1,5 +1,6 @@
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ChangePasswordAPIOptions, ChangePasswordAPIReturn } from "@/@types/api.ts"
 
@@ -25,7 +26,7 @@ export const changePassword = async ({
         })
 
         const { request, rateLimit, userId } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/password/change")
+            .buildRequest("/password/change")
             .verifyRateLimit("changePassword")
             .verifySession()
             .verifyUserStatus()

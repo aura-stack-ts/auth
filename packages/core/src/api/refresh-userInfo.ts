@@ -2,7 +2,8 @@ import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getUserInfo } from "@/shared/oauth2/get-user-info.ts"
 import { getProviderTokens } from "@/api/get-provider-tokens.ts"
 import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
     RefreshUserInfoAPIOptions,
@@ -34,7 +35,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
 
         const { request, provider, rateLimit, rawSession, sessionToken } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauth)
-            .buildRequest(requestInit, `/providers/${oauth}/user/refresh`)
+            .buildRequest(`/providers/${oauth}/user/refresh`)
             .verifyRateLimit("refreshUserInfo")
             .verifySession()
             .verifyUserStatus()

@@ -1,5 +1,6 @@
 import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { RevokeTokenAPIOptions, RevokeTokenAPIReturn, LiteralUnion, BuiltInOAuthProvider } from "@/@types/index.ts"
 
@@ -27,7 +28,7 @@ export const revokeToken = async (
 
         const { provider, rateLimit, rawSession } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauthId)
-            .buildRequest(requestInit, `/providers/${oauthId}/tokens/revoke`)
+            .buildRequest(`/providers/${oauthId}/tokens/revoke`)
             .verifyRateLimit("revokeToken")
             .verifySession()
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)

@@ -1,5 +1,6 @@
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ResetPasswordAPIOptions, ResetPasswordAPIReturn } from "@/@types/api.ts"
 
@@ -17,7 +18,7 @@ export const resetPassword = async ({
     try {
         logger?.log("RESET_PASSWORD_INITIATED")
         const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/password/reset")
+            .buildRequest("/password/reset")
             .verifyRateLimit("resetPassword")
             .execute()
         if (rateLimit) {
