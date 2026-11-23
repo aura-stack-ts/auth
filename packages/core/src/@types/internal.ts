@@ -287,6 +287,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         headers: Headers
         provider: RuntimeOAuthProvider<any, DefaultUser>
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{ tokens: OAuthTokenPayload; headers: Headers }>
     /**
      * Attempt to refresh using the refresh token cookie.
@@ -313,6 +314,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     destroySession(options: {
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
         headers: Headers
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{ headers: Headers }>
     /**
      * Revoke the access token for a specific OAuth provider.
@@ -324,6 +326,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         headers: Headers
         disconnect: boolean
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{ headers: Headers }>
     /**
      * Check if the user is connected to a specific OAuth provider.
@@ -333,6 +336,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         oauthId: string
         headers: Headers
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<boolean>
     /**
      * Refresh the user info in the session.
@@ -381,6 +385,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         provider: RuntimeOAuthProvider
         request: Request
         params: { code: string; state: string }
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{ headers: Headers }>
     /**
      *  Send a verification email to the user with a token and URL.

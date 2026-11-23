@@ -12,7 +12,7 @@ export const oauthCallback = async ({
 }: FunctionAPIContext<OAuthCallbackAPIOptions>): Promise<OAuthCallbackAPIReturn> => {
     const { logger } = ctx
     try {
-        const { request, rateLimit, provider } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, provider, cookieStore } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(payload.oauthId)
             .buildRequest(`/callback/${payload.oauthId}`)
             .verifyRateLimit("oauthCallback")
@@ -24,6 +24,7 @@ export const oauthCallback = async ({
         const { headers } = await ctx.session.strategy.oauthCallback({
             request,
             provider,
+            cookieStore,
             oauthId: payload.oauthId,
             params: { code: payload.code, state: payload.state },
         })

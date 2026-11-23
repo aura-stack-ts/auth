@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from "vitest"
+import { describe, test, expect } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/exports/crypto.ts"
 import { jose, POST } from "@test/setup/auth.ts"

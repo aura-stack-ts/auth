@@ -24,7 +24,6 @@ export const updateSession = async <DefaultUser extends User = User>({
                 doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
             },
         })
-
         const { request, rateLimit, sessionToken, rawSession } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest("/session")
             .verifyRateLimit("updateSession")

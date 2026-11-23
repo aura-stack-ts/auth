@@ -16,7 +16,7 @@ export const isProviderConnected = async (
             structuredData: { provider: oauthId, operation: "check_connection" },
         })
 
-        const { rateLimit, rawSession } = await createValidation(ctx, requestInit, headersInit)
+        const { rateLimit, rawSession, cookieStore } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauthId)
             .buildRequest(`/providers/${oauthId}`)
             .verifyRateLimit("isProviderConnected")
@@ -29,6 +29,7 @@ export const isProviderConnected = async (
 
         const connected = await ctx.session.strategy.isProviderConnected({
             oauthId,
+            cookieStore,
             headers: getInitialHeaders(requestInit, headersInit),
             rawSession,
         })

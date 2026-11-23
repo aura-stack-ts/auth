@@ -10,22 +10,22 @@ import { createAccessToken, createRedirectTo, getUserInfo } from "@/shared/oauth
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const oauthCallback = (ctx: InternalContextForStateless): SessionStrategy["oauthCallback"] => {
-    const { cookies, jose, logger } = ctx
+    const { jose, logger } = ctx
 
-    return async ({ oauthId, provider, request, params: { code, state } }) => {
+    return async ({ oauthId, provider, request, params: { code, state }, cookieStore }) => {
         const isOIDC = isOIDCProvider(provider)
-        const cookieState = getCookie(request, cookies.store.state.name)
-        const codeVerifier = getCookie(request, cookies.store.codeVerifier.name)
-        const cookieNonce = isOIDC ? getOptionalCookie(request, cookies.store.nonce.name) : null
-        const cookieRedirectTo = getCookie(request, cookies.store.redirectTo.name)
-        const cookieRedirectURI = getCookie(request, cookies.store.redirectURI.name)
+        const cookieState = getCookie(request, cookieStore.state.name)
+        const codeVerifier = getCookie(request, cookieStore.codeVerifier.name)
+        const cookieNonce = isOIDC ? getOptionalCookie(request, cookieStore.nonce.name) : null
+        const cookieRedirectTo = getCookie(request, cookieStore.redirectTo.name)
+        const cookieRedirectURI = getCookie(request, cookieStore.redirectURI.name)
 
         const clearCookieHeaders = new HeadersBuilder(secureApiHeaders)
-            .setCookie(cookies.store.state.name, "", getExpiredCookie(cookies.store.state.attributes))
-            .setCookie(cookies.store.redirectURI.name, "", getExpiredCookie(cookies.store.redirectURI.attributes))
-            .setCookie(cookies.store.redirectTo.name, "", getExpiredCookie(cookies.store.redirectTo.attributes))
-            .setCookie(cookies.store.codeVerifier.name, "", getExpiredCookie(cookies.store.codeVerifier.attributes))
-            .setCookie(cookies.store.nonce.name, "", getExpiredCookie(cookies.store.nonce.attributes))
+            .setCookie(cookieStore.state.name, "", getExpiredCookie(cookieStore.state.attributes))
+            .setCookie(cookieStore.redirectURI.name, "", getExpiredCookie(cookieStore.redirectURI.attributes))
+            .setCookie(cookieStore.redirectTo.name, "", getExpiredCookie(cookieStore.redirectTo.attributes))
+            .setCookie(cookieStore.codeVerifier.name, "", getExpiredCookie(cookieStore.codeVerifier.attributes))
+            .setCookie(cookieStore.nonce.name, "", getExpiredCookie(cookieStore.nonce.attributes))
 
         if (!timingSafeEqual(cookieState, state)) {
             throw new AuraAuthError({ code: "AUTH_MISMATCHING_STATE", headers: clearCookieHeaders.toHeaders() })
@@ -57,9 +57,9 @@ export const oauthCallback = (ctx: InternalContextForStateless): SessionStrategy
 
         const headers = clearCookieHeaders
             .setHeader("Location", redirectTo)
-            .setCookie(cookies.store.sessionToken.name, session, cookies.store.sessionToken.attributes)
-            .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
-            .setCookie(`${cookies.store.accessToken.name}.${oauthId}`, providerToken, cookies.store.accessToken.attributes)
+            .setCookie(cookieStore.sessionToken.name, session, cookieStore.sessionToken.attributes)
+            .setCookie(cookieStore.csrfToken.name, csrfToken, cookieStore.csrfToken.attributes)
+            .setCookie(`${cookieStore.accessToken.name}.${oauthId}`, providerToken, cookieStore.accessToken.attributes)
             .toHeaders()
 
         return { headers }

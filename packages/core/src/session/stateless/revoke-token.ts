@@ -7,8 +7,8 @@ import type { InternalContextForStateless, SessionStrategy } from "@/@types/inte
 export const revokeToken = (ctx: InternalContextForStateless): SessionStrategy["revokeToken"] => {
     const { logger, identity, jose } = ctx
 
-    return async ({ oauthId, provider, disconnect, headers }) => {
-        const cookieName = `${ctx.cookies.store.accessToken.name}.${oauthId}`
+    return async ({ oauthId, provider, disconnect, headers, cookieStore }) => {
+        const cookieName = `${cookieStore.accessToken.name}.${oauthId}`
         const cookie = getCookie(headers, cookieName)
 
         if (!disconnect) {
@@ -26,7 +26,7 @@ export const revokeToken = (ctx: InternalContextForStateless): SessionStrategy["
             })
         }
         const builder = new HeadersBuilder(secureApiHeaders)
-            .setCookie(cookieName, "", getExpiredCookie(ctx.cookies.store.accessToken.attributes))
+            .setCookie(cookieName, "", getExpiredCookie(cookieStore.accessToken.attributes))
             .toHeaders()
         return { headers: builder }
     }

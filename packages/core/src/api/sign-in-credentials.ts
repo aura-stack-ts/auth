@@ -18,7 +18,7 @@ export const signInCredentials = async ({
     doubleSubmitToken = undefined,
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
-    const { cookies, credentials, logger, session: sessionConfig } = ctx
+    const { credentials, logger, session: sessionConfig } = ctx
     const headers = new Headers(secureApiHeaders)
     try {
         ctx.logger?.log("SIGN_IN_CREDENTIALS_INITIATED", {
@@ -28,7 +28,7 @@ export const signInCredentials = async ({
             },
         })
 
-        const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, cookieStore } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest("/signIn/credentials")
             .verifyRateLimit("signInCredentials")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
@@ -54,8 +54,8 @@ export const signInCredentials = async ({
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")
 
         const builder = new HeadersBuilder(headers)
-            .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
-            .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
+            .setCookie(cookieStore.csrfToken.name, csrfToken, cookieStore.csrfToken.attributes)
+            .setCookie(cookieStore.sessionToken.name, sessionToken, cookieStore.sessionToken.attributes)
 
         const { redirect, redirectURL, status } = await resolveApiRedirect({
             ctx,

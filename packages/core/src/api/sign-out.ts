@@ -23,7 +23,7 @@ export const signOut = async ({
             },
         })
 
-        const { request, rateLimit, rawSession } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, rawSession, cookieStore } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest("/signOut")
             .verifyRateLimit("signOut")
             .verifySession()
@@ -36,6 +36,7 @@ export const signOut = async ({
 
         const { headers } = await ctx.session.strategy.destroySession({
             rawSession,
+            cookieStore,
             headers: initHeaders,
         })
 

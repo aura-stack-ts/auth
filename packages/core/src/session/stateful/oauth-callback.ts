@@ -1,19 +1,19 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
+import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { assertUserStatus } from "@/shared/utils/stateful.ts"
 import { verifyOIDCConfig } from "@/shared/oidc/verify-oidc-config.ts"
 import { createCSRF, createHash, createSecretValue } from "@/exports/crypto.ts"
 import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
 import { createAccessToken, createRedirectTo, getUserInfo } from "@/shared/oauth2/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
-import { assertUserStatus } from "@/shared/utils/stateful.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
 
 export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy["oauthCallback"] => {
     const { logger, jose, session } = ctx
     const createDevice = createDeviceHelper(ctx)
 
-    return async ({ oauthId, provider, request, params: { state, code } }) => {
+    return async ({ oauthId, provider, request, params: { state, code }, cookieStore }) => {
         const isOIDC = isOIDCProvider(provider)
         const transaction = await session.config.adapter.getOAuthTransactionByState(state)
 
@@ -158,8 +158,8 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
 
         const headers = new HeadersBuilder(secureApiHeaders)
             .setHeader("Location", redirectTo)
-            .setCookie(ctx.cookies.store.sessionToken.name, sessionToken, ctx.cookies.store.sessionToken.attributes)
-            .setCookie(ctx.cookies.store.csrfToken.name, csrfToken, ctx.cookies.store.csrfToken.attributes)
+            .setCookie(cookieStore.sessionToken.name, sessionToken, cookieStore.sessionToken.attributes)
+            .setCookie(cookieStore.csrfToken.name, csrfToken, cookieStore.csrfToken.attributes)
             .toHeaders()
 
         return { headers }

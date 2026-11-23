@@ -62,13 +62,13 @@ export const createValidation = (
                 if (isStatelessStrategy(ctx.session.config)) {
                     const { session, sessionToken } = await verifySessionToken({
                         headers,
-                        cookies: ctx.cookies.store,
+                        cookies: output.cookieStore!,
                         jwt: ctx.jose.manager,
                     })
                     output.rawSession = session
                     output.sessionToken = sessionToken
                 } else {
-                    const { sessionToken } = createCookieManager(() => ctx.cookies.store).getCookie(headers)
+                    const { sessionToken } = createCookieManager(() => output.cookieStore!).getCookie(headers)
                     if (!sessionToken) {
                         throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
                     }
@@ -99,7 +99,7 @@ export const createValidation = (
         },
         verifyCSRFToken: (skipCSRFCheck: boolean, doubleSubmitToken: string | undefined, generateNewToken: boolean = false) => {
             steps.push(async () => {
-                const existingCSRFToken = getOptionalCookie(headers, ctx.cookies.store.csrfToken.name)
+                const existingCSRFToken = getOptionalCookie(headers, output.cookieStore!.csrfToken.name!)
                 const csrfTokenValue = generateNewToken
                     ? await createCSRF(ctx.jose.instance, existingCSRFToken)
                     : existingCSRFToken
@@ -109,6 +109,7 @@ export const createValidation = (
                     skipCSRFCheck,
                     doubleSubmitToken,
                     csrfTokenValue,
+                    cookieStore: output.cookieStore!,
                 })
             })
             return builder

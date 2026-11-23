@@ -5,7 +5,7 @@ import { getErrorName } from "@/errors/aura-error.ts"
 import { createRedirectTo } from "@/shared/oauth2/authorization.ts"
 import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
 import type { LOG_MESSAGES } from "@/config/logger/catalog.ts"
-import type { InternalLogger, RouterGlobalContext } from "@/@types/internal.ts"
+import type { InternalCookieStoreConfig, InternalLogger, RouterGlobalContext } from "@/@types/internal.ts"
 
 export const handleApiError = (error: unknown, defaultCode: string, defaultMessage: string, defaultStatus = 400) => {
     let code = defaultCode
@@ -59,17 +59,19 @@ export const internal_verifyCSRFToken = async ({
     doubleSubmitToken,
     ctx,
     csrfTokenValue,
+    cookieStore,
 }: {
     headers: Headers
     skipCSRFCheck: boolean
     doubleSubmitToken?: string
     csrfTokenValue?: string
     ctx: RouterGlobalContext
+    cookieStore: InternalCookieStoreConfig
 }): Promise<boolean> => {
     let csrfToken = csrfTokenValue || null
 
     try {
-        csrfToken = csrfToken || getCookie(headers, ctx.cookies.store.csrfToken.name)
+        csrfToken = csrfToken || getCookie(headers, cookieStore.csrfToken.name)
     } catch (cause) {
         throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause })
     }

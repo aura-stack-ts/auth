@@ -18,7 +18,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     doubleSubmitToken = undefined,
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<SignUpAPIOptions<Payload>>): Promise<SignUpAPIReturn> => {
-    const { signUp, cookies, session, logger } = ctx
+    const { signUp, session, logger } = ctx
     const headers = new Headers(secureApiHeaders)
     try {
         ctx.logger?.log("SIGN_UP_INITIATED", {
@@ -28,7 +28,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
             },
         })
 
-        const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, cookieStore } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest("/signUp")
             .verifyRateLimit("signUp")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
@@ -53,8 +53,8 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         logger?.log("SIGN_UP_SUCCESS")
 
         const builder = new HeadersBuilder(headers)
-            .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
-            .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
+            .setCookie(cookieStore.csrfToken.name, csrfToken, cookieStore.csrfToken.attributes)
+            .setCookie(cookieStore.sessionToken.name, sessionToken, cookieStore.sessionToken.attributes)
 
         const { redirect, redirectURL, status } = await resolveApiRedirect({
             ctx,
