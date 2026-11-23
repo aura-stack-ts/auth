@@ -1,7 +1,8 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyMagicLinkAPIOptions, VerifyMagicLinkAPIReturn } from "@/@types/api.ts"
 
@@ -16,12 +17,12 @@ export const verifyMagicLink = async (
         fallbackRedirectTo = undefined,
     }: FunctionAPIContext<VerifyMagicLinkAPIOptions>
 ): Promise<VerifyMagicLinkAPIReturn> => {
-    const { logger, session, cookies } = ctx
+    const { logger, session } = ctx
     const headers = new Headers(secureApiHeaders)
     try {
         logger?.log("VERIFY_MAGIC_LINK_INITIATED")
-        const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/signIn/magicLink/verify")
+        const { request, rateLimit, cookieStore } = await createValidation(ctx, requestInit, headersInit)
+            .buildRequest("/signIn/magicLink/verify")
             .verifyRateLimit("verifyMagicLink")
             .execute()
         if (rateLimit) {
@@ -33,8 +34,8 @@ export const verifyMagicLink = async (
 
         const csrfToken = await createCSRF(ctx.jose.instance)
         const builder = new HeadersBuilder(headers)
-            .setCookie(cookies.store.csrfToken.name, csrfToken, cookies.store.csrfToken.attributes)
-            .setCookie(cookies.store.sessionToken.name, sessionToken, cookies.store.sessionToken.attributes)
+            .setCookie(cookieStore.csrfToken.name, csrfToken, cookieStore.csrfToken.attributes)
+            .setCookie(cookieStore.sessionToken.name, sessionToken, cookieStore.sessionToken.attributes)
 
         const { redirect, redirectURL, status } = await resolveApiRedirect({
             ctx,

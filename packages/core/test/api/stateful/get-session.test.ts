@@ -6,6 +6,8 @@ import { sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("getSession", () => {
     test("getSession with no session token", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const { api } = authInstance({})
         const output = await api.getSession({ headers: {} })
         expect(output).toMatchObject({
@@ -24,6 +26,8 @@ describe("getSession", () => {
     })
 
     test("getSession with invalid session token", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const { api } = authInstance({})
 
         const output = await api.getSession({
@@ -45,6 +49,8 @@ describe("getSession", () => {
     })
 
     test("getSession with valid session token", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -52,6 +58,8 @@ describe("getSession", () => {
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
 
         const mock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { api } = authInstance({
             getSessionByToken: mock,
@@ -95,6 +103,8 @@ describe("getSession", () => {
     })
 
     test("getSession with expired session token", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -106,6 +116,8 @@ describe("getSession", () => {
             expiresAt: new Date(Date.now() - 1000),
         })
         const revokeSessionMock = vi.fn().mockResolvedValue(true)
+
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { api } = authInstance({
             getSessionByToken: sessionByTokenMock,
@@ -140,6 +152,8 @@ describe("getSession", () => {
     })
 
     test("getSession with session token missing sub claim", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -154,6 +168,7 @@ describe("getSession", () => {
                 name: undefined,
             },
         })
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { api } = authInstance({
             getSessionByToken: mock,
@@ -193,6 +208,8 @@ describe("getSession", () => {
     })
 
     test("getSession with extra attributes in database", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -209,6 +226,8 @@ describe("getSession", () => {
                 },
             },
         })
+
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { api } = authInstance({
             getSessionByToken: mock,

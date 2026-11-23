@@ -22,7 +22,7 @@ import {
     sendMagicLink,
     verifyMagicLink,
 } from "@/api/index.ts"
-import type { GlobalContext, InferSchema } from "@aura-stack/router"
+import type { InferSchema } from "@aura-stack/router"
 import type {
     BuiltInOAuthProvider,
     LiteralUnion,
@@ -76,11 +76,12 @@ import type {
 } from "@/@types/index.ts"
 import type { ZodObject } from "zod"
 import type { SchemaTypes } from "@/identity/index.ts"
+import type { RouterGlobalContext } from "@/@types/internal.ts"
 
 type InferSignUp<T> = Wrap<RemoveIndexSignature<InferSchema<T>>>
 
 export const createAuthAPI = <DefaultUser extends User = User, SignUpSchema extends SchemaTypes = ZodObject<any>>(
-    ctx: GlobalContext
+    ctx: RouterGlobalContext<any, any>
 ) => {
     return {
         /**

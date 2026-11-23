@@ -31,11 +31,8 @@ const auth = createAuth({
     },
 })
 
-export const {
-    handlers: { GET, POST, PATCH },
-    jose,
-    api,
-} = auth
+export const { handlers, jose, api } = auth
+export const { GET, POST, PATCH } = handlers
 
 export const authInstance = (adapter?: Partial<Record<keyof DatabaseAdapter, any>>, override?: Partial<AuthConfig<any, any>>) => {
     const config: AuthConfig<any, any> = {

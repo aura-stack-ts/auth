@@ -1,5 +1,6 @@
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
 
@@ -22,8 +23,8 @@ export const signOut = async ({
             },
         })
 
-        const { request, rateLimit, rawSession } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/signOut")
+        const { request, rateLimit, rawSession, cookieStore } = await createValidation(ctx, requestInit, headersInit)
+            .buildRequest("/signOut")
             .verifyRateLimit("signOut")
             .verifySession()
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
@@ -35,6 +36,7 @@ export const signOut = async ({
 
         const { headers } = await ctx.session.strategy.destroySession({
             rawSession,
+            cookieStore,
             headers: initHeaders,
         })
 

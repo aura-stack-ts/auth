@@ -8,7 +8,7 @@ import type { InternalContextForStateless, SessionStrategy } from "@/@types/inte
 export const getProviderTokens = (ctx: InternalContextForStateless): SessionStrategy["getProviderTokens"] => {
     const { logger, identity, jose } = ctx
 
-    return async ({ oauthId, provider, headers }) => {
+    return async ({ oauthId, provider, headers, cookieStore }) => {
         logger?.log("STATELESS_GET_PROVIDER_TOKENS_START", {
             structuredData: {
                 strategy: "stateless",
@@ -17,7 +17,7 @@ export const getProviderTokens = (ctx: InternalContextForStateless): SessionStra
             },
         })
 
-        const cookieName = `${ctx.cookies.store.accessToken.name}.${oauthId}`
+        const cookieName = `${cookieStore.accessToken.name}.${oauthId}`
         const cookie = getCookie(headers, cookieName)
 
         const decodedToken = await jose.manager.verifyToken(cookie)
@@ -63,7 +63,7 @@ export const getProviderTokens = (ctx: InternalContextForStateless): SessionStra
 
             const encodedTokens = await jose.manager.createToken(refreshedTokens as any)
             const builder = new HeadersBuilder(secureApiHeaders)
-                .setCookie(cookieName, encodedTokens, ctx.cookies.store.accessToken.attributes)
+                .setCookie(cookieName, encodedTokens, cookieStore.accessToken.attributes)
                 .toHeaders()
 
             logger?.log("STATELESS_GET_PROVIDER_TOKENS_COOKIE_UPDATED", {

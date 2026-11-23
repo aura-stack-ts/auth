@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed cookie store initialization across authentication requests to correctly determine whether secure cookies should be used. The cookie configuration is now resolved based on the `useSecureCookies` option, trusted proxy headers (when enabled), `baseURL`, or environment variables. Previously, direct server-side authentication APIs initialized the cookie store for insecure connections without considering the current request's transport security. This could override an explicitly configured secure attribute with `false`, allowing session cookies issued over HTTPS to be transmitted over HTTP. [#335](https://github.com/aura-stack-ts/auth/pull/335)
+
 ### Security
 
 - Enabled secure cookies by default in `createAuth()`. Cookie configurations now use secure settings, including the `__Secure-` and `__Host-` prefixes and their respective required attributes. This reinforces the library's security-first philosophy by adopting a **secure by default** approach. [#334](https://github.com/aura-stack-ts/auth/pull/334)

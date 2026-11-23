@@ -1,6 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SendMagicLinkAPIOptions, SendMagicLinkAPIReturn } from "@/@types/api.ts"
 
@@ -30,7 +31,7 @@ export const sendMagicLink = async (
             },
         })
         const { request, rateLimit, origin } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/signIn/magicLink")
+            .buildRequest("/signIn/magicLink")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifyRateLimit("sendMagicLink")
             .execute()

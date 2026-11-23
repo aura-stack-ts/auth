@@ -13,8 +13,6 @@ describe("signInCredentials API", async () => {
     test("success signIn flow", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const { api } = await import("@test/setup/auth.ts")
-
         const output = await api.signInCredentials({
             headers: {
                 ...headers,
@@ -188,8 +186,6 @@ describe("signInCredentials API", async () => {
     test("signIn with redirect: true and redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const { api } = await import("@test/setup/auth.ts")
-
         const output = await api.signInCredentials({
             headers,
             payload: {
@@ -227,8 +223,6 @@ describe("signInCredentials API", async () => {
     test("signIn with redirect: false and valid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const { api } = await import("@test/setup/auth.ts")
-
         const output = await api.signInCredentials({
             headers,
             payload: {
@@ -264,8 +258,6 @@ describe("signInCredentials API", async () => {
 
     test("signIn redirect: true and invalid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-
-        const { api } = await import("@test/setup/auth.ts")
 
         const output = await api.signInCredentials({
             headers,
@@ -303,8 +295,6 @@ describe("signInCredentials API", async () => {
     test("signIn with redirect: false and invalid redirectTo", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
-        const { api } = await import("@test/setup/auth.ts")
-
         const output = await api.signInCredentials({
             headers,
             payload: {
@@ -340,7 +330,6 @@ describe("signInCredentials API", async () => {
 
     test("signInCredentials with doubleSubmitToken", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const output = await api.signInCredentials({
             headers,
@@ -376,7 +365,6 @@ describe("signInCredentials API", async () => {
 
     test("signInCredentials with doubleSubmitToken and invalid value", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const output = await api.signInCredentials({
             headers,
@@ -403,7 +391,6 @@ describe("signInCredentials API", async () => {
 
     test("signInCredentials enables double-submit cookie manually", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const newHeaders = new Headers(headers)
         newHeaders.set("x-csrf-token", csrfToken)
@@ -442,7 +429,6 @@ describe("signInCredentials API", async () => {
 
     test("signInCredentials enables double-submit cookie manually and invalid value", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const newHeaders = new Headers(headers)
         newHeaders.set("x-csrf-token", "invalid-value")

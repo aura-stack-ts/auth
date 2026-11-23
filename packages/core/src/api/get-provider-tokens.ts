@@ -1,5 +1,6 @@
 import { getInitialHeaders, secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
     GetProviderTokensAPIOptions,
@@ -13,9 +14,9 @@ export const getProviderTokens = async (
     { ctx, request: requestInit, headers: headersInit }: FunctionAPIContext<GetProviderTokensAPIOptions>
 ): Promise<GetProviderTokensAPIReturn> => {
     try {
-        const { rateLimit, provider, rawSession } = await createValidation(ctx, requestInit, headersInit)
+        const { rateLimit, provider, rawSession, cookieStore } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauthId)
-            .buildRequest(requestInit, `/providers/${oauthId}/tokens`)
+            .buildRequest(`/providers/${oauthId}/tokens`)
             .verifyRateLimit("getProviderTokens")
             .verifySession()
             .verifyUserStatus()
@@ -28,6 +29,7 @@ export const getProviderTokens = async (
             oauthId,
             provider,
             rawSession,
+            cookieStore,
             headers: getInitialHeaders(requestInit, headersInit),
         })
         return {

@@ -1,5 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { getExpiredCookie } from "@/shared/http/cookie.ts"
+import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -9,8 +10,10 @@ export const getSession = async <DefaultUser extends User = User>({
     ctx,
     headers: headersInit,
 }: FunctionAPIContext<GetSessionAPIOptions>): Promise<GetSessionAPIReturn<DefaultUser>> => {
+    const incomingHeaders = getInitialHeaders(undefined, headersInit)
+    const cookieStore = getCookieStore({ ctx, request: incomingHeaders })
     const headers = new HeadersBuilder(secureApiHeaders)
-        .setCookie(ctx.cookies.store.sessionToken.name, "", getExpiredCookie(ctx.cookies.store.sessionToken.attributes))
+        .setCookie(cookieStore.sessionToken.name, "", getExpiredCookie(cookieStore.sessionToken.attributes))
         .toHeaders()
     const unauthorizedError = {
         code: "GET_SESSION_FAILED",
@@ -25,7 +28,8 @@ export const getSession = async <DefaultUser extends User = User>({
     }
     try {
         const { session, headers } = await ctx.session.strategy.getSession({
-            headers: getInitialHeaders(undefined, headersInit),
+            headers: incomingHeaders,
+            cookieStore,
         })
         if (!session) return unauthorized
         return {

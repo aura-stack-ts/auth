@@ -9,6 +9,7 @@ export const getTrustedOriginsConfig = <Identity extends Identities, SignUpSchem
 ) => {
     const originsFromEnv = getEnvArray("TRUSTED_ORIGINS")
     const origins = originsFromEnv.length > 0 ? originsFromEnv : config?.trustedOrigins
+    /** Validates the URLs */
     if (proxyHeaders && (!origins || (Array.isArray(origins) && origins.length === 0))) {
         throw new AuraAuthError({ code: "AUTH_INVALID_PROXY_HEADERS_CONFIG" })
     }

@@ -407,6 +407,17 @@ export interface CookieConfig {
      * @see {@link CookieStoreConfig} for the structure of each cookie configuration.
      */
     overrides?: Partial<CookieStoreConfig>
+    /**
+     * Controls whether the app emits secure cookies (including the `Secure` attribute
+     * and `__Secure-` or `__Host-` cookie prefixes). Configure this carefully based on
+     * where the app is mounted and which resources interact with it.
+     *
+     * @remarks
+     * Takes precedence over `trustedOrigins` inference, `BASE_URL`/`baseURL`, and production mode detection.
+     *
+     * @default undefined
+     */
+    useSecureCookies?: boolean
 }
 
 /**

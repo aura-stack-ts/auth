@@ -146,6 +146,7 @@ export type JoseManager<DefaultUser extends User = User> = {
 
 export interface InternalCookieConfig {
     store: InternalCookieStoreConfig
+    secureCookies: "trusted" | "untrusted" | "dynamic"
     precomputed: {
         trusted: InternalCookieStoreConfig
         untrusted: InternalCookieStoreConfig
@@ -269,7 +270,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Read and validate the session from an incoming request.
      * Returns null if absent, invalid, or expired. Never throws on auth failure.
      */
-    getSession(options: { headers: Headers }): Promise<{
+    getSession(options: { headers: Headers; cookieStore: InternalCookieStoreConfig }): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
     }>
@@ -286,6 +287,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         headers: Headers
         provider: RuntimeOAuthProvider<any, DefaultUser>
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{ tokens: OAuthTokenPayload; headers: Headers }>
     /**
      * Attempt to refresh using the refresh token cookie.
@@ -295,6 +297,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         session: DeepPartial<Session<DefaultUser>>
         sessionToken: string
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{
         session: Session<DefaultUser>
         headers: Headers
@@ -312,6 +315,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     destroySession(options: {
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
         headers: Headers
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{ headers: Headers }>
     /**
      * Revoke the access token for a specific OAuth provider.
@@ -323,6 +327,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         headers: Headers
         disconnect: boolean
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{ headers: Headers }>
     /**
      * Check if the user is connected to a specific OAuth provider.
@@ -332,6 +337,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         oauthId: string
         headers: Headers
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<boolean>
     /**
      * Refresh the user info in the session.
@@ -342,6 +348,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         skipCSRFCheck?: boolean
         sessionToken: string
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
@@ -365,6 +372,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         request: Request
         headers: Headers
         redirectTo?: string
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{
         success: boolean
         headers: Headers
@@ -379,6 +387,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         provider: RuntimeOAuthProvider
         request: Request
         params: { code: string; state: string }
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{ headers: Headers }>
     /**
      *  Send a verification email to the user with a token and URL.

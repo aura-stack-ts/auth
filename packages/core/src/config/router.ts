@@ -25,8 +25,8 @@ import {
     verifyMagicLinkAction,
 } from "@/actions/index.ts"
 import { createAuthAPI } from "@/api/index.ts"
-import { createContext } from "@/config/context.ts"
 import { onErrorHook } from "@/config/hooks.ts"
+import { createContext } from "@/config/context.ts"
 import type { ZodObject } from "zod"
 import type { EditableShape } from "@/@types/identity.ts"
 import type { ZodIdentitySchema } from "@/@types/index.ts"

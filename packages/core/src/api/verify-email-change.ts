@@ -1,5 +1,6 @@
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { createValidation, errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyEmailChangeAPIOptions, VerifyEmailChangeAPIReturn } from "@/@types/api.ts"
 
@@ -24,7 +25,7 @@ export const verifyEmailChange = async ({
             },
         })
         const { request, rateLimit, userId, sessionId } = await createValidation(ctx, requestInit, headersInit)
-            .buildRequest(requestInit, "/email/change/verify")
+            .buildRequest("/email/change/verify")
             .verifyRateLimit("verifyEmailChange")
             .verifySession()
             .verifyUserStatus()

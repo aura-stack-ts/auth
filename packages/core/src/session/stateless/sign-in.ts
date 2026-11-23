@@ -7,7 +7,7 @@ import type { InternalContextForStateless, SessionStrategy } from "@/@types/inte
 export const signIn = (ctx: InternalContextForStateless): SessionStrategy["signIn"] => {
     const { logger } = ctx
 
-    return async ({ oauthId, provider, request, headers, redirectTo }) => {
+    return async ({ oauthId, provider, request, headers, redirectTo, cookieStore }) => {
         const redirectURI = await createRedirectURI(request, oauthId, ctx)
         const redirectToValue = await createRedirectTo(request, redirectTo, ctx)
 
@@ -48,13 +48,13 @@ export const signIn = (ctx: InternalContextForStateless): SessionStrategy["signI
 
         const headersBuilder = new HeadersBuilder(headers)
             .setHeader("Location", authorization)
-            .setCookie(ctx.cookies.store.state.name, state, ctx.cookies.store.state.attributes)
-            .setCookie(ctx.cookies.store.redirectURI.name, redirectURI, ctx.cookies.store.redirectURI.attributes)
-            .setCookie(ctx.cookies.store.redirectTo.name, redirectToValue, ctx.cookies.store.redirectTo.attributes)
-            .setCookie(ctx.cookies.store.codeVerifier.name, codeVerifier, ctx.cookies.store.codeVerifier.attributes)
+            .setCookie(cookieStore.state.name, state, cookieStore.state.attributes)
+            .setCookie(cookieStore.redirectURI.name, redirectURI, cookieStore.redirectURI.attributes)
+            .setCookie(cookieStore.redirectTo.name, redirectToValue, cookieStore.redirectTo.attributes)
+            .setCookie(cookieStore.codeVerifier.name, codeVerifier, cookieStore.codeVerifier.attributes)
 
         if (nonce) {
-            headersBuilder.setCookie(ctx.cookies.store.nonce.name, nonce, ctx.cookies.store.nonce.attributes)
+            headersBuilder.setCookie(cookieStore.nonce.name, nonce, cookieStore.nonce.attributes)
         }
         return {
             success: true,

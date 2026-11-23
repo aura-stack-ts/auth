@@ -32,6 +32,8 @@ describe("sessionAction", () => {
     })
 
     test("invalid sessionToken cookie", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -40,6 +42,8 @@ describe("sessionAction", () => {
 
         const revokeSessionMock = vi.fn()
         const sessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { handlers } = authInstance({
             revokeSession: revokeSessionMock,
@@ -62,6 +66,8 @@ describe("sessionAction", () => {
     })
 
     test("valid sessionToken cookie with correct version", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -70,6 +76,8 @@ describe("sessionAction", () => {
 
         const revokeSessionMock = vi.fn()
         const sessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { handlers } = authInstance({
             revokeSession: revokeSessionMock,
@@ -104,6 +112,8 @@ describe("sessionAction", () => {
     })
 
     test("valid sessionToken cookie in insecure connection", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -112,6 +122,8 @@ describe("sessionAction", () => {
 
         const revokeSessionMock = vi.fn()
         const sessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { handlers } = authInstance({
             revokeSession: revokeSessionMock,
@@ -146,6 +158,8 @@ describe("sessionAction", () => {
     })
 
     test("expired sessionToken cookie", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -157,6 +171,8 @@ describe("sessionAction", () => {
             ...sessionEntityWithUser,
             expiresAt: new Date(Date.now() / 1000 - 3600),
         })
+
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { handlers } = authInstance({
             revokeSession: revokeSessionMock,
@@ -195,6 +211,8 @@ describe("sessionAction", () => {
     })
 
     test("invalid access from http", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -203,6 +221,8 @@ describe("sessionAction", () => {
 
         const revokeSessionMock = vi.fn()
         const sessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { handlers } = authInstance({
             revokeSession: revokeSessionMock,
@@ -225,6 +245,8 @@ describe("sessionAction", () => {
     })
 
     test("invalid access from https", async () => {
+        vi.stubEnv("NODE_ENV", "production")
+
         const registry = createSchemaRegistry({})
         const module = await import("@/validator/registry.ts")
 
@@ -233,6 +255,8 @@ describe("sessionAction", () => {
 
         const revokeSessionMock = vi.fn()
         const sessionByTokenMock = vi.fn().mockResolvedValue(sessionEntityWithUser)
+
+        const { authInstance } = await import("@test/setup/auth.ts")
 
         const { handlers } = authInstance({
             revokeSession: revokeSessionMock,
