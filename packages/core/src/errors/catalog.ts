@@ -335,6 +335,13 @@ export const ERROR_CATALOG = {
             "The request location context was blocked. The incoming value does not match patterns mapped inside your array configuration rules.",
         userMessage: "The incoming ORIGIN is not trusted. Verify your trustedOrigins configuration.",
     },
+    INVALID_TRUSTED_ORIGIN_VALUE: {
+        type: "VALIDATION",
+        statusCode: 500,
+        name: "ConfigError",
+        message: "The 'trustedOrigins' configuration value must contain only valid URL strings.",
+        userMessage: "Internal library configuration error. Each trustedOrigins value must be a valid URL.",
+    },
     CLIENT_BASE_URL_MISSING: {
         type: "VALIDATION",
         statusCode: 500,

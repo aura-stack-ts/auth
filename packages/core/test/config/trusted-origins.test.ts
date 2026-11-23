@@ -1,5 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { getTrustedOriginsConfig } from "@/config/get-trusted-origins.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import type { AuthConfig } from "@/index.ts"
 
 describe("getTrustedOriginsConfig", () => {
@@ -83,5 +84,27 @@ describe("getTrustedOriginsConfig", () => {
                 true
             )
         ).toEqual(["https://app.com"])
+    })
+
+    test("throws INVALID_TRUSTED_ORIGIN_VALUE for invalid origin URLs", () => {
+        expect(() =>
+            getTrustedOriginsConfig(
+                {
+                    trustedOrigins: ["not-a-url"],
+                },
+                false
+            )
+        ).toThrow(new AuraAuthError({ code: "INVALID_TRUSTED_ORIGIN_VALUE" }))
+    })
+
+    test("throws INVALID_TRUSTED_ORIGIN_VALUE for invalid origin URLs", () => {
+        expect(() =>
+            getTrustedOriginsConfig(
+                {
+                    trustedOrigins: ["https://app.com", "not-a-url"],
+                },
+                false
+            )
+        ).toThrow(new AuraAuthError({ code: "INVALID_TRUSTED_ORIGIN_VALUE" }))
     })
 })

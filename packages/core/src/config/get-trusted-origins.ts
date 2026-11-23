@@ -1,7 +1,8 @@
 import { getEnvArray } from "@/shared/env.ts"
+import { isString } from "@/shared/assert.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import type { AuthConfig, TrustedProxyHeadersSource } from "@/@types/config.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
+import type { AuthConfig, TrustedProxyHeadersSource } from "@/@types/config.ts"
 
 export const getTrustedOriginsConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>(
     config: AuthConfig<Identity, SignUpSchema> | undefined,
@@ -9,9 +10,15 @@ export const getTrustedOriginsConfig = <Identity extends Identities, SignUpSchem
 ) => {
     const originsFromEnv = getEnvArray("TRUSTED_ORIGINS")
     const origins = originsFromEnv.length > 0 ? originsFromEnv : config?.trustedOrigins
-    /** Validates the URLs */
     if (proxyHeaders && (!origins || (Array.isArray(origins) && origins.length === 0))) {
         throw new AuraAuthError({ code: "AUTH_INVALID_PROXY_HEADERS_CONFIG" })
+    }
+    if (Array.isArray(origins)) {
+        origins.forEach((origin) => {
+            if (!isString(origin) || !URL.canParse(origin)) {
+                throw new AuraAuthError({ code: "INVALID_TRUSTED_ORIGIN_VALUE" })
+            }
+        })
     }
     return origins
 }
