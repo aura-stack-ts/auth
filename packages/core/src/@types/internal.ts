@@ -270,7 +270,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Read and validate the session from an incoming request.
      * Returns null if absent, invalid, or expired. Never throws on auth failure.
      */
-    getSession(options: { headers: Headers }): Promise<{
+    getSession(options: { headers: Headers; cookieStore: InternalCookieStoreConfig }): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers
     }>
@@ -297,6 +297,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         session: DeepPartial<Session<DefaultUser>>
         sessionToken: string
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{
         session: Session<DefaultUser>
         headers: Headers
@@ -347,6 +348,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         skipCSRFCheck?: boolean
         sessionToken: string
         rawSession: TypedJWTPayload<User> | SessionWithUserEntity
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{
         session: Session<DefaultUser> | null
         headers: Headers

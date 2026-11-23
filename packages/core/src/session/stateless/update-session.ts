@@ -1,4 +1,5 @@
 import { getExpiresAt } from "@/shared/utils/session-strategy.ts"
+import { createCookieManager } from "@/session/cookie-manager.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
@@ -10,7 +11,7 @@ export const updateSession = <DefaultUser extends User = User>(
     const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = session?.config?.expirationStrategy ?? session?.config?.jwt?.expirationStrategy ?? "absolute"
 
-    return async ({ session, rawSession }) => {
+    return async ({ session, rawSession, cookieStore }) => {
         const now = Date.now()
 
         const { exp, mexp, iat } = await identity.schemaRegistry.parseWithJWT(rawSession)
@@ -49,7 +50,7 @@ export const updateSession = <DefaultUser extends User = User>(
         })
         return {
             session: { expires: updatedSession.expires, user: verifiedPayload },
-            headers: ctx.cookies.manager.setCookie({ sessionToken }),
+            headers: createCookieManager(() => cookieStore).setCookie({ sessionToken }),
         }
     }
 }

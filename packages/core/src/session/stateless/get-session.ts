@@ -2,6 +2,7 @@ import { getErrorName } from "@/errors/aura-error.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
+import { createCookieManager } from "@/session/cookie-manager.ts"
 import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
@@ -18,10 +19,11 @@ export const getSession = <DefaultUser extends User>(
         throw new AuraAuthError({ code: "INVALID_SLIDING_THRESHOLD_CONFIG_VALUE" })
     }
 
-    return async ({ headers: incomingHeaders }) => {
+    return async ({ headers: incomingHeaders, cookieStore }) => {
         const headers = new Headers(secureApiHeaders)
+        const cookieManager = createCookieManager(() => cookieStore)
         try {
-            const { sessionToken } = ctx.cookies.manager.getCookie(incomingHeaders)
+            const { sessionToken } = cookieManager.getCookie(incomingHeaders)
             if (!sessionToken) return { session: null, headers }
 
             const payload = await jose.manager.verifyToken(sessionToken)
@@ -61,11 +63,11 @@ export const getSession = <DefaultUser extends User>(
                     user: sessionPayload,
                     expires: expiresAt.toISOString(),
                 },
-                headers: ctx.cookies.manager.setCookie({ sessionToken: newSessionToken }),
+                headers: cookieManager.setCookie({ sessionToken: newSessionToken }),
             }
         } catch (error) {
             logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
-            return { session: null, headers: ctx.cookies.manager.clearAll() }
+            return { session: null, headers: cookieManager.clearAll() }
         }
     }
 }

@@ -33,7 +33,11 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             },
         })
 
-        const { request, provider, rateLimit, rawSession, sessionToken } = await createValidation(ctx, requestInit, headersInit)
+        const { request, provider, rateLimit, rawSession, sessionToken, cookieStore } = await createValidation(
+            ctx,
+            requestInit,
+            headersInit
+        )
             .verifyOAuthProvider(oauth)
             .buildRequest(`/providers/${oauth}/user/refresh`)
             .verifyRateLimit("refreshUserInfo")
@@ -86,6 +90,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             rawSession,
             sessionToken,
             user: userInfo,
+            cookieStore,
         })
         return {
             success: !!session,

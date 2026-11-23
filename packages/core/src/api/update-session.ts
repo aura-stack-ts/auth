@@ -1,6 +1,8 @@
 import { isAuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
+import { createCookieManager } from "@/session/cookie-manager.ts"
+import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getInitialHeaders, secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
@@ -17,6 +19,7 @@ export const updateSession = async <DefaultUser extends User = User>({
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
     const initialHeaders = new Headers(secureApiHeaders)
+    let cookieStore = getCookieStore({ ctx, request: requestInit ?? getInitialHeaders(undefined, headersInit) })
     try {
         ctx.logger?.log("UPDATE_SESSION_INITIATED", {
             structuredData: {
@@ -24,7 +27,13 @@ export const updateSession = async <DefaultUser extends User = User>({
                 doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
             },
         })
-        const { request, rateLimit, sessionToken, rawSession } = await createValidation(ctx, requestInit, headersInit)
+        const {
+            request,
+            rateLimit,
+            sessionToken,
+            rawSession,
+            cookieStore: resolvedCookieStore,
+        } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest("/session")
             .verifyRateLimit("updateSession")
             .verifySession()
@@ -35,11 +44,13 @@ export const updateSession = async <DefaultUser extends User = User>({
         if (rateLimit) {
             return rateLimit as UpdateSessionAPIReturn<DefaultUser>
         }
+        cookieStore = resolvedCookieStore
 
         const { session, headers } = await ctx.session.strategy.updateSession({
             session: sessionInit,
             rawSession,
             sessionToken,
+            cookieStore,
         })
 
         const { redirect, redirectURL, status } = await resolveApiRedirect({
@@ -77,7 +88,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             isAuraAuthError(error) &&
             ["SESSION_NOT_FOUND", "SESSION_INVALID", "SESSION_EXPIRED", "SESSION_REVOKED"].includes(error.code)
         const resolvedHeaders = shouldClearSessionCookie
-            ? toUnionHeaders(ctx.cookies.manager.clear(), initialHeaders)
+            ? toUnionHeaders(createCookieManager(() => cookieStore).clear(), initialHeaders)
             : initialHeaders
 
         return {
