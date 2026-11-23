@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { createCSRF } from "@/exports/crypto.ts"
 import { jose, POST } from "@test/setup/auth.ts"
@@ -292,13 +292,9 @@ describe("signInCredentials action", async () => {
 
     test("credentials with redirect: false and redirectTo", async () => {
         const response = await POST(
-            new Request("http://localhost:3000/auth/signIn/credentials?redirect=false&redirectTo=/dashboard", {
+            new Request("https://example.com/auth/signIn/credentials?redirect=false&redirectTo=/dashboard", {
                 method: "POST",
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                    Cookie: `aura-auth.csrf_token=${csrfToken}`,
-                    "Content-Type": "application/json",
-                },
+                headers,
                 body: JSON.stringify({
                     username: "alice",
                     password: "1234567890",
@@ -312,7 +308,7 @@ describe("signInCredentials action", async () => {
             redirect: false,
             redirectURL: "/dashboard",
         })
-        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "aura-auth.session_token")!)
+        const decodedToken = await jose.decodeJWT(getSetCookie(response.headers, "__Secure-aura-auth.session_token")!)
         expect(decodedToken).toMatchObject({
             sub: "1234567890",
             name: "alice",

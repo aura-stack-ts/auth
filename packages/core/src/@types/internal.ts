@@ -366,6 +366,7 @@ export interface SessionStrategy<DefaultUser extends User = User> {
         request: Request
         headers: Headers
         redirectTo?: string
+        cookieStore: InternalCookieStoreConfig
     }): Promise<{
         success: boolean
         headers: Headers

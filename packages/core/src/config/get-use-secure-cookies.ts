@@ -6,15 +6,17 @@ import type { Identities, SchemaTypes } from "@/identity/index.ts"
 export const getUseSecureCookiesConfig = <Identity extends Identities, SignUpSchema extends SchemaTypes>({
     config,
     baseURL,
+    proxyHeaders,
 }: {
     config: AuthConfig<Identity, SignUpSchema> | undefined
     baseURL: string | undefined
+    proxyHeaders: boolean
 }) => {
     return isBoolean(config?.cookies?.useSecureCookies)
         ? config.cookies.useSecureCookies
             ? "trusted"
             : "untrusted"
-        : config?.trustedProxyHeaders
+        : proxyHeaders
           ? "dynamic"
           : isString(baseURL) && URL.canParse(baseURL)
             ? new URL(baseURL).protocol === "https:"

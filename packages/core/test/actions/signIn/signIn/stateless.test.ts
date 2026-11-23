@@ -62,8 +62,8 @@ describe("signIn action", () => {
         } = createAuth({
             oauth: [oauthCustomService],
         })
-        const request = await GET(new Request("http://example.com/auth/signIn/oauth-provider?redirectTo=/dashboard"))
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("/dashboard")
+        const request = await GET(new Request("https://example.com/auth/signIn/oauth-provider?redirectTo=/dashboard"))
+        expect(getSetCookie(request, "__Secure-aura-auth.redirect_to")).toEqual("/dashboard")
     })
 
     test("stores redirectTo when origin is trusted", async () => {
@@ -71,12 +71,12 @@ describe("signIn action", () => {
             handlers: { GET },
         } = createAuth({
             oauth: [oauthCustomService],
-            trustedOrigins: ["http://example.com", "http://app.com"],
+            trustedOrigins: ["https://example.com", "https://app.com"],
         })
         const request = await GET(
-            new Request("http://example.com/auth/signIn/oauth-provider?redirectTo=http://app.com/dashboard")
+            new Request("https://example.com/auth/signIn/oauth-provider?redirectTo=https://app.com/dashboard")
         )
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("http://app.com/dashboard")
+        expect(getSetCookie(request, "__Secure-aura-auth.redirect_to")).toEqual("https://app.com/dashboard")
     })
 
     test("falls back to root when redirectTo origin is untrusted", async () => {
@@ -86,9 +86,9 @@ describe("signIn action", () => {
             oauth: [oauthCustomService],
         })
         const request = await GET(
-            new Request("http://example.com/auth/signIn/oauth-provider?redirectTo=http://app.com/dashboard")
+            new Request("https://example.com/auth/signIn/oauth-provider?redirectTo=https://app.com/dashboard")
         )
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("/")
+        expect(getSetCookie(request, "__Secure-aura-auth.redirect_to")).toEqual("/")
     })
 
     test("uses same-origin Referer as redirectTo", async () => {
@@ -98,13 +98,13 @@ describe("signIn action", () => {
             oauth: [oauthCustomService],
         })
         const request = await GET(
-            new Request("http://example.com/auth/signIn/oauth-provider", {
+            new Request("https://example.com/auth/signIn/oauth-provider", {
                 headers: {
-                    Referer: "http://example.com/dashboard",
+                    Referer: "https://example.com/dashboard",
                 },
             })
         )
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("/dashboard")
+        expect(getSetCookie(request, "__Secure-aura-auth.redirect_to")).toEqual("/dashboard")
     })
 
     test("falls back to root when Referer is cross-origin", async () => {
@@ -114,13 +114,13 @@ describe("signIn action", () => {
             oauth: [oauthCustomService],
         })
         const request = await GET(
-            new Request("http://example.com/auth/signIn/oauth-provider", {
+            new Request("https://example.com/auth/signIn/oauth-provider", {
                 headers: {
-                    Referer: "http://app.com/dashboard",
+                    Referer: "https://app.com/dashboard",
                 },
             })
         )
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("/")
+        expect(getSetCookie(request, "__Secure-aura-auth.redirect_to")).toEqual("/")
     })
 
     test("accepts cross-origin Referer when origin is trusted", async () => {
@@ -128,16 +128,16 @@ describe("signIn action", () => {
             handlers: { GET },
         } = createAuth({
             oauth: [oauthCustomService],
-            trustedOrigins: ["http://example.com", "http://app.com"],
+            trustedOrigins: ["https://example.com", "https://app.com"],
         })
         const request = await GET(
-            new Request("http://example.com/auth/signIn/oauth-provider", {
+            new Request("https://example.com/auth/signIn/oauth-provider", {
                 headers: {
-                    Referer: "http://app.com/dashboard",
+                    Referer: "https://app.com/dashboard",
                 },
             })
         )
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("http://app.com/dashboard")
+        expect(getSetCookie(request, "__Secure-aura-auth.redirect_to")).toEqual("https://app.com/dashboard")
     })
 
     test("rejects cross-origin Referer when trusted proxy headers are used", async () => {
@@ -195,13 +195,13 @@ describe("signIn action", () => {
             oauth: [oauthCustomService],
         })
         const request = await GET(
-            new Request("http://example.com/auth/signIn/oauth-provider", {
+            new Request("https://example.com/auth/signIn/oauth-provider", {
                 headers: {
-                    Referer: "http://app.example.com/dashboard",
+                    Referer: "https://app.example.com/dashboard",
                 },
             })
         )
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("/")
+        expect(getSetCookie(request, "__Secure-aura-auth.redirect_to")).toEqual("/")
     })
 
     test("accepts subdomain Referer when wildcard origin is trusted", async () => {
@@ -209,16 +209,16 @@ describe("signIn action", () => {
             handlers: { GET },
         } = createAuth({
             oauth: [oauthCustomService],
-            trustedOrigins: ["http://*.example.com"],
+            trustedOrigins: ["https://*.example.com"],
         })
         const request = await GET(
-            new Request("http://sub.example.com/auth/signIn/oauth-provider", {
+            new Request("https://sub.example.com/auth/signIn/oauth-provider", {
                 headers: {
-                    Referer: "http://app.example.com/dashboard",
+                    Referer: "https://app.example.com/dashboard",
                 },
             })
         )
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("http://app.example.com/dashboard")
+        expect(getSetCookie(request, "__Secure-aura-auth.redirect_to")).toEqual("https://app.example.com/dashboard")
     })
 
     test("rejects proxy-derived origin when trusted origins are not configured", async () => {
@@ -282,16 +282,16 @@ describe("signIn action", () => {
             handlers: { GET },
         } = createAuth({
             oauth: [oauthCustomService],
-            trustedOrigins: ["http://*.example.com"],
+            trustedOrigins: ["https://*.example.com"],
         })
         const request = await GET(
-            new Request("http://sub.example.com/auth/signIn/oauth-provider", {
+            new Request("https://sub.example.com/auth/signIn/oauth-provider", {
                 headers: {
-                    Referer: "http://app.example.com/dashboard",
+                    Referer: "https://app.example.com/dashboard",
                 },
             })
         )
-        expect(getSetCookie(request, "aura-auth.redirect_to")).toEqual("http://app.example.com/dashboard")
+        expect(getSetCookie(request, "__Secure-aura-auth.redirect_to")).toEqual("https://app.example.com/dashboard")
     })
 
     test("return UNTRUSTED_ORIGIN error when origin is not set in the trusted origin list", async () => {

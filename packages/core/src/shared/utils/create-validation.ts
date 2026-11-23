@@ -10,9 +10,9 @@ import { verifySessionToken } from "@/shared/utils/session.ts"
 import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
 import { internal_verifyCSRFToken } from "@/shared/utils/api.ts"
 import { createCookieManager } from "@/session/cookie-manager.ts"
-import { isSecureConnection } from "@/shared/http/secure-connection.ts"
+import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import type { AuraErrorCode } from "@/errors/catalog.ts"
-import type { RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
+import type { InternalCookieStoreConfig, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
 import type {
     BuiltInOAuthProvider,
     LiteralUnion,
@@ -40,6 +40,7 @@ export const createValidation = (
         origin?: string
         rawSession?: TypedJWTPayload<User> | SessionWithUserEntity
         sessionToken?: string
+        cookieStore?: InternalCookieStoreConfig
     } = {}
 
     const builder = {
@@ -122,10 +123,7 @@ export const createValidation = (
                 }
                 output.origin = await getOriginURL(request, ctx)
                 output.request = request
-                if (ctx.cookies.secureCookies === "dynamic") {
-                    const isSecure = isSecureConnection(request, ctx.trustedProxyHeaders)
-                    ctx.cookies.store = isSecure ? ctx.cookies.precomputed.trusted : ctx.cookies.precomputed.untrusted
-                }
+                output.cookieStore = getCookieStore({ ctx, request })
             })
             return builder
         },
@@ -155,6 +153,7 @@ export const createValidation = (
                 origin: string
                 rawSession: TypedJWTPayload<User> | SessionWithUserEntity
                 sessionToken: string
+                cookieStore: InternalCookieStoreConfig
             }
         },
     }

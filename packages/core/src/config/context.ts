@@ -34,7 +34,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
     const jose = createJoseInstance<FromShapeToObject<Identity>>(secret, salt, config?.session)
     const precomputed = getPrecomputedCookies(config, logger)
     const baseURL = getBaseURLConfig(config)
-    const useSecureCookies = getUseSecureCookiesConfig({ config, baseURL })
+    const useSecureCookies = getUseSecureCookiesConfig({ config, baseURL, proxyHeaders: proxyHeadersAsBoolean })
 
     const ctx = {
         credentials: getCredentialsConfig(config),

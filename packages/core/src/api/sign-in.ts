@@ -14,7 +14,7 @@ export const signIn = async (
 ): Promise<SignInAPIReturn> => {
     const initHeaders = new Headers(secureApiHeaders)
     try {
-        const { request, rateLimit, provider } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, provider, cookieStore } = await createValidation(ctx, requestInit, headersInit)
             .verifyOAuthProvider(oauthId)
             .buildRequest(`/signIn/${oauthId}`)
             .verifyRateLimit("signIn")
@@ -45,6 +45,7 @@ export const signIn = async (
             provider,
             request,
             redirectTo,
+            cookieStore,
             headers: initHeaders,
         })
 

@@ -38,6 +38,11 @@ export default defineConfig({
             AURA_AUTH_GITHUB_CLIENT_SECRET: "github-client-secret",
             AURA_AUTH_OAUTH_PROVIDER_CLIENT_ID: "oauth_client_id",
             AURA_AUTH_OAUTH_PROVIDER_CLIENT_SECRET: "oauth_client_secret",
+            /**
+             * Most tests target HTTPS and expect secure cookies. Setting `NODE_ENV` to
+             * "test" produces non-secure cookies that do not match HTTPS behavior.
+             */
+            NODE_ENV: "production",
         },
         typecheck: {
             enabled: false,

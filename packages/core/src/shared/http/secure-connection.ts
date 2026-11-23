@@ -1,6 +1,6 @@
 import { isBoolean } from "@/shared/assert.ts"
-import type { AuthConfig } from "@/@types/config.ts"
 import { getBaseURLFromProxyHeaders } from "@/shared/utils/proxy-headers-source.ts"
+import type { AuthConfig } from "@/@types/config.ts"
 
 export const isSecureConnection = (
     request: Request | Headers,

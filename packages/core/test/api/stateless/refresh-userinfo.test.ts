@@ -24,7 +24,6 @@ describe("refreshUserInfo", () => {
 
     test("invalid operation when the session token is missing", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const output = await api.refreshUserInfo("oauth-provider", { headers: new Headers() })
         expect(output).toEqual({
@@ -43,7 +42,6 @@ describe("refreshUserInfo", () => {
 
     test("throws error when CSRF token is missing", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const sessionToken = await jose.encodeJWT(sessionPayload)
 
@@ -68,7 +66,6 @@ describe("refreshUserInfo", () => {
 
     test("throws error when provider token does not exist", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -95,7 +92,6 @@ describe("refreshUserInfo", () => {
 
     test("successfully refreshes user info", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -155,7 +151,6 @@ describe("refreshUserInfo", () => {
 
     test("handles getUserInfo network error gracefully", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -188,7 +183,6 @@ describe("refreshUserInfo", () => {
 
     test("handles getUserInfo invalid response from provider", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -224,7 +218,6 @@ describe("refreshUserInfo", () => {
 
     test("handles getUserInfo OAuth error response", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -264,7 +257,6 @@ describe("refreshUserInfo", () => {
 
     test("handles getUserInfo missing required user fields", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -349,7 +341,6 @@ describe("refreshUserInfo", () => {
 
     test("handles expired access token with successful refresh", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -409,7 +400,6 @@ describe("refreshUserInfo", () => {
 
     test("handles invalid user info response with missing content type", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -452,7 +442,6 @@ describe("refreshUserInfo", () => {
 
     test("handles session token verification failure", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const invalidSessionToken = "invalid.session.token"
@@ -480,7 +469,6 @@ describe("refreshUserInfo", () => {
 
     test("updates session cookie with new session token", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -530,7 +518,6 @@ describe("refreshUserInfo", () => {
 
     test("handles malformed provider tokens cookie", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -558,7 +545,6 @@ describe("refreshUserInfo", () => {
 
     test("successfully refreshes with custom profile function", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -606,7 +592,6 @@ describe("refreshUserInfo", () => {
 
     test("toResponse returns correct response on success", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -656,7 +641,6 @@ describe("refreshUserInfo", () => {
 
     test("refreshUserInfo with doubleSubmitToken", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -715,7 +699,6 @@ describe("refreshUserInfo", () => {
 
     test("refreshUserInfo with doubleSubmitToken and invalid value", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -758,7 +741,6 @@ describe("refreshUserInfo", () => {
 
     test("refreshUserInfo enables double-submit cookie manually", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)
@@ -818,7 +800,6 @@ describe("refreshUserInfo", () => {
 
     test("refreshUserInfo enables double-submit cookie manually and invalid token", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
-        const { api } = await import("@test/setup/auth.ts")
 
         const csrfToken = await createCSRF(jose)
         const sessionToken = await jose.encodeJWT(sessionPayload)

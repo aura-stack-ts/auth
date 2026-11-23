@@ -30,10 +30,12 @@ describe("createValidation", () => {
         test("builds a request using the incoming request origin by default", async () => {
             const ctx = createContext({})
             const request = new Request("https://example.com")
-            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual({
-                request: new Request("https://example.com/path"),
-                origin: "https://example.com",
-            })
+            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual(
+                expect.objectContaining({
+                    request: new Request("https://example.com/path"),
+                    origin: "https://example.com",
+                })
+            )
         })
 
         test("rejects an incoming request origin that is not trusted", async () => {
@@ -52,10 +54,12 @@ describe("createValidation", () => {
                     "X-Forwarded-Host": "example.com",
                 },
             })
-            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual({
-                request: new Request("https://example.com/path"),
-                origin: "https://example.com",
-            })
+            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual(
+                expect.objectContaining({
+                    request: new Request("https://example.com/path"),
+                    origin: "https://example.com",
+                })
+            )
         })
 
         test("rejects forwarded headers that resolve to an untrusted origin", async () => {
@@ -79,10 +83,12 @@ describe("createValidation", () => {
                     "X-Forwarded-Host": "10.0.0.98:8888",
                 },
             })
-            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual({
-                request: new Request("http://10.0.0.98:8888/path"),
-                origin: "http://10.0.0.98:8888",
-            })
+            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual(
+                expect.objectContaining({
+                    request: new Request("http://10.0.0.98:8888/path"),
+                    origin: "http://10.0.0.98:8888",
+                })
+            )
         })
 
         test("uses a trusted forwarded host when it differs from the request host", async () => {
@@ -93,10 +99,12 @@ describe("createValidation", () => {
                     "X-Forwarded-Host": "10.0.0.98:8888",
                 },
             })
-            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual({
-                request: new Request("http://10.0.0.98:8888/path"),
-                origin: "http://10.0.0.98:8888",
-            })
+            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual(
+                expect.objectContaining({
+                    request: new Request("http://10.0.0.98:8888/path"),
+                    origin: "http://10.0.0.98:8888",
+                })
+            )
         })
 
         test("uses trusted forwarded HTTPS headers instead of the request origin", async () => {
@@ -107,10 +115,12 @@ describe("createValidation", () => {
                     "X-Forwarded-Host": "example.com",
                 },
             })
-            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual({
-                request: new Request("https://example.com/path"),
-                origin: "https://example.com",
-            })
+            expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual(
+                expect.objectContaining({
+                    request: new Request("https://example.com/path"),
+                    origin: "https://example.com",
+                })
+            )
         })
 
         describe("build request", () => {
@@ -125,10 +135,12 @@ describe("createValidation", () => {
                         "X-Forwarded-Host": "app.com",
                     },
                 })
-                expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual({
-                    request: new Request("https://app.com/path"),
-                    origin: "https://app.com",
-                })
+                expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual(
+                    expect.objectContaining({
+                        request: new Request("https://app.com/path"),
+                        origin: "https://app.com",
+                    })
+                )
             })
 
             test("rejects a forwarded origin that is not listed in trusted origins", async () => {
@@ -150,10 +162,12 @@ describe("createValidation", () => {
                         "X-Forwarded-Host": "10.0.0.1:8888",
                     },
                 })
-                expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual({
-                    request: new Request("http://10.0.0.1:8888/path"),
-                    origin: "http://10.0.0.1:8888",
-                })
+                expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual(
+                    expect.objectContaining({
+                        request: new Request("http://10.0.0.1:8888/path"),
+                        origin: "http://10.0.0.1:8888",
+                    })
+                )
             })
 
             test("accepts a second trusted forwarded IPv4 origin", async () => {
@@ -163,10 +177,9 @@ describe("createValidation", () => {
                         "X-Forwarded-Host": "152.1.2.3:2222",
                     },
                 })
-                expect(await createValidation(ctx, request).buildRequest("/path").execute()).toEqual({
-                    request: new Request("http://152.1.2.3:2222/path"),
-                    origin: "http://152.1.2.3:2222",
-                })
+                const output = await createValidation(ctx, request).buildRequest("/path").execute()
+                expect(output.origin).toBe("http://152.1.2.3:2222")
+                expect(output.request).toEqual(new Request("http://152.1.2.3:2222/path"))
             })
         })
 
@@ -242,9 +255,9 @@ describe("createValidation", () => {
                             "X-Forwarded-Host": "app.com",
                         },
                     })
-                    await createValidation(ctx, request).buildRequest("/path").execute()
+                    const { cookieStore } = await createValidation(ctx, request).buildRequest("/path").execute()
 
-                    expect(ctx.cookies.store.sessionToken).toEqual({
+                    expect(cookieStore.sessionToken).toEqual({
                         name: "__Secure-aura-auth.session_token",
                         attributes: {
                             httpOnly: true,
@@ -263,9 +276,9 @@ describe("createValidation", () => {
                             "X-Forwarded-Host": "192.1.2.3:4444",
                         },
                     })
-                    await createValidation(ctx, request).buildRequest("/path").execute()
+                    const { cookieStore } = await createValidation(ctx, request).buildRequest("/path").execute()
 
-                    expect(ctx.cookies.store.sessionToken).toEqual({
+                    expect(cookieStore.sessionToken).toEqual({
                         name: "aura-auth.session_token",
                         attributes: {
                             httpOnly: true,
