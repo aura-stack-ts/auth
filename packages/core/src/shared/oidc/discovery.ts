@@ -9,25 +9,15 @@ export const DISCOVERY_SUFFIX = "/.well-known/openid-configuration"
 export const normalizeIssuer = (issuer: string): string => issuer.replace(/\/$/, "")
 
 export const discoveryMetadata = async (issuer: string): Promise<OpenIDMetadata> => {
-    let response: Response
-    try {
-        const base = normalizeIssuer(issuer)
-        response = await fetchAsync(`${base}${DISCOVERY_SUFFIX}`, {
-            headers: { Accept: "application/json" },
-        })
-        assertContentTypeResponse(response)
-    } catch (cause) {
-        throw new AuraAuthError({ code: "OIDC_DISCOVERY_NETWORK_FAILED", cause })
-    }
+    const base = normalizeIssuer(issuer)
+    const response = await fetchAsync(`${base}${DISCOVERY_SUFFIX}`, {
+        headers: { Accept: "application/json" },
+    })
+    assertContentTypeResponse(response)
     if (!response.ok) {
         throw new AuraAuthError({ code: "OIDC_DISCOVERY_INVALID_RESPONSE" })
     }
-    let json: unknown
-    try {
-        json = await response.json()
-    } catch (cause) {
-        throw new AuraAuthError({ code: "OIDC_DISCOVERY_INVALID_FORMAT_RESPONSE", cause })
-    }
+    const json = await response.json()
     const parsed = OpenIDMetadataSchema.safeParse(json)
     if (!parsed.success) {
         throw new AuraAuthError({ code: "OIDC_DISCOVERY_INVALID_SCHEMA", cause: parsed.error })

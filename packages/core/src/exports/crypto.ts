@@ -1,12 +1,10 @@
-import { isJWTPayloadWithToken } from "@/shared/assert.ts"
-import { equals } from "@/shared/utils.ts"
-import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/errors/aura-error.ts"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
-import type { JoseInstance, User } from "@/@types/index.ts"
 import type { AsymmetricKeyPairFromEnv, RouterGlobalContext } from "@/@types/internal.ts"
 
 export { generateKeyPair as createKeyPair } from "@aura-stack/jose/jose"
+export { assertCSRFToken as verifyCSRF } from "@/shared/utils/verify-csrf-token.ts"
 
 export const createSecretValue = (length: number = 32) => {
     return base64url.encode(getRandomBytes(length))
@@ -38,16 +36,6 @@ export const createPKCE = async (verifier?: string) => {
     return { codeVerifier, codeChallenge, method: "S256" }
 }
 
-export const assertCSRFTokenCookie = async (jose: RouterGlobalContext["jose"]["instance"], cookie?: string) => {
-    try {
-        if (cookie) {
-            await jose.verifyJWS(cookie)
-        }
-    } catch (error) {
-        throw new AuraAuthError({ code: "INVALID_CSRF_TOKEN", cause: error })
-    }
-}
-
 /**
  * Creates a CSRF token to be used in OAuth flows to prevent cross-site request forgery attacks.
  *
@@ -65,37 +53,6 @@ export const createCSRF = async (jose: RouterGlobalContext["jose"]["instance"], 
     } catch {
         const token = createSecretValue(32)
         return jose.signJWS({ token })
-    }
-}
-
-export const verifyCSRF = async <DefaultUser extends User = User>(
-    jose: JoseInstance<DefaultUser>,
-    cookie: string,
-    header: string
-): Promise<boolean> => {
-    try {
-        const cookiePayload = await jose.verifyJWS(cookie)
-        const headerPayload = await jose.verifyJWS(header)
-
-        if (!isJWTPayloadWithToken(cookiePayload)) {
-            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-        }
-        if (!isJWTPayloadWithToken(headerPayload)) {
-            throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING" })
-        }
-
-        if (!equals(cookiePayload.token.length, headerPayload.token.length)) {
-            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
-        }
-        if (!timingSafeEqual(cookiePayload.token, headerPayload.token)) {
-            throw new AuraAuthError({ code: "CSRF_TOKEN_MISMATCH" })
-        }
-        return true
-    } catch (error) {
-        if (isAuraAuthError(error)) {
-            throw error
-        }
-        throw new AuraAuthError({ code: "CSRF_TOKEN_MISSING", cause: error })
     }
 }
 

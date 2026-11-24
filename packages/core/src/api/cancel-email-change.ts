@@ -77,7 +77,7 @@ export const cancelEmailChange = async ({
                     {
                         success: true,
                         redirect,
-                        redirectURL: redirect ? null : redirectURL,
+                        redirectURL,
                     },
                     { headers, status }
                 )

@@ -35,8 +35,5 @@ export const revokeProviderToken = async (provider: RuntimeOAuthProvider, access
     if (!response.ok) {
         throw new AuraAuthError({ code: "OAUTH_INVALID_REVOKE_TOKEN_RESPONSE" })
     }
-    if (response.status !== 200 && response.status !== 204) {
-        throw new AuraAuthError({ code: "OAUTH_INVALID_REVOKE_TOKEN_PROCESS" })
-    }
     return true
 }

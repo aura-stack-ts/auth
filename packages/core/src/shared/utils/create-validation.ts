@@ -8,7 +8,6 @@ import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { assertUserStatus } from "@/shared/utils/stateful.ts"
 import { verifySessionToken } from "@/shared/utils/session.ts"
 import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
-import { internal_verifyCSRFToken } from "@/shared/utils/api.ts"
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import type { AuraErrorCode } from "@/errors/catalog.ts"
 import type { InternalCookieStoreConfig, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
@@ -21,6 +20,7 @@ import type {
     TypedJWTPayload,
     User,
 } from "@/@types/index.ts"
+import { verifyDoubleSubmitCSRFTokenFromRequest } from "./verify-csrf-token.ts"
 
 export const createValidation = (
     ctx: RouterGlobalContext<any, any>,
@@ -113,11 +113,9 @@ export const createValidation = (
         },
         verifyCSRFToken: (skipCSRFCheck: boolean, doubleSubmitToken: string | undefined, generateNewToken: boolean = false) => {
             steps.push(async () => {
-                const existingCSRFToken = getOptionalCookie(headers, output.cookieStore!.csrfToken.name!)
-                const csrfTokenValue = generateNewToken
-                    ? await createCSRF(ctx.jose.instance, existingCSRFToken)
-                    : existingCSRFToken
-                await internal_verifyCSRFToken({
+                const token = getOptionalCookie(headers, output.cookieStore!.csrfToken.name!)
+                const csrfTokenValue = generateNewToken ? await createCSRF(ctx.jose.instance, token) : token
+                await verifyDoubleSubmitCSRFTokenFromRequest({
                     ctx,
                     headers,
                     skipCSRFCheck,

@@ -379,8 +379,8 @@ describe("signInCredentials API", async () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -446,8 +446,8 @@ describe("signInCredentials API", async () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

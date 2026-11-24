@@ -300,7 +300,7 @@ describe("revokeToken", () => {
         const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
-            ok: true,
+            ok: false,
             status: 201,
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -315,8 +315,8 @@ describe("revokeToken", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "OAUTH_INVALID_REVOKE_TOKEN_PROCESS",
-                message: "The identity provider encountered an error while processing the token revocation.",
+                code: "OAUTH_INVALID_REVOKE_TOKEN_RESPONSE",
+                message: "Failed to communicate token revocation down to the identity provider.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -613,8 +613,8 @@ describe("revokeToken", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -701,8 +701,8 @@ describe("revokeToken", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

@@ -229,8 +229,7 @@ describe("Revoke Action", () => {
         const encodedTokens = await jose.encodeJWT(oauthTokens as unknown as Record<string, unknown>)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
-            ok: true,
-            status: 201,
+            ok: false,
         })
         vi.stubGlobal("fetch", mockFetch)
 
