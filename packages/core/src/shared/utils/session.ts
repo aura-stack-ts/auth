@@ -1,20 +1,19 @@
 import { errors } from "@aura-stack/jose/jose"
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getOptionalCookie } from "@/shared/http/cookie.ts"
-import type { CookieManager, InternalCookieStoreConfig, JoseManager } from "@/@types/internal.ts"
+import type { InternalCookieStoreConfig, JoseManager } from "@/@types/internal.ts"
 
 export const verifySessionToken = async ({
     headers,
     cookies,
     jwt,
-    cookieStore,
+    outHeaders,
 }: {
     headers: Headers
     jwt: JoseManager
     cookies: InternalCookieStoreConfig
-    cookieStore: CookieManager
+    outHeaders: Headers
 }) => {
-    const outHeaders = cookieStore.clear()
     const token = getOptionalCookie(headers, cookies.sessionToken.name)
     if (!token) throw new AuraAuthError({ code: "SESSION_MISSING", headers: outHeaders })
     try {
@@ -24,6 +23,6 @@ export const verifySessionToken = async ({
         if (error instanceof errors.JWTExpired) {
             throw new AuraAuthError({ code: "SESSION_EXPIRED", headers: outHeaders })
         }
-        throw new AuraAuthError({ code: "SESSION_INVALID", cause: error, headers })
+        throw new AuraAuthError({ code: "SESSION_INVALID", cause: error, headers: outHeaders })
     }
 }

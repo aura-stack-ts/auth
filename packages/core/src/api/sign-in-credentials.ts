@@ -49,6 +49,7 @@ export const signInCredentials = async ({
         const sessionToken = await sessionConfig.strategy.signInCredentials({
             request,
             payload: session,
+            cookieStore,
         })
         const csrfToken = await createCSRF(ctx.jose.instance)
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")

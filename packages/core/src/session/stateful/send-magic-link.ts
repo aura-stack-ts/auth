@@ -16,7 +16,7 @@ export const sendMagicLink = (ctx: InternalContextForStateful): SessionStrategy[
                 emailVerifiedAt: null,
             })
         }
-        assertUserStatus(user, { error: "SILENT_USER_NOT_FOUND", cookieStore })
+        assertUserStatus(user, { error: "SILENT_USER_NOT_FOUND", headers: ctx.cookies.manager.clear(cookieStore) })
         if (!user.email) {
             throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
         }

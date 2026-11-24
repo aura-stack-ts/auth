@@ -38,7 +38,7 @@ export const signInCredentials = (ctx: InternalContextForStateful): SessionStrat
         if (!user) {
             throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
         }
-        assertUserStatus(user, { cookieStore })
+        assertUserStatus(user, { headers: ctx.cookies.manager.clear(cookieStore) })
 
         const device = await createDevice(user.id, request)
 

@@ -9,7 +9,6 @@ import { assertUserStatus } from "@/shared/utils/stateful.ts"
 import { verifySessionToken } from "@/shared/utils/session.ts"
 import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
 import { internal_verifyCSRFToken } from "@/shared/utils/api.ts"
-import { createCookieManager } from "@/session/cookie-manager.ts"
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import type { AuraErrorCode } from "@/errors/catalog.ts"
 import type { InternalCookieStoreConfig, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
@@ -59,19 +58,19 @@ export const createValidation = (
         },
         verifySession: () => {
             steps.push(async () => {
-                const cookieStore = createCookieManager(() => output.cookieStore!)
+                const outHeaders = ctx.cookies.manager.clear(output.cookieStore!)
                 if (isStatelessStrategy(ctx.session.config)) {
                     const { session, sessionToken } = await verifySessionToken({
                         headers,
                         cookies: output.cookieStore!,
                         jwt: ctx.jose.manager,
-                        cookieStore,
+                        outHeaders,
                     })
                     output.rawSession = session
                     output.sessionToken = sessionToken
                 } else {
-                    const { sessionToken } = cookieStore.getCookie(headers)
-                    const outHeaders = cookieStore.clear()
+                    const { sessionToken } = ctx.cookies.manager.getCookie(headers, output.cookieStore!)
+                    const outHeaders = ctx.cookies.manager.clear(output.cookieStore!)
                     if (!sessionToken) {
                         throw new AuraAuthError({ code: "SESSION_MISSING", headers: outHeaders })
                     }
@@ -108,7 +107,7 @@ export const createValidation = (
                 }
                 if (isStatelessStrategy(ctx.session.config)) return
                 const session = output.rawSession as SessionWithUserEntity
-                assertUserStatus(session.user, { error, cookieStore: output.cookieStore! })
+                assertUserStatus(session.user, { error, headers: ctx.cookies.manager.clear(output.cookieStore!) })
             })
             return builder
         },

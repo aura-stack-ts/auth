@@ -30,7 +30,7 @@ export const sendMagicLink = async (
                 allowSignUp: magicLinks?.allowSignUp ?? false,
             },
         })
-        const { request, rateLimit, origin } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, origin, cookieStore } = await createValidation(ctx, requestInit, headersInit)
             .buildRequest("/signIn/magicLink")
             .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifyRateLimit("sendMagicLink")
@@ -41,6 +41,7 @@ export const sendMagicLink = async (
         const { token, url } = await session.strategy.sendMagicLink({
             email,
             origin,
+            cookieStore,
             allowSignUp: magicLinks?.allowSignUp ?? false,
         })
 
