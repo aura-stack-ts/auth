@@ -26,9 +26,7 @@ interface CatalogEntry {
 }
 
 export const ERROR_CATALOG = {
-    /**
-     * JWT and JOSE Errors
-     */
+    // #region JWT and JOSE
     JWT_EXPIRED: {
         type: "AUTH_FLOW",
         statusCode: 401,
@@ -90,9 +88,7 @@ export const ERROR_CATALOG = {
             "The specified session mode does not match structural constraints. Expected configurations: 'sealed', 'signed', or 'encrypted'.",
         userMessage: "Invalid JWT mode configured. Valid options are: 'sealed', 'signed', 'encrypted'.",
     },
-    /**
-     * CSRF Tokens Errors
-     */
+    // #region CSRF Token
     CSRF_TOKEN_MISSING: {
         type: "AUTH_FLOW",
         statusCode: 403,
@@ -125,9 +121,7 @@ export const ERROR_CATALOG = {
             "The state verification engine failed because the custom 'X-CSRF-Token' header was missing from the mutation request parameters.",
         userMessage: "The CSRF header is missing. Please refresh and try again.",
     },
-    /**
-     * Session Errors
-     */
+    // #region Session
     SESSION_NOT_FOUND: {
         type: "AUTH_FLOW",
         statusCode: 401,
@@ -151,6 +145,20 @@ export const ERROR_CATALOG = {
         message:
             "The session block execution was aborted because the target token was explicitly blacklisted or flagged as inactive in persistence layer checks.",
         userMessage: "Your session has been revoked. Please sign in again.",
+    },
+    SESSION_MISSING: {
+        type: "AUTH_FLOW",
+        statusCode: 401,
+        name: "SessionError",
+        message: "The request does not contain an active session token in the session cookie.",
+        userMessage: "The session is missing. Please sign in again.",
+    },
+    SESSION_INACTIVE: {
+        type: "AUTH_FLOW",
+        statusCode: 401,
+        name: "SessionError",
+        message: "The session record exists, but its status is no longer active.",
+        userMessage: "Your session is inactive. Please sign in again.",
     },
     SESSION_INVALID: {
         type: "AUTH_FLOW",
@@ -198,10 +206,7 @@ export const ERROR_CATALOG = {
         message: "The provided 'session.strategy' option string value is unsupported by the engine runtime core configurations.",
         userMessage: "Unknown session strategy configured. Valid options are: 'jwt'.",
     },
-
-    /**
-     * Cookie Errors
-     */
+    // #region Cookie
     COOKIE_NOT_FOUND: {
         type: "AUTH_FLOW",
         statusCode: 401,

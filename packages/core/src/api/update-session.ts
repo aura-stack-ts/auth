@@ -1,5 +1,4 @@
 import { isAuraAuthError } from "@/errors/aura-error.ts"
-import { createCookieManager } from "@/session/cookie-manager.ts"
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getInitialHeaders, secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
@@ -83,16 +82,10 @@ export const updateSession = async <DefaultUser extends User = User>({
     } catch (error) {
         errorToLogMessage(error, "UPDATE_SESSION_INVALID", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
-
-        const shouldClearSessionCookie =
-            isAuraAuthError(error) &&
-            ["SESSION_NOT_FOUND", "SESSION_INVALID", "SESSION_EXPIRED", "SESSION_REVOKED"].includes(error.code)
-        const resolvedHeaders = shouldClearSessionCookie
-            ? toUnionHeaders(createCookieManager(() => cookieStore).clear(), initialHeaders)
-            : initialHeaders
+        const headers = isAuraAuthError(error) ? toUnionHeaders(initialHeaders, error.headers) : initialHeaders
 
         return {
-            headers: resolvedHeaders,
+            headers: headers,
             session: null,
             success: false,
             redirect: false,
@@ -101,7 +94,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             toResponse: () => {
                 return Response.json(
                     { success: false, session: null, redirect: false, redirectURL: null },
-                    { status: statusCode, headers: resolvedHeaders }
+                    { status: statusCode, headers: headers }
                 )
             },
         }

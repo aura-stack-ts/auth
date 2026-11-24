@@ -27,8 +27,8 @@ describe("revokeToken", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_MISSING",
+                message: "The session is missing. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

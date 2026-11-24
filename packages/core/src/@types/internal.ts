@@ -362,7 +362,12 @@ export interface SessionStrategy<DefaultUser extends User = User> {
      * Sign in a user with the given credentials and request. Returns the session token on success.
      * @unstable This API is experimental and may change in future releases.
      */
-    signInCredentials(options: { payload: Record<string, unknown>; request: Request; redirectTo?: string }): Promise<string>
+    signInCredentials(options: {
+        payload: Record<string, unknown>
+        request: Request
+        redirectTo?: string
+        cookieStore: InternalCookieStoreConfig
+    }): Promise<string>
     /**
      * Sign in a user with the given OAuth provider and request. Returns the session token on success.
      */
@@ -436,7 +441,12 @@ export interface SessionStrategy<DefaultUser extends User = User> {
     /**
      * Initiates the magic link sign-in or sign-up flow by sending an email with a token and URL.
      */
-    sendMagicLink(options: { email: string; allowSignUp: boolean; origin: string }): Promise<{ token: string; url: string }>
+    sendMagicLink(options: {
+        email: string
+        allowSignUp: boolean
+        origin: string
+        cookieStore: InternalCookieStoreConfig
+    }): Promise<{ token: string; url: string }>
     /**
      * Verivy the magic link token
      */

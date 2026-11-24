@@ -59,23 +59,38 @@ export const createValidation = (
         },
         verifySession: () => {
             steps.push(async () => {
+                const cookieStore = createCookieManager(() => output.cookieStore!)
                 if (isStatelessStrategy(ctx.session.config)) {
                     const { session, sessionToken } = await verifySessionToken({
                         headers,
                         cookies: output.cookieStore!,
                         jwt: ctx.jose.manager,
+                        cookieStore,
                     })
                     output.rawSession = session
                     output.sessionToken = sessionToken
                 } else {
-                    const { sessionToken } = createCookieManager(() => output.cookieStore!).getCookie(headers)
+                    const { sessionToken } = cookieStore.getCookie(headers)
+                    const outHeaders = cookieStore.clear()
                     if (!sessionToken) {
-                        throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
+                        throw new AuraAuthError({ code: "SESSION_MISSING", headers: outHeaders })
                     }
                     const tokenHash = await createHash(sessionToken)
                     const session = await ctx.session.config.adapter.getSessionByToken(tokenHash)
-                    if (!session || session.status !== "active" || new Date() > session.expiresAt) {
-                        throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
+                    if (!session) {
+                        throw new AuraAuthError({ code: "SESSION_NOT_FOUND", headers: outHeaders })
+                    }
+                    if (session.revokedAt || session.status === "revoked") {
+                        throw new AuraAuthError({ code: "SESSION_REVOKED", headers: outHeaders })
+                    }
+                    if (new Date() >= session.expiresAt || session.status === "expired") {
+                        throw new AuraAuthError({ code: "SESSION_EXPIRED", headers: outHeaders })
+                    }
+                    if (session.status !== "active") {
+                        throw new AuraAuthError({ code: "SESSION_INACTIVE", headers: outHeaders })
+                    }
+                    if (!session.user) {
+                        throw new AuraAuthError({ code: "USER_NOT_FOUND", headers: outHeaders })
                     }
                     output.userId = session.userId
                     output.sessionId = session.id
@@ -93,7 +108,7 @@ export const createValidation = (
                 }
                 if (isStatelessStrategy(ctx.session.config)) return
                 const session = output.rawSession as SessionWithUserEntity
-                assertUserStatus(session.user, { error })
+                assertUserStatus(session.user, { error, cookieStore: output.cookieStore! })
             })
             return builder
         },

@@ -63,7 +63,7 @@ export const oauthCallback = (ctx: InternalContextForStateful): SessionStrategy[
         const user = await session.config.adapter.getUserByEmail(userInfo.email)
 
         if (user) {
-            assertUserStatus(user)
+            assertUserStatus(user, { cookieStore })
             userId = user.id
 
             const { sub: _, name, email, image, ...attributes } = userInfo

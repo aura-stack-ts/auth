@@ -1,6 +1,7 @@
-import { getInitialHeaders, secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
+import { isAuraAuthError } from "@/errors/aura-error.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getInitialHeaders, secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
     GetProviderTokensAPIOptions,
@@ -41,19 +42,19 @@ export const getProviderTokens = async (
             },
         }
     } catch (error) {
-        const headers = new Headers(secureApiHeaders)
         errorToLogMessage(error, "GET_PROVIDER_TOKENS_ERROR", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
-        const resolvedHeaders =
-            errors.code === "SESSION_NOT_FOUND" ? toUnionHeaders(ctx.cookies.manager.clear(), headers) : headers
+        const headers = isAuraAuthError(error)
+            ? toUnionHeaders(new Headers(error.headers), secureApiHeaders)
+            : new Headers(secureApiHeaders)
 
         return {
             success: false,
             tokens: null,
             error: errors,
-            headers: resolvedHeaders,
-            toResponse: () => Response.json({ success: false, tokens: null }, { status: statusCode, headers: resolvedHeaders }),
+            headers,
+            toResponse: () => Response.json({ success: false, tokens: null }, { status: statusCode, headers }),
         }
     }
 }
