@@ -1,5 +1,6 @@
-import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ResetPasswordAPIOptions, ResetPasswordAPIReturn } from "@/@types/api.ts"
@@ -36,22 +37,13 @@ export const resetPassword = async ({
             fallbackRedirectTo,
         })
 
-        return {
+        return toAPIResponse<ResetPasswordAPIReturn>({
             success: true,
             redirect,
             redirectURL,
             headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers, status }
-                )
-            },
-        } as ResetPasswordAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "RESET_PASSWORD_ERROR", logger)
         const { errors, statusCode } = handleApiError(
@@ -59,24 +51,15 @@ export const resetPassword = async ({
             "RESET_PASSWORD_ERROR",
             "An error occurred while resetting the password."
         )
-        const outHeaders = getAuraAuthHeaders(error, headers)
 
-        return {
+        const outHeaders = getAuraAuthHeaders(error, headers)
+        return toAPIResponse<ResetPasswordAPIReturn>({
             success: false,
-            error: errors,
+            silent: { error: errors },
             redirect: false,
             redirectURL: null,
             headers: outHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers: outHeaders, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

@@ -1,3 +1,4 @@
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
@@ -40,45 +41,34 @@ export const signOut = async ({
             headers: initHeaders,
         })
 
-        const { redirect, redirectURL } = await resolveApiRedirect({
+        const { redirect, redirectURL, status } = await resolveApiRedirect({
             ctx,
             request,
             redirectInit,
             redirectTo,
             headers,
             fallbackRedirectTo,
+            status: 202,
         })
 
-        return {
+        return toAPIResponse<SignOutAPIReturn>({
             success: true,
             headers,
             redirect,
             redirectURL,
-            toResponse: () => {
-                return Response.json({ success: true, redirect, redirectURL }, { headers, status: redirect ? 302 : 202 })
-            },
-        } as SignOutAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "SIGN_OUT_FAILED", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "SIGN_OUT_FAILED", "Failed to sign-out session")
         const headers = getAuraAuthHeaders(error, initHeaders)
-
-        return {
+        return toAPIResponse<SignOutAPIReturn>({
             success: false,
             headers,
             redirect: false,
             redirectURL: null,
-            error: errors,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers, status: statusCode }
-                )
-            },
-        }
+            silent: { error: errors },
+            status: statusCode,
+        })
     }
 }

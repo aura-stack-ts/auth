@@ -1,6 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SendVerificationEmailAPIOptions, SendVerificationEmailAPIReturn } from "@/@types/api.ts"
@@ -49,22 +50,13 @@ export const sendVerificationEmail = async (
             fallbackRedirectTo,
         })
 
-        return {
+        return toAPIResponse<SendVerificationEmailAPIReturn>({
             success: true,
             redirect,
             redirectURL,
             headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers, status }
-                )
-            },
-        } as SendVerificationEmailAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "SEND_VERIFICATION_EMAIL_ERROR", logger)
         const { errors, statusCode } = handleApiError(
@@ -73,23 +65,13 @@ export const sendVerificationEmail = async (
             "An error occurred while sending the verification email."
         )
         const outHeaders = getAuraAuthHeaders(error, headers)
-
-        return {
+        return toAPIResponse<SendVerificationEmailAPIReturn>({
             success: false,
-            error: errors,
+            silent: { error: errors },
             redirect: false,
             redirectURL: null,
             headers: outHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers: outHeaders, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

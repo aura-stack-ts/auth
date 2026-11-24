@@ -3,6 +3,7 @@ import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { RevokeTokenAPIOptions, RevokeTokenAPIReturn, LiteralUnion, BuiltInOAuthProvider } from "@/@types/index.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 
 export const revokeToken = async (
     oauthId: LiteralUnion<BuiltInOAuthProvider>,
@@ -49,13 +50,7 @@ export const revokeToken = async (
             headers: getInitialHeaders(requestInit, headersInit),
             rawSession,
         })
-        return {
-            success: true,
-            headers,
-            toResponse: () => {
-                return Response.json({ success: true }, { status: 200, headers })
-            },
-        }
+        return toAPIResponse<RevokeTokenAPIReturn>({ success: true, headers })
     } catch (error) {
         errorToLogMessage(error, "REVOKE_TOKEN_ERROR", ctx.logger)
         const { errors, statusCode } = handleApiError(
@@ -64,14 +59,11 @@ export const revokeToken = async (
             "Failed to revoke token for the OAuth provider"
         )
         const headers = getAuraAuthHeaders(error, initHeaders)
-
-        return {
+        return toAPIResponse<RevokeTokenAPIReturn>({
             success: false,
-            error: errors,
+            silent: { error: errors },
             headers,
-            toResponse: () => {
-                return Response.json({ success: false }, { status: statusCode, headers })
-            },
-        }
+            status: statusCode,
+        })
     }
 }

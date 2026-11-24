@@ -1,6 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SendMagicLinkAPIOptions, SendMagicLinkAPIReturn } from "@/@types/api.ts"
@@ -55,47 +56,28 @@ export const sendMagicLink = async (
             headers,
             fallbackRedirectTo,
         })
-        return {
+        return toAPIResponse<SendMagicLinkAPIReturn>({
             success: true,
             redirect,
             redirectURL,
             headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers, status }
-                )
-            },
-        } as SendMagicLinkAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "SEND_MAGIC_LINK_ERROR", logger)
         const { errors } = handleApiError(error, "SEND_MAGIC_LINK_ERROR", "An error occurred while sending the magic link.")
         const outHeaders = getAuraAuthHeaders(error, headers)
-
-        return {
+        /**
+         * For security reasons, we always return a 200 status code to avoid leaking information
+         * about the existence of the email address or enumeration attacks.
+         */
+        return toAPIResponse<SendMagicLinkAPIReturn>({
             success: false,
-            error: errors,
+            silent: { error: errors },
             redirect: false,
             redirectURL: null,
             headers: outHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    /**
-                     * For security reasons, we always return a 200 status code to avoid leaking information
-                     * about the existence of the email address or enumeration attacks.
-                     */
-                    { headers: outHeaders, status: 200 }
-                )
-            },
-        }
+            status: 200,
+        })
     }
 }

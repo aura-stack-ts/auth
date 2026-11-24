@@ -1,3 +1,4 @@
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
@@ -67,22 +68,13 @@ export const cancelEmailChange = async ({
             fallbackRedirectTo,
         })
 
-        return {
+        return toAPIResponse<CancelEmailChangeAPIReturn>({
             success: true,
+            headers,
+            status,
             redirect,
             redirectURL,
-            headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers, status }
-                )
-            },
-        } as CancelEmailChangeAPIReturn
+        })
     } catch (error) {
         errorToLogMessage(error, "CANCEL_EMAIL_CHANGE_ERROR", logger)
         const { errors, statusCode } = handleApiError(
@@ -91,22 +83,13 @@ export const cancelEmailChange = async ({
             "An error occurred while canceling the email change."
         )
         const outHeaders = getAuraAuthHeaders(error, headers)
-        return {
+        return toAPIResponse<CancelEmailChangeAPIReturn>({
             success: false,
-            error: errors,
+            status: statusCode,
+            silent: { error: errors },
+            headers: outHeaders,
             redirect: false,
             redirectURL: null,
-            headers: outHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers: outHeaders, status: statusCode }
-                )
-            },
-        }
+        })
     }
 }

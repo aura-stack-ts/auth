@@ -1,8 +1,9 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignUpAPIOptions, SignUpAPIReturn } from "@/@types/api.ts"
@@ -66,43 +67,25 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
         })
 
         const toHeaders = builder.toHeaders()
-        return {
+        return toAPIResponse<SignUpAPIReturn>({
             success: true,
             redirect,
             redirectURL,
             headers: toHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers: toHeaders, status }
-                )
-            },
-        } as SignUpAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "SIGN_UP_ERROR", logger)
         const { errors, statusCode } = handleApiError(error, "SIGN_UP_ERROR", "An error occurred during sign-up.")
-        const outHeaders = getAuraAuthHeaders(error, headers)
 
-        return {
+        const outHeaders = getAuraAuthHeaders(error, headers)
+        return toAPIResponse<SignUpAPIReturn>({
             success: false,
-            error: errors,
-            redirect: false,
+            silent: { error: errors },
             headers: outHeaders,
+            redirect: false,
             redirectURL: null,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers: outHeaders, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

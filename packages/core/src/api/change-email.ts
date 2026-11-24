@@ -1,4 +1,5 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
@@ -63,22 +64,13 @@ export const changeEmail = async ({
             fallbackRedirectTo,
         })
 
-        return {
+        return toAPIResponse<ChangeEmailAPIReturn>({
             success: true,
+            headers,
             redirect,
             redirectURL,
-            headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers, status }
-                )
-            },
-        } as ChangeEmailAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "CHANGE_EMAIL_ERROR", logger)
         const { errors, statusCode } = handleApiError(
@@ -87,22 +79,13 @@ export const changeEmail = async ({
             "An error occurred while changing the email address."
         )
         const outHeaders = getAuraAuthHeaders(error, headers)
-        return {
+        return toAPIResponse<ChangeEmailAPIReturn>({
             success: false,
-            error: errors,
+            silent: { error: errors },
             redirect: false,
             redirectURL: null,
             headers: outHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers: outHeaders, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

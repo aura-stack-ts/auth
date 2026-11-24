@@ -1,3 +1,4 @@
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
@@ -38,26 +39,22 @@ export const isProviderConnected = async (
             structuredData: { provider: oauthId, connected },
         })
 
-        return {
+        return toAPIResponse<ProviderConnectedAPIReturn>({
             success: true,
             connected,
             headers,
-            toResponse: () => Response.json({ success: true, connected }, { status: 200, headers }),
-        }
+        })
     } catch (error) {
         errorToLogMessage(error, "OAUTH_PROVIDER_CONNECTED_ERROR", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "OAUTH_PROVIDER_CONNECTED_ERROR", "Provider connected error.")
 
         const outHeaders = getAuraAuthHeaders(error, headers)
-
-        return {
+        return toAPIResponse<ProviderConnectedAPIReturn>({
             success: false,
             connected: false,
-            error: errors,
+            silent: { error: errors },
             headers: outHeaders,
-            toResponse: () => {
-                return Response.json({ success: false, connected: false }, { status: statusCode, headers: outHeaders })
-            },
-        }
+            status: statusCode,
+        })
     }
 }

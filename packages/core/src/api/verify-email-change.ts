@@ -1,5 +1,6 @@
-import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyEmailChangeAPIOptions, VerifyEmailChangeAPIReturn } from "@/@types/api.ts"
@@ -50,22 +51,13 @@ export const verifyEmailChange = async ({
             fallbackRedirectTo,
         })
 
-        return {
+        return toAPIResponse<VerifyEmailChangeAPIReturn>({
             success: true,
             redirect,
             redirectURL,
             headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers, status }
-                )
-            },
-        } as VerifyEmailChangeAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "VERIFY_EMAIL_CHANGE_ERROR", logger)
         const { errors, statusCode } = handleApiError(
@@ -74,23 +66,13 @@ export const verifyEmailChange = async ({
             "An error occurred while verifying the email change."
         )
         const outHeaders = getAuraAuthHeaders(error, headers)
-
-        return {
+        return toAPIResponse<VerifyEmailChangeAPIReturn>({
             success: false,
-            error: errors,
+            silent: { error: errors },
             redirect: false,
             redirectURL: null,
             headers: outHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers: outHeaders, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

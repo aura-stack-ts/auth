@@ -1,5 +1,6 @@
-import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyEmailAPIOptions, VerifyEmailAPIReturn } from "@/@types/api.ts"
@@ -38,43 +39,25 @@ export const verifyEmail = async (
             fallbackRedirectTo,
         })
 
-        return {
+        return toAPIResponse<VerifyEmailAPIReturn>({
             success: true,
             redirect,
             redirectURL,
             headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers, status }
-                )
-            },
-        } as VerifyEmailAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "VERIFY_EMAIL_ERROR", logger)
         const { errors, statusCode } = handleApiError(error, "VERIFY_EMAIL_ERROR", "An error occurred while verifying the email.")
-        const outHeaders = getAuraAuthHeaders(error, headers)
 
-        return {
+        const outHeaders = getAuraAuthHeaders(error, headers)
+        return toAPIResponse<VerifyEmailAPIReturn>({
             success: false,
             redirect: false,
             redirectURL: null,
-            error: errors,
+            silent: { error: errors },
             headers: outHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers: outHeaders, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

@@ -1,4 +1,5 @@
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
@@ -61,42 +62,27 @@ export const updateSession = async <DefaultUser extends User = User>({
             fallbackRedirectTo,
         })
 
-        return {
+        return toAPIResponse<UpdateSessionAPIReturn<DefaultUser>>({
             headers,
             session,
             success: true,
             redirect,
             redirectURL,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        session,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers, status }
-                )
-            },
-        } as UpdateSessionAPIReturn<DefaultUser>
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "UPDATE_SESSION_INVALID", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
         const outHeaders = getAuraAuthHeaders(error, initHeaders)
 
-        return {
-            headers: outHeaders,
+        return toAPIResponse<UpdateSessionAPIReturn<DefaultUser>>({
             session: null,
             success: false,
             redirect: false,
             redirectURL: null,
-            error: errors,
-            toResponse: () => {
-                return Response.json(
-                    { success: false, session: null, redirect: false, redirectURL: null },
-                    { status: statusCode, headers: outHeaders }
-                )
-            },
-        }
+            headers: outHeaders,
+            silent: { error: errors },
+            status: statusCode,
+        })
     }
 }

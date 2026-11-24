@@ -24,6 +24,7 @@ export const resolveApiRedirect = async ({
     redirectTo,
     request,
     fallbackRedirectTo,
+    status,
 }: {
     ctx: RouterGlobalContext
     request: Request
@@ -31,6 +32,7 @@ export const resolveApiRedirect = async ({
     redirectTo: string | undefined
     headers: Headers | HeadersBuilder
     fallbackRedirectTo: string | undefined
+    status?: number
 }) => {
     let redirectURL: string | null = await createRedirectTo(request, redirectTo, ctx, fallbackRedirectTo)
     redirectURL = redirectTo ? redirectURL : redirectURL === "/" ? null : redirectURL
@@ -47,7 +49,7 @@ export const resolveApiRedirect = async ({
     return {
         redirect: shouldRedirectServer,
         redirectURL: shouldRedirectServer ? null : redirectURL,
-        status: shouldRedirectServer ? 302 : 200,
+        status: shouldRedirectServer ? 302 : (status ?? 200),
     }
 }
 

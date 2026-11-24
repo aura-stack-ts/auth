@@ -1,7 +1,8 @@
 import { createSignInURL } from "@/shared/oauth2/authorization.ts"
-import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { BuiltInOAuthProvider, LiteralUnion, SignInAPIOptions, SignInAPIReturn } from "@/@types/index.ts"
 
@@ -49,37 +50,25 @@ export const signIn = async (
             headers: initHeaders,
         })
 
-        return {
+        return toAPIResponse<SignInAPIReturn>({
             success,
             redirect: true,
             signInURL,
             headers,
-            toResponse: () => {
-                return Response.json({ success, redirect: true, signInURL }, { status: 302, headers })
-            },
-        } as SignInAPIReturn
+            status: 302,
+        })
     } catch (error) {
         errorToLogMessage(error, "AUTH_SIGN_IN_FAILED", ctx.logger)
         const { errors } = handleApiError(error, "AUTH_SIGN_IN_FAILED", "An error occurred during the sign-in process.")
         const headers = getAuraAuthHeaders(error, initHeaders)
 
-        return {
+        return toAPIResponse<SignInAPIReturn>({
             success: false,
             redirect: false,
             signInURL: null,
             error: errors,
             headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        signInURL: null,
-                        error: errors,
-                    },
-                    { status: 500, headers }
-                )
-            },
-        }
+            status: 500,
+        })
     }
 }
