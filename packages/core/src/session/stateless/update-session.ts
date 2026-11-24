@@ -1,5 +1,4 @@
 import { getExpiresAt } from "@/shared/utils/session-strategy.ts"
-import { createCookieManager } from "@/session/cookie-manager.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
@@ -50,7 +49,7 @@ export const updateSession = <DefaultUser extends User = User>(
         })
         return {
             session: { expires: updatedSession.expires, user: verifiedPayload },
-            headers: createCookieManager(() => cookieStore).setCookie({ sessionToken }),
+            headers: ctx.cookies.manager.setCookie({ sessionToken, store: cookieStore }),
         }
     }
 }

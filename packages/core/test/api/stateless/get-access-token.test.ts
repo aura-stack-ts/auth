@@ -31,21 +31,14 @@ describe("getAccessToken API", () => {
             success: false,
             accessToken: null,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_MISSING",
+                message: "The session is missing. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([
-            expect.objectContaining({
-                name: "__Secure-aura-auth.session_token",
-                value: "",
-                expires: new Date(0),
-                sameSite: "lax",
-            }),
-        ])
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("throws error when provider token does not exist", async () => {

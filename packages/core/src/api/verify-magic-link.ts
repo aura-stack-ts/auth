@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -68,13 +68,14 @@ export const verifyMagicLink = async (
             "VERIFY_MAGIC_LINK_ERROR",
             "An error occurred while verifying the magic link."
         )
+        const outHeaders = getAuraAuthHeaders(error, headers)
 
         return {
             success: false,
             error: errors,
             redirect: false,
             redirectURL: null,
-            headers,
+            headers: outHeaders,
             toResponse: () => {
                 return Response.json(
                     {
@@ -82,7 +83,7 @@ export const verifyMagicLink = async (
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers, status: statusCode }
+                    { headers: outHeaders, status: statusCode }
                 )
             },
         }

@@ -39,8 +39,8 @@ describe("revokeToken (Stateful)", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_MISSING",
+                message: "The session is missing. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -163,7 +163,13 @@ describe("revokeToken (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
@@ -485,7 +491,7 @@ describe("revokeToken (Stateful)", () => {
         const sessionTokenHash = await createHash(sessionToken)
 
         const mockFetch = vi.fn().mockResolvedValueOnce({
-            ok: true,
+            ok: false,
             status: 201,
         })
         vi.stubGlobal("fetch", mockFetch)
@@ -500,8 +506,8 @@ describe("revokeToken (Stateful)", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "OAUTH_INVALID_REVOKE_TOKEN_PROCESS",
-                message: "The identity provider encountered an error while processing the token revocation.",
+                code: "OAUTH_INVALID_REVOKE_TOKEN_RESPONSE",
+                message: "Failed to communicate token revocation down to the identity provider.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -634,14 +640,20 @@ describe("revokeToken (Stateful)", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_EXPIRED",
+                message: "Your session has expired. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(revokeSessionMock).not.toHaveBeenCalled()
@@ -683,14 +695,20 @@ describe("revokeToken (Stateful)", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_REVOKED",
+                message: "Your session has been revoked. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
@@ -959,8 +977,8 @@ describe("revokeToken (Stateful)", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -1079,8 +1097,8 @@ describe("revokeToken (Stateful)", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

@@ -26,9 +26,7 @@ interface CatalogEntry {
 }
 
 export const ERROR_CATALOG = {
-    /**
-     * JWT and JOSE Errors
-     */
+    // #region JWT and JOSE
     JWT_EXPIRED: {
         type: "AUTH_FLOW",
         statusCode: 401,
@@ -90,9 +88,7 @@ export const ERROR_CATALOG = {
             "The specified session mode does not match structural constraints. Expected configurations: 'sealed', 'signed', or 'encrypted'.",
         userMessage: "Invalid JWT mode configured. Valid options are: 'sealed', 'signed', 'encrypted'.",
     },
-    /**
-     * CSRF Tokens Errors
-     */
+    // #region CSRF Token
     CSRF_TOKEN_MISSING: {
         type: "AUTH_FLOW",
         statusCode: 403,
@@ -109,14 +105,6 @@ export const ERROR_CATALOG = {
             "Security violation: The request payload/header anti-forgery token string does not match the value stored in the secure session cookie.",
         userMessage: "CSRF token verification failed. Please refresh and try again.",
     },
-    CSRF_ORIGIN_REJECTED: {
-        type: "AUTH_FLOW",
-        statusCode: 403,
-        name: "CsrfError",
-        message:
-            "Cross-Origin request blocked: The incoming Request 'Origin' header does not match the expected application Host or trusted subdomains.",
-        userMessage: "Request validation failed. Request origin is untrusted.",
-    },
     CSRF_DOUBLE_SUBMIT_FAILED: {
         type: "AUTH_FLOW",
         statusCode: 403,
@@ -125,9 +113,28 @@ export const ERROR_CATALOG = {
             "The state verification engine failed because the custom 'X-CSRF-Token' header was missing from the mutation request parameters.",
         userMessage: "The CSRF header is missing. Please refresh and try again.",
     },
-    /**
-     * Session Errors
-     */
+    CSRF_TOKEN_INVALID: {
+        type: "AUTH_FLOW",
+        statusCode: 403,
+        name: "CsrfError",
+        message: "CSRF JWS verification failed because the token signature or structure is malformed or invalid.",
+        userMessage: "Invalid CSRF token. Please refresh and try again.",
+    },
+    CSRF_TOKEN_INVALID_VALUE: {
+        type: "AUTH_FLOW",
+        statusCode: 403,
+        name: "CsrfError",
+        message: "CSRF JWS payload is structurally valid, but its internal anti-forgery token claim is missing or malformed.",
+        userMessage: "Invalid CSRF token payload. Please refresh and try again.",
+    },
+    CSRF_TOKEN_EXPIRED: {
+        type: "AUTH_FLOW",
+        statusCode: 403,
+        name: "CsrfError",
+        message: "CSRF token verification failed because the JWS expiration timestamp ('exp') has passed.",
+        userMessage: "Your CSRF token has expired. Please refresh and try again.",
+    },
+    // #region Session
     SESSION_NOT_FOUND: {
         type: "AUTH_FLOW",
         statusCode: 401,
@@ -151,6 +158,20 @@ export const ERROR_CATALOG = {
         message:
             "The session block execution was aborted because the target token was explicitly blacklisted or flagged as inactive in persistence layer checks.",
         userMessage: "Your session has been revoked. Please sign in again.",
+    },
+    SESSION_MISSING: {
+        type: "AUTH_FLOW",
+        statusCode: 401,
+        name: "SessionError",
+        message: "The request does not contain an active session token in the session cookie.",
+        userMessage: "The session is missing. Please sign in again.",
+    },
+    SESSION_INACTIVE: {
+        type: "AUTH_FLOW",
+        statusCode: 401,
+        name: "SessionError",
+        message: "The session record exists, but its status is no longer active.",
+        userMessage: "Your session is inactive. Please sign in again.",
     },
     SESSION_INVALID: {
         type: "AUTH_FLOW",
@@ -198,10 +219,7 @@ export const ERROR_CATALOG = {
         message: "The provided 'session.strategy' option string value is unsupported by the engine runtime core configurations.",
         userMessage: "Unknown session strategy configured. Valid options are: 'jwt'.",
     },
-
-    /**
-     * Cookie Errors
-     */
+    // #region Cookie
     COOKIE_NOT_FOUND: {
         type: "AUTH_FLOW",
         statusCode: 401,
@@ -818,14 +836,6 @@ export const ERROR_CATALOG = {
         message:
             "Initialization aborted: The 'slidingThreshold' configuration value must be a floating-point number between 0 and 1 (inclusive), representing a percentage fraction of the total session lifespan.",
         userMessage: "Internal library configuration error. The sliding session threshold must be a number between 0 and 1.",
-    },
-    INVALID_CSRF_TOKEN: {
-        type: "AUTH_FLOW",
-        statusCode: 403,
-        name: "CsrfError",
-        message:
-            "CSRF security verification failed. The provided anti-CSRF token does not match the token embedded in the secure session cookie context or failed cryptographic validation.",
-        userMessage: "Security verification failed. Invalid or missing CSRF token.",
     },
     INVALID_CUSTOM_TRUSTED_PROXY_HEADERS_CONFIG: {
         type: "AUTH_FLOW",

@@ -218,3 +218,12 @@ export const isTrustedProxyHeadersSourceProtocolHost = (value: unknown): value i
         typeof (value as any).host === "string"
     )
 }
+
+// Temporary solution for "error instanceof errors.JWTExpired"
+export const isJWTExpired = (error: unknown) => {
+    return error instanceof Error && "code" in error && error.code === "ERR_JWS_VERIFICATION"
+}
+
+export const isValidJWS = (value: string) => {
+    return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+$/.test(value)
+}

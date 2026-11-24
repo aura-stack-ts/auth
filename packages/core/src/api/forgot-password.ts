@@ -1,5 +1,5 @@
-import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ForgotPasswordAPIOptions, ForgotPasswordAPIReturn } from "@/@types/api.ts"
@@ -61,13 +61,14 @@ export const forgotPassword = async (
             "FORGOT_PASSWORD_ERROR",
             "An error occurred while processing the forgot password request."
         )
+        const outHeaders = getAuraAuthHeaders(error, headers)
 
         return {
             success: false,
             error: errors,
             redirect: false,
             redirectURL: null,
-            headers,
+            headers: outHeaders,
             toResponse: () => {
                 return Response.json(
                     {
@@ -75,7 +76,7 @@ export const forgotPassword = async (
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers, status: statusCode }
+                    { headers: outHeaders, status: statusCode }
                 )
             },
         }

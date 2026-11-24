@@ -1,5 +1,7 @@
+import { HeadersBuilder } from "@aura-stack/router"
 import { shouldRefresh } from "@/shared/utils.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
+import { getExpiredCookie } from "@/shared/http/cookie.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
 import type { SessionWithUserEntity } from "@/@types/entities.ts"
@@ -8,7 +10,7 @@ import type { InternalContextForStateful, SessionStrategy } from "@/@types/inter
 export const getProviderTokens = (ctx: InternalContextForStateful): SessionStrategy["getProviderTokens"] => {
     const { logger, session } = ctx
 
-    return async ({ oauthId, provider, rawSession }) => {
+    return async ({ oauthId, provider, rawSession, cookieStore }) => {
         const headers = new Headers(secureApiHeaders)
         logger?.log("STATEFUL_GET_PROVIDER_TOKENS_START", {
             structuredData: {
@@ -23,7 +25,12 @@ export const getProviderTokens = (ctx: InternalContextForStateful): SessionStrat
             if (isExpired) {
                 await session.config.adapter.revokeSession(sessionByToken.id, "user_logout")
             }
-            throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
+            throw new AuraAuthError({
+                code: "SESSION_NOT_FOUND",
+                headers: new HeadersBuilder(secureApiHeaders)
+                    .setCookie(cookieStore.sessionToken.name, "", getExpiredCookie(cookieStore.sessionToken.attributes))
+                    .toHeaders(),
+            })
         }
 
         logger?.log("STATEFUL_GET_PROVIDER_TOKENS_SESSION_FOUND", {

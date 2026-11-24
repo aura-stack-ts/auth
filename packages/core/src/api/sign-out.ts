@@ -1,5 +1,5 @@
-import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignOutAPIOptions, SignOutAPIReturn } from "@/@types/index.ts"
@@ -61,9 +61,11 @@ export const signOut = async ({
     } catch (error) {
         errorToLogMessage(error, "SIGN_OUT_FAILED", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "SIGN_OUT_FAILED", "Failed to sign-out session")
+        const headers = getAuraAuthHeaders(error, initHeaders)
+
         return {
             success: false,
-            headers: initHeaders,
+            headers,
             redirect: false,
             redirectURL: null,
             error: errors,
@@ -74,7 +76,7 @@ export const signOut = async ({
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers: initHeaders, status: statusCode }
+                    { headers, status: statusCode }
                 )
             },
         }

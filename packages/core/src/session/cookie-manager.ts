@@ -3,30 +3,30 @@ import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { getExpiredCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import type { InternalCookieStoreConfig } from "@/@types/internal.ts"
 
-export const createCookieManager = (store: () => InternalCookieStoreConfig) => {
-    const getCookie = (request: Request | Headers) => {
-        const sessionToken = getOptionalCookie(request, store().sessionToken.name)
+export const createCookieManager = () => {
+    const getCookie = (request: Request | Headers, store: InternalCookieStoreConfig) => {
+        const sessionToken = getOptionalCookie(request, store.sessionToken.name)
         return {
             sessionToken,
         }
     }
 
-    const setCookie = ({ sessionToken }: { sessionToken: string }) => {
+    const setCookie = ({ sessionToken, store }: { sessionToken: string; store: InternalCookieStoreConfig }) => {
         return new HeadersBuilder(secureApiHeaders)
-            .setCookie(store().sessionToken.name, sessionToken, store().sessionToken.attributes)
+            .setCookie(store.sessionToken.name, sessionToken, store.sessionToken.attributes)
             .toHeaders()
     }
 
-    const clear = () => {
+    const clear = (store: InternalCookieStoreConfig) => {
         return new HeadersBuilder(secureApiHeaders)
-            .setCookie(store().sessionToken.name, "", getExpiredCookie(store().sessionToken.attributes))
+            .setCookie(store.sessionToken.name, "", getExpiredCookie(store.sessionToken.attributes))
             .toHeaders()
     }
 
-    const clearAll = () => {
+    const clearAll = (store: InternalCookieStoreConfig) => {
         return new HeadersBuilder(secureApiHeaders)
-            .setCookie(store().csrfToken.name, "", getExpiredCookie(store().csrfToken.attributes))
-            .setCookie(store().sessionToken.name, "", getExpiredCookie(store().sessionToken.attributes))
+            .setCookie(store.csrfToken.name, "", getExpiredCookie(store.csrfToken.attributes))
+            .setCookie(store.sessionToken.name, "", getExpiredCookie(store.sessionToken.attributes))
             .toHeaders()
     }
 

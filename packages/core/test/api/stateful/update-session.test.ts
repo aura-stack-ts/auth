@@ -37,20 +37,13 @@ describe("updateSession API", () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_MISSING",
+                message: "The session is missing. Please sign in again.",
             },
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([
-            expect.objectContaining({
-                name: "__Secure-aura-auth.session_token",
-                value: "",
-                expires: new Date(0),
-                sameSite: "lax",
-            }),
-        ])
+        expect(output.headers).toHaveValidSetCookies([])
 
         expect(spy).not.toHaveBeenCalled()
         expect(sessionByTokenMock).not.toHaveBeenCalled()
@@ -950,7 +943,13 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(updateUserMock).not.toHaveBeenCalled()

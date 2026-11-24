@@ -2,6 +2,7 @@ import { getProviderTokens } from "@/api/get-provider-tokens.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { AccessTokenAPIOptions, AccessTokenAPIReturn, LiteralUnion, BuiltInOAuthProvider } from "@/@types/index.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 
 export const getAccessToken = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
@@ -30,12 +31,14 @@ export const getAccessToken = async (
     } catch (error) {
         errorToLogMessage(error, "ACCESS_TOKEN_ERROR", ctx.ctx.logger)
         const { errors } = handleApiError(error, "ACCESS_TOKEN_ERROR", "Failed to get access token")
+        const outHeaders = getAuraAuthHeaders(error, new Headers(secureApiHeaders))
+
         return {
             success: false,
             accessToken: null,
             error: errors,
-            headers: new Headers(),
-            toResponse: () => Response.json({ success: false, accessToken: null }, { status: 500, headers: new Headers() }),
+            headers: outHeaders,
+            toResponse: () => Response.json({ success: false, accessToken: null }, { status: 500, headers: outHeaders }),
         }
     }
 }

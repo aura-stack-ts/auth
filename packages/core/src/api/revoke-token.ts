@@ -1,4 +1,4 @@
-import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -63,12 +63,14 @@ export const revokeToken = async (
             "UNKNOWN_REVOKE_TOKEN_ERROR",
             "Failed to revoke token for the OAuth provider"
         )
+        const headers = getAuraAuthHeaders(error, initHeaders)
+
         return {
             success: false,
             error: errors,
-            headers: initHeaders,
+            headers,
             toResponse: () => {
-                return Response.json({ success: false }, { status: statusCode, headers: initHeaders })
+                return Response.json({ success: false }, { status: statusCode, headers })
             },
         }
     }

@@ -1,11 +1,11 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/exports/crypto.ts"
-import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 import { assertUserStatus } from "@/shared/utils/stateful.ts"
+import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const sendMagicLink = (ctx: InternalContextForStateful): SessionStrategy["sendMagicLink"] => {
     const { session } = ctx
-    return async ({ email, origin, allowSignUp }) => {
+    return async ({ email, origin, allowSignUp, cookieStore }) => {
         let user = await session.config.adapter.getUserByEmail(email)
         if (!user) {
             if (!allowSignUp) {
@@ -16,7 +16,7 @@ export const sendMagicLink = (ctx: InternalContextForStateful): SessionStrategy[
                 emailVerifiedAt: null,
             })
         }
-        assertUserStatus(user, { error: "SILENT_USER_NOT_FOUND" })
+        assertUserStatus(user, { error: "SILENT_USER_NOT_FOUND", headers: ctx.cookies.manager.clear(cookieStore) })
         if (!user.email) {
             throw new AuraAuthError({ code: "SILENT_USER_NOT_FOUND" })
         }

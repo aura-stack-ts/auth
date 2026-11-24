@@ -1,9 +1,9 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getUserInfo } from "@/shared/oauth2/get-user-info.ts"
 import { getProviderTokens } from "@/api/get-provider-tokens.ts"
-import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
     RefreshUserInfoAPIOptions,
@@ -113,9 +113,11 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             "UNKNOWN_REFRESH_USER_INFO_ERROR",
             "Failed to refresh user information from the OAuth provider"
         )
+        const headers = getAuraAuthHeaders(error, initHeaders)
+
         return {
             success: false,
-            headers: initHeaders,
+            headers,
             error: errors,
             session: null,
             toResponse: () => {
@@ -124,7 +126,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
                         success: false,
                         session: null,
                     },
-                    { headers: initHeaders, status: statusCode }
+                    { headers, status: statusCode }
                 )
             },
         }

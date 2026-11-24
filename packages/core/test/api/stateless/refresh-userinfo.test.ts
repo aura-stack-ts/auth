@@ -30,8 +30,8 @@ describe("refreshUserInfo", () => {
             success: false,
             session: null,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_MISSING",
+                message: "The session is missing. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -464,7 +464,13 @@ describe("refreshUserInfo", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("updates session cookie with new session token", async () => {
@@ -727,8 +733,8 @@ describe("refreshUserInfo", () => {
             success: false,
             session: null,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -829,8 +835,8 @@ describe("refreshUserInfo", () => {
             success: false,
             session: null,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

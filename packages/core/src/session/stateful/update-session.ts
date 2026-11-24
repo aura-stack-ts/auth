@@ -1,6 +1,5 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getExpiresAt } from "@/shared/utils/session-strategy.ts"
-import { createCookieManager } from "@/session/cookie-manager.ts"
 import type { Session, SessionWithUserEntity, User } from "@/@types/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
@@ -81,6 +80,6 @@ export const updateSession = <DefaultUser extends User>(
             },
         })
 
-        return { session: updatedSession, headers: createCookieManager(() => cookieStore).setCookie({ sessionToken }) }
+        return { session: updatedSession, headers: ctx.cookies.manager.setCookie({ sessionToken, store: cookieStore }) }
     }
 }

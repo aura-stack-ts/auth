@@ -4,7 +4,6 @@ import { AuraAuthError } from "@/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
 import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
-import { createCookieManager } from "@/session/cookie-manager.ts"
 import type { User } from "@/@types/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
@@ -21,7 +20,6 @@ export const getSession = <DefaultUser extends User>(
     }
 
     return async ({ headers, cookieStore }) => {
-        const cookieManager = createCookieManager(() => cookieStore)
         logger?.log("STATEFUL_GET_SESSION_START", {
             structuredData: {
                 strategy: "stateful",
@@ -30,7 +28,7 @@ export const getSession = <DefaultUser extends User>(
         })
 
         try {
-            const { sessionToken } = cookieManager.getCookie(headers)
+            const { sessionToken } = ctx.cookies.manager.getCookie(headers, cookieStore)
 
             logger?.log("STATEFUL_SESSION_TOKEN_EXTRACTED", {
                 structuredData: {
@@ -98,7 +96,7 @@ export const getSession = <DefaultUser extends User>(
                 })
                 return {
                     session: null,
-                    headers: cookieManager.clear(),
+                    headers: ctx.cookies.manager.clear(cookieStore),
                 }
             }
 
@@ -113,7 +111,7 @@ export const getSession = <DefaultUser extends User>(
 
                 return {
                     session: null,
-                    headers: cookieManager.clear(),
+                    headers: ctx.cookies.manager.clear(cookieStore),
                 }
             }
 
@@ -171,7 +169,7 @@ export const getSession = <DefaultUser extends User>(
                     user: parsedUser as DefaultUser,
                     expires: effectiveExpiresAt.toISOString(),
                 },
-                headers: cookieManager.setCookie({ sessionToken }),
+                headers: ctx.cookies.manager.setCookie({ sessionToken, store: cookieStore }),
             }
         } catch (error) {
             logger?.log("STATEFUL_GET_SESSION_ERROR", {
@@ -182,7 +180,7 @@ export const getSession = <DefaultUser extends User>(
             })
             return {
                 session: null,
-                headers: cookieManager.clear(),
+                headers: ctx.cookies.manager.clear(cookieStore),
             }
         }
     }

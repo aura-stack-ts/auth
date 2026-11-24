@@ -1,5 +1,5 @@
 import { createSignInURL } from "@/shared/oauth2/authorization.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -61,12 +61,14 @@ export const signIn = async (
     } catch (error) {
         errorToLogMessage(error, "AUTH_SIGN_IN_FAILED", ctx.logger)
         const { errors } = handleApiError(error, "AUTH_SIGN_IN_FAILED", "An error occurred during the sign-in process.")
+        const headers = getAuraAuthHeaders(error, initHeaders)
+
         return {
             success: false,
             redirect: false,
             signInURL: null,
             error: errors,
-            headers: initHeaders,
+            headers,
             toResponse: () => {
                 return Response.json(
                     {
@@ -75,7 +77,7 @@ export const signIn = async (
                         signInURL: null,
                         error: errors,
                     },
-                    { status: 500, headers: initHeaders }
+                    { status: 500, headers }
                 )
             },
         }

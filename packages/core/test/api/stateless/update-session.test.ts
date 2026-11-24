@@ -22,19 +22,13 @@ describe("updateSession API", () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_MISSING",
+                message: "The session is missing. Please sign in again.",
             },
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([
-            expect.objectContaining({
-                name: "__Secure-aura-auth.session_token",
-                value: "",
-                expires: new Date(0),
-            }),
-        ])
+        expect(updated.headers).toHaveValidSetCookies([])
     })
 
     test("updates user session with skipCSRFCheck", async () => {
@@ -588,8 +582,8 @@ describe("updateSession API", () => {
             redirect: false,
             redirectURL: null,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

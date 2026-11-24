@@ -13,24 +13,14 @@ const jwksVerifierCache = new Map<string, CachedVerifier>()
 const JWKS_CACHE_TTL_MS = 5 * 60 * 1000
 
 export const fetchJWKS = async (jwks_uri: string) => {
-    let response: Response
-    try {
-        response = await fetchAsync(jwks_uri, {
-            headers: { Accept: "application/json" },
-        })
-        assertContentTypeResponse(response)
-    } catch (cause) {
-        throw new AuraAuthError({ code: "OIDC_JWKS_INVALID_RESPONSE", cause })
-    }
+    const response = await fetchAsync(jwks_uri, {
+        headers: { Accept: "application/json" },
+    })
+    assertContentTypeResponse(response)
     if (!response.ok) {
         throw new AuraAuthError({ code: "OIDC_JWKS_INVALID_RESPONSE" })
     }
-    let json: unknown
-    try {
-        json = await response.json()
-    } catch (cause) {
-        throw new AuraAuthError({ code: "OIDC_JWKS_INVALID_RESPONSE", cause })
-    }
+    const json = await response.json()
     const parsed = JWKSResponseSchema.safeParse(json)
     if (!parsed.success) {
         throw new AuraAuthError({ code: "OIDC_JWKS_INVALID_SCHEMA", cause: parsed.error })

@@ -396,8 +396,7 @@ describe("Revoke Action", () => {
         const csrfToken = await createCSRF(jose)
         const tokenHash = await createHash("valid-token-hash")
         const mockFetch = vi.fn().mockResolvedValueOnce({
-            ok: true,
-            status: 201,
+            ok: false,
         })
         vi.stubGlobal("fetch", mockFetch)
 

@@ -54,7 +54,13 @@ describe("isProviderConnected (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
@@ -90,14 +96,20 @@ describe("isProviderConnected (Stateful)", () => {
             success: false,
             connected: false,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_EXPIRED",
+                message: "Your session has expired. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
@@ -132,14 +144,20 @@ describe("isProviderConnected (Stateful)", () => {
             success: false,
             connected: false,
             error: {
-                code: "SESSION_NOT_FOUND",
-                message: "The session token is not found. There is no active session.",
+                code: "SESSION_REVOKED",
+                message: "Your session has been revoked. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()

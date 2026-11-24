@@ -8,8 +8,6 @@ import { getInitialHeaders } from "@/shared/http/headers.ts"
 import { assertUserStatus } from "@/shared/utils/stateful.ts"
 import { verifySessionToken } from "@/shared/utils/session.ts"
 import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
-import { internal_verifyCSRFToken } from "@/shared/utils/api.ts"
-import { createCookieManager } from "@/session/cookie-manager.ts"
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import type { AuraErrorCode } from "@/errors/catalog.ts"
 import type { InternalCookieStoreConfig, RouterGlobalContext, RuntimeOAuthProvider } from "@/@types/internal.ts"
@@ -22,6 +20,7 @@ import type {
     TypedJWTPayload,
     User,
 } from "@/@types/index.ts"
+import { verifyDoubleSubmitCSRFTokenFromRequest } from "./verify-csrf-token.ts"
 
 export const createValidation = (
     ctx: RouterGlobalContext<any, any>,
@@ -59,23 +58,38 @@ export const createValidation = (
         },
         verifySession: () => {
             steps.push(async () => {
+                const outHeaders = ctx.cookies.manager.clear(output.cookieStore!)
                 if (isStatelessStrategy(ctx.session.config)) {
                     const { session, sessionToken } = await verifySessionToken({
                         headers,
                         cookies: output.cookieStore!,
                         jwt: ctx.jose.manager,
+                        outHeaders,
                     })
                     output.rawSession = session
                     output.sessionToken = sessionToken
                 } else {
-                    const { sessionToken } = createCookieManager(() => output.cookieStore!).getCookie(headers)
+                    const { sessionToken } = ctx.cookies.manager.getCookie(headers, output.cookieStore!)
+                    const outHeaders = ctx.cookies.manager.clear(output.cookieStore!)
                     if (!sessionToken) {
-                        throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
+                        throw new AuraAuthError({ code: "SESSION_MISSING" })
                     }
                     const tokenHash = await createHash(sessionToken)
                     const session = await ctx.session.config.adapter.getSessionByToken(tokenHash)
-                    if (!session || session.status !== "active" || new Date() > session.expiresAt) {
-                        throw new AuraAuthError({ code: "SESSION_NOT_FOUND" })
+                    if (!session) {
+                        throw new AuraAuthError({ code: "SESSION_NOT_FOUND", headers: outHeaders })
+                    }
+                    if (session.revokedAt || session.status === "revoked") {
+                        throw new AuraAuthError({ code: "SESSION_REVOKED", headers: outHeaders })
+                    }
+                    if (new Date() >= session.expiresAt || session.status === "expired") {
+                        throw new AuraAuthError({ code: "SESSION_EXPIRED", headers: outHeaders })
+                    }
+                    if (session.status !== "active") {
+                        throw new AuraAuthError({ code: "SESSION_INACTIVE", headers: outHeaders })
+                    }
+                    if (!session.user) {
+                        throw new AuraAuthError({ code: "USER_NOT_FOUND", headers: outHeaders })
                     }
                     output.userId = session.userId
                     output.sessionId = session.id
@@ -93,17 +107,15 @@ export const createValidation = (
                 }
                 if (isStatelessStrategy(ctx.session.config)) return
                 const session = output.rawSession as SessionWithUserEntity
-                assertUserStatus(session.user, { error })
+                assertUserStatus(session.user, { error, headers: ctx.cookies.manager.clear(output.cookieStore!) })
             })
             return builder
         },
         verifyCSRFToken: (skipCSRFCheck: boolean, doubleSubmitToken: string | undefined, generateNewToken: boolean = false) => {
             steps.push(async () => {
-                const existingCSRFToken = getOptionalCookie(headers, output.cookieStore!.csrfToken.name!)
-                const csrfTokenValue = generateNewToken
-                    ? await createCSRF(ctx.jose.instance, existingCSRFToken)
-                    : existingCSRFToken
-                await internal_verifyCSRFToken({
+                const token = getOptionalCookie(headers, output.cookieStore!.csrfToken.name!)
+                const csrfTokenValue = generateNewToken ? await createCSRF(ctx.jose.instance, token) : token
+                await verifyDoubleSubmitCSRFTokenFromRequest({
                     ctx,
                     headers,
                     skipCSRFCheck,

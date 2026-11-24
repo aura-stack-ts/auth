@@ -42,7 +42,7 @@ export const createContext = <Identity extends Identities, SignUpSchema extends 
             store: useSecureCookies === "untrusted" ? precomputed.untrusted : precomputed.trusted,
             secureCookies: useSecureCookies,
             precomputed,
-            manager: createCookieManager(() => ctx.cookies.store),
+            manager: createCookieManager(),
         },
         jose: {
             instance: jose,

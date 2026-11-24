@@ -169,7 +169,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledOnce()
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
@@ -223,7 +229,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
@@ -388,7 +400,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
         expect(getAccountsByUserIdMock).not.toHaveBeenCalled()
@@ -995,7 +1013,13 @@ describe("refreshUserInfo API (Stateful)", () => {
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("toResponse returns correct response on success", async () => {
@@ -1332,8 +1356,8 @@ describe("refreshUserInfo API (Stateful)", () => {
             success: false,
             session: null,
             error: {
-                code: "CSRF_TOKEN_MISMATCH",
-                message: "CSRF token verification failed. Please refresh and try again.",
+                code: "CSRF_TOKEN_INVALID",
+                message: "Invalid CSRF token. Please refresh and try again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

@@ -1,14 +1,14 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
+import { assertUserStatus } from "@/shared/utils/stateful.ts"
 import { createHash, createSecretValue } from "@/exports/crypto.ts"
 import { createDevice as createDeviceHelper } from "@/shared/utils/session-strategy.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
-import { assertUserStatus } from "@/shared/utils/stateful.ts"
 
 export const signInCredentials = (ctx: InternalContextForStateful): SessionStrategy["signInCredentials"] => {
     const { logger, session } = ctx
     const createDevice = createDeviceHelper(ctx)
 
-    return async ({ payload, request }) => {
+    return async ({ payload, request, cookieStore }) => {
         logger?.log("STATEFUL_SIGN_IN_CREDENTIALS_START", {
             structuredData: {
                 strategy: "stateful",
@@ -38,7 +38,7 @@ export const signInCredentials = (ctx: InternalContextForStateful): SessionStrat
         if (!user) {
             throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
         }
-        assertUserStatus(user)
+        assertUserStatus(user, { headers: ctx.cookies.manager.clear(cookieStore) })
 
         const device = await createDevice(user.id, request)
 
