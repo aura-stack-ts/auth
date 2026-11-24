@@ -1,6 +1,6 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ChangeEmailAPIOptions, ChangeEmailAPIReturn } from "@/@types/api.ts"
@@ -86,12 +86,13 @@ export const changeEmail = async ({
             "CHANGE_EMAIL_ERROR",
             "An error occurred while changing the email address."
         )
+        const outHeaders = getAuraAuthHeaders(error, headers)
         return {
             success: false,
             error: errors,
             redirect: false,
             redirectURL: null,
-            headers,
+            headers: outHeaders,
             toResponse: () => {
                 return Response.json(
                     {
@@ -99,7 +100,7 @@ export const changeEmail = async ({
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers, status: statusCode }
+                    { headers: outHeaders, status: statusCode }
                 )
             },
         }

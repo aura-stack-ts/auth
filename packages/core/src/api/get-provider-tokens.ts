@@ -1,7 +1,6 @@
-import { isAuraAuthError } from "@/errors/aura-error.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
-import { getInitialHeaders, secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
     GetProviderTokensAPIOptions,
@@ -45,9 +44,7 @@ export const getProviderTokens = async (
         errorToLogMessage(error, "GET_PROVIDER_TOKENS_ERROR", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
-        const headers = isAuraAuthError(error)
-            ? toUnionHeaders(new Headers(error.headers), secureApiHeaders)
-            : new Headers(secureApiHeaders)
+        const headers = getAuraAuthHeaders(error, new Headers(secureApiHeaders))
 
         return {
             success: false,

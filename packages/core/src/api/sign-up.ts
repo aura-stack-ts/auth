@@ -1,7 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -85,12 +85,13 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
     } catch (error) {
         errorToLogMessage(error, "SIGN_UP_ERROR", logger)
         const { errors, statusCode } = handleApiError(error, "SIGN_UP_ERROR", "An error occurred during sign-up.")
+        const outHeaders = getAuraAuthHeaders(error, headers)
 
         return {
             success: false,
             error: errors,
             redirect: false,
-            headers,
+            headers: outHeaders,
             redirectURL: null,
             toResponse: () => {
                 return Response.json(
@@ -99,7 +100,7 @@ export const signUp = async <Payload extends Record<string, unknown> = Record<st
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers, status: statusCode }
+                    { headers: outHeaders, status: statusCode }
                 )
             },
         }

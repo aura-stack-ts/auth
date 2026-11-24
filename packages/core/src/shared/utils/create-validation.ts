@@ -72,7 +72,7 @@ export const createValidation = (
                     const { sessionToken } = ctx.cookies.manager.getCookie(headers, output.cookieStore!)
                     const outHeaders = ctx.cookies.manager.clear(output.cookieStore!)
                     if (!sessionToken) {
-                        throw new AuraAuthError({ code: "SESSION_MISSING", headers: outHeaders })
+                        throw new AuraAuthError({ code: "SESSION_MISSING" })
                     }
                     const tokenHash = await createHash(sessionToken)
                     const session = await ctx.session.config.adapter.getSessionByToken(tokenHash)

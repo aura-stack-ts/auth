@@ -28,13 +28,7 @@ describe("updateSession API", () => {
             toResponse: expect.any(Function),
         })
         expect(updated.headers).toHaveValidSecurityHeaders()
-        expect(updated.headers).toHaveValidSetCookies([
-            expect.objectContaining({
-                name: "__Secure-aura-auth.session_token",
-                value: "",
-                expires: new Date(0),
-            }),
-        ])
+        expect(updated.headers).toHaveValidSetCookies([])
     })
 
     test("updates user session with skipCSRFCheck", async () => {

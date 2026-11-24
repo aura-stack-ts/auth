@@ -12,12 +12,16 @@ export const discoveryMetadata = async (issuer: string): Promise<OpenIDMetadata>
     const base = normalizeIssuer(issuer)
     const response = await fetchAsync(`${base}${DISCOVERY_SUFFIX}`, {
         headers: { Accept: "application/json" },
+    }).catch((error) => {
+        throw new AuraAuthError({ code: "OIDC_DISCOVERY_NETWORK_FAILED", cause: error })
     })
     assertContentTypeResponse(response)
     if (!response.ok) {
         throw new AuraAuthError({ code: "OIDC_DISCOVERY_INVALID_RESPONSE" })
     }
-    const json = await response.json()
+    const json = await response.json().catch((error) => {
+        throw new AuraAuthError({ code: "OIDC_DISCOVERY_INVALID_FORMAT_RESPONSE", cause: error })
+    })
     const parsed = OpenIDMetadataSchema.safeParse(json)
     if (!parsed.success) {
         throw new AuraAuthError({ code: "OIDC_DISCOVERY_INVALID_SCHEMA", cause: parsed.error })

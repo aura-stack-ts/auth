@@ -4,7 +4,7 @@ import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPa
 import type { AsymmetricKeyPairFromEnv, RouterGlobalContext } from "@/@types/internal.ts"
 
 export { generateKeyPair as createKeyPair } from "@aura-stack/jose/jose"
-export { assertCSRFToken as verifyCSRF } from "@/shared/utils/verify-csrf-token.ts"
+export { verifyDoubleSubmitCSRFToken as verifyCSRF } from "@/shared/utils/verify-csrf-token.ts"
 
 export const createSecretValue = (length: number = 32) => {
     return base64url.encode(getRandomBytes(length))

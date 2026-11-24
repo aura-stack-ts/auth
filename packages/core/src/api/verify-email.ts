@@ -1,4 +1,4 @@
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -57,13 +57,14 @@ export const verifyEmail = async (
     } catch (error) {
         errorToLogMessage(error, "VERIFY_EMAIL_ERROR", logger)
         const { errors, statusCode } = handleApiError(error, "VERIFY_EMAIL_ERROR", "An error occurred while verifying the email.")
+        const outHeaders = getAuraAuthHeaders(error, headers)
 
         return {
             success: false,
             redirect: false,
             redirectURL: null,
             error: errors,
-            headers,
+            headers: outHeaders,
             toResponse: () => {
                 return Response.json(
                     {
@@ -71,7 +72,7 @@ export const verifyEmail = async (
                         redirect: false,
                         redirectURL: null,
                     },
-                    { headers, status: statusCode }
+                    { headers: outHeaders, status: statusCode }
                 )
             },
         }

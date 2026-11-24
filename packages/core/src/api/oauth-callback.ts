@@ -1,4 +1,4 @@
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -37,7 +37,7 @@ export const oauthCallback = async ({
             },
         }
     } catch (error) {
-        const headers = new Headers(secureApiHeaders)
+        const headers = getAuraAuthHeaders(error, new Headers(secureApiHeaders))
         errorToLogMessage(error, "OAUTH_CALLBACK_ERROR", logger)
         const { errors, statusCode } = handleApiError(error, "OAUTH_CALLBACK_ERROR", "An error occurred on callback process")
 

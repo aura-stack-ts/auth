@@ -1,8 +1,7 @@
-import { isAuraAuthError } from "@/errors/aura-error.ts"
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
-import { getInitialHeaders, secureApiHeaders, toUnionHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
@@ -17,7 +16,8 @@ export const updateSession = async <DefaultUser extends User = User>({
     doubleSubmitToken = undefined,
     fallbackRedirectTo = undefined,
 }: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
-    const initialHeaders = new Headers(secureApiHeaders)
+    const initHeaders = new Headers(secureApiHeaders)
+
     let cookieStore = getCookieStore({ ctx, request: requestInit ?? getInitialHeaders(undefined, headersInit) })
     try {
         ctx.logger?.log("UPDATE_SESSION_INITIATED", {
@@ -82,10 +82,10 @@ export const updateSession = async <DefaultUser extends User = User>({
     } catch (error) {
         errorToLogMessage(error, "UPDATE_SESSION_INVALID", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
-        const headers = isAuraAuthError(error) ? toUnionHeaders(initialHeaders, error.headers) : initialHeaders
+        const outHeaders = getAuraAuthHeaders(error, initHeaders)
 
         return {
-            headers: headers,
+            headers: outHeaders,
             session: null,
             success: false,
             redirect: false,
@@ -94,7 +94,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             toResponse: () => {
                 return Response.json(
                     { success: false, session: null, redirect: false, redirectURL: null },
-                    { status: statusCode, headers: headers }
+                    { status: statusCode, headers: outHeaders }
                 )
             },
         }

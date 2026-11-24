@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/exports/crypto.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
@@ -78,18 +78,23 @@ export const signInCredentials = async ({
             },
         } as SignInCredentialsAPIReturn
     } catch (error) {
+        const outHeaders = getAuraAuthHeaders(error, headers)
+
         const {
             errors: { code, message },
             statusCode,
         } = handleApiError(error, "CREDENTIALS_SIGN_IN_ERROR", "An error occurred during credentials sign-in.", 401)
         const invalidCredentials: SignInCredentialsAPIReturn = {
             success: false,
-            headers,
+            headers: outHeaders,
             redirect: false,
             redirectURL: null,
             error: { code, message },
             toResponse: () => {
-                return Response.json({ success: false, redirect: false, redirectURL: null }, { headers, status: statusCode })
+                return Response.json(
+                    { success: false, redirect: false, redirectURL: null },
+                    { headers: outHeaders, status: statusCode }
+                )
             },
         }
         if (error instanceof AuraAuthError && error.code === "AUTH_CREDENTIALS_INVALID") {

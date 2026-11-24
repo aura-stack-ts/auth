@@ -1,5 +1,5 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
-import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -74,13 +74,14 @@ export const sendMagicLink = async (
     } catch (error) {
         errorToLogMessage(error, "SEND_MAGIC_LINK_ERROR", logger)
         const { errors } = handleApiError(error, "SEND_MAGIC_LINK_ERROR", "An error occurred while sending the magic link.")
+        const outHeaders = getAuraAuthHeaders(error, headers)
 
         return {
             success: false,
             error: errors,
             redirect: false,
             redirectURL: null,
-            headers,
+            headers: outHeaders,
             toResponse: () => {
                 return Response.json(
                     {
@@ -92,7 +93,7 @@ export const sendMagicLink = async (
                      * For security reasons, we always return a 200 status code to avoid leaking information
                      * about the existence of the email address or enumeration attacks.
                      */
-                    { headers, status: 200 }
+                    { headers: outHeaders, status: 200 }
                 )
             },
         }

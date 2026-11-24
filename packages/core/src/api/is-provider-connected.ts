@@ -1,6 +1,6 @@
-import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
@@ -48,13 +48,15 @@ export const isProviderConnected = async (
         errorToLogMessage(error, "OAUTH_PROVIDER_CONNECTED_ERROR", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "OAUTH_PROVIDER_CONNECTED_ERROR", "Provider connected error.")
 
+        const outHeaders = getAuraAuthHeaders(error, headers)
+
         return {
             success: false,
             connected: false,
             error: errors,
-            headers,
+            headers: outHeaders,
             toResponse: () => {
-                return Response.json({ success: false, connected: false }, { status: statusCode, headers })
+                return Response.json({ success: false, connected: false }, { status: statusCode, headers: outHeaders })
             },
         }
     }

@@ -424,14 +424,20 @@ describe("revokeToken", () => {
         expect(output).toEqual({
             success: false,
             error: {
-                code: "SESSION_INVALID",
-                message: "The session is not valid. Its signature or decryption parameters failed.",
+                code: "SESSION_EXPIRED",
+                message: "Your session has expired. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([])
+        expect(output.headers).toHaveValidSetCookies([
+            expect.objectContaining({
+                name: "__Secure-aura-auth.session_token",
+                value: "",
+                expires: new Date(0),
+            }),
+        ])
     })
 
     test("handles provider with custom revoke token URL", async () => {

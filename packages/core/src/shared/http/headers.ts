@@ -1,3 +1,4 @@
+import { isAuraAuthError } from "@/errors/aura-error.ts"
 import type { RequestHeaders } from "@aura-stack/router"
 
 /**
@@ -69,4 +70,8 @@ export const getInitialHeaders = (requestInit?: Request, headersInit?: HeadersIn
     const newHeaders = toUnionHeaders(new Headers(requestInit?.headers), headersInit as HeadersInit)
     toUnionHeaders(newHeaders, secureApiHeaders)
     return newHeaders
+}
+
+export const getAuraAuthHeaders = (error: unknown, init: Headers) => {
+    return isAuraAuthError(error) ? toUnionHeaders(new Headers(init), error.headers) : init
 }
