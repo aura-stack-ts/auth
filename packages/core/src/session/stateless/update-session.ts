@@ -1,4 +1,4 @@
-import { getExpiresAt } from "@/shared/utils/session-strategy.ts"
+import { getExpiresAt } from "@/shared/utils/expires-at.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 

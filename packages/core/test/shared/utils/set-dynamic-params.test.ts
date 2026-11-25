@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest"
-import { AuraAuthError } from "@/errors/aura-error.ts"
-import { setDynamicParams } from "@/shared/utils/params.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
+import { setDynamicParams } from "@/shared/utils/search-params.ts"
 
 describe("setDynamicParams", () => {
     describe("valid cases", () => {

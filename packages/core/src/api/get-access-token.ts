@@ -1,6 +1,6 @@
 import { getProviderTokens } from "@/api/get-provider-tokens.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/handle-messages.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { AccessTokenAPIOptions, AccessTokenAPIReturn, LiteralUnion, BuiltInOAuthProvider } from "@/@types/index.ts"

@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest"
 import { getTrustedOriginsConfig } from "@/config/get-trusted-origins.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import type { AuthConfig } from "@/index.ts"
 
 describe("getTrustedOriginsConfig", () => {

@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { createCSRF } from "@/exports/crypto.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createSchemaRegistry } from "@/shared/identity-registry.ts"
 import { deviceEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("signInCredentials action", async () => {
@@ -15,7 +15,7 @@ describe("signInCredentials action", async () => {
 
     test("success signIn flow", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -71,7 +71,7 @@ describe("signInCredentials action", async () => {
 
     test("invalid credentials", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -119,7 +119,7 @@ describe("signInCredentials action", async () => {
 
     test("invalid authorize by missing required fields", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -177,7 +177,7 @@ describe("signInCredentials action", async () => {
 
     test("credentials with redirect: true (by default)", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -235,7 +235,7 @@ describe("signInCredentials action", async () => {
 
     test("credentials with redirect: true and redirectTo", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -293,7 +293,7 @@ describe("signInCredentials action", async () => {
 
     test("credentials with redirect: false", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -351,7 +351,7 @@ describe("signInCredentials action", async () => {
 
     test("credentials with redirect: false and redirectTo", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)

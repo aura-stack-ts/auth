@@ -1,6 +1,6 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
+import { revokeProviderToken } from "@/shared/oauth2/revoke-token.ts"
 import type { SessionWithUserEntity } from "@/@types/entities.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 

@@ -4,7 +4,7 @@ import { createCSRF } from "@/exports/crypto.ts"
 import { identitySchema } from "@/identity/zod.ts"
 import { sessionPayload } from "@test/setup/presets.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createSchemaRegistry } from "@/shared/identity-registry.ts"
 import { accountEntity, deviceEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("signUp API", async () => {
@@ -18,7 +18,7 @@ describe("signUp API", async () => {
 
     test("success signUp flow not already exists", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -94,7 +94,7 @@ describe("signUp API", async () => {
 
     test("success signUp flow already exists", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -146,7 +146,7 @@ describe("signUp API", async () => {
 
     test("invalid signUp.onCreateUser return", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -192,7 +192,7 @@ describe("signUp API", async () => {
 
     test("invalid signUp.onCreateUser return with custom schema", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)

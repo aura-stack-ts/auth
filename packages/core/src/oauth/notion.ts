@@ -1,4 +1,5 @@
-import { createBasicAuthHeader, merge } from "@/shared/utils.ts"
+import { merge } from "@/shared/utils/merge.ts"
+import { createBasicAuthHeader } from "@/shared/utils/basic-auth.ts"
 import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 export interface Person {

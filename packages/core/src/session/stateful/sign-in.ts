@@ -1,9 +1,10 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { createRedirectTo } from "@/shared/utils/create-redirect-to.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { createFingerprint, getDeviceInfo } from "@/shared/http/request-metadata.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
-import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth2/authorization.ts"
+import { createAuthorizationURL, createRedirectURI } from "@/shared/oauth2/authorization-url.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const signIn = (ctx: InternalContextForStateful): SessionStrategy["signIn"] => {

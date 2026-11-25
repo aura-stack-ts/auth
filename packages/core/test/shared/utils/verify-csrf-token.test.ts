@@ -1,10 +1,10 @@
 import { describe, test, expect } from "vitest"
-import { getEnv } from "@/shared/env.ts"
+import { getEnv } from "@/shared/utils/get-env.ts"
 import { jose } from "@test/setup/auth.ts"
 import { signJWS } from "@aura-stack/jose"
 import { createCSRF } from "@/exports/crypto.ts"
 import { createContext } from "@/config/context.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import {
     assertCSRFToken,
     verifyDoubleSubmitCSRFToken,

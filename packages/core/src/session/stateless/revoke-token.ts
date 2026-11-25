@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { revokeProviderToken } from "@/shared/utils/revoke-token.ts"
+import { revokeProviderToken } from "@/shared/oauth2/revoke-token.ts"
 import { getCookie, getExpiredCookie } from "@/shared/http/cookie.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 

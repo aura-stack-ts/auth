@@ -1,5 +1,5 @@
 import { createHash } from "@/exports/crypto.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import type { SessionStrategy, InternalContextForStateful } from "@/@types/internal.ts"
 
 export const verifyEmail = (ctx: InternalContextForStateful): SessionStrategy["verifyEmail"] => {

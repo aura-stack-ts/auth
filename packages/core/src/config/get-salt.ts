@@ -1,6 +1,6 @@
-import { getEnv } from "@/shared/env.ts"
+import { getEnv } from "@/shared/utils/get-env.ts"
 import { createSecret } from "@aura-stack/jose"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 
 export const getSaltConfig = () => {
     const salt = getEnv("SALT")

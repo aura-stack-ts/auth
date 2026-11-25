@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { createAuth } from "@/createAuth.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { createBasicAuthHeader } from "@/shared/utils.ts"
+import { createBasicAuthHeader } from "@/shared/utils/basic-auth.ts"
 import { oauthCustomService } from "@test/setup/presets.ts"
 import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { accountEntity, sessionEntityWithUser } from "@test/setup/entities.ts"

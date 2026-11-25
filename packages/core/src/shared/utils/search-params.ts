@@ -1,6 +1,6 @@
-import { getEnv } from "@/shared/env.ts"
+import { getEnv } from "@/shared/utils/get-env.ts"
 import { isFalsy } from "@/shared/assert.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 
 export const setDynamicParams = <const T extends string, P extends Record<string, unknown>>(
     template: T,

@@ -1,4 +1,4 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { getSafeURL } from "@/shared/utils/get-safe-url.ts"
 import type { ClientContext } from "@/client/context.ts"
 import type { ClientSideReturnData } from "@/@types/api.ts"

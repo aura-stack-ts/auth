@@ -1,5 +1,5 @@
-import { env } from "@/shared/env.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { getEnv } from "@/shared/utils/get-env.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { parse, parseSetCookie, serialize, type SerializeOptions } from "@aura-stack/router/cookie"
 import type { CookieConfig } from "@/@types/index.ts"
 import type { InternalLogger, InternalCookieStoreConfig } from "@/@types/internal.ts"
@@ -154,7 +154,7 @@ export const defineSecureCookieOptions = (
             attributes.sameSite = "lax"
             logger?.log("COOKIE_SAMESITE_NONE_WITHOUT_SECURE")
         }
-        if (env.NODE_ENV === "production") {
+        if (getEnv("NODE_ENV") === "production") {
             logger?.log("COOKIE_INSECURE_IN_PRODUCTION")
         }
         if (strategy === "host") {

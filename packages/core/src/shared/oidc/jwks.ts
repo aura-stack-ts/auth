@@ -1,5 +1,5 @@
 import { createLocalJWKSet, type JWTVerifyGetKey } from "@aura-stack/jose/jose"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { fetchAsync } from "@/shared/http/fetch-async.ts"
 import { assertContentTypeResponse } from "@/shared/assert.ts"
 import { JWKSResponseSchema } from "@/shared/schemas/general.ts"

@@ -1,4 +1,4 @@
-import { getEnv } from "@/shared/env.ts"
+import { getEnv } from "@/shared/utils/get-env.ts"
 import { isBoolean, isString } from "@/shared/assert.ts"
 import type { AuthConfig } from "@/@types/config.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"

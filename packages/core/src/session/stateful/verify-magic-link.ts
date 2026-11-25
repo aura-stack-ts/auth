@@ -1,11 +1,11 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/exports/crypto.ts"
-import { createDevice as createDeviceRegistry } from "@/shared/utils/session-strategy.ts"
+import { createDevice as createDeviceHelper } from "@/session/stateful/create-device.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const verifyMagicLink = (ctx: InternalContextForStateful): SessionStrategy["verifyMagicLink"] => {
     const { session } = ctx
-    const createDevice = createDeviceRegistry(ctx)
+    const createDevice = createDeviceHelper(ctx)
 
     return async ({ token, request }) => {
         const now = new Date()

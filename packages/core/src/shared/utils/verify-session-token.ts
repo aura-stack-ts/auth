@@ -1,5 +1,5 @@
 import { isJWTExpired } from "@/shared/assert.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { getOptionalCookie } from "@/shared/http/cookie.ts"
 import type { InternalCookieStoreConfig, JoseManager } from "@/@types/internal.ts"
 

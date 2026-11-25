@@ -1,12 +1,13 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { transformToTokenPayload } from "@/shared/utils.ts"
+import { transformToTokenPayload } from "@/shared/utils/provider-tokens.ts"
 import { createCSRF, timingSafeEqual } from "@/exports/crypto.ts"
 import { verifyOIDCConfig } from "@/shared/oidc/verify-oidc-config.ts"
+import { createRedirectTo } from "@/shared/utils/create-redirect-to.ts"
 import { getCookie, getExpiredCookie, getOptionalCookie } from "@/shared/http/cookie.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
-import { createAccessToken, createRedirectTo, getUserInfo } from "@/shared/oauth2/index.ts"
+import { createAccessToken, getUserInfo } from "@/shared/oauth2/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const oauthCallback = (ctx: InternalContextForStateless): SessionStrategy["oauthCallback"] => {

@@ -5,12 +5,12 @@ import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { oauthCustomService, oauthTokens } from "@test/setup/presets.ts"
 import { accountEntity, oauthAccountEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
-import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createSchemaRegistry } from "@/shared/identity-registry.ts"
 
 describe("refreshUserInfo action", () => {
     test("unsupported oauth provider", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -57,7 +57,7 @@ describe("refreshUserInfo action", () => {
 
     test("throws error when CSRF token is missing", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -113,7 +113,7 @@ describe("refreshUserInfo action", () => {
 
     test("throws error when CSRF token is invalid", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -171,7 +171,7 @@ describe("refreshUserInfo action", () => {
 
     test("throws error when provider token does not exist", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -228,7 +228,7 @@ describe("refreshUserInfo action", () => {
 
     test("successfully refreshes user info", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -344,7 +344,7 @@ describe("refreshUserInfo action", () => {
 
     test("handles getUserInfo invalid response from provider", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -408,7 +408,7 @@ describe("refreshUserInfo action", () => {
 
     test("handles getUserInfo OAuth error response", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -476,7 +476,7 @@ describe("refreshUserInfo action", () => {
 
     test("handles getUserInfo missing required user fields", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -544,7 +544,7 @@ describe("refreshUserInfo action", () => {
 
     test("handles getProviderTokens failure", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -618,7 +618,7 @@ describe("refreshUserInfo action", () => {
         }
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -739,7 +739,7 @@ describe("refreshUserInfo action", () => {
 
     test("handles invalid user info response with missing content type", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -810,7 +810,7 @@ describe("refreshUserInfo action", () => {
 
     test("successfully refreshes with custom profile function", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")

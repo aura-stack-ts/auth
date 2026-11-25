@@ -1,6 +1,6 @@
-import { getEnvArray } from "@/shared/env.ts"
+import { getEnvArray } from "@/shared/utils/get-env.ts"
 import { isString } from "@/shared/assert.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { AuthConfig, TrustedProxyHeadersSource } from "@/@types/config.ts"
 

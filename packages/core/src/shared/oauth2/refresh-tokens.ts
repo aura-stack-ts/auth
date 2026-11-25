@@ -1,6 +1,6 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { fetchAsync } from "@/shared/http/fetch-async.ts"
-import { createBasicAuthHeader } from "@/shared/utils.ts"
+import { createBasicAuthHeader } from "@/shared/utils/basic-auth.ts"
 import { isObject, isRefreshTokenObject } from "@/shared/assert.ts"
 import type { OAuthTokenPayload } from "@/@types/session.ts"
 import type { RuntimeOAuthProvider } from "@/@types/internal.ts"

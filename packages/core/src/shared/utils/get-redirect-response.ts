@@ -1,5 +1,5 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { createRedirectTo } from "@/shared/oauth2/authorization.ts"
+import { createRedirectTo } from "@/shared/utils/create-redirect-to.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { APIOptionsWithRedirectTo, APIOptionsWithRequest } from "@/@types/api.ts"
 

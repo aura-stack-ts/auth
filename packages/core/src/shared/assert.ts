@@ -1,6 +1,6 @@
 import { Type } from "arktype"
 import { Type as TypeboxType } from "typebox"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import type { ZodObject, ZodTypeAny } from "zod"
 import type { JWK } from "@aura-stack/jose/jose"
 import type { BaseSchema, ObjectSchema } from "valibot"
@@ -17,6 +17,11 @@ import type {
     StatelessStrategyConfig,
     TrustedProxyHeadersSource,
 } from "@/@types/index.ts"
+
+export const equals = (a: string | number | undefined | null, b: string | number | undefined | null) => {
+    if (a === null || b === null || a === undefined || b === undefined) return false
+    return a === b
+}
 
 // #region Type Guards
 export const isFalsy = (value: unknown): boolean => {
@@ -199,7 +204,7 @@ export const isInvalidSlidingThreshold = (value: unknown): value is number => {
     return typeof value === "number" && (Number.isNaN(value) || value < 0 || value > 1)
 }
 
-// #region Trusted Proxy Headers Source
+// #region Trusted Headers
 export const isTrustedProxyHeadersSource = (value: unknown): value is TrustedProxyHeadersSource => {
     return isTrustedProxyHeadersSourceURL(value) || isTrustedProxyHeadersSourceProtocolHost(value)
 }

@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { createContext } from "@/config/context.ts"
 import { builtInOAuthProviders } from "@/oauth/index.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 
 describe("createValidation", () => {
     describe("verifyOAuthProvider", () => {

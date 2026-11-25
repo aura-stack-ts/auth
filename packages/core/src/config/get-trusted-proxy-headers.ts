@@ -1,5 +1,5 @@
 import { isBoolean } from "@/shared/assert.ts"
-import { getEnvBoolean } from "@/shared/env.ts"
+import { getEnvBoolean } from "@/shared/utils/get-env.ts"
 import type { AuthConfig } from "@/@types/config.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 

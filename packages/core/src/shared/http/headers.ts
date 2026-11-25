@@ -1,4 +1,4 @@
-import { isAuraAuthError } from "@/errors/aura-error.ts"
+import { isAuraAuthError } from "@/shared/errors/aura-error.ts"
 import type { RequestHeaders } from "@aura-stack/router"
 
 /**

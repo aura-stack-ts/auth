@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { z } from "zod/v4"
 import { authInstance, jose } from "@test/setup/auth.ts"
 import { createCSRF, createHash } from "@/exports/crypto.ts"
-import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createSchemaRegistry } from "@/shared/identity-registry.ts"
 import { identitySchema as UserIdentity } from "@/identity/zod.ts"
 import { sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
@@ -11,7 +11,7 @@ describe("updateSession API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spy = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -123,7 +123,7 @@ describe("updateSession API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -210,7 +210,7 @@ describe("updateSession API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -304,7 +304,7 @@ describe("updateSession API", () => {
         const registry = createSchemaRegistry({
             schema: extendedIdentitySchema,
         })
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -419,7 +419,7 @@ describe("updateSession API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -508,7 +508,7 @@ describe("updateSession API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -597,7 +597,7 @@ describe("updateSession API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")
@@ -686,7 +686,7 @@ describe("updateSession API", () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         const spyParseAsPartial = vi.spyOn(registry, "parseAsPartial")

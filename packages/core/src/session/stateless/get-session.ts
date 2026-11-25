@@ -1,8 +1,8 @@
-import { getErrorName } from "@/errors/aura-error.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { getErrorName } from "@/shared/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
-import { calcStatelessExpiration } from "@/shared/utils/session-strategy.ts"
+import { calcStatelessExpiration } from "@/shared/utils/expires-at.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 

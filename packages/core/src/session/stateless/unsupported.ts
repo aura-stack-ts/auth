@@ -1,4 +1,4 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import type { SessionStrategy, InternalContextForStateless } from "@/@types/internal.ts"
 
 export const revokeSession = (_: InternalContextForStateless): SessionStrategy["revokeSession"] => {

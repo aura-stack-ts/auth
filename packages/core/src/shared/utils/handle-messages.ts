@@ -1,5 +1,5 @@
-import { getErrorName } from "@/errors/aura-error.ts"
-import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
+import { getErrorName } from "@/shared/errors/aura-error.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors/aura-error.ts"
 import type { InternalLogger } from "@/@types/internal.ts"
 import type { LOG_MESSAGES } from "@/config/logger/catalog.ts"
 

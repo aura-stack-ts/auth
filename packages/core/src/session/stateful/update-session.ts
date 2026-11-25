@@ -1,5 +1,5 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
-import { getExpiresAt } from "@/shared/utils/session-strategy.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
+import { getExpiresAt } from "@/shared/utils/expires-at.ts"
 import type { Session, SessionWithUserEntity, User } from "@/@types/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 

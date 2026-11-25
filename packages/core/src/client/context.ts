@@ -1,6 +1,6 @@
 import { createClient as createClientAPI } from "@aura-stack/router"
-import { getEnv } from "@/shared/env.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { getEnv } from "@/shared/utils/get-env.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { defaultRedirect, getSafeRedirectTo } from "@/shared/utils/client.ts"
 import type { AuthClient, AuthClientOptions } from "@/@types/client.ts"
 

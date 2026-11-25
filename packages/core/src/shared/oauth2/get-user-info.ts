@@ -1,6 +1,6 @@
 import { fetchAsync } from "@/shared/http/fetch-async.ts"
 import { isOIDCProvider } from "@/shared/oidc/resolve-provider.ts"
-import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors/aura-error.ts"
 import { VERSION } from "@/version.ts"
 
 import { assertContentTypeResponse, isCustomUserInfoFunction } from "@/shared/assert.ts"
