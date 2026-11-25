@@ -1,15 +1,15 @@
+import { createCSRF } from "@/exports/crypto.ts"
 import { getBaseURL } from "@/config/get-base-url.ts"
-import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { isStatelessStrategy } from "@/shared/assert.ts"
 import { verifyRateLimit } from "@/shared/rate-limiter.ts"
 import { getOptionalCookie } from "@/shared/http/cookie.ts"
-import { createCSRF, createHash } from "@/exports/crypto.ts"
 import { getInitialHeaders } from "@/shared/http/headers.ts"
-import { assertUserStatus } from "@/shared/utils/assert-user-status.ts"
-import { verifySessionToken } from "@/shared/utils/verify-session-token.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { getOriginURL } from "@/shared/utils/get-origin-url.ts"
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
+import { assertUserStatus } from "@/shared/utils/assert-user-status.ts"
 import { verifyDoubleSubmitCSRFTokenFromRequest } from "@/shared/utils/verify-csrf-token.ts"
+import { verifyStatefulSessionToken, verifyStatelessSessionToken } from "@/shared/utils/verify-session-token.ts"
 import type { RoutePattern } from "@aura-stack/router"
 import type { AuraErrorCode } from "@/shared/errors/catalog.ts"
 import type { FunctionAPIContext, InternalCookieStoreConfig, RuntimeOAuthProvider } from "@/@types/internal.ts"
@@ -86,7 +86,7 @@ export const createValidation = <Context extends FunctionAPIContext<object>>(con
                 const headers = getInitialHeaders(local.request, local.headers)
                 const outHeaders = local.ctx.cookies.manager.clear(output.cookieStore!)
                 if (isStatelessStrategy(local.ctx.session.config)) {
-                    const { session, sessionToken } = await verifySessionToken({
+                    const { session, sessionToken } = await verifyStatelessSessionToken({
                         headers,
                         cookies: output.cookieStore!,
                         jwt: local.ctx.jose.manager,
@@ -95,28 +95,11 @@ export const createValidation = <Context extends FunctionAPIContext<object>>(con
                     output.rawSession = session
                     output.sessionToken = sessionToken
                 } else {
-                    const { sessionToken } = local.ctx.cookies.manager.getCookie(headers, output.cookieStore!)
-                    const outHeaders = local.ctx.cookies.manager.clear(output.cookieStore!)
-                    if (!sessionToken) {
-                        throw new AuraAuthError({ code: "SESSION_MISSING" })
-                    }
-                    const tokenHash = await createHash(sessionToken)
-                    const session = await local.ctx.session.config.adapter.getSessionByToken(tokenHash)
-                    if (!session) {
-                        throw new AuraAuthError({ code: "SESSION_NOT_FOUND", headers: outHeaders })
-                    }
-                    if (session.revokedAt || session.status === "revoked") {
-                        throw new AuraAuthError({ code: "SESSION_REVOKED", headers: outHeaders })
-                    }
-                    if (new Date() >= session.expiresAt || session.status === "expired") {
-                        throw new AuraAuthError({ code: "SESSION_EXPIRED", headers: outHeaders })
-                    }
-                    if (session.status !== "active") {
-                        throw new AuraAuthError({ code: "SESSION_INACTIVE", headers: outHeaders })
-                    }
-                    if (!session.user) {
-                        throw new AuraAuthError({ code: "USER_NOT_FOUND", headers: outHeaders })
-                    }
+                    const { session, sessionToken } = await verifyStatefulSessionToken({
+                        context: local,
+                        headers,
+                        cookies: output.cookieStore!,
+                    })
                     output.userId = session.userId
                     output.sessionId = session.id
                     // @unstable

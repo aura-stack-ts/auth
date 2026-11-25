@@ -181,6 +181,14 @@ export const ERROR_CATALOG = {
             "The framework extracted a session token string, but it failed basic integrity decoding checks or cryptographic signatures.",
         userMessage: "The session is not valid. Its signature or decryption parameters failed.",
     },
+    SESSION_SCHEMA_PARSER_FAILED: {
+        type: "AUTH_FLOW",
+        statusCode: 500,
+        name: "SessionError",
+        message:
+            "Session data validation failed during getSession because the stored or decoded payload did not match the expected session schema.",
+        userMessage: "We could not validate your session data. Please sign in again.",
+    },
     SESSION_STRATEGY_MISMATCH: {
         type: "VALIDATION",
         statusCode: 500,

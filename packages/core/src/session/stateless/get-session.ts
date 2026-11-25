@@ -1,15 +1,16 @@
-import { getErrorName } from "@/shared/errors/aura-error.ts"
-import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
+import { toRethrowError } from "@/shared/utils/to-rethrow-error.ts"
 import { calcStatelessExpiration } from "@/shared/utils/expires-at.ts"
+import { verifyStatelessSessionToken } from "@/shared/utils/verify-session-token.ts"
 import type { Session, User } from "@/@types/index.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const getSession = <DefaultUser extends User>(
     ctx: InternalContextForStateless
 ): SessionStrategy<DefaultUser>["getSession"] => {
-    const { logger, identity, jose, session } = ctx
+    const { identity, jose, session } = ctx
 
     const maxAge = session?.config?.maxAge ?? session?.config?.jwt?.maxAge ?? 60 * 60 * 24 * 15
     const strategy = session?.config?.expirationStrategy ?? session?.config?.jwt?.expirationStrategy ?? "absolute"
@@ -20,15 +21,24 @@ export const getSession = <DefaultUser extends User>(
 
     return async ({ headers: incomingHeaders, cookieStore }) => {
         const headers = new Headers(secureApiHeaders)
-        try {
-            const { sessionToken } = ctx.cookies.manager.getCookie(incomingHeaders, cookieStore)
-            if (!sessionToken) return { session: null, headers }
+        const outHeaders = ctx.cookies.manager.clear(cookieStore)
 
-            const payload = await jose.manager.verifyToken(sessionToken)
+        const { session: payload } = await verifyStatelessSessionToken({
+            headers: incomingHeaders,
+            jwt: jose.manager,
+            cookies: cookieStore,
+            outHeaders,
+        })
+
+        try {
             const { exp, iat, mexp } = await identity.schemaRegistry.parseWithJWT(payload)
 
-            const sessionPayload = identity.skipValidation ? payload : await identity.schemaRegistry.parse(payload)
-            if (!sessionPayload.sub) return { session: null, headers }
+            const sessionPayload = identity.skipValidation
+                ? payload
+                : await identity.schemaRegistry.parse(payload, "SESSION_SCHEMA_PARSER_FAILED")
+            if (!sessionPayload.sub) {
+                throw new AuraAuthError({ code: "SESSION_INVALID", headers: outHeaders })
+            }
 
             const session: Session<DefaultUser> = {
                 user: sessionPayload,
@@ -42,7 +52,7 @@ export const getSession = <DefaultUser extends User>(
                 slidingThreshold,
             })
             if (calc.action === "invalid") {
-                return { session: null, headers }
+                throw new AuraAuthError({ code: "SESSION_INVALID", headers: outHeaders })
             }
             if (calc.action === "no_change" || calc.action === "touch") {
                 return { session, headers }
@@ -55,7 +65,6 @@ export const getSession = <DefaultUser extends User>(
                 iat: issuedAt,
                 mexp,
             })
-            logger?.log("SESSION_REFRESHED", { structuredData: { strategy: "stateless", expiresAt: expiresAt.toISOString() } })
             return {
                 session: {
                     user: sessionPayload,
@@ -64,8 +73,8 @@ export const getSession = <DefaultUser extends User>(
                 headers: ctx.cookies.manager.setCookie({ sessionToken: newSessionToken, store: cookieStore }),
             }
         } catch (error) {
-            logger?.log("AUTH_SESSION_INVALID", { structuredData: { error_type: getErrorName(error) } })
-            return { session: null, headers: ctx.cookies.manager.clearAll(cookieStore) }
+            toRethrowError(error, { headers: outHeaders })
+            throw new AuraAuthError({ code: "SESSION_INVALID", cause: error, headers: outHeaders })
         }
     }
 }

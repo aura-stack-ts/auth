@@ -99,7 +99,7 @@ describe("getSession", () => {
 
         expect(mock).toHaveBeenCalledWith(sessionTokenHash)
         const { attributes: _, ...spreadPayload } = userEntity
-        expect(spy).toHaveBeenCalledWith({ sub: userEntity.id, ...spreadPayload })
+        expect(spy).toHaveBeenCalledWith({ sub: userEntity.id, ...spreadPayload }, "SESSION_SCHEMA_PARSER_FAILED")
     })
 
     test("getSession with expired session token", async () => {
@@ -130,8 +130,8 @@ describe("getSession", () => {
             session: null,
             success: false,
             error: {
-                code: "GET_SESSION_FAILED",
-                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+                code: "SESSION_EXPIRED",
+                message: "Your session has expired. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -181,8 +181,8 @@ describe("getSession", () => {
             session: null,
             success: false,
             error: {
-                code: "GET_SESSION_FAILED",
-                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+                code: "SESSION_SCHEMA_PARSER_FAILED",
+                message: "We could not validate your session data. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -199,12 +199,15 @@ describe("getSession", () => {
         const tokenHash = await createHash("valid-token-hash")
         expect(mock).toHaveBeenCalledWith(tokenHash)
         const { attributes: _, ...spreadPayload } = userEntity
-        expect(spy).toHaveBeenCalledWith({
-            ...spreadPayload,
-            id: undefined,
-            sub: undefined,
-            name: undefined,
-        })
+        expect(spy).toHaveBeenCalledWith(
+            {
+                ...spreadPayload,
+                id: undefined,
+                sub: undefined,
+                name: undefined,
+            },
+            "SESSION_SCHEMA_PARSER_FAILED"
+        )
     })
 
     test("getSession with extra attributes in database", async () => {
@@ -264,11 +267,14 @@ describe("getSession", () => {
 
         expect(mock).toHaveBeenCalledWith(sessionTokenHash)
         const { attributes: _, ...spreadPayload } = userEntity
-        expect(spy).toHaveBeenCalledWith({
-            ...spreadPayload,
-            sub: userEntity.id,
-            role: "admin",
-            permissions: ["read", "write"],
-        })
+        expect(spy).toHaveBeenCalledWith(
+            {
+                ...spreadPayload,
+                sub: userEntity.id,
+                role: "admin",
+                permissions: ["read", "write"],
+            },
+            "SESSION_SCHEMA_PARSER_FAILED"
+        )
     })
 })

@@ -9,6 +9,7 @@ import { OAuthTokenPayloadSchema } from "@/shared/schemas/general.ts"
 import { isArkType, isValibotSchema, isZodSchema } from "@/shared/assert.ts"
 import type { OAuthTokenPayload } from "@/@types/session.ts"
 import type { EditableToSchema } from "@/@types/identity.ts"
+import type { AuraErrorCode } from "@/shared/errors/catalog.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { InternalIdentityConfig, ReturnUpdateSessionShape } from "@/@types/internal.ts"
 
@@ -126,10 +127,10 @@ export const createSchemaRegistry = <Identity extends SchemaTypes>(config: Inter
 
     const expiresAt = createValidator<string>(z.coerce.date().optional())
 
-    const parse = async (data: unknown = {}): Promise<any> => {
+    const parse = async (data: unknown = {}, errorCode: AuraErrorCode = "SCHEMA_PARSER_FAILED"): Promise<any> => {
         const { data: output, success, error } = validator.validate(data)
         if (!success) {
-            throw new AuraAuthError({ code: "SCHEMA_PARSER_FAILED", cause: error })
+            throw new AuraAuthError({ code: errorCode, cause: error })
         }
         return output
     }

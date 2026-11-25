@@ -108,7 +108,7 @@ describe("sessionAction", () => {
         expect(sessionByTokenMock).toHaveReturnedWith(Promise.resolve(sessionEntityWithUser))
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
-        expect(spy).toHaveBeenCalledWith({ ...spreadUser, ...attributes, sub: userEntity.id })
+        expect(spy).toHaveBeenCalledWith({ ...spreadUser, ...attributes, sub: userEntity.id }, "SESSION_SCHEMA_PARSER_FAILED")
     })
 
     test("valid sessionToken cookie in insecure connection", async () => {
@@ -154,7 +154,7 @@ describe("sessionAction", () => {
         expect(sessionByTokenMock).toHaveReturnedWith(Promise.resolve(sessionEntityWithUser))
         expect(revokeSessionMock).not.toHaveBeenCalled()
         const { attributes, ...spreadUser } = userEntity
-        expect(spy).toHaveBeenCalledWith({ ...spreadUser, ...attributes, sub: userEntity.id })
+        expect(spy).toHaveBeenCalledWith({ ...spreadUser, ...attributes, sub: userEntity.id }, "SESSION_SCHEMA_PARSER_FAILED")
     })
 
     test("expired sessionToken cookie", async () => {
