@@ -1,40 +1,29 @@
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ResetPasswordAPIOptions, ResetPasswordAPIReturn } from "@/@types/api.ts"
 
-export const resetPassword = async ({
-    ctx,
-    headers: headersInit,
-    request: requestInit,
-    payload,
-    redirectTo,
-    redirect: redirectInit = true,
-    fallbackRedirectTo = undefined,
-}: FunctionAPIContext<ResetPasswordAPIOptions>): Promise<ResetPasswordAPIReturn> => {
-    const { logger, session } = ctx
+export const resetPassword = async (context: FunctionAPIContext<ResetPasswordAPIOptions>): Promise<ResetPasswordAPIReturn> => {
     const headers = new Headers(secureApiHeaders)
     try {
-        logger?.log("RESET_PASSWORD_INITIATED")
-        const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit } = await createValidation(context)
             .buildRequest("/password/reset")
             .verifyRateLimit("resetPassword")
             .execute()
+
         if (rateLimit) {
-            return rateLimit as ResetPasswordAPIReturn
+            return rateLimit
         }
 
-        await session.strategy.resetPassword(payload)
+        await context.ctx.session.strategy.resetPassword(context.payload)
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
-            request,
-            redirectInit,
-            redirectTo,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             headers,
-            fallbackRedirectTo,
+            request,
         })
 
         return toAPIResponse<ResetPasswordAPIReturn>({
@@ -45,7 +34,7 @@ export const resetPassword = async ({
             status,
         })
     } catch (error) {
-        errorToLogMessage(error, "RESET_PASSWORD_ERROR", logger)
+        errorToLogMessage(error, "RESET_PASSWORD_ERROR", context.ctx.logger)
         const { errors, statusCode } = handleApiError(
             error,
             "RESET_PASSWORD_ERROR",

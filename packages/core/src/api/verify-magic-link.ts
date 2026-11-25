@@ -1,28 +1,21 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyMagicLinkAPIOptions, VerifyMagicLinkAPIReturn } from "@/@types/api.ts"
 
 export const verifyMagicLink = async (
     token: string,
-    {
-        ctx,
-        headers: headersInit,
-        request: requestInit,
-        redirectTo,
-        redirect: redirectInit = true,
-        fallbackRedirectTo = undefined,
-    }: FunctionAPIContext<VerifyMagicLinkAPIOptions>
+    context: FunctionAPIContext<VerifyMagicLinkAPIOptions>
 ): Promise<VerifyMagicLinkAPIReturn> => {
-    const { logger, session } = ctx
+    const { logger, session } = context.ctx
     const headers = new Headers(secureApiHeaders)
     try {
-        logger?.log("VERIFY_MAGIC_LINK_INITIATED")
-        const { request, rateLimit, cookieStore } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, cookieStore } = await createValidation(context)
             .buildRequest("/signIn/magicLink/verify")
             .verifyRateLimit("verifyMagicLink")
             .execute()
@@ -33,18 +26,15 @@ export const verifyMagicLink = async (
         const { sessionToken } = await session.strategy.verifyMagicLink({ token, request })
         logger?.log("VERIFY_MAGIC_LINK_SUCCESS")
 
-        const csrfToken = await createCSRF(ctx.jose.instance)
+        const csrfToken = await createCSRF(context.ctx.jose.instance)
         const builder = new HeadersBuilder(headers)
             .setCookie(cookieStore.csrfToken.name, csrfToken, cookieStore.csrfToken.attributes)
             .setCookie(cookieStore.sessionToken.name, sessionToken, cookieStore.sessionToken.attributes)
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             request,
-            redirectInit,
-            redirectTo,
             headers: builder,
-            fallbackRedirectTo,
         })
         return toAPIResponse<VerifyMagicLinkAPIReturn>({
             success: true,

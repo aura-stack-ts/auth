@@ -1,46 +1,32 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/errors/aura-error.ts"
+import { handleApiError } from "@/shared/utils/api.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
-import { handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/exports/crypto.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SignInCredentialsAPIOptions, SignInCredentialsAPIReturn } from "@/@types/api.ts"
 
-export const signInCredentials = async ({
-    ctx,
-    payload,
-    request: requestInit,
-    headers: headersInit,
-    redirect: redirectInit = true,
-    redirectTo,
-    skipCSRFCheck = false,
-    doubleSubmitToken = undefined,
-    fallbackRedirectTo = undefined,
-}: FunctionAPIContext<SignInCredentialsAPIOptions>): Promise<SignInCredentialsAPIReturn> => {
-    const { credentials, logger, session: sessionConfig } = ctx
+export const signInCredentials = async (
+    context: FunctionAPIContext<SignInCredentialsAPIOptions>
+): Promise<SignInCredentialsAPIReturn> => {
+    const { credentials, logger, session: sessionConfig } = context.ctx
     const headers = new Headers(secureApiHeaders)
     try {
-        ctx.logger?.log("SIGN_IN_CREDENTIALS_INITIATED", {
-            structuredData: {
-                skipCSRFCheck: skipCSRFCheck,
-                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
-            },
-        })
-
-        const { request, rateLimit, cookieStore } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, cookieStore } = await createValidation(context)
             .buildRequest("/signIn/credentials")
             .verifyRateLimit("signInCredentials")
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, true)
+            .verifyCSRFToken(true)
             .execute()
 
         if (rateLimit) {
-            return rateLimit as SignInCredentialsAPIReturn
+            return rateLimit
         }
 
         const session = await credentials?.authorize({
-            credentials: payload,
+            credentials: context.payload,
             deriveSecret: credentials?.hash ?? hashPassword,
             verifySecret: credentials?.verify ?? verifyPassword,
         })
@@ -52,20 +38,17 @@ export const signInCredentials = async ({
             payload: session,
             cookieStore,
         })
-        const csrfToken = await createCSRF(ctx.jose.instance)
+        const csrfToken = await createCSRF(context.ctx.jose.instance)
         logger?.log("CREDENTIALS_SIGN_IN_SUCCESS")
 
         const builder = new HeadersBuilder(headers)
             .setCookie(cookieStore.csrfToken.name, csrfToken, cookieStore.csrfToken.attributes)
             .setCookie(cookieStore.sessionToken.name, sessionToken, cookieStore.sessionToken.attributes)
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             request,
-            redirectInit,
-            redirectTo,
             headers: builder,
-            fallbackRedirectTo,
         })
 
         const toHeaders = builder.toHeaders()

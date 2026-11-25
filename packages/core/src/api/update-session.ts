@@ -1,44 +1,33 @@
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { UpdateSessionAPIOptions, UpdateSessionAPIReturn, User } from "@/@types/index.ts"
 
-export const updateSession = async <DefaultUser extends User = User>({
-    ctx,
-    request: requestInit,
-    redirect: redirectInit = true,
-    headers: headersInit,
-    session: sessionInit,
-    redirectTo: redirectToInit,
-    skipCSRFCheck = false,
-    doubleSubmitToken = undefined,
-    fallbackRedirectTo = undefined,
-}: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
+export const updateSession = async <DefaultUser extends User = User>(
+    context: FunctionAPIContext<UpdateSessionAPIOptions<DefaultUser>>
+): Promise<UpdateSessionAPIReturn<DefaultUser>> => {
     const initHeaders = new Headers(secureApiHeaders)
-
-    let cookieStore = getCookieStore({ ctx, request: requestInit ?? getInitialHeaders(undefined, headersInit) })
+    let cookieStore = getCookieStore({
+        ctx: context.ctx,
+        request: context.request ?? getInitialHeaders(undefined, context.headers),
+    })
     try {
-        ctx.logger?.log("UPDATE_SESSION_INITIATED", {
-            structuredData: {
-                skipCSRFCheck: skipCSRFCheck,
-                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
-            },
-        })
         const {
             request,
             rateLimit,
             sessionToken,
             rawSession,
             cookieStore: resolvedCookieStore,
-        } = await createValidation(ctx, requestInit, headersInit)
+        } = await createValidation(context)
             .buildRequest("/session")
             .verifyRateLimit("updateSession")
             .verifySession()
             .verifyUserStatus()
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken, false)
+            .verifyCSRFToken()
             .execute()
 
         if (rateLimit) {
@@ -46,20 +35,17 @@ export const updateSession = async <DefaultUser extends User = User>({
         }
         cookieStore = resolvedCookieStore
 
-        const { session, headers } = await ctx.session.strategy.updateSession({
-            session: sessionInit,
+        const { session, headers } = await context.ctx.session.strategy.updateSession({
+            session: context.session,
             rawSession,
             sessionToken,
             cookieStore,
         })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             request,
             headers,
-            redirectInit,
-            redirectTo: redirectToInit,
-            fallbackRedirectTo,
         })
 
         return toAPIResponse<UpdateSessionAPIReturn<DefaultUser>>({
@@ -71,7 +57,7 @@ export const updateSession = async <DefaultUser extends User = User>({
             status,
         })
     } catch (error) {
-        errorToLogMessage(error, "UPDATE_SESSION_INVALID", ctx.logger)
+        errorToLogMessage(error, "UPDATE_SESSION_INVALID", context.ctx.logger)
         const { errors, statusCode } = handleApiError(error, "UPDATE_SESSION_INVALID", "Failed to update session.")
         const outHeaders = getAuraAuthHeaders(error, initHeaders)
 

@@ -1,26 +1,19 @@
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyEmailAPIOptions, VerifyEmailAPIReturn } from "@/@types/api.ts"
 
 export const verifyEmail = async (
     token: string,
-    {
-        ctx,
-        headers: headersInit,
-        request: requestInit,
-        redirectTo,
-        redirect: redirectInit = true,
-        fallbackRedirectTo = undefined,
-    }: FunctionAPIContext<VerifyEmailAPIOptions>
+    context: FunctionAPIContext<VerifyEmailAPIOptions>
 ): Promise<VerifyEmailAPIReturn> => {
-    const { logger, session } = ctx
+    const { logger, session } = context.ctx
     const headers = new Headers(secureApiHeaders)
     try {
-        logger?.log("VERIFY_EMAIL_INITIATED")
-        const { request, rateLimit } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit } = await createValidation(context)
             .buildRequest("/verifyEmail")
             .verifyRateLimit("verifyEmail")
             .execute()
@@ -30,13 +23,10 @@ export const verifyEmail = async (
 
         await session.strategy.verifyEmail({ token })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             request,
-            redirectInit,
-            redirectTo,
             headers,
-            fallbackRedirectTo,
         })
 
         return toAPIResponse<VerifyEmailAPIReturn>({
