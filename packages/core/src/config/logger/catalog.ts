@@ -1031,4 +1031,10 @@ export const LOG_MESSAGES = {
         msgId: "OAUTH_CALLBACK_ERROR",
         message: "Error occurred during oauth callback process",
     },
+    CSRF_TOKEN_VALIDATION: {
+        facility: 4,
+        severity: "debug",
+        msgId: "CSRF_TOKEN_VALIDATION",
+        message: "Starting CSRF token validation",
+    },
 } as const

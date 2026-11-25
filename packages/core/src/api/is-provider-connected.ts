@@ -1,6 +1,6 @@
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"
 import type { BuiltInOAuthProvider } from "@/oauth/index.ts"
@@ -9,15 +9,11 @@ import type { ProviderConnectedAPIOptions, ProviderConnectedAPIReturn } from "@/
 
 export const isProviderConnected = async (
     oauthId: LiteralUnion<BuiltInOAuthProvider>,
-    { ctx, headers: headersInit, request: requestInit }: FunctionAPIContext<ProviderConnectedAPIOptions>
+    context: FunctionAPIContext<ProviderConnectedAPIOptions>
 ): Promise<ProviderConnectedAPIReturn> => {
     const headers = new Headers(secureApiHeaders)
     try {
-        ctx.logger?.log("OAUTH_ACCESS_TOKEN_REQUEST_INITIATED", {
-            structuredData: { provider: oauthId, operation: "check_connection" },
-        })
-
-        const { rateLimit, rawSession, cookieStore } = await createValidation(ctx, requestInit, headersInit)
+        const { rateLimit, rawSession, cookieStore } = await createValidation(context)
             .verifyOAuthProvider(oauthId)
             .buildRequest(`/providers/${oauthId}`)
             .verifyRateLimit("isProviderConnected")
@@ -28,14 +24,14 @@ export const isProviderConnected = async (
             return rateLimit
         }
 
-        const connected = await ctx.session.strategy.isProviderConnected({
+        const connected = await context.ctx.session.strategy.isProviderConnected({
             oauthId,
             cookieStore,
-            headers: getInitialHeaders(requestInit, headersInit),
+            headers: getInitialHeaders(context.request, context.headers),
             rawSession,
         })
 
-        ctx.logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
+        context.ctx.logger?.log("OAUTH_ACCESS_TOKEN_SUCCESS", {
             structuredData: { provider: oauthId, connected },
         })
 
@@ -45,7 +41,7 @@ export const isProviderConnected = async (
             headers,
         })
     } catch (error) {
-        errorToLogMessage(error, "OAUTH_PROVIDER_CONNECTED_ERROR", ctx.logger)
+        errorToLogMessage(error, "OAUTH_PROVIDER_CONNECTED_ERROR", context.ctx.logger)
         const { errors, statusCode } = handleApiError(error, "OAUTH_PROVIDER_CONNECTED_ERROR", "Provider connected error.")
 
         const outHeaders = getAuraAuthHeaders(error, headers)

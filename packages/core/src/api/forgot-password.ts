@@ -1,43 +1,29 @@
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ForgotPasswordAPIOptions, ForgotPasswordAPIReturn } from "@/@types/api.ts"
 
 export const forgotPassword = async (
     email: string,
-    {
-        ctx,
-        headers: headersInit,
-        request: requestInit,
-        redirectTo,
-        redirect: redirectInit = true,
-        fallbackRedirectTo = undefined,
-    }: FunctionAPIContext<ForgotPasswordAPIOptions>
+    context: FunctionAPIContext<ForgotPasswordAPIOptions>
 ): Promise<ForgotPasswordAPIReturn> => {
-    const { logger, session, passwordReset } = ctx
     const headers = new Headers(secureApiHeaders)
     try {
-        logger?.log("FORGOT_PASSWORD_INITIATED")
-        const { request, rateLimit, origin } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, origin } = await createValidation(context)
             .buildRequest("/password/forgot")
             .verifyRateLimit("forgotPassword")
             .execute()
+
         if (rateLimit) {
             return rateLimit as ForgotPasswordAPIReturn
         }
-        const { token, url } = await session.strategy.forgotPassword({ email, origin })
-        await passwordReset?.sendPasswordResetEmail?.({ email, token, url })
+        const { token, url } = await context.ctx.session.strategy.forgotPassword({ email, origin })
+        await context.ctx.passwordReset?.sendPasswordResetEmail?.({ email, token, url })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
-            request,
-            redirectInit,
-            redirectTo,
-            headers,
-            fallbackRedirectTo,
-        })
+        const { redirect, redirectURL, status } = await getRedirectResponse({ context, headers, request })
 
         return toAPIResponse<ForgotPasswordAPIReturn>({
             success: true,
@@ -47,7 +33,7 @@ export const forgotPassword = async (
             status,
         })
     } catch (error) {
-        errorToLogMessage(error, "FORGOT_PASSWORD_ERROR", logger)
+        errorToLogMessage(error, "FORGOT_PASSWORD_ERROR", context.ctx.logger)
         const { errors, statusCode } = handleApiError(
             error,
             "FORGOT_PASSWORD_ERROR",

@@ -2,8 +2,8 @@ import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getUserInfo } from "@/shared/oauth2/get-user-info.ts"
 import { getProviderTokens } from "@/api/get-provider-tokens.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
@@ -16,53 +16,29 @@ import type {
 
 export const refreshUserInfo = async <DefaultUser extends User = User>(
     oauth: LiteralUnion<BuiltInOAuthProvider>,
-    {
-        ctx,
-        headers: headersInit,
-        request: requestInit,
-        skipCSRFCheck = false,
-        doubleSubmitToken = undefined,
-    }: FunctionAPIContext<RefreshUserInfoAPIOptions>
+    context: FunctionAPIContext<RefreshUserInfoAPIOptions>
 ): Promise<RefreshUserInfoAPIReturn<DefaultUser>> => {
     const initHeaders = new Headers(secureApiHeaders)
     try {
-        ctx.logger?.log("OAUTH_USERINFO_REQUEST_INITIATED", {
-            structuredData: {
-                provider: oauth,
-                skipCSRFCheck: skipCSRFCheck,
-                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
-            },
-        })
-
-        const { request, provider, rateLimit, rawSession, sessionToken, cookieStore } = await createValidation(
-            ctx,
-            requestInit,
-            headersInit
-        )
+        const { request, provider, rateLimit, rawSession, sessionToken, cookieStore } = await createValidation(context)
             .verifyOAuthProvider(oauth)
             .buildRequest(`/providers/${oauth}/user/refresh`)
             .verifyRateLimit("refreshUserInfo")
             .verifySession()
             .verifyUserStatus()
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
+            .verifyCSRFToken()
             .execute()
 
         if (rateLimit) {
-            ctx.logger?.log("INVALID_REQUEST", {
-                structuredData: { provider: oauth },
-            })
             return rateLimit as RefreshUserInfoAPIReturn<DefaultUser>
         }
 
         const { success, tokens } = await getProviderTokens(oauth, {
-            ctx,
+            ctx: context.ctx,
             request,
-            headers: getInitialHeaders(requestInit, headersInit),
+            headers: getInitialHeaders(context.request, context.headers),
         })
         if (!success) {
-            ctx.logger?.log("OAUTH_ACCESS_TOKEN_ERROR", {
-                structuredData: { provider: oauth },
-            })
             throw new AuraAuthError({ code: "INVALID_ACCESS_TOKEN_RETRIEVING_REFRESH_USER_INFO" })
         }
 
@@ -80,14 +56,14 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
                 scope: tokens?.scopes?.join(" "),
                 token_type: tokens?.tokenType,
             },
-            ctx.logger
+            context.ctx.logger
         )
 
-        ctx.logger?.log("OAUTH_USERINFO_SUCCESS", {
+        context.ctx.logger?.log("OAUTH_USERINFO_SUCCESS", {
             structuredData: { provider: oauth, userId: userInfo.sub },
         })
 
-        const { session, headers } = await ctx.session.strategy.refreshUserInfo({
+        const { session, headers } = await context.ctx.session.strategy.refreshUserInfo({
             rawSession,
             sessionToken,
             user: userInfo,
@@ -99,7 +75,7 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             session: session,
         })
     } catch (error) {
-        errorToLogMessage(error, "REFRESH_USER_INFO_ERROR", ctx.logger)
+        errorToLogMessage(error, "REFRESH_USER_INFO_ERROR", context.ctx.logger)
         const { errors, statusCode } = handleApiError(
             error,
             "UNKNOWN_REFRESH_USER_INFO_ERROR",

@@ -1,40 +1,26 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { ChangeEmailAPIOptions, ChangeEmailAPIReturn } from "@/@types/api.ts"
 
-export const changeEmail = async ({
-    payload,
-    ctx,
-    headers: headersInit,
-    request: requestInit,
-    redirectTo,
-    redirect: redirectInit = true,
-    doubleSubmitToken = undefined,
-    skipCSRFCheck = false,
-    fallbackRedirectTo = undefined,
-}: FunctionAPIContext<ChangeEmailAPIOptions>): Promise<ChangeEmailAPIReturn> => {
-    const { logger, session, emailChange } = ctx
+export const changeEmail = async (context: FunctionAPIContext<ChangeEmailAPIOptions>): Promise<ChangeEmailAPIReturn> => {
+    const { logger, session, emailChange } = context.ctx
     if (!emailChange?.sendEmailChangeVerification) {
         throw new AuraAuthError({ code: "CHANGE_EMAIL_NOT_IMPLEMENTED" })
     }
     const headers = new Headers(secureApiHeaders)
     try {
-        logger?.log("CHANGE_EMAIL_INITIATED", {
-            structuredData: {
-                skipCSRFCheck: skipCSRFCheck,
-                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
-            },
-        })
-        const { request, rateLimit, userId, origin } = await createValidation(ctx, requestInit, headersInit)
+        const { payload } = context
+        const { request, rateLimit, userId, origin } = await createValidation(context)
             .buildRequest("/email/change")
             .verifyRateLimit("changeEmail")
             .verifySession()
             .verifyUserStatus("SILENT_USER_NOT_FOUND")
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
+            .verifyCSRFToken()
             .execute()
 
         if (rateLimit) {
@@ -55,13 +41,10 @@ export const changeEmail = async ({
             cancelURL,
         })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
-            request,
-            redirectInit,
-            redirectTo,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             headers,
-            fallbackRedirectTo,
+            request,
         })
 
         return toAPIResponse<ChangeEmailAPIReturn>({

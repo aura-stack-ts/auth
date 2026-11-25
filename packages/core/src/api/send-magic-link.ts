@@ -1,40 +1,26 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SendMagicLinkAPIOptions, SendMagicLinkAPIReturn } from "@/@types/api.ts"
 
 export const sendMagicLink = async (
     email: string,
-    {
-        ctx,
-        headers: headersInit,
-        request: requestInit,
-        redirectTo,
-        redirect: redirectInit = true,
-        skipCSRFCheck = false,
-        doubleSubmitToken = undefined,
-        fallbackRedirectTo = undefined,
-    }: FunctionAPIContext<SendMagicLinkAPIOptions>
+    context: FunctionAPIContext<SendMagicLinkAPIOptions>
 ): Promise<SendMagicLinkAPIReturn> => {
-    const { logger, session, magicLinks } = ctx
+    const { logger, session, magicLinks } = context.ctx
     if (!magicLinks?.sendMagicLinkEmail) {
         throw new AuraAuthError({ code: "MAGIC_LINK_SEND_EMAIL_NOT_IMPLEMENTED" })
     }
     const headers = new Headers(secureApiHeaders)
     try {
-        logger?.log("SEND_MAGIC_LINK_INITIATED", {
-            structuredData: {
-                email,
-                allowSignUp: magicLinks?.allowSignUp ?? false,
-            },
-        })
-        const { request, rateLimit, origin, cookieStore } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, origin, cookieStore } = await createValidation(context)
             .buildRequest("/signIn/magicLink")
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
             .verifyRateLimit("sendMagicLink")
+            .verifyCSRFToken()
             .execute()
         if (rateLimit) {
             return rateLimit as SendMagicLinkAPIReturn
@@ -48,13 +34,10 @@ export const sendMagicLink = async (
 
         await magicLinks.sendMagicLinkEmail({ email, token, url })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
-            request,
-            redirectInit,
-            redirectTo,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             headers,
-            fallbackRedirectTo,
+            request,
         })
         return toAPIResponse<SendMagicLinkAPIReturn>({
             success: true,

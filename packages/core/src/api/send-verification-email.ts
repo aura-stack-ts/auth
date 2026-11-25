@@ -2,38 +2,30 @@ import { AuraAuthError } from "@/errors/aura-error.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { SendVerificationEmailAPIOptions, SendVerificationEmailAPIReturn } from "@/@types/api.ts"
 
 export const sendVerificationEmail = async (
     email: string,
-    {
-        ctx,
-        headers: headersInit,
-        request: requestInit,
-        redirectTo,
-        redirect: redirectInit = true,
-        skipCSRFCheck = false,
-        doubleSubmitToken = undefined,
-        fallbackRedirectTo = undefined,
-    }: FunctionAPIContext<SendVerificationEmailAPIOptions>
+    context: FunctionAPIContext<SendVerificationEmailAPIOptions>
 ): Promise<SendVerificationEmailAPIReturn> => {
-    const { logger, session, emailVerification } = ctx
+    const { logger, session, emailVerification } = context.ctx
     if (!emailVerification?.sendVerificationEmail) {
         throw new AuraAuthError({ code: "SEND_VERIFICATION_EMAIL_NOT_IMPLEMENTED" })
     }
     const headers = new Headers(secureApiHeaders)
     try {
         logger?.log("SEND_VERIFICATION_EMAIL_INITIATED")
-        const { request, rateLimit, origin } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, origin } = await createValidation(context)
             .buildRequest("/sendVerificationEmail")
             .verifyRateLimit("sendVerificationEmail")
             .verifySession()
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
+            .verifyCSRFToken()
             .execute()
         if (rateLimit) {
-            return rateLimit as SendVerificationEmailAPIReturn
+            return rateLimit
         }
         const { token, url } = await session.strategy.sendVerificationEmail({
             email,
@@ -41,13 +33,10 @@ export const sendVerificationEmail = async (
         })
         await emailVerification.sendVerificationEmail({ email, token, url })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
-            request,
-            redirectInit,
-            redirectTo,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             headers,
-            fallbackRedirectTo,
+            request,
         })
 
         return toAPIResponse<SendVerificationEmailAPIReturn>({

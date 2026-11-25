@@ -166,7 +166,7 @@ export interface InternalJoseConfig<DefaultUser extends User = User> {
  */
 export type FunctionAPIContext<Options extends object = {}> = Prettify<
     {
-        ctx: RouterGlobalContext
+        ctx: RouterGlobalContext<any, any>
     } & Options
 >
 

@@ -1,6 +1,6 @@
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type {
@@ -12,10 +12,10 @@ import type {
 
 export const getProviderTokens = async (
     oauthId: LiteralUnion<BuiltInOAuthProvider>,
-    { ctx, request: requestInit, headers: headersInit }: FunctionAPIContext<GetProviderTokensAPIOptions>
+    context: FunctionAPIContext<GetProviderTokensAPIOptions>
 ): Promise<GetProviderTokensAPIReturn> => {
     try {
-        const { rateLimit, provider, rawSession, cookieStore } = await createValidation(ctx, requestInit, headersInit)
+        const { rateLimit, provider, rawSession, cookieStore } = await createValidation(context)
             .verifyOAuthProvider(oauthId)
             .buildRequest(`/providers/${oauthId}/tokens`)
             .verifyRateLimit("getProviderTokens")
@@ -26,12 +26,12 @@ export const getProviderTokens = async (
         if (rateLimit) {
             return rateLimit as unknown as GetProviderTokensAPIReturn
         }
-        const { tokens, headers } = await ctx.session.strategy.getProviderTokens({
+        const { tokens, headers } = await context.ctx.session.strategy.getProviderTokens({
             oauthId,
             provider,
             rawSession,
             cookieStore,
-            headers: getInitialHeaders(requestInit, headersInit),
+            headers: getInitialHeaders(context.request, context.headers),
         })
         return toAPIResponse<GetProviderTokensAPIReturn>({
             success: true,
@@ -39,7 +39,7 @@ export const getProviderTokens = async (
             headers,
         })
     } catch (error) {
-        errorToLogMessage(error, "GET_PROVIDER_TOKENS_ERROR", ctx.logger)
+        errorToLogMessage(error, "GET_PROVIDER_TOKENS_ERROR", context.ctx.logger)
         const { errors, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
         const headers = getAuraAuthHeaders(error, new Headers(secureApiHeaders))

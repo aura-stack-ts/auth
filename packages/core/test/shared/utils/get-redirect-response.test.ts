@@ -1,18 +1,17 @@
 import { describe, test, expect } from "vitest"
-import { resolveApiRedirect } from "@/shared/utils/api.ts"
-import type { GlobalContext } from "@aura-stack/router/types"
+import { createContext } from "@/config/context.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 
-describe("resolveApiRedirect", () => {
+describe("getRedirectResponse", () => {
+    const ctx = createContext({})
+
     test("redirect: false and redirectTo: /", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: false, redirectTo: "/dashboard", fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "/dashboard",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -25,13 +24,10 @@ describe("resolveApiRedirect", () => {
     test("redirect: true and redirectTo: /", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: true, redirectTo: "/", fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: true,
-                redirectTo: "/",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: true,
@@ -46,13 +42,10 @@ describe("resolveApiRedirect", () => {
     test("redirect: true and redirectTo: undefined", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: true, redirectTo: undefined, fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: true,
-                redirectTo: undefined,
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -65,13 +58,10 @@ describe("resolveApiRedirect", () => {
     test("redirect: true and redirectTo in same origin", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: true, redirectTo: "/dashboard", fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: true,
-                redirectTo: "/dashboard",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: true,
@@ -86,13 +76,10 @@ describe("resolveApiRedirect", () => {
     test("redirect: false and redirectTo in same origin", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: false, redirectTo: "/dashboard", fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "/dashboard",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -105,13 +92,10 @@ describe("resolveApiRedirect", () => {
     test("redirect: true and redirectTo in same origin and cutting origin", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: true, redirectTo: "https://app.com/admin/dashboard", fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: true,
-                redirectTo: "https://app.com/admin/dashboard",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: true,
@@ -126,13 +110,10 @@ describe("resolveApiRedirect", () => {
     test("redirect: false and redirectTo in same origin and cutting origin", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: false, redirectTo: "https://app.com/admin/dashboard", fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "https://app.com/admin/dashboard",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -145,13 +126,10 @@ describe("resolveApiRedirect", () => {
     test("redirect: true and redirectTo with untrusted redirectTo", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: true, redirectTo: "https://devil.com/admin", fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: true,
-                redirectTo: "https://devil.com/admin",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: true,
@@ -166,13 +144,10 @@ describe("resolveApiRedirect", () => {
     test("redirect: false and redirectTo with untrusted redirectTo", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: false, redirectTo: "https://devil.com/admin", fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "https://devil.com/admin",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -184,14 +159,18 @@ describe("resolveApiRedirect", () => {
 
     test("uses a global validated fallback when redirectTo is untrusted", async () => {
         const headers = new Headers()
+        const ctx = createContext({ fallbackRedirectTo: "/dashboard" })
+
         expect(
-            await resolveApiRedirect({
-                ctx: { fallbackRedirectTo: "/dashboard" } as GlobalContext,
+            await getRedirectResponse({
+                context: {
+                    ctx,
+                    redirect: false,
+                    redirectTo: "https://devil.com/admin",
+                    fallbackRedirectTo: undefined,
+                },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "https://devil.com/admin",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -203,14 +182,13 @@ describe("resolveApiRedirect", () => {
 
     test("rejects an untrusted global fallback redirectTo", async () => {
         const headers = new Headers()
+        const ctx = createContext({ fallbackRedirectTo: "https://superdevil.com/admin/dashboard" })
+
         expect(
-            await resolveApiRedirect({
-                ctx: { fallbackRedirectTo: "https://superdevil.com/admin/dashboard" } as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: false, redirectTo: "https://devil.com/admin", fallbackRedirectTo: undefined },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "https://devil.com/admin",
-                fallbackRedirectTo: undefined,
             })
         ).toEqual({
             redirect: false,
@@ -223,13 +201,10 @@ describe("resolveApiRedirect", () => {
     test("uses a validated fallback when redirectTo is untrusted", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: { ctx, redirect: false, redirectTo: "https://devil.com/admin", fallbackRedirectTo: "/dashboard" },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "https://devil.com/admin",
-                fallbackRedirectTo: "/dashboard",
             })
         ).toEqual({
             redirect: false,
@@ -242,13 +217,15 @@ describe("resolveApiRedirect", () => {
     test("rejects an untrusted fallback redirectTo", async () => {
         const headers = new Headers()
         expect(
-            await resolveApiRedirect({
-                ctx: {} as GlobalContext,
+            await getRedirectResponse({
+                context: {
+                    ctx,
+                    redirect: false,
+                    redirectTo: "https://devil.com/admin",
+                    fallbackRedirectTo: "https://superdevil.com/admin/dashboard",
+                },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "https://devil.com/admin",
-                fallbackRedirectTo: "https://superdevil.com/admin/dashboard",
             })
         ).toEqual({
             redirect: false,
@@ -260,14 +237,18 @@ describe("resolveApiRedirect", () => {
 
     test("uses a validated fallback when redirectTo and global fallback are untrusted", async () => {
         const headers = new Headers()
+        const ctx = createContext({ fallbackRedirectTo: "https://superdevil.com/admin" })
+
         expect(
-            await resolveApiRedirect({
-                ctx: { fallbackRedirectTo: "https://superdevil.com/admin" } as GlobalContext,
+            await getRedirectResponse({
+                context: {
+                    ctx,
+                    redirect: false,
+                    redirectTo: "https://devil.com/admin",
+                    fallbackRedirectTo: "/dashboard",
+                },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "https://devil.com/admin",
-                fallbackRedirectTo: "/dashboard",
             })
         ).toEqual({
             redirect: false,
@@ -279,14 +260,18 @@ describe("resolveApiRedirect", () => {
 
     test("uses a validated fallback when redirectTo is untrusted", async () => {
         const headers = new Headers()
+        const ctx = createContext({ fallbackRedirectTo: "/dashboard" })
+
         expect(
-            await resolveApiRedirect({
-                ctx: { fallbackRedirectTo: "/dashboard" } as GlobalContext,
-                request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "https://devil.com/admin",
-                fallbackRedirectTo: "https://superdevi.com/admin/dashboard",
+            await getRedirectResponse({
+                context: {
+                    ctx,
+                    redirect: false,
+                    redirectTo: "https://devil.com/admin",
+                    fallbackRedirectTo: "https://superdevi.com/admin/dashboard",
+                },
                 headers,
+                request: new Request("https://app.com"),
             })
         ).toEqual({
             redirect: false,
@@ -298,14 +283,18 @@ describe("resolveApiRedirect", () => {
 
     test("rejects all untrusted fallback redirectTo", async () => {
         const headers = new Headers()
+        const ctx = createContext({ fallbackRedirectTo: "https://superdevil.com/admin" })
+
         expect(
-            await resolveApiRedirect({
-                ctx: { fallbackRedirectTo: "https://superdevil.com/admin" } as GlobalContext,
+            await getRedirectResponse({
+                context: {
+                    ctx,
+                    redirect: false,
+                    redirectTo: "https://devil.com/admin",
+                    fallbackRedirectTo: "https://hyperdevil.com/admin",
+                },
                 headers,
                 request: new Request("https://app.com"),
-                redirectInit: false,
-                redirectTo: "https://devil.com/admin",
-                fallbackRedirectTo: "https://hyperdevil.com/admin",
             })
         ).toEqual({
             redirect: false,

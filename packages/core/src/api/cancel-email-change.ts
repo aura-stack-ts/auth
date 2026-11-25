@@ -1,38 +1,25 @@
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { createValidation } from "@/shared/utils/create-validation.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { CancelEmailChangeAPIOptions, CancelEmailChangeAPIReturn } from "@/@types/api.ts"
 
-export const cancelEmailChange = async ({
-    ctx,
-    payload,
-    headers: headersInit,
-    request: requestInit,
-    redirectTo,
-    redirect: redirectInit = true,
-    skipCSRFCheck = false,
-    doubleSubmitToken = undefined,
-    fallbackRedirectTo = undefined,
-}: FunctionAPIContext<CancelEmailChangeAPIOptions>): Promise<CancelEmailChangeAPIReturn> => {
-    const { logger, session } = ctx
+export const cancelEmailChange = async (
+    context: FunctionAPIContext<CancelEmailChangeAPIOptions>
+): Promise<CancelEmailChangeAPIReturn> => {
+    const {
+        ctx: { logger, session },
+        payload,
+    } = context
     const headers = new Headers(secureApiHeaders)
     try {
-        logger?.log("CANCEL_EMAIL_CHANGE_INITIATED", {
-            structuredData: {
-                skipCSRFCheck: skipCSRFCheck,
-                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
-                hasToken: Boolean(payload?.token),
-            },
-        })
-        const validation = createValidation(ctx, requestInit, headersInit)
-            .buildRequest("/email/change/cancel")
-            .verifyRateLimit("cancelEmailChange")
+        const validation = createValidation(context).buildRequest("/email/change/cancel").verifyRateLimit("cancelEmailChange")
 
         if (payload?.token) {
             const { request, rateLimit } = await validation.execute()
-            requestInit = requestInit ?? request
+            context.request = context.request ?? request
 
             if (rateLimit) {
                 return rateLimit
@@ -43,11 +30,8 @@ export const cancelEmailChange = async ({
                 userId: undefined,
             })
         } else {
-            const { request, rateLimit, userId } = await validation
-                .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
-                .verifySession()
-                .execute()
-            requestInit = requestInit ?? request
+            const { request, rateLimit, userId } = await validation.verifyCSRFToken().verifySession().execute()
+            context.request = context.request ?? request
 
             if (rateLimit) {
                 return rateLimit
@@ -59,13 +43,10 @@ export const cancelEmailChange = async ({
             })
         }
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
-            request: requestInit,
-            redirectInit,
-            redirectTo,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             headers,
-            fallbackRedirectTo,
+            request: context.request,
         })
 
         return toAPIResponse<CancelEmailChangeAPIReturn>({

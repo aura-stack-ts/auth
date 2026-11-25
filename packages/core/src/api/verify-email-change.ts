@@ -1,36 +1,23 @@
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
-import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getRedirectResponse } from "@/shared/utils/get-redirect-response.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyEmailChangeAPIOptions, VerifyEmailChangeAPIReturn } from "@/@types/api.ts"
 
-export const verifyEmailChange = async ({
-    payload,
-    ctx,
-    headers: headersInit,
-    request: requestInit,
-    redirectTo,
-    redirect: redirectInit = true,
-    skipCSRFCheck = false,
-    doubleSubmitToken = undefined,
-    fallbackRedirectTo = undefined,
-}: FunctionAPIContext<VerifyEmailChangeAPIOptions>): Promise<VerifyEmailChangeAPIReturn> => {
-    const { logger, session } = ctx
+export const verifyEmailChange = async (
+    context: FunctionAPIContext<VerifyEmailChangeAPIOptions>
+): Promise<VerifyEmailChangeAPIReturn> => {
+    const { logger, session } = context.ctx
     const headers = new Headers(secureApiHeaders)
     try {
-        logger?.log("VERIFY_EMAIL_CHANGE_INITIATED", {
-            structuredData: {
-                skipCSRFCheck: skipCSRFCheck,
-                doubleSubmitToken: doubleSubmitToken ? "provided" : "not_provided",
-            },
-        })
-        const { request, rateLimit, userId, sessionId } = await createValidation(ctx, requestInit, headersInit)
+        const { request, rateLimit, userId, sessionId } = await createValidation(context)
             .buildRequest("/email/change/verify")
             .verifyRateLimit("verifyEmailChange")
             .verifySession()
             .verifyUserStatus()
-            .verifyCSRFToken(skipCSRFCheck, doubleSubmitToken)
+            .verifyCSRFToken()
             .execute()
 
         if (rateLimit) {
@@ -39,16 +26,13 @@ export const verifyEmailChange = async ({
         await session.strategy.verifyEmailChange({
             sessionId: sessionId!,
             userId: userId!,
-            token: payload.token,
+            token: context.payload.token,
         })
 
-        const { redirect, redirectURL, status } = await resolveApiRedirect({
-            ctx,
+        const { redirect, redirectURL, status } = await getRedirectResponse({
+            context,
             request,
-            redirectInit,
-            redirectTo,
             headers,
-            fallbackRedirectTo,
         })
 
         return toAPIResponse<VerifyEmailChangeAPIReturn>({
