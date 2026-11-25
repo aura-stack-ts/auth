@@ -1,7 +1,8 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { createCSRF } from "@/exports/crypto.ts"
-import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { VerifyMagicLinkAPIOptions, VerifyMagicLinkAPIReturn } from "@/@types/api.ts"
@@ -45,22 +46,13 @@ export const verifyMagicLink = async (
             headers: builder,
             fallbackRedirectTo,
         })
-        return {
+        return toAPIResponse<VerifyMagicLinkAPIReturn>({
             success: true,
             redirect,
             redirectURL,
             headers: builder.toHeaders(),
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers: builder.toHeaders(), status }
-                )
-            },
-        } as VerifyMagicLinkAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "VERIFY_MAGIC_LINK_ERROR", logger)
         const { errors, statusCode } = handleApiError(
@@ -68,24 +60,15 @@ export const verifyMagicLink = async (
             "VERIFY_MAGIC_LINK_ERROR",
             "An error occurred while verifying the magic link."
         )
-        const outHeaders = getAuraAuthHeaders(error, headers)
 
-        return {
+        const outHeaders = getAuraAuthHeaders(error, headers)
+        return toAPIResponse<VerifyMagicLinkAPIReturn>({
             success: false,
-            error: errors,
+            silent: { error: errors },
             redirect: false,
             redirectURL: null,
             headers: outHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers: outHeaders, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

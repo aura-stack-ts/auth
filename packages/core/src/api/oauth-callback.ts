@@ -1,6 +1,7 @@
-import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { OAuthCallbackAPIOptions, OAuthCallbackAPIReturn } from "@/@types/api.ts"
 
@@ -29,31 +30,17 @@ export const oauthCallback = async ({
             params: { code: payload.code, state: payload.state },
         })
 
-        return {
-            success: true,
-            headers,
-            toResponse: () => {
-                return Response.json({ success: true }, { status: 302, headers })
-            },
-        }
+        return toAPIResponse<OAuthCallbackAPIReturn>({ success: true, headers, status: 302 })
     } catch (error) {
         const headers = getAuraAuthHeaders(error, new Headers(secureApiHeaders))
         errorToLogMessage(error, "OAUTH_CALLBACK_ERROR", logger)
         const { errors, statusCode } = handleApiError(error, "OAUTH_CALLBACK_ERROR", "An error occurred on callback process")
 
-        return {
+        return toAPIResponse<OAuthCallbackAPIReturn>({
             success: false,
             error: errors,
             headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        error: errors,
-                    },
-                    { headers, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

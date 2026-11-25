@@ -1,3 +1,4 @@
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import { errorToLogMessage, handleApiError, resolveApiRedirect } from "@/shared/utils/api.ts"
@@ -38,22 +39,13 @@ export const forgotPassword = async (
             fallbackRedirectTo,
         })
 
-        return {
+        return toAPIResponse<ForgotPasswordAPIReturn>({
             success: true,
             redirect,
             redirectURL,
             headers,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: true,
-                        redirect,
-                        redirectURL,
-                    },
-                    { headers, status }
-                )
-            },
-        } as ForgotPasswordAPIReturn
+            status,
+        })
     } catch (error) {
         errorToLogMessage(error, "FORGOT_PASSWORD_ERROR", logger)
         const { errors, statusCode } = handleApiError(
@@ -63,22 +55,13 @@ export const forgotPassword = async (
         )
         const outHeaders = getAuraAuthHeaders(error, headers)
 
-        return {
+        return toAPIResponse<ForgotPasswordAPIReturn>({
             success: false,
-            error: errors,
+            silent: { error: errors },
             redirect: false,
             redirectURL: null,
             headers: outHeaders,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        redirect: false,
-                        redirectURL: null,
-                    },
-                    { headers: outHeaders, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

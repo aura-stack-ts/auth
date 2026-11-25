@@ -1,6 +1,7 @@
 import { AuraAuthError } from "@/errors/aura-error.ts"
 import { getUserInfo } from "@/shared/oauth2/get-user-info.ts"
 import { getProviderTokens } from "@/api/get-provider-tokens.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
@@ -92,20 +93,11 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             user: userInfo,
             cookieStore,
         })
-        return {
+        return toAPIResponse<RefreshUserInfoAPIReturn<DefaultUser>>({
             success: !!session,
             headers,
             session: session,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: !!session,
-                        session,
-                    },
-                    { headers, status: 200 }
-                )
-            },
-        } as RefreshUserInfoAPIReturn<DefaultUser>
+        })
     } catch (error) {
         errorToLogMessage(error, "REFRESH_USER_INFO_ERROR", ctx.logger)
         const { errors, statusCode } = handleApiError(
@@ -113,22 +105,14 @@ export const refreshUserInfo = async <DefaultUser extends User = User>(
             "UNKNOWN_REFRESH_USER_INFO_ERROR",
             "Failed to refresh user information from the OAuth provider"
         )
-        const headers = getAuraAuthHeaders(error, initHeaders)
 
-        return {
+        const headers = getAuraAuthHeaders(error, initHeaders)
+        return toAPIResponse<RefreshUserInfoAPIReturn<DefaultUser>>({
             success: false,
             headers,
-            error: errors,
+            silent: { error: errors },
             session: null,
-            toResponse: () => {
-                return Response.json(
-                    {
-                        success: false,
-                        session: null,
-                    },
-                    { headers, status: statusCode }
-                )
-            },
-        }
+            status: statusCode,
+        })
     }
 }

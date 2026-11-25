@@ -1,3 +1,4 @@
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
 import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
@@ -32,26 +33,22 @@ export const getProviderTokens = async (
             cookieStore,
             headers: getInitialHeaders(requestInit, headersInit),
         })
-        return {
+        return toAPIResponse<GetProviderTokensAPIReturn>({
             success: true,
-            tokens: tokens,
+            tokens,
             headers,
-            toResponse: () => {
-                return Response.json({ success: true, tokens: tokens }, { headers })
-            },
-        }
+        })
     } catch (error) {
         errorToLogMessage(error, "GET_PROVIDER_TOKENS_ERROR", ctx.logger)
         const { errors, statusCode } = handleApiError(error, "PROVIDER_TOKENS_ERROR", "Failed to get provider tokens")
 
         const headers = getAuraAuthHeaders(error, new Headers(secureApiHeaders))
-
-        return {
+        return toAPIResponse<GetProviderTokensAPIReturn>({
             success: false,
             tokens: null,
-            error: errors,
+            silent: { error: errors },
             headers,
-            toResponse: () => Response.json({ success: false, tokens: null }, { status: statusCode, headers }),
-        }
+            status: statusCode,
+        })
     }
 }
