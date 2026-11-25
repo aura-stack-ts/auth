@@ -1,8 +1,8 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { shouldRefresh } from "@/shared/utils.ts"
+import { shouldRefresh } from "@/shared/utils/provider-tokens.ts"
 import { getCookie } from "@/shared/http/cookie.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
-import { refreshProviderToken } from "@/shared/utils/refresh-tokens.ts"
+import { refreshProviderToken } from "@/shared/oauth2/refresh-tokens.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const getProviderTokens = (ctx: InternalContextForStateless): SessionStrategy["getProviderTokens"] => {

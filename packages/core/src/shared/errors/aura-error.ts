@@ -1,4 +1,4 @@
-import { ERROR_CATALOG, type AuraErrorCode, type AuraErrorType } from "@/errors/catalog.ts"
+import { ERROR_CATALOG, type AuraErrorCode, type AuraErrorType } from "@/shared/errors/catalog.ts"
 
 export interface AuraErrorOptions extends ErrorOptions {
     code: AuraErrorCode

@@ -1,6 +1,6 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import type { UserEntity } from "@/@types/entities.ts"
-import type { AuraErrorCode } from "@/errors/catalog.ts"
+import type { AuraErrorCode } from "@/shared/errors/catalog.ts"
 
 export const assertUserStatus = (
     user: UserEntity,

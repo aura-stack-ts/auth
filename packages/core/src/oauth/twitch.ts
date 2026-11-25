@@ -1,5 +1,5 @@
-import { getEnv } from "@/shared/env.ts"
-import { merge } from "@/shared/utils.ts"
+import { getEnv } from "@/shared/utils/get-env.ts"
+import { merge } from "@/shared/utils/merge.ts"
 import type { DeepPartial, OAuthProviderCredentials, User } from "@/@types/index.ts"
 
 /**

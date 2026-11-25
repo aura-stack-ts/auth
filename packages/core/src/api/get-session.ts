@@ -1,7 +1,7 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { getExpiredCookie } from "@/shared/http/cookie.ts"
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
-import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/handle-messages.ts"
 import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { GetSessionAPIOptions, GetSessionAPIReturn, User } from "@/@types/index.ts"

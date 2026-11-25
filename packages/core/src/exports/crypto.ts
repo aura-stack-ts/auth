@@ -1,4 +1,4 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { base64url, encoder, getRandomBytes, getSubtleCrypto } from "@/jose.ts"
 import { exportJWK, generateKeyPair, importPKCS8, importSPKI, type GenerateKeyPairOptions } from "@aura-stack/jose/jose"
 import type { AsymmetricKeyPairFromEnv, RouterGlobalContext } from "@/@types/internal.ts"

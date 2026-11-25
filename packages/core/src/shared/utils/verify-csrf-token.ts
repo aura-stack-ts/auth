@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "@/exports/crypto.ts"
-import { AuraAuthError, isAuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError, isAuraAuthError } from "@/shared/errors/aura-error.ts"
 import { isJWTExpired, isJWTPayloadWithToken, isValidJWS } from "@/shared/assert.ts"
 import { getOptionalCookie } from "@/shared/http/cookie.ts"
 import type { JoseInstance, User } from "@/@types/index.ts"

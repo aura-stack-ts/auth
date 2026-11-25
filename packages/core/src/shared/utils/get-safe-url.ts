@@ -1,4 +1,5 @@
-import { equals, extractPath, patternToRegex } from "@/shared/utils.ts"
+import { equals } from "@/shared/assert.ts"
+import { extractPath, patternToRegex } from "@/shared/utils/path-url.ts"
 import { isRelativeURL, isSameOrigin, isTrustedOrigin, isValidURL } from "@/shared/utils/get-origin-url.ts"
 
 export const getSafeURL = ({

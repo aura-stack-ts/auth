@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { equals } from "@/shared/utils.ts"
+import { equals } from "@/shared/assert.ts"
 import { createCSRF } from "@/exports/crypto.ts"
 import { sessionPayload } from "@test/setup/presets.ts"
 import { jose, PATCH, POST } from "@test/setup/auth.ts"

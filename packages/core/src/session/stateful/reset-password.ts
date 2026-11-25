@@ -1,4 +1,4 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { createHash, hashPassword } from "@/exports/crypto.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 

@@ -1,4 +1,4 @@
-import { merge } from "@/shared/utils.ts"
+import { merge } from "@/shared/utils/merge.ts"
 import type { DeepPartial, OpenIDProvider, User } from "@/@types/index.ts"
 
 /**

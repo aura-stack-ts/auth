@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
-import { AuraAuthError } from "@/errors/aura-error.ts"
-import { handleApiError } from "@/shared/utils/api.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
+import { handleApiError } from "@/shared/utils/handle-messages.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/exports/crypto.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"

@@ -1,4 +1,4 @@
-import { getEnv, getEnvBoolean } from "@/shared/env.ts"
+import { getEnv, getEnvBoolean } from "@/shared/utils/get-env.ts"
 import { LOG_MESSAGES } from "@/config/logger/catalog.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 import type { AuthConfig, Logger, LogLevel, SyslogOptions } from "@/@types/index.ts"

@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import { createCSRF } from "@/exports/crypto.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createSchemaRegistry } from "@/shared/identity-registry.ts"
 import { deviceEntity, sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("signInCredentials API", async () => {
@@ -15,7 +15,7 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -92,7 +92,7 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -143,7 +143,7 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -204,7 +204,7 @@ describe("signInCredentials API", async () => {
 
     test("signIn without URL configuration", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -252,7 +252,7 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -330,7 +330,7 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -406,7 +406,7 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -482,7 +482,7 @@ describe("signInCredentials API", async () => {
         vi.stubEnv("BASE_URL", "https://example.com")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spyParse = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)

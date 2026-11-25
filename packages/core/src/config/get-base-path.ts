@@ -1,5 +1,5 @@
-import { getEnv } from "@/shared/env.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { getEnv } from "@/shared/utils/get-env.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import type { AuthConfig } from "@/@types/config.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 

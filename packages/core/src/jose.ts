@@ -10,7 +10,7 @@ import {
     type JWEHeaderParameters,
     type JWTDecryptOptions,
 } from "@aura-stack/jose"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 export { base64url, type JWTPayload } from "@aura-stack/jose/jose"
 import { getSecrets, type InternalSecret } from "@/config/get-secret.ts"
 export { encoder, getRandomBytes, getSubtleCrypto } from "@aura-stack/jose/crypto"

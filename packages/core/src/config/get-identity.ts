@@ -1,4 +1,4 @@
-import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createSchemaRegistry } from "@/shared/identity-registry.ts"
 import type { AuthConfig } from "@/@types/config.ts"
 import type { Identities, SchemaTypes } from "@/identity/index.ts"
 

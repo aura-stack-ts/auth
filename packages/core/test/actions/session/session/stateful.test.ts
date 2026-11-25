@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from "vitest"
 import { createHash } from "@/exports/crypto.ts"
 import { sessionPayload } from "@test/setup/presets.ts"
 import { authInstance, jose } from "@test/setup/auth.ts"
-import { createSchemaRegistry } from "@/validator/registry.ts"
+import { createSchemaRegistry } from "@/shared/identity-registry.ts"
 import { sessionEntityWithUser, userEntity } from "@test/setup/entities.ts"
 
 describe("sessionAction", () => {
@@ -10,7 +10,7 @@ describe("sessionAction", () => {
 
     test("sessionToken cookie not found", async () => {
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spy = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -35,7 +35,7 @@ describe("sessionAction", () => {
         vi.stubEnv("NODE_ENV", "production")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spy = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -69,7 +69,7 @@ describe("sessionAction", () => {
         vi.stubEnv("NODE_ENV", "production")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spy = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -115,7 +115,7 @@ describe("sessionAction", () => {
         vi.stubEnv("NODE_ENV", "production")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spy = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -161,7 +161,7 @@ describe("sessionAction", () => {
         vi.stubEnv("NODE_ENV", "production")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spy = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -214,7 +214,7 @@ describe("sessionAction", () => {
         vi.stubEnv("NODE_ENV", "production")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spy = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)
@@ -248,7 +248,7 @@ describe("sessionAction", () => {
         vi.stubEnv("NODE_ENV", "production")
 
         const registry = createSchemaRegistry({})
-        const module = await import("@/validator/registry.ts")
+        const module = await import("@/shared/identity-registry.ts")
 
         const spy = vi.spyOn(registry, "parse")
         vi.spyOn(module, "createSchemaRegistry").mockReturnValue(registry)

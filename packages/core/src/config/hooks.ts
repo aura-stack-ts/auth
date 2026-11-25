@@ -1,4 +1,4 @@
-import { isAuraAuthError } from "@/errors/aura-error.ts"
+import { isAuraAuthError } from "@/shared/errors/aura-error.ts"
 import { isAuraRouterError, isAuraRouterValidationError, type OnErrorHook } from "@aura-stack/router"
 
 export const onErrorHook: OnErrorHook<any, any> = ({ error, context }) => {

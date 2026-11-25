@@ -1,6 +1,7 @@
+import { equals } from "@/shared/assert.ts"
 import { getBaseURL } from "@/config/get-base-url.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
-import { equals, patternToRegex } from "@/shared/utils.ts"
+import { patternToRegex } from "@/shared/utils/path-url.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { getTrustedOrigins } from "@/config/get-trusted-origins.ts"
 import type { GlobalContext } from "@aura-stack/router/types"
 
@@ -44,7 +45,7 @@ export const isValidURL = (value: string): boolean => {
     const regex =
         /^https?:\/\/(?:[a-zA-Z0-9._-]+|localhost|\[[0-9a-fA-F:]+\])(?::\d{1,5})?(?:\/[a-zA-Z0-9._~!$&'()?#*+,;=:@-]*)*\/?$/
 
-    return regex.test(match[0])
+    return regex.test(match[0]) && URL.canParse(value)
 }
 export const isRelativeURL = (value: string): boolean => {
     if (value.length > 100) return false
@@ -94,15 +95,4 @@ export const isTrustedOrigin = (url: string, trustedOrigins: string[]): boolean 
         }
     } catch {}
     return false
-}
-
-/**
- * Validates and sanitizes redirect URLs to prevent open redirect attacks.
- * Only relative URLs (starting with /) are allowed; absolute URLs are
- * rejected and replaced with "/" to enforce same-origin redirects.
- */
-export const validateRedirectTo = (url: string): string => {
-    if (!isRelativeURL(url) && !isValidURL(url)) return "/"
-    if (isRelativeURL(url)) return url
-    return "/"
 }

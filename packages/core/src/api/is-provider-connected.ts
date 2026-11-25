@@ -1,5 +1,5 @@
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
-import { errorToLogMessage, handleApiError } from "@/shared/utils/api.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/handle-messages.ts"
 import { createValidation } from "@/shared/utils/create-validation.ts"
 import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { LiteralUnion } from "@/@types/utility.ts"

@@ -1,7 +1,8 @@
 import { HeadersBuilder } from "@aura-stack/router"
+import { createRedirectTo } from "@/shared/utils/create-redirect-to.ts"
 import { createOIDCAuthorizationURL } from "@/shared/oidc/authorization-url.ts"
 import { isOIDCProvider, resolveOpenIDProvider } from "@/shared/oidc/resolve-provider.ts"
-import { createAuthorizationURL, createRedirectTo, createRedirectURI } from "@/shared/oauth2/authorization.ts"
+import { createAuthorizationURL, createRedirectURI } from "@/shared/oauth2/authorization-url.ts"
 import type { InternalContextForStateless, SessionStrategy } from "@/@types/internal.ts"
 
 export const signIn = (ctx: InternalContextForStateless): SessionStrategy["signIn"] => {

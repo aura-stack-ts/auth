@@ -1,6 +1,6 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { createHash, createSecretValue } from "@/exports/crypto.ts"
-import { assertUserStatus } from "@/shared/utils/stateful.ts"
+import { assertUserStatus } from "@/shared/utils/assert-user-status.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
 export const sendMagicLink = (ctx: InternalContextForStateful): SessionStrategy["sendMagicLink"] => {

@@ -1,4 +1,4 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { isStatelessStrategy } from "@/shared/assert.ts"
 import { createStatefulStrategy } from "@/session/stateful/index.ts"
 import { createStatelessStrategy } from "@/session/stateless/index.ts"

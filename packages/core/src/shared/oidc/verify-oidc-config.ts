@@ -1,4 +1,4 @@
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { validateIDToken } from "@/shared/oidc/id-token.ts"
 import type { OAuthAccessTokenResponseType, RuntimeOAuthProvider } from "@/@types/internal.ts"
 

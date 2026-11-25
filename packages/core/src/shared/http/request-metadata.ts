@@ -1,5 +1,5 @@
-import type { DeviceType } from "@/@types/entities.ts"
 import { createHash } from "@/exports/crypto.ts"
+import type { DeviceType } from "@/@types/entities.ts"
 
 export const getBrowser = (userAgent: string) => {
     if (userAgent.includes("Edg/")) return "Edge"

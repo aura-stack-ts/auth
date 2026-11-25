@@ -1,9 +1,9 @@
-import { getErrorName } from "@/errors/aura-error.ts"
+import { getErrorName } from "@/shared/errors/aura-error.ts"
 import { createHash } from "@/exports/crypto.ts"
-import { AuraAuthError } from "@/errors/aura-error.ts"
+import { AuraAuthError } from "@/shared/errors/aura-error.ts"
 import { secureApiHeaders } from "@/shared/http/headers.ts"
 import { isInvalidSlidingThreshold } from "@/shared/assert.ts"
-import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/session-strategy.ts"
+import { calcStatefulExpiration, verifyDebounceLastActivity } from "@/shared/utils/expires-at.ts"
 import type { User } from "@/@types/index.ts"
 import type { InternalContextForStateful, SessionStrategy } from "@/@types/internal.ts"
 
