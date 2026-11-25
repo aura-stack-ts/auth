@@ -271,6 +271,13 @@ export const ERROR_CATALOG = {
             "The custom user 'authorize' handler function returned a nullish profile structure object or explicitly threw a mismatch validation signal.",
         userMessage: "The user's session couldn't be established with the provided credentials.",
     },
+    AUTHORIZE_FAILED: {
+        type: "AUTH_FLOW",
+        statusCode: 500,
+        name: "AuthorizeError",
+        message: "An unexpected error occurred while executing the authorize callback during username/password sign-in.",
+        userMessage: "We could not complete your sign-in right now. Please try again later.",
+    },
     AUTH_PROVIDER_REJECTED: {
         type: "PROTOCOL",
         statusCode: 502,

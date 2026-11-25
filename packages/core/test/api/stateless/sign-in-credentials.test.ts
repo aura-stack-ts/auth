@@ -455,4 +455,35 @@ describe("signInCredentials API", async () => {
         expect(output.headers).toHaveValidSecurityHeaders()
         expect(output.headers).toHaveValidSetCookies([])
     })
+
+    test("throws error when authorize throws an error", async () => {
+        vi.stubEnv("BASE_URL", "https://app.com")
+
+        const { api } = createAuth({
+            credentials: {
+                authorize: () => {
+                    throw new Error("Invalid credentials")
+                },
+            },
+        })
+
+        const output = await api.signInCredentials({
+            headers,
+            payload: {
+                username: "john@doe.com",
+                password: "1234567890",
+            },
+        })
+        expect(output).toEqual({
+            success: false,
+            redirect: false,
+            redirectURL: null,
+            error: {
+                code: "AUTHORIZE_FAILED",
+                message: "We could not complete your sign-in right now. Please try again later.",
+            },
+            headers: expect.any(Headers),
+            toResponse: expect.any(Function),
+        })
+    })
 })

@@ -73,7 +73,7 @@ export const getSession = <DefaultUser extends User>(
             }
         } catch (error) {
             toRethrowError(error, { headers: outHeaders })
-            throw new AuraAuthError({ code: "SESSION_INVALID", headers: outHeaders })
+            throw new AuraAuthError({ code: "SESSION_INVALID", headers: outHeaders, cause: error })
         }
     }
 }

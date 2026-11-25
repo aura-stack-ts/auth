@@ -25,11 +25,16 @@ export const signInCredentials = async (
             return rateLimit
         }
 
-        const session = await credentials?.authorize({
-            credentials: context.payload,
-            deriveSecret: credentials?.hash ?? hashPassword,
-            verifySecret: credentials?.verify ?? verifyPassword,
-        })
+        let session: Record<string, unknown> = {}
+        try {
+            session = await credentials?.authorize({
+                credentials: context.payload,
+                deriveSecret: credentials?.hash ?? hashPassword,
+                verifySecret: credentials?.verify ?? verifyPassword,
+            })
+        } catch {
+            throw new AuraAuthError({ code: "AUTHORIZE_FAILED" })
+        }
         if (!session) {
             throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
         }

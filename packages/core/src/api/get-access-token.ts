@@ -7,12 +7,14 @@ export const getAccessToken = async (
     oauth: LiteralUnion<BuiltInOAuthProvider>,
     ctx: FunctionAPIContext<AccessTokenAPIOptions>
 ): Promise<AccessTokenAPIReturn> => {
-    const { success, tokens, headers, toResponse: _, ...error } = await getProviderTokens(oauth, ctx)
+    const { success, tokens, headers, toResponse, ...error } = await getProviderTokens(oauth, ctx)
+    const status = toResponse().status
 
     return toAPIResponse<AccessTokenAPIReturn>({
         success,
         headers,
-        ...error,
+        silent: { ...error },
         accessToken: success ? tokens.accessToken : null,
+        status,
     })
 }
