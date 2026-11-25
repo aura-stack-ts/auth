@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/shared/errors/aura-error.ts"
-import { handleApiError } from "@/shared/utils/handle-messages.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/handle-messages.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/exports/crypto.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
@@ -61,7 +61,7 @@ export const signInCredentials = async (
         })
     } catch (error) {
         const outHeaders = getAuraAuthHeaders(error, headers)
-
+        errorToLogMessage(error, "SIGN_IN_CREDENTIALS_ERROR", context.ctx.logger)
         const { errors, statusCode } = handleApiError(
             error,
             "CREDENTIALS_SIGN_IN_ERROR",

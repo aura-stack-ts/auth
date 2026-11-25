@@ -875,6 +875,12 @@ export const LOG_MESSAGES = {
         msgId: "SIGN_IN_CREDENTIALS_INITIATED",
         message: "Starting sign-in process with user credentials",
     },
+    SIGN_IN_CREDENTIALS_ERROR: {
+        facility: 4,
+        severity: "error",
+        msgId: "SIGN_IN_CREDENTIALS_ERROR",
+        message: "An error occurred during credentials sign-in",
+    },
     SIGN_OUT_INITIATED: {
         facility: 4,
         severity: "debug",
