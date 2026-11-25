@@ -1,6 +1,6 @@
 import { HeadersBuilder } from "@aura-stack/router"
 import { AuraAuthError } from "@/shared/errors/aura-error.ts"
-import { handleApiError } from "@/shared/utils/handle-messages.ts"
+import { errorToLogMessage, handleApiError } from "@/shared/utils/handle-messages.ts"
 import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { createCSRF, hashPassword, verifyPassword } from "@/exports/crypto.ts"
 import { getAuraAuthHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
@@ -25,11 +25,16 @@ export const signInCredentials = async (
             return rateLimit
         }
 
-        const session = await credentials?.authorize({
-            credentials: context.payload,
-            deriveSecret: credentials?.hash ?? hashPassword,
-            verifySecret: credentials?.verify ?? verifyPassword,
-        })
+        let session: Record<string, unknown> = {}
+        try {
+            session = await credentials?.authorize({
+                credentials: context.payload,
+                deriveSecret: credentials?.hash ?? hashPassword,
+                verifySecret: credentials?.verify ?? verifyPassword,
+            })
+        } catch {
+            throw new AuraAuthError({ code: "AUTHORIZE_FAILED" })
+        }
         if (!session) {
             throw new AuraAuthError({ code: "AUTH_CREDENTIALS_INVALID" })
         }
@@ -61,7 +66,7 @@ export const signInCredentials = async (
         })
     } catch (error) {
         const outHeaders = getAuraAuthHeaders(error, headers)
-
+        errorToLogMessage(error, "SIGN_IN_CREDENTIALS_ERROR", context.ctx.logger)
         const { errors, statusCode } = handleApiError(
             error,
             "CREDENTIALS_SIGN_IN_ERROR",

@@ -14,20 +14,14 @@ describe("getSession", () => {
             session: null,
             success: false,
             error: {
-                code: "GET_SESSION_FAILED",
-                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+                code: "SESSION_MISSING",
+                message: "The session is missing. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
         })
         expect(output.headers).toHaveValidSecurityHeaders()
-        expect(output.headers).toHaveValidSetCookies([
-            expect.objectContaining({
-                name: "__Secure-aura-auth.session_token",
-                value: "",
-                expires: new Date(0),
-            }),
-        ])
+        expect(output.headers).toHaveValidSetCookies([])
     })
 
     test("getSession with invalid session token", async () => {
@@ -42,8 +36,8 @@ describe("getSession", () => {
             session: null,
             success: false,
             error: {
-                code: "GET_SESSION_FAILED",
-                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+                code: "SESSION_INVALID",
+                message: "The session is not valid. Its signature or decryption parameters failed.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -99,8 +93,8 @@ describe("getSession", () => {
             session: null,
             success: false,
             error: {
-                code: "GET_SESSION_FAILED",
-                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+                code: "SESSION_EXPIRED",
+                message: "Your session has expired. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),
@@ -129,8 +123,8 @@ describe("getSession", () => {
             session: null,
             success: false,
             error: {
-                code: "GET_SESSION_FAILED",
-                message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
+                code: "SESSION_SCHEMA_PARSER_FAILED",
+                message: "We could not validate your session data. Please sign in again.",
             },
             headers: expect.any(Headers),
             toResponse: expect.any(Function),

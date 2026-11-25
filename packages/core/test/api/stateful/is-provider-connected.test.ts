@@ -76,10 +76,12 @@ describe("isProviderConnected (Stateful)", () => {
         }
         const getSessionByTokenMock = vi.fn().mockResolvedValue(expiredSession)
         const getAccountsByUserIdMock = vi.fn()
+        const revokeSessionMock = vi.fn()
 
         const { api } = authInstance({
             getSessionByToken: getSessionByTokenMock,
             getAccountsByUserId: getAccountsByUserIdMock,
+            revokeSession: revokeSessionMock,
         })
 
         const csrfToken = await createCSRF(jose)

@@ -181,6 +181,14 @@ export const ERROR_CATALOG = {
             "The framework extracted a session token string, but it failed basic integrity decoding checks or cryptographic signatures.",
         userMessage: "The session is not valid. Its signature or decryption parameters failed.",
     },
+    SESSION_SCHEMA_PARSER_FAILED: {
+        type: "AUTH_FLOW",
+        statusCode: 500,
+        name: "SessionError",
+        message:
+            "Session data validation failed during getSession because the stored or decoded payload did not match the expected session schema.",
+        userMessage: "We could not validate your session data. Please sign in again.",
+    },
     SESSION_STRATEGY_MISMATCH: {
         type: "VALIDATION",
         statusCode: 500,
@@ -262,6 +270,13 @@ export const ERROR_CATALOG = {
         message:
             "The custom user 'authorize' handler function returned a nullish profile structure object or explicitly threw a mismatch validation signal.",
         userMessage: "The user's session couldn't be established with the provided credentials.",
+    },
+    AUTHORIZE_FAILED: {
+        type: "AUTH_FLOW",
+        statusCode: 500,
+        name: "AuthorizeError",
+        message: "An unexpected error occurred while executing the authorize callback during username/password sign-in.",
+        userMessage: "We could not complete your sign-in right now. Please try again later.",
     },
     AUTH_PROVIDER_REJECTED: {
         type: "PROTOCOL",

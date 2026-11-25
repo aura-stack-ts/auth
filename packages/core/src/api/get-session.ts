@@ -1,8 +1,7 @@
-import { HeadersBuilder } from "@aura-stack/router"
-import { getExpiredCookie } from "@/shared/http/cookie.ts"
+import { toAPIResponse } from "@/shared/utils/to-api-response.ts"
 import { getCookieStore } from "@/shared/utils/get-cookie-store.ts"
 import { errorToLogMessage, handleApiError } from "@/shared/utils/handle-messages.ts"
-import { getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
+import { getAuraAuthHeaders, getInitialHeaders, secureApiHeaders } from "@/shared/http/headers.ts"
 import type { FunctionAPIContext } from "@/@types/internal.ts"
 import type { GetSessionAPIOptions, GetSessionAPIReturn, User } from "@/@types/index.ts"
 
@@ -10,45 +9,33 @@ export const getSession = async <DefaultUser extends User = User>({
     ctx,
     headers: headersInit,
 }: FunctionAPIContext<GetSessionAPIOptions>): Promise<GetSessionAPIReturn<DefaultUser>> => {
-    const incomingHeaders = getInitialHeaders(undefined, headersInit)
-    const cookieStore = getCookieStore({ ctx, request: incomingHeaders })
-    const headers = new HeadersBuilder(secureApiHeaders)
-        .setCookie(cookieStore.sessionToken.name, "", getExpiredCookie(cookieStore.sessionToken.attributes))
-        .toHeaders()
-    const unauthorizedError = {
-        code: "GET_SESSION_FAILED",
-        message: "Failed to retrieve session. The session token may be missing, expired, or invalid.",
-    } as const
-    const unauthorized: GetSessionAPIReturn<DefaultUser> = {
-        session: null,
-        headers,
-        success: false,
-        error: unauthorizedError,
-        toResponse: () => Response.json({ success: false, session: null }, { status: 401, headers }),
-    }
+    const initHeaders = getInitialHeaders(undefined, headersInit)
+    const cookieStore = getCookieStore({ ctx, request: initHeaders })
     try {
         const { session, headers } = await ctx.session.strategy.getSession({
-            headers: incomingHeaders,
+            headers: initHeaders,
             cookieStore,
         })
-        if (!session) return unauthorized
-        return {
+        return toAPIResponse<GetSessionAPIReturn<DefaultUser>>({
+            success: true,
             session,
             headers,
-            success: true,
-            toResponse: () => Response.json({ success: true, session }, { headers }),
-        } as GetSessionAPIReturn<DefaultUser>
+        })
     } catch (error) {
         errorToLogMessage(error, "AUTH_SESSION_INVALID", ctx.logger)
-        const { errors } = handleApiError(
+        const { errors, statusCode } = handleApiError(
             error,
             "GET_SESSION_FAILED",
             "Failed to retrieve session. The session token may be missing, expired, or invalid."
         )
-        return {
-            ...unauthorized,
-            error: errors,
-            toResponse: () => Response.json({ success: false, session: null }, { status: 401, headers }),
-        }
+        const headers = getAuraAuthHeaders(error, new Headers(secureApiHeaders))
+
+        return toAPIResponse<GetSessionAPIReturn<DefaultUser>>({
+            success: false,
+            session: null,
+            headers,
+            silent: { error: errors },
+            status: statusCode,
+        })
     }
 }

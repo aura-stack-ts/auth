@@ -268,7 +268,6 @@ export type CookieManager = ReturnType<typeof createCookieManager>
 export interface SessionStrategy<DefaultUser extends User = User> {
     /**
      * Read and validate the session from an incoming request.
-     * Returns null if absent, invalid, or expired. Never throws on auth failure.
      */
     getSession(options: { headers: Headers; cookieStore: InternalCookieStoreConfig }): Promise<{
         session: Session<DefaultUser> | null

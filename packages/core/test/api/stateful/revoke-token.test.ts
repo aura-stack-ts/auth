@@ -656,7 +656,7 @@ describe("revokeToken (Stateful)", () => {
         ])
 
         expect(getSessionByTokenMock).toHaveBeenCalledWith(sessionTokenHash)
-        expect(revokeSessionMock).not.toHaveBeenCalled()
+        expect(revokeSessionMock).toHaveBeenCalledWith("session-123", "user_logout")
         expect(getOAuthAccountMock).not.toHaveBeenCalled()
         expect(updateAccountStatusMock).not.toHaveBeenCalled()
     })
