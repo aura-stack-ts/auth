@@ -1,4 +1,4 @@
-import type { SchemaTypes } from "@/identity"
+import type { SchemaTypes } from "@/generated/identity"
 import type { zod } from "@aura-stack/auth/identity/zod"
 import type { AuthInstance, Session, User } from "@aura-stack/auth"
 

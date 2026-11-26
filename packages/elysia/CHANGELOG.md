@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed an incorrect import path for the `identity.ts` resource. The issue was introduced when the `identity`, `exports`, and `oauth` directories were moved from `src/` to `src/generated/`. [#343](https://github.com/aura-stack-ts/auth/pull/343)
+
 ---
 
 ## [0.5.0] - 2026-10-18
