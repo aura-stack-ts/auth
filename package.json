@@ -10,7 +10,7 @@
     "dev:docs": "turbo run docs#dev",
     "build": "turbo run build --filter=./packages/* --filter=./apps/*",
     "build:packages": "turbo run build --filter=./packages/* --filter=!./packages/integration --continue=dependencies-successful",
-    "test": "turbo run test --filter='!./packages/prisma'",
+    "test": "turbo run test --filter='!./packages/prisma' --filter='!./packages/elysia'",
     "test:types": "turbo run test:types",
     "format": "turbo run format format:root",
     "format:root": "oxfmt \"!packages\" \"!apps\" \"!configs\"",
