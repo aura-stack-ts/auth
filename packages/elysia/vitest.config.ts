@@ -11,18 +11,16 @@ const alias = {
 }
 
 export default defineConfig({
+    resolve: {
+        alias,
+    },
     test: {
         globals: true,
-        typecheck: {
-            enabled: false,
-            include: ["test/**/*.test-d.ts"],
-            exclude: ["test/**/*.test.ts"],
-        },
+        unstubEnvs: true,
         coverage: {
             provider: "v8",
             enabled: true,
         },
-        unstubEnvs: true,
         env: {
             DEBUG: "1",
             AURA_AUTH_SECRET: SECRET_KEY,
@@ -34,31 +32,34 @@ export default defineConfig({
         },
         projects: [
             {
+                extends: true,
                 test: {
                     name: "stateful",
                     include: ["test/stateful/**/*.test.ts"],
                     setupFiles: ["test/stateful/setup.ts"],
                     fileParallelism: false,
-                    sequence: {
-                        concurrent: false,
-                    },
-                },
-                resolve: {
-                    alias,
+                    sequence: { concurrent: false },
                 },
             },
             {
+                extends: true,
                 test: {
                     name: "stateless",
                     include: ["test/stateless/**/*.test.ts"],
                 },
-                resolve: {
-                    alias,
+            },
+            {
+                extends: true,
+                test: {
+                    name: "typecheck",
+                    include: [],
+                    typecheck: {
+                        enabled: true,
+                        only: true,
+                        include: ["test/**/*.test-d.ts"],
+                    },
                 },
             },
         ],
-    },
-    resolve: {
-        alias,
     },
 })

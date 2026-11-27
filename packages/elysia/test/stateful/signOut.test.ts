@@ -10,7 +10,7 @@ describe("signOut (Stateful)", () => {
                 method: "POST",
             })
         )
-        expect(response.status).toBe(403)
+        expect(response.status).toBe(401)
         expect(await response.json()).toEqual({
             success: false,
             redirect: false,

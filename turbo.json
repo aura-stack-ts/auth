@@ -25,6 +25,9 @@
     "test": {
       "dependsOn": ["^test"]
     },
+    "test:types": {
+      "dependsOn": ["^test:types"]
+    },
     "format": {
       "dependsOn": ["^format"],
       "outputLogs": "new-only"
@@ -35,6 +38,7 @@
     "type-check": {
       "dependsOn": ["^type-check"],
       "outputLogs": "new-only",
+      "cache": false,
       "persistent": false
     }
   },
