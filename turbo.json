@@ -23,10 +23,16 @@
       "env": ["AURA_AUTH_*"]
     },
     "test": {
-      "dependsOn": ["^test"]
+      "dependsOn": ["^build"]
     },
     "test:types": {
-      "dependsOn": ["^test:types"]
+      "dependsOn": ["^build"]
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "outputLogs": "new-only",
+      "cache": false,
+      "persistent": false
     },
     "format": {
       "dependsOn": ["^format"],
@@ -34,12 +40,6 @@
     },
     "//#format:root": {
       "outputLogs": "new-only"
-    },
-    "type-check": {
-      "dependsOn": ["^type-check"],
-      "outputLogs": "new-only",
-      "cache": false,
-      "persistent": false
     }
   },
   "ui": "stream",
