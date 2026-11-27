@@ -1,8 +1,7 @@
 import type { Context, MiddlewareHandler } from "hono"
 import type { zod } from "@aura-stack/auth/identity/zod"
-import type { Prettify } from "@aura-stack/jose"
 import type { EnvWithSession } from "@/lib/with-auth"
-import type { SchemaTypes, AuthInstance, RemoveIndexSignature, InferSchema, User } from "@aura-stack/auth/types"
+import type { SchemaTypes, AuthInstance, RemoveIndexSignature, InferSchema, User, Prettify } from "@aura-stack/auth/types"
 
 export type * from "@aura-stack/auth/types"
 
