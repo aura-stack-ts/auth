@@ -52,7 +52,7 @@ export type NextInstance<DefaultUser extends User = User, SignUpSchema extends S
  *
  * type SignUp = InferSignUp<typeof auth>
  */
-export type InferSignUp<T extends NextInstance> =
+export type InferSignUp<T> =
     T extends NextAppInstance<any, infer SignUpSchema>
         ? Prettify<Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>>
         : T extends NextPagesInstance<any, infer SignUpSchema>

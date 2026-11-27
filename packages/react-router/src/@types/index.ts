@@ -1,7 +1,7 @@
 import { zod } from "@aura-stack/react/identity/zod"
 import type { ReactRouterAPI } from "@/@types/api"
 import type { SchemaTypes } from "@aura-stack/react/identity"
-import type { Handlers, AuthInstance, User, Prettify, Wrap, RemoveIndexSignature, InferSchema } from "@aura-stack/react/types"
+import type { Handlers, AuthInstance, User, Prettify, RemoveIndexSignature, InferSchema } from "@aura-stack/react/types"
 
 export type * from "@/@types/api"
 export type * from "@/@types/core"
@@ -17,7 +17,5 @@ export interface ReactRouterInstance<DefaultUser extends User = User, SignUpSche
     handlers: Handlers
 }
 
-export type InferSignUp<T extends ReactRouterInstance> =
-    T extends ReactRouterInstance<any, infer SignUpSchema>
-        ? Prettify<Wrap<RemoveIndexSignature<InferSchema<SignUpSchema>>>>
-        : never
+export type InferSignUp<T> =
+    T extends ReactRouterInstance<any, infer SignUpSchema> ? Prettify<RemoveIndexSignature<InferSchema<SignUpSchema>>> : never
